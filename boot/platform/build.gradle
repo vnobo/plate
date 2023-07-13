@@ -3,7 +3,6 @@ plugins {
     id "idea"
     id "org.springframework.boot"
     id "io.spring.dependency-management"
-    id "org.graalvm.buildtools.native"
 }
 
 java {
@@ -20,13 +19,15 @@ tasks.named("bootBuildImage") {
     tags = ["alexbob/${project.name}:latest"]
     imageName = "alexbob/${project.name}:${project.version}"
     bindings = [
-            "/mnt/build-image/syft:/platform/bindings/syft"
+            "/mnt/build-image/jre:/platform/bindings/jre",
+            "/mnt/build-image/syft:/platform/bindings/syft",
+            "/mnt/build-image/boot:/platform/bindings/spring-boot"
     ]
     environment = [
             "BP_JVM_VERSION"              : "17",
-            "BP_NATIVE_IMAGE"             : "true",
             "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
-            "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError"
+            "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dspring.profiles.active=test -Dfile.encoding=UTF-8 " +
+                    "-XX:+HeapDumpOnOutOfMemoryError"
     ]
     publish = true
     buildCache {

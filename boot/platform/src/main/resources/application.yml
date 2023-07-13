@@ -13,7 +13,7 @@ server:
   http2.enabled: true
 
 spring:
-  application.name: platform-boot
+  application.name: platform
   webflux:
     format:
       time: HH:mm:ss
