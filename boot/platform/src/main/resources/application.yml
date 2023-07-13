@@ -1,0 +1,34 @@
+logging:
+  register-shutdown-hook: true
+  level:
+    web: debug
+    com.platform.boot.*: debug
+    org.springframework.web: debug
+    org.springframework.r2dbc: debug
+    io.r2dbc.postgresql:
+      PARAM: debug
+
+server:
+  shutdown: graceful
+  http2.enabled: true
+
+spring:
+  application.name: platform-boot
+  webflux:
+    format:
+      time: HH:mm:ss
+      date-time: yyyy-MM-dd HH:mm:ss
+      date: yyyy-MM-dd
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    locale: zh_CN
+  codec:
+    max-in-memory-size: 32MB
+    log-request-details: true
+  cache:
+    type: redis
+    redis:
+      key-prefix: "plate:caches:"
+      time-to-live: 300s
+      enable-statistics: true

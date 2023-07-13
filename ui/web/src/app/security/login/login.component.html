@@ -1,0 +1,69 @@
+<div class="page page-center">
+  <div class="container container-normal py-4">
+    <div class="row align-items-center g-4">
+      <div class="col-lg d-none d-lg-block">
+        <!--<img src="assets/illustrations/undraw_secure_login_pdn4.svg" height="300" class="d-block mx-auto" alt="">-->
+      </div>
+      <div class="col-lg">
+        <div class="container-tight">
+          <div class="card card-md">
+            <div class="card-header justify-content-center">
+              <h1 class="my-0">
+                <a class="navbar-brand navbar-brand-autodark " href="." i18n>Plateva Platform Manager</a>
+              </h1>
+            </div>
+            <div class="card-body">
+              <h2 class="h2 text-center mb-4" i18n>Login to your account</h2>
+              <form (ngSubmit)="onSubmit()" [formGroup]="loginForm" autocomplete="off" class="needs-validation"
+                    novalidate>
+                <div class="mb-3 ">
+                  <label class="form-label" for="username" i18n>Email address</label>
+                  <input [class.is-invalid]="loginForm.controls.username.invalid &&
+                           (loginForm.controls.username.dirty || loginForm.controls.username.touched)"
+                         [class.is-valid]="loginForm.controls.username.valid" autocomplete="off"
+                         class="form-control is-valid"
+                         formControlName="username" id="username" name="username" placeholder="your@email.com"
+                         required
+                         type="email">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label" for="password"><span i18n>Password</span>
+                    <span class="form-label-description" i18n><a href="#">I forgot password</a> </span>
+                  </label>
+                  <div class="input-group">
+                    <input [class.is-invalid]="loginForm.controls.password.invalid &&
+                           (loginForm.controls.password.dirty || loginForm.controls.password.touched)"
+                           [class.is-valid]="loginForm.controls.password.valid" autocomplete="off" class="form-control"
+                           formControlName="password" id="password" name="password" placeholder="Your password"
+                           required
+                           i18n-placeholder type="password">
+                    <div *ngIf="loginForm.controls.password.errors?.['minlength']
+                    || loginForm.controls.password.errors?.['maxlength']" class="invalid-feedback" i18n>
+                      Your password must be 8-20 characters long, contain letters and numbers, and must not contain
+                      spaces, special characters, or emoji.
+                    </div>
+                    <div *ngIf="loginForm.controls.password.errors?.['required']" class="invalid-feedback" i18n>
+                      Password is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label class="form-check">
+                    <input class="form-check-input" formControlName="rememberMe" id="rememberMe" name="rememberMe"
+                           type="checkbox"/>
+                    <span class="form-check-label" i18n>Remember me on this device</span>
+                  </label>
+                </div>
+                <div class="form-footer">
+                  <button [disabled]="!loginForm.valid" class="btn btn-primary w-100" i18n
+                          type="submit">Sign in
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

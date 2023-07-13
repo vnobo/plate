@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="2.0" xmlns="urn:oasis:names:tc:xliff:document:2.0" srcLang="en-US">
+  <file id="ngi18n" original="ng.template">
+    <unit id="errorMessage401">
+      <notes>
+        <note category="location">src/app/security/http-interceptors/handle-error.interceptor.ts:24</note>
+      </notes>
+      <segment>
+        <source>用户名或者密码不正确,请重新登录!</source>
+      </segment>
+    </unit>
+    <unit id="errorMessage407">
+      <notes>
+        <note category="location">src/app/security/http-interceptors/handle-error.interceptor.ts:28</note>
+      </notes>
+      <segment>
+        <source>Authenticate is incorrectness,please login again.</source>
+      </segment>
+    </unit>
+    <unit id="errorMessage403">
+      <notes>
+        <note category="location">src/app/security/http-interceptors/handle-error.interceptor.ts:32</note>
+      </notes>
+      <segment>
+        <source>验证码不正确,请重新登录!</source>
+      </segment>
+    </unit>
+    <unit id="snackBarAction">
+      <notes>
+        <note category="location">src/app/security/http-interceptors/handle-error.interceptor.ts:34</note>
+      </notes>
+      <segment>
+        <source>关闭</source>
+      </segment>
+    </unit>
+    <unit id="errorMessage">
+      <notes>
+        <note category="location">src/app/security/http-interceptors/handle-error.interceptor.ts:37</note>
+      </notes>
+      <segment>
+        <source>请求接口位置错误<ph id="0" equiv="PH" disp="error.status"/>, 错误详细:
+        </source>
+      </segment>
+    </unit>
+    <unit id="6826167776608804576">
+      <notes>
+        <note category="location">src/app/security/login/login.component.html:12</note>
+      </notes>
+      <segment>
+        <source>Plateva Platform Manager</source>
+        <target>平台管理后台</target>
+      </segment>
+    </unit>
+    <unit id="1274686598843595771">
+      <notes>
+        <note category="location">src/app/security/login/login.component.html:16</note>
+      </notes>
+      <segment>
+        <source>Login to your account</source>
+        <target>登录你的账号</target>
+      </segment>
+    </unit>
+    <unit id="3967269098753656610">
+      <notes>
+        <note category="location">src/app/security/login/login.component.html:20</note>
+      </notes>
+      <segment>
+        <source>Email address</source>
+        <target>电子邮件</target>
+      </segment>
+    </unit>
+    <unit id="1431416938026210429">
+      <notes>
+        <note category="location">src/app/security/login/login.component.html:30</note>
+      </notes>
+      <segment>
+        <source>Password</source>
+        <target>密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码</target>
+      </segment>
+    </unit>
+    <unit id="8012335070809035962">
+      <notes>
+        <note category="location">src/app/security/login/login.component.html:31</note>
+      </notes>
+      <segment>
+        <source>
+          <pc id="0" equivStart="START_LINK" equivEnd="CLOSE_LINK" type="link" dispStart="&lt;a href=&quot;#&quot;&gt;"
+              dispEnd="&lt;/a&gt;">I forgot password
+          </pc>
+        </source>
+        <target>
+          <pc id="0" equivStart="START_LINK" equivEnd="CLOSE_LINK" type="link" dispStart="&lt;a href=&quot;#&quot;&gt;"
+              dispEnd="&lt;/a&gt;">
+            我忘记了密码
+          </pc>
+        </target>
+      </segment>
+    </unit>
+    <unit id="4921687518561446633">
+      <notes>
+        <note category="location">src/app/security/login/login.component.html:37</note>
+      </notes>
+      <segment>
+        <source>Your password</source>
+        <target>你的密码</target>
+      </segment>
+    </unit>
+    <unit id="8209975069103412781">
+      <notes>
+        <note category="location">src/app/security/login/login.component.html:40,43</note>
+      </notes>
+      <segment>
+        <source>Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces,
+          special characters, or emoji.
+        </source>
+        <target>你的密码长度必须 8-20,包含字母和数字.</target>
+      </segment>
+    </unit>
+    <unit id="2161528641772974097">
+      <notes>
+        <note category="location">src/app/security/login/login.component.html:45,47</note>
+      </notes>
+      <segment>
+        <source>Password is required.</source>
+        <target>密码是必填项.</target>
+      </segment>
+    </unit>
+    <unit id="9083101090637026189">
+      <notes>
+        <note category="location">src/app/security/login/login.component.html:49</note>
+      </notes>
+      <segment>
+        <source>Remember me on this device</source>
+        <target>是否在此设备记住我?</target>
+      </segment>
+    </unit>
+    <unit id="2509978568586099561">
+      <notes>
+        <note category="location">src/app/security/login/login.component.html:54</note>
+      </notes>
+      <segment>
+        <source>Sign in</source>
+        <target>登&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;录</target>
+      </segment>
+    </unit>
+  </file>
+</xliff>

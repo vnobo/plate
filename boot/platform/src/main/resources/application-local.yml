@@ -1,0 +1,27 @@
+server.port: 8080
+
+spring:
+  r2dbc:
+    url: r2dbc:postgres://192.168.1.2:5432/plate
+    username: farmer
+    password: q1w2e3..
+    pool.max-idle-time: 10m
+  sql.init.mode: always
+  data.redis:
+    host: 192.168.1.2
+    repositories.enabled: false
+  codec:
+    max-in-memory-size: 32MB
+    log-request-details: true
+  rabbitmq:
+    host: 192.168.1.2
+    username: guest
+    password: q1w2e3..
+    listener.simple:
+      batch-size: 5
+      prefetch: 2
+      retry:
+        enabled: true
+        initial-interval: 3s
+        max-interval: 90s
+        max-attempts: 10
