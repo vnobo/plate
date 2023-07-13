@@ -1,4 +1,4 @@
-# Alex Platform For Plate
+# Platform For Plate
 
 ---
 
