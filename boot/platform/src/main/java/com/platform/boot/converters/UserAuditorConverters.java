@@ -2,38 +2,23 @@ package com.platform.boot.converters;
 
 import com.platform.boot.security.UserAuditor;
 import lombok.NonNull;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  * This class contains converters for UserAuditor objects.
  *
  * @author billb
  */
-public final class UserAuditorConverters {
-    public static final UserAuditorConverters INSTANCE = new UserAuditorConverters();
+@Configuration(proxyBeanMethods = false)
+public class UserAuditorConverters {
 
-    /**
-     * Gets a collection of converters.
-     *
-     * @return a collection of converters
-     */
-    public Collection<Object> getConverters() {
-        List<Object> converters = new ArrayList<>();
-        converters.add(UserAuditorWriteConverter.INSTANCE);
-        converters.add(UserAuditorReadConverter.INSTANCE);
-        return converters;
-    }
-
+    @Component
     @WritingConverter
-    private enum UserAuditorWriteConverter implements Converter<UserAuditor, String> {
-        INSTANCE;
-
+    public static class UserAuditorWriteConverter implements Converter<UserAuditor, String> {
         /**
          * Converts a UserAuditor object to a string.
          *
@@ -46,9 +31,9 @@ public final class UserAuditorConverters {
         }
     }
 
+    @Component
     @ReadingConverter
-    private enum UserAuditorReadConverter implements Converter<String, UserAuditor> {
-        INSTANCE;
+    public static class UserAuditorReadConverter implements Converter<String, UserAuditor> {
 
         /**
          * Converts a string to a UserAuditor object.

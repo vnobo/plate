@@ -5,41 +5,25 @@ import com.platform.boot.commons.annotation.exception.JsonException;
 import com.platform.boot.commons.utils.ContextHolder;
 import io.r2dbc.postgresql.codec.Json;
 import lombok.NonNull;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * This class contains the converters for JsonNode
  *
  * @author billb
  */
-public final class JsonNodeConverters {
-    public static final JsonNodeConverters INSTANCE = new JsonNodeConverters();
+@Configuration(proxyBeanMethods = false)
+public class JsonNodeConverters {
 
-    /**
-     * Get the list of converters
-     *
-     * @return Collection of converters
-     */
-    public Collection<Object> getConverters() {
-        List<Object> converters = new ArrayList<>();
-        converters.add(JsonToNodeWriteConverter.INSTANCE);
-        converters.add(JsonToNodeReadConverter.INSTANCE);
-        return converters;
-    }
-
+    @Component
     @WritingConverter
-    private enum JsonToNodeWriteConverter implements Converter<JsonNode, Json> {
-        /**
-         * default INSTANCE
-         */
-        INSTANCE;
+    public static class JsonToNodeWriteConverter implements Converter<JsonNode, Json> {
 
         /**
          * Convert JsonNode to Json
@@ -53,12 +37,9 @@ public final class JsonNodeConverters {
         }
     }
 
+    @Component
     @ReadingConverter
-    private enum JsonToNodeReadConverter implements Converter<Json, JsonNode> {
-        /**
-         * default INSTANCE
-         */
-        INSTANCE;
+    public static class JsonToNodeReadConverter implements Converter<Json, JsonNode> {
 
         /**
          * Convert Json to JsonNode

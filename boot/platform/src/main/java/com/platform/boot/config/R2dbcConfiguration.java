@@ -1,7 +1,5 @@
 package com.platform.boot.config;
 
-import com.platform.boot.converters.JsonNodeConverters;
-import com.platform.boot.converters.UserAuditorConverters;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +12,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Configuration class for R2DBC autoconfiguration.
@@ -29,7 +26,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
 
-    private final Map<String, Converter<?, ?>> customConverters;
+    private final List<Converter<?, ?>> customConverters;
 
     /**
      * Returns a ConnectionFactory for R2DBC.
@@ -50,9 +47,6 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
     @Override
     @NonNull
     public List<Object> getCustomConverters() {
-        List<Object> converters = new ArrayList<>(JsonNodeConverters.INSTANCE.getConverters());
-        converters.addAll(UserAuditorConverters.INSTANCE.getConverters());
-        converters.addAll(customConverters.values());
-        return converters;
+        return new ArrayList<>(customConverters);
     }
 }
