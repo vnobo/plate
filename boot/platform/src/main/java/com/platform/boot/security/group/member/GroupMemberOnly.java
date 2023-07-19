@@ -2,7 +2,7 @@ package com.platform.boot.security.group.member;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.platform.boot.commons.BeanUtils;
+import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.security.group.Group;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

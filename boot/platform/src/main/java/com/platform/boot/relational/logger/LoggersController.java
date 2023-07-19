@@ -1,6 +1,6 @@
 package com.platform.boot.relational.logger;
 
-import com.platform.boot.commons.utils.ContextHolder;
+import com.platform.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +22,7 @@ public class LoggersController {
 
     @GetMapping("search")
     public Flux<Logger> search(LoggerRequest request, Pageable pageable) {
-        return ContextHolder.securityDetails().flatMapMany(userDetails -> {
+        return ContextUtils.securityDetails().flatMapMany(userDetails -> {
             request.setSecurityCode(userDetails.getTenantCode());
             return this.loggersService.search(request, pageable);
         });
@@ -30,7 +30,7 @@ public class LoggersController {
 
     @GetMapping("page")
     public Mono<Page<Logger>> page(LoggerRequest request, Pageable pageable) {
-        return ContextHolder.securityDetails().flatMap(userDetails -> {
+        return ContextUtils.securityDetails().flatMap(userDetails -> {
             request.setSecurityCode(userDetails.getTenantCode());
             return this.loggersService.page(request, pageable);
         });

@@ -1,7 +1,7 @@
 package com.platform.boot.security.user;
 
 
-import com.platform.boot.commons.utils.ContextHolder;
+import com.platform.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,14 +24,14 @@ public class UsersController {
     // Endpoint to search for users
     @GetMapping("search")
     public Flux<User> search(UserRequest request, Pageable pageable) {
-        return ContextHolder.securityDetails().flatMapMany(securityDetails -> this.usersService.search(
+        return ContextUtils.securityDetails().flatMapMany(securityDetails -> this.usersService.search(
                 request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 
     // Endpoint to get a page of users
     @GetMapping("page")
     public Mono<Page<User>> page(UserRequest request, Pageable pageable) {
-        return ContextHolder.securityDetails().flatMap(securityDetails -> this.usersService.page(
+        return ContextUtils.securityDetails().flatMap(securityDetails -> this.usersService.page(
                 request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 

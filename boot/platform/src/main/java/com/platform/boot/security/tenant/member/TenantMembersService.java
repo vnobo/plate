@@ -1,7 +1,7 @@
 package com.platform.boot.security.tenant.member;
 
-import com.platform.boot.commons.BeanUtils;
 import com.platform.boot.commons.base.DatabaseService;
+import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.security.tenant.TenantsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

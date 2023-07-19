@@ -1,6 +1,6 @@
 package com.platform.boot.security.filter;
 
-import com.platform.boot.commons.utils.ContextHolder;
+import com.platform.boot.commons.utils.ContextUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.Ordered;
@@ -26,8 +26,8 @@ public record CsrfWebFilter() implements WebFilter, Ordered {
         Mono<CsrfToken> csrfTokenMono = exchange.getAttribute(CsrfToken.class.getName());
         if (csrfTokenMono != null) {
             return csrfTokenMono.flatMap(csrfToken -> Mono.defer(() -> chain.filter(exchange))
-                    .contextWrite((context) -> context.hasKey(ContextHolder.CSRF_TOKEN_CONTEXT) ?
-                            context : context.put(ContextHolder.CSRF_TOKEN_CONTEXT, csrfToken)));
+                    .contextWrite((context) -> context.hasKey(ContextUtils.CSRF_TOKEN_CONTEXT) ?
+                            context : context.put(ContextUtils.CSRF_TOKEN_CONTEXT, csrfToken)));
         }
         return chain.filter(exchange);
     }

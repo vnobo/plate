@@ -1,6 +1,6 @@
 package com.platform.boot.security.group;
 
-import com.platform.boot.commons.BeanUtils;
+import com.platform.boot.commons.utils.BeanUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

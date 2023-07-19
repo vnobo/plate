@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.CaseFormat;
 import com.platform.boot.commons.base.BaseEntity;
-import com.platform.boot.commons.utils.ContextHolder;
+import com.platform.boot.commons.utils.ContextUtils;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -150,7 +150,7 @@ public class Menu implements BaseEntity<Integer> {
     @JsonGetter
     public Set<Permission> getPermissions() {
         return Optional.ofNullable(this.getExtend()).map(node -> node.get("permissions"))
-                .map(node -> ContextHolder.OBJECT_MAPPER.convertValue(node, new TypeReference<Set<Permission>>() {
+                .map(node -> ContextUtils.OBJECT_MAPPER.convertValue(node, new TypeReference<Set<Permission>>() {
                 })).orElse(null);
     }
 

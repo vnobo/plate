@@ -3,7 +3,7 @@ package com.platform.boot.converters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.platform.boot.commons.annotation.exception.JsonException;
-import com.platform.boot.commons.utils.ContextHolder;
+import com.platform.boot.commons.utils.ContextUtils;
 import io.r2dbc.postgresql.codec.Json;
 import lombok.NonNull;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +27,7 @@ public class CollectionConverter {
         @Override
         public Collection<?> convert(@NonNull Json source) {
             try {
-                return ContextHolder.OBJECT_MAPPER.readValue(source.asString(), new TypeReference<>() {
+                return ContextUtils.OBJECT_MAPPER.readValue(source.asString(), new TypeReference<>() {
                 });
             } catch (JsonProcessingException e) {
                 throw JsonException.withMsg("序列化数据Json为Set类型错误,信息: " + e.getMessage());
@@ -42,7 +42,7 @@ public class CollectionConverter {
         @Override
         public Json convert(@NonNull Collection<?> source) {
             try {
-                return Json.of(ContextHolder.OBJECT_MAPPER.writeValueAsBytes(source));
+                return Json.of(ContextUtils.OBJECT_MAPPER.writeValueAsBytes(source));
             } catch (JsonProcessingException e) {
                 throw JsonException.withMsg("序列化数据Json为Set类型错误,信息: " + e.getMessage());
             }

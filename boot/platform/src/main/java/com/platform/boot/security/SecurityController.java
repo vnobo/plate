@@ -1,7 +1,7 @@
 package com.platform.boot.security;
 
 import com.platform.boot.commons.annotation.exception.RestServerException;
-import com.platform.boot.commons.utils.ContextHolder;
+import com.platform.boot.commons.utils.ContextUtils;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +44,7 @@ public class SecurityController {
     @GetMapping("csrf")
     public Mono<CsrfToken> csrfToken() {
         return Mono.deferContextual((contextView) -> {
-            CsrfToken ctk = contextView.get(ContextHolder.CSRF_TOKEN_CONTEXT);
+            CsrfToken ctk = contextView.get(ContextUtils.CSRF_TOKEN_CONTEXT);
             return Mono.justOrEmpty(ctk);
         });
     }
@@ -58,7 +58,7 @@ public class SecurityController {
     @GetMapping("me")
     public Mono<SecurityDetails> me() {
         // Retrieve the security details of the current user from the ContextHolder
-        Mono<SecurityDetails> securityDetailsMono = ContextHolder.securityDetails();
+        Mono<SecurityDetails> securityDetailsMono = ContextUtils.securityDetails();
         // Once the security details are retrieved, delay until the loginSuccess operation is performed by the SecurityManager
         return securityDetailsMono
                 .delayUntil(securityDetails -> this.securityManager.loginSuccess(securityDetails.getUsername()));

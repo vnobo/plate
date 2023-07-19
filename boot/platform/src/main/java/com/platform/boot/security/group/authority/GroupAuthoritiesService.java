@@ -1,8 +1,8 @@
 package com.platform.boot.security.group.authority;
 
 
-import com.platform.boot.commons.BeanUtils;
 import com.platform.boot.commons.base.DatabaseService;
+import com.platform.boot.commons.utils.BeanUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

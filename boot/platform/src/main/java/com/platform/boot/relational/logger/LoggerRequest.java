@@ -1,7 +1,7 @@
 package com.platform.boot.relational.logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.platform.boot.commons.BeanUtils;
+import com.platform.boot.commons.utils.BeanUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

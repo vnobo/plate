@@ -2,7 +2,7 @@ package com.platform.boot.converters;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.platform.boot.commons.annotation.exception.JsonException;
-import com.platform.boot.commons.utils.ContextHolder;
+import com.platform.boot.commons.utils.ContextUtils;
 import io.r2dbc.postgresql.codec.Json;
 import lombok.NonNull;
 import org.springframework.context.annotation.Configuration;
@@ -50,7 +50,7 @@ public class JsonNodeConverters {
         @Override
         public JsonNode convert(@NonNull Json source) {
             try {
-                return ContextHolder.OBJECT_MAPPER.readTree(source.asArray());
+                return ContextUtils.OBJECT_MAPPER.readTree(source.asArray());
             } catch (IOException e) {
                 throw JsonException.withError(e);
             }

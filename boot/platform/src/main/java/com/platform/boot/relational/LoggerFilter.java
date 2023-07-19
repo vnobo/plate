@@ -3,7 +3,7 @@ package com.platform.boot.relational;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.platform.boot.commons.annotation.exception.JsonException;
-import com.platform.boot.commons.utils.ContextHolder;
+import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.relational.logger.LoggerRequest;
 import com.platform.boot.relational.logger.LoggersService;
 import com.platform.boot.security.SecurityDetails;
@@ -161,7 +161,7 @@ public class LoggerFilter implements WebFilter {
     private JsonNode readRequestBody(ServerWebExchange exchange) {
         String bodyStr = exchange.getRequiredAttribute(CACHED_REQUEST_BODY_ATTR);
         try {
-            return ContextHolder.OBJECT_MAPPER.readTree(bodyStr);
+            return ContextUtils.OBJECT_MAPPER.readTree(bodyStr);
         } catch (IOException exception) {
             throw JsonException.withError(exception);
         }
@@ -213,7 +213,7 @@ public class LoggerFilter implements WebFilter {
             return this.requireCsrfProtectionMatcher.matches(exchange)
                     .filter(ServerWebExchangeMatcher.MatchResult::isMatch)
                     .switchIfEmpty(continueFilterChain(exchange, chain).then(Mono.empty()))
-                    .flatMap((m) -> cacheFilterChain(exchange, chain).then(ContextHolder.securityDetails()
+                    .flatMap((m) -> cacheFilterChain(exchange, chain).then(ContextUtils.securityDetails()
                             .flatMap(userDetails -> logRequest(exchange, userDetails))));
         }
         return continueFilterChain(exchange, chain).then(Mono.empty());
@@ -268,7 +268,7 @@ public class LoggerFilter implements WebFilter {
         ServerHttpResponse response = exchange.getResponse();
 
         // 创建请求体，并填充请求和响应的头部信息、响应状态码和请求体
-        ObjectNode contentNode = ContextHolder.OBJECT_MAPPER.createObjectNode();
+        ObjectNode contentNode = ContextUtils.OBJECT_MAPPER.createObjectNode();
         contentNode.putPOJO("requestHeaders", request.getHeaders());
         contentNode.set("requestBody", readRequestBody(exchange));
 
@@ -293,7 +293,7 @@ public class LoggerFilter implements WebFilter {
     private JsonNode readResponseBody(ServerWebExchange exchange) {
         DataBuffer dataBuffer = exchange.getRequiredAttribute(CACHED_RESPONSE_BODY_ATTR);
         if (dataBuffer.readableByteCount() == 0) {
-            return ContextHolder.OBJECT_MAPPER.createObjectNode();
+            return ContextUtils.OBJECT_MAPPER.createObjectNode();
         }
         try (var byteBufferIterator = dataBuffer.readableByteBuffers()) {
             StringBuilder bodyStr = new StringBuilder();
@@ -301,7 +301,7 @@ public class LoggerFilter implements WebFilter {
                 ByteBuffer byteBuffer = byteBufferIterator.next();
                 bodyStr.append(CharsetUtil.UTF_8.decode(byteBuffer));
             }
-            return ContextHolder.OBJECT_MAPPER.readTree(bodyStr.toString());
+            return ContextUtils.OBJECT_MAPPER.readTree(bodyStr.toString());
         } catch (IOException exception) {
             throw JsonException.withError(exception);
         }

@@ -1,10 +1,9 @@
-package com.platform.boot.commons;
+package com.platform.boot.commons.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.platform.boot.commons.utils.ContextHolder;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Map;
@@ -104,7 +103,7 @@ public class BeanUtils {
      * @return result of conversion as a map
      */
     public static <T> Map<String, Object> beanToMap(T bean, final boolean ignoreNullValue) {
-        return BeanUtils.beanToMap(bean, ignoreNullValue, false);
+        return BeanUtils.beanToMap(bean, false, ignoreNullValue);
     }
 
     /**
@@ -116,11 +115,11 @@ public class BeanUtils {
      * @param <T>               type of the bean
      * @return a Map containing the values from the bean
      */
-    public static <T> Map<String, Object> beanToMap(T bean, final boolean ignoreNullValue, final boolean isToUnderlineCase) {
+    public static <T> Map<String, Object> beanToMap(T bean, final boolean isToUnderlineCase, final boolean ignoreNullValue) {
         if (ObjectUtils.isEmpty(bean)) {
             return null;
         }
-        ObjectMapper objectMapper = ContextHolder.OBJECT_MAPPER.copy();
+        ObjectMapper objectMapper = ContextUtils.OBJECT_MAPPER.copy();
         if (isToUnderlineCase) {
             objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         }
