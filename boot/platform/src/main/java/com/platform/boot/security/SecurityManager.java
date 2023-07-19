@@ -39,7 +39,8 @@ public class SecurityManager extends DatabaseService
     @Override
     public Mono<UserDetails> updatePassword(UserDetails user, String newPassword) {
         return Mono.just(withNewPassword(user, newPassword))
-                .delayUntil((userDetails) -> this.usersService.changePassword(userDetails.getUsername(), newPassword));
+                .delayUntil((userDetails) -> this.usersService.changePassword(userDetails.getUsername(), newPassword))
+                .doAfterTerminate(() -> this.cache.clear());
     }
 
     private UserDetails withNewPassword(UserDetails userDetails, String newPassword) {
@@ -71,9 +72,7 @@ public class SecurityManager extends DatabaseService
                 .flatMap(tuple2 -> buildUserDetails(tuple2.getT1(), new HashSet<>(tuple2.getT2())));
         // 如果出现错误，则抛出 AuthenticationServiceException 异常
         return tuple2Mono.onErrorResume(throwable -> Mono.error(new AuthenticationServiceException(
-                        throwable.getLocalizedMessage(), throwable)))
-                // 清除缓存
-                .doAfterTerminate(() -> this.cache.clear());
+                throwable.getLocalizedMessage(), throwable)));
     }
 
     /**
@@ -136,7 +135,7 @@ public class SecurityManager extends DatabaseService
     }
 
     private Flux<GrantedAuthority> getAuthorities(String username) {
-        String queryUserAuthoritySql = "select * from se_authorities where username ilike :username" ;
+        String queryUserAuthoritySql = "select * from se_authorities where username ilike :username";
         return this.queryWithCache(Objects.hash("USER_AUTHORITIES", username),
                         queryUserAuthoritySql, Map.of("username", username), UserAuthority.class)
                 .cast(GrantedAuthority.class);

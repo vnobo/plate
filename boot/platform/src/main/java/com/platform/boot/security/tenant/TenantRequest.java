@@ -1,7 +1,7 @@
 package com.platform.boot.security.tenant;
 
-import com.platform.boot.commons.BeanUtils;
-import com.platform.boot.commons.utils.CriteriaHolder;
+import com.platform.boot.commons.utils.BeanUtils;
+import com.platform.boot.commons.utils.CriteriaUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -32,7 +32,7 @@ public class TenantRequest extends Tenant implements Serializable {
 
     public Criteria toCriteria() {
 
-        Criteria criteria = CriteriaHolder.build(this, Set.of("securityCode"));
+        Criteria criteria = CriteriaUtils.build(this, Set.of("securityCode"));
 
         if (StringUtils.hasLength(this.securityCode)) {
             criteria = criteria.and("code").like(this.securityCode + "%");

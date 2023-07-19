@@ -1,6 +1,6 @@
 package com.platform.boot.relational.menus;
 
-import com.platform.boot.commons.utils.ContextHolder;
+import com.platform.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,7 +40,7 @@ public class MenusController {
      */
     @GetMapping("me")
     public Flux<Menu> loadMeMenus() {
-        return ContextHolder.securityDetails().flatMapMany(userDetails -> {
+        return ContextUtils.securityDetails().flatMapMany(userDetails -> {
             MenuRequest request = MenuRequest.of(userDetails.getTenantCode(), null);
             if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> "ROLE_ADMINISTRATORS"
                     .equals(grantedAuthority.getAuthority()))) {

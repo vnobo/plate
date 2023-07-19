@@ -1,6 +1,6 @@
 package com.platform.boot.security.group.authority;
 
-import com.platform.boot.commons.BeanUtils;
+import com.platform.boot.commons.utils.BeanUtils;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

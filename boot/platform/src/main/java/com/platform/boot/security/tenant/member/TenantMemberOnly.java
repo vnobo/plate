@@ -1,7 +1,7 @@
 package com.platform.boot.security.tenant.member;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.platform.boot.commons.BeanUtils;
+import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.security.tenant.Tenant;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

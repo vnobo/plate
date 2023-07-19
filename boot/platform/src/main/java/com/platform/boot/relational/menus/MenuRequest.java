@@ -1,8 +1,8 @@
 package com.platform.boot.relational.menus;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.platform.boot.commons.BeanUtils;
-import com.platform.boot.commons.utils.ContextHolder;
+import com.platform.boot.commons.utils.BeanUtils;
+import com.platform.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -41,7 +41,7 @@ public class MenuRequest extends Menu {
         Menu menu = BeanUtils.copyProperties(this, Menu.class);
         ObjectNode objectNode = Optional.ofNullable(this.getExtend())
                 .map(node -> (ObjectNode) node.deepCopy())
-                .orElse(ContextHolder.OBJECT_MAPPER.createObjectNode());
+                .orElse(ContextUtils.OBJECT_MAPPER.createObjectNode());
         if (!ObjectUtils.isEmpty(this.permissions)) {
             objectNode.putPOJO("permissions", this.permissions);
         }

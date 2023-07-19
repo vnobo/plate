@@ -1,7 +1,6 @@
 package com.platform.boot.commons.utils;
 
 import com.google.common.base.CaseFormat;
-import com.platform.boot.commons.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Criteria;
@@ -13,7 +12,7 @@ import java.util.stream.Collectors;
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
-public final class CriteriaHolder {
+public final class CriteriaUtils {
     public static final int DEFAULT_PAGE_SIZE = 500;
     public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend", "createdTime", "updatedTime");
 
@@ -42,7 +41,7 @@ public final class CriteriaHolder {
         }
         StringJoiner sortSql = new StringJoiner(" , ");
         sort.iterator().forEachRemaining((o) -> {
-            String sortedPropertyName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE,o.getProperty());
+            String sortedPropertyName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, o.getProperty());
             String sortedProperty = o.isIgnoreCase() ? "LOWER(" + sortedPropertyName + ")" : sortedPropertyName;
             sortSql.add(sortedProperty + (o.isAscending() ? " ASC" : " DESC"));
         });
@@ -50,8 +49,42 @@ public final class CriteriaHolder {
     }
 
     /**
+     * 使用 applyWhere 方法将一个对象转化成查询条件 where 语句
+     *
+     * @param object   待转化的对象
+     * @param skipKeys 跳过的字段名列表
+     * @return 返回 where 语句字符串
+     */
+    public static Map<String, Map<String, Object>> applyWhereParameterSql(Object object, List<String> skipKeys) {
+
+        Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
+
+        Set<String> mergeSet = new HashSet<>(SKIP_CRITERIA_KEYS);
+        if (!ObjectUtils.isEmpty(skipKeys)) {
+            mergeSet.addAll(skipKeys);
+        }
+        mergeSet.forEach(objectMap::remove);
+
+        StringBuilder whereSql = new StringBuilder();
+        for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
+            String key = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, entry.getKey());
+            if (entry.getValue() instanceof String) {
+                whereSql.append(" AND ").append(key).append(" LIKE ").append(":").append(entry.getKey());
+            } else if (entry.getValue() instanceof Collection<?>) {
+                whereSql.append(" AND ").append(key).append(" IN (:").append(entry.getKey()).append(")");
+            } else {
+                whereSql.append(" AND ").append(key).append(" = :").append(entry.getKey());
+            }
+        }
+        if (whereSql.length() > 0) {
+            whereSql.insert(0, " WHERE 1=1 ");
+        }
+        return Map.of(whereSql.toString(), objectMap);
+    }
+
+    /**
      * Builds a Criteria object from the given object excluding the given keys.
-     * The static skip keys such as {@link CriteriaHolder} are also excluded.
+     * The static skip keys such as {@link CriteriaUtils} are also excluded.
      *
      * @param object  the object from which to build the Criteria
      * @param skipKes the keys to skip

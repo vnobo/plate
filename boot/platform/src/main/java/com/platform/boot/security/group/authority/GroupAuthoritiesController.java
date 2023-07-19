@@ -1,6 +1,6 @@
 package com.platform.boot.security.group.authority;
 
-import com.platform.boot.commons.utils.ContextHolder;
+import com.platform.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,14 +22,14 @@ public class GroupAuthoritiesController {
 
     @GetMapping("search")
     public Flux<GroupAuthority> search(GroupAuthorityRequest request, Pageable pageable) {
-        return ContextHolder.securityDetails().flatMapMany(securityDetails ->
+        return ContextUtils.securityDetails().flatMapMany(securityDetails ->
                 this.authoritiesService.search(request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 
 
     @GetMapping("page")
     public Mono<Page<GroupAuthority>> page(GroupAuthorityRequest request, Pageable pageable) {
-        return ContextHolder.securityDetails().flatMap(securityDetails ->
+        return ContextUtils.securityDetails().flatMap(securityDetails ->
                 this.authoritiesService.page(request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 

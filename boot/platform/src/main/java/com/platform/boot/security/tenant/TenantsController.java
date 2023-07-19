@@ -1,7 +1,7 @@
 package com.platform.boot.security.tenant;
 
 
-import com.platform.boot.commons.utils.ContextHolder;
+import com.platform.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,13 +23,13 @@ public class TenantsController {
 
     @GetMapping("search")
     public Flux<Tenant> search(TenantRequest request, Pageable pageable) {
-        return ContextHolder.securityDetails().flatMapMany(securityDetails ->
+        return ContextUtils.securityDetails().flatMapMany(securityDetails ->
                 this.tenantsService.search(request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 
     @GetMapping("page")
     public Mono<Page<Tenant>> page(TenantRequest request, Pageable pageable) {
-        return ContextHolder.securityDetails().flatMap(securityDetails ->
+        return ContextUtils.securityDetails().flatMap(securityDetails ->
                 this.tenantsService.page(request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 

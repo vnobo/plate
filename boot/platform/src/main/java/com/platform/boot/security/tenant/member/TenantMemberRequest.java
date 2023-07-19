@@ -1,6 +1,6 @@
 package com.platform.boot.security.tenant.member;
 
-import com.platform.boot.commons.BeanUtils;
+import com.platform.boot.commons.utils.BeanUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

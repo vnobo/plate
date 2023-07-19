@@ -21,15 +21,27 @@ import java.util.*;
  */
 @Data
 public final class SecurityDetails implements UserDetails {
+
     private String username;
-    private String password;
-    private Boolean disabled;
-    private Boolean accountExpired;
-    private Boolean accountLocked;
-    private Boolean credentialsExpired;
     private Set<GrantedAuthority> authorities;
     private Set<TenantMemberOnly> tenants;
     private Set<GroupMemberOnly> groups;
+
+    @JsonIgnore
+    private String password;
+
+    @JsonIgnore
+    private Boolean disabled;
+
+    @JsonIgnore
+    private Boolean accountExpired;
+
+    @JsonIgnore
+    private Boolean accountLocked;
+
+    @JsonIgnore
+    private Boolean credentialsExpired;
+
 
     /**
      * Creates a {@link SecurityDetails} instance with the specified parameters.
@@ -112,12 +124,6 @@ public final class SecurityDetails implements UserDetails {
         }
         return this.getTenants().stream().filter(TenantMember::getEnabled).findAny()
                 .map(TenantMemberOnly::getTenantName).orElse(null);
-    }
-
-    @Override
-    @JsonIgnore
-    public String getPassword() {
-        return this.password;
     }
 
     @Override

@@ -17,17 +17,17 @@ import java.io.Serializable;
  * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
  */
 @Component
-public final class ContextHolder implements Serializable {
+public final class ContextUtils implements Serializable {
     public static final String CSRF_TOKEN_CONTEXT = "CSRF_TOKEN_CONTEXT";
     public static final String SECURITY_AUTH_TOKEN_HEADER = "X-Auth-Token";
     public static ObjectMapper OBJECT_MAPPER = null;
     public static Snowflake SNOW_FLAKE = null;
     public static CacheManager CACHE_MANAGER = null;
 
-    ContextHolder(ObjectMapper objectMapper, CacheManager cacheManager) {
-        ContextHolder.SNOW_FLAKE = new Snowflake(1, 1);
-        ContextHolder.OBJECT_MAPPER = objectMapper;
-        ContextHolder.CACHE_MANAGER = cacheManager;
+    ContextUtils(ObjectMapper objectMapper, CacheManager cacheManager) {
+        ContextUtils.SNOW_FLAKE = new Snowflake(1, 1);
+        ContextUtils.OBJECT_MAPPER = objectMapper;
+        ContextUtils.CACHE_MANAGER = cacheManager;
     }
 
     public static Mono<SecurityDetails> securityDetails() {

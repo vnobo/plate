@@ -1,6 +1,6 @@
 package com.platform.boot.config;
 
-import com.platform.boot.commons.utils.ContextHolder;
+import com.platform.boot.commons.utils.ContextUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
@@ -33,7 +33,7 @@ public class SessionConfiguration {
     @Bean
     public WebSessionIdResolver webSessionIdResolver() {
         HeaderWebSessionIdResolver resolver = new CustomHeaderWebSessionIdResolver();
-        resolver.setHeaderName(ContextHolder.SECURITY_AUTH_TOKEN_HEADER);
+        resolver.setHeaderName(ContextUtils.SECURITY_AUTH_TOKEN_HEADER);
         return resolver;
     }
 

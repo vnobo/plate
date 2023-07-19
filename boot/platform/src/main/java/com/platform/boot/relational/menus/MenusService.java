@@ -1,9 +1,9 @@
 package com.platform.boot.relational.menus;
 
 
-import com.platform.boot.commons.BeanUtils;
 import com.platform.boot.commons.annotation.exception.RestServerException;
 import com.platform.boot.commons.base.DatabaseService;
+import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.security.group.authority.GroupAuthoritiesRepository;
 import com.platform.boot.security.user.authority.UserAuthoritiesRepository;
 import lombok.RequiredArgsConstructor;
