@@ -2,7 +2,7 @@ package com.platform.boot.converters;
 
 import com.platform.boot.security.UserAuditor;
 import com.platform.boot.security.user.User;
-import com.platform.boot.security.user.UsersRepository;
+import com.platform.boot.security.user.UsersService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -42,7 +42,7 @@ public class UserAuditorConverters {
     @RequiredArgsConstructor
     public static class UserAuditorReadConverter implements Converter<String, UserAuditor> {
 
-        private final UsersRepository usersRepository;
+        private final UsersService usersService;
 
         /**
          * Converts a string to a UserAuditor object.
@@ -53,7 +53,7 @@ public class UserAuditorConverters {
         @Override
         public UserAuditor convert(@NonNull String source) {
             UserAuditor userAuditor = UserAuditor.withUsername(source);
-            User user = this.usersRepository.findByUsernameIgnoreCase(source)
+            User user = this.usersService.loadByUsername(source)
                     .timeout(Duration.ofSeconds(1)).share().block();
             if (!ObjectUtils.isEmpty(user)) {
                 userAuditor.setName(user.getName());
