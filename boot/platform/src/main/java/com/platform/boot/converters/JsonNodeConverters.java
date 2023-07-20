@@ -16,7 +16,7 @@ import java.io.IOException;
 /**
  * This class contains the converters for JsonNode
  *
- * @author billb
+ * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Configuration(proxyBeanMethods = false)
 public class JsonNodeConverters {
