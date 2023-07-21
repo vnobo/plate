@@ -25,6 +25,7 @@ public class Group implements BaseEntity<Integer> {
 
     private String pcode;
 
+    @NotBlank(message = "租户编码[tenantCode]不能为空!")
     private String tenantCode;
 
     @NotBlank(message = "角色[name]不能为空!")

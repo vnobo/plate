@@ -10,6 +10,8 @@ create table se_users
     credentials_expired boolean     not null default false,
     name                varchar(64),
     extend              jsonb,
+    creator             varchar(64),
+    updater             varchar(64),
     login_time          timestamp            default current_timestamp,
     created_time        timestamp            default current_timestamp,
     updated_time        timestamp            default current_timestamp

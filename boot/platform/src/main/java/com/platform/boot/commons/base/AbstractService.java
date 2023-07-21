@@ -1,6 +1,7 @@
 package com.platform.boot.commons.base;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.platform.boot.commons.utils.ContextUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,13 +35,7 @@ public abstract class AbstractService implements InitializingBean {
     protected final Log log = LogFactory.getLog(AbstractService.class);
 
     protected Cache cache;
-    protected CacheManager cacheManager;
     protected ObjectMapper objectMapper;
-
-    @Autowired
-    public void setCacheManager(CacheManager cacheManager) {
-        this.cacheManager = cacheManager;
-    }
 
     @Autowired
     public void setObjectMapper(ObjectMapper objectMapper) {
@@ -54,7 +49,7 @@ public abstract class AbstractService implements InitializingBean {
      * @param cacheName the name of the cache to be initialized
      */
     protected void initializingCache(String cacheName) {
-        this.cache = Optional.ofNullable(this.cacheManager).map(manager -> manager.getCache(cacheName))
+        this.cache = Optional.ofNullable(ContextUtils.CACHE_MANAGER).map(manager -> manager.getCache(cacheName))
                 .orElse(new ConcurrentMapCache(cacheName));
         this.cache.clear();
         log.debug("Initializing provider [%s] cache names: %s".formatted(
