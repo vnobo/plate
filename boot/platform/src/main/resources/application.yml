@@ -14,11 +14,10 @@ server:
 
 spring:
   application.name: platform
-  webflux:
-    format:
-      time: HH:mm:ss
-      date-time: yyyy-MM-dd HH:mm:ss
-      date: yyyy-MM-dd
+  webflux.format:
+    time: HH:mm:ss
+    date-time: yyyy-MM-dd HH:mm:ss
+    date: yyyy-MM-dd
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
