@@ -72,6 +72,8 @@ create table se_tenants
     name         varchar(64) not null,
     description  text,
     extend       jsonb,
+    creator varchar(64),
+    updater varchar(64),
     created_time timestamp default current_timestamp,
     updated_time timestamp default current_timestamp
 );

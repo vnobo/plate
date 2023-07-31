@@ -6,7 +6,9 @@ spring:
     url: r2dbc:postgres://192.168.1.2:5432/plate
     username: farmer
     password: q1w2e3..
-    pool.max-idle-time: 10m
+    pool:
+      max-idle-time: 10m
+      max-size: 32
   sql.init.mode: always
   data.redis:
     host: 192.168.1.2

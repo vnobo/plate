@@ -14,12 +14,8 @@ import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * This class contains converters for UserAuditor objects.
@@ -65,26 +61,28 @@ public class UserAuditorConverters {
          */
         @Override
         public UserAuditor convert(@NonNull String source) {
-            return UserAuditor.withUsername(source);
+            UserAuditor userAuditor = UserAuditor.withUsername(source);
+            User user = queryWithCache(source).share().block();
+            if (!ObjectUtils.isEmpty(user)) {
+                userAuditor.setName(user.getName());
+            }
+            return userAuditor;
         }
 
         private Mono<User> queryWithCache(String username) {
             assert this.cache != null;
-            // Get data from cache
-            List<User> cacheData = this.cache.get(username, ArrayList::new);
-            // Note: the returned list will not be null
-            assert cacheData != null;
 
-            Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
+            // Get data from cache
+            User cacheData = this.cache.get(username, () -> null);
+
+            Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true)).limit(1);
             // Construct the query request and sort the results
-            Flux<User> source = ContextUtils.ENTITY_TEMPLATE.select(query, User.class)
+            Mono<User> source = ContextUtils.ENTITY_TEMPLATE.select(query, User.class).shareNext()
+                    .subscribeOn(Schedulers.single())
                     // Add the query result to the cache
-                    .doOnNext(cacheData::add)
-                    // When the query is complete, store the data in the cache
-                    .doAfterTerminate(() -> this.cache.put(username, cacheData));
+                    .doOnNext(user -> this.cache.put(username, user));
             // If there is no data in the cache, return the query result; otherwise, return the cache data
-            return Flux.fromIterable(ObjectUtils.isEmpty(cacheData) ? Collections.emptyList() : cacheData)
-                    .switchIfEmpty(source).singleOrEmpty();
+            return Mono.justOrEmpty(cacheData).switchIfEmpty(source);
         }
     }
 }
