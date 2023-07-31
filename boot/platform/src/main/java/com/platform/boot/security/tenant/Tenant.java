@@ -2,16 +2,15 @@ package com.platform.boot.security.tenant;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.platform.boot.commons.base.BaseEntity;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.ObjectUtils;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -20,7 +19,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Table("se_tenants")
-public class Tenant implements Serializable, Persistable<Integer> {
+public class Tenant implements BaseEntity<Integer> {
 
     @Id
     private Integer id;

@@ -82,6 +82,11 @@ public class BeanUtils {
         org.springframework.beans.BeanUtils.copyProperties(source, target, nullKeys);
     }
 
+    public static <T> T mapToBean(Map<String, Object> source, Class<T> clazz) {
+        ObjectMapper objectMapper = ContextUtils.OBJECT_MAPPER.copy();
+        return objectMapper.convertValue(source, clazz);
+    }
+
     /**
      * This method is used to convert a java bean to a map.
      * Default no ignore Null Value.
