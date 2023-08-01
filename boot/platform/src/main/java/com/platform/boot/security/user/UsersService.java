@@ -3,6 +3,7 @@ package com.platform.boot.security.user;
 import com.platform.boot.commons.annotation.exception.RestServerException;
 import com.platform.boot.commons.base.DatabaseService;
 import com.platform.boot.commons.utils.BeanUtils;
+import com.platform.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,7 +28,7 @@ public class UsersService extends DatabaseService {
     public Flux<User> search(UserRequest request, Pageable pageable) {
         String cacheKey = BeanUtils.cacheKey(request, pageable);
         Query query = Query.query(request.toCriteria()).with(pageable);
-        return super.queryWithCache(cacheKey, query, User.class);
+        return super.queryWithCache(cacheKey, query, User.class).flatMap(ContextUtils::userAuditorSerializable);
     }
 
     public Mono<Page<User>> page(UserRequest request, Pageable pageable) {

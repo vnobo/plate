@@ -1,5 +1,6 @@
 package com.platform.boot.security;
 
+import com.platform.boot.security.user.User;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -28,14 +29,22 @@ public class UserAuditor implements Serializable {
 
     private String name;
 
+    public static UserAuditor withDetails(SecurityDetails securityDetails) {
+        UserAuditor userAuditor = UserAuditor.withUsername(securityDetails.getUsername());
+        userAuditor.setName(securityDetails.getName());
+        return userAuditor;
+    }
+
     public static UserAuditor withUsername(String username) {
         UserAuditor userAuditor = new UserAuditor();
         userAuditor.setUsername(username);
         return userAuditor;
     }
 
-    public static UserAuditor withDetails(SecurityDetails securityDetails) {
-        return UserAuditor.withUsername(securityDetails.getUsername());
+    public UserAuditor withUser(User user) {
+        this.username = user.getUsername();
+        this.name = user.getName();
+        return this;
     }
 
 }

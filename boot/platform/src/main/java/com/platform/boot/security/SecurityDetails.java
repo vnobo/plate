@@ -23,6 +23,7 @@ import java.util.*;
 public final class SecurityDetails implements UserDetails {
 
     private String username;
+    private String name;
     private Set<GrantedAuthority> authorities;
     private Set<TenantMemberOnly> tenants;
     private Set<GroupMemberOnly> groups;

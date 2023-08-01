@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 @Service
 @RequiredArgsConstructor
 public class TenantMembersService extends DatabaseService {
+
     private final TenantMembersRepository tenantMembersRepository;
     private final TenantsRepository tenantsRepository;
 

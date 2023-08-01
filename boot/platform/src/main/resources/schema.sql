@@ -2,6 +2,7 @@ drop table if exists se_users;
 create table se_users
 (
     id                  serial8 primary key,
+    tenant_code varchar(32) not null default '0',
     username            varchar(64) not null unique,
     password            text        not null,
     disabled            boolean     not null default false,
@@ -35,6 +36,7 @@ create table se_groups
     id           serial8 primary key,
     code         varchar(32) not null unique,
     pcode        varchar(32) not null default '0',
+    tenant_code varchar(32) not null default '0',
     name         varchar(64) not null,
     extend       jsonb,
     created_time timestamp            default current_timestamp,
@@ -97,7 +99,7 @@ create table se_menus
     id           serial8 primary key,
     code         varchar(32) not null unique,
     pcode        varchar(32) not null default '0',
-    tenant_code  varchar(20) not null default '0',
+    tenant_code varchar(32) not null default '0',
     type         varchar(20)          default 'MENU',
     sort         int                  default 0,
     authority    varchar(64) not null,
@@ -115,8 +117,8 @@ drop table if exists se_loggers;
 create table se_loggers
 (
     id           serial8 primary key,
-    code         varchar(20) not null unique,
-    tenant_code  varchar(20) not null default '0',
+    code        varchar(32) not null unique,
+    tenant_code varchar(32) not null default '0',
     prefix       varchar(32),
     operator     varchar(32),
     status       varchar(32),

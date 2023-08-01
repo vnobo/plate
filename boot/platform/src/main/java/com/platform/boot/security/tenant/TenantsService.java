@@ -2,6 +2,7 @@ package com.platform.boot.security.tenant;
 
 import com.platform.boot.commons.base.DatabaseService;
 import com.platform.boot.commons.utils.BeanUtils;
+import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.security.tenant.member.TenantMembersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,7 +33,7 @@ public class TenantsService extends DatabaseService {
         // 使用Java 17中的var关键字，类型推断更加简洁
         var query = Query.query(request.toCriteria()).with(pageable);
         // 使用Java 17中的新方法of，避免使用Tuple2
-        return super.queryWithCache(cacheKey, query, Tenant.class);
+        return super.queryWithCache(cacheKey, query, Tenant.class).flatMap(ContextUtils::userAuditorSerializable);
     }
 
     /**

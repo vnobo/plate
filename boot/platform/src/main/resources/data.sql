@@ -1,5 +1,6 @@
-insert into se_users(username, password)
-values ('admin', '{pbkdf2}7d8a68bc5d507bd19bc153ff10bcdef66f5a5f3d0c1ab2438630e50b5c65894bccc2c7e4404c5afa');
+insert into se_users(username, password, name)
+values ('admin', '{pbkdf2}7d8a68bc5d507bd19bc153ff10bcdef66f5a5f3d0c1ab2438630e50b5c65894bccc2c7e4404c5afa',
+        '系统超级管理员');
 insert into se_authorities(username, authority)
 values ('admin', 'ROLE_ADMINISTRATORS');
 values ('admin', 'ROLE_GROUP_ADMINISTRATORS');
