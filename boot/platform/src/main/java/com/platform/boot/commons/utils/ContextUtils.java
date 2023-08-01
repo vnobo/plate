@@ -7,7 +7,6 @@ import com.platform.boot.security.SecurityDetails;
 import com.platform.boot.security.UserAuditor;
 import com.platform.boot.security.user.UsersService;
 import org.springframework.beans.BeanUtils;
-import org.springframework.cache.CacheManager;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -29,13 +28,11 @@ public final class ContextUtils implements Serializable {
     public static final String SECURITY_AUTH_TOKEN_HEADER = "X-Auth-Token";
     public static ObjectMapper OBJECT_MAPPER;
     public static Snowflake SNOW_FLAKE;
-    public static CacheManager CACHE_MANAGER;
     public static UsersService USERS_SERVICE;
 
-    ContextUtils(ObjectMapper objectMapper, CacheManager cacheManager, UsersService usersService) {
+    ContextUtils(ObjectMapper objectMapper, UsersService usersService) {
         ContextUtils.SNOW_FLAKE = new Snowflake(1, 1);
         ContextUtils.OBJECT_MAPPER = objectMapper;
-        ContextUtils.CACHE_MANAGER = cacheManager;
         ContextUtils.USERS_SERVICE = usersService;
     }
 
