@@ -76,7 +76,7 @@ public final class CriteriaUtils {
                 whereSql.append(" AND ").append(key).append(" = :").append(entry.getKey());
             }
         }
-        if (whereSql.length() > 0) {
+        if (!whereSql.isEmpty()) {
             whereSql.insert(0, " WHERE 1=1 ");
         }
         return Map.of(whereSql.toString(), objectMap);

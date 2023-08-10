@@ -1,10 +1,12 @@
 package com.platform.boot.security.tenant.member;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.platform.boot.commons.base.BaseEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 
 /**
@@ -25,5 +27,11 @@ public class TenantMember implements BaseEntity<Long> {
 
     @NotNull(message = "是否启用[enabled]不能为空!")
     private Boolean enabled;
+
+    @Transient
+    private String tenantName;
+
+    @Transient
+    private JsonNode tenantExtend;
 
 }

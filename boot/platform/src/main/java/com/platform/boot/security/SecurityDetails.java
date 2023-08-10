@@ -1,9 +1,8 @@
 package com.platform.boot.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.platform.boot.security.group.member.GroupMemberOnly;
+import com.platform.boot.security.group.member.GroupMember;
 import com.platform.boot.security.tenant.member.TenantMember;
-import com.platform.boot.security.tenant.member.TenantMemberOnly;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,8 +24,8 @@ public final class SecurityDetails implements UserDetails {
     private String username;
     private String name;
     private Set<GrantedAuthority> authorities;
-    private Set<TenantMemberOnly> tenants;
-    private Set<GroupMemberOnly> groups;
+    private Set<TenantMember> tenants;
+    private Set<GroupMember> groups;
 
     @JsonIgnore
     private String password;
@@ -111,7 +110,7 @@ public final class SecurityDetails implements UserDetails {
             return null;
         }
         return this.getTenants().stream().filter(TenantMember::getEnabled).findAny()
-                .map(TenantMemberOnly::getTenantCode).orElse(null);
+                .map(TenantMember::getTenantCode).orElse(null);
     }
 
     /**
@@ -124,7 +123,7 @@ public final class SecurityDetails implements UserDetails {
             return null;
         }
         return this.getTenants().stream().filter(TenantMember::getEnabled).findAny()
-                .map(TenantMemberOnly::getTenantName).orElse(null);
+                .map(TenantMember::getTenantName).orElse(null);
     }
 
     @Override

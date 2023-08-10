@@ -23,14 +23,14 @@ public class GroupMembersService extends DatabaseService {
 
     private final GroupsRepository groupsRepository;
 
-    public Flux<GroupMemberOnly> search(GroupMemberRequest request, Pageable pageable) {
+    public Flux<GroupMember> search(GroupMemberRequest request, Pageable pageable) {
         String cacheKey = BeanUtils.cacheKey(request, pageable);
         Query query = Query.query(request.toCriteria()).with(pageable);
         return super.queryWithCache(cacheKey, query, GroupMember.class)
                 .flatMap(this::serializeOnly);
     }
 
-    public Mono<Page<GroupMemberOnly>> page(GroupMemberRequest request, Pageable pageable) {
+    public Mono<Page<GroupMember>> page(GroupMemberRequest request, Pageable pageable) {
         String cacheKey = BeanUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria());
         var searchMono = this.search(request, pageable).collectList();
@@ -39,9 +39,13 @@ public class GroupMembersService extends DatabaseService {
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
-    private Mono<GroupMemberOnly> serializeOnly(GroupMember groupMember) {
+    private Mono<GroupMember> serializeOnly(GroupMember groupMember) {
         return groupsRepository.findByCode(groupMember.getGroupCode())
-                .map(group -> GroupMemberOnly.withGroupMember(groupMember).group(group));
+                .map(group -> {
+                    groupMember.setGroupName(group.getName());
+                    groupMember.setGroupExtend(group.getExtend());
+                    return groupMember;
+                });
     }
 
     public Mono<GroupMember> operate(GroupMemberRequest request) {

@@ -25,14 +25,14 @@ public class TenantMembersService extends DatabaseService {
     private final TenantMembersRepository tenantMembersRepository;
     private final TenantsRepository tenantsRepository;
 
-    public Flux<TenantMemberOnly> search(TenantMemberRequest request, Pageable pageable) {
+    public Flux<TenantMember> search(TenantMemberRequest request, Pageable pageable) {
         String cacheKey = BeanUtils.cacheKey(request, pageable);
         Query query = Query.query(request.toCriteria()).with(pageable);
         return super.queryWithCache(cacheKey, query, TenantMember.class)
                 .flatMapSequential(this::serializeOnly);
     }
 
-    public Mono<Page<TenantMemberOnly>> page(TenantMemberRequest request, Pageable pageable) {
+    public Mono<Page<TenantMember>> page(TenantMemberRequest request, Pageable pageable) {
         String cacheKey = BeanUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria());
         var searchMono = this.search(request, pageable).collectList();
@@ -41,9 +41,13 @@ public class TenantMembersService extends DatabaseService {
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
-    private Mono<TenantMemberOnly> serializeOnly(TenantMember tenantMember) {
+    private Mono<TenantMember> serializeOnly(TenantMember tenantMember) {
         return this.tenantsRepository.findByCode(tenantMember.getTenantCode())
-                .map(tenant -> TenantMemberOnly.withTenantMember(tenantMember).tenant(tenant));
+                .map(tenant -> {
+                    tenantMember.setTenantName(tenant.getName());
+                    tenantMember.setTenantExtend(tenant.getExtend());
+                    return tenantMember;
+                });
     }
 
     @Transactional(rollbackFor = Exception.class)

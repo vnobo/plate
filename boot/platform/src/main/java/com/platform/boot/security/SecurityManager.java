@@ -2,8 +2,8 @@ package com.platform.boot.security;
 
 import com.platform.boot.commons.base.DatabaseService;
 import com.platform.boot.security.group.authority.GroupAuthority;
-import com.platform.boot.security.group.member.GroupMemberOnly;
-import com.platform.boot.security.tenant.member.TenantMemberOnly;
+import com.platform.boot.security.group.member.GroupMember;
+import com.platform.boot.security.tenant.member.TenantMember;
 import com.platform.boot.security.user.User;
 import com.platform.boot.security.user.UsersService;
 import com.platform.boot.security.user.authority.UserAuthority;
@@ -109,24 +109,24 @@ public class SecurityManager extends DatabaseService
                 user.getAccountLocked(), user.getCredentialsExpired());
     }
 
-    private Mono<List<GroupMemberOnly>> loadGroups(String username) {
+    private Mono<List<GroupMember>> loadGroups(String username) {
         String queryGroupMemberSql = """
                 select a.id,a.group_code,a.username,b.name as group_name,b.extend as group_extend
                 from se_group_members a join se_groups b on a.group_code=b.code
                 where a.username ilike :username
                 """;
         return this.queryWithCache(Objects.hash("USER_GROUPS", username),
-                queryGroupMemberSql, Map.of("username", username), GroupMemberOnly.class).collectList();
+                queryGroupMemberSql, Map.of("username", username), GroupMember.class).collectList();
     }
 
-    private Mono<List<TenantMemberOnly>> loadTenants(String username) {
+    private Mono<List<TenantMember>> loadTenants(String username) {
         String queryGroupMemberSql = """
                 select a.id,a.tenant_code,a.username,b.name as tenant_name,b.extend as tenant_extend
                 from se_tenant_members a join se_tenants b on a.tenant_code=b.code
                 where a.username ilike :username
                 """;
         return this.queryWithCache(Objects.hash("USER_TENANTS", username),
-                queryGroupMemberSql, Map.of("username", username), TenantMemberOnly.class).collectList();
+                queryGroupMemberSql, Map.of("username", username), TenantMember.class).collectList();
     }
 
     private Mono<List<GrantedAuthority>> authorities(String username) {
