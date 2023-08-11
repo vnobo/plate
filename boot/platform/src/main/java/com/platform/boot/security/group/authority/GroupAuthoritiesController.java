@@ -11,7 +11,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
+ * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
 @RestController
 @RequestMapping("/groups/authorities")
@@ -25,7 +25,6 @@ public class GroupAuthoritiesController {
         return ContextUtils.securityDetails().flatMapMany(securityDetails ->
                 this.authoritiesService.search(request.securityCode(securityDetails.getTenantCode()), pageable));
     }
-
 
     @GetMapping("page")
     public Mono<Page<GroupAuthority>> page(GroupAuthorityRequest request, Pageable pageable) {
