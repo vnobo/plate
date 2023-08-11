@@ -42,8 +42,7 @@ public class TenantMembersService extends DatabaseService {
     }
 
     private Mono<TenantMember> serializeOnly(TenantMember tenantMember) {
-        return this.tenantsRepository.findByCode(tenantMember.getTenantCode())
-                .map(tenant -> {
+        return this.tenantsRepository.findByCode(tenantMember.getTenantCode()).map(tenant -> {
                     tenantMember.setTenantName(tenant.getName());
                     tenantMember.setTenantExtend(tenant.getExtend());
                     return tenantMember;
