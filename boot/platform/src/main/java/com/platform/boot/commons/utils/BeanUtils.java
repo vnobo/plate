@@ -4,9 +4,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Map;
+import java.util.StringJoiner;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -23,6 +26,13 @@ public class BeanUtils {
         // Convert objects to a map using ObjectMapper
         StringBuilder keyBuilder = new StringBuilder();
         for (Object object : objects) {
+            if (object instanceof Pageable pageable) {
+                keyBuilder.append(applySort(pageable.getSort()));
+                keyBuilder.append("&page=").append(pageable.getPageNumber());
+                keyBuilder.append("&size=").append(pageable.getPageSize());
+                keyBuilder.append("&offset=").append(pageable.getOffset());
+                continue;
+            }
             // Convert object to a map using ObjectMapper
             Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
             // Check if the object map is empty
@@ -36,6 +46,19 @@ public class BeanUtils {
         }
         // Return the final cache key as a string
         return keyBuilder.toString();
+    }
+
+    public static String applySort(Sort sort) {
+        if (sort == null || sort.isUnsorted()) {
+            return "";
+        }
+        StringJoiner sortSql = new StringJoiner(", ");
+        for (Sort.Order order : sort) {
+            String sortedPropertyName = order.getProperty();
+            String sortedProperty = order.isIgnoreCase() ? "lower(" + sortedPropertyName + ")" : sortedPropertyName;
+            sortSql.add("&" + sortedProperty + "=" + (order.isAscending() ? "asc" : "desc"));
+        }
+        return sortSql.toString();
     }
 
     /**

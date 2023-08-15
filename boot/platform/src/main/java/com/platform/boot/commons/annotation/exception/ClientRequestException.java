@@ -1,5 +1,7 @@
 package com.platform.boot.commons.annotation.exception;
 
+import lombok.Getter;
+
 /**
  * This class represents an exception that occurs when a client request is invalid.
  * It extends the RestServerException class.
@@ -7,8 +9,13 @@ package com.platform.boot.commons.annotation.exception;
  *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
+@Getter
 public class ClientRequestException extends RestServerException {
 
+    /**
+     * -- GETTER --
+     * Returns the serviceId field of this exception.
+     */
     private String serviceId;
 
     public ClientRequestException(int code, Object msg) {
@@ -45,15 +52,6 @@ public class ClientRequestException extends RestServerException {
     public ClientRequestException serviceId(String serviceId) {
         this.setServiceId(serviceId);
         return this;
-    }
-
-    /**
-     * Returns the serviceId field of this exception.
-     *
-     * @return the serviceId
-     */
-    public String getServiceId() {
-        return serviceId;
     }
 
     /**

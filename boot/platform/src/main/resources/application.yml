@@ -1,16 +1,7 @@
-logging:
-  register-shutdown-hook: true
-  level:
-    web: debug
-    com.platform.boot.*: debug
-    org.springframework.web: debug
-    org.springframework.r2dbc: debug
-    io.r2dbc.postgresql:
-      PARAM: debug
-
 server:
   shutdown: graceful
   http2.enabled: true
+  compression.enabled: true
 
 spring:
   application.name: platform
