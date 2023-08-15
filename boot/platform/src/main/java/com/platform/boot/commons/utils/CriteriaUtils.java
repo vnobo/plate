@@ -55,7 +55,7 @@ public final class CriteriaUtils {
      * @param skipKeys 跳过的字段名列表
      * @return 返回 where 语句字符串
      */
-    public static Map<String, Map<String, Object>> applyWhereParameterSql(Object object, List<String> skipKeys) {
+    public static Map<String, Map<String, Object>> whereParameterSql(Object object, List<String> skipKeys) {
 
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
 
