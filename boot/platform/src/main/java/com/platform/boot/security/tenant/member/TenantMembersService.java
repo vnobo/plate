@@ -27,7 +27,8 @@ public class TenantMembersService extends DatabaseService {
     public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
         String cacheKey = BeanUtils.cacheKey(request, pageable);
         var parameter = request.buildWhereSql();
-        String query = request.querySql() + parameter.getSql() + CriteriaUtils.applyPage(pageable);
+        String query = request.querySql() + parameter.getSql() +
+                CriteriaUtils.applyPage(pageable, "se_tenant_members");
         return super.queryWithCache(cacheKey, query, parameter.getParams(), TenantMemberResponse.class);
     }
 

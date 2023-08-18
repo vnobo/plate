@@ -24,7 +24,12 @@ public final class CriteriaUtils {
      * @return page query based on pageable
      */
     public static String applyPage(Pageable pageable) {
-        String orderSql = applySort(pageable.getSort());
+        String orderSql = applySort(pageable.getSort(), null);
+        return String.format(orderSql + " LIMIT %d OFFSET %d", pageable.getPageSize(), pageable.getOffset());
+    }
+
+    public static String applyPage(Pageable pageable, String prefix) {
+        String orderSql = applySort(pageable.getSort(), prefix);
         return String.format(orderSql + " LIMIT %d OFFSET %d", pageable.getPageSize(), pageable.getOffset());
     }
 
@@ -36,7 +41,7 @@ public final class CriteriaUtils {
      * @param sort The Sort object used to generate the ORDER By clause.
      * @return An ORDER BY clause string.
      */
-    public static String applySort(Sort sort) {
+    public static String applySort(Sort sort, String prefix) {
         if (sort == null || sort.isUnsorted()) {
             return "";
         }
@@ -44,6 +49,9 @@ public final class CriteriaUtils {
         sort.iterator().forEachRemaining((o) -> {
             String sortedPropertyName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, o.getProperty());
             String sortedProperty = o.isIgnoreCase() ? "LOWER(" + sortedPropertyName + ")" : sortedPropertyName;
+            if (StringUtils.hasLength(prefix)) {
+                sortedProperty = prefix + "." + sortedProperty;
+            }
             sortSql.add(sortedProperty + (o.isAscending() ? " ASC" : " DESC"));
         });
         return " ORDER BY " + sortSql;
