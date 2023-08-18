@@ -2,7 +2,7 @@ package com.platform.boot.security.tenant.member;
 
 import com.platform.boot.commons.base.DatabaseService;
 import com.platform.boot.commons.utils.BeanUtils;
-import com.platform.boot.security.tenant.TenantsRepository;
+import com.platform.boot.commons.utils.CriteriaUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -23,31 +23,25 @@ import reactor.core.publisher.Mono;
 public class TenantMembersService extends DatabaseService {
 
     private final TenantMembersRepository tenantMembersRepository;
-    private final TenantsRepository tenantsRepository;
 
-    public Flux<TenantMember> search(TenantMemberRequest request, Pageable pageable) {
+    public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
         String cacheKey = BeanUtils.cacheKey(request, pageable);
-        Query query = Query.query(request.toCriteria()).with(pageable);
-        return super.queryWithCache(cacheKey, query, TenantMember.class)
-                .flatMapSequential(this::serializeOnly);
+        var parameter = request.buildWhereSql();
+        String query = request.querySql() + parameter.getSql() + CriteriaUtils.applyPage(pageable);
+        return super.queryWithCache(cacheKey, query, parameter.getParams(), TenantMemberResponse.class);
     }
 
-    public Mono<Page<TenantMember>> page(TenantMemberRequest request, Pageable pageable) {
-        String cacheKey = BeanUtils.cacheKey(request);
-        Query query = Query.query(request.toCriteria());
+    public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        Mono<Long> countMono = this.countWithCache(cacheKey, query, TenantMember.class);
+
+        String cacheKey = BeanUtils.cacheKey(request);
+        var parameter = request.buildWhereSql();
+        String query = request.countSql() + parameter.getSql();
+        Mono<Long> countMono = this.countWithCache(cacheKey, query, parameter.getParams());
         return Mono.zip(searchMono, countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
-    private Mono<TenantMember> serializeOnly(TenantMember tenantMember) {
-        return this.tenantsRepository.findByCode(tenantMember.getTenantCode()).map(tenant -> {
-                    tenantMember.setTenantName(tenant.getName());
-                    tenantMember.setTenantExtend(tenant.getExtend());
-                    return tenantMember;
-                });
-    }
 
     @Transactional(rollbackFor = Exception.class)
     public Mono<TenantMember> operate(TenantMemberRequest request) {

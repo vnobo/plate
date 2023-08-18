@@ -1,10 +1,12 @@
 package com.platform.boot.commons.utils;
 
 import com.google.common.base.CaseFormat;
+import lombok.Data;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,19 +56,35 @@ public final class CriteriaUtils {
      * @param skipKeys 跳过的字段名列表
      * @return 返回 where 语句字符串
      */
-    public static Map<String, Map<String, Object>> whereParameterSql(Object object, List<String> skipKeys) {
+    public static Parameter whereParameterSql(Object object, List<String> skipKeys) {
+        return whereParameterSql(object, skipKeys, null);
+    }
 
+    /**
+     * 使用 applyWhere 方法将一个对象转化成查询条件 where 语句
+     *
+     * @param object   待转化的对象
+     * @param skipKeys 跳过的字段名列表
+     * @param prefix   拼接条件前缀
+     * @return 返回 where 语句字符串
+     */
+    public static Parameter whereParameterSql(Object object, List<String> skipKeys, String prefix) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
-
         Set<String> mergeSet = new HashSet<>(SKIP_CRITERIA_KEYS);
         if (!ObjectUtils.isEmpty(skipKeys)) {
             mergeSet.addAll(skipKeys);
         }
         mergeSet.forEach(objectMap::remove);
+        return whereParameterSql(objectMap, prefix);
+    }
 
+    public static Parameter whereParameterSql(Map<String, Object> objectMap, String prefix) {
         StringBuilder whereSql = new StringBuilder();
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
             String key = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, entry.getKey());
+            if (StringUtils.hasLength(prefix)) {
+                key = prefix + "." + key;
+            }
             if (entry.getValue() instanceof String) {
                 whereSql.append(" AND ").append(key).append(" LIKE ").append(":").append(entry.getKey());
             } else if (entry.getValue() instanceof Collection<?>) {
@@ -78,7 +96,7 @@ public final class CriteriaUtils {
         if (!whereSql.isEmpty()) {
             whereSql.insert(0, " WHERE 1=1 ");
         }
-        return Map.of(whereSql.toString(), objectMap);
+        return Parameter.of(whereSql.toString(), objectMap);
     }
 
     /**
@@ -127,5 +145,11 @@ public final class CriteriaUtils {
             }
         }).collect(Collectors.toList());
         return Criteria.from(criteriaList);
+    }
+
+    @Data(staticConstructor = "of")
+    public static class Parameter {
+        private final String sql;
+        private final Map<String, Object> params;
     }
 }

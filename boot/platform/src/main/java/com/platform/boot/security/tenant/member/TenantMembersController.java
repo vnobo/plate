@@ -22,14 +22,14 @@ public class TenantMembersController {
     private final TenantMembersService tenantMembersService;
 
     @GetMapping("search")
-    public Flux<TenantMember> search(TenantMemberRequest request, Pageable pageable) {
+    public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMapMany(securityDetails ->
                 this.tenantMembersService.search(request
                         .securityCode(securityDetails.getTenantCode()), pageable));
     }
 
     @GetMapping("page")
-    public Mono<Page<TenantMember>> page(TenantMemberRequest request, Pageable pageable) {
+    public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMap(securityDetails ->
                 this.tenantMembersService.page(request
                         .securityCode(securityDetails.getTenantCode()), pageable));

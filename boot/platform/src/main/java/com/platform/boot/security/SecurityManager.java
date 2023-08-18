@@ -3,7 +3,7 @@ package com.platform.boot.security;
 import com.platform.boot.commons.base.DatabaseService;
 import com.platform.boot.security.group.authority.GroupAuthority;
 import com.platform.boot.security.group.member.GroupMember;
-import com.platform.boot.security.tenant.member.TenantMember;
+import com.platform.boot.security.tenant.member.TenantMemberResponse;
 import com.platform.boot.security.user.User;
 import com.platform.boot.security.user.UsersService;
 import com.platform.boot.security.user.authority.UserAuthority;
@@ -119,14 +119,14 @@ public class SecurityManager extends DatabaseService
                 queryGroupMemberSql, Map.of("username", username), GroupMember.class).collectList();
     }
 
-    private Mono<List<TenantMember>> loadTenants(String username) {
+    private Mono<List<TenantMemberResponse>> loadTenants(String username) {
         String queryGroupMemberSql = """
                 select a.id,a.tenant_code,a.username,b.name as tenant_name,b.extend as tenant_extend
                 from se_tenant_members a join se_tenants b on a.tenant_code=b.code
                 where a.username ilike :username
                 """;
         return this.queryWithCache(Objects.hash("USER_TENANTS", username),
-                queryGroupMemberSql, Map.of("username", username), TenantMember.class).collectList();
+                queryGroupMemberSql, Map.of("username", username), TenantMemberResponse.class).collectList();
     }
 
     private Mono<List<GrantedAuthority>> authorities(String username) {

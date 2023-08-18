@@ -67,7 +67,7 @@ public abstract class DatabaseService extends AbstractService {
      */
     protected <T> Flux<T> queryWithCache(Object key, String query, Map<String, Object> bindParams, Class<T> entityClass) {
         // Create a GenericExecuteSpec object from the given query
-        var executeSpec = this.databaseClient.sql(query);
+        var executeSpec = this.databaseClient.sql(() -> query);
         // Bind the given parameters to the query
         for (var e : bindParams.entrySet()) {
             executeSpec = executeSpec.bind(e.getKey(), e.getValue());
@@ -136,12 +136,12 @@ public abstract class DatabaseService extends AbstractService {
      * 分页并缓存查询结果。
      *
      * @param key   缓存键值
-     * @param query 查询条件
+     * @param query 查询语句
      * @return 查询结果元组（包括实体列表和总数）
      */
     protected Mono<Long> countWithCache(Object key, String query, Map<String, Object> bindParams) {
         // Create a GenericExecuteSpec object from the given query
-        var executeSpec = this.databaseClient.sql(query);
+        var executeSpec = this.databaseClient.sql(() -> query);
         // Bind the given parameters to the query
         for (var e : bindParams.entrySet()) {
             executeSpec = executeSpec.bind(e.getKey(), e.getValue());

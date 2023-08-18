@@ -3,6 +3,7 @@ package com.platform.boot.security;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.platform.boot.security.group.member.GroupMember;
 import com.platform.boot.security.tenant.member.TenantMember;
+import com.platform.boot.security.tenant.member.TenantMemberResponse;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,7 +25,7 @@ public final class SecurityDetails implements UserDetails {
     private String username;
     private String name;
     private Set<GrantedAuthority> authorities;
-    private Set<TenantMember> tenants;
+    private Set<TenantMemberResponse> tenants;
     private Set<GroupMember> groups;
 
     @JsonIgnore
@@ -122,8 +123,8 @@ public final class SecurityDetails implements UserDetails {
         if (ObjectUtils.isEmpty(this.getTenants())) {
             return null;
         }
-        return this.getTenants().stream().filter(TenantMember::getEnabled).findAny()
-                .map(TenantMember::getTenantName).orElse(null);
+        return this.getTenants().stream().filter(TenantMemberResponse::getEnabled).findAny()
+                .map(TenantMemberResponse::getTenantName).orElse(null);
     }
 
     @Override
