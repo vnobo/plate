@@ -45,13 +45,8 @@
               "src/manifest.webmanifest",
               {
                 "glob": "**/*",
-                "input": "./node_modules/bootstrap-icons/icons/",
-                "output": "/assets/icons"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/@tabler/core/dist/img/",
-                "output": "/assets/tabler"
+                "input": "./node_modules/layui/dist/font/",
+                "output": "/assets/layui/font/"
               }
             ],
             "styles": [
@@ -60,19 +55,15 @@
                 "bundleName": "material-module"
               },
               {
-                "input": "bootstrap-icons/font/bootstrap-icons.scss",
-                "bundleName": "bootstrap-icons-module"
-              },
-              {
-                "input": "@tabler/core/dist/css/tabler.min.css",
-                "bundleName": "table-module"
+                "input": "layui/dist/css/layui.css",
+                "bundleName": "layui-module"
               },
               "src/styles.scss"
             ],
             "scripts": [
               {
-                "input": "@tabler/core/dist/js/tabler.min.js",
-                "bundleName": "table-module"
+                "input": "layui/dist/layui.js",
+                "bundleName": "layui-module"
               }
             ],
             "serviceWorker": true,
