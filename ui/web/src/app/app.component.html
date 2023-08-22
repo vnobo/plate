@@ -1,54 +1,54 @@
-<div class="fixed-top">
-  <mat-progress-bar *ngIf="progressShow" mode="query"></mat-progress-bar>
-</div>
-<div *ngIf="!layoutHided; else elseBlock" class="layout-fluid">
-  <app-header-navbar *ngIf="authenticated"></app-header-navbar>
-  <div class="page">
-    <app-aside-navbar *ngIf="authenticated" class="navbar navbar-vertical navbar-expand-lg"></app-aside-navbar>
-    <div class="page-wrapper">
-      <!-- Page header -->
-      <div class="page-header">
-        <div class="row align-items-center mw-100">
-          <div class="col">
-            <div class="mb-1">
-              <ol aria-label="breadcrumbs" class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                <li class="breadcrumb-item"><a href="#">Library</a></li>
-                <li aria-current="page" class="breadcrumb-item active"><a href="#">Articles</a></li>
-              </ol>
-            </div>
-            <h2 class="page-title">
-              <span class="text-truncate">Knights of Ni, we are but simple travelers who seek the enchanter
-                who lives beyond these woods.</span>
-            </h2>
-          </div>
-          <div class="col-auto">
-            <div class="btn-list">
-              <a class="btn d-none d-md-inline-flex" href="#">
-                <!-- Download SVG icon from http://tabler-icons.io/i/edit -->
-                <svg class="icon" fill="none" height="24" stroke="currentColor" stroke-linecap="round"
-                     stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24"
-                     xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0 0h24v24H0z" fill="none" stroke="none"/>
-                  <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1"/>
-                  <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z"/>
-                  <path d="M16 5l3 3"/>
-                </svg>
-                Edit
-              </a>
-              <a class="btn btn-primary" href="#">
-                Publish
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <router-outlet></router-outlet>
+<nz-layout class="app-layout">
+  <nz-sider [(nzCollapsed)]="isCollapsed"
+            [nzTrigger]="null"
+            class="menu-sidebar"
+            nzBreakpoint="md"
+            nzCollapsible
+            nzWidth="256px">
+    <div class="sidebar-logo">
+      <a href="https://ng.ant.design/" target="_blank">
+        <img alt="logo" src="https://ng.ant.design/assets/img/logo.svg">
+        <h1>Ant Design Of Angular</h1>
+      </a>
     </div>
-  </div>
-</div>
-
-<!--Elseif single Page View --->
-<ng-template #elseBlock>
-  <router-outlet></router-outlet>
-</ng-template>
+    <ul [nzInlineCollapsed]="isCollapsed" nz-menu nzMode="inline" nzTheme="dark">
+      <li nz-submenu nzIcon="dashboard" nzOpen nzTitle="Dashboard">
+        <ul>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/welcome">Welcome</a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a>Monitor</a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a>Workplace</a>
+          </li>
+        </ul>
+      </li>
+      <li nz-submenu nzIcon="form" nzOpen nzTitle="Form">
+        <ul>
+          <li nz-menu-item nzMatchRouter>
+            <a>Basic Form</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </nz-sider>
+  <nz-layout>
+    <nz-header>
+      <div class="app-header">
+        <span (click)="isCollapsed = !isCollapsed" class="header-trigger">
+            <span [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"
+                  class="trigger"
+                  nz-icon
+            ></span>
+        </span>
+      </div>
+    </nz-header>
+    <nz-content>
+      <div class="inner-content">
+        <router-outlet></router-outlet>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

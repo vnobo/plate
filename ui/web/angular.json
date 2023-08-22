@@ -45,26 +45,22 @@
               "src/manifest.webmanifest",
               {
                 "glob": "**/*",
-                "input": "./node_modules/layui/dist/font/",
-                "output": "/assets/layui/font/"
+                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                "output": "/assets/"
               }
             ],
             "styles": [
               {
-                "input": "@angular/material/prebuilt-themes/indigo-pink.css",
-                "bundleName": "material-module"
+                "input": "src/theme.less",
+                "bundleName": "ng-zorro-antd-module"
               },
               {
-                "input": "layui/dist/css/layui.css",
-                "bundleName": "layui-module"
+                "input": "@angular/material/prebuilt-themes/indigo-pink.css",
+                "bundleName": "material-module"
               },
               "src/styles.scss"
             ],
             "scripts": [
-              {
-                "input": "layui/dist/layui.js",
-                "bundleName": "layui-module"
-              }
             ],
             "serviceWorker": true,
             "ngswConfigPath": "ngsw-config.json"
