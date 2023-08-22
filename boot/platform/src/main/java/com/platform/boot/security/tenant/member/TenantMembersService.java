@@ -24,6 +24,13 @@ public class TenantMembersService extends DatabaseService {
 
     private final TenantMembersRepository tenantMembersRepository;
 
+    /**
+     * Search for a list of tenant members based on the provided request and pageable parameters.
+     *
+     * @param request  the request object containing the search criteria
+     * @param pageable the pageable object for pagination
+     * @return a flux of TenantMemberResponse objects matching the search criteria
+     */
     public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
         String cacheKey = BeanUtils.cacheKey(request, pageable);
         var parameter = request.buildWhereSql();
@@ -32,6 +39,13 @@ public class TenantMembersService extends DatabaseService {
         return super.queryWithCache(cacheKey, query, parameter.getParams(), TenantMemberResponse.class);
     }
 
+    /**
+     * Retrieves a page of TenantMemberResponse objects based on the provided TenantMemberRequest and Pageable.
+     *
+     * @param  request   the TenantMemberRequest object containing the search criteria
+     * @param  pageable  the Pageable object specifying the page size and sorting criteria
+     * @return a Mono containing a Page of TenantMemberResponse objects
+     */
     public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
 
