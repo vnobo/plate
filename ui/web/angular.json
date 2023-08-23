@@ -51,16 +51,12 @@
             ],
             "styles": [
               {
-                "input": "src/theme.less",
-                "bundleName": "ng-zorro-antd-module"
-              },
-              {
                 "input": "@angular/material/prebuilt-themes/indigo-pink.css",
                 "bundleName": "material-module"
               },
               {
-                "input": "bootstrap/dist/css/bootstrap.css",
-                "bundleName": "bootstrap-module"
+                "input": "src/zorro-antd-theme.less",
+                "bundleName": "ng-zorro-antd-module"
               },
               "src/styles.scss"
             ],
