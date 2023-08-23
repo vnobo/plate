@@ -44,7 +44,6 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.loginService.clearRememberMe();
     }
     this.loginService.login(credentials).subscribe((res) => {
-      console.log('Login is success. ', res);
       this.router.navigate(['/dashboard/index'], {relativeTo: this.route}).then();
     });
   }

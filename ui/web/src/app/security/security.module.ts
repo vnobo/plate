@@ -4,15 +4,20 @@ import {SecurityRoutingModule} from './security-routing.module';
 import {LoginComponent} from './login/login.component';
 import {SharedModule} from "../shared/shared.module";
 import {MAT_SNACK_BAR_DEFAULT_OPTIONS} from "@angular/material/snack-bar";
+import {NzDividerModule} from "ng-zorro-antd/divider";
 
 
 @NgModule({
+  imports: [
+    SharedModule,
+    SecurityRoutingModule,
+    NzDividerModule
+  ],
   declarations: [
     LoginComponent
   ],
-  imports: [
-    SharedModule,
-    SecurityRoutingModule
+  exports: [
+    LoginComponent
   ],
   providers: [
     {provide: MAT_SNACK_BAR_DEFAULT_OPTIONS, useValue: {duration: 2500}}

@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
 import {finalize, Observable} from 'rxjs';
-import {ProgressBarService} from "../../shared/progress-bar.service";
+import {ProgressBarService} from "../shared/progress-bar.service";
 
 /**
  * This code is an interceptor that adds a header to the request and shows a progress bar while the request is being processed. It then sends the request to the next handler and hides the progress bar when the request is finished.

@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
 import {catchError, Observable, throwError, timeout} from 'rxjs';
 import {ActivatedRoute, Router} from "@angular/router";
-import {AuthService} from "../auth.service";
+import {AuthService} from "../security/auth.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Injectable()
