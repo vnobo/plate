@@ -42,7 +42,7 @@
         </source>
       </segment>
     </unit>
-    <unit id="6826167776608804576">
+    <unit id="app.login.title">
       <notes>
         <note category="location">src/app/security/login/login.component.html:12</note>
       </notes>
@@ -143,6 +143,14 @@
         <target>登&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;录</target>
       </segment>
     </unit>
+        <unit id="app.login.or">
+          <notes>
+            <note category="location">src/app/security/login/login.component.html:64</note>
+          </notes>
+          <segment>
+            <source>或</source>
+          </segment>
+        </unit>
     <unit id="siteTitlePrefix">
           <notes>
             <note category="location">src/app/shared/page-title-strategy.service.ts:16</note>
