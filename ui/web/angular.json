@@ -59,15 +59,15 @@
                 "bundleName": "material-module"
               },
               {
-                "input": "@bootstrap/d/prebuilt-themes/indigo-pink.css",
-                "bundleName": "material-module"
+                "input": "bootstrap/dist/css/bootstrap.css",
+                "bundleName": "bootstrap-module"
               },
               "src/styles.scss"
             ],
             "scripts": [
               {
-                "input": "@angular/material/prebuilt-themes/indigo-pink.css",
-                "bundleName": "material-module"
+                "input": "bootstrap/dist/js/bootstrap.js",
+                "bundleName": "bootstrap-module"
               }
             ],
             "serviceWorker": true,
@@ -206,7 +206,6 @@
   "cli": {
     "analytics": "489bfb31-ef00-4ec9-a195-abe890c7f49b",
     "schematicCollections": [
-      "@angular-eslint/schematics",
       "@angular-eslint/schematics"
     ]
   }
