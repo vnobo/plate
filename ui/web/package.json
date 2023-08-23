@@ -23,6 +23,7 @@
     "@angular/platform-server": "^16.2.1",
     "@angular/router": "^16.2.1",
     "@angular/service-worker": "^16.2.1",
+    "bootstrap": "^5.3.1",
     "dayjs": "^1.11.7",
     "ng-zorro-antd": "^16.1.0",
     "rxjs": "~7.5.7",

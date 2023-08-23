@@ -58,9 +58,17 @@
                 "input": "@angular/material/prebuilt-themes/indigo-pink.css",
                 "bundleName": "material-module"
               },
+              {
+                "input": "@bootstrap/d/prebuilt-themes/indigo-pink.css",
+                "bundleName": "material-module"
+              },
               "src/styles.scss"
             ],
             "scripts": [
+              {
+                "input": "@angular/material/prebuilt-themes/indigo-pink.css",
+                "bundleName": "material-module"
+              }
             ],
             "serviceWorker": true,
             "ngswConfigPath": "ngsw-config.json"
