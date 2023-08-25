@@ -5,7 +5,7 @@ logging:
     com.platform.boot.*: debug
     org.springframework.web: debug
     org.springframework.r2dbc: debug
-    io.r2dbc.postgresql.PARAM: debug
+    io.r2dbc.postgresql.PARAM: info
 
 server.port: 8080
 
@@ -16,7 +16,7 @@ spring:
     username: farmer
     password: q1w2e3..
     pool.max-idle-time: 10m
-  sql.init.mode: always
+  sql.init.mode: never
   data.redis:
     host: 192.168.1.2
     repositories.enabled: false

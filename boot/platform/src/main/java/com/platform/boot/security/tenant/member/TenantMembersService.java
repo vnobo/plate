@@ -42,8 +42,8 @@ public class TenantMembersService extends DatabaseService {
     /**
      * Retrieves a page of TenantMemberResponse objects based on the provided TenantMemberRequest and Pageable.
      *
-     * @param  request   the TenantMemberRequest object containing the search criteria
-     * @param  pageable  the Pageable object specifying the page size and sorting criteria
+     * @param request  the TenantMemberRequest object containing the search criteria
+     * @param pageable the Pageable object specifying the page size and sorting criteria
      * @return a Mono containing a Page of TenantMemberResponse objects
      */
     public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
@@ -64,26 +64,16 @@ public class TenantMembersService extends DatabaseService {
                 .defaultIfEmpty(request.toMemberTenant());
         tenantMemberMono = tenantMemberMono.flatMap(old -> {
             old.setEnabled(true);
-            return this.save(old);
+            return this.tenantMembersRepository.save(old);
         });
         return userDefaultTenant(request.getUserCode())
                 .then(tenantMemberMono).doAfterTerminate(() -> this.cache.clear());
     }
 
-    private Mono<Void> userDefaultTenant(String username) {
-        Query query = Query.query(Criteria.where("username").is(username));
+    private Mono<Void> userDefaultTenant(String userCode) {
+        Query query = Query.query(Criteria.where("userCode").is(userCode));
         Update update = Update.update("enabled", false);
         return entityTemplate.update(TenantMember.class).matching(query).apply(update).then();
-    }
-
-    public Mono<TenantMember> save(TenantMember tenantMember) {
-        if (tenantMember.isNew()) {
-            return this.tenantMembersRepository.save(tenantMember);
-        } else {
-            assert tenantMember.getId() != null;
-            return this.tenantMembersRepository.findById(tenantMember.getId())
-                    .flatMap(old -> this.tenantMembersRepository.save(tenantMember));
-        }
     }
 
     /**

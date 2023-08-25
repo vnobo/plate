@@ -17,12 +17,6 @@ import java.util.stream.Collectors;
 public final class CriteriaUtils {
     public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend", "createdTime", "updatedTime");
 
-    /**
-     * Method to construct page query by pageable
-     *
-     * @param pageable pageable to be used as query
-     * @return page query based on pageable
-     */
     public static String applyPage(Pageable pageable) {
         String orderSql = applySort(pageable.getSort(), null);
         return String.format(orderSql + " LIMIT %d OFFSET %d", pageable.getPageSize(), pageable.getOffset());
@@ -33,14 +27,6 @@ public final class CriteriaUtils {
         return String.format(orderSql + " LIMIT %d OFFSET %d", pageable.getPageSize(), pageable.getOffset());
     }
 
-    /**
-     * Generates an ORDER BY clause for the given {@link Sort} object,
-     * taking into account whether the sorting order is ascending or descending,
-     * and whether the sorting has to be case-sensitive or not.
-     *
-     * @param sort The Sort object used to generate the ORDER By clause.
-     * @return An ORDER BY clause string.
-     */
     public static String applySort(Sort sort, String prefix) {
         if (sort == null || sort.isUnsorted()) {
             return "";
@@ -57,25 +43,6 @@ public final class CriteriaUtils {
         return " ORDER BY " + sortSql;
     }
 
-    /**
-     * 使用 applyWhere 方法将一个对象转化成查询条件 where 语句
-     *
-     * @param object   待转化的对象
-     * @param skipKeys 跳过的字段名列表
-     * @return 返回 where 语句字符串
-     */
-    public static Parameter whereParameterSql(Object object, List<String> skipKeys) {
-        return whereParameterSql(object, skipKeys, null);
-    }
-
-    /**
-     * 使用 applyWhere 方法将一个对象转化成查询条件 where 语句
-     *
-     * @param object   待转化的对象
-     * @param skipKeys 跳过的字段名列表
-     * @param prefix   拼接条件前缀
-     * @return 返回 where 语句字符串
-     */
     public static Parameter whereParameterSql(Object object, List<String> skipKeys, String prefix) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
         Set<String> mergeSet = new HashSet<>(SKIP_CRITERIA_KEYS);
@@ -87,24 +54,16 @@ public final class CriteriaUtils {
     }
 
     public static Parameter whereParameterSql(Map<String, Object> objectMap, String prefix) {
-        StringBuilder whereSql = new StringBuilder();
+        Map<String, Object> whereMap = new HashMap<>(objectMap.size());
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
             String key = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, entry.getKey());
             if (StringUtils.hasLength(prefix)) {
                 key = prefix + "." + key;
             }
-            if (entry.getValue() instanceof String) {
-                whereSql.append(" AND ").append(key).append(" LIKE ").append(":").append(entry.getKey());
-            } else if (entry.getValue() instanceof Collection<?>) {
-                whereSql.append(" AND ").append(key).append(" IN (:").append(entry.getKey()).append(")");
-            } else {
-                whereSql.append(" AND ").append(key).append(" = :").append(entry.getKey());
-            }
+            whereMap.put(key, ":" + entry.getKey());
         }
-        if (!whereSql.isEmpty()) {
-            whereSql.insert(0, " WHERE 1=1 ");
-        }
-        return Parameter.of(whereSql.toString(), objectMap);
+        String whereSql = build(whereMap).toString();
+        return Parameter.of(whereSql, objectMap);
     }
 
     /**

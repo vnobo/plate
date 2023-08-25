@@ -6,7 +6,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.relational.core.sql.Update;
 import org.springframework.util.Assert;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -46,7 +48,7 @@ public class UsersController {
 
     // Endpoint to modify a user
     @PutMapping("modify")
-    public Mono<User> modify(@Valid @RequestBody UserRequest request) {
+    public Mono<User> modify(@Validated(Update.class) @RequestBody UserRequest request) {
         // Check that the user ID is not null (i.e. this is an existing user)
         Assert.isTrue(!request.isNew(), "When modifying an existing user, the ID must not be null");
         // Call the users service to modify the user and return the result as a Mono

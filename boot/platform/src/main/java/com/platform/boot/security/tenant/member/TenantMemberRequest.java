@@ -26,14 +26,14 @@ public class TenantMemberRequest extends TenantMember {
 
     private String securityCode;
 
-    public static TenantMemberRequest withUsername(String username) {
+    public static TenantMemberRequest withUserCode(String userCode) {
         TenantMemberRequest request = new TenantMemberRequest();
-        request.setUserCode(username);
+        request.setUserCode(userCode);
         return request;
     }
 
-    public static TenantMemberRequest of(String tenantCode, String username) {
-        TenantMemberRequest request = withUsername(username);
+    public static TenantMemberRequest of(String tenantCode, String userCode) {
+        TenantMemberRequest request = withUserCode(userCode);
         request.setTenantCode(tenantCode);
         return request;
     }
@@ -51,47 +51,38 @@ public class TenantMemberRequest extends TenantMember {
         return criteria(Set.of("securityCode", "users"));
     }
 
-    /**
-     * Retrieves the SQL query for querying data from the database.
-     *
-     * @return the SQL query as a String
-     */
     public String querySql() {
         return """
-                select *, se_tenants.name as tenant_name, se_tenants.extend as tenant_extend,
-                    se_users.name as user_name
-                from se_tenant_members
-                inner join se_tenants on tenant_code = code
-                inner join se_users on se_users.username = se_tenant_members.username
+                select a.*, b.name as tenant_name, b.extend as tenant_extend,c.name as user_name
+                from se_tenant_members a
+                inner join se_tenants b on a.tenant_code = b.code
+                inner join se_users c on c.code = a.user_code
                 """;
     }
 
-    /**
-     * Generates a SQL statement to count the number of records in the `se_tenant_members` table
-     * by joining it with the `se_tenants` and `se_users` tables.
-     *
-     * @return a SQL statement that counts the number of records
-     */
     public String countSql() {
         return """
-                select count(*) from se_tenant_members
-                inner join se_tenants on tenant_code = code
-                inner join se_users on se_users.username = se_tenant_members.username
+                select count(*) from se_tenant_members a
+                inner join se_tenants b on a.tenant_code = b.code
+                inner join se_users c on c.code = a.user_code
                 """;
     }
 
     public CriteriaUtils.Parameter buildWhereSql() {
         var parameter = CriteriaUtils
-                .whereParameterSql(this, List.of("users", "securityCode"), "se_tenant_members");
+                .whereParameterSql(this, List.of("users", "securityCode"), "a");
         Map<String, Object> bindParams = parameter.getParams();
+
         String whereSql = Optional.ofNullable(parameter.getSql()).orElse("Where 1=1 ");
+
         if (!ObjectUtils.isEmpty(this.getUsers())) {
             bindParams.put("users", this.getUsers());
-            whereSql += " and se_tenant_members.username in( :users) ";
+            whereSql += " and a.user_code in( :users) ";
         }
+
         if (StringUtils.hasLength(this.getSecurityCode())) {
             bindParams.put("securityCode", this.getSecurityCode());
-            whereSql += " and se_tenant_members.tenant_code like :securityCode";
+            whereSql += " and a.tenant_code like :securityCode";
         }
         return CriteriaUtils.Parameter.of(whereSql, bindParams);
     }

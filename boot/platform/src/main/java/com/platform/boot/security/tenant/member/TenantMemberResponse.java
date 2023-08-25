@@ -11,6 +11,8 @@ import lombok.EqualsAndHashCode;
 @Data
 public class TenantMemberResponse extends TenantMember {
 
+    private String userName;
+
     private String tenantName;
 
     private JsonNode tenantExtend;
