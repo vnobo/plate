@@ -26,13 +26,14 @@ public class UsersService extends DatabaseService {
     private final UsersRepository usersRepository;
 
     public Flux<User> search(UserRequest request, Pageable pageable) {
-        String cacheKey = BeanUtils.cacheKey(request, pageable);
+        String cacheKey = ContextUtils.cacheKey(request, pageable);
         Query query = Query.query(request.toCriteria()).with(pageable);
-        return super.queryWithCache(cacheKey, query, User.class).flatMap(ContextUtils::userAuditorSerializable);
+        return super.queryWithCache(cacheKey, query, User.class)
+                .flatMapSequential(ContextUtils::userAuditorSerializable);
     }
 
     public Mono<Page<User>> page(UserRequest request, Pageable pageable) {
-        String cacheKey = BeanUtils.cacheKey(request);
+        String cacheKey = ContextUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria());
         var searchMono = this.search(request, pageable).collectList();
         var countMono = super.countWithCache(cacheKey, query, User.class);

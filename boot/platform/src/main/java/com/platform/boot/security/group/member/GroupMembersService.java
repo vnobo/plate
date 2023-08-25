@@ -1,7 +1,7 @@
 package com.platform.boot.security.group.member;
 
 import com.platform.boot.commons.base.DatabaseService;
-import com.platform.boot.commons.utils.BeanUtils;
+import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.security.group.GroupsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,14 +24,14 @@ public class GroupMembersService extends DatabaseService {
     private final GroupsRepository groupsRepository;
 
     public Flux<GroupMember> search(GroupMemberRequest request, Pageable pageable) {
-        String cacheKey = BeanUtils.cacheKey(request, pageable);
+        String cacheKey = ContextUtils.cacheKey(request, pageable);
         Query query = Query.query(request.toCriteria()).with(pageable);
         return super.queryWithCache(cacheKey, query, GroupMember.class)
                 .flatMap(this::serializeOnly);
     }
 
     public Mono<Page<GroupMember>> page(GroupMemberRequest request, Pageable pageable) {
-        String cacheKey = BeanUtils.cacheKey(request);
+        String cacheKey = ContextUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria());
         var searchMono = this.search(request, pageable).collectList();
         var countMono = this.countWithCache(cacheKey, query, GroupMember.class);

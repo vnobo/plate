@@ -2,7 +2,7 @@ package com.platform.boot.security.group.authority;
 
 
 import com.platform.boot.commons.base.DatabaseService;
-import com.platform.boot.commons.utils.BeanUtils;
+import com.platform.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,13 +22,13 @@ public class GroupAuthoritiesService extends DatabaseService {
     private final GroupAuthoritiesRepository authoritiesRepository;
 
     public Flux<GroupAuthority> search(GroupAuthorityRequest request, Pageable pageable) {
-        String cacheKey = BeanUtils.cacheKey(request, pageable);
+        String cacheKey = ContextUtils.cacheKey(request, pageable);
         Query query = Query.query(request.toCriteria()).with(pageable);
         return super.queryWithCache(cacheKey, query, GroupAuthority.class);
     }
 
     public Mono<Page<GroupAuthority>> page(GroupAuthorityRequest request, Pageable pageable) {
-        String cacheKey = BeanUtils.cacheKey(request);
+        String cacheKey = ContextUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria());
         var searchMono = this.search(request, pageable).collectList();
         var countMono = super.countWithCache(cacheKey, query, GroupAuthority.class);

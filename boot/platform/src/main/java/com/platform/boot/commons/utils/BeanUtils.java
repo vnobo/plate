@@ -4,62 +4,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Map;
-import java.util.StringJoiner;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 public class BeanUtils {
 
-    /**
-     * 生成缓存键的方法
-     *
-     * @param objects 可变参数，用于生成缓存键的对象
-     * @return 生成的缓存键字符串
-     */
-    public static String cacheKey(Object... objects) {
-        // Convert objects to a map using ObjectMapper
-        StringBuilder keyBuilder = new StringBuilder();
-        for (Object object : objects) {
-            if (object instanceof Pageable pageable) {
-                keyBuilder.append(applySort(pageable.getSort()));
-                keyBuilder.append("&page=").append(pageable.getPageNumber());
-                keyBuilder.append("&size=").append(pageable.getPageSize());
-                keyBuilder.append("&offset=").append(pageable.getOffset());
-                continue;
-            }
-            // Convert object to a map using ObjectMapper
-            Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
-            // Check if the object map is empty
-            if (ObjectUtils.isEmpty(objectMap)) {
-                // Append the class name of the object to the key builder
-                keyBuilder.append(object.getClass().getName()).append("&");
-                continue;
-            }
-            // Append each key-value pair from the object map to the key builder
-            objectMap.forEach((k, v) -> keyBuilder.append(k).append("=").append(v).append("&"));
-        }
-        // Return the final cache key as a string
-        return keyBuilder.toString();
-    }
-
-    public static String applySort(Sort sort) {
-        if (sort == null || sort.isUnsorted()) {
-            return "";
-        }
-        StringJoiner sortSql = new StringJoiner(", ");
-        for (Sort.Order order : sort) {
-            String sortedPropertyName = order.getProperty();
-            String sortedProperty = order.isIgnoreCase() ? "lower(" + sortedPropertyName + ")" : sortedPropertyName;
-            sortSql.add("&" + sortedProperty + "=" + (order.isAscending() ? "asc" : "desc"));
-        }
-        return sortSql.toString();
-    }
 
     /**
      * This is a static method that copies the properties of a given source object to a given target object.

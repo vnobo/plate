@@ -3,7 +3,7 @@ package com.platform.boot.relational.menus;
 
 import com.platform.boot.commons.annotation.exception.RestServerException;
 import com.platform.boot.commons.base.DatabaseService;
-import com.platform.boot.commons.utils.BeanUtils;
+import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.security.group.authority.GroupAuthoritiesRepository;
 import com.platform.boot.security.user.authority.UserAuthoritiesRepository;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +43,7 @@ public class MenusService extends DatabaseService {
      * @return a Flux of Menus with the search criteria
      */
     public Flux<Menu> search(MenuRequest request) {
-        String cacheKey = BeanUtils.cacheKey(request);
+        String cacheKey = ContextUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria()).sort(Sort.by("sort"));
         return this.queryWithCache(cacheKey, query, Menu.class);
     }

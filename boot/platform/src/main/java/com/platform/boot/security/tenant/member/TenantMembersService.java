@@ -1,7 +1,7 @@
 package com.platform.boot.security.tenant.member;
 
 import com.platform.boot.commons.base.DatabaseService;
-import com.platform.boot.commons.utils.BeanUtils;
+import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.commons.utils.CriteriaUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,7 +32,7 @@ public class TenantMembersService extends DatabaseService {
      * @return a flux of TenantMemberResponse objects matching the search criteria
      */
     public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
-        String cacheKey = BeanUtils.cacheKey(request, pageable);
+        String cacheKey = ContextUtils.cacheKey(request, pageable);
         var parameter = request.buildWhereSql();
         String query = request.querySql() + parameter.getSql() +
                 CriteriaUtils.applyPage(pageable, "se_tenant_members");
@@ -49,7 +49,7 @@ public class TenantMembersService extends DatabaseService {
     public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
 
-        String cacheKey = BeanUtils.cacheKey(request);
+        String cacheKey = ContextUtils.cacheKey(request);
         var parameter = request.buildWhereSql();
         String query = request.countSql() + parameter.getSql();
         Mono<Long> countMono = this.countWithCache(cacheKey, query, parameter.getParams());
