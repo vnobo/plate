@@ -17,9 +17,6 @@ import org.springframework.security.core.userdetails.ReactiveUserDetailsPassword
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -44,47 +41,28 @@ public class SecurityManager extends DatabaseService
     }
 
     private UserDetails withNewPassword(UserDetails userDetails, String newPassword) {
-        return withUserDetails(userDetails).password(newPassword);
+        SecurityDetails securityDetails = (SecurityDetails) userDetails;
+        return securityDetails.password(newPassword);
     }
 
-    public static SecurityDetails withUserDetails(UserDetails userDetails) {
-        return SecurityDetails.of(userDetails.getUsername(), userDetails.getPassword(), !userDetails.isEnabled(),
-                        !userDetails.isAccountNonExpired(),
-                        !userDetails.isAccountNonLocked(),
-                        !userDetails.isCredentialsNonExpired())
-                .authorities(new HashSet<>(userDetails.getAuthorities()));
-    }
-
-    /**
-     * this login user security details and authorities.
-     *
-     * @param username 用户名
-     * @return Mono<UserDetails> 用户详细信息
-     */
     @Override
     public Mono<UserDetails> findByUsername(String username) {
-        // 加载用户信息
-        var userMono = this.usersService.loadByUsername(username);
-        // 加载用户权限信息
-        var authoritiesMono = this.authorities(username);
-        // 使用 Mono.zip 同时加载用户信息和用户权限信息，并构建用户详细信息
-        var tuple2Mono = Mono.zip(userMono, authoritiesMono)
+
+        var userMono = this.usersService.loadByUsername(username)
+                .zipWhen(user -> this.authorities(user.getCode()));
+
+        var tuple2Mono = userMono
                 .flatMap(tuple2 -> buildUserDetails(tuple2.getT1(), new HashSet<>(tuple2.getT2())));
-        // 如果出现错误，则抛出 AuthenticationServiceException 异常
+
         return tuple2Mono.onErrorResume(throwable -> Mono.error(new AuthenticationServiceException(
                 throwable.getLocalizedMessage(), throwable)));
     }
 
-    /**
-     * Build user details
-     *
-     * @param user        user
-     * @param authorities user authority
-     * @return Mono<UserDetails> 用户详细信息
-     */
-    public Mono<UserDetails> buildUserDetails(User user, Set<GrantedAuthority> authorities) {
+    private Mono<UserDetails> buildUserDetails(User user, Set<GrantedAuthority> authorities) {
         // 构建用户详细信息
-        SecurityDetails userDetails = this.withUser(user).authorities(authorities);
+        SecurityDetails userDetails = SecurityDetails.of(user.getCode(), user.getUsername(), user.getPassword(),
+                user.getDisabled(), user.getAccountExpired(),
+                user.getAccountLocked(), user.getCredentialsExpired()).authorities(authorities);
         // 使用 Mono.zip 同时加载用户的组和租户信息
         var tuple2Mono = Mono.zip(this.loadGroups(user.getUsername()), this.loadTenants(user.getUsername()));
         // 将组和租户信息设置到用户详细信息中
@@ -95,61 +73,46 @@ public class SecurityManager extends DatabaseService
         });
     }
 
-    /**
-     * Constructor to create a new SecurityUserDetails instance
-     *
-     * @param user user
-     * @return a new SecurityUserDetails instance
-     */
-    private SecurityDetails withUser(User user) {
-        Assert.isTrue(StringUtils.hasLength(user.getUsername())
-                        && StringUtils.hasLength(user.getPassword()) && !ObjectUtils.isEmpty(user.getDisabled()),
-                "Cannot pass null or empty values to constructor");
-        return SecurityDetails.of(user.getUsername(), user.getPassword(), user.getDisabled(), user.getAccountExpired(),
-                user.getAccountLocked(), user.getCredentialsExpired());
-    }
-
-    private Mono<List<GroupMember>> loadGroups(String username) {
+    private Mono<List<GroupMember>> loadGroups(String userCode) {
         String queryGroupMemberSql = """
-                select a.id,a.group_code,a.username,b.name as group_name,b.extend as group_extend
+                select a.*,b.name as group_name,b.extend as group_extend
                 from se_group_members a join se_groups b on a.group_code=b.code
-                where a.username ilike :username
+                where a.user_code ilike :userCode
                 """;
-        return this.queryWithCache(Objects.hash("USER_GROUPS", username),
-                queryGroupMemberSql, Map.of("username", username), GroupMember.class).collectList();
+        return this.queryWithCache(Objects.hash("USER_GROUPS", userCode),
+                queryGroupMemberSql, Map.of("userCode", userCode), GroupMember.class).collectList();
     }
 
-    private Mono<List<TenantMemberResponse>> loadTenants(String username) {
+    private Mono<List<TenantMemberResponse>> loadTenants(String userCode) {
         String queryGroupMemberSql = """
-                select a.id,a.tenant_code,a.username,b.name as tenant_name,b.extend as tenant_extend
+                select a.*,b.name as tenant_name,b.extend as tenant_extend
                 from se_tenant_members a join se_tenants b on a.tenant_code=b.code
-                where a.username ilike :username
+                where a.user_code ilike :userCode
                 """;
-        return this.queryWithCache(Objects.hash("USER_TENANTS", username),
-                queryGroupMemberSql, Map.of("username", username), TenantMemberResponse.class).collectList();
+        return this.queryWithCache(Objects.hash("USER_TENANTS", userCode),
+                queryGroupMemberSql, Map.of("userCode", userCode), TenantMemberResponse.class).collectList();
     }
 
-    private Mono<List<GrantedAuthority>> authorities(String username) {
-        return this.getAuthorities(username)
-                .concatWith(this.getGroupAuthorities(username)).distinct().collectList();
+    private Mono<List<GrantedAuthority>> authorities(String userCode) {
+        return this.getAuthorities(userCode)
+                .concatWith(this.getGroupAuthorities(userCode)).distinct().collectList();
     }
 
-    private Flux<GrantedAuthority> getAuthorities(String username) {
-        String queryUserAuthoritySql = "select * from se_authorities where username ilike :username";
-        return this.queryWithCache(Objects.hash("USER_AUTHORITIES", username),
-                        queryUserAuthoritySql, Map.of("username", username), UserAuthority.class)
+    private Flux<GrantedAuthority> getAuthorities(String userCode) {
+        String queryUserAuthoritySql = "select * from se_authorities where user_code = :userCode";
+        return this.queryWithCache(Objects.hash("USER_AUTHORITIES", userCode),
+                        queryUserAuthoritySql, Map.of("userCode", userCode), UserAuthority.class)
                 .cast(GrantedAuthority.class);
     }
 
-
-    private Flux<GrantedAuthority> getGroupAuthorities(String username) {
+    private Flux<GrantedAuthority> getGroupAuthorities(String userCode) {
         String queryGroupAuthoritySql = """
-                select ga.id,ga.group_code,ga.authority
+                select ga.*
                 from se_group_authorities ga join se_group_members gm on ga.group_code = gm.group_code
-                where gm.username ilike :username
+                where gm.user_code = :userCode
                 """;
-        return this.queryWithCache(Objects.hash("GROUP_AUTHORITIES", username),
-                        queryGroupAuthoritySql, Map.of("username", username), GroupAuthority.class)
+        return this.queryWithCache(Objects.hash("GROUP_AUTHORITIES", userCode),
+                        queryGroupAuthoritySql, Map.of("userCode", userCode), GroupAuthority.class)
                 .cast(GrantedAuthority.class);
     }
 

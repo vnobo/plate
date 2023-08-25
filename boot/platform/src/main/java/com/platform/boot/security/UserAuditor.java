@@ -25,23 +25,26 @@ import java.io.Serializable;
 @Data
 public class UserAuditor implements Serializable {
 
+    private String code;
     private String username;
 
     private String name;
 
     public static UserAuditor withDetails(SecurityDetails securityDetails) {
-        UserAuditor userAuditor = UserAuditor.withUsername(securityDetails.getUsername());
+        UserAuditor userAuditor = UserAuditor.withCode(securityDetails.getCode());
         userAuditor.setName(securityDetails.getName());
+        userAuditor.setUsername(securityDetails.getUsername());
         return userAuditor;
     }
 
-    public static UserAuditor withUsername(String username) {
+    public static UserAuditor withCode(String code) {
         UserAuditor userAuditor = new UserAuditor();
-        userAuditor.setUsername(username);
+        userAuditor.setCode(code);
         return userAuditor;
     }
 
     public UserAuditor withUser(User user) {
+        this.code = user.getCode();
         this.username = user.getUsername();
         this.name = user.getName();
         return this;

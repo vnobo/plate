@@ -22,7 +22,7 @@ public class GroupMember implements BaseEntity<Long> {
     private String groupCode;
 
     @NotBlank(message = "用户[username]不能为空!")
-    private String username;
+    private String userCode;
 
     @Transient
     private String groupName;

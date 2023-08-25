@@ -22,6 +22,7 @@ import java.util.*;
 @Data
 public final class SecurityDetails implements UserDetails {
 
+    private String code;
     private String username;
     private String name;
     private Set<GrantedAuthority> authorities;
@@ -55,9 +56,10 @@ public final class SecurityDetails implements UserDetails {
      * @param credentialsExpired whether the credentials have expired or not
      * @return a {@link SecurityDetails} instance
      */
-    public static SecurityDetails of(String username, String password, Boolean disabled,
+    public static SecurityDetails of(String code, String username, String password, Boolean disabled,
                                      Boolean accountExpired, Boolean accountLocked, Boolean credentialsExpired) {
         SecurityDetails securityDetails = new SecurityDetails();
+        securityDetails.setCode(code);
         securityDetails.setUsername(username);
         securityDetails.setPassword(password);
         securityDetails.setDisabled(disabled);

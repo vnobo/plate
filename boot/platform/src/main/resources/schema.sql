@@ -2,6 +2,7 @@ drop table if exists se_users;
 create table se_users
 (
     id                  serial8 primary key,
+    code        varchar(32) not null unique,
     tenant_code varchar(32) not null default '0',
     username            varchar(64) not null unique,
     password            text        not null,
@@ -24,9 +25,9 @@ drop table if exists se_authorities;
 create table se_authorities
 (
     id        serial8 primary key,
-    username  varchar(64) not null,
-    authority varchar(64) not null,
-    unique (username, authority)
+    user_code varchar(32)  not null,
+    authority varchar(256) not null,
+    unique (user_code, authority)
 );
 comment on table se_authorities is '用户权限表';
 
@@ -60,8 +61,8 @@ create table se_group_members
 (
     id         serial8 primary key,
     group_code varchar(32) not null,
-    username   varchar(64) not null,
-    unique (group_code, username)
+    user_code varchar(32) not null,
+    unique (group_code, user_code)
 );
 comment on table se_group_members is '角色用户关系表';
 
@@ -87,9 +88,9 @@ create table se_tenant_members
 (
     id          serial8 primary key,
     tenant_code varchar(32) not null,
-    username    varchar(64) not null,
+    user_code varchar(32) not null,
     enabled     boolean     not null default true,
-    unique (tenant_code, username)
+    unique (tenant_code, user_code)
 );
 comment on table se_tenant_members is '租户用户关系表';
 
@@ -100,8 +101,8 @@ create table se_menus
     code         varchar(32) not null unique,
     pcode        varchar(32) not null default '0',
     tenant_code varchar(32) not null default '0',
-    type         varchar(20)          default 'MENU',
-    sort         int                  default 0,
+    type        varchar(20) not null default 'MENU',
+    sort        int         not null default 0,
     authority    varchar(64) not null,
     name         varchar(64) not null,
     path         text,

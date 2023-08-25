@@ -41,9 +41,8 @@ public class UsersService extends DatabaseService {
     }
 
     public Mono<User> loadByUsername(String username) {
-        Mono<User> source = this.usersRepository.findByUsernameIgnoreCase(username)
-                .doOnNext(user -> this.cache.put(username, user));
-        return Mono.justOrEmpty(this.cache.get(username, User.class)).switchIfEmpty(source);
+        var userMono = this.usersRepository.findByUsernameIgnoreCase(username).flux();
+        return queryWithCache(username, userMono).next();
     }
 
     /**

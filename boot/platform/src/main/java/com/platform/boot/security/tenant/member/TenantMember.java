@@ -17,11 +17,11 @@ public class TenantMember implements BaseEntity<Long> {
     @Id
     private Long id;
 
-    @NotBlank(message = "用户[username]不能为空!")
-    private String username;
-
     @NotBlank(message = "租户[tenantCode]不能为空!")
     private String tenantCode;
+
+    @NotBlank(message = "用户[username]不能为空!")
+    private String userCode;
 
     @NotNull(message = "是否启用[enabled]不能为空!")
     private Boolean enabled;

@@ -18,7 +18,7 @@ public class UserAuthority implements GrantedAuthority, BaseEntity<Integer> {
     private Integer id;
 
     @NotBlank(message = "用户[userCode]不能为空!")
-    private String username;
+    private String userCode;
 
     @NotBlank(message = "权限[authority]不能为空!")
     private String authority;

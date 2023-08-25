@@ -21,6 +21,8 @@ public class User implements BaseEntity<Long> {
     @Id
     private Long id;
 
+    private String code;
+
     @NotBlank(message = "Login username [username] cannot be empty!")
     @Pattern(regexp = "^[a-zA-Z0-9_-]{6,16}$", message = "Login username [username] must be " +
             "6 to 16 characters (letters, numbers, _, -)!")

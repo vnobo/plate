@@ -27,7 +27,7 @@ public class UserAuditorConverters {
          */
         @Override
         public String convert(@NonNull UserAuditor source) {
-            return source.getUsername();
+            return source.getCode();
         }
     }
 
@@ -43,7 +43,7 @@ public class UserAuditorConverters {
          */
         @Override
         public UserAuditor convert(@NonNull String source) {
-            return UserAuditor.withUsername(source);
+            return UserAuditor.withCode(source);
         }
     }
 }

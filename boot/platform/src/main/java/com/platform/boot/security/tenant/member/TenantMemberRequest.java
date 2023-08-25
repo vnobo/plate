@@ -28,7 +28,7 @@ public class TenantMemberRequest extends TenantMember {
 
     public static TenantMemberRequest withUsername(String username) {
         TenantMemberRequest request = new TenantMemberRequest();
-        request.setUsername(username);
+        request.setUserCode(username);
         return request;
     }
 

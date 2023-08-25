@@ -66,7 +66,7 @@ public class TenantMembersService extends DatabaseService {
             old.setEnabled(true);
             return this.save(old);
         });
-        return userDefaultTenant(request.getUsername())
+        return userDefaultTenant(request.getUserCode())
                 .then(tenantMemberMono).doAfterTerminate(() -> this.cache.clear());
     }
 
