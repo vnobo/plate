@@ -3,12 +3,19 @@ import {Subject} from "rxjs";
 import {HttpErrorResponse} from "@angular/common/http";
 import {CanActivateChildFn, CanActivateFn, CanMatchFn, Router} from "@angular/router";
 
+/**
+ * A function that acts as an authentication guard.
+ *
+ * @return {CanMatchFn | CanActivateFn | CanActivateChildFn} The authentication result.
+ */
 export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
+
   if (authService.isLoggedIn) {
     return true;
   }
+
   return router.parseUrl(authService.loginUrl);
 }
 
