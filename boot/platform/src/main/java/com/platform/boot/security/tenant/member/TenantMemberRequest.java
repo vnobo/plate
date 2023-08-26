@@ -10,8 +10,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -23,7 +21,7 @@ import java.util.Set;
 public class TenantMemberRequest extends TenantMember {
 
     private Set<String> users;
-
+    private String username;
     private String securityCode;
 
     public static TenantMemberRequest withUserCode(String userCode) {
@@ -48,12 +46,12 @@ public class TenantMemberRequest extends TenantMember {
     }
 
     public Criteria toCriteria() {
-        return criteria(Set.of("securityCode", "users"));
+        return criteria(Set.of("securityCode", "users", "username"));
     }
 
     public String querySql() {
         return """
-                select a.*, b.name as tenant_name, b.extend as tenant_extend,c.name as user_name
+                select a.*, b.name as tenant_name, b.extend as tenant_extend,c.name as login_name,c.username
                 from se_tenant_members a
                 inner join se_tenants b on a.tenant_code = b.code
                 inner join se_users c on c.code = a.user_code
@@ -68,22 +66,29 @@ public class TenantMemberRequest extends TenantMember {
                 """;
     }
 
-    public CriteriaUtils.Parameter buildWhereSql() {
-        var parameter = CriteriaUtils
-                .whereParameterSql(this, List.of("users", "securityCode"), "a");
-        Map<String, Object> bindParams = parameter.getParams();
+    public String buildWhereSql() {
+        String whereSql = CriteriaUtils
+                .whereSql(this, List.of("users", "securityCode", "username"), "a");
 
-        String whereSql = Optional.ofNullable(parameter.getSql()).orElse("Where 1=1 ");
+        Criteria criteria = Criteria.empty();
 
         if (!ObjectUtils.isEmpty(this.getUsers())) {
-            bindParams.put("users", this.getUsers());
-            whereSql += " and a.user_code in( :users) ";
+            criteria = criteria.and("a.user_code").in(this.getUsers());
         }
 
         if (StringUtils.hasLength(this.getSecurityCode())) {
-            bindParams.put("securityCode", this.getSecurityCode());
-            whereSql += " and a.tenant_code like :securityCode";
+            criteria = criteria.and("a.tenant_code").like(this.getSecurityCode() + "%");
         }
-        return CriteriaUtils.Parameter.of(whereSql, bindParams);
+
+        if (StringUtils.hasLength(this.getUsername())) {
+            criteria = criteria.and("c.username").is(this.getUsername()).ignoreCase(true);
+        }
+        if (StringUtils.hasLength(whereSql)) {
+            return whereSql + (criteria.isEmpty() ? "" : " and " + criteria);
+        }
+        if (criteria.isEmpty()) {
+            return "";
+        }
+        return "Where " + criteria;
     }
 }

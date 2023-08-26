@@ -33,10 +33,8 @@ public class TenantMembersService extends DatabaseService {
      */
     public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
         String cacheKey = ContextUtils.cacheKey(request, pageable);
-        var parameter = request.buildWhereSql();
-        String query = request.querySql() + parameter.getSql() +
-                CriteriaUtils.applyPage(pageable, "se_tenant_members");
-        return super.queryWithCache(cacheKey, query, parameter.getParams(), TenantMemberResponse.class);
+        String query = request.querySql() + request.buildWhereSql() + CriteriaUtils.applyPage(pageable, "a");
+        return super.queryWithCache(cacheKey, query, TenantMemberResponse.class);
     }
 
     /**
@@ -48,11 +46,9 @@ public class TenantMembersService extends DatabaseService {
      */
     public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-
         String cacheKey = ContextUtils.cacheKey(request);
-        var parameter = request.buildWhereSql();
-        String query = request.countSql() + parameter.getSql();
-        Mono<Long> countMono = this.countWithCache(cacheKey, query, parameter.getParams());
+        String query = request.countSql() + request.buildWhereSql();
+        Mono<Long> countMono = this.countWithCache(cacheKey, query);
         return Mono.zip(searchMono, countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }

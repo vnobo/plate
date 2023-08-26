@@ -72,7 +72,7 @@ public class UsersService extends DatabaseService {
      */
     public Mono<User> operate(UserRequest request) {
         request.setPassword(this.upgradeEncodingIfPassword(request.getPassword()));
-        var userMono = this.usersRepository.findByUsernameIgnoreCase(request.getUsername())
+        var userMono = this.usersRepository.findByCode(request.getCode())
                 .defaultIfEmpty(request.toUser());
         userMono = userMono.flatMap(user -> {
             BeanUtils.copyProperties(request, user);

@@ -12,19 +12,19 @@ server.port: 8080
 spring:
   application.name: platform
   r2dbc:
-    url: r2dbc:postgres://192.168.1.2:5432/plate
+    url: r2dbc:postgres://127.0.0.1:5432/plate
     username: farmer
     password: q1w2e3..
     pool.max-idle-time: 10m
   sql.init.mode: never
   data.redis:
-    host: 192.168.1.2
+    host: 127.0.0.1
     repositories.enabled: false
   codec:
     max-in-memory-size: 64MB
     log-request-details: true
   rabbitmq:
-    host: 192.168.1.2
+    host: 127.0.0.1
     username: guest
     password: q1w2e3..
     listener.simple:

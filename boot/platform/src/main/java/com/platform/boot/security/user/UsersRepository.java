@@ -9,7 +9,13 @@ import reactor.core.publisher.Mono;
  * @author Alex bob(<a href="https://github.com/vnobo">https://github.com/vnobo</a>)
  */
 public interface UsersRepository extends R2dbcRepository<User, Long> {
-
+    /**
+     * get tenant by code
+     *
+     * @param code tenant code
+     * @return tenant result
+     */
+    Mono<User> findByCode(String code);
     /**
      * get by username
      *
