@@ -27,7 +27,6 @@ public class UserAuditor implements Serializable {
 
     private String code;
     private String username;
-
     private String name;
 
     public static UserAuditor withDetails(SecurityDetails securityDetails) {

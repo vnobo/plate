@@ -7,14 +7,13 @@ import lombok.EqualsAndHashCode;
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class TenantMemberResponse extends TenantMember {
 
-    private String userName;
-
+    private String username;
+    private String loginName;
     private String tenantName;
-
     private JsonNode tenantExtend;
 
 }

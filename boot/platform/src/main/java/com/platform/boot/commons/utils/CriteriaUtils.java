@@ -43,27 +43,30 @@ public final class CriteriaUtils {
         return " ORDER BY " + sortSql;
     }
 
-    public static Parameter whereParameterSql(Object object, List<String> skipKeys, String prefix) {
+    public static String whereSql(Object object, List<String> skipKeys, String prefix) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
         Set<String> mergeSet = new HashSet<>(SKIP_CRITERIA_KEYS);
         if (!ObjectUtils.isEmpty(skipKeys)) {
             mergeSet.addAll(skipKeys);
         }
         mergeSet.forEach(objectMap::remove);
-        return whereParameterSql(objectMap, prefix);
+        return whereSql(objectMap, prefix);
     }
 
-    public static Parameter whereParameterSql(Map<String, Object> objectMap, String prefix) {
+    public static String whereSql(Map<String, Object> objectMap, String prefix) {
         Map<String, Object> whereMap = new HashMap<>(objectMap.size());
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
             String key = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, entry.getKey());
             if (StringUtils.hasLength(prefix)) {
                 key = prefix + "." + key;
             }
-            whereMap.put(key, ":" + entry.getKey());
+            whereMap.put(key, entry.getValue());
         }
         String whereSql = build(whereMap).toString();
-        return Parameter.of(whereSql, objectMap);
+        if (StringUtils.hasLength(whereSql)) {
+            return "Where " + whereSql;
+        }
+        return whereSql;
     }
 
     /**
