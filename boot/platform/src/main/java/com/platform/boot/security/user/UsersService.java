@@ -81,12 +81,9 @@ public class UsersService extends DatabaseService {
         return userMono.doAfterTerminate(() -> this.cache.clear());
     }
 
-    public Mono<User> delete(UserRequest request) {
-        request.setAccountExpired(true);
-        request.setAccountLocked(true);
-        request.setCredentialsExpired(true);
-        request.setDisabled(true);
-        return this.save(request.toUser()).doAfterTerminate(() -> this.cache.clear());
+    public Mono<Void> delete(UserRequest request) {
+        return this.usersRepository.delete(request.toUser())
+                .doAfterTerminate(() -> this.cache.clear());
     }
 
     /**

@@ -2,7 +2,7 @@ package com.platform.boot.security.group.member;
 
 import com.platform.boot.commons.base.DatabaseService;
 import com.platform.boot.commons.utils.ContextUtils;
-import com.platform.boot.security.group.GroupsRepository;
+import com.platform.boot.commons.utils.CriteriaUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,31 +21,21 @@ public class GroupMembersService extends DatabaseService {
 
     private final GroupMembersRepository memberRepository;
 
-    private final GroupsRepository groupsRepository;
-
-    public Flux<GroupMember> search(GroupMemberRequest request, Pageable pageable) {
+    public Flux<GroupMemberResponse> search(GroupMemberRequest request, Pageable pageable) {
         String cacheKey = ContextUtils.cacheKey(request, pageable);
-        Query query = Query.query(request.toCriteria()).with(pageable);
-        return super.queryWithCache(cacheKey, query, GroupMember.class)
-                .flatMap(this::serializeOnly);
+        String query = request.querySql() + request.buildWhereSql() + CriteriaUtils.applyPage(pageable);
+        return super.queryWithCache(cacheKey, query, GroupMemberResponse.class);
     }
 
-    public Mono<Page<GroupMember>> page(GroupMemberRequest request, Pageable pageable) {
-        String cacheKey = ContextUtils.cacheKey(request);
-        Query query = Query.query(request.toCriteria());
+    public Mono<Page<GroupMemberResponse>> page(GroupMemberRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        var countMono = this.countWithCache(cacheKey, query, GroupMember.class);
+
+        String cacheKey = ContextUtils.cacheKey(request);
+        String query = request.countSql() + request.buildWhereSql();
+        var countMono = this.countWithCache(cacheKey, query);
+
         return Mono.zip(searchMono, countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
-    }
-
-    private Mono<GroupMember> serializeOnly(GroupMember groupMember) {
-        return groupsRepository.findByCode(groupMember.getGroupCode())
-                .map(group -> {
-                    groupMember.setGroupName(group.getName());
-                    groupMember.setGroupExtend(group.getExtend());
-                    return groupMember;
-                });
     }
 
     public Mono<GroupMember> operate(GroupMemberRequest request) {
@@ -64,4 +54,13 @@ public class GroupMembersService extends DatabaseService {
         }
     }
 
+    /**
+     * Deletes a tenant.
+     *
+     * @param request the tenant request
+     * @return a Mono of void
+     */
+    public Mono<Void> delete(GroupMemberRequest request) {
+        return this.memberRepository.delete(request.toGroupMember());
+    }
 }

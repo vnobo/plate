@@ -1,11 +1,9 @@
 package com.platform.boot.security.group.member;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.platform.boot.commons.base.BaseEntity;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 
 /**
@@ -24,9 +22,4 @@ public class GroupMember implements BaseEntity<Long> {
     @NotBlank(message = "用户[username]不能为空!")
     private String userCode;
 
-    @Transient
-    private String groupName;
-
-    @Transient
-    private JsonNode groupExtend;
 }

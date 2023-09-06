@@ -44,12 +44,16 @@ public final class CriteriaUtils {
     }
 
     public static String whereSql(Object object, List<String> skipKeys, String prefix) {
-        Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
+        Map<String, Object> objectMap = BeanUtils.beanToMap(object, true, true);
+        if (objectMap == null) {
+            return "";
+        }
         Set<String> mergeSet = new HashSet<>(SKIP_CRITERIA_KEYS);
         if (!ObjectUtils.isEmpty(skipKeys)) {
             mergeSet.addAll(skipKeys);
         }
-        mergeSet.forEach(objectMap::remove);
+        mergeSet.stream().map(key -> CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, key))
+                .forEach(objectMap::remove);
         return whereSql(objectMap, prefix);
     }
 

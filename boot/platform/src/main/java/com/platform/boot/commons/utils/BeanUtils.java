@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.google.common.collect.Maps;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Map;
@@ -51,9 +52,8 @@ public class BeanUtils {
         Map<String, Object> targetMap = BeanUtils.beanToMap(source);
         String[] nullKeys = new String[0];
         if (ignoreNullValue) {
-            nullKeys = targetMap.entrySet().stream()
-                    .filter(entry -> ObjectUtils.isEmpty(entry.getValue()))
-                    .map(Map.Entry::getKey).distinct().toArray(String[]::new);
+            nullKeys = Maps.filterEntries(targetMap, entry -> ObjectUtils.isEmpty(entry.getValue()))
+                    .keySet().toArray(String[]::new);
         }
         org.springframework.beans.BeanUtils.copyProperties(source, target, nullKeys);
     }

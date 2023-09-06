@@ -24,18 +24,6 @@ public class TenantMemberRequest extends TenantMember {
     private String username;
     private String securityCode;
 
-    public static TenantMemberRequest withUserCode(String userCode) {
-        TenantMemberRequest request = new TenantMemberRequest();
-        request.setUserCode(userCode);
-        return request;
-    }
-
-    public static TenantMemberRequest of(String tenantCode, String userCode) {
-        TenantMemberRequest request = withUserCode(userCode);
-        request.setTenantCode(tenantCode);
-        return request;
-    }
-
     public TenantMemberRequest securityCode(String securityCode) {
         this.setSecurityCode(securityCode);
         return this;

@@ -57,7 +57,7 @@ public class UsersController {
 
     // Endpoint to delete a user
     @DeleteMapping("delete")
-    public Mono<User> delete(@Valid @RequestBody UserRequest request) {
+    public Mono<Void> delete(@Valid @RequestBody UserRequest request) {
         // Check that the user ID is not null (i.e. this is an existing user)
         Assert.isTrue(!request.isNew(), "When deleting a user, the ID must not be null");
         // Call the users service to delete the user and return the result as a Mono
