@@ -16,7 +16,7 @@ spring:
     username: farmer
     password: q1w2e3..
     pool.max-idle-time: 10m
-  sql.init.mode: never
+  sql.init.mode: always
   data.redis:
     host: 192.168.1.2
     repositories.enabled: false

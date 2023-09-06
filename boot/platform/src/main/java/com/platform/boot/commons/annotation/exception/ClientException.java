@@ -10,7 +10,7 @@ import lombok.Getter;
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Getter
-public class ClientRequestException extends RestServerException {
+public class ClientException extends RestServerException {
 
     /**
      * -- GETTER --
@@ -18,7 +18,7 @@ public class ClientRequestException extends RestServerException {
      */
     private String serviceId;
 
-    public ClientRequestException(int code, Object msg) {
+    public ClientException(int code, Object msg) {
         super(code, msg);
     }
 
@@ -29,8 +29,8 @@ public class ClientRequestException extends RestServerException {
      * @param msg  the error message
      * @return a new instance of ClientRequestException
      */
-    public static ClientRequestException withMsg(int code, Object msg) {
-        return new ClientRequestException(code, msg);
+    public static ClientException withMsg(int code, Object msg) {
+        return new ClientException(code, msg);
     }
 
     /**
@@ -39,7 +39,7 @@ public class ClientRequestException extends RestServerException {
      * @param msg the error message
      * @return a new instance of ClientRequestException
      */
-    public static ClientRequestException withMsg(Object msg) {
+    public static ClientException withMsg(Object msg) {
         return withMsg(1502, msg);
     }
 
@@ -49,7 +49,7 @@ public class ClientRequestException extends RestServerException {
      * @param serviceId the serviceId to set
      * @return this exception
      */
-    public ClientRequestException serviceId(String serviceId) {
+    public ClientException serviceId(String serviceId) {
         this.setServiceId(serviceId);
         return this;
     }

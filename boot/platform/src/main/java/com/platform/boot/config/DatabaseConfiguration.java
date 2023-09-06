@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
 import org.springframework.data.r2dbc.config.EnableR2dbcAuditing;
-import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.ArrayList;
@@ -22,11 +21,11 @@ import java.util.List;
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @AutoConfiguration
+@EnableTransactionManagement
+@EnableR2dbcAuditing
 public class DatabaseConfiguration {
 
     @Configuration(proxyBeanMethods = false)
-    @EnableTransactionManagement
-    @EnableR2dbcAuditing
     @RequiredArgsConstructor
     static class R2dbcConfiguration extends AbstractR2dbcConfiguration {
 
@@ -38,7 +37,6 @@ public class DatabaseConfiguration {
          * @return ConnectionFactory for R2DBC
          */
         @Override
-        @NonNull
         public ConnectionFactory connectionFactory() {
             return ConnectionFactories.get("r2dbc:..");
         }
@@ -49,7 +47,6 @@ public class DatabaseConfiguration {
          * @return List of custom converters
          */
         @Override
-        @NonNull
         public List<Object> getCustomConverters() {
             return new ArrayList<>(customConverters);
         }

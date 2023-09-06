@@ -1,13 +1,11 @@
 pluginManagement {
     repositories {
+        maven { url 'https://repo.spring.io/milestone' }
+        maven { url 'https://repo.spring.io/snapshot' }
+        maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
         mavenCentral()
         gradlePluginPortal()
-        maven {
-            url 'https://maven.aliyun.com/repository/spring-plugin'
-        }
-        maven {
-            url 'https://maven.aliyun.com/repository/gradle-plugin'
-        }
     }
 }
 rootProject.name = "plate"

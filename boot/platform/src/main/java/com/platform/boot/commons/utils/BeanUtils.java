@@ -24,7 +24,7 @@ public class BeanUtils {
      */
     public static <T> T copyProperties(Object source, Class<T> clazz) {
         T target = org.springframework.beans.BeanUtils.instantiateClass(clazz);
-        org.springframework.beans.BeanUtils.copyProperties(source, target);
+        BeanUtils.copyProperties(source, target, false);
         return target;
     }
 

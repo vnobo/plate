@@ -30,8 +30,8 @@ public class RedisConfiguration {
      * @return the ReactiveRedisTemplate bean
      */
     @Bean
-    public ReactiveRedisTemplate<String, Object> reactiveRedisTemplate(ReactiveRedisConnectionFactory factory,
-                                                                       ObjectMapper objectMapper) {
+    public ReactiveRedisTemplate<String, Object> redisTemplate(ReactiveRedisConnectionFactory factory,
+                                                               ObjectMapper objectMapper) {
         StringRedisSerializer keySerializer = new StringRedisSerializer();
         GenericJackson2JsonRedisSerializer redisSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
         RedisSerializationContext.RedisSerializationContextBuilder<String, Object> builder =

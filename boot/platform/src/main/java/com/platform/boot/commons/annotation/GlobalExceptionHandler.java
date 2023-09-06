@@ -1,6 +1,6 @@
 package com.platform.boot.commons.annotation;
 
-import com.platform.boot.commons.annotation.exception.ClientRequestException;
+import com.platform.boot.commons.annotation.exception.ClientException;
 import com.platform.boot.commons.annotation.exception.RestServerException;
 import io.r2dbc.spi.R2dbcException;
 import org.apache.commons.logging.Log;
@@ -102,8 +102,8 @@ public class GlobalExceptionHandler {
      * @param ex       the exception thrown
      * @return a response entity with an error response
      */
-    @ExceptionHandler(ClientRequestException.class)
-    public ResponseEntity<ErrorResponse> handleClientException(ServerWebExchange exchange, ClientRequestException ex) {
+    @ExceptionHandler(ClientException.class)
+    public ResponseEntity<ErrorResponse> handleClientException(ServerWebExchange exchange, ClientException ex) {
         log.error("[%s] 内部服务访问错误! 信息: %s".formatted(exchange.getLogPrefix(), ex.getMessage()));
         if (log.isDebugEnabled()) {
             ex.printStackTrace();

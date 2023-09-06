@@ -133,15 +133,15 @@ public class SecurityConfiguration {
                     .matches(exchange).filter(MatchResult::isMatch)
                     .flatMap(res -> MatchResult.notMatch())
                     .switchIfEmpty(MatchResult.match());
-
-            return Mono.just(exchange.getRequest()).flatMap((r) -> Mono.justOrEmpty(r.getMethod()))
-                    .filter(allowedMethods::contains).flatMap((m) -> MatchResult.notMatch())
-                    .switchIfEmpty(ignoreMono);
+            var request = exchange.getRequest();
+            return Mono.justOrEmpty(request.getMethod()).filter(allowedMethods::contains)
+                    .flatMap((m) -> MatchResult.notMatch()).switchIfEmpty(ignoreMono);
         }
     }
 
     static class CustomServerAuthenticationEntryPoint extends HttpBasicServerAuthenticationEntryPoint {
         private static final Log log = LogFactory.getLog(CustomServerAuthenticationEntryPoint.class);
+
         /**
          * This method is called when authentication fails. It first checks if the request matches the captcha protection
          * matcher. If it does, it generates a captcha token and returns a response with a JSON body containing the captcha
@@ -156,17 +156,18 @@ public class SecurityConfiguration {
             String xRequestedWith = "X-Requested-With";
             String xmlHttpRequest = "XMLHttpRequest";
             String requestedWith = exchange.getRequest().getHeaders().getFirst(xRequestedWith);
+
             log.error("认证失败! 信息: %s".formatted(e.getMessage()));
-            if (log.isDebugEnabled()) {
-                e.printStackTrace();
-            }
+            log.debug(e.getMessage(), e);
+
             if (requestedWith != null && requestedWith.contains(xmlHttpRequest)) {
                 var response = exchange.getResponse();
                 response.setStatusCode(HttpStatus.UNAUTHORIZED);
                 response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
                 var body = """
                         {"code":401,"msg":"认证失败,检查你的用户名,密码是否正确或安全密钥是否过期!","errors":"%s"}
-                        """.formatted(e.getMessage());
+                        """;
+                body = body.formatted(e.getMessage());
                 var dataBufferFactory = response.bufferFactory();
                 var bodyBuffer = dataBufferFactory.wrap(body.getBytes());
                 return response.writeAndFlushWith(Flux.just(bodyBuffer).windowUntilChanged())
