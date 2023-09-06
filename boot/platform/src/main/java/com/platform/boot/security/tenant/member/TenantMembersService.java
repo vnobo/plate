@@ -1,6 +1,7 @@
 package com.platform.boot.security.tenant.member;
 
 import com.platform.boot.commons.base.DatabaseService;
+import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.commons.utils.CriteriaUtils;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,8 @@ public class TenantMembersService extends DatabaseService {
     public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
         String cacheKey = ContextUtils.cacheKey(request, pageable);
         String query = request.querySql() + request.buildWhereSql() + CriteriaUtils.applyPage(pageable, "a");
-        return super.queryWithCache(cacheKey, query, TenantMemberResponse.class);
+        return super.queryWithCache(cacheKey, query,
+                BeanUtils.beanToMap(request, true), TenantMemberResponse.class);
     }
 
     /**
@@ -48,7 +50,7 @@ public class TenantMembersService extends DatabaseService {
         var searchMono = this.search(request, pageable).collectList();
         String cacheKey = ContextUtils.cacheKey(request);
         String query = request.countSql() + request.buildWhereSql();
-        Mono<Long> countMono = this.countWithCache(cacheKey, query);
+        Mono<Long> countMono = this.countWithCache(cacheKey, query, BeanUtils.beanToMap(request, true));
         return Mono.zip(searchMono, countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }

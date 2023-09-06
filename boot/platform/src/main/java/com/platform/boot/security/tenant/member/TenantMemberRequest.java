@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Set;
+import java.util.StringJoiner;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -58,23 +59,23 @@ public class TenantMemberRequest extends TenantMember {
         String whereSql = CriteriaUtils
                 .whereSql(this, List.of("users", "securityCode", "username"), "a");
 
-        Criteria criteria = Criteria.empty();
+        StringJoiner criteria = new StringJoiner(" AND ");
 
         if (!ObjectUtils.isEmpty(this.getUsers())) {
-            criteria = criteria.and("a.user_code").in(this.getUsers());
+            criteria.add("a.user_code in (:users)");
         }
 
         if (StringUtils.hasLength(this.getSecurityCode())) {
-            criteria = criteria.and("a.tenant_code").like(this.getSecurityCode() + "%");
+            criteria.add("a.tenant_code like :securityCode");
         }
 
         if (StringUtils.hasLength(this.getUsername())) {
-            criteria = criteria.and("c.username").is(this.getUsername()).ignoreCase(true);
+            criteria.add("c.username = :username");
         }
         if (StringUtils.hasLength(whereSql)) {
-            return whereSql + (criteria.isEmpty() ? "" : " and " + criteria);
+            return whereSql + (criteria.length() == 0 ? "" : " and " + criteria);
         }
-        if (criteria.isEmpty()) {
+        if (criteria.length() == 0) {
             return "";
         }
         return "Where " + criteria;

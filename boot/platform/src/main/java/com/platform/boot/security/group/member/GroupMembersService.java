@@ -1,6 +1,7 @@
 package com.platform.boot.security.group.member;
 
 import com.platform.boot.commons.base.DatabaseService;
+import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.commons.utils.CriteriaUtils;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,8 @@ public class GroupMembersService extends DatabaseService {
     public Flux<GroupMemberResponse> search(GroupMemberRequest request, Pageable pageable) {
         String cacheKey = ContextUtils.cacheKey(request, pageable);
         String query = request.querySql() + request.buildWhereSql() + CriteriaUtils.applyPage(pageable);
-        return super.queryWithCache(cacheKey, query, GroupMemberResponse.class);
+        return super.queryWithCache(cacheKey, query,
+                BeanUtils.beanToMap(request, true), GroupMemberResponse.class);
     }
 
     public Mono<Page<GroupMemberResponse>> page(GroupMemberRequest request, Pageable pageable) {
@@ -32,7 +34,7 @@ public class GroupMembersService extends DatabaseService {
 
         String cacheKey = ContextUtils.cacheKey(request);
         String query = request.countSql() + request.buildWhereSql();
-        var countMono = this.countWithCache(cacheKey, query);
+        var countMono = this.countWithCache(cacheKey, query, BeanUtils.beanToMap(request, true));
 
         return Mono.zip(searchMono, countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
@@ -61,6 +63,6 @@ public class GroupMembersService extends DatabaseService {
      * @return a Mono of void
      */
     public Mono<Void> delete(GroupMemberRequest request) {
-        return this.memberRepository.delete(request.toGroupMember());
+        return this.memberRepository.delete(request.toGroupMember()).doAfterTerminate(() -> this.cache.clear());
     }
 }

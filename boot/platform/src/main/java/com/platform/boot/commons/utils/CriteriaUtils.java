@@ -1,6 +1,7 @@
 package com.platform.boot.commons.utils;
 
 import com.google.common.base.CaseFormat;
+import com.google.common.collect.Maps;
 import lombok.Data;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -44,33 +45,36 @@ public final class CriteriaUtils {
     }
 
     public static String whereSql(Object object, List<String> skipKeys, String prefix) {
-        Map<String, Object> objectMap = BeanUtils.beanToMap(object, true, true);
+        Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         if (objectMap == null) {
             return "";
         }
-        Set<String> mergeSet = new HashSet<>(SKIP_CRITERIA_KEYS);
+        Set<String> removeKeys = new HashSet<>(SKIP_CRITERIA_KEYS);
         if (!ObjectUtils.isEmpty(skipKeys)) {
-            mergeSet.addAll(skipKeys);
+            removeKeys.addAll(skipKeys);
         }
-        mergeSet.stream().map(key -> CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, key))
-                .forEach(objectMap::remove);
-        return whereSql(objectMap, prefix);
+        return whereSql(Maps.filterKeys(objectMap, key -> !removeKeys.contains(key)), prefix);
     }
 
     public static String whereSql(Map<String, Object> objectMap, String prefix) {
-        Map<String, Object> whereMap = new HashMap<>(objectMap.size());
+        if (ObjectUtils.isEmpty(objectMap)) {
+            return "";
+        }
+        StringJoiner whereSql = new StringJoiner(" AND ");
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-            String key = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, entry.getKey());
+            String key = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey());
             if (StringUtils.hasLength(prefix)) {
                 key = prefix + "." + key;
             }
-            whereMap.put(key, entry.getValue());
+            if (entry.getValue() instanceof String) {
+                whereSql.add(key + " like :" + entry.getKey());
+            } else if (entry.getValue() instanceof Collection<?>) {
+                whereSql.add(key + " in (:" + entry.getKey() + ")");
+            } else {
+                whereSql.add(key + " = :" + entry.getKey());
+            }
         }
-        String whereSql = build(whereMap).toString();
-        if (StringUtils.hasLength(whereSql)) {
-            return "Where " + whereSql;
-        }
-        return whereSql;
+        return "Where " + whereSql;
     }
 
     /**

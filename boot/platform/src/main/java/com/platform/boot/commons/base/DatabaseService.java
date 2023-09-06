@@ -44,19 +44,6 @@ public abstract class DatabaseService extends AbstractService {
     }
 
     /**
-     * 在带有缓存的情况下查询符合条件的实体。
-     *
-     * @param key         缓存键
-     * @param entityClass 实体类
-     * @param query       查询条件
-     * @param <T>         泛型，表示实体类
-     * @return 一个包含实体类对象的Flux
-     */
-    protected <T> Flux<T> queryWithCache(Object key, String query, Class<T> entityClass) {
-        return queryWithCache(key, query, Map.of(), entityClass);
-    }
-
-    /**
      * Query entities that meet the conditions with cache.
      *
      * @param key         cache key
@@ -118,18 +105,6 @@ public abstract class DatabaseService extends AbstractService {
         Mono<Long> source = this.entityTemplate.count(query, entityClass);
         // 如果缓存中没有数据，返回查询结果；否则返回缓存数据
         return countWithCache(key, source);
-    }
-
-    /**
-     * 分页并缓存查询结果。
-     *
-     * @param key   缓存键值
-     * @param query 查询条件
-     * @return 查询结果元组（包括实体列表和总数）
-     */
-    protected Mono<Long> countWithCache(Object key, String query) {
-        // 如果缓存中没有数据，返回查询结果；否则返回缓存数据
-        return this.countWithCache(key, query, Map.of());
     }
 
     /**
