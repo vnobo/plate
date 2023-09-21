@@ -25,7 +25,7 @@ public final class CriteriaUtils {
 
     public static String applyPage(Pageable pageable, String prefix) {
         String orderSql = applySort(pageable.getSort(), prefix);
-        return String.format(orderSql + " LIMIT %d OFFSET %d", pageable.getPageSize(), pageable.getOffset());
+        return String.format(orderSql + " limit %d offset %d", pageable.getPageSize(), pageable.getOffset());
     }
 
     public static String applySort(Sort sort, String prefix) {
@@ -34,33 +34,39 @@ public final class CriteriaUtils {
         }
         StringJoiner sortSql = new StringJoiner(" , ");
         sort.iterator().forEachRemaining((o) -> {
-            String sortedPropertyName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, o.getProperty());
-            String sortedProperty = o.isIgnoreCase() ? "LOWER(" + sortedPropertyName + ")" : sortedPropertyName;
+            String sortedPropertyName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, o.getProperty());
+            String sortedProperty = o.isIgnoreCase() ? "lower(" + sortedPropertyName + ")" : sortedPropertyName;
             if (StringUtils.hasLength(prefix)) {
                 sortedProperty = prefix + "." + sortedProperty;
             }
-            sortSql.add(sortedProperty + (o.isAscending() ? " ASC" : " DESC"));
+            sortSql.add(sortedProperty + (o.isAscending() ? " asc" : " desc"));
         });
-        return " ORDER BY " + sortSql;
+        return " order by " + sortSql;
     }
 
     public static String whereSql(Object object, List<String> skipKeys, String prefix) {
+
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
-        if (objectMap == null) {
+        if (ObjectUtils.isEmpty(objectMap)) {
             return "";
         }
+
         Set<String> removeKeys = new HashSet<>(SKIP_CRITERIA_KEYS);
         if (!ObjectUtils.isEmpty(skipKeys)) {
             removeKeys.addAll(skipKeys);
         }
-        return whereSql(Maps.filterKeys(objectMap, key -> !removeKeys.contains(key)), prefix);
+
+        objectMap = Maps.filterKeys(objectMap, key -> !removeKeys.contains(key));
+        return whereSql(objectMap, prefix);
     }
 
     public static String whereSql(Map<String, Object> objectMap, String prefix) {
+
         if (ObjectUtils.isEmpty(objectMap)) {
             return "";
         }
-        StringJoiner whereSql = new StringJoiner(" AND ");
+
+        StringJoiner whereSql = new StringJoiner(" and ");
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
             String key = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey());
             if (StringUtils.hasLength(prefix)) {
@@ -74,6 +80,7 @@ public final class CriteriaUtils {
                 whereSql.add(key + " = :" + entry.getKey());
             }
         }
+
         return "Where " + whereSql;
     }
 
