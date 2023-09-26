@@ -70,7 +70,7 @@ idea {
 
 dependencies {
 
-    implementation("com.google.guava:guava:${guavaVersion}")
+    implementation("com.google.guava:guava:32.+")
 
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.session:spring-session-data-redis")
