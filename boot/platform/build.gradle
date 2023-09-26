@@ -25,6 +25,7 @@ tasks.named("bootBuildImage") {
     ]
     environment = [
             "BP_JVM_VERSION"              : "17",
+            'BP_NATIVE_IMAGE'             : 'true',
             "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
             "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError"
     ]
@@ -39,16 +40,19 @@ tasks.named("bootBuildImage") {
             name = "cache.${rootProject.name}.${project.name}.launch"
         }
     }
-    docker.publishRegistry {
-        username = "${dockerUsername}"
-        password = "${dockerPassword}"
-        email = "${dockerEmail}"
+    docker {
+        host = "tcp://192.168.1.2:2376"
+        publishRegistry {
+            username = "${dockerUsername}"
+            password = "${dockerPassword}"
+            email = "${dockerEmail}"
+        }
     }
 }
 
 idea {
     //if you want parts of paths in resulting files (*.iml, etc.) to be replaced by variables (Files)
-    pathVariables GRADLE_HOME: file('../gradle')
+    pathVariables GRADLE_HOME: file('./gradle')
     module {
         iml {
             beforeMerged { module ->
