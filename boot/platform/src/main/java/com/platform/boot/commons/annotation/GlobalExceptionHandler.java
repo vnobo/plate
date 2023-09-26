@@ -1,5 +1,6 @@
 package com.platform.boot.commons.annotation;
 
+import com.google.common.collect.Lists;
 import com.platform.boot.commons.annotation.exception.ClientException;
 import com.platform.boot.commons.annotation.exception.RestServerException;
 import io.r2dbc.spi.R2dbcException;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,8 +41,7 @@ public class GlobalExceptionHandler {
     // Exception handler for ServerWebInputException
     @ExceptionHandler(ServerWebInputException.class)
     public ResponseEntity<ErrorResponse> handleBindException(ServerWebExchange exchange, ServerWebInputException ex) {
-
-        List<String> errors = new ArrayList<>();
+        List<String> errors = Lists.newArrayList();
         // Check if exception is WebExchangeBindException
         if (ex instanceof WebExchangeBindException bindException) {
             for (ObjectError objectError : bindException.getBindingResult().getAllErrors()) {
@@ -55,14 +54,14 @@ public class GlobalExceptionHandler {
             errors.add("Exception reason %s".formatted(ex.getReason()));
         }
         // Log error
-        log.error("[%s] 请求参数验证失败! 信息:%s".formatted(exchange.getLogPrefix(), errors));
+        log.error("[%s] 请求参数验证失败! 信息: %s".formatted(exchange.getLogPrefix(), errors));
         if (log.isDebugEnabled()) {
-            ex.printStackTrace();
+            log.error("Server error", ex);
         }
         // Return response entity
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
-                        4071, ex.getMessage(), errors));
+                        4070, ex.getMessage(), errors));
     }
 
 
@@ -75,7 +74,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({DataAccessException.class, R2dbcException.class})
     public ResponseEntity<ErrorResponse> handleFailureException(ServerWebExchange exchange, RuntimeException ex) {
-        List<String> errors = new ArrayList<>();
+        List<String> errors = Lists.newArrayList();
         if (ex instanceof R2dbcException r2dbcException) {
             errors.add(r2dbcException.getMessage());
             errors.add(r2dbcException.getSql());
@@ -86,13 +85,13 @@ public class GlobalExceptionHandler {
         } else {
             errors.add(ex.getLocalizedMessage());
         }
-        log.error("[%S] 数据库操作错误! 信息:%S".formatted(exchange.getLogPrefix(), errors));
+        log.error("[%S] 数据库操作错误! 信息: %S".formatted(exchange.getLogPrefix(), errors));
         if (log.isDebugEnabled()) {
-            ex.printStackTrace();
+            log.error("Server error", ex);
         }
         return ResponseEntity.status(HttpStatus.INSUFFICIENT_STORAGE).contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
-                        5071, ex.getMessage(), errors));
+                        5070, ex.getMessage(), errors));
     }
 
     /**
@@ -106,7 +105,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleClientException(ServerWebExchange exchange, ClientException ex) {
         log.error("[%s] 内部服务访问错误! 信息: %s".formatted(exchange.getLogPrefix(), ex.getMessage()));
         if (log.isDebugEnabled()) {
-            ex.printStackTrace();
+            log.error("Server error", ex);
         }
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
@@ -124,7 +123,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleRestServerException(ServerWebExchange exchange, RestServerException ex) {
         log.error("[%s] 服务器自定义错误. 信息: %s".formatted(exchange.getLogPrefix(), ex.getLocalizedMessage()));
         if (log.isDebugEnabled()) {
-            ex.printStackTrace();
+            log.error("Server error", ex);
         }
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
@@ -142,11 +141,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(ServerWebExchange exchange, Exception ex) {
         log.error("[%s] 服务器自定义错误. 信息: %s".formatted(exchange.getLogPrefix(), ex.getLocalizedMessage()));
         if (log.isDebugEnabled()) {
-            ex.printStackTrace();
+            log.error("Server error", ex);
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
-                        ex.hashCode(), ex.getMessage(), ex));
+                        5000, ex.getMessage(), ex));
     }
 
 }

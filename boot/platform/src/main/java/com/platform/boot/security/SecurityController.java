@@ -76,13 +76,14 @@ public class SecurityController {
                                             Authentication authentication) {
         // 验证新密码和确认密码是否匹配
         if (!request.getPassword().equals(request.getNewPassword())) {
-            throw RestServerException.withMsg("Password and newPassword not match!");
+            throw RestServerException.withMsg("Password and newPassword not match", request);
         }
         // 获取当前用户提供的密码
         String presentedPassword = (String) authentication.getCredentials();
         // 验证提供的密码是否与当前密码匹配
         if (!this.passwordEncoder.matches(presentedPassword, request.getPassword())) {
-            throw RestServerException.withMsg("Password verification failed, presented password not match!");
+            throw RestServerException.withMsg(
+                    "Password verification failed, presented password not match", presentedPassword);
         }
         // 编码新密码
         String newPassword = this.passwordEncoder.encode(request.getNewPassword());

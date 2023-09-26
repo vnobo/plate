@@ -22,8 +22,8 @@ public class RestServerException extends RuntimeException implements Serializabl
 
     protected int code;
 
-    public RestServerException(int code, Object msg) {
-        super(msg.toString());
+    public RestServerException(int code, String message, Object msg) {
+        super(message);
         this.msg = msg;
         this.code = code;
     }
@@ -35,8 +35,8 @@ public class RestServerException extends RuntimeException implements Serializabl
      * @param msg  the message to describe the error
      * @return a new instance of RestServerException
      */
-    public static RestServerException withMsg(int code, Object msg) {
-        return new RestServerException(code, msg);
+    public static RestServerException withMsg(int code, String message, Object msg) {
+        return new RestServerException(code, message, msg);
     }
 
     /**
@@ -45,7 +45,7 @@ public class RestServerException extends RuntimeException implements Serializabl
      * @param msg the message to describe the error
      * @return a new instance of RestServerException
      */
-    public static RestServerException withMsg(Object msg) {
-        return withMsg(1000, msg);
+    public static RestServerException withMsg(String message, Object msg) {
+        return withMsg(5000, message, msg);
     }
 }

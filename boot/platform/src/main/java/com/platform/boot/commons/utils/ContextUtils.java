@@ -106,11 +106,13 @@ public final class ContextUtils implements Serializable {
                         propertyDescriptor.getWriteMethod().invoke(obejct, userAuditor.withUser(user));
                         return Mono.just(obejct);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        return Mono.error(RestServerException.withMsg(e.getMessage()));
+                        return Mono.error(RestServerException.withMsg(
+                                "User auditor serialization getWriteMethod invoke error", e));
                     }
                 });
             } catch (IllegalAccessException | InvocationTargetException e) {
-                return Mono.error(RestServerException.withMsg(e.getMessage()));
+                return Mono.error(RestServerException.withMsg(
+                        "User auditor serialization getReadMethod invoke error", e));
             }
         });
         return propertyFlux.then(Mono.just(obejct));
@@ -118,7 +120,8 @@ public final class ContextUtils implements Serializable {
 
     public static String nextId() {
         if (ObjectUtils.isEmpty(SNOW_FLAKE)) {
-            throw RestServerException.withMsg("Snowflake 未初始化!请先初始化");
+            throw RestServerException.withMsg(
+                    "Snowflake not found", "Snowflake server is not found, init snowflake first.");
         }
         return SNOW_FLAKE.nextIdStr();
     }

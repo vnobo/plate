@@ -30,7 +30,8 @@ public class CollectionConverter {
                 return ContextUtils.OBJECT_MAPPER.readValue(source.asString(), new TypeReference<>() {
                 });
             } catch (JsonProcessingException e) {
-                throw JsonException.withMsg("序列化数据Json为Set类型错误,信息: " + e.getMessage());
+                throw JsonException.withMsg("Json converter to collection error",
+                        "Object Json converter to Collection error, message: " + e.getMessage());
             }
         }
     }
@@ -44,7 +45,8 @@ public class CollectionConverter {
             try {
                 return Json.of(ContextUtils.OBJECT_MAPPER.writeValueAsBytes(source));
             } catch (JsonProcessingException e) {
-                throw JsonException.withMsg("序列化数据Json为Set类型错误,信息: " + e.getMessage());
+                throw JsonException.withMsg("Collection converter to Json error",
+                        "Collection converter to Json error, message: " + e.getMessage());
             }
         }
     }

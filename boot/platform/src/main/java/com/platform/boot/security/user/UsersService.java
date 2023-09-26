@@ -55,7 +55,7 @@ public class UsersService extends DatabaseService {
     public Mono<User> add(UserRequest request) {
         return this.usersRepository.existsByUsernameIgnoreCase(request.getUsername()).flatMap(exists -> {
             if (exists) {
-                return Mono.error(RestServerException.withMsg(1101,
+                return Mono.error(RestServerException.withMsg(1101, "User already exists",
                         "Username [" + request.getUsername() + "] already exists!"));
             }
             return this.operate(request);
@@ -114,7 +114,7 @@ public class UsersService extends DatabaseService {
         } else {
             assert user.getId() != null;
             return this.usersRepository.findById(user.getId())
-                    .switchIfEmpty(Mono.error(RestServerException.withMsg(1404,
+                    .switchIfEmpty(Mono.error(RestServerException.withMsg(1404, "User not found",
                             "User by id [" + user.getId() + "] not found!")))
                     .flatMap(old -> {
                         user.setCreatedTime(old.getCreatedTime());

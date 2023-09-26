@@ -18,19 +18,8 @@ public class ClientException extends RestServerException {
      */
     private String serviceId;
 
-    public ClientException(int code, Object msg) {
-        super(code, msg);
-    }
-
-    /**
-     * Creates a new instance of ClientRequestException with the given code and message.
-     *
-     * @param code the error code
-     * @param msg  the error message
-     * @return a new instance of ClientRequestException
-     */
-    public static ClientException withMsg(int code, Object msg) {
-        return new ClientException(code, msg);
+    public ClientException(int code, String message, Object msg) {
+        super(code, message, msg);
     }
 
     /**
@@ -39,8 +28,8 @@ public class ClientException extends RestServerException {
      * @param msg the error message
      * @return a new instance of ClientRequestException
      */
-    public static ClientException withMsg(Object msg) {
-        return withMsg(1502, msg);
+    public static ClientException withMsg(String message, Object msg) {
+        return new ClientException(5020, message, msg);
     }
 
     /**
@@ -50,16 +39,8 @@ public class ClientException extends RestServerException {
      * @return this exception
      */
     public ClientException serviceId(String serviceId) {
-        this.setServiceId(serviceId);
+        this.serviceId = serviceId;
         return this;
     }
 
-    /**
-     * Sets the serviceId field of this exception.
-     *
-     * @param serviceId the serviceId to set
-     */
-    public void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
-    }
 }

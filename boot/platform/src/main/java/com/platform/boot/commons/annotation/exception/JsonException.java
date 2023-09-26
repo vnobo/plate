@@ -18,7 +18,7 @@ public class JsonException extends RestServerException {
      * @param jsonProcessingException JSON processing exception
      */
     public JsonException(IOException jsonProcessingException) {
-        this(1101, jsonProcessingException);
+        this(5010, "Json processing exception", jsonProcessingException);
     }
 
     /**
@@ -27,8 +27,8 @@ public class JsonException extends RestServerException {
      * @param status status code
      * @param msg    exception message
      */
-    public JsonException(int status, Object msg) {
-        super(status, msg);
+    public JsonException(int status, String message, Object msg) {
+        super(status, message, msg);
     }
 
     /**
