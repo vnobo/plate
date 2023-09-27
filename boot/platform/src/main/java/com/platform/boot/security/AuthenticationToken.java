@@ -1,6 +1,5 @@
 package com.platform.boot.security;
 
-import lombok.Data;
 import org.springframework.web.server.WebSession;
 
 import java.io.Serializable;
@@ -10,30 +9,12 @@ import java.io.Serializable;
  * It takes a WebSession object and generates a token, expires and lastAccessTime.
  * Then, this can be used to implement customized authentication schemes.
  *
+ * @param token          Token used for authentication
+ * @param expires        Expiry time of the token in seconds
+ * @param lastAccessTime Last access time of the token in epoch seconds
  * @author Alex bob
  */
-@Data
-public class AuthenticationToken implements Serializable {
-    // Token used for authentication
-    private final String token;
-    // Expiry time of the token in seconds
-    private final Long expires;
-    // Last access time of the token in epoch seconds
-    private final Long lastAccessTime;
-
-    /**
-     * Constructor for the authentication token
-     *
-     * @param token          The token used for authentication
-     * @param expires        The expiry time of the token in seconds
-     * @param lastAccessTime The last access time of the token in epoch seconds
-     */
-    public AuthenticationToken(String token, Long expires, Long lastAccessTime) {
-        this.token = token;
-        this.expires = expires;
-        this.lastAccessTime = lastAccessTime;
-    }
-
+public record AuthenticationToken(String token, Long expires, Long lastAccessTime) implements Serializable {
     /**
      * Builds an authentication token from a web session
      *

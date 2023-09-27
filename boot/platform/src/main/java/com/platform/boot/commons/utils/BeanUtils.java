@@ -40,14 +40,6 @@ public class BeanUtils {
         BeanUtils.copyProperties(source, target, true);
     }
 
-    /**
-     * 如果源对象不为空，则将源对象复制到目标对象。
-     * 忽略源对象中的空属性。
-     *
-     * @param source          源对象
-     * @param target          目标对象
-     * @param ignoreNullValue 是否忽略空值
-     */
     public static void copyProperties(Object source, Object target, boolean ignoreNullValue) {
         Map<String, Object> targetMap = BeanUtils.beanToMap(source);
         String[] nullKeys = new String[0];
@@ -56,11 +48,6 @@ public class BeanUtils {
                     .keySet().toArray(String[]::new);
         }
         org.springframework.beans.BeanUtils.copyProperties(source, target, nullKeys);
-    }
-
-    public static <T> T mapToBean(Map<String, Object> source, Class<T> clazz) {
-        ObjectMapper objectMapper = ContextUtils.OBJECT_MAPPER.copy();
-        return objectMapper.convertValue(source, clazz);
     }
 
     /**

@@ -43,7 +43,7 @@ public abstract class AbstractService implements InitializingBean {
     }
 
     @Autowired
-    public void setObjectMapper(CacheManager cacheManager) {
+    public void setCacheManager(CacheManager cacheManager) {
         this.cacheManager = cacheManager;
     }
 

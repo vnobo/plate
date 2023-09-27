@@ -52,7 +52,8 @@ public abstract class DatabaseService extends AbstractService {
      * @param <T>         generic type, representing entity class
      * @return a Flux containing entity class objects
      */
-    protected <T> Flux<T> queryWithCache(Object key, String query, Map<String, Object> bindParams, Class<T> entityClass) {
+    protected <T> Flux<T> queryWithCache(Object key, String query,
+                                         Map<String, Object> bindParams, Class<T> entityClass) {
         // Create a GenericExecuteSpec object from the given query
         var executeSpec = this.databaseClient.sql(() -> query);
         // Bind the given parameters to the query

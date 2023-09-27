@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Component
-public record CsrfWebFilter() implements WebFilter, Ordered {
+public class CsrfWebFilter implements WebFilter, Ordered {
     private static final Log log = LogFactory.getLog(CsrfWebFilter.class);
 
     @Override

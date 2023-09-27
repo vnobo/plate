@@ -92,7 +92,6 @@ public class SecurityController {
         return this.securityManager.updatePassword(userDetails, newPassword);
     }
 
-
     @Data
     public static class ChangePasswordRequest {
 
