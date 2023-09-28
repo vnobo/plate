@@ -18,23 +18,15 @@ configurations {
 tasks.named("bootBuildImage") {
     tags = ["alexbob/${project.name}:latest"]
     imageName = ("alexbob/${project.name}:${project.version}")
-    //bindings = [
-    //        "/home/alexbob/build-bindings/java:/platform/bindings/jre",
-    //        "/home/alexbob/build-bindings/syft:/platform/bindings/syft",
-    //        "/home/alexbob/build-bindings/boot:/platform/bindings/spring-boot"
-    //]
     publish = true
     pullPolicy = "IF_NOT_PRESENT"
     environment = [
-            "BP_JVM_VERSION" : "21",
-            'BP_NATIVE_IMAGE': 'false',
+            "BP_JVM_VERSION": "21",
             "BP_NATIVE_IMAGE"             : "true",
             "BP_BINARY_COMPRESSION_METHOD": "upx",
-            "BP_JVM_VERSION"              : "17",
             "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
             "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError"
     ]
-    publish = true
     buildCache {
         volume {
             name = "cache.${rootProject.name}.${project.name}.build"
