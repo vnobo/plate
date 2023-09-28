@@ -19,13 +19,22 @@ import java.io.Serializable;
 public class RestServerException extends RuntimeException implements Serializable {
 
     protected Object msg;
-
     protected int code;
 
     public RestServerException(int code, String message, Object msg) {
         super(message);
         this.msg = msg;
         this.code = code;
+    }
+
+    /**
+     * This method creates a new instance of RestServerException with the default code and the given message.
+     *
+     * @param msg the message to describe the error
+     * @return a new instance of RestServerException
+     */
+    public static RestServerException withMsg(String message, Object msg) {
+        return withMsg(5000, message, msg);
     }
 
     /**
@@ -39,13 +48,4 @@ public class RestServerException extends RuntimeException implements Serializabl
         return new RestServerException(code, message, msg);
     }
 
-    /**
-     * This method creates a new instance of RestServerException with the default code and the given message.
-     *
-     * @param msg the message to describe the error
-     * @return a new instance of RestServerException
-     */
-    public static RestServerException withMsg(String message, Object msg) {
-        return withMsg(5000, message, msg);
-    }
 }

@@ -33,8 +33,8 @@ public abstract class AbstractService implements InitializingBean {
 
     protected final Log log = LogFactory.getLog(AbstractService.class);
 
-    protected CacheManager cacheManager;
     protected Cache cache;
+    protected CacheManager cacheManager;
     protected ObjectMapper objectMapper;
 
     @Autowired
