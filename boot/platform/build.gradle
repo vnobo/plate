@@ -7,6 +7,9 @@ plugins {
 
 java {
     sourceCompatibility = '21'
+    targetCompatibility = '21'
+    withJavadocJar()
+    withSourcesJar()
 }
 
 configurations {
@@ -21,9 +24,8 @@ tasks.named("bootBuildImage") {
     publish = true
     pullPolicy = "IF_NOT_PRESENT"
     environment = [
-            "BP_JVM_VERSION": "21",
-            "BP_NATIVE_IMAGE"             : "true",
-            "BP_BINARY_COMPRESSION_METHOD": "upx",
+            "BP_JVM_VERSION" : "21",
+            "BP_NATIVE_IMAGE": "false",
             "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
             "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError"
     ]
@@ -49,7 +51,7 @@ tasks.named("bootBuildImage") {
 
 idea {
     //if you want parts of paths in resulting files (*.iml, etc.) to be replaced by variables (Files)
-    pathVariables GRADLE_HOME: file('./gradle')
+    pathVariables GRADLE_HOME: file('../../gradle')
     module {
         iml {
             beforeMerged { module ->
@@ -59,8 +61,8 @@ idea {
         }
         //if you prefer different output folders
         inheritOutputDirs = false
-        outputDir = file('muchBetterOutputDir')
-        testOutputDir = file('muchBetterTestOutputDir')
+        outputDir = file('muchBetterOutputDir') as File
+        testOutputDir = file('muchBetterTestOutputDir') as File
 
     }
 }

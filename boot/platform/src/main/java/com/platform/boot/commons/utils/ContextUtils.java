@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.StringJoiner;
 
-
 /**
  * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
  */
