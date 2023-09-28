@@ -21,7 +21,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -60,8 +63,8 @@ public class SecurityManager extends DatabaseService
 
     private Mono<UserDetails> buildUserDetails(User user, Set<GrantedAuthority> authorities) {
         // 构建用户详细信息
-        SecurityDetails userDetails = SecurityDetails.of(user.getCode(), user.getUsername(), user.getPassword(),
-                user.getDisabled(), user.getAccountExpired(),
+        SecurityDetails userDetails = SecurityDetails.of(user.getCode(), user.getUsername(), user.getName(),
+                user.getPassword(), user.getDisabled(), user.getAccountExpired(),
                 user.getAccountLocked(), user.getCredentialsExpired()).authorities(authorities);
         // 使用 Mono.zip 同时加载用户的组和租户信息
         var tuple2Mono = Mono.zip(this.loadGroups(user.getUsername()), this.loadTenants(user.getUsername()));
@@ -79,7 +82,7 @@ public class SecurityManager extends DatabaseService
                 from se_group_members a join se_groups b on a.group_code=b.code
                 where a.user_code ilike :userCode
                 """;
-        return this.queryWithCache(Objects.hash("USER_GROUPS", userCode),
+        return this.queryWithCache("USER_GROUPS-" + userCode,
                 queryGroupMemberSql, Map.of("userCode", userCode), GroupMember.class).collectList();
     }
 
@@ -89,7 +92,7 @@ public class SecurityManager extends DatabaseService
                 from se_tenant_members a join se_tenants b on a.tenant_code=b.code
                 where a.user_code ilike :userCode
                 """;
-        return this.queryWithCache(Objects.hash("USER_TENANTS", userCode),
+        return this.queryWithCache("USER_TENANTS-" + userCode,
                 queryGroupMemberSql, Map.of("userCode", userCode), TenantMemberResponse.class).collectList();
     }
 
@@ -100,7 +103,7 @@ public class SecurityManager extends DatabaseService
 
     private Flux<GrantedAuthority> getAuthorities(String userCode) {
         String queryUserAuthoritySql = "select * from se_authorities where user_code = :userCode";
-        return this.queryWithCache(Objects.hash("USER_AUTHORITIES", userCode),
+        return this.queryWithCache("USER_AUTHORITIES-" + userCode,
                         queryUserAuthoritySql, Map.of("userCode", userCode), UserAuthority.class)
                 .cast(GrantedAuthority.class);
     }
@@ -111,7 +114,7 @@ public class SecurityManager extends DatabaseService
                 from se_group_authorities ga join se_group_members gm on ga.group_code = gm.group_code
                 where gm.user_code = :userCode
                 """;
-        return this.queryWithCache(Objects.hash("GROUP_AUTHORITIES", userCode),
+        return this.queryWithCache("GROUP_AUTHORITIES-" + userCode,
                         queryGroupAuthoritySql, Map.of("userCode", userCode), GroupAuthority.class)
                 .cast(GrantedAuthority.class);
     }

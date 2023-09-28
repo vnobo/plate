@@ -1,5 +1,6 @@
 package com.platform.boot.config;
 
+import com.google.common.collect.Lists;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,6 @@ import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
 import org.springframework.data.r2dbc.config.EnableR2dbcAuditing;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,7 +48,7 @@ public class DatabaseConfiguration {
          */
         @Override
         public List<Object> getCustomConverters() {
-            return new ArrayList<>(customConverters);
+            return Lists.newArrayList(customConverters);
         }
     }
 }
