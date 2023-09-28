@@ -142,7 +142,7 @@ public class CaptchaFilter implements WebFilter, Ordered {
         @Override
         public Mono<Void> handle(ServerWebExchange exchange, AccessDeniedException ex) {
             if (log.isDebugEnabled()) {
-                log.error("Access denied: {}", ex);
+                log.error("Access denied exception.", ex);
             }
             return Mono.defer(() -> Mono.just(exchange.getResponse())).flatMap((response) -> {
                 response.setStatusCode(this.httpStatus);
