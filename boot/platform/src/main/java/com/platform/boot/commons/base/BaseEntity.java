@@ -25,6 +25,15 @@ import java.util.Set;
 public interface BaseEntity<T> extends Serializable, Persistable<T> {
 
     /**
+     * Gets the code of the entity.
+     *
+     * @return the code of the entity
+     */
+    default String getCode() {
+        return null;
+    }
+
+    /**
      * Sets the code of the entity.
      *
      * @param code the code to set
@@ -43,7 +52,9 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
     default boolean isNew() {
         boolean isNew = ObjectUtils.isEmpty(getId());
         if (isNew) {
-            setCode(ContextUtils.nextId());
+            if (ObjectUtils.isEmpty(getCode())) {
+                setCode(ContextUtils.nextId());
+            }
         }
         return isNew;
     }

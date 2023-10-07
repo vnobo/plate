@@ -6,6 +6,7 @@ import com.platform.boot.commons.annotation.exception.RestServerException;
 import com.platform.boot.security.SecurityDetails;
 import com.platform.boot.security.UserAuditor;
 import com.platform.boot.security.user.UsersService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -25,6 +26,7 @@ import java.util.StringJoiner;
 /**
  * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
  */
+@Log4j2
 @Component
 public final class ContextUtils implements Serializable {
     public static final String CSRF_TOKEN_CONTEXT = "CSRF_TOKEN_CONTEXT";
@@ -122,6 +124,8 @@ public final class ContextUtils implements Serializable {
             throw RestServerException.withMsg(
                     "Snowflake not found", "Snowflake server is not found, init snowflake first.");
         }
-        return SNOW_FLAKE.nextIdStr();
+        String id = SNOW_FLAKE.nextIdStr();
+        log.debug("Next ID: {}", id);
+        return id;
     }
 }

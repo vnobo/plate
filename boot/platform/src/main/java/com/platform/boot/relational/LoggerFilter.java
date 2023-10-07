@@ -33,6 +33,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -209,12 +210,14 @@ public class LoggerFilter implements WebFilter {
      */
     @Override
     public @NotNull Mono<Void> filter(@NotNull ServerWebExchange exchange, @NotNull WebFilterChain chain) {
+        var nextMono = cacheFilterChain(exchange, chain).then(Mono.defer(ContextUtils::securityDetails)
+                .publishOn(Schedulers.boundedElastic())
+                .doOnNext(userDetails -> logRequest(exchange, userDetails)).then());
         if (validContentTypeIsJson(exchange)) {
             return this.requireCsrfProtectionMatcher.matches(exchange)
                     .filter(ServerWebExchangeMatcher.MatchResult::isMatch)
                     .switchIfEmpty(continueFilterChain(exchange, chain).then(Mono.empty()))
-                    .flatMap((m) -> cacheFilterChain(exchange, chain).then(ContextUtils.securityDetails()
-                            .flatMap(userDetails -> logRequest(exchange, userDetails))));
+                    .flatMap((m) -> nextMono);
         }
         return continueFilterChain(exchange, chain).then(Mono.empty());
     }
@@ -262,7 +265,7 @@ public class LoggerFilter implements WebFilter {
      *
      * @param exchange 包含请求和响应信息的上下文对象
      */
-    private Mono<Void> logRequest(ServerWebExchange exchange, SecurityDetails userDetails) {
+    private void logRequest(ServerWebExchange exchange, SecurityDetails userDetails) {
         // 获取请求和响应对象、用户信息和系统信息
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpResponse response = exchange.getResponse();
@@ -285,9 +288,9 @@ public class LoggerFilter implements WebFilter {
         // 根据获取到的信息创建日志对象，并记录日志
         LoggerRequest logger = LoggerRequest.of(tenantCode, userDetails.getUsername(), prefix,
                 method, status, path, contentNode);
-        log.debug("%s **操作日志**: %s : MessageBody: %s".formatted(exchange.getLogPrefix(), method, logger));
-
-        return this.loggerService.operate(logger).then();
+        this.loggerService.operate(logger).share()
+                .subscribe(res -> log.debug("%s **操作日志**: %s : MessageBody: %s"
+                        .formatted(exchange.getLogPrefix(), exchange.getRequest().getMethod().name(), res)));
     }
 
     private JsonNode readResponseBody(ServerWebExchange exchange) {

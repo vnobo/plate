@@ -75,7 +75,7 @@ public class UsersService extends DatabaseService {
         var userMono = this.usersRepository.findByCode(request.getCode())
                 .defaultIfEmpty(request.toUser());
         userMono = userMono.flatMap(user -> {
-            BeanUtils.copyProperties(request, user);
+            BeanUtils.copyProperties(request, user, true);
             return this.save(user);
         });
         return userMono.doAfterTerminate(() -> this.cache.clear());
