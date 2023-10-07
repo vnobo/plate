@@ -60,9 +60,10 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
     }
 
     /**
-     * 默认的查询条件
+     * Method to convert this BaseEntity to a Criteria
      *
-     * @return 返回一个Criteria对象
+     * @param skipKeys the keys to skip
+     * @return the criteria
      */
     default Criteria criteria(Set<String> skipKeys) {
         return CriteriaUtils.build(this, skipKeys);
