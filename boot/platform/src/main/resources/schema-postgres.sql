@@ -2,21 +2,21 @@ drop table if exists se_users;
 create table if not exists se_users
 (
     id                  serial8 primary key,
-    code        varchar(64)  not null unique,
-    tenant_code varchar(64)  not null default '0',
-    username    varchar(256) not null unique,
-    password            text        not null,
-    disabled            boolean     not null default false,
-    account_expired     boolean     not null default false,
-    account_locked      boolean     not null default false,
-    credentials_expired boolean     not null default false,
-    name        varchar(512),
+    code                varchar(64)  not null unique,
+    tenant_code         varchar(64)  not null default '0',
+    username            varchar(256) not null unique,
+    password            text         not null,
+    disabled            boolean      not null default false,
+    account_expired     boolean      not null default false,
+    account_locked      boolean      not null default false,
+    credentials_expired boolean      not null default false,
+    name                varchar(512),
     extend              jsonb,
     creator             varchar(64),
     updater             varchar(64),
-    login_time          timestamp            default current_timestamp,
-    created_time        timestamp            default current_timestamp,
-    updated_time        timestamp            default current_timestamp
+    login_time          timestamp             default current_timestamp,
+    created_time        timestamp             default current_timestamp,
+    updated_time        timestamp             default current_timestamp
 );
 create index se_users_tenant_code_username_idx on se_users (tenant_code, username);
 create index se_users_extend_gin_idx on se_users using gin (extend);
@@ -52,8 +52,8 @@ drop table if exists se_group_authorities;
 create table if not exists se_group_authorities
 (
     id         serial8 primary key,
-    group_code varchar(64) not null,
-    authority varchar(512) not null,
+    group_code varchar(64)  not null,
+    authority  varchar(512) not null,
     unique (group_code, authority)
 );
 comment on table se_group_authorities is '角色权限表';
