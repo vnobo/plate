@@ -8,7 +8,6 @@ plugins {
 java {
     sourceCompatibility = '21'
     targetCompatibility = '21'
-    withJavadocJar()
     withSourcesJar()
 }
 
@@ -23,6 +22,11 @@ tasks.named("bootBuildImage") {
     imageName = ("alexbob/${project.name}:${project.version}")
     publish = true
     pullPolicy = "IF_NOT_PRESENT"
+    bindings = [
+            "/mnt/build-image/jre:/platform/bindings/jre",
+            "/mnt/build-image/syft:/platform/bindings/syft",
+            "/mnt/build-image/boot:/platform/bindings/spring-boot"
+    ]
     environment = [
             "BP_JVM_VERSION" : "21",
             "BP_NATIVE_IMAGE": "false",

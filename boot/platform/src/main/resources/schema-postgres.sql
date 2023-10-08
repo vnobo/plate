@@ -2,9 +2,9 @@ drop table if exists se_users;
 create table if not exists se_users
 (
     id                  serial8 primary key,
-    code        varchar(64) not null unique,
-    tenant_code varchar(64) not null default '0',
-    username            varchar(64) not null unique,
+    code        varchar(64)  not null unique,
+    tenant_code varchar(64)  not null default '0',
+    username    varchar(256) not null unique,
     password            text        not null,
     disabled            boolean     not null default false,
     account_expired     boolean     not null default false,
@@ -26,8 +26,8 @@ drop table if exists se_authorities;
 create table if not exists se_authorities
 (
     id        serial8 primary key,
-    user_code varchar(64) not null,
-    authority varchar(256) not null,
+    user_code varchar(64)  not null,
+    authority varchar(512) not null,
     unique (user_code, authority)
 );
 comment on table se_authorities is '用户权限表';
@@ -53,7 +53,7 @@ create table if not exists se_group_authorities
 (
     id         serial8 primary key,
     group_code varchar(64) not null,
-    authority  varchar(64) not null,
+    authority varchar(512) not null,
     unique (group_code, authority)
 );
 comment on table se_group_authorities is '角色权限表';
