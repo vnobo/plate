@@ -111,8 +111,7 @@ create table if not exists se_menus
     sort         int                   default 0,
     extend       jsonb,
     created_time timestamp             default current_timestamp,
-    updated_time timestamp             default current_timestamp,
-    unique (tenant_code, authority)
+    updated_time timestamp default current_timestamp
 );
 create index se_menus_pcode_tenant_code_type_name_idx on se_menus (pcode, tenant_code, type, name);
 create index se_menus_extend_gin_idx on se_menus using gin (extend);
