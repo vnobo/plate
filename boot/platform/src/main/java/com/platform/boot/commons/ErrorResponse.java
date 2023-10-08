@@ -1,4 +1,4 @@
-package com.platform.boot.commons.annotation;
+package com.platform.boot.commons;
 
 import lombok.Data;
 

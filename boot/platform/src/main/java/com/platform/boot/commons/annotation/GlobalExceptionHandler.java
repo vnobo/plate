@@ -1,6 +1,7 @@
 package com.platform.boot.commons.annotation;
 
 import com.google.common.collect.Lists;
+import com.platform.boot.commons.ErrorResponse;
 import com.platform.boot.commons.annotation.exception.ClientException;
 import com.platform.boot.commons.annotation.exception.RestServerException;
 import io.r2dbc.spi.R2dbcException;
@@ -38,7 +39,6 @@ public class GlobalExceptionHandler {
      * @param ex       the exception thrown
      * @return a response entity with an error response
      */
-    // Exception handler for ServerWebInputException
     @ExceptionHandler(ServerWebInputException.class)
     public ResponseEntity<ErrorResponse> handleBindException(ServerWebExchange exchange, ServerWebInputException ex) {
         List<String> errors = Lists.newArrayList();
