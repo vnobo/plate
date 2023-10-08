@@ -29,11 +29,6 @@ tasks.named("bootBuildImage") {
             "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
             "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError"
     ]
-    bindings = [
-            "/mnt/build-image/jre:/platform/bindings/jre",
-            "/mnt/build-image/syft:/platform/bindings/syft",
-            "/mnt/build-image/boot:/platform/bindings/spring-boot"
-    ]
     buildCache {
         volume {
             name = "cache.${rootProject.name}.${project.name}.build"
