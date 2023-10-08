@@ -27,12 +27,12 @@ tasks.named("bootBuildImage") {
             "/mnt/build-image/syft:/platform/bindings/syft",
             "/mnt/build-image/boot:/platform/bindings/spring-boot"
     ]
-    environment = [
-            "BP_JVM_VERSION" : "21",
-            "BP_NATIVE_IMAGE": "false",
-            "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
-            "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError"
-    ]
+    //environment = [
+    //        "BP_JVM_VERSION" : "21",
+    //        "BP_NATIVE_IMAGE": "false",
+    //        "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
+    //        "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError"
+    //]
     buildCache {
         volume {
             name = "cache.${rootProject.name}.${project.name}.build"
