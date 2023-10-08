@@ -30,7 +30,7 @@ jobs:
         distribution: 'liberica'
         architecture: x64
 
-    - name: Validate Gradle wrapper
+    - name: Set Gradle action
       uses: gradle/gradle-build-action@v2
         
     - name: Make gradlew executable
