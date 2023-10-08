@@ -18,8 +18,8 @@ configurations {
 }
 
 tasks.named("bootBuildImage") {
-    tags = ["alexbob/${project.name}:latest"]
-    imageName = ("alexbob/${project.name}:${project.version}")
+    tags = ["ghcr.io/${project.name}:latest"]
+    imageName = ("ghcr.io/${project.name}:${project.version}")
     publish = true
     pullPolicy = "IF_NOT_PRESENT"
     //bindings = [
