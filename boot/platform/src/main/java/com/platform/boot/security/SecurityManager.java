@@ -2,7 +2,7 @@ package com.platform.boot.security;
 
 import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.security.group.authority.GroupAuthority;
-import com.platform.boot.security.group.member.GroupMember;
+import com.platform.boot.security.group.member.GroupMemberResponse;
 import com.platform.boot.security.tenant.member.TenantMemberResponse;
 import com.platform.boot.security.user.User;
 import com.platform.boot.security.user.UsersService;
@@ -67,7 +67,7 @@ public class SecurityManager extends AbstractDatabase
                 user.getPassword(), user.getDisabled(), user.getAccountExpired(),
                 user.getAccountLocked(), user.getCredentialsExpired()).authorities(authorities);
         // 使用 Mono.zip 同时加载用户的组和租户信息
-        var tuple2Mono = Mono.zip(this.loadGroups(user.getUsername()), this.loadTenants(user.getUsername()));
+        var tuple2Mono = Mono.zip(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
         // 将组和租户信息设置到用户详细信息中
         return tuple2Mono.flatMap(tuple2 -> {
             userDetails.setGroups(new HashSet<>(tuple2.getT1()));
@@ -76,14 +76,14 @@ public class SecurityManager extends AbstractDatabase
         });
     }
 
-    private Mono<List<GroupMember>> loadGroups(String userCode) {
+    private Mono<List<GroupMemberResponse>> loadGroups(String userCode) {
         String queryGroupMemberSql = """
                 select a.*,b.name as group_name,b.extend as group_extend
                 from se_group_members a join se_groups b on a.group_code=b.code
                 where a.user_code ilike :userCode
                 """;
         return this.queryWithCache("USER_GROUPS-" + userCode,
-                queryGroupMemberSql, Map.of("userCode", userCode), GroupMember.class).collectList();
+                queryGroupMemberSql, Map.of("userCode", userCode), GroupMemberResponse.class).collectList();
     }
 
     private Mono<List<TenantMemberResponse>> loadTenants(String userCode) {
