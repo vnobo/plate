@@ -7,10 +7,10 @@ ext {
     def prefixStr = System.getenv("DOCKER_PREFIX")
     def usernameStr = System.getenv("DOCKER_USERNAME")
     def passwordStr = System.getenv("DOCKER_PASSWORD")
-    dockerUsername = Objects.isNull(usernameStr) ? "${username}" : usernameStr
-    dockerPassword = Objects.isNull(passwordStr) ? "${password}" : passwordStr
-    dockerEmail = "${email}"
-    dockerPrefix = Objects.isNull(prefixStr) ? "${prefix}" : prefixStr
+    dockerUsername = Objects.isNull(usernameStr) ? "${dusername}" : usernameStr
+    dockerPassword = Objects.isNull(passwordStr) ? "${dpassword}" : passwordStr
+    dockerPrefix = Objects.isNull(prefixStr) ? "${dprefix}" : prefixStr
+    dockerEmail = "${demail}"
 }
 
 configure(allprojects) { project ->
