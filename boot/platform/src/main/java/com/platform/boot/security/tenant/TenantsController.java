@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class TenantsController {
 
-    private final TenantsService tenantsService;
+    private final TenantsServiceAbstract tenantsService;
 
     @GetMapping("search")
     public Flux<Tenant> search(TenantRequest request, Pageable pageable) {

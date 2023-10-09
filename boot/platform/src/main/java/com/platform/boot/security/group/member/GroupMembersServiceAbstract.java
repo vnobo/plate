@@ -1,6 +1,6 @@
 package com.platform.boot.security.group.member;
 
-import com.platform.boot.commons.base.DatabaseService;
+import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.commons.utils.CriteriaUtils;
@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class GroupMembersService extends DatabaseService {
+public class GroupMembersServiceAbstract extends AbstractDatabase {
 
     private final GroupMembersRepository memberRepository;
 

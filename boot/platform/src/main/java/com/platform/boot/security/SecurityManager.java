@@ -1,11 +1,11 @@
 package com.platform.boot.security;
 
-import com.platform.boot.commons.base.DatabaseService;
+import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.security.group.authority.GroupAuthority;
 import com.platform.boot.security.group.member.GroupMember;
 import com.platform.boot.security.tenant.member.TenantMemberResponse;
 import com.platform.boot.security.user.User;
-import com.platform.boot.security.user.UsersService;
+import com.platform.boot.security.user.UsersServiceAbstract;
 import com.platform.boot.security.user.authority.UserAuthority;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.relational.core.query.Criteria;
@@ -31,10 +31,10 @@ import java.util.Set;
  */
 @Service
 @RequiredArgsConstructor
-public class SecurityManager extends DatabaseService
+public class SecurityManager extends AbstractDatabase
         implements ReactiveUserDetailsService, ReactiveUserDetailsPasswordService {
 
-    private final UsersService usersService;
+    private final UsersServiceAbstract usersService;
 
     @Override
     public Mono<UserDetails> updatePassword(UserDetails user, String newPassword) {

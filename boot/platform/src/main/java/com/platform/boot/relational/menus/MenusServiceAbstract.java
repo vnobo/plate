@@ -2,7 +2,7 @@ package com.platform.boot.relational.menus;
 
 
 import com.platform.boot.commons.annotation.exception.RestServerException;
-import com.platform.boot.commons.base.DatabaseService;
+import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.security.group.authority.GroupAuthoritiesRepository;
 import com.platform.boot.security.user.authority.UserAuthoritiesRepository;
@@ -28,7 +28,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class MenusService extends DatabaseService {
+public class MenusServiceAbstract extends AbstractDatabase {
     public final static String AUTHORITY_PREFIX = "ROLE_";
 
     private final MenusRepository menusRepository;

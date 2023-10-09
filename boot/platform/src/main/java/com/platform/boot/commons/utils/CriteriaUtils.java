@@ -20,7 +20,7 @@ public final class CriteriaUtils {
 
     public static String applyPage(Pageable pageable) {
         String orderSql = applySort(pageable.getSort(), null);
-        return String.format(orderSql + " LIMIT %d OFFSET %d", pageable.getPageSize(), pageable.getOffset());
+        return String.format(orderSql + " limit %d offset %d", pageable.getPageSize(), pageable.getOffset());
     }
 
     public static String applyPage(Pageable pageable, String prefix) {

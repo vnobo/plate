@@ -1,6 +1,6 @@
 package com.platform.boot.security.group;
 
-import com.platform.boot.commons.base.DatabaseService;
+import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class GroupsService extends DatabaseService {
+public class GroupsServiceAbstract extends AbstractDatabase {
 
     private final GroupsRepository groupsRepository;
 

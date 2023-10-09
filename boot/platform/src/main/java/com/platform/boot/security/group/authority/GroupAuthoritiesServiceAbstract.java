@@ -1,7 +1,7 @@
 package com.platform.boot.security.group.authority;
 
 
-import com.platform.boot.commons.base.DatabaseService;
+import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class GroupAuthoritiesService extends DatabaseService {
+public class GroupAuthoritiesServiceAbstract extends AbstractDatabase {
 
     private final GroupAuthoritiesRepository authoritiesRepository;
 

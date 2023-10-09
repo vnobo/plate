@@ -21,7 +21,7 @@ import java.util.Map;
  *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
-public abstract class DatabaseService extends AbstractService {
+public abstract class AbstractDatabase extends AbstractService {
 
     protected R2dbcEntityTemplate entityTemplate;
     protected DatabaseClient databaseClient;

@@ -8,8 +8,10 @@ import java.io.Serializable;
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 public class Snowflake implements Serializable {
-
-    private static final long EPOCH = 1609459200000L; // 设置起始时间戳，例如：2021-01-01 00:00:00
+    /**
+     * 设置起始时间戳，例如：2021-01-01 00:00:00
+     */
+    private static final long EPOCH = 1609459200000L;
     private final long dataCenterId;
     private final long workerId;
     private long sequence = 0L;

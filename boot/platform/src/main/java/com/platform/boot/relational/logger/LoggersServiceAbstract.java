@@ -1,6 +1,6 @@
 package com.platform.boot.relational.logger;
 
-import com.platform.boot.commons.base.DatabaseService;
+import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class LoggersService extends DatabaseService {
+public class LoggersServiceAbstract extends AbstractDatabase {
 
     private final LoggersRepository loggersRepository;
 

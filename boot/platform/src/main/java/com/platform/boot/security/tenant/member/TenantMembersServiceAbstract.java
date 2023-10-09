@@ -1,6 +1,6 @@
 package com.platform.boot.security.tenant.member;
 
-import com.platform.boot.commons.base.DatabaseService;
+import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.commons.utils.CriteriaUtils;
@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class TenantMembersService extends DatabaseService {
+public class TenantMembersServiceAbstract extends AbstractDatabase {
 
     private final TenantMembersRepository tenantMembersRepository;
 

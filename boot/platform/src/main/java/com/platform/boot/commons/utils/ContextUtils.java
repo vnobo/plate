@@ -5,7 +5,7 @@ import com.platform.boot.commons.Snowflake;
 import com.platform.boot.commons.annotation.exception.RestServerException;
 import com.platform.boot.security.SecurityDetails;
 import com.platform.boot.security.UserAuditor;
-import com.platform.boot.security.user.UsersService;
+import com.platform.boot.security.user.UsersServiceAbstract;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Pageable;
@@ -33,9 +33,9 @@ public final class ContextUtils implements Serializable {
     public static final String SECURITY_AUTH_TOKEN_HEADER = "X-Auth-Token";
     public static ObjectMapper OBJECT_MAPPER;
     public static Snowflake SNOW_FLAKE;
-    public static UsersService USERS_SERVICE;
+    public static UsersServiceAbstract USERS_SERVICE;
 
-    ContextUtils(ObjectMapper objectMapper, UsersService usersService) {
+    ContextUtils(ObjectMapper objectMapper, UsersServiceAbstract usersService) {
         ContextUtils.SNOW_FLAKE = new Snowflake(1, 1);
         ContextUtils.OBJECT_MAPPER = objectMapper;
         ContextUtils.USERS_SERVICE = usersService;

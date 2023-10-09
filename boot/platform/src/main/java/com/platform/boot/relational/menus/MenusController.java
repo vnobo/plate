@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class MenusController {
 
-    private final MenusService menusService;
+    private final MenusServiceAbstract menusService;
 
     /**
      * Endpoint to search Menus

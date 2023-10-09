@@ -1,7 +1,7 @@
 package com.platform.boot.security.user;
 
 import com.platform.boot.commons.annotation.exception.RestServerException;
-import com.platform.boot.commons.base.DatabaseService;
+import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class UsersService extends DatabaseService {
+public class UsersServiceAbstract extends AbstractDatabase {
 
     private final PasswordEncoder passwordEncoder;
     private final UsersRepository usersRepository;
@@ -127,9 +127,10 @@ public class UsersService extends DatabaseService {
         }
     }
 
-    /* This method upgrades the encoding of the user password if necessary.
+    /**
+     *  This method upgrades the encoding of the user password if necessary.
      *
-     * @param request The user request containing the authentication data.
+     * @param password The user request containing the authentication data.
      */
     private String upgradeEncodingIfPassword(String password) {
         // Check if password exists and the encoding needs to be upgraded

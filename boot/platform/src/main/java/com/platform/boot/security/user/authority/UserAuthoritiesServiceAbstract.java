@@ -1,6 +1,6 @@
 package com.platform.boot.security.user.authority;
 
-import com.platform.boot.commons.base.DatabaseService;
+import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.relational.core.query.Query;
@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class UserAuthoritiesService extends DatabaseService {
+public class UserAuthoritiesServiceAbstract extends AbstractDatabase {
 
     private final UserAuthoritiesRepository userAuthoritiesRepository;
 
