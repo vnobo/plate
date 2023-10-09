@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UsersController {
 
-    private final UsersServiceAbstract usersService;
+    private final UsersService usersService;
 
     // Endpoint to search for users
     @GetMapping("search")

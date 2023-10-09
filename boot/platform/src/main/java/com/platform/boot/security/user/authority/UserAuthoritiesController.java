@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UserAuthoritiesController {
 
-    private final UserAuthoritiesServiceAbstract authoritiesService;
+    private final UserAuthoritiesService authoritiesService;
 
     @GetMapping("search")
     public Flux<UserAuthority> search(UserAuthorityRequest request) {

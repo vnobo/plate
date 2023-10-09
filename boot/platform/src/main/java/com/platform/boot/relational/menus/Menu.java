@@ -134,8 +134,8 @@ public class Menu implements BaseEntity<Integer> {
             return null;
         }
         String role = authority;
-        if (!authority.startsWith(MenusServiceAbstract.AUTHORITY_PREFIX)) {
-            role = MenusServiceAbstract.AUTHORITY_PREFIX + "_"
+        if (!authority.startsWith(MenusService.AUTHORITY_PREFIX)) {
+            role = MenusService.AUTHORITY_PREFIX + "_"
                     + CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, authority);
         }
         role = role.toUpperCase();
@@ -244,8 +244,8 @@ public class Menu implements BaseEntity<Integer> {
                 return null;
             }
             String role = authority;
-            if (!authority.startsWith(MenusServiceAbstract.AUTHORITY_PREFIX)) {
-                role = MenusServiceAbstract.AUTHORITY_PREFIX + "BTN_" +
+            if (!authority.startsWith(MenusService.AUTHORITY_PREFIX)) {
+                role = MenusService.AUTHORITY_PREFIX + "BTN_" +
                         CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, authority);
             }
             role = role.toUpperCase();

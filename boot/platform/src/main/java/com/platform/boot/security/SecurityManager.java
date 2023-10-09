@@ -5,7 +5,7 @@ import com.platform.boot.security.group.authority.GroupAuthority;
 import com.platform.boot.security.group.member.GroupMember;
 import com.platform.boot.security.tenant.member.TenantMemberResponse;
 import com.platform.boot.security.user.User;
-import com.platform.boot.security.user.UsersServiceAbstract;
+import com.platform.boot.security.user.UsersService;
 import com.platform.boot.security.user.authority.UserAuthority;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.relational.core.query.Criteria;
@@ -34,7 +34,7 @@ import java.util.Set;
 public class SecurityManager extends AbstractDatabase
         implements ReactiveUserDetailsService, ReactiveUserDetailsPasswordService {
 
-    private final UsersServiceAbstract usersService;
+    private final UsersService usersService;
 
     @Override
     public Mono<UserDetails> updatePassword(UserDetails user, String newPassword) {

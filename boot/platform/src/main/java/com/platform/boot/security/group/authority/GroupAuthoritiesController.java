@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class GroupAuthoritiesController {
 
-    private final GroupAuthoritiesServiceAbstract authoritiesService;
+    private final GroupAuthoritiesService authoritiesService;
 
     @GetMapping("search")
     public Flux<GroupAuthority> search(GroupAuthorityRequest request, Pageable pageable) {

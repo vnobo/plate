@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.platform.boot.commons.annotation.exception.JsonException;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.relational.logger.LoggerRequest;
-import com.platform.boot.relational.logger.LoggersServiceAbstract;
+import com.platform.boot.relational.logger.LoggersService;
 import com.platform.boot.security.SecurityDetails;
 import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
@@ -74,7 +74,7 @@ public class LoggerFilter implements WebFilter {
     // Matcher used to check if CSRF protection is required
     private final ServerWebExchangeMatcher requireCsrfProtectionMatcher = DEFAULT_CSRF_MATCHER;
     // Service used to log requests
-    private final LoggersServiceAbstract loggerService;
+    private final LoggersService loggerService;
 
     public static <T> Mono<T> cacheRequestBody(ServerWebExchange exchange,
                                                Function<ServerHttpRequest, Mono<T>> function) {

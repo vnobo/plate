@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class GroupsController {
 
-    private final GroupsServiceAbstract groupsService;
+    private final GroupsService groupsService;
 
     @GetMapping("search")
     public Flux<Group> search(GroupRequest request, Pageable pageable) {

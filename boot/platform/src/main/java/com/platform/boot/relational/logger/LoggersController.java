@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class LoggersController {
 
-    private final LoggersServiceAbstract loggersService;
+    private final LoggersService loggersService;
 
     @GetMapping("search")
     public Flux<Logger> search(LoggerRequest request, Pageable pageable) {

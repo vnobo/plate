@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class TenantsServiceAbstract extends AbstractDatabase {
+public class TenantsService extends AbstractDatabase {
 
     private final TenantsRepository tenantsRepository;
     private final TenantMembersRepository membersRepository;

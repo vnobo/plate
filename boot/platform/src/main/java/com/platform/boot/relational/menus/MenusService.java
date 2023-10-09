@@ -28,7 +28,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class MenusServiceAbstract extends AbstractDatabase {
+public class MenusService extends AbstractDatabase {
     public final static String AUTHORITY_PREFIX = "ROLE_";
 
     private final MenusRepository menusRepository;

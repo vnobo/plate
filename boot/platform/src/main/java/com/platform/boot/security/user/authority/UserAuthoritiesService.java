@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class UserAuthoritiesServiceAbstract extends AbstractDatabase {
+public class UserAuthoritiesService extends AbstractDatabase {
 
     private final UserAuthoritiesRepository userAuthoritiesRepository;
 
