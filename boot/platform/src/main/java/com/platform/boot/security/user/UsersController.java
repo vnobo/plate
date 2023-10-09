@@ -23,21 +23,18 @@ public class UsersController {
 
     private final UsersService usersService;
 
-    // Endpoint to search for users
     @GetMapping("search")
     public Flux<User> search(UserRequest request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMapMany(securityDetails -> this.usersService.search(
                 request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 
-    // Endpoint to get a page of users
     @GetMapping("page")
     public Mono<Page<User>> page(UserRequest request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMap(securityDetails -> this.usersService.page(
                 request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 
-    // Endpoint to add a user
     @PostMapping("add")
     public Mono<User> add(@Valid @RequestBody UserRequest request) {
         // Check that the user ID is null (i.e. this is a new user)
@@ -46,7 +43,6 @@ public class UsersController {
         return this.usersService.add(request);
     }
 
-    // Endpoint to modify a user
     @PutMapping("modify")
     public Mono<User> modify(@Validated(Update.class) @RequestBody UserRequest request) {
         // Check that the user ID is not null (i.e. this is an existing user)
@@ -55,7 +51,6 @@ public class UsersController {
         return this.usersService.operate(request);
     }
 
-    // Endpoint to delete a user
     @DeleteMapping("delete")
     public Mono<Void> delete(@Valid @RequestBody UserRequest request) {
         // Check that the user ID is not null (i.e. this is an existing user)

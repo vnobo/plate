@@ -102,7 +102,7 @@ public final class ContextUtils implements Serializable {
                 if (ObjectUtils.isEmpty(userAuditor)) {
                     return Mono.just(obejct);
                 }
-                return USERS_SERVICE.loadByUsername(userAuditor.getUsername()).flatMap(user -> {
+                return USERS_SERVICE.loadByCode(userAuditor.getCode()).flatMap(user -> {
                     try {
                         propertyDescriptor.getWriteMethod().invoke(obejct, userAuditor.withUser(user));
                         return Mono.just(obejct);
@@ -124,8 +124,6 @@ public final class ContextUtils implements Serializable {
             throw RestServerException.withMsg(
                     "Snowflake not found", "Snowflake server is not found, init snowflake first.");
         }
-        String id = SNOW_FLAKE.nextIdStr();
-        log.debug("Next ID: {}", id);
-        return id;
+        return SNOW_FLAKE.nextIdStr();
     }
 }

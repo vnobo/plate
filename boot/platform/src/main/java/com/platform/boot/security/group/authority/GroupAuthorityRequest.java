@@ -21,13 +21,6 @@ public class GroupAuthorityRequest extends GroupAuthority implements Serializabl
     @NotNull(message = "权限[authorities]不能为空!")
     private Set<String> authorities;
 
-    private String securityCode;
-
-    public GroupAuthorityRequest securityCode(String securityCode) {
-        this.securityCode = securityCode;
-        return this;
-    }
-
     public GroupAuthority toGroupAuthority() {
         return BeanUtils.copyProperties(this, GroupAuthority.class);
     }

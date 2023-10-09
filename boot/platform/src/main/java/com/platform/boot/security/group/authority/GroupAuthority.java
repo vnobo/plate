@@ -1,26 +1,49 @@
 package com.platform.boot.security.group.authority;
 
 import com.platform.boot.commons.base.BaseEntity;
+import com.platform.boot.security.UserAuditor;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.*;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
+
+import java.time.LocalDateTime;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Data
+@NoArgsConstructor
 @Table("se_group_authorities")
 public class GroupAuthority implements GrantedAuthority, BaseEntity<Integer> {
 
     @Id
     private Integer id;
 
-    @NotBlank(message = "角色[groupCode]不能为空!")
+    private String code;
+
+    @NotBlank(message = "Role [groupCode] can not be empty!")
     private String groupCode;
 
-    @NotBlank(message = "权限[authority]不能为空!")
+    @NotBlank(message = "Role [authority]can not be empty!")
     private String authority;
 
+    @CreatedBy
+    private UserAuditor creator;
+
+    @LastModifiedBy
+    private UserAuditor updater;
+
+    @CreatedDate
+    private LocalDateTime createdTime;
+
+    @LastModifiedDate
+    private LocalDateTime updatedTime;
+
+    public GroupAuthority(String groupCode, String authority) {
+        this.groupCode = groupCode;
+        this.authority = authority;
+    }
 }

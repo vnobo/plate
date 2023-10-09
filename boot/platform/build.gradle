@@ -22,11 +22,6 @@ tasks.named("bootBuildImage") {
     imageName = ("${dockerPrefix}/${project.name}:${project.version}")
     publish = true
     pullPolicy = "IF_NOT_PRESENT"
-    //bindings = [
-    //        "/mnt/build-image/jre:/platform/bindings/jre",
-    //        "/mnt/build-image/syft:/platform/bindings/syft",
-    //        "/mnt/build-image/boot:/platform/bindings/spring-boot"
-    //]
     environment = [
             "BP_JVM_VERSION" : "21",
             "BP_NATIVE_IMAGE": "false",
@@ -44,7 +39,6 @@ tasks.named("bootBuildImage") {
         }
     }
     docker {
-        //host = "tcp://192.168.1.2:2376"
         publishRegistry {
             username = "${dockerUsername}"
             password = "${dockerPassword}"

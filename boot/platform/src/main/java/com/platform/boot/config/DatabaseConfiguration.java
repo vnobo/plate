@@ -1,12 +1,15 @@
 package com.platform.boot.config;
 
 import com.google.common.collect.Lists;
+import com.platform.boot.security.UserAuditor;
+import com.platform.boot.security.UserAuditorAware;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.domain.ReactiveAuditorAware;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
 import org.springframework.data.r2dbc.config.EnableR2dbcAuditing;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -20,14 +23,11 @@ import java.util.List;
  *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
-@AutoConfiguration
+@Configuration(proxyBeanMethods = false)
 @EnableTransactionManagement
 @EnableR2dbcAuditing
-public class DatabaseConfiguration {
-
-    @Configuration(proxyBeanMethods = false)
-    @RequiredArgsConstructor
-    static class R2dbcConfiguration extends AbstractR2dbcConfiguration {
+@RequiredArgsConstructor
+public class DatabaseConfiguration extends AbstractR2dbcConfiguration {
 
         private final List<Converter<?, ?>> customConverters;
 
@@ -50,5 +50,9 @@ public class DatabaseConfiguration {
         public List<Object> getCustomConverters() {
             return Lists.newArrayList(customConverters);
         }
+
+    @Bean
+    public ReactiveAuditorAware<UserAuditor> userAuditorProvider() {
+        return new UserAuditorAware();
     }
 }

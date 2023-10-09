@@ -8,7 +8,7 @@ import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * This interface defines the base entity for all entities in the application.
@@ -65,7 +65,7 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
      * @param skipKeys the keys to skip
      * @return the criteria
      */
-    default Criteria criteria(Set<String> skipKeys) {
+    default Criteria criteria(Collection<String> skipKeys) {
         return CriteriaUtils.build(this, skipKeys);
     }
 }

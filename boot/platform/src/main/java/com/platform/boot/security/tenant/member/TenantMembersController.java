@@ -43,9 +43,6 @@ public class TenantMembersController {
         return this.tenantMembersService.operate(request);
     }
 
-    /**
-     * Endpoint to modify a Tenant
-     */
     @PutMapping("modify")
     public Mono<TenantMember> modify(@Valid @RequestBody TenantMemberRequest request) {
         // Check that the Tenant ID is not null (i.e. this is an existing Tenant)
@@ -54,9 +51,6 @@ public class TenantMembersController {
         return this.tenantMembersService.operate(request);
     }
 
-    /**
-     * Endpoint to delete a Tenant
-     */
     @DeleteMapping("delete")
     public Mono<Void> delete(@Valid @RequestBody TenantMemberRequest request) {
         // Check that the Tenant ID is not null (i.e. this is an existing Tenant)

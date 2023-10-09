@@ -30,25 +30,11 @@ public class GroupMembersController {
         return this.groupMembersService.page(request, pageable);
     }
 
-    // Endpoint to add a Tenant
-    @PostMapping("add")
-    public Mono<GroupMember> add(@Valid @RequestBody GroupMemberRequest request) {
-        // Check that the Tenant ID is null (i.e. this is a new Tenant)
-        Assert.isTrue(request.isNew(), "When adding a new Tenant, the ID must be null");
-        // Call the Tenants service to add the Tenant and return the result as a Mono
+    @PostMapping("save")
+    public Mono<GroupMember> save(@Valid @RequestBody GroupMemberRequest request) {
         return this.groupMembersService.operate(request);
     }
 
-    // Endpoint to modify a Tenant
-    @PutMapping("modify")
-    public Mono<GroupMember> modify(@Valid @RequestBody GroupMemberRequest request) {
-        // Check that the Tenant ID is not null (i.e. this is an existing Tenant)
-        Assert.isTrue(!request.isNew(), "When modifying an existing Tenant, the ID must not be null");
-        // Call the Tenants service to modify the Tenant and return the result as a Mono
-        return this.groupMembersService.operate(request);
-    }
-
-    // Endpoint to delete a Tenant
     @DeleteMapping("delete")
     public Mono<Void> delete(@Valid @RequestBody GroupMemberRequest request) {
         // Check that the Tenant ID is not null (i.e. this is an existing Tenant)

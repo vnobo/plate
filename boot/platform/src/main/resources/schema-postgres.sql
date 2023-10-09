@@ -25,9 +25,14 @@ comment on table se_users is '用户表';
 drop table if exists se_authorities;
 create table if not exists se_authorities
 (
-    id        serial8 primary key,
-    user_code varchar(64)  not null,
-    authority varchar(512) not null,
+    id           serial8 primary key,
+    code         varchar(64)  not null unique,
+    user_code    varchar(64)  not null,
+    authority    varchar(512) not null,
+    creator      varchar(64),
+    updater      varchar(64),
+    created_time timestamp default current_timestamp,
+    updated_time timestamp default current_timestamp,
     unique (user_code, authority)
 );
 comment on table se_authorities is '用户权限表';
@@ -51,9 +56,14 @@ comment on table se_groups is '角色表';
 drop table if exists se_group_authorities;
 create table if not exists se_group_authorities
 (
-    id         serial8 primary key,
-    group_code varchar(64)  not null,
-    authority  varchar(512) not null,
+    id           serial8 primary key,
+    code         varchar(64)  not null unique,
+    group_code   varchar(64)  not null,
+    authority    varchar(512) not null,
+    creator      varchar(64),
+    updater      varchar(64),
+    created_time timestamp default current_timestamp,
+    updated_time timestamp default current_timestamp,
     unique (group_code, authority)
 );
 comment on table se_group_authorities is '角色权限表';

@@ -33,7 +33,6 @@ public class TenantsController {
                 this.tenantsService.page(request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 
-    // Endpoint to add a Tenant
     @PostMapping("add")
     public Mono<Tenant> add(@Valid @RequestBody TenantRequest request) {
         // Check that the Tenant ID is null (i.e. this is a new Tenant)
@@ -42,7 +41,6 @@ public class TenantsController {
         return this.tenantsService.operate(request);
     }
 
-    // Endpoint to modify a Tenant
     @PutMapping("modify")
     public Mono<Tenant> modify(@Valid @RequestBody TenantRequest request) {
         // Check that the Tenant ID is not null (i.e. this is an existing Tenant)
@@ -51,7 +49,6 @@ public class TenantsController {
         return this.tenantsService.operate(request);
     }
 
-    // Endpoint to delete a Tenant
     @DeleteMapping("delete")
     public Mono<Void> delete(@Valid @RequestBody TenantRequest request) {
         // Check that the Tenant ID is not null (i.e. this is an existing Tenant)

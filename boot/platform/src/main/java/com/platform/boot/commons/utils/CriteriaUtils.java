@@ -44,7 +44,7 @@ public final class CriteriaUtils {
         return " order by " + sortSql;
     }
 
-    public static String whereSql(Object object, List<String> skipKeys, String prefix) {
+    public static String whereSql(Object object, Collection<String> skipKeys, String prefix) {
 
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         if (ObjectUtils.isEmpty(objectMap)) {
@@ -92,7 +92,7 @@ public final class CriteriaUtils {
      * @param skipKes the keys to skip
      * @return the built Criteria
      */
-    public static Criteria build(Object object, Set<String> skipKes) {
+    public static Criteria build(Object object, Collection<String> skipKes) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
         if (!ObjectUtils.isEmpty(objectMap)) {
             Set<String> mergeSet = new HashSet<>(SKIP_CRITERIA_KEYS);

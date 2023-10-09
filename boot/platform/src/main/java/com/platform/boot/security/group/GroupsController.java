@@ -33,7 +33,6 @@ public class GroupsController {
                 this.groupsService.page(request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 
-    // Endpoint to add a Group
     @PostMapping("add")
     public Mono<Group> add(@Valid @RequestBody GroupRequest request) {
         // Check that the Group ID is null (i.e. this is a new Group)
@@ -42,7 +41,6 @@ public class GroupsController {
         return this.groupsService.operate(request);
     }
 
-    // Endpoint to modify a Group
     @PutMapping("modify")
     public Mono<Group> modify(@Valid @RequestBody GroupRequest request) {
         // Check that the Group ID is not null (i.e. this is an existing Group)
@@ -51,7 +49,6 @@ public class GroupsController {
         return this.groupsService.operate(request);
     }
 
-    // Endpoint to delete a Group
     @DeleteMapping("delete")
     public Mono<Void> delete(@Valid @RequestBody GroupRequest request) {
         // Check that the Group ID is not null (i.e. this is an existing Group)
