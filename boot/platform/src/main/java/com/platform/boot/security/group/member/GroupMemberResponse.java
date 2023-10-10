@@ -13,9 +13,8 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class GroupMemberResponse extends GroupMember {
 
-    private String username;
-    private String loginName;
-    private String groupName;
-    private JsonNode groupExtend;
+    private String name;
+
+    private JsonNode extend;
 
 }

@@ -39,7 +39,7 @@ public class GroupAuthoritiesController {
     @PostMapping("batch")
     public Mono<Object> batch(@RequestBody GroupAuthorityRequest request) {
         Assert.notNull(request.getAuthorities(), "Authorities param [authorities] cannot be null!");
-        return this.authoritiesService.batch(request).thenReturn(Map.of("success", true,
+        return this.authoritiesService.batch(request).thenReturn(Map.of("success", 200,
                 "message", "The operation succeeds and takes effect in a few minutes!"));
     }
 

@@ -23,10 +23,15 @@ import java.util.*;
 public final class SecurityDetails implements UserDetails {
 
     private String code;
+
     private String username;
+
     private String name;
+
     private Set<GrantedAuthority> authorities;
+
     private Set<TenantMemberResponse> tenants;
+
     private Set<GroupMemberResponse> groups;
 
     @JsonIgnore
@@ -128,7 +133,7 @@ public final class SecurityDetails implements UserDetails {
             return null;
         }
         return this.getTenants().stream().filter(TenantMemberResponse::getEnabled).findAny()
-                .map(TenantMemberResponse::getTenantName).orElse(null);
+                .map(TenantMemberResponse::getName).orElse(null);
     }
 
     @Override

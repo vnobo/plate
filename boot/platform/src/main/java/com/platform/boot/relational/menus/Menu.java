@@ -6,13 +6,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.CaseFormat;
 import com.platform.boot.commons.base.BaseEntity;
 import com.platform.boot.commons.utils.ContextUtils;
+import com.platform.boot.security.UserAuditor;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.*;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.StringUtils;
 
@@ -99,6 +98,12 @@ public class Menu implements BaseEntity<Integer> {
      * The extend field can be null and is used to store additional data for this menu in JSON format.
      */
     private JsonNode extend;
+
+    @CreatedBy
+    private UserAuditor creator;
+
+    @LastModifiedBy
+    private UserAuditor updater;
 
     /**
      * The date and time that this menu was created.

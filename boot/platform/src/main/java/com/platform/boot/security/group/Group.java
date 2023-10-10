@@ -2,11 +2,10 @@ package com.platform.boot.security.group;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.platform.boot.commons.base.BaseEntity;
+import com.platform.boot.security.UserAuditor;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.*;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
@@ -32,6 +31,12 @@ public class Group implements BaseEntity<Integer> {
     private String name;
 
     private JsonNode extend;
+
+    @CreatedBy
+    private UserAuditor creator;
+
+    @LastModifiedBy
+    private UserAuditor updater;
 
     @CreatedDate
     private LocalDateTime createdTime;

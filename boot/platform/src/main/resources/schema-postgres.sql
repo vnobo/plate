@@ -46,6 +46,8 @@ create table if not exists se_groups
     tenant_code  varchar(64)  not null default '0',
     name         varchar(512) not null,
     extend       jsonb,
+    creator varchar(64),
+    updater varchar(64),
     created_time timestamp             default current_timestamp,
     updated_time timestamp             default current_timestamp
 );
@@ -71,9 +73,14 @@ comment on table se_group_authorities is '角色权限表';
 drop table if exists se_group_members;
 create table if not exists se_group_members
 (
-    id         serial8 primary key,
-    group_code varchar(64) not null,
-    user_code  varchar(64) not null,
+    id           serial8 primary key,
+    code         varchar(64) not null unique,
+    group_code   varchar(64) not null,
+    user_code    varchar(64) not null,
+    creator      varchar(64),
+    updater      varchar(64),
+    created_time timestamp default current_timestamp,
+    updated_time timestamp default current_timestamp,
     unique (group_code, user_code)
 );
 comment on table se_group_members is '角色用户关系表';
@@ -99,10 +106,15 @@ comment on table se_tenants is '租户表';
 drop table if exists se_tenant_members;
 create table if not exists se_tenant_members
 (
-    id          serial8 primary key,
-    tenant_code varchar(64) not null,
-    user_code   varchar(64) not null,
-    enabled     boolean     not null default true,
+    id           serial8 primary key,
+    code         varchar(64) not null unique,
+    tenant_code  varchar(64) not null,
+    user_code    varchar(64) not null,
+    enabled      boolean     not null default true,
+    creator      varchar(64),
+    updater      varchar(64),
+    created_time timestamp            default current_timestamp,
+    updated_time timestamp            default current_timestamp,
     unique (tenant_code, user_code)
 );
 comment on table se_tenant_members is '租户用户关系表';
@@ -120,6 +132,8 @@ create table if not exists se_menus
     path         text,
     sort         int                   default 0,
     extend       jsonb,
+    creator      varchar(64),
+    updater      varchar(64),
     created_time timestamp             default current_timestamp,
     updated_time timestamp default current_timestamp
 );

@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -62,12 +61,11 @@ public class GroupAuthoritiesService extends AbstractDatabase {
             Set<String> requestAuthorities = request.getAuthorities();
             Map<Boolean, List<GroupAuthority>> groupedData = data.stream()
                     .collect(Collectors.partitioningBy(a -> requestAuthorities.contains(a.getAuthority())));
-            List<GroupAuthority> updateData = groupedData.get(true);
             List<GroupAuthority> deleteData = groupedData.get(false);
 
-            Set<GroupAuthority> saveData = Stream.concat(request.getAuthorities().stream()
+            Set<GroupAuthority> saveData = request.getAuthorities().stream()
                             .filter(a -> data.stream().noneMatch(b -> b.getAuthority().equalsIgnoreCase(a)))
-                            .map(a -> new GroupAuthority(request.getGroupCode(), a)), updateData.stream())
+                    .map(a -> new GroupAuthority(request.getGroupCode(), a))
                     .collect(Collectors.toSet());
 
             var deleteAllMono = deleteData.isEmpty() ? Mono.empty() : this.authoritiesRepository.deleteAll(deleteData);

@@ -78,7 +78,7 @@ public class SecurityManager extends AbstractDatabase
 
     private Mono<List<GroupMemberResponse>> loadGroups(String userCode) {
         String queryGroupMemberSql = """
-                select a.*,b.name as group_name,b.extend as group_extend
+                select a.*,b.name,b.extend
                 from se_group_members a join se_groups b on a.group_code=b.code
                 where a.user_code ilike :userCode
                 """;
@@ -88,7 +88,7 @@ public class SecurityManager extends AbstractDatabase
 
     private Mono<List<TenantMemberResponse>> loadTenants(String userCode) {
         String queryGroupMemberSql = """
-                select a.*,b.name as tenant_name,b.extend as tenant_extend
+                select a.*,b.name ,b.extend
                 from se_tenant_members a join se_tenants b on a.tenant_code=b.code
                 where a.user_code ilike :userCode
                 """;
