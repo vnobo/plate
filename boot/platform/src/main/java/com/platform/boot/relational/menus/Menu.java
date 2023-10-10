@@ -170,8 +170,17 @@ public class Menu implements BaseEntity<Integer> {
                 .map(JsonNode::asText).orElse(null);
     }
 
+    /**
+     *
+     */
     enum MenuType {
+        /**
+         * folder
+         */
         FOLDER,
+        /**
+         * menu
+         */
         MENU
     }
 
