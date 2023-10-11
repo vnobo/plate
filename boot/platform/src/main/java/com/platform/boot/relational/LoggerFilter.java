@@ -71,9 +71,13 @@ public class LoggerFilter implements WebFilter {
     public static final String CACHED_SERVER_HTTP_REQUEST_DECORATOR_ATTR = "cachedServerHttpRequestDecorator";
     public static final String CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR = "cachedServerHttpResponseDecorator";
 
-    // Matcher used to check if CSRF protection is required
+    /**
+     * Matcher used to check if CSRF protection is required
+     */
     private final ServerWebExchangeMatcher requireCsrfProtectionMatcher = DEFAULT_CSRF_MATCHER;
-    // Service used to log requests
+    /**
+     * Service used to log requests
+     */
     private final LoggersService loggerService;
 
     public static <T> Mono<T> cacheRequestBody(ServerWebExchange exchange,
