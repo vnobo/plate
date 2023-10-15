@@ -20,17 +20,26 @@ public class LoggersService extends AbstractDatabase {
 
     private final LoggersRepository loggersRepository;
 
+
     public Flux<Logger> search(LoggerRequest request, Pageable pageable) {
+        //Create a cache key based on the given request and pageable parameters
         String cacheKey = ContextUtils.cacheKey(request, pageable);
+        //Create a query based on the given request and pageable parameters
         Query query = Query.query(request.toCriteria()).with(pageable);
+        //Return the query with the cache key and Logger class
         return this.queryWithCache(cacheKey, query, Logger.class);
     }
 
     public Mono<Page<Logger>> page(LoggerRequest request, Pageable pageable) {
+        //Create a cache key based on the request
         String cacheKey = ContextUtils.cacheKey(request);
+        //Create a query based on the request
         Query query = Query.query(request.toCriteria());
+        //Collect a list of Loggers based on the request and pageable
         var searchMono = this.search(request, pageable).collectList();
+        //Count the number of Loggers based on the cache key, query, and Logger class
         var countMono = this.countWithCache(cacheKey, query, Logger.class);
+        //Return a Mono of a Page of Loggers based on the searchMono and countMono
         return Mono.zip(searchMono, countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
