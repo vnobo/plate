@@ -13,7 +13,7 @@ server.port: 8080
 spring:
   application.name: platform
   r2dbc:
-    url: r2dbc:postgres://192.168.1.2:5432/plate
+    url: r2dbc:postgres://localhost:5432/plate
     username: farmer
     password: q1w2e3..
     pool:
@@ -27,5 +27,5 @@ spring:
     mode: always
     platform: postgres
   data.redis:
-    host: 192.168.1.2
+    host: localhost
     repositories.enabled: false
