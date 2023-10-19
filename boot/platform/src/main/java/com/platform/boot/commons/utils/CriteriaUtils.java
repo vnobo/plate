@@ -18,6 +18,14 @@ import java.util.stream.Collectors;
 public final class CriteriaUtils {
     public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend", "createdTime", "updatedTime");
 
+    public static StringJoiner queryJson(Map<String, Object> params) {
+        StringJoiner whereSql = new StringJoiner(" and ");
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            whereSql.add(entry.getKey() + "=:" + entry.getValue());
+        }
+        return whereSql;
+    }
+
     public static String applyPage(Pageable pageable) {
         String orderSql = applySort(pageable.getSort(), null);
         return String.format(orderSql + " limit %d offset %d", pageable.getPageSize(), pageable.getOffset());
@@ -111,6 +119,7 @@ public final class CriteriaUtils {
         // Return the SQL
         return "Where " + whereSql;
     }
+
     /**
      * Builds a Criteria object from the given object excluding the given keys.
      * The static skip keys such as {@link CriteriaUtils} are also excluded.

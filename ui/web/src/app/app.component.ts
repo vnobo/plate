@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 
 @Component({
   // Selector for the component
@@ -8,5 +8,11 @@ import {Component} from '@angular/core';
   // Styles URL for the component
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  page: number = 0;
+
+  ngOnInit(): void {
+    this.page = 1;
+  }
+
 }
