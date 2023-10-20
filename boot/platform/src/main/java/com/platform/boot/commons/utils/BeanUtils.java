@@ -19,8 +19,8 @@ import java.util.Map;
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 public class BeanUtils {
-    private static final ByteArrayOutputStream BYTE_ARRAY_OUTPUT_STREAM = new ByteArrayOutputStream();
-    private static final ObjectOutputStream OBJECT_OUTPUT_STREAM;
+    private final static ByteArrayOutputStream BYTE_ARRAY_OUTPUT_STREAM = new ByteArrayOutputStream();
+    private final static ObjectOutputStream OBJECT_OUTPUT_STREAM;
 
     static {
         try {

@@ -155,7 +155,9 @@ public abstract class AbstractDatabase extends AbstractService {
     private void cachePut(String cacheKey, Object obj) {
         DataSize objectSize = com.platform.boot.commons.utils.BeanUtils.getBeanSize(obj);
         if (objectSize.toBytes() > maxInMemorySize.toBytes()) {
-            throw RestServerException.withMsg("Object size ", "");
+            throw RestServerException.withMsg("Object size is too large.",
+                    "Object size is too large, max size is " + maxInMemorySize.toBytes() + "," +
+                            " Object size is " + objectSize.toBytes() + ".");
         }
         this.cache.put(cacheKey, obj);
     }
