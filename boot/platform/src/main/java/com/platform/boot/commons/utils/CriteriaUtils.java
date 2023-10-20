@@ -18,6 +18,13 @@ import java.util.stream.Collectors;
 public final class CriteriaUtils {
     public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend", "createdTime", "updatedTime");
 
+    /**
+     * Generates a JSON query based on the provided parameters and returns a map
+     * of the generated SQL query and its corresponding parameters.
+     *
+     * @param params a map of key-value pairs representing the parameters for the query
+     * @return a map containing the generated SQL query and its parameters
+     */
     public static Map<StringJoiner, Map<String, Object>> queryJson(Map<String, Object> params) {
         if (ObjectUtils.isEmpty(params)) {
             return Map.of(new StringJoiner(" and "), Maps.newHashMap());
@@ -25,6 +32,12 @@ public final class CriteriaUtils {
         return Map.of(queryJsonSql(params), queryJsonParams(params));
     }
 
+    /**
+     * Generates a SQL WHERE clause for querying JSON data based on the provided parameters.
+     *
+     * @param params a map of key-value pairs representing the query parameters
+     * @return a StringJoiner object representing the generated SQL WHERE clause
+     */
     public static StringJoiner queryJsonSql(Map<String, Object> params) {
         StringJoiner whereSql = new StringJoiner(" and ");
         if (ObjectUtils.isEmpty(params)) {
@@ -47,13 +60,18 @@ public final class CriteriaUtils {
                 if (!ObjectUtils.isEmpty(value)) {
                     whereSql.add("JSON_VALUE(data,'$." + key + "') like :" + bindKey);
                 }
-
-
             }
         }
         return whereSql;
     }
 
+    /**
+     * Generate the function comment for the given function body in a
+     * markdown code block with the correct language syntax.
+     *
+     * @param params the map of parameters to query
+     * @return the map of where parameters
+     */
     public static Map<String, Object> queryJsonParams(Map<String, Object> params) {
         Map<String, Object> whereParams = Maps.newHashMap();
         if (ObjectUtils.isEmpty(params)) {
@@ -81,16 +99,36 @@ public final class CriteriaUtils {
         return whereParams;
     }
 
+    /**
+     * Generates a SQL query for applying pagination to a result set.
+     *
+     * @param pageable the pageable object containing the pagination information
+     * @return the SQL query with applied pagination
+     */
     public static String applyPage(Pageable pageable) {
         String orderSql = applySort(pageable.getSort(), null);
         return String.format(orderSql + " limit %d offset %d", pageable.getPageSize(), pageable.getOffset());
     }
 
+    /**
+     * Applies pagination to a SQL query by generating the LIMIT and OFFSET clauses.
+     *
+     * @param pageable the pagination information
+     * @param prefix   the prefix for the column names in the SQL query
+     * @return the SQL query with the LIMIT and OFFSET clauses applied
+     */
     public static String applyPage(Pageable pageable, String prefix) {
         String orderSql = applySort(pageable.getSort(), prefix);
         return String.format(orderSql + " limit %d offset %d", pageable.getPageSize(), pageable.getOffset());
     }
 
+    /**
+     * Applies the specified sort to the given prefix.
+     *
+     * @param sort   the sort to be applied
+     * @param prefix the prefix to be used in the sorting
+     * @return the SQL representation of the sorting
+     */
     public static String applySort(Sort sort, String prefix) {
         if (sort == null || sort.isUnsorted()) {
             return "";
@@ -107,6 +145,14 @@ public final class CriteriaUtils {
         return " order by " + sortSql;
     }
 
+    /**
+     * Generates a WHERE SQL clause based on the given object, skip keys, and prefix.
+     *
+     * @param object   the object to generate the WHERE SQL clause from
+     * @param skipKeys the collection of keys to skip
+     * @param prefix   the prefix for the SQL clause
+     * @return the generated WHERE SQL clause
+     */
     public static String whereSql(Object object, Collection<String> skipKeys, String prefix) {
 
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
@@ -123,6 +169,13 @@ public final class CriteriaUtils {
         return whereSql(objectMap, prefix);
     }
 
+    /**
+     * Generates a WHERE clause for an SQL query based on the provided objectMap and prefix.
+     *
+     * @param objectMap a map containing key-value pairs representing the columns and values for filtering
+     * @param prefix    a prefix to be added to each column in the WHERE clause
+     * @return a string representing the WHERE clause for the SQL query
+     */
     public static String whereSql(Map<String, Object> objectMap, String prefix) {
 
         if (ObjectUtils.isEmpty(objectMap)) {
