@@ -21,10 +21,10 @@ public class GroupMember implements BaseEntity<Long> {
 
     private String code;
 
-    @NotBlank(message = "角色[groupCode]不能为空!")
+    @NotBlank(message = "Rule [groupCode] not be empty!")
     private String groupCode;
 
-    @NotBlank(message = "用户[username]不能为空!")
+    @NotBlank(message = "User [username]not be empty!")
     private String userCode;
 
     @CreatedBy

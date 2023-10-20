@@ -12,9 +12,8 @@ import reactor.core.publisher.Mono;
 public interface MenusRepository extends R2dbcRepository<Menu, Integer> {
 
     /**
-     * 根据code查找
-     *
-     * @param code CODE
+     *  findByCode
+     * @param code entity code
      * @return entity
      */
     Mono<Menu> findByCode(String code);

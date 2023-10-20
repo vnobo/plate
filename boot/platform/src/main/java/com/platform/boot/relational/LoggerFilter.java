@@ -195,23 +195,10 @@ public class LoggerFilter implements WebFilter {
         }
     }
 
-    /**
-     * 验证请求头是否为json
-     *
-     * @param exchange 包含请求和响应信息的上下文对象
-     * @return boolean
-     */
     private boolean validContentTypeIsJson(ServerWebExchange exchange) {
         return MediaType.APPLICATION_JSON.equalsTypeAndSubtype(exchange.getRequest().getHeaders().getContentType());
     }
 
-    /**
-     * 过滤器链
-     *
-     * @param exchange 包含请求和响应信息的上下文对象
-     * @param chain    过滤器链
-     * @return Mono<Void>
-     */
     @Override
     public @NotNull Mono<Void> filter(@NotNull ServerWebExchange exchange, @NotNull WebFilterChain chain) {
         var nextMono = cacheFilterChain(exchange, chain).then(Mono.defer(ContextUtils::securityDetails)
@@ -264,17 +251,10 @@ public class LoggerFilter implements WebFilter {
         }));
     }
 
-    /**
-     * 记录请求日志方法
-     *
-     * @param exchange 包含请求和响应信息的上下文对象
-     */
     private void logRequest(ServerWebExchange exchange, SecurityDetails userDetails) {
-        // 获取请求和响应对象、用户信息和系统信息
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpResponse response = exchange.getResponse();
 
-        // 创建请求体，并填充请求和响应的头部信息、响应状态码和请求体
         ObjectNode contentNode = ContextUtils.OBJECT_MAPPER.createObjectNode();
         contentNode.putPOJO("requestHeaders", request.getHeaders());
         contentNode.set("requestBody", readRequestBody(exchange));
@@ -283,13 +263,12 @@ public class LoggerFilter implements WebFilter {
         contentNode.putPOJO("responseStatusCode", response.getStatusCode());
         contentNode.set("responseBody", readResponseBody(exchange));
 
-        // 获取日志前缀、请求方法和租户编码，并获取请求路径
         String prefix = exchange.getLogPrefix();
         String method = request.getMethod().name();
         String status = String.valueOf(Objects.requireNonNull(response.getStatusCode()).value());
         String tenantCode = Optional.ofNullable(userDetails.getTenantCode()).orElse("0");
         String path = request.getPath().value();
-        // 根据获取到的信息创建日志对象，并记录日志
+
         LoggerRequest logger = LoggerRequest.of(tenantCode, userDetails.getUsername(), prefix,
                 method, status, path, contentNode);
         this.loggerService.operate(logger).share()

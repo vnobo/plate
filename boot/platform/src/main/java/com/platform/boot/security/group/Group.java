@@ -24,10 +24,10 @@ public class Group implements BaseEntity<Integer> {
 
     private String pcode;
 
-    @NotBlank(message = "租户编码[tenantCode]不能为空!")
+    @NotBlank(message = "Tenant [tenantCode] not be empty!")
     private String tenantCode;
 
-    @NotBlank(message = "角色[name]不能为空!")
+    @NotBlank(message = " Rules [name] not be empty!")
     private String name;
 
     private JsonNode extend;

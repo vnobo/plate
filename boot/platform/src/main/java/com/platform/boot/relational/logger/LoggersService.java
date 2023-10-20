@@ -20,7 +20,6 @@ public class LoggersService extends AbstractDatabase {
 
     private final LoggersRepository loggersRepository;
 
-
     public Flux<Logger> search(LoggerRequest request, Pageable pageable) {
         //Create a cache key based on the given request and pageable parameters
         String cacheKey = ContextUtils.cacheKey(request, pageable);

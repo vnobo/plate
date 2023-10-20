@@ -41,12 +41,6 @@ public final class ContextUtils implements Serializable {
         ContextUtils.USERS_SERVICE = usersService;
     }
 
-    /**
-     * 生成缓存键的方法
-     *
-     * @param objects 可变参数，用于生成缓存键的对象
-     * @return 生成的缓存键字符串
-     */
     public static String cacheKey(Object... objects) {
         // Convert objects to a map using ObjectMapper
         StringBuilder keyBuilder = new StringBuilder();

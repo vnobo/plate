@@ -98,15 +98,6 @@ public abstract class AbstractDatabase extends AbstractService {
                 .switchIfEmpty(source);
     }
 
-    /**
-     * 分页并缓存查询结果。
-     *
-     * @param key         缓存键值
-     * @param entityClass 实体类
-     * @param query       查询条件
-     * @param <T>         实体类型
-     * @return 查询结果元组（包括实体列表和总数）
-     */
     protected <T> Mono<Long> countWithCache(Object key, Query query, Class<T> entityClass) {
         // 将查询结果添加到缓存中
         Mono<Long> source = this.entityTemplate.count(query, entityClass);
@@ -114,13 +105,6 @@ public abstract class AbstractDatabase extends AbstractService {
         return countWithCache(key, source);
     }
 
-    /**
-     * 分页并缓存查询结果。
-     *
-     * @param key   缓存键值
-     * @param query 查询语句
-     * @return 查询结果元组（包括实体列表和总数）
-     */
     protected Mono<Long> countWithCache(Object key, String query, Map<String, Object> bindParams) {
         // Create a GenericExecuteSpec object from the given query
         var executeSpec = this.databaseClient.sql(() -> query);
@@ -135,13 +119,6 @@ public abstract class AbstractDatabase extends AbstractService {
         return countWithCache(key, source);
     }
 
-    /**
-     * 从缓存中查询数据
-     *
-     * @param key        缓存的 key
-     * @param sourceMono 数据源
-     * @return 查询结果
-     */
     protected Mono<Long> countWithCache(Object key, Mono<Long> sourceMono) {
         String cacheKey = key + ":count";
         // 从缓存中获取数据
@@ -162,19 +139,11 @@ public abstract class AbstractDatabase extends AbstractService {
         this.cache.put(cacheKey, obj);
     }
 
-    /**
-     * Set the R2dbcEntityTemplate for the service.
-     *
-     * @param entityTemplate the R2dbcEntityTemplate to set
-     */
     @Autowired
     public void setEntityTemplate(R2dbcEntityTemplate entityTemplate) {
         this.entityTemplate = entityTemplate;
     }
 
-    /**
-     * Set up the DatabaseClient and R2dbcConverter for the service after properties are set.
-     */
     @Override
     public void afterPropertiesSet() {
         super.afterPropertiesSet();
