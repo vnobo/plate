@@ -5,15 +5,41 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.google.common.collect.Maps;
+import com.platform.boot.commons.annotation.exception.JsonException;
+import com.platform.boot.commons.annotation.exception.RestServerException;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.unit.DataSize;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.Map;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 public class BeanUtils {
+    private static final ByteArrayOutputStream BYTE_ARRAY_OUTPUT_STREAM = new ByteArrayOutputStream();
+    private static final ObjectOutputStream OBJECT_OUTPUT_STREAM;
 
+    static {
+        try {
+            OBJECT_OUTPUT_STREAM = new ObjectOutputStream(BYTE_ARRAY_OUTPUT_STREAM);
+        } catch (IOException e) {
+            throw RestServerException.withMsg("Init static ObjectOutputStream error.", e);
+        }
+    }
+
+    public static DataSize getBeanSize(Object obj) {
+        try {
+            BYTE_ARRAY_OUTPUT_STREAM.reset();
+            OBJECT_OUTPUT_STREAM.writeObject(obj);
+            OBJECT_OUTPUT_STREAM.flush();
+            return DataSize.ofBytes(BYTE_ARRAY_OUTPUT_STREAM.size());
+        } catch (IOException e) {
+            throw JsonException.withError(e);
+        }
+    }
 
     /**
      * This is a static method that copies the properties of a given source object to a given target object.

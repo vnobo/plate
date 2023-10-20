@@ -1,11 +1,14 @@
 package com.platform.boot.commons.base;
 
+import com.platform.boot.commons.annotation.exception.RestServerException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.r2dbc.convert.R2dbcConverter;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.unit.DataSize;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -22,6 +25,9 @@ import java.util.Map;
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 public abstract class AbstractDatabase extends AbstractService {
+
+    @Value("${spring.codec.max-in-memory-size:6m)")
+    private DataSize maxInMemorySize;
 
     protected R2dbcEntityTemplate entityTemplate;
     protected DatabaseClient databaseClient;
@@ -86,7 +92,7 @@ public abstract class AbstractDatabase extends AbstractService {
                 // Add the query result to the cache
                 .doOnNext(cacheData::add)
                 // When the query is complete, store the data in the cache
-                .doAfterTerminate(() -> this.cache.put(cacheKey, cacheData));
+                .doAfterTerminate(() -> this.cachePut(cacheKey, cacheData));
         // If there is no data in the cache, return the query result; otherwise, return the cache data
         return Flux.fromIterable(ObjectUtils.isEmpty(cacheData) ? Collections.emptyList() : cacheData)
                 .switchIfEmpty(source);
@@ -141,11 +147,18 @@ public abstract class AbstractDatabase extends AbstractService {
         // 从缓存中获取数据
         Long cacheCount = this.cache.get(cacheKey, () -> null);
         // 将查询结果添加到缓存中
-        Mono<Long> source = sourceMono.doOnNext(count -> this.cache.put(cacheKey, count));
+        Mono<Long> source = sourceMono.doOnNext(count -> this.cachePut(cacheKey, count));
         // 如果缓存中没有数据，返回查询结果；否则返回缓存数据
         return Mono.justOrEmpty(cacheCount).switchIfEmpty(source);
     }
 
+    private void cachePut(String cacheKey, Object obj) {
+        DataSize objectSize = com.platform.boot.commons.utils.BeanUtils.getBeanSize(obj);
+        if (objectSize.toBytes() > maxInMemorySize.toBytes()) {
+            throw RestServerException.withMsg("Object size ", "");
+        }
+        this.cache.put(cacheKey, obj);
+    }
 
     /**
      * Set the R2dbcEntityTemplate for the service.

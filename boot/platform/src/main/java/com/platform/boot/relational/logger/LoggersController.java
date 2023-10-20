@@ -22,16 +22,22 @@ public class LoggersController {
 
     @GetMapping("search")
     public Flux<Logger> search(LoggerRequest request, Pageable pageable) {
+        // Get the security details from the context
         return ContextUtils.securityDetails().flatMapMany(userDetails -> {
+            // Set the security code to the tenant code
             request.setSecurityCode(userDetails.getTenantCode());
+            // Return the search results
             return this.loggersService.search(request, pageable);
         });
     }
 
     @GetMapping("page")
     public Mono<Page<Logger>> page(LoggerRequest request, Pageable pageable) {
+        // Get the security details from the context
         return ContextUtils.securityDetails().flatMap(userDetails -> {
+            // Set the security code to the tenant code
             request.setSecurityCode(userDetails.getTenantCode());
+            // Return the page of loggers
             return this.loggersService.page(request, pageable);
         });
     }
