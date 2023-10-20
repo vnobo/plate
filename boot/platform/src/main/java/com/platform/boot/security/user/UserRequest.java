@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.data.relational.core.query.Criteria;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -15,6 +16,8 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class UserRequest extends User {
+
+    private Map<String, Object> query;
 
     private String securityCode;
 
@@ -28,7 +31,7 @@ public class UserRequest extends User {
     }
 
     public Criteria toCriteria() {
-        return criteria(Set.of("securityCode"));
+        return criteria(Set.of("securityCode", "query"));
     }
 
 }

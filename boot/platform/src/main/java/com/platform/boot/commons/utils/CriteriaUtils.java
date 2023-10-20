@@ -18,6 +18,69 @@ import java.util.stream.Collectors;
 public final class CriteriaUtils {
     public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend", "createdTime", "updatedTime");
 
+    public static Map<StringJoiner, Map<String, Object>> queryJson(Map<String, Object> params) {
+        if (ObjectUtils.isEmpty(params)) {
+            return Map.of(new StringJoiner(" and "), Maps.newHashMap());
+        }
+        return Map.of(queryJsonSql(params), queryJsonParams(params));
+    }
+
+    public static StringJoiner queryJsonSql(Map<String, Object> params) {
+        StringJoiner whereSql = new StringJoiner(" and ");
+        if (ObjectUtils.isEmpty(params)) {
+            return whereSql;
+        }
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (StringUtils.startsWithIgnoreCase(key, "query.")) {
+                key = key.replace("query.", "");
+                String replaceStr = StringUtils.replace(key, ".", "_");
+                String bindKey = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, replaceStr);
+                if (!ObjectUtils.isEmpty(value)) {
+                    whereSql.add("JSON_VALUE(data,'$." + key + "') = :" + bindKey);
+                }
+            } else if (StringUtils.startsWithIgnoreCase(key, "like.")) {
+                key = key.replace("like.", "");
+                String replaceStr = StringUtils.replace(key, ".", "_");
+                String bindKey = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, replaceStr);
+                if (!ObjectUtils.isEmpty(value)) {
+                    whereSql.add("JSON_VALUE(data,'$." + key + "') like :" + bindKey);
+                }
+
+
+            }
+        }
+        return whereSql;
+    }
+
+    public static Map<String, Object> queryJsonParams(Map<String, Object> params) {
+        Map<String, Object> whereParams = Maps.newHashMap();
+        if (ObjectUtils.isEmpty(params)) {
+            return whereParams;
+        }
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (StringUtils.startsWithIgnoreCase(key, "query.")) {
+                key = key.replace("query.", "");
+                String replaceStr = StringUtils.replace(key, ".", "_");
+                String bindKey = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, replaceStr);
+                if (!ObjectUtils.isEmpty(value)) {
+                    whereParams.put(bindKey, value);
+                }
+            } else if (StringUtils.startsWithIgnoreCase(key, "like.")) {
+                key = key.replace("like.", "");
+                String replaceStr = StringUtils.replace(key, ".", "_");
+                String bindKey = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, replaceStr);
+                if (!ObjectUtils.isEmpty(value)) {
+                    whereParams.put(bindKey, value);
+                }
+            }
+        }
+        return whereParams;
+    }
+
     public static String applyPage(Pageable pageable) {
         String orderSql = applySort(pageable.getSort(), null);
         return String.format(orderSql + " limit %d offset %d", pageable.getPageSize(), pageable.getOffset());
