@@ -2,8 +2,11 @@ package com.platform.boot.security.user;
 
 import com.platform.boot.commons.annotation.exception.RestServerException;
 import com.platform.boot.commons.base.AbstractDatabase;
+import com.platform.boot.commons.query.BindSql;
+import com.platform.boot.commons.query.QueryJson;
 import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
+import com.platform.boot.commons.utils.CriteriaUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,8 +30,9 @@ public class UsersService extends AbstractDatabase {
 
     public Flux<User> search(UserRequest request, Pageable pageable) {
         String cacheKey = ContextUtils.cacheKey(request, pageable);
-        Query query = Query.query(request.toCriteria()).with(pageable);
-        return super.queryWithCache(cacheKey, query, User.class)
+        BindSql bindSql = QueryJson.queryJson(request.getQuery());
+        String query = "select * from se_users where " + bindSql.sql() + CriteriaUtils.applyPage(pageable);
+        return super.queryWithCache(cacheKey, query, bindSql.params(), User.class)
                 .flatMapSequential(ContextUtils::userAuditorSerializable);
     }
 
@@ -133,7 +137,7 @@ public class UsersService extends AbstractDatabase {
     }
 
     /**
-     *  This method upgrades the encoding of the user password if necessary.
+     * This method upgrades the encoding of the user password if necessary.
      *
      * @param password The user request containing the authentication data.
      */

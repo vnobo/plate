@@ -33,5 +33,4 @@ public class UserRequest extends User {
     public Criteria toCriteria() {
         return criteria(Set.of("securityCode", "query"));
     }
-
 }
