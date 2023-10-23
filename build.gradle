@@ -1,5 +1,5 @@
 plugins {
-    id "org.springframework.boot" version "3.2.0-M3" apply false
+    id "org.springframework.boot" version "3.2.0-RC1" apply false
     id 'io.spring.dependency-management' version '1.1.3' apply false
 }
 
@@ -7,10 +7,11 @@ ext {
     def prefixStr = System.getenv("DOCKER_PREFIX")
     def usernameStr = System.getenv("DOCKER_USERNAME")
     def passwordStr = System.getenv("DOCKER_PASSWORD")
+    def emailStr = System.getenv("DOCKER_EMAIL")
     dockerUsername = Objects.isNull(usernameStr) ? "${dusername}" : usernameStr
     dockerPassword = Objects.isNull(passwordStr) ? "${dpassword}" : passwordStr
     dockerPrefix = Objects.isNull(prefixStr) ? "${dprefix}" : prefixStr
-    dockerEmail = "${demail}"
+    dockerEmail = Objects.isNull(emailStr) ? "${demail}" : emailStr
 }
 
 configure(allprojects) { project ->
