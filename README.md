@@ -4,7 +4,7 @@
 
 ## Spring boot 3 application
 
-Spring boot 3.0.5 project
+Spring boot project
 
 ## Angular pc web
 
