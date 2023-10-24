@@ -1,6 +1,5 @@
 package com.platform.boot.relational.menus;
 
-import com.platform.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,24 +30,6 @@ public class MenusController {
     @PreAuthorize("hasRole('ROLE_ADMINISTRATORS')")
     public Flux<Menu> search(MenuRequest request) {
         return this.menusService.search(request);
-    }
-
-    /**
-     * Endpoint to load menus for current user
-     *
-     * @return Flux of Menu
-     */
-    @GetMapping("me")
-    public Flux<Menu> loadMeMenus() {
-        return ContextUtils.securityDetails().flatMapMany(userDetails -> {
-            MenuRequest request = MenuRequest.of(userDetails.getTenantCode(), null);
-            if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> "ROLE_ADMINISTRATORS"
-                    .equals(grantedAuthority.getAuthority()))) {
-                return this.search(MenuRequest.of(null, null));
-            }
-            return this.search(request).filter(menu -> userDetails.getAuthorities()
-                    .stream().anyMatch(authority -> authority.getAuthority().equals(menu.getAuthority())));
-        });
     }
 
     /**

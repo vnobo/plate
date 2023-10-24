@@ -1,6 +1,6 @@
 package com.platform.boot.security.user;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.platform.boot.commons.base.BaseEntity;
 import com.platform.boot.security.UserAuditor;
 import jakarta.validation.constraints.NotBlank;
@@ -46,7 +46,7 @@ public class User implements BaseEntity<Long> {
 
     private String name;
 
-    private ObjectNode extend;
+    private JsonNode extend;
 
     private LocalDateTime loginTime;
 

@@ -130,13 +130,6 @@ public class GlobalExceptionHandler {
                         ex.getCode(), ex.getMessage(), ex.getMsg()));
     }
 
-    /**
-     * 用于处理全局异常的方法。
-     *
-     * @param exchange ServerWebExchange对象，用于获取请求信息
-     * @param ex       异常对象
-     * @return 包含错误响应的ResponseEntity对象
-     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(ServerWebExchange exchange, Exception ex) {
         log.error("[%s] 服务器自定义错误. 信息: %s".formatted(exchange.getLogPrefix(), ex.getLocalizedMessage()));

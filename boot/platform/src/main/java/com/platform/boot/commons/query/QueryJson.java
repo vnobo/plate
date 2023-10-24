@@ -55,23 +55,42 @@ public class QueryJson {
      */
     public static ParamSql queryJson(Map<String, Object> params) {
         if (ObjectUtils.isEmpty(params)) {
-            return ParamSql.of(new StringJoiner(""), Maps.newHashMap());
+            return ParamSql.EMPTY;
         }
         Map<String, Object> bindParams = Maps.newHashMap();
         StringJoiner whereSql = new StringJoiner(" and ");
         for (Map.Entry<String, Object> entry : params.entrySet()) {
-            Object value = entry.getValue();
             String[] keys = StringUtils.delimitedListToStringArray(entry.getKey(), "Query");
             String column = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, keys[0]);
-            String key = keys[1];
-            Map.Entry<String, String> exps = exitsKeyWords(key);
-            String jsonPath = ObjectUtils.isEmpty(exps) ? key : StringUtils.replace(key, exps.getKey(), "");
-            if (!ObjectUtils.isEmpty(value)) {
-                whereSql.add(column + "->>'" + jsonPath + "' = :" + jsonPath);
-                bindParams.put(jsonPath, value);
-            }
+            Map.Entry<String, String> exps = jsonPathKeyAndParamName(column, keys[1]);
+            whereSql.add(exps.getValue());
+            bindParams.put(exps.getKey(), entry.getValue());
         }
         return ParamSql.of(whereSql, bindParams);
+    }
+
+    private static Map.Entry<String, String> jsonPathKeyAndParamName(String column, String key) {
+        Map.Entry<String, String> exps = exitsKeyWords(key);
+        String source = ObjectUtils.isEmpty(exps) ? key : key.substring(0, key.length() - exps.getKey().length());
+        String[] paths = StringUtils.delimitedListToStringArray(source, ".");
+        StringBuilder jsonPath = new StringBuilder(column);
+        int index = 0;
+        for (String path : paths) {
+            var capath = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, path);
+            if (index < paths.length - 1) {
+                jsonPath.append("->'").append(capath).append("'");
+            } else {
+                jsonPath.append("->>'").append(capath).append("' ");
+            }
+            index++;
+        }
+        String paramName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, source.replace(".", "_"));
+        if (!ObjectUtils.isEmpty(exps)) {
+            jsonPath.append(exps.getValue()).append(" :").append(paramName);
+        } else {
+            jsonPath.append("= ").append(":").append(paramName);
+        }
+        return Map.of(paramName, jsonPath.toString()).entrySet().stream().findFirst().orElseThrow();
     }
 
     private static Map.Entry<String, String> exitsKeyWords(String inputStr) {
