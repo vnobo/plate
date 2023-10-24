@@ -1,6 +1,5 @@
 package com.platform.boot.commons.base;
 
-import com.platform.boot.commons.annotation.exception.RestServerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.r2dbc.convert.R2dbcConverter;
@@ -131,10 +130,9 @@ public abstract class AbstractDatabase extends AbstractService {
 
     private void cachePut(String cacheKey, Object obj) {
         DataSize objectSize = com.platform.boot.commons.utils.BeanUtils.getBeanSize(obj);
-        if (objectSize.toBytes() > maxInMemorySize.toBytes()) {
-            throw RestServerException.withMsg("Object size is too large.",
-                    "Object size is too large, max size is " + maxInMemorySize.toBytes() + "," +
-                            " Object size is " + objectSize.toBytes() + ".");
+        if (objectSize.toBytes() > this.maxInMemorySize.toBytes()) {
+            log.warn("Object size is too large,Max memory size is " + this.maxInMemorySize + "," +
+                    " Object size is " + objectSize + ".");
         }
         this.cache.put(cacheKey, obj);
     }

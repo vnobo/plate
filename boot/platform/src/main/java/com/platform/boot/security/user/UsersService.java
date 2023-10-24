@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.relational.core.query.Query;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -31,16 +30,19 @@ public class UsersService extends AbstractDatabase {
     public Flux<User> search(UserRequest request, Pageable pageable) {
         String cacheKey = ContextUtils.cacheKey(request, pageable);
         ParamSql paramSql = QueryJson.queryJson(request.getQuery());
-        String query = "select * from se_users where " + paramSql.sql() + CriteriaUtils.applyPage(pageable);
+        String query = "select * from se_users " + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
         return super.queryWithCache(cacheKey, query, paramSql.params(), User.class)
                 .flatMapSequential(ContextUtils::userAuditorSerializable);
     }
 
     public Mono<Page<User>> page(UserRequest request, Pageable pageable) {
-        String cacheKey = ContextUtils.cacheKey(request);
-        Query query = Query.query(request.toCriteria());
         var searchMono = this.search(request, pageable).collectList();
-        var countMono = super.countWithCache(cacheKey, query, User.class);
+
+        String cacheKey = ContextUtils.cacheKey(request);
+        ParamSql paramSql = QueryJson.queryJson(request.getQuery());
+        String query = "select count(*) from se_users " + paramSql.whereSql();
+        var countMono = super.countWithCache(cacheKey, query, paramSql.params());
+
         return Mono.zip(searchMono, countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
@@ -96,7 +98,8 @@ public class UsersService extends AbstractDatabase {
     }
 
     /**
-     * This method is used to change the password of the user with the given username to the given new password. It will also
+     * This method is used to change the password of the user with the given username
+     * to the given new password. It will also
      * invalidate the cache once the password has been changed.
      *
      * @param username    The username of the user whose password is to be changed.

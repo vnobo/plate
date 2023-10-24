@@ -2,12 +2,7 @@ insert into se_users(code, username, password, name, extend)
 values ('U1000', 'admin', '{pbkdf2}7d8a68bc5d507bd19bc153ff10bcdef66f5a5f3d0c1ab2438630e50b5c65894bccc2c7e4404c5afa',
         '系统超级管理员',
         '{
-          "avatar": "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png",
-          "roles": [
-            "ROLE_ADMINISTRATORS"
-          ],
-          "tenantCode": "610115",
-          "tenantName": "默认租户"
+          "avatar": "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png"
         }');
 insert into se_authorities(code, user_code, authority)
 values ('A1000', 'U1000', 'ROLE_ADMINISTRATORS');
