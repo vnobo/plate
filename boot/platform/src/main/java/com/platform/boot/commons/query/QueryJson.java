@@ -20,10 +20,14 @@ public class QueryJson {
     static {
         KEYWORDS.put("After", ">");
         KEYWORDS.put("GreaterThanEqual", ">=");
+        KEYWORDS.put("GTE", ">=");
         KEYWORDS.put("GreaterThan", ">");
+        KEYWORDS.put("GT", ">");
         KEYWORDS.put("Before", "<");
         KEYWORDS.put("LessThanEqual", "<=");
+        KEYWORDS.put("LTE", "<=");
         KEYWORDS.put("LessThan", "<");
+        KEYWORDS.put("LT", "<");
         KEYWORDS.put("Between", "BETWEEN");
         KEYWORDS.put("NotBetween", "NOT BETWEEN");
         KEYWORDS.put("NotIn", "NOT IN");
