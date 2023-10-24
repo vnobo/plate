@@ -2,7 +2,7 @@ package com.platform.boot.security.user;
 
 import com.platform.boot.commons.annotation.exception.RestServerException;
 import com.platform.boot.commons.base.AbstractDatabase;
-import com.platform.boot.commons.query.BindSql;
+import com.platform.boot.commons.query.ParamSql;
 import com.platform.boot.commons.query.QueryJson;
 import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
@@ -30,9 +30,9 @@ public class UsersService extends AbstractDatabase {
 
     public Flux<User> search(UserRequest request, Pageable pageable) {
         String cacheKey = ContextUtils.cacheKey(request, pageable);
-        BindSql bindSql = QueryJson.queryJson(request.getQuery());
-        String query = "select * from se_users where " + bindSql.sql() + CriteriaUtils.applyPage(pageable);
-        return super.queryWithCache(cacheKey, query, bindSql.params(), User.class)
+        ParamSql paramSql = QueryJson.queryJson(request.getQuery());
+        String query = "select * from se_users where " + paramSql.sql() + CriteriaUtils.applyPage(pageable);
+        return super.queryWithCache(cacheKey, query, paramSql.params(), User.class)
                 .flatMapSequential(ContextUtils::userAuditorSerializable);
     }
 

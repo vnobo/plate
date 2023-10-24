@@ -1,5 +1,6 @@
 package com.platform.boot.security.group.member;
 
+import com.platform.boot.commons.query.ParamSql;
 import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.CriteriaUtils;
 import lombok.Data;
@@ -11,6 +12,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -50,27 +52,23 @@ public class GroupMemberRequest extends GroupMember implements Serializable {
                 """;
     }
 
-    public String buildWhereSql() {
-        String whereSql = CriteriaUtils.whereSql(this, List.of("users", "username"), "a");
+    public ParamSql toParamSql() {
+        ParamSql paramSql = CriteriaUtils.applyParamsSql(this, List.of("users", "username"), "a");
 
-        StringJoiner criteria = new StringJoiner(" AND ");
+        StringJoiner criteria = paramSql.sql();
+        Map<String, Object> params = paramSql.params();
 
         if (!ObjectUtils.isEmpty(this.getUsers())) {
-            criteria.add("a.user_code in (:users)");
+            criteria.add("a.user_code in :users");
+            params.put("users", this.getUsers());
         }
 
         if (StringUtils.hasLength(this.getUsername())) {
             criteria.add("c.username = :username");
+            params.put("username", this.getUsername());
         }
 
-        if (StringUtils.hasLength(whereSql)) {
-            return whereSql + (criteria.length() == 0 ? "" : " and " + criteria);
-        }
-
-        if (criteria.length() == 0) {
-            return "";
-        }
-        return "Where " + criteria;
+        return ParamSql.of(criteria, params);
     }
 
 }

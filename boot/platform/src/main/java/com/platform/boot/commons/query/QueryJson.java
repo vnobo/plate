@@ -53,9 +53,9 @@ public class QueryJson {
      * @param params a map of key-value pairs representing the parameters for the query
      * @return a map containing the generated SQL query and its parameters
      */
-    public static BindSql queryJson(Map<String, Object> params) {
+    public static ParamSql queryJson(Map<String, Object> params) {
         if (ObjectUtils.isEmpty(params)) {
-            return BindSql.of(new StringJoiner(""), Maps.newHashMap());
+            return ParamSql.of(new StringJoiner(""), Maps.newHashMap());
         }
         Map<String, Object> bindParams = Maps.newHashMap();
         StringJoiner whereSql = new StringJoiner(" and ");
@@ -71,7 +71,7 @@ public class QueryJson {
                 bindParams.put(jsonPath, value);
             }
         }
-        return BindSql.of(whereSql, bindParams);
+        return ParamSql.of(whereSql, bindParams);
     }
 
     private static Map.Entry<String, String> exitsKeyWords(String inputStr) {

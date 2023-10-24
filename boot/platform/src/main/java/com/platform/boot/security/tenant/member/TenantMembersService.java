@@ -1,7 +1,7 @@
 package com.platform.boot.security.tenant.member;
 
 import com.platform.boot.commons.base.AbstractDatabase;
-import com.platform.boot.commons.utils.BeanUtils;
+import com.platform.boot.commons.query.ParamSql;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.commons.utils.CriteriaUtils;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class TenantMembersServiceAbstract extends AbstractDatabase {
+public class TenantMembersService extends AbstractDatabase {
 
     private final TenantMembersRepository tenantMembersRepository;
 
@@ -34,9 +34,9 @@ public class TenantMembersServiceAbstract extends AbstractDatabase {
      */
     public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
         String cacheKey = ContextUtils.cacheKey(request, pageable);
-        String query = request.querySql() + request.buildWhereSql() + CriteriaUtils.applyPage(pageable, "a");
-        return super.queryWithCache(cacheKey, query,
-                BeanUtils.beanToMap(request, true), TenantMemberResponse.class);
+        ParamSql paramSql = request.toParamSql();
+        String query = request.querySql() + paramSql.whereSql() + CriteriaUtils.applyPage(pageable, "a");
+        return super.queryWithCache(cacheKey, query, paramSql.params(), TenantMemberResponse.class);
     }
 
     /**
@@ -48,9 +48,12 @@ public class TenantMembersServiceAbstract extends AbstractDatabase {
      */
     public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
+
         String cacheKey = ContextUtils.cacheKey(request);
-        String query = request.countSql() + request.buildWhereSql();
-        Mono<Long> countMono = this.countWithCache(cacheKey, query, BeanUtils.beanToMap(request, true));
+        ParamSql paramSql = request.toParamSql();
+        String query = request.countSql() + paramSql.whereSql();
+        Mono<Long> countMono = this.countWithCache(cacheKey, query, paramSql.params());
+
         return Mono.zip(searchMono, countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }

@@ -2,6 +2,7 @@ package com.platform.boot.commons.utils;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
+import com.platform.boot.commons.query.ParamSql;
 import lombok.Data;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -73,11 +74,11 @@ public final class CriteriaUtils {
      * @param prefix   the prefix for the SQL clause
      * @return the generated WHERE SQL clause
      */
-    public static String whereSql(Object object, Collection<String> skipKeys, String prefix) {
+    public static ParamSql applyParamsSql(Object object, Collection<String> skipKeys, String prefix) {
 
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         if (ObjectUtils.isEmpty(objectMap)) {
-            return "";
+            return ParamSql.EMPTY;
         }
 
         Set<String> removeKeys = new HashSet<>(SKIP_CRITERIA_KEYS);
@@ -86,7 +87,7 @@ public final class CriteriaUtils {
         }
 
         objectMap = Maps.filterKeys(objectMap, key -> !removeKeys.contains(key));
-        return whereSql(objectMap, prefix);
+        return applyParamsSql(objectMap, prefix);
     }
 
     /**
@@ -96,28 +97,26 @@ public final class CriteriaUtils {
      * @param prefix    a prefix to be added to each column in the WHERE clause
      * @return a string representing the WHERE clause for the SQL query
      */
-    public static String whereSql(Map<String, Object> objectMap, String prefix) {
-
-        if (ObjectUtils.isEmpty(objectMap)) {
-            return "";
-        }
-
+    public static ParamSql applyParamsSql(Map<String, Object> objectMap, String prefix) {
         StringJoiner whereSql = new StringJoiner(" and ");
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
             String key = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey());
             if (StringUtils.hasLength(prefix)) {
                 key = prefix + "." + key;
             }
-            if (entry.getValue() instanceof String) {
-                whereSql.add(key + " like :" + entry.getKey());
-            } else if (entry.getValue() instanceof Collection<?>) {
-                whereSql.add(key + " in (:" + entry.getKey() + ")");
+
+            Object value = entry.getValue();
+            String paramName = ":" + entry.getKey();
+
+            if (value instanceof String) {
+                whereSql.add(key + " like " + paramName);
+            } else if (value instanceof Collection<?>) {
+                whereSql.add(key + " in :" + paramName);
             } else {
-                whereSql.add(key + " = :" + entry.getKey());
+                whereSql.add(key + " = " + paramName);
             }
         }
-
-        return "Where " + whereSql;
+        return ParamSql.of(whereSql, objectMap);
     }
 
     /**
