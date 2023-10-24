@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class CaptchaController {
 
-    private final ServerCaptchaRepository captchaTokenRepository = new ServerCaptchaRepository();
+    private final CaptchaRepository captchaTokenRepository;
 
     @GetMapping("code")
     public Mono<ResponseEntity<DataBuffer>> getCaptcha(ServerWebExchange exchange) {

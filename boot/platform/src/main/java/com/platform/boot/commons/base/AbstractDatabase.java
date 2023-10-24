@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public abstract class AbstractDatabase extends AbstractService {
 
-    @Value("${spring.codec.max-in-memory-size:6m}")
+    @Value("${spring.codec.max-in-memory-size:256kb}")
     private DataSize maxInMemorySize;
 
     protected R2dbcEntityTemplate entityTemplate;

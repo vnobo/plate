@@ -1,5 +1,6 @@
 package com.platform.boot.security.captcha;
 
+import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
@@ -10,8 +11,9 @@ import java.util.Map;
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
-public class ServerCaptchaRepository {
-    public static final String DEFAULT_CAPTCHA_TOKEN_ATTR_NAME = ServerCaptchaRepository.class.getName()
+@Service
+public class CaptchaRepository {
+    public static final String DEFAULT_CAPTCHA_TOKEN_ATTR_NAME = CaptchaRepository.class.getName()
             .concat(".CAPTCHA_TOKEN");
     static final String DEFAULT_CAPTCHA_PARAMETER_NAME = "_captcha";
     static final String DEFAULT_CAPTCHA_HEADER_NAME = "X-CAPTCHA-TOKEN";

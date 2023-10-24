@@ -1,7 +1,7 @@
 package com.platform.boot.security.filter;
 
+import com.platform.boot.security.captcha.CaptchaRepository;
 import com.platform.boot.security.captcha.CaptchaToken;
-import com.platform.boot.security.captcha.ServerCaptchaRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -25,18 +25,18 @@ import reactor.core.publisher.Mono;
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 public class CaptchaFilter implements WebFilter, Ordered {
-    // Default matcher for captcha protection
     public static final ServerWebExchangeMatcher DEFAULT_CAPTCHA_MATCHER =
             new PathPatternParserServerWebExchangeMatcher("/oauth2/token");
 
-    // Handler to handle access denied exceptions
     private final ServerAccessDeniedHandler accessDeniedHandler = new CaptchaServerAccessDeniedHandler(
             HttpStatus.FORBIDDEN);
 
-    // Matcher to determine which requests require captcha protection
     private final ServerWebExchangeMatcher requireCaptchaProtectionMatcher = DEFAULT_CAPTCHA_MATCHER;
-    // Repository to store and retrieve captcha tokens
-    private final ServerCaptchaRepository captchaTokenRepository = new ServerCaptchaRepository();
+    private final CaptchaRepository captchaTokenRepository;
+
+    public CaptchaFilter(CaptchaRepository captchaTokenRepository) {
+        this.captchaTokenRepository = captchaTokenRepository;
+    }
 
     /**
      * Filter to handle server-side captcha protection. If a captcha token is present in theSession Attributes, and validation is successful, the filter chain is invoked. Otherwise, an access denied exception is thrown.
@@ -53,7 +53,7 @@ public class CaptchaFilter implements WebFilter, Ordered {
                 .filter(ServerWebExchangeMatcher.MatchResult::isMatch)
                 // Check if captcha token is present in session
                 .filterWhen((matchResult) -> exchange.getSession().map(webSession -> webSession.getAttributes()
-                        .containsKey(ServerCaptchaRepository.DEFAULT_CAPTCHA_TOKEN_ATTR_NAME)))
+                        .containsKey(CaptchaRepository.DEFAULT_CAPTCHA_TOKEN_ATTR_NAME)))
                 // Validate the token
                 .flatMap((m) -> validateToken(exchange))
                 // If no exception, proceed with the filter chain
