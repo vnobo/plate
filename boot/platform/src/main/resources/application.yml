@@ -4,6 +4,7 @@ server:
   compression.enabled: true
 
 spring:
+  main.keep-alive: true
   application.name: platform
   webflux.format:
     time: HH:mm:ss

@@ -6,9 +6,11 @@ plugins {
 }
 
 java {
-    sourceCompatibility = '21'
-    targetCompatibility = '21'
-    withSourcesJar()
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+        vendor = JvmVendorSpec.BELLSOFT
+        implementation = JvmImplementation.VENDOR_SPECIFIC
+    }
 }
 
 configurations {
