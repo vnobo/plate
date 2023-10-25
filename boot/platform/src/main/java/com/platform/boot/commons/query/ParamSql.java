@@ -17,7 +17,7 @@ public record ParamSql(StringJoiner sql, Map<String, Object> params) {
 
     public String whereSql() {
         if (this.sql.length() > 0) {
-            return "Where " + this.sql;
+            return " Where " + this.sql;
         }
         return "";
     }

@@ -12,8 +12,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -60,9 +60,9 @@ public abstract class AbstractDatabase extends AbstractService {
     protected <T> Flux<T> queryWithCache(Object key, String query,
                                          Map<String, Object> bindParams, Class<T> entityClass) {
         // Create a GenericExecuteSpec object from the given query
-        var executeSpec = this.databaseClient.sql(() -> query);
+        DatabaseClient.GenericExecuteSpec executeSpec = this.databaseClient.sql(() -> query);
         // Bind the given parameters to the query
-        for (var e : bindParams.entrySet()) {
+        for (Map.Entry<String, Object> e : bindParams.entrySet()) {
             executeSpec = executeSpec.bind(e.getKey(), e.getValue());
         }
         // Read the results of the query into an entity class
@@ -82,7 +82,7 @@ public abstract class AbstractDatabase extends AbstractService {
     protected <T> Flux<T> queryWithCache(Object key, Flux<T> sourceMono) {
         String cacheKey = key + ":data";
         // Get data from cache
-        List<T> cacheData = this.cache.get(cacheKey, ArrayList::new);
+        Collection<T> cacheData = this.cache.get(cacheKey, ArrayList::new);
         // Note: the returned list will not be null
         assert cacheData != null;
 
@@ -106,9 +106,9 @@ public abstract class AbstractDatabase extends AbstractService {
 
     protected Mono<Long> countWithCache(Object key, String query, Map<String, Object> bindParams) {
         // Create a GenericExecuteSpec object from the given query
-        var executeSpec = this.databaseClient.sql(() -> query);
+        DatabaseClient.GenericExecuteSpec executeSpec = this.databaseClient.sql(() -> query);
         // Bind the given parameters to the query
-        for (var e : bindParams.entrySet()) {
+        for (Map.Entry<String, Object> e : bindParams.entrySet()) {
             executeSpec = executeSpec.bind(e.getKey(), e.getValue());
         }
         // Read the results of the query into an entity class

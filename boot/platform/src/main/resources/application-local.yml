@@ -5,7 +5,7 @@ logging:
     com.platform.boot.*: debug
     org.springframework.web: debug
     org.springframework.r2dbc: debug
-    io.r2dbc.postgresql.QUERY: debug
+    #io.r2dbc.postgresql.QUERY: debug
     io.r2dbc.postgresql.PARAM: debug
 
 server.port: 8080

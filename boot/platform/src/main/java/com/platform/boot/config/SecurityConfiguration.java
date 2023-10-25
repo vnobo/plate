@@ -158,7 +158,6 @@ public class SecurityConfiguration {
             String requestedWith = exchange.getRequest().getHeaders().getFirst(xRequestedWith);
 
             log.error("认证失败! 信息: %s".formatted(e.getMessage()));
-            log.debug(e.getMessage(), e);
 
             if (requestedWith != null && requestedWith.contains(xmlHttpRequest)) {
                 var response = exchange.getResponse();

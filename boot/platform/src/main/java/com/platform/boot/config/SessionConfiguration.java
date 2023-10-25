@@ -41,8 +41,7 @@ public class SessionConfiguration {
      * CustomHeaderWebSessionIdResolver class.
      */
     static class CustomHeaderWebSessionIdResolver extends HeaderWebSessionIdResolver {
-        private final CookieWebSessionIdResolver cookieWebSessionIdResolver =
-                new CookieWebSessionIdResolver();
+        private final CookieWebSessionIdResolver cookieWebSessionIdResolver = new CookieWebSessionIdResolver();
 
         @Override
         public void setSessionId(@NonNull ServerWebExchange exchange, @NonNull String id) {
@@ -50,8 +49,8 @@ public class SessionConfiguration {
             cookieWebSessionIdResolver.setSessionId(exchange, id);
         }
 
-        @Override
         @NonNull
+        @Override
         public List<String> resolveSessionIds(@NonNull ServerWebExchange exchange) {
             List<String> requestedWith = super.resolveSessionIds(exchange);
             if (ObjectUtils.isEmpty(requestedWith)) {
