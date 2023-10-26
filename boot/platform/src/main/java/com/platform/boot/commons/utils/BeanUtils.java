@@ -31,6 +31,9 @@ public class BeanUtils {
     }
 
     public static DataSize getBeanSize(Object obj) {
+        if (ObjectUtils.isEmpty(obj)) {
+            throw RestServerException.withMsg("Object is empty.", "This object not null.");
+        }
         try {
             BYTE_ARRAY_OUTPUT_STREAM.reset();
             OBJECT_OUTPUT_STREAM.writeObject(obj);

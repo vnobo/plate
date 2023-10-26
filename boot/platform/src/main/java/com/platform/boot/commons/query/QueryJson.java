@@ -94,7 +94,7 @@ public class QueryJson {
         } else {
             jsonPath.append("= ").append(":").append(paramName);
         }
-        return Map.of(paramName, jsonPath.toString()).entrySet().stream().findFirst().orElseThrow();
+        return Map.entry(paramName, jsonPath.toString());
     }
 
     private static Map.Entry<String, String> exitsKeyWords(String inputStr) {
