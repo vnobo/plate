@@ -51,19 +51,20 @@
             ],
             "styles": [
               {
-                "input": "@angular/material/prebuilt-themes/indigo-pink.css",
-                "bundleName": "material-module"
-              },
-              {
-                "input": "node_modules/bootstrap/dist/css/bootstrap.css",
+                "input": "bootstrap/dist/css/bootstrap.css",
                 "bundleName": "bootstrap-module"
               },
               {
-                "input": "node_modules/ng-zorro-antd/ng-zorro-antd.css",
+                "input": "@angular/material/prebuilt-themes/indigo-pink.css",
+                "bundleName": "material-module"
+              },
+
+              {
+                "input": "ng-zorro-antd/ng-zorro-antd.css",
                 "bundleName": "ng-zorro-antd-module"
               },
               {
-                "input": "node_modules/layui/dist/css/layui.css",
+                "input": "layui/dist/css/layui.css",
                 "bundleName": "layui-module"
               },
               "src/styles.scss"

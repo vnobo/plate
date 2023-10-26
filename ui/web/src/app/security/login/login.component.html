@@ -1,70 +1,82 @@
-<div class="page min-vh-100 min-vw-100 d-flex flex-column-reverse justify-content-around">
-  <div class="container container-normal py-4">
-    <div class="row align-items-center g-4">
-      <div class="col-lg d-none d-lg-block">
-        <!--<img src="assets/illustrations/undraw_secure_login_pdn4.svg" height="300" class="d-block mx-auto" alt="">-->
-      </div>
-      <div class="col-lg-4">
-        <div class="container-tight">
-          <div class="card card-md">
-            <div class="card-header justify-content-center">
-              <h1 class="my-1">
-                <a class="navbar-brand navbar-brand-autodark " href="." i18n="@@app.login.title">
-                  Plateva Platform Manager</a>
-              </h1>
-            </div>
-            <div class="card-body">
-              <h2 class="h2 text-center mb-4" i18n>Login to your account</h2>
-              <form (ngSubmit)="onSubmit()" [formGroup]="loginForm" autocomplete="off" class="needs-validation"
-                    novalidate>
-                <div class="mb-3 ">
-                  <label class="form-label" for="username" i18n>Email address</label>
-                  <input [class.is-invalid]="loginForm.controls.username.invalid &&
-                           (loginForm.controls.username.dirty || loginForm.controls.username.touched)"
-                         [class.is-valid]="loginForm.controls.username.valid" autocomplete="off"
-                         class="form-control is-valid"
-                         formControlName="username" id="username" name="username" placeholder="your@email.com"
-                         required
-                         type="email">
+<div class="page min-vh-100 min-vw-100">
+  <div class="position-absolute top-50 start-50 translate-middle">
+    <div class="card" style="width: 30rem;">
+      <h4 class="card-header text-center py-2">
+        <a class="navbar-brand navbar-brand-autodark" href="." i18n="@@app.login.title">
+          Plate Platform Manager</a>
+      </h4>
+      <div class="card-body">
+        <h5 class="text-center mb-4" i18n>Login to your account</h5>
+        <form (ngSubmit)="onSubmit()" [formGroup]="loginForm" autocomplete="off" class="layui-form needs-validation">
+          <div class="demo-login-container">
+            <div class="layui-form-item">
+              <div class="layui-input-wrap">
+                <div class="layui-input-prefix">
+                  <i class="layui-icon layui-icon-username"></i>
                 </div>
-                <div class="mb-2">
-                  <label class="form-label" for="password"><span i18n>Password</span>
-                    <span class="form-label-description" i18n><a href="#">I forgot password</a> </span>
-                  </label>
-                  <div class="input-group">
-                    <input [class.is-invalid]="loginForm.controls.password.invalid &&
-                           (loginForm.controls.password.dirty || loginForm.controls.password.touched)"
-                           [class.is-valid]="loginForm.controls.password.valid" autocomplete="off" class="form-control"
-                           formControlName="password" id="password" name="password" placeholder="Your password"
-                           required
-                           i18n-placeholder type="password">
-                    <div *ngIf="loginForm.controls.password.errors?.['minlength']
+                <input [class.is-invalid]="loginForm.controls.username.invalid &&
+                           (loginForm.controls.username.dirty || loginForm.controls.username.touched)" [class.is-valid]="loginForm.controls.username.valid" autocomplete="off" class="layui-input"
+                       name="username" placeholder="用户名"
+                       required
+                       type="text">
+              </div>
+            </div>
+            <div class="layui-form-item">
+              <div class="layui-input-wrap">
+                <div class="layui-input-prefix">
+                  <i class="layui-icon layui-icon-password"></i>
+                </div>
+                <input [class.is-invalid]="loginForm.controls.password.invalid &&
+                           (loginForm.controls.password.dirty || loginForm.controls.password.touched)" [class.is-valid]="loginForm.controls.password.valid" autocomplete="off" class="layui-input"
+                       name="password" placeholder="密   码"
+                       required
+                       type="password">
+              </div>
+              <div *ngIf="loginForm.controls.password.errors?.['minlength']
                     || loginForm.controls.password.errors?.['maxlength']" class="invalid-feedback" i18n>
-                      Your password must be 8-20 characters long, contain letters and numbers, and must not contain
-                      spaces, special characters, or emoji.
+                Your password must be 8-20 characters long, contain letters and numbers, and must not contain
+                spaces, special characters, or emoji.
+              </div>
+              <div *ngIf="loginForm.controls.password.errors?.['required']" class="invalid-feedback" i18n>
+                Password is required.
+              </div>
+            </div>
+            <!--<div class="layui-form-item">
+              <div class="layui-row">
+                <div class="layui-col-xs7">
+                  <div class="layui-input-wrap">
+                    <div class="layui-input-prefix">
+                      <i class="layui-icon layui-icon-vercode"></i>
                     </div>
-                    <div *ngIf="loginForm.controls.password.errors?.['required']" class="invalid-feedback" i18n>
-                      Password is required.
-                    </div>
+                    <input type="text" name="captcha" value="" lay-verify="required" placeholder="验证码"
+                           lay-reqtext="请填写验证码" autocomplete="off" class="layui-input" lay-affix="clear">
                   </div>
                 </div>
-                <div class="mb-2">
-                  <label class="form-check">
-                    <input class="form-check-input" formControlName="rememberMe" id="rememberMe" name="rememberMe"
-                           type="checkbox"/>
-                    <span class="form-check-label" i18n>Remember me on this device</span>
-                  </label>
+                <div class="layui-col-xs5">
+                  <div style="margin-left: 10px;">
+                    <img src="https://www.oschina.net/action/user/captcha"
+                         onclick="this.src='https://www.oschina.net/action/user/captcha?t='+ new Date().getTime();">
+                  </div>
                 </div>
-                <div class="form-footer">
-                  <button [disabled]="!loginForm.valid" class="btn btn-primary w-100" i18n
-                          type="submit">Sign in
-                  </button>
-                </div>
-              </form>
+              </div>
+            </div>-->
+            <div class="layui-form-item">
+              <input lay-skin="primary" name="remember" title="记住密码" type="checkbox">
+              <a href="#forget" style="float: right; margin-top: 7px;">忘记密码？</a>
             </div>
-            <nz-divider i18n-nzText="@@app.login.or" nzText="or"></nz-divider>
-            <div class="card-body"></div>
+            <div class="layui-form-item">
+              <button class="layui-btn layui-btn-fluid" lay-filter="demo-login" lay-submit>登录</button>
+            </div>
           </div>
+        </form>
+        <div class="layui-form-item fs-5 mt-4">
+          <label>社交账号登录</label>
+          <span class="px-2 me-2">
+        <a href="javascript:;"><i class="layui-icon layui-icon-login-qq "
+                                  style="color: #3492ed;font-size: 26px"></i></a>
+        <a href="javascript:;"><i class="layui-icon layui-icon-login-wechat" style="color: #4daf29;font-size: 26px"></i></a>
+        <a href="javascript:;"><i class="layui-icon layui-icon-login-weibo" style="color: #cf1900;font-size: 26px"></i></a>
+        </span> 或 <a class="ms-4" href="#reg">注册帐号</a>
         </div>
       </div>
     </div>
