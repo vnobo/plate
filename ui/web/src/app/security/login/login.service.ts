@@ -22,7 +22,7 @@ export class LoginService {
   }
 
   login(credentials: Credentials): Observable<Authentication> {
-    const headers = new HttpHeaders(credentials ? {
+    const headers: HttpHeaders = new HttpHeaders(credentials ? {
       authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password)
     } : {});
     return this.http.get<Authentication>('/oauth2/token', {headers: headers})
