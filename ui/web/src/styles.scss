@@ -1,12 +1,3 @@
-// Include any default variable overrides here (though functions won't be available)
-@import "../node_modules/bootstrap/scss/bootstrap";
-// Then add additional custom code here
-@import "../node_modules/layui/dist/css/layui.css";
-
-// Default variable overrides
-$primary: #0074d9;
-$danger: #ff4136;
-
 /*this set custom own styles css.*/
 html, body {
   height: 100%;

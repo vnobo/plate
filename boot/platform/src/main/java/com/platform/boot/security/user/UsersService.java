@@ -30,7 +30,7 @@ public class UsersService extends AbstractDatabase {
     public Flux<User> search(UserRequest request, Pageable pageable) {
         String cacheKey = ContextUtils.cacheKey(request, pageable);
         ParamSql paramSql = QueryJson.queryJson(request.getQuery());
-        String query = "select * from se_users " + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
+        String query = "select * from se_users" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
         return super.queryWithCache(cacheKey, query, paramSql.params(), User.class)
                 .flatMapSequential(ContextUtils::userAuditorSerializable);
     }
@@ -40,7 +40,7 @@ public class UsersService extends AbstractDatabase {
 
         String cacheKey = ContextUtils.cacheKey(request);
         ParamSql paramSql = QueryJson.queryJson(request.getQuery());
-        String query = "select count(*) from se_users " + paramSql.whereSql();
+        String query = "select count(*) from se_users" + paramSql.whereSql();
         var countMono = super.countWithCache(cacheKey, query, paramSql.params());
 
         return Mono.zip(searchMono, countMono)
