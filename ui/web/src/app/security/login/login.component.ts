@@ -2,7 +2,6 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, FormControl, Validators} from "@angular/forms";
 import {Credentials, LoginService} from "./login.service";
 import {ActivatedRoute, Router} from "@angular/router";
-import {LayoutService} from "../../shared/layout.service";
 
 @Component({
   selector: 'app-login',
@@ -25,11 +24,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     rememberMe: new FormControl(false)
   });
 
-  constructor(private formBuilder: FormBuilder,
-              private loginService: LoginService,
-              private layoutService: LayoutService,
-              private router: Router,
-              private route: ActivatedRoute) {
+  constructor(private router: Router,
+              private route: ActivatedRoute,
+              private formBuilder: FormBuilder,
+              private loginService: LoginService) {
   }
 
   onSubmit(): void {
@@ -54,14 +52,12 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.loginForm.patchValue({
         username: credentials.username,
         password: credentials.password,
-        rememberMe: true
+        rememberMe: false
       });
     }
-    this.layoutService.isHide(true);
   }
 
   ngOnDestroy(): void {
-    this.layoutService.isHide(false);
   }
 
 }

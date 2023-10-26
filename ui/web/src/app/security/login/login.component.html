@@ -15,10 +15,9 @@
                   <i class="layui-icon layui-icon-username"></i>
                 </div>
                 <input [class.is-invalid]="loginForm.controls.username.invalid &&
-                           (loginForm.controls.username.dirty || loginForm.controls.username.touched)" [class.is-valid]="loginForm.controls.username.valid" autocomplete="off" class="layui-input"
-                       name="username" placeholder="用户名"
-                       required
-                       type="text">
+                           (loginForm.controls.username.dirty || loginForm.controls.username.touched)"
+                       [class.is-valid]="loginForm.controls.username.valid" autocomplete="off" class="layui-input"
+                       name="username" placeholder="用户名" required type="text">
               </div>
             </div>
             <div class="layui-form-item">
@@ -27,10 +26,9 @@
                   <i class="layui-icon layui-icon-password"></i>
                 </div>
                 <input [class.is-invalid]="loginForm.controls.password.invalid &&
-                           (loginForm.controls.password.dirty || loginForm.controls.password.touched)" [class.is-valid]="loginForm.controls.password.valid" autocomplete="off" class="layui-input"
-                       name="password" placeholder="密   码"
-                       required
-                       type="password">
+                           (loginForm.controls.password.dirty || loginForm.controls.password.touched)"
+                       [class.is-valid]="loginForm.controls.password.valid" autocomplete="off" class="layui-input"
+                       name="password" placeholder="密   码" required type="password">
               </div>
               <div *ngIf="loginForm.controls.password.errors?.['minlength']
                     || loginForm.controls.password.errors?.['maxlength']" class="invalid-feedback" i18n>
@@ -65,7 +63,7 @@
               <a href="#forget" style="float: right; margin-top: 7px;">忘记密码？</a>
             </div>
             <div class="layui-form-item">
-              <button class="layui-btn layui-btn-fluid" lay-filter="demo-login" lay-submit>登录</button>
+              <button class="layui-btn layui-btn-fluid" type="submit">登录</button>
             </div>
           </div>
         </form>

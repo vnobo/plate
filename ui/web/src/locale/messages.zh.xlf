@@ -47,8 +47,8 @@
         <note category="location">src/app/security/login/login.component.html:12</note>
       </notes>
       <segment>
-        <source>Plateva Platform Manager</source>
-        <target>平台管理后台</target>
+        <source>Plate Platform Manager</source>
+        <target>盘子管理平台</target>
       </segment>
     </unit>
     <unit id="1274686598843595771">
@@ -156,7 +156,7 @@
             <note category="location">src/app/shared/page-title-strategy.service.ts:16</note>
           </notes>
           <segment>
-            <source>盘子管理平台- | <ph id="0" equiv="PH" disp="title"/></source>
+            <source>盘子管理平台 | <ph id="0" equiv="PH" disp="title"/></source>
           </segment>
         </unit>
   </file>

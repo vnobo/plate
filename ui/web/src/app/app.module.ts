@@ -8,10 +8,12 @@ import {RouterModule} from '@angular/router';
 import {httpInterceptorProviders} from "./http-interceptors";
 import {HttpClientXsrfModule} from "@angular/common/http";
 import {SharedModule} from "./shared/shared.module";
+import {PageNotFoundComponent} from "./pages/page-not-found/page-not-found.component";
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    PageNotFoundComponent
   ],
   imports: [
     ServiceWorkerModule.register('ngsw-worker.js', {

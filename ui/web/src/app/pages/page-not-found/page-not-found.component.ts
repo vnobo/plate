@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {LayoutService} from "../layout.service";
 
 @Component({
   selector: 'app-page-not-found',
@@ -7,7 +6,6 @@ import {LayoutService} from "../layout.service";
   styleUrls: ['./page-not-found.component.scss']
 })
 export class PageNotFoundComponent {
-  constructor(private layoutService: LayoutService) {
-    layoutService.isHide(true);
+  constructor() {
   }
 }
