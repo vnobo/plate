@@ -18,27 +18,4 @@ public class UserResponse extends User {
         return super.getPassword();
     }
 
-    @JsonIgnore
-    @Override
-    public Boolean getDisabled() {
-        return super.getDisabled();
-    }
-
-    @JsonIgnore
-    @Override
-    public Boolean getAccountExpired() {
-        return super.getAccountExpired();
-    }
-
-    @JsonIgnore
-    @Override
-    public Boolean getAccountLocked() {
-        return super.getAccountLocked();
-    }
-
-    @JsonIgnore
-    @Override
-    public Boolean getCredentialsExpired() {
-        return super.getCredentialsExpired();
-    }
 }

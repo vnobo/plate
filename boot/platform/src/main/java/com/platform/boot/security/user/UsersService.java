@@ -27,15 +27,15 @@ public class UsersService extends AbstractDatabase {
     private final PasswordEncoder passwordEncoder;
     private final UsersRepository usersRepository;
 
-    public Flux<User> search(UserRequest request, Pageable pageable) {
+    public Flux<UserResponse> search(UserRequest request, Pageable pageable) {
         String cacheKey = ContextUtils.cacheKey(request, pageable);
         ParamSql paramSql = QueryJson.queryJson(request.getQuery());
         String query = "select * from se_users" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
-        return super.queryWithCache(cacheKey, query, paramSql.params(), User.class)
+        return super.queryWithCache(cacheKey, query, paramSql.params(), UserResponse.class)
                 .flatMapSequential(ContextUtils::userAuditorSerializable);
     }
 
-    public Mono<Page<User>> page(UserRequest request, Pageable pageable) {
+    public Mono<Page<UserResponse>> page(UserRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
 
         String cacheKey = ContextUtils.cacheKey(request);
@@ -83,8 +83,7 @@ public class UsersService extends AbstractDatabase {
      */
     public Mono<User> operate(UserRequest request) {
         request.setPassword(this.upgradeEncodingIfPassword(request.getPassword()));
-        var userMono = this.usersRepository.findByCode(request.getCode())
-                .defaultIfEmpty(request.toUser());
+        var userMono = this.usersRepository.findByCode(request.getCode()).defaultIfEmpty(request.toUser());
         userMono = userMono.flatMap(user -> {
             BeanUtils.copyProperties(request, user, true);
             return this.save(user);
