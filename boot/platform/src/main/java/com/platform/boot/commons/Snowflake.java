@@ -1,5 +1,7 @@
 package com.platform.boot.commons;
 
+import com.platform.boot.commons.annotation.exception.RestServerException;
+
 import java.io.Serializable;
 
 /**
@@ -27,7 +29,9 @@ public class Snowflake implements Serializable {
     public synchronized long nextId() {
         long timestamp = System.currentTimeMillis();
         if (timestamp < lastTimestamp) {
-            throw new RuntimeException("Invalid system clock");
+            throw RestServerException.withMsg("Invalid system clock error!",
+                    "Invalid lastTimestamp > currentTimeMillis is error." +
+                            " Current time :" + timestamp + ",Last timestamp :" + lastTimestamp);
         }
         if (timestamp == lastTimestamp) {
             sequence = (sequence + 1) & 4095;
