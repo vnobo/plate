@@ -96,9 +96,9 @@ public final class ContextUtils implements Serializable {
                 if (ObjectUtils.isEmpty(userAuditor)) {
                     return Mono.just(obejct);
                 }
-                return USERS_SERVICE.loadByCode(userAuditor.code()).flatMap(user -> {
+                return USERS_SERVICE.loadByCode(userAuditor.getCode()).flatMap(user -> {
                     try {
-                        propertyDescriptor.getWriteMethod().invoke(obejct, UserAuditor.withUser(user));
+                        propertyDescriptor.getWriteMethod().invoke(obejct, userAuditor.withUser(user));
                         return Mono.just(obejct);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         return Mono.error(RestServerException.withMsg(

@@ -1,6 +1,7 @@
 package com.platform.boot.security;
 
 import com.platform.boot.security.user.User;
+import lombok.Data;
 
 import java.io.Serializable;
 
@@ -21,22 +22,31 @@ import java.io.Serializable;
  *
  * @author Alex bob (<a href="https://github.com/vnobo">Alex bob</a>)
  */
-public record UserAuditor(String code, String username, String name) implements Serializable {
+@Data
+public class UserAuditor implements Serializable {
 
-    public static UserAuditor of(String code, String username, String name) {
-        return new UserAuditor(code, username, name);
+    private String code;
+    private String username;
+    private String name;
+
+    public static UserAuditor withDetails(SecurityDetails securityDetails) {
+        UserAuditor userAuditor = UserAuditor.withCode(securityDetails.getCode());
+        userAuditor.setName(securityDetails.getName());
+        userAuditor.setUsername(securityDetails.getUsername());
+        return userAuditor;
     }
 
     public static UserAuditor withCode(String code) {
-        return of(code, null, null);
+        UserAuditor userAuditor = new UserAuditor();
+        userAuditor.setCode(code);
+        return userAuditor;
     }
 
-    public static UserAuditor withDetails(SecurityDetails securityDetails) {
-        return of(securityDetails.getCode(), securityDetails.getUsername(), securityDetails.getName());
-    }
-
-    public static UserAuditor withUser(User user) {
-        return of(user.getCode(), user.getUsername(), user.getName());
+    public UserAuditor withUser(User user) {
+        this.code = user.getCode();
+        this.username = user.getUsername();
+        this.name = user.getName();
+        return this;
     }
 
 }

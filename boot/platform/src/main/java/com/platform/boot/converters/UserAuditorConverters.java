@@ -27,7 +27,7 @@ public class UserAuditorConverters {
          */
         @Override
         public String convert(@NonNull UserAuditor source) {
-            return source.code();
+            return source.getCode();
         }
     }
 

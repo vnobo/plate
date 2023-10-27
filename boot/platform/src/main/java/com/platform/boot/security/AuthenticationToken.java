@@ -15,11 +15,6 @@ import java.io.Serializable;
  * @author Alex bob
  */
 public record AuthenticationToken(String token, Long expires, Long lastAccessTime) implements Serializable {
-
-    public static AuthenticationToken of(String token, String expires, Long lastAccessTime) {
-        return new AuthenticationToken(token, Long.parseLong(expires), lastAccessTime);
-    }
-
     /**
      * Builds an authentication token from a web session
      *
@@ -27,7 +22,8 @@ public record AuthenticationToken(String token, Long expires, Long lastAccessTim
      * @return The authentication token
      */
     public static AuthenticationToken build(WebSession session) {
-        return new AuthenticationToken(session.getId(), session.getMaxIdleTime().getSeconds(),
+        return new AuthenticationToken(session.getId(),
+                session.getMaxIdleTime().getSeconds(),
                 session.getLastAccessTime().getEpochSecond());
     }
 }
