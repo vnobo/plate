@@ -22,7 +22,7 @@ public class CsrfWebFilter implements WebFilter, Ordered {
     @Override
     @NonNull
     public Mono<Void> filter(ServerWebExchange exchange, @NonNull WebFilterChain chain) {
-        log.debug("Csrf filter next log id %s".formatted(exchange.getLogPrefix()));
+        log.debug("%sCsrf filter chain next.".formatted(exchange.getLogPrefix()));
         Mono<CsrfToken> csrfTokenMono = exchange.getAttribute(CsrfToken.class.getName());
         if (csrfTokenMono != null) {
             return csrfTokenMono.flatMap(csrfToken -> Mono.defer(() -> chain.filter(exchange))

@@ -160,7 +160,7 @@ public class LoggerFilter implements WebFilter {
      * @return A {@link Mono} of void
      */
     private Mono<Void> continueFilterChain(ServerWebExchange exchange, WebFilterChain chain) {
-        log.debug("Continuing filter chain next %s".formatted(exchange.getLogPrefix()));
+        log.debug("%sLogger filter chain next.".formatted(exchange.getLogPrefix()));
         return Mono.defer(() -> chain.filter(exchange));
     }
 
@@ -276,7 +276,7 @@ public class LoggerFilter implements WebFilter {
         LoggerRequest logger = LoggerRequest.of(tenantCode, userDetails.getUsername(), prefix,
                 method, status, path, contentNode);
         this.loggerService.operate(logger).share()
-                .subscribe(res -> log.debug("%s **操作日志**: %s : MessageBody: %s"
+                .subscribe(res -> log.debug("%s**操作日志**: %s : MessageBody: %s"
                         .formatted(exchange.getLogPrefix(), exchange.getRequest().getMethod().name(), res)));
     }
 
