@@ -42,21 +42,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ServerWebInputException.class)
     public ResponseEntity<ErrorResponse> handleBindException(ServerWebExchange exchange, ServerWebInputException ex) {
         List<String> errors = Lists.newArrayList();
-        // Check if exception is WebExchangeBindException
         if (ex instanceof WebExchangeBindException bindException) {
             for (ObjectError objectError : bindException.getBindingResult().getAllErrors()) {
                 errors.add("Error object %s message %s.".formatted(objectError.getObjectName(),
                         objectError.getDefaultMessage()));
             }
         } else {
-            // Add cause and reason to errors list
             errors.add("Cause message %s.".formatted(ex.getCause().getMessage()));
             errors.add("Exception reason %s".formatted(ex.getReason()));
         }
         // Log error
-        log.error("[%s] 请求参数验证失败! 信息: %s".formatted(exchange.getLogPrefix(), errors));
+        log.error("%s请求参数验证失败! 信息: %s".formatted(exchange.getLogPrefix(), errors));
         if (log.isDebugEnabled()) {
-            log.error("Server error", ex);
+            log.error("请求参数验证失败", ex);
         }
         // Return response entity
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
@@ -85,11 +83,11 @@ public class GlobalExceptionHandler {
         } else {
             errors.add(ex.getLocalizedMessage());
         }
-        log.error("[%S] 数据库操作错误! 信息: %S".formatted(exchange.getLogPrefix(), errors));
+        log.error("%s数据库操作错误! 信息: %S".formatted(exchange.getLogPrefix(), errors));
         if (log.isDebugEnabled()) {
-            log.error("Server error", ex);
+            log.error("数据库操作错误!", ex);
         }
-        return ResponseEntity.status(HttpStatus.INSUFFICIENT_STORAGE).contentType(MediaType.APPLICATION_JSON)
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
                         5070, ex.getMessage(), errors));
     }
@@ -103,11 +101,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ClientException.class)
     public ResponseEntity<ErrorResponse> handleClientException(ServerWebExchange exchange, ClientException ex) {
-        log.error("[%s] 内部服务访问错误! 信息: %s".formatted(exchange.getLogPrefix(), ex.getMessage()));
+        log.error("%s内部服务访问错误! 信息: %s".formatted(exchange.getLogPrefix(), ex.getMessage()));
         if (log.isDebugEnabled()) {
-            log.error("Server error", ex);
+            log.error("内部服务访问错误!", ex);
         }
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).contentType(MediaType.APPLICATION_JSON)
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
                         ex.getCode(), ex.getMessage(), ex.getMsg()));
     }
@@ -121,20 +119,20 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(RestServerException.class)
     public ResponseEntity<ErrorResponse> handleRestServerException(ServerWebExchange exchange, RestServerException ex) {
-        log.error("[%s] 服务器自定义错误. 信息: %s".formatted(exchange.getLogPrefix(), ex.getLocalizedMessage()));
+        log.error("%s服务器自定义错误! 信息: %s".formatted(exchange.getLogPrefix(), ex.getLocalizedMessage()));
         if (log.isDebugEnabled()) {
-            log.error("Server error", ex);
+            log.error("服务器自定义错误!", ex);
         }
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).contentType(MediaType.APPLICATION_JSON)
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
                         ex.getCode(), ex.getMessage(), ex.getMsg()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(ServerWebExchange exchange, Exception ex) {
-        log.error("[%s] 服务器自定义错误. 信息: %s".formatted(exchange.getLogPrefix(), ex.getLocalizedMessage()));
+        log.error("%s服务器未知错误! 信息: %s".formatted(exchange.getLogPrefix(), ex.getLocalizedMessage()));
         if (log.isDebugEnabled()) {
-            log.error("Server error", ex);
+            log.error("服务器未知错误!", ex);
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),

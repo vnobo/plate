@@ -41,6 +41,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.platform.boot.commons.utils.ContextUtils.getClientIpAddress;
 import static org.springframework.security.web.server.csrf.CsrfWebFilter.DEFAULT_CSRF_MATCHER;
 
 /**
@@ -228,7 +229,7 @@ public class LoggerFilter implements WebFilter {
                     HandlerStrategies.withDefaults().messageReaders());
             return serverRequest.bodyToMono(String.class).doOnNext((objectValue) -> {
                 Object previousCachedBody = exchange.getAttributes().put(CACHED_REQUEST_BODY_ATTR, objectValue);
-                log.debug("[%s]Cache request body: %s".formatted(exchange.getLogPrefix(), previousCachedBody));
+                log.debug("%sCache request body: %s".formatted(exchange.getLogPrefix(), previousCachedBody));
             });
         }).then(Mono.defer(() -> {
             ServerHttpRequest cachedRequest = exchange.getAttribute(CACHED_SERVER_HTTP_REQUEST_DECORATOR_ATTR);
@@ -257,6 +258,9 @@ public class LoggerFilter implements WebFilter {
 
         ObjectNode contentNode = ContextUtils.OBJECT_MAPPER.createObjectNode();
         contentNode.putPOJO("requestHeaders", request.getHeaders());
+        contentNode.putPOJO("requestAddress", getClientIpAddress(request));
+        contentNode.putPOJO("requestCookies", request.getCookies());
+        contentNode.putPOJO("requestQueryParams", request.getQueryParams());
         contentNode.set("requestBody", readRequestBody(exchange));
 
         contentNode.putPOJO("responseHeaders", response.getHeaders());

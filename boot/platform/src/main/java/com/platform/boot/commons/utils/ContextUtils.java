@@ -10,9 +10,12 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -21,6 +24,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -29,6 +33,21 @@ import java.util.StringJoiner;
 @Log4j2
 @Component
 public final class ContextUtils implements Serializable {
+    private static final String[] IP_HEADER_CANDIDATES = {
+            "X-Forwarded-For",
+            "X-Real-IP",
+            "Proxy-Client-IP",
+            "WL-Proxy-Client-IP",
+            "HTTP_X_FORWARDED_FOR",
+            "HTTP_X_FORWARDED",
+            "HTTP_X_CLUSTER_CLIENT_IP",
+            "HTTP_CLIENT_IP",
+            "HTTP_FORWARDED_FOR",
+            "HTTP_FORWARDED",
+            "HTTP_VIA",
+            "REMOTE_ADDR"
+    };
+
     public final static String CSRF_TOKEN_CONTEXT = "CSRF_TOKEN_CONTEXT";
     public final static String SECURITY_AUTH_TOKEN_HEADER = "X-Auth-Token";
     public static ObjectMapper OBJECT_MAPPER;
@@ -39,6 +58,18 @@ public final class ContextUtils implements Serializable {
         ContextUtils.SNOW_FLAKE = new Snowflake(1, 1);
         ContextUtils.OBJECT_MAPPER = objectMapper;
         ContextUtils.USERS_SERVICE = usersService;
+    }
+
+    public static String getClientIpAddress(ServerHttpRequest httpRequest) {
+        HttpHeaders headers = httpRequest.getHeaders();
+        for (String header : IP_HEADER_CANDIDATES) {
+            String ipList = headers.getFirst(header);
+            if (ipList != null && !ipList.isEmpty() && !"unknown".equalsIgnoreCase(ipList)) {
+                String[] ipArray = StringUtils.commaDelimitedListToStringArray(ipList);
+                return ipArray[0];
+            }
+        }
+        return Objects.requireNonNull(httpRequest.getRemoteAddress()).getAddress().getHostAddress();
     }
 
     public static StringJoiner cacheKey(Object... objects) {

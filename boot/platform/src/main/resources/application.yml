@@ -5,7 +5,7 @@ server:
 
 spring:
   main.keep-alive: true
-  application.name: platform
+  application.name: plate
   webflux.format:
     time: HH:mm:ss
     date-time: yyyy-MM-dd HH:mm:ss
