@@ -41,43 +41,44 @@ public final class ContextUtils implements Serializable {
         ContextUtils.USERS_SERVICE = usersService;
     }
 
-    public static String cacheKey(Object... objects) {
+    public static StringJoiner cacheKey(Object... objects) {
         // Convert objects to a map using ObjectMapper
-        StringBuilder keyBuilder = new StringBuilder();
+        StringJoiner keyBuilder = new StringJoiner("&");
         for (Object object : objects) {
             if (object instanceof Pageable pageable) {
-                keyBuilder.append(applySort(pageable.getSort()));
-                keyBuilder.append("&page=").append(pageable.getPageNumber());
-                keyBuilder.append("&size=").append(pageable.getPageSize());
-                keyBuilder.append("&offset=").append(pageable.getOffset());
+                keyBuilder.merge(applySort(pageable.getSort()));
+                keyBuilder.add("page=" + pageable.getPageNumber());
+                keyBuilder.add("size=" + pageable.getPageSize());
+                keyBuilder.add("offset=" + pageable.getOffset());
                 continue;
             }
             // Convert object to a map using ObjectMapper
-            Map<String, Object> objectMap = com.platform.boot.commons.utils.BeanUtils.beanToMap(object, true);
+            Map<String, Object> objectMap = com.platform.boot.commons.utils.BeanUtils
+                    .beanToMap(object, true);
             // Check if the object map is empty
             if (ObjectUtils.isEmpty(objectMap)) {
                 // Append the class name of the object to the key builder
-                keyBuilder.append(object.getClass().getName()).append("&");
+                keyBuilder.add(object.getClass().getName());
                 continue;
             }
             // Append each key-value pair from the object map to the key builder
-            objectMap.forEach((k, v) -> keyBuilder.append(k).append("=").append(v).append("&"));
+            objectMap.forEach((k, v) -> keyBuilder.add(k + "=" + v));
         }
         // Return the final cache key as a string
-        return keyBuilder.toString();
+        return keyBuilder;
     }
 
-    private static String applySort(Sort sort) {
+    private static StringJoiner applySort(Sort sort) {
+        StringJoiner sortKey = new StringJoiner("&");
         if (sort == null || sort.isUnsorted()) {
-            return "";
+            return sortKey;
         }
-        StringJoiner sortSql = new StringJoiner(", ");
         for (Sort.Order order : sort) {
             String sortedPropertyName = order.getProperty();
             String sortedProperty = order.isIgnoreCase() ? "lower(" + sortedPropertyName + ")" : sortedPropertyName;
-            sortSql.add("&" + sortedProperty + "=" + (order.isAscending() ? "asc" : "desc"));
+            sortKey.add(sortedProperty + "=" + (order.isAscending() ? "asc" : "desc"));
         }
-        return sortSql.toString();
+        return sortKey;
     }
 
     public static Mono<SecurityDetails> securityDetails() {
@@ -102,12 +103,12 @@ public final class ContextUtils implements Serializable {
                         return Mono.just(obejct);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         return Mono.error(RestServerException.withMsg(
-                                "User auditor serialization getWriteMethod invoke error", e));
+                                "User auditor serialization getWriteMethod invoke error!", e));
                     }
                 });
             } catch (IllegalAccessException | InvocationTargetException e) {
                 return Mono.error(RestServerException.withMsg(
-                        "User auditor serialization getReadMethod invoke error", e));
+                        "User auditor serialization getReadMethod invoke error!", e));
             }
         });
         return propertyFlux.then(Mono.just(obejct));
@@ -116,7 +117,7 @@ public final class ContextUtils implements Serializable {
     public static String nextId() {
         if (ObjectUtils.isEmpty(SNOW_FLAKE)) {
             throw RestServerException.withMsg(
-                    "Snowflake not found", "Snowflake server is not found, init snowflake first.");
+                    "Snowflake not found!", "Snowflake server is not found, init snowflake first.");
         }
         return SNOW_FLAKE.nextIdStr();
     }

@@ -29,7 +29,7 @@ public class TenantsService extends AbstractDatabase {
      * @return 包含租户信息的Flux对象
      */
     public Flux<Tenant> search(TenantRequest request, Pageable pageable) {
-        String cacheKey = ContextUtils.cacheKey(request, pageable);
+        var cacheKey = ContextUtils.cacheKey(request, pageable);
         // 使用Java 17中的var关键字，类型推断更加简洁
         var query = Query.query(request.toCriteria()).with(pageable);
         // 使用Java 17中的新方法of，避免使用Tuple2
@@ -42,7 +42,7 @@ public class TenantsService extends AbstractDatabase {
      * @return 包含租户信息的Mono对象
      */
     public Mono<Page<Tenant>> page(TenantRequest request, Pageable pageable) {
-        String cacheKey = ContextUtils.cacheKey(request);
+        var cacheKey = ContextUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria());
         // 使用Java 17中的var关键字，类型推断更加简洁
         var tenantsMono = this.search(request, pageable).collectList();

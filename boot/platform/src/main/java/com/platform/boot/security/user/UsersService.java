@@ -28,7 +28,7 @@ public class UsersService extends AbstractDatabase {
     private final UsersRepository usersRepository;
 
     public Flux<UserResponse> search(UserRequest request, Pageable pageable) {
-        String cacheKey = ContextUtils.cacheKey(request, pageable);
+        var cacheKey = ContextUtils.cacheKey(request, pageable);
         ParamSql paramSql = QueryJson.queryJson(request.getQuery());
         String query = "select * from se_users" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
         return super.queryWithCache(cacheKey, query, paramSql.params(), UserResponse.class)
@@ -38,7 +38,7 @@ public class UsersService extends AbstractDatabase {
     public Mono<Page<UserResponse>> page(UserRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
 
-        String cacheKey = ContextUtils.cacheKey(request);
+        var cacheKey = ContextUtils.cacheKey(request);
         ParamSql paramSql = QueryJson.queryJson(request.getQuery());
         String query = "select count(*) from se_users" + paramSql.whereSql();
         var countMono = super.countWithCache(cacheKey, query, paramSql.params());

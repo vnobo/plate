@@ -27,8 +27,7 @@ public final class CriteriaUtils {
      * @return the SQL query with applied pagination
      */
     public static String applyPage(Pageable pageable) {
-        String orderSql = applySort(pageable.getSort(), null);
-        return String.format(orderSql + " limit %d offset %d", pageable.getPageSize(), pageable.getOffset());
+        return applySort(pageable.getSort(), null);
     }
 
     /**
@@ -54,7 +53,7 @@ public final class CriteriaUtils {
         if (sort == null || sort.isUnsorted()) {
             return "";
         }
-        StringJoiner sortSql = new StringJoiner(" , ");
+        StringJoiner sortSql = new StringJoiner(", ");
         sort.iterator().forEachRemaining((o) -> {
             String sortedPropertyName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, o.getProperty());
             String sortedProperty = o.isIgnoreCase() ? "lower(" + sortedPropertyName + ")" : sortedPropertyName;

@@ -22,7 +22,7 @@ public class LoggersService extends AbstractDatabase {
 
     public Flux<Logger> search(LoggerRequest request, Pageable pageable) {
         //Create a cache key based on the given request and pageable parameters
-        String cacheKey = ContextUtils.cacheKey(request, pageable);
+        var cacheKey = ContextUtils.cacheKey(request, pageable);
         //Create a query based on the given request and pageable parameters
         Query query = Query.query(request.toCriteria()).with(pageable);
         //Return the query with the cache key and Logger class
@@ -31,7 +31,7 @@ public class LoggersService extends AbstractDatabase {
 
     public Mono<Page<Logger>> page(LoggerRequest request, Pageable pageable) {
         //Create a cache key based on the request
-        String cacheKey = ContextUtils.cacheKey(request);
+        var cacheKey = ContextUtils.cacheKey(request);
         //Create a query based on the request
         Query query = Query.query(request.toCriteria());
         //Collect a list of Loggers based on the request and pageable

@@ -1,7 +1,6 @@
 package com.platform.boot.commons.base;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -20,14 +19,6 @@ import java.util.Optional;
  * If the cacheManager is null, a new ConcurrentMapCache is created.
  *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
- * @see InitializingBean
- * @see Cache
- * @see CacheManager
- * @see ConcurrentMapCache
- * @see Optional
- * @see ObjectMapper
- * @see Log4j2
- * @since 1.0.0
  */
 public abstract class AbstractService implements InitializingBean {
 

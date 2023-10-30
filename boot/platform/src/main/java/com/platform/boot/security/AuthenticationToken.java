@@ -12,7 +12,7 @@ import java.io.Serializable;
  * @param token          Token used for authentication
  * @param expires        Expiry time of the token in seconds
  * @param lastAccessTime Last access time of the token in epoch seconds
- * @author Alex bob
+ * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
  */
 public record AuthenticationToken(String token, Long expires, Long lastAccessTime) implements Serializable {
 

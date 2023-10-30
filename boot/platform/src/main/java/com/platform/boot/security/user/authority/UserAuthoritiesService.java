@@ -18,7 +18,7 @@ public class UserAuthoritiesService extends AbstractDatabase {
     private final UserAuthoritiesRepository userAuthoritiesRepository;
 
     public Flux<UserAuthority> search(UserAuthorityRequest request) {
-        String cacheKey = ContextUtils.cacheKey(request);
+        var cacheKey = ContextUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria());
         return super.queryWithCache(cacheKey, query, UserAuthority.class)
                 .flatMap(ContextUtils::userAuditorSerializable);

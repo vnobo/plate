@@ -33,7 +33,7 @@ public class TenantMembersService extends AbstractDatabase {
      * @return a flux of TenantMemberResponse objects matching the search criteria
      */
     public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
-        String cacheKey = ContextUtils.cacheKey(request, pageable);
+        var cacheKey = ContextUtils.cacheKey(request, pageable);
         ParamSql paramSql = request.toParamSql();
         String query = request.querySql() + paramSql.whereSql() + CriteriaUtils.applyPage(pageable, "a");
         return super.queryWithCache(cacheKey, query, paramSql.params(), TenantMemberResponse.class);
@@ -49,7 +49,7 @@ public class TenantMembersService extends AbstractDatabase {
     public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
 
-        String cacheKey = ContextUtils.cacheKey(request);
+        var cacheKey = ContextUtils.cacheKey(request);
         ParamSql paramSql = request.toParamSql();
         String query = request.countSql() + paramSql.whereSql();
         Mono<Long> countMono = this.countWithCache(cacheKey, query, paramSql.params());

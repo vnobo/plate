@@ -31,7 +31,7 @@ public class GroupAuthoritiesService extends AbstractDatabase {
 
     public Flux<GroupAuthority> search(GroupAuthorityRequest request, Pageable pageable) {
 
-        String cacheKey = ContextUtils.cacheKey(request, pageable);
+        var cacheKey = ContextUtils.cacheKey(request, pageable);
         Query query = Query.query(request.toCriteria()).with(pageable);
 
         return super.queryWithCache(cacheKey, query, GroupAuthority.class)
@@ -42,7 +42,7 @@ public class GroupAuthoritiesService extends AbstractDatabase {
 
         var searchMono = this.search(request, pageable).collectList();
 
-        String cacheKey = ContextUtils.cacheKey(request);
+        var cacheKey = ContextUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria());
         var countMono = super.countWithCache(cacheKey, query, GroupAuthority.class);
 

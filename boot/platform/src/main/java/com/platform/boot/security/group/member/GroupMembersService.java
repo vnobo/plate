@@ -23,7 +23,7 @@ public class GroupMembersService extends AbstractDatabase {
     private final GroupMembersRepository memberRepository;
 
     public Flux<GroupMemberResponse> search(GroupMemberRequest request, Pageable pageable) {
-        String cacheKey = ContextUtils.cacheKey(request, pageable);
+        var cacheKey = ContextUtils.cacheKey(request, pageable);
         ParamSql paramSql = request.toParamSql();
         String query = request.querySql() + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
         return super.queryWithCache(cacheKey, query, paramSql.params(), GroupMemberResponse.class);
@@ -32,7 +32,7 @@ public class GroupMembersService extends AbstractDatabase {
     public Mono<Page<GroupMemberResponse>> page(GroupMemberRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
 
-        String cacheKey = ContextUtils.cacheKey(request);
+        var cacheKey = ContextUtils.cacheKey(request);
         ParamSql paramSql = request.toParamSql();
         String query = request.countSql() + paramSql.whereSql();
         var countMono = this.countWithCache(cacheKey, query, paramSql.params());

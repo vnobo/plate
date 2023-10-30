@@ -43,7 +43,7 @@ public class MenusService extends AbstractDatabase {
      * @return a Flux of Menus with the search criteria
      */
     public Flux<Menu> search(MenuRequest request) {
-        String cacheKey = ContextUtils.cacheKey(request);
+        var cacheKey = ContextUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria()).sort(Sort.by("sort"));
         return this.queryWithCache(cacheKey, query, Menu.class);
     }
