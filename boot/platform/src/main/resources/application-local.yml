@@ -11,7 +11,7 @@ logging:
 server.port: 8080
 
 spring:
-  application.name: platform
+  application.name: plate
   r2dbc:
     url: r2dbc:postgres://192.168.1.2:5432/plate?fetchSize=5000
     username: farmer
@@ -24,9 +24,11 @@ spring:
       max-acquire-time: 5s
       validation-query: "select version()"
   sql.init:
-    mode: always
+    mode: never
     platform: postgres
     encoding: utf-8
   data.redis:
     host: 192.168.1.2
+    connect-timeout: 10s
+    timeout: 30s
     repositories.enabled: false
