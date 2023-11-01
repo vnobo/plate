@@ -1,6 +1,6 @@
 /*this set custom own styles css.*/
 html, body {
-  height: 100%;
-  width: 100%;
-  overflow-y: auto;
+  min-width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
 }

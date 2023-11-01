@@ -1,16 +1,6 @@
-<nz-layout class="app-layout">
-  <nz-sider [(nzCollapsed)]="isCollapsed"
-            [nzTrigger]="null"
-            class="menu-sidebar"
-            nzBreakpoint="md"
-            nzCollapsible
-            nzWidth="256px">
-    <div class="sidebar-logo">
-      <a href="https://ng.ant.design/" target="_blank">
-        <img alt="logo" src="https://ng.ant.design/assets/img/logo.svg">
-        <h1>Ant Design Of Angular</h1>
-      </a>
-    </div>
+<nz-layout class="layout">
+  <nz-sider [nzCollapsedWidth]="0" nzBreakpoint="lg" nzCollapsible>
+    <div class="logo"></div>
     <ul [nzInlineCollapsed]="isCollapsed" nz-menu nzMode="inline" nzTheme="dark">
       <li nz-submenu nzIcon="dashboard" nzOpen nzTitle="Dashboard">
         <ul>
@@ -35,20 +25,10 @@
     </ul>
   </nz-sider>
   <nz-layout>
-    <nz-header>
-      <div class="app-header">
-        <span (click)="isCollapsed = !isCollapsed" class="header-trigger">
-            <span [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"
-                  class="trigger"
-                  nz-icon
-            ></span>
-        </span>
-      </div>
-    </nz-header>
+    <nz-header></nz-header>
     <nz-content>
-      <div class="inner-content">
-        <router-outlet></router-outlet>
-      </div>
+      <div class="inner-content">Content</div>
     </nz-content>
+    <nz-footer>Ant Design ©2020 Implement By Angular</nz-footer>
   </nz-layout>
 </nz-layout>

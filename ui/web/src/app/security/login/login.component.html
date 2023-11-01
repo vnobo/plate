@@ -1,6 +1,6 @@
 <div class="page min-vh-100 min-vw-100">
   <div class="position-absolute top-50 start-50 translate-middle">
-    <div class="card" style="width: 25rem;">
+    <div class="card" style="width: 28rem;">
       <h4 class="card-header text-center py-2">
         <a class="navbar-brand navbar-brand-autodark" href="." i18n="@@app.login.title">
           Plate Platform Manager</a>
@@ -56,14 +56,14 @@
             </div>-->
             <div class="layui-form-item">
               <input lay-skin="primary" name="remember" title="记住密码" type="checkbox">
-              <a href="./" style="float: right; margin-top: 7px;">忘记密码？</a>
+              <a class="mt-1 float-end" href="./">忘记密码？</a>
             </div>
             <div class="layui-form-item">
               <button [disabled]="!loginForm.valid" class="layui-btn layui-btn-fluid" type="submit">登录</button>
             </div>
           </div>
         </form>
-        <div class="layui-form-item fs-5 mt-4">
+        <div class="layui-form-item mt-2">
           <label>社交账号登录</label>
           <span class="px-2 me-2">
         <a href="."><i class="layui-icon layui-icon-login-qq fs-4"
