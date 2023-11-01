@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ServerWebInputException.class)
     public ResponseEntity<ErrorResponse> handleBindException(ServerWebExchange exchange, ServerWebInputException ex) {
-        List<String> errors = Lists.newArrayList();
+        List<String> errors = Lists.newArrayList(ex.getLocalizedMessage());
         if (ex instanceof WebExchangeBindException bindException) {
             for (ObjectError objectError : bindException.getBindingResult().getAllErrors()) {
                 errors.add("Error object %s message %s.".formatted(objectError.getObjectName(),
@@ -51,7 +51,6 @@ public class GlobalExceptionHandler {
             errors.add("Cause message %s.".formatted(ex.getCause().getMessage()));
             errors.add("Exception reason %s".formatted(ex.getReason()));
         }
-        // Log error
         log.error("%s请求参数验证失败! 信息: %s".formatted(exchange.getLogPrefix(), errors));
         if (log.isDebugEnabled()) {
             log.error("请求参数验证失败", ex);
@@ -72,7 +71,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({DataAccessException.class, R2dbcException.class})
     public ResponseEntity<ErrorResponse> handleFailureException(ServerWebExchange exchange, RuntimeException ex) {
-        List<String> errors = Lists.newArrayList();
+        List<String> errors = Lists.newArrayList(ex.getLocalizedMessage());
         if (ex instanceof R2dbcException r2dbcException) {
             errors.add(r2dbcException.getMessage());
             errors.add(r2dbcException.getSql());
