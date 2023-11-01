@@ -1,7 +1,7 @@
 logging:
   register-shutdown-hook: true
   level:
-    web: debug
+    #web: debug
     com.platform.boot.*: debug
     org.springframework.r2dbc: debug
     #io.r2dbc.postgresql.QUERY: debug
