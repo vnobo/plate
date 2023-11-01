@@ -19,13 +19,24 @@ import reactor.core.publisher.Mono;
 @Service
 @RequiredArgsConstructor
 public class GroupMembersService extends AbstractDatabase {
+    private final static String QUERY_SQL = """
+            select a.*, b.name as group_name, b.extend as group_extend,c.name as login_name,c.username
+            from se_group_members a
+            inner join se_groups b on a.group_code = b.code
+            inner join se_users c on c.code = a.user_code
+            """;
+    private final static String COUNT_SQL = """
+            select count(*) from se_group_members a
+            inner join se_groups b on a.group_code = b.code
+            inner join se_users c on c.code = a.user_code
+            """;
 
     private final GroupMembersRepository memberRepository;
 
     public Flux<GroupMemberResponse> search(GroupMemberRequest request, Pageable pageable) {
         var cacheKey = ContextUtils.cacheKey(request, pageable);
         ParamSql paramSql = request.toParamSql();
-        String query = request.querySql() + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
+        String query = QUERY_SQL + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
         return super.queryWithCache(cacheKey, query, paramSql.params(), GroupMemberResponse.class);
     }
 
@@ -34,7 +45,7 @@ public class GroupMembersService extends AbstractDatabase {
 
         var cacheKey = ContextUtils.cacheKey(request);
         ParamSql paramSql = request.toParamSql();
-        String query = request.countSql() + paramSql.whereSql();
+        String query = COUNT_SQL + paramSql.whereSql();
         var countMono = this.countWithCache(cacheKey, query, paramSql.params());
 
         return Mono.zip(searchMono, countMono)

@@ -22,13 +22,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @EnableCaching
 public class RedisConfiguration {
 
-    /**
-     * Creates a ReactiveRedisTemplate bean.
-     *
-     * @param factory      the ReactiveRedisConnectionFactory to use
-     * @param objectMapper the ObjectMapper to use for serialization
-     * @return the ReactiveRedisTemplate bean
-     */
     @Bean
     public ReactiveRedisTemplate<String, Object> redisTemplate(ReactiveRedisConnectionFactory factory,
                                                                ObjectMapper objectMapper) {

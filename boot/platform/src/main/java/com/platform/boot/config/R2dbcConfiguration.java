@@ -31,21 +31,11 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
 
     private final List<Converter<?, ?>> customConverters;
 
-    /**
-     * Returns a ConnectionFactory for R2DBC.
-     *
-     * @return ConnectionFactory for R2DBC
-     */
     @Override
     public ConnectionFactory connectionFactory() {
         return ConnectionFactories.get("r2dbc:..");
     }
 
-    /**
-     * Returns a list of custom converters for JSON nodes and user auditing.
-     *
-     * @return List of custom converters
-     */
     @Override
     public List<Object> getCustomConverters() {
         return Lists.newArrayList(customConverters);

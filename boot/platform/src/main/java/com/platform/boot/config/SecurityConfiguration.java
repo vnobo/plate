@@ -45,23 +45,11 @@ import java.util.Set;
 @EnableReactiveMethodSecurity
 public class SecurityConfiguration {
 
-    /**
-     * This method defines the PasswordEncoder bean required for the security configuration.
-     *
-     * @return PasswordEncoder object
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
-    /**
-     * This method defines the SecurityWebFilterChain bean required for the security configuration.
-     * It sets up the security filters and rules for the application.
-     *
-     * @param http ServerHttpSecurity object
-     * @return SecurityWebFilterChain object
-     */
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http.authorizeExchange(exchange -> {
@@ -80,22 +68,12 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-    /**
-     * This method sets up the CSRF protection for the application.
-     *
-     * @param csrfSpec ServerHttpSecurity.CsrfSpec object
-     */
     private void setCsrfSpec(ServerHttpSecurity.CsrfSpec csrfSpec) {
         csrfSpec.requireCsrfProtectionMatcher(new IgnoreRequireCsrfProtectionMatcher());
         csrfSpec.csrfTokenRepository(CookieServerCsrfTokenRepository.withHttpOnlyFalse());
         csrfSpec.csrfTokenRequestHandler(new ServerCsrfTokenRequestAttributeHandler());
     }
 
-    /**
-     * This method sets up the logout functionality for the application.
-     *
-     * @param logout ServerHttpSecurity.LogoutSpec object
-     */
     private void setLogout(ServerHttpSecurity.LogoutSpec logout) {
         ServerLogoutHandler securityContext = new SecurityContextServerLogoutHandler();
         ClearSiteDataServerHttpHeadersWriter writer = new ClearSiteDataServerHttpHeadersWriter(
@@ -108,10 +86,6 @@ public class SecurityConfiguration {
         logout.logoutSuccessHandler(new HttpStatusReturningServerLogoutSuccessHandler());
     }
 
-    /**
-     * This class defines a custom ServerWebExchangeMatcher that ignores CSRF protection for certain requests.
-     * It allows GET, HEAD, TRACE, and OPTIONS requests, as well as requests to the "/oauth2/none" endpoint with a POST method.
-     */
     static class IgnoreRequireCsrfProtectionMatcher implements ServerWebExchangeMatcher {
         private final Set<HttpMethod> allowedMethods = new HashSet<>(
                 Arrays.asList(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.TRACE, HttpMethod.OPTIONS));
@@ -119,14 +93,6 @@ public class SecurityConfiguration {
                 new PathPatternParserServerWebExchangeMatcher("/oauth2/none", HttpMethod.POST)
         );
 
-        /**
-         * This method checks if the given ServerWebExchange matches the allowed methods and matchers.
-         * If it does, it returns a MatchResult indicating that CSRF protection should be ignored.
-         * If it does not, it returns a MatchResult indicating that CSRF protection should be enforced.
-         *
-         * @param exchange ServerWebExchange object
-         * @return Mono<MatchResult> indicating whether CSRF protection should be ignored or enforced
-         */
         @Override
         public Mono<MatchResult> matches(ServerWebExchange exchange) {
             Mono<MatchResult> ignoreMono = new OrServerWebExchangeMatcher(allowedMatchers)
@@ -142,15 +108,6 @@ public class SecurityConfiguration {
     static class CustomServerAuthenticationEntryPoint extends HttpBasicServerAuthenticationEntryPoint {
         private static final Log log = LogFactory.getLog(CustomServerAuthenticationEntryPoint.class);
 
-        /**
-         * This method is called when authentication fails. It first checks if the request matches the captcha protection
-         * matcher. If it does, it generates a captcha token and returns a response with a JSON body containing the captcha
-         * URL and an error message. If it does not, it returns a response with a JSON body containing an error message.
-         *
-         * @param exchange ServerWebExchange object
-         * @param e        AuthenticationException object
-         * @return Mono<Void> indicating completion of the response
-         */
         @Override
         public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException e) {
             String xRequestedWith = "X-Requested-With";

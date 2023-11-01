@@ -40,23 +40,6 @@ public class TenantMemberRequest extends TenantMember {
         return criteria(Set.of("securityCode", "users", "username"));
     }
 
-    public String querySql() {
-        return """
-                select a.*, b.name as tenant_name, b.extend as tenant_extend,c.name as login_name,c.username
-                from se_tenant_members a
-                inner join se_tenants b on a.tenant_code = b.code
-                inner join se_users c on c.code = a.user_code
-                """;
-    }
-
-    public String countSql() {
-        return """
-                select count(*) from se_tenant_members a
-                inner join se_tenants b on a.tenant_code = b.code
-                inner join se_users c on c.code = a.user_code
-                """;
-    }
-
     public ParamSql toParamSql() {
         ParamSql paramSql = CriteriaUtils
                 .applyParamsSql(this, List.of("users", "securityCode", "username"), "a");

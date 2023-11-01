@@ -12,31 +12,14 @@ import java.io.IOException;
  */
 public class JsonException extends RestServerException {
 
-    /**
-     * Constructor.
-     *
-     * @param jsonProcessingException JSON processing exception
-     */
     public JsonException(IOException jsonProcessingException) {
         this(5010, "Json processing exception", jsonProcessingException);
     }
 
-    /**
-     * Constructor.
-     *
-     * @param status status code
-     * @param msg    exception message
-     */
     public JsonException(int status, String message, Object msg) {
         super(status, message, msg);
     }
 
-    /**
-     * Static method that returns a JsonException object.
-     *
-     * @param jsonProcessingException JSON processing exception
-     * @return JsonException object
-     */
     public static JsonException withError(IOException jsonProcessingException) {
         return new JsonException(jsonProcessingException);
     }

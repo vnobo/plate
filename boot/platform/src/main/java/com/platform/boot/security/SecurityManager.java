@@ -33,6 +33,24 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SecurityManager extends AbstractDatabase
         implements ReactiveUserDetailsService, ReactiveUserDetailsPasswordService {
+    private final static String QUERY_GROUP_MEMBERS_SQL = """
+            select a.*,b.name,b.extend
+            from se_group_members a join se_groups b on a.group_code=b.code
+            where a.user_code like :userCode
+            """;
+    private final static String QUERY_TENANT_MEMBERS_SQL = """
+            select a.*,b.name ,b.extend
+            from se_tenant_members a join se_tenants b on a.tenant_code=b.code
+            where a.user_code like :userCode
+            """;
+    private final static String QUERY_USER_AUTHORITY_SQL = """
+            select * from se_authorities where user_code = :userCode
+            """;
+    private final static String QUERY_GROUP_AUTHORITY_SQL = """
+            select ga.*
+            from se_group_authorities ga join se_group_members gm on ga.group_code = gm.group_code
+            where gm.user_code = :userCode
+            """;
 
     private final UsersService usersService;
 
@@ -77,23 +95,13 @@ public class SecurityManager extends AbstractDatabase
     }
 
     private Mono<List<GroupMemberResponse>> loadGroups(String userCode) {
-        String queryGroupMemberSql = """
-                select a.*,b.name,b.extend
-                from se_group_members a join se_groups b on a.group_code=b.code
-                where a.user_code ilike :userCode
-                """;
         return this.queryWithCache("USER_GROUPS-" + userCode,
-                queryGroupMemberSql, Map.of("userCode", userCode), GroupMemberResponse.class).collectList();
+                QUERY_GROUP_MEMBERS_SQL, Map.of("userCode", userCode), GroupMemberResponse.class).collectList();
     }
 
     private Mono<List<TenantMemberResponse>> loadTenants(String userCode) {
-        String queryGroupMemberSql = """
-                select a.*,b.name ,b.extend
-                from se_tenant_members a join se_tenants b on a.tenant_code=b.code
-                where a.user_code ilike :userCode
-                """;
         return this.queryWithCache("USER_TENANTS-" + userCode,
-                queryGroupMemberSql, Map.of("userCode", userCode), TenantMemberResponse.class).collectList();
+                QUERY_TENANT_MEMBERS_SQL, Map.of("userCode", userCode), TenantMemberResponse.class).collectList();
     }
 
     private Mono<List<GrantedAuthority>> authorities(String userCode) {
@@ -102,20 +110,14 @@ public class SecurityManager extends AbstractDatabase
     }
 
     private Flux<GrantedAuthority> getAuthorities(String userCode) {
-        String queryUserAuthoritySql = "select * from se_authorities where user_code = :userCode";
         return this.queryWithCache("USER_AUTHORITIES-" + userCode,
-                        queryUserAuthoritySql, Map.of("userCode", userCode), UserAuthority.class)
+                        QUERY_USER_AUTHORITY_SQL, Map.of("userCode", userCode), UserAuthority.class)
                 .cast(GrantedAuthority.class);
     }
 
     private Flux<GrantedAuthority> getGroupAuthorities(String userCode) {
-        String queryGroupAuthoritySql = """
-                select ga.*
-                from se_group_authorities ga join se_group_members gm on ga.group_code = gm.group_code
-                where gm.user_code = :userCode
-                """;
         return this.queryWithCache("GROUP_AUTHORITIES-" + userCode,
-                        queryGroupAuthoritySql, Map.of("userCode", userCode), GroupAuthority.class)
+                        QUERY_GROUP_AUTHORITY_SQL, Map.of("userCode", userCode), GroupAuthority.class)
                 .cast(GrantedAuthority.class);
     }
 

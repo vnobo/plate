@@ -49,18 +49,6 @@ public final class SecurityDetails implements UserDetails {
     @JsonIgnore
     private Boolean credentialsExpired;
 
-
-    /**
-     * Creates a {@link SecurityDetails} instance with the specified parameters.
-     *
-     * @param username           the username
-     * @param password           the password
-     * @param disabled           whether the account is disabled or not
-     * @param accountExpired     whether the account has expired or not
-     * @param accountLocked      whether the account is locked or not
-     * @param credentialsExpired whether the credentials have expired or not
-     * @return a {@link SecurityDetails} instance
-     */
     public static SecurityDetails of(String code, String username, String name, String password, Boolean disabled,
                                      Boolean accountExpired, Boolean accountLocked, Boolean credentialsExpired) {
         SecurityDetails securityDetails = new SecurityDetails();
@@ -75,12 +63,6 @@ public final class SecurityDetails implements UserDetails {
         return securityDetails;
     }
 
-    /**
-     * Set the authorities of the user
-     *
-     * @param authorities the authorities of the user
-     * @return the updated {@link SecurityDetails} instance with a set of authorities
-     */
     public SecurityDetails authorities(Set<GrantedAuthority> authorities) {
         this.setAuthorities(Collections.unmodifiableSet(sortAuthorities(authorities)));
         return this;
@@ -91,12 +73,6 @@ public final class SecurityDetails implements UserDetails {
         return this;
     }
 
-    /**
-     * Helper method to sort the given collection of GrantedAuthority objects
-     *
-     * @param authorities the collection of GrantedAuthority objects
-     * @return a sorted set of GrantedAuthority objects
-     */
     private static SortedSet<GrantedAuthority> sortAuthorities(Collection<? extends GrantedAuthority> authorities) {
         Assert.notNull(authorities, "Cannot pass a null GrantedAuthority collection");
         // Ensure array iteration order is predictable (as per
@@ -109,11 +85,6 @@ public final class SecurityDetails implements UserDetails {
         return sortedAuthorities;
     }
 
-    /**
-     * Get the tenant code of the user
-     *
-     * @return the tenant code of the user
-     */
     public String getTenantCode() {
         if (ObjectUtils.isEmpty(this.getTenants())) {
             return null;
@@ -122,11 +93,6 @@ public final class SecurityDetails implements UserDetails {
                 .map(TenantMemberResponse::getTenantCode).orElse(null);
     }
 
-    /**
-     * Get the tenant name of the user
-     *
-     * @return the tenant name of the user
-     */
     @JsonGetter
     public String getTenantName() {
         if (ObjectUtils.isEmpty(this.getTenants())) {
@@ -156,15 +122,9 @@ public final class SecurityDetails implements UserDetails {
         return !this.disabled;
     }
 
-    /**
-     * Comparator for comparing GrantedAuthority objects
-     */
     private static class AuthorityComparator implements Comparator<GrantedAuthority>, Serializable {
         @Override
         public int compare(GrantedAuthority g1, GrantedAuthority g2) {
-            // Neither should ever be null as each entry is checked before adding it to
-            // the set. If the authority is null, it is a custom authority and should
-            // precede others.
             if (g2.getAuthority() == null) {
                 return -1;
             }

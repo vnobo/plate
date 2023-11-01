@@ -22,36 +22,33 @@ import reactor.core.publisher.Mono;
 @Service
 @RequiredArgsConstructor
 public class TenantMembersService extends AbstractDatabase {
+    private final static String QUERY_SQL = """
+            select a.*, b.name as tenant_name, b.extend as tenant_extend,c.name as login_name,c.username
+            from se_tenant_members a
+            inner join se_tenants b on a.tenant_code = b.code
+            inner join se_users c on c.code = a.user_code
+            """;
+    private final static String COUNT_SQL = """
+            select count(*) from se_tenant_members a
+            inner join se_tenants b on a.tenant_code = b.code
+            inner join se_users c on c.code = a.user_code
+            """;
 
     private final TenantMembersRepository tenantMembersRepository;
 
-    /**
-     * Search for a list of tenant members based on the provided request and pageable parameters.
-     *
-     * @param request  the request object containing the search criteria
-     * @param pageable the pageable object for pagination
-     * @return a flux of TenantMemberResponse objects matching the search criteria
-     */
     public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
         var cacheKey = ContextUtils.cacheKey(request, pageable);
         ParamSql paramSql = request.toParamSql();
-        String query = request.querySql() + paramSql.whereSql() + CriteriaUtils.applyPage(pageable, "a");
+        String query = QUERY_SQL + paramSql.whereSql() + CriteriaUtils.applyPage(pageable, "a");
         return super.queryWithCache(cacheKey, query, paramSql.params(), TenantMemberResponse.class);
     }
 
-    /**
-     * Retrieves a page of TenantMemberResponse objects based on the provided TenantMemberRequest and Pageable.
-     *
-     * @param request  the TenantMemberRequest object containing the search criteria
-     * @param pageable the Pageable object specifying the page size and sorting criteria
-     * @return a Mono containing a Page of TenantMemberResponse objects
-     */
     public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
 
         var cacheKey = ContextUtils.cacheKey(request);
         ParamSql paramSql = request.toParamSql();
-        String query = request.countSql() + paramSql.whereSql();
+        String query = COUNT_SQL + paramSql.whereSql();
         Mono<Long> countMono = this.countWithCache(cacheKey, query, paramSql.params());
 
         return Mono.zip(searchMono, countMono)
@@ -77,12 +74,6 @@ public class TenantMembersService extends AbstractDatabase {
         return entityTemplate.update(TenantMember.class).matching(query).apply(update).then();
     }
 
-    /**
-     * Deletes a tenant.
-     *
-     * @param request the tenant request
-     * @return a Mono of void
-     */
     public Mono<Void> delete(TenantMemberRequest request) {
         return this.tenantMembersRepository.delete(request.toMemberTenant());
     }

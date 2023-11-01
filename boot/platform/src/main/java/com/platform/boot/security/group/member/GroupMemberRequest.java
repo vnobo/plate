@@ -35,23 +35,6 @@ public class GroupMemberRequest extends GroupMember implements Serializable {
         return criteria(Set.of("users", "username"));
     }
 
-    public String querySql() {
-        return """
-                select a.*, b.name as group_name, b.extend as group_extend,c.name as login_name,c.username
-                from se_group_members a
-                inner join se_groups b on a.group_code = b.code
-                inner join se_users c on c.code = a.user_code
-                """;
-    }
-
-    public String countSql() {
-        return """
-                select count(*) from se_group_members a
-                inner join se_groups b on a.group_code = b.code
-                inner join se_users c on c.code = a.user_code
-                """;
-    }
-
     public ParamSql toParamSql() {
         ParamSql paramSql = CriteriaUtils.applyParamsSql(this, List.of("users", "username"), "a");
 

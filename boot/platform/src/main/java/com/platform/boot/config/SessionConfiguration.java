@@ -25,11 +25,6 @@ import java.util.List;
 @Configuration(proxyBeanMethods = false)
 public class SessionConfiguration {
 
-    /**
-     * Bean for WebSessionIdResolver.
-     *
-     * @return HeaderWebSessionIdResolver
-     */
     @Bean
     public WebSessionIdResolver webSessionIdResolver() {
         HeaderWebSessionIdResolver resolver = new CustomHeaderWebSessionIdResolver();
@@ -37,9 +32,6 @@ public class SessionConfiguration {
         return resolver;
     }
 
-    /**
-     * CustomHeaderWebSessionIdResolver class.
-     */
     static class CustomHeaderWebSessionIdResolver extends HeaderWebSessionIdResolver {
         private final CookieWebSessionIdResolver cookieWebSessionIdResolver = new CookieWebSessionIdResolver();
 

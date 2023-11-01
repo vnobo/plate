@@ -57,12 +57,6 @@ public class UsersService extends AbstractDatabase {
         return queryWithCache(code, userMono).next();
     }
 
-    /**
-     * Add a user.
-     *
-     * @param request the request of user.
-     * @return a mono of the User
-     */
     public Mono<User> add(UserRequest request) {
         return this.usersRepository.existsByUsernameIgnoreCase(request.getUsername()).flatMap(exists -> {
             if (exists) {
@@ -73,14 +67,6 @@ public class UsersService extends AbstractDatabase {
         });
     }
 
-    /**
-     * Operates on the given {@link UserRequest} and returns the {@link Mono} of {@link User}.
-     * If the request contains a password, it is encoded before being saved.
-     * The cache is also cleared after the operation is finished.
-     *
-     * @param request The {@link UserRequest} to be operated on
-     * @return A {@link Mono} of the saved {@link User}
-     */
     public Mono<User> operate(UserRequest request) {
         request.setPassword(this.upgradeEncodingIfPassword(request.getPassword()));
         var userMono = this.usersRepository.findByCode(request.getCode()).defaultIfEmpty(request.toUser());
@@ -96,29 +82,11 @@ public class UsersService extends AbstractDatabase {
                 .doAfterTerminate(() -> this.cache.clear());
     }
 
-    /**
-     * This method is used to change the password of the user with the given username
-     * to the given new password. It will also
-     * invalidate the cache once the password has been changed.
-     *
-     * @param username    The username of the user whose password is to be changed.
-     * @param newPassword The new password to be set for the given user.
-     * @return A {@link Mono} indicating the completion of the operation.
-     */
     public Mono<Void> changePassword(String username, String newPassword) {
         return this.usersRepository.changePassword(username, newPassword).then()
                 .doAfterTerminate(() -> this.cache.clear());
     }
 
-    /**
-     * Saves the given User entity.
-     * If the user is new, it is inserted into the repository.
-     * If the user is existing, it is updated in the repository.
-     * Properties such as createdTime and password will be ignored during the update.
-     *
-     * @param user The User entity to be saved.
-     * @return A Mono containing the saved user.
-     */
     public Mono<User> save(User user) {
         if (user.isNew()) {
             return this.usersRepository.save(user);
@@ -138,13 +106,7 @@ public class UsersService extends AbstractDatabase {
         }
     }
 
-    /**
-     * This method upgrades the encoding of the user password if necessary.
-     *
-     * @param password The user request containing the authentication data.
-     */
     private String upgradeEncodingIfPassword(String password) {
-        // Check if password exists and the encoding needs to be upgraded
         if (StringUtils.hasLength(password) &&
                 this.passwordEncoder.upgradeEncoding(password)) {
             // Encode the password

@@ -14,12 +14,6 @@ import org.springframework.web.reactive.result.method.annotation.ArgumentResolve
 @Configuration(proxyBeanMethods = false)
 public class WebConfiguration implements WebFluxConfigurer {
 
-    /**
-     * Configures a custom argument resolver for Reactive Spring WebFlux.
-     * The custom argument resolver allows for easier pagination of large data sets.
-     *
-     * @param configurer the argument resolver configurer
-     */
     @Override
     public void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
         ReactivePageableHandlerMethodArgumentResolver pageableResolver =
