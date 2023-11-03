@@ -14,6 +14,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -24,13 +25,13 @@ import reactor.core.publisher.Mono;
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
+@Component
 public class CaptchaFilter implements WebFilter, Ordered {
     public static final ServerWebExchangeMatcher DEFAULT_CAPTCHA_MATCHER =
             new PathPatternParserServerWebExchangeMatcher("/oauth2/token");
 
     private final ServerAccessDeniedHandler accessDeniedHandler = new CaptchaServerAccessDeniedHandler(
             HttpStatus.FORBIDDEN);
-
     private final ServerWebExchangeMatcher requireCaptchaProtectionMatcher = DEFAULT_CAPTCHA_MATCHER;
     private final CaptchaRepository captchaTokenRepository;
 
