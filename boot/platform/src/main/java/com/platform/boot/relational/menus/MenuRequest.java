@@ -24,6 +24,8 @@ public class MenuRequest extends Menu {
 
     private String icons;
 
+    private Set<String> rules;
+
     @Valid
     private Set<MenuRequest> menus;
 
@@ -53,7 +55,7 @@ public class MenuRequest extends Menu {
     }
 
     public Criteria toCriteria() {
-        Criteria criteria = criteria(Set.of("permissions", "tenantCode", "icons", "menus"));
+        Criteria criteria = criteria(Set.of("permissions", "tenantCode", "icons", "menus", "rules"));
 
         if (StringUtils.hasLength(getTenantCode())) {
             criteria = criteria.and("tenantCode").is(this.getTenantCode());
@@ -61,6 +63,10 @@ public class MenuRequest extends Menu {
 
         if (StringUtils.hasLength(getAuthority())) {
             criteria = criteria.and("authority").is(this.getAuthority());
+        }
+
+        if (!ObjectUtils.isEmpty(getRules())) {
+            criteria = criteria.and("authority").in(this.getRules());
         }
 
         return criteria;

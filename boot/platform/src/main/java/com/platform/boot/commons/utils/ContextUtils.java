@@ -47,7 +47,7 @@ public final class ContextUtils implements Serializable {
             "HTTP_VIA",
             "REMOTE_ADDR"
     };
-
+    public final static String RULE_ADMINISTRATORS = "ROLE_ADMINISTRATORS";
     public final static String CSRF_TOKEN_CONTEXT = "CSRF_TOKEN_CONTEXT";
     public final static String SECURITY_AUTH_TOKEN_HEADER = "X-Auth-Token";
     public static ObjectMapper OBJECT_MAPPER;

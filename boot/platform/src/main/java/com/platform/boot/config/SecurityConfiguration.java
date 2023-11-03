@@ -59,7 +59,6 @@ public class SecurityConfiguration {
             exchange.anyExchange().authenticated();
         });
         http.securityContextRepository(new WebSessionServerSecurityContextRepository());
-        http.formLogin(Customizer.withDefaults());
         http.httpBasic(httpBasicSpec -> httpBasicSpec
                 .authenticationEntryPoint(new CustomServerAuthenticationEntryPoint()));
         http.formLogin(Customizer.withDefaults());

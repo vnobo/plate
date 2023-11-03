@@ -20,12 +20,6 @@ public record AuthenticationToken(String token, Long expires, Long lastAccessTim
         return new AuthenticationToken(token, Long.parseLong(expires), lastAccessTime);
     }
 
-    /**
-     * Builds an authentication token from a web session
-     *
-     * @param session The web session
-     * @return The authentication token
-     */
     public static AuthenticationToken build(WebSession session) {
         return new AuthenticationToken(session.getId(), session.getMaxIdleTime().getSeconds(),
                 session.getLastAccessTime().getEpochSecond());
