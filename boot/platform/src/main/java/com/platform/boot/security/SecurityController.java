@@ -94,7 +94,7 @@ public class SecurityController {
     }
 
     @Data
-    public static class ChangePasswordRequest {
+    static class ChangePasswordRequest {
 
         @NotBlank(message = "Password not empty!")
         private String password;

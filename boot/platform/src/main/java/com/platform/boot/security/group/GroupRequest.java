@@ -23,11 +23,6 @@ public class GroupRequest extends Group {
         return this;
     }
 
-    public GroupRequest id(Integer id) {
-        this.setId(id);
-        return this;
-    }
-
     public Group toGroup() {
         return BeanUtils.copyProperties(this, Group.class);
     }

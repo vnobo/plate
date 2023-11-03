@@ -1,7 +1,7 @@
 logging:
   register-shutdown-hook: true
   level:
-    #web: debug
+    web: debug
     com.platform.boot.*: debug
     org.springframework.r2dbc: debug
     #io.r2dbc.postgresql.QUERY: debug
@@ -23,7 +23,7 @@ spring:
       max-acquire-time: 5s
       validation-query: "select version()"
   sql.init:
-    mode: never
+    mode: always
     platform: postgres
     encoding: utf-8
   data.redis:

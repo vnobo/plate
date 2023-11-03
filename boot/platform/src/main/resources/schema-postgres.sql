@@ -42,7 +42,6 @@ create table if not exists se_groups
 (
     id           serial8 primary key,
     code         varchar(64)  not null unique,
-    pcode        varchar(64)  not null default '0',
     tenant_code  varchar(64)  not null default '0',
     name         varchar(512) not null,
     extend       jsonb,
@@ -51,7 +50,7 @@ create table if not exists se_groups
     created_time timestamp             default current_timestamp,
     updated_time timestamp             default current_timestamp
 );
-create index se_groups_pcode_tenant_code_name_idx on se_groups (pcode, tenant_code, name);
+create index se_groups_tenant_code_name_idx on se_groups (tenant_code, name);
 create index se_groups_extend_gin_idx on se_groups using gin (extend);
 comment on table se_groups is '角色表';
 
@@ -90,7 +89,6 @@ create table if not exists se_tenants
 (
     id           serial primary key,
     code    varchar(64)  not null unique,
-    pcode   varchar(64)  not null,
     name    varchar(512) not null,
     description  text,
     extend       jsonb,
@@ -99,7 +97,7 @@ create table if not exists se_tenants
     created_time timestamp default current_timestamp,
     updated_time timestamp default current_timestamp
 );
-create index se_tenants_tenant_code_name_idx on se_tenants (pcode, name);
+create index se_tenants_name_idx on se_tenants (name);
 create index se_tenants_extend_gin_idx on se_tenants using gin (extend);
 comment on table se_tenants is '租户表';
 

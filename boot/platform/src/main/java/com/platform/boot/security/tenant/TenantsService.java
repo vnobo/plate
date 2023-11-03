@@ -26,7 +26,8 @@ public class TenantsService extends AbstractDatabase {
     public Flux<Tenant> search(TenantRequest request, Pageable pageable) {
         var cacheKey = ContextUtils.cacheKey(request, pageable);
         var query = Query.query(request.toCriteria()).with(pageable);
-        return super.queryWithCache(cacheKey, query, Tenant.class).flatMap(ContextUtils::userAuditorSerializable);
+        return super.queryWithCache(cacheKey, query, Tenant.class)
+                .flatMap(ContextUtils::userAuditorSerializable);
     }
 
     public Mono<Page<Tenant>> page(TenantRequest request, Pageable pageable) {

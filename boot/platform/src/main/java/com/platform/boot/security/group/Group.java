@@ -22,8 +22,6 @@ public class Group implements BaseEntity<Integer> {
 
     private String code;
 
-    private String pcode;
-
     @NotBlank(message = "Tenant [tenantCode] not be empty!")
     private String tenantCode;
 

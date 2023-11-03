@@ -1,6 +1,7 @@
 package com.platform.boot.security;
 
 import com.platform.boot.commons.base.AbstractDatabase;
+import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.security.group.authority.GroupAuthority;
 import com.platform.boot.security.group.member.GroupMemberResponse;
 import com.platform.boot.security.tenant.member.TenantMemberResponse;
@@ -72,10 +73,10 @@ public class SecurityManager extends AbstractDatabase
         var userMono = this.usersService.loadByUsername(username)
                 .zipWhen(user -> this.authorities(user.getCode()));
 
-        var tuple2Mono = userMono
+        var userDetailsMono = userMono
                 .flatMap(tuple2 -> buildUserDetails(tuple2.getT1(), new HashSet<>(tuple2.getT2())));
 
-        return tuple2Mono.onErrorResume(throwable -> Mono.error(new AuthenticationServiceException(
+        return userDetailsMono.onErrorResume(throwable -> Mono.error(new AuthenticationServiceException(
                 throwable.getLocalizedMessage(), throwable)));
     }
 
@@ -96,17 +97,20 @@ public class SecurityManager extends AbstractDatabase
 
     private Mono<List<GroupMemberResponse>> loadGroups(String userCode) {
         return this.queryWithCache("USER_GROUPS-" + userCode,
-                QUERY_GROUP_MEMBERS_SQL, Map.of("userCode", userCode), GroupMemberResponse.class).collectList();
+                        QUERY_GROUP_MEMBERS_SQL, Map.of("userCode", userCode), GroupMemberResponse.class)
+                .flatMap(ContextUtils::userAuditorSerializable).collectList();
     }
 
     private Mono<List<TenantMemberResponse>> loadTenants(String userCode) {
         return this.queryWithCache("USER_TENANTS-" + userCode,
-                QUERY_TENANT_MEMBERS_SQL, Map.of("userCode", userCode), TenantMemberResponse.class).collectList();
+                        QUERY_TENANT_MEMBERS_SQL, Map.of("userCode", userCode), TenantMemberResponse.class)
+                .flatMap(ContextUtils::userAuditorSerializable).collectList();
     }
 
     private Mono<List<GrantedAuthority>> authorities(String userCode) {
         return this.getAuthorities(userCode)
-                .concatWith(this.getGroupAuthorities(userCode)).distinct().collectList();
+                .concatWith(this.getGroupAuthorities(userCode))
+                .flatMap(ContextUtils::userAuditorSerializable).distinct().collectList();
     }
 
     private Flux<GrantedAuthority> getAuthorities(String userCode) {
@@ -122,10 +126,9 @@ public class SecurityManager extends AbstractDatabase
     }
 
     public Mono<Void> loginSuccess(String username) {
-        return this.entityTemplate.update(User.class)
-                .matching(Query.query(Criteria.where("username").is(username)))
-                .apply(Update.update("loginTime", LocalDateTime.now()))
-                .then();
+        Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
+        Update update = Update.update("loginTime", LocalDateTime.now());
+        return this.entityTemplate.update(User.class).matching(query).apply(update).then();
     }
 
 }
