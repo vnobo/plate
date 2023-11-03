@@ -25,7 +25,7 @@ public class GroupsService extends AbstractDatabase {
         var cacheKey = ContextUtils.cacheKey(request, pageable);
         Query query = Query.query(request.toCriteria()).with(pageable);
         return super.queryWithCache(cacheKey, query, Group.class)
-                .flatMap(ContextUtils::userAuditorSerializable);
+                .flatMap(ContextUtils::serializeUserAuditor);
     }
 
     public Mono<Page<Group>> page(GroupRequest request, Pageable pageable) {

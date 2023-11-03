@@ -42,7 +42,7 @@ public class TenantMemberRequest extends TenantMember {
 
     public ParamSql toParamSql() {
         ParamSql paramSql = CriteriaUtils
-                .applyParamsSql(this, List.of("users", "securityCode", "username"), "a");
+                .buildParamSql(this, List.of("users", "securityCode", "username"), "a");
 
         StringJoiner criteria = paramSql.sql();
         Map<String, Object> params = paramSql.params();

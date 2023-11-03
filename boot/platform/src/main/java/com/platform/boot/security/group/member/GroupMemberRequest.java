@@ -36,7 +36,7 @@ public class GroupMemberRequest extends GroupMember implements Serializable {
     }
 
     public ParamSql toParamSql() {
-        ParamSql paramSql = CriteriaUtils.applyParamsSql(this, List.of("users", "username"), "a");
+        ParamSql paramSql = CriteriaUtils.buildParamSql(this, List.of("users", "username"), "a");
 
         StringJoiner criteria = paramSql.sql();
         Map<String, Object> params = paramSql.params();

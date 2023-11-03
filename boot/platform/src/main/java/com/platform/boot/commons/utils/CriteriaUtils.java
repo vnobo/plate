@@ -73,7 +73,7 @@ public final class CriteriaUtils {
      * @param prefix   the prefix for the SQL clause
      * @return the generated WHERE SQL clause
      */
-    public static ParamSql applyParamsSql(Object object, Collection<String> skipKeys, String prefix) {
+    public static ParamSql buildParamSql(Object object, Collection<String> skipKeys, String prefix) {
 
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         if (ObjectUtils.isEmpty(objectMap)) {
@@ -86,7 +86,7 @@ public final class CriteriaUtils {
         }
 
         objectMap = Maps.filterKeys(objectMap, key -> !removeKeys.contains(key));
-        return applyParamsSql(objectMap, prefix);
+        return buildParamSql(objectMap, prefix);
     }
 
     /**
@@ -96,7 +96,7 @@ public final class CriteriaUtils {
      * @param prefix    a prefix to be added to each column in the WHERE clause
      * @return a string representing the WHERE clause for the SQL query
      */
-    public static ParamSql applyParamsSql(Map<String, Object> objectMap, String prefix) {
+    public static ParamSql buildParamSql(Map<String, Object> objectMap, String prefix) {
         StringJoiner whereSql = new StringJoiner(" and ");
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
             String key = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey());

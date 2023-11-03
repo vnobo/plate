@@ -32,7 +32,7 @@ public class UsersService extends AbstractDatabase {
         ParamSql paramSql = QueryJson.queryJson(request.getQuery());
         String query = "select * from se_users" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
         return super.queryWithCache(cacheKey, query, paramSql.params(), UserResponse.class)
-                .flatMapSequential(ContextUtils::userAuditorSerializable);
+                .flatMapSequential(ContextUtils::serializeUserAuditor);
     }
 
     public Mono<Page<UserResponse>> page(UserRequest request, Pageable pageable) {

@@ -35,7 +35,7 @@ public class GroupAuthoritiesService extends AbstractDatabase {
         Query query = Query.query(request.toCriteria()).with(pageable);
 
         return super.queryWithCache(cacheKey, query, GroupAuthority.class)
-                .flatMap(ContextUtils::userAuditorSerializable);
+                .flatMap(ContextUtils::serializeUserAuditor);
     }
 
     public Mono<Page<GroupAuthority>> page(GroupAuthorityRequest request, Pageable pageable) {

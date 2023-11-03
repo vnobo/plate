@@ -27,7 +27,7 @@ public class TenantsService extends AbstractDatabase {
         var cacheKey = ContextUtils.cacheKey(request, pageable);
         var query = Query.query(request.toCriteria()).with(pageable);
         return super.queryWithCache(cacheKey, query, Tenant.class)
-                .flatMap(ContextUtils::userAuditorSerializable);
+                .flatMap(ContextUtils::serializeUserAuditor);
     }
 
     public Mono<Page<Tenant>> page(TenantRequest request, Pageable pageable) {

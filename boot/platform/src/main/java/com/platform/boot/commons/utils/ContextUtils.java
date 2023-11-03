@@ -118,31 +118,34 @@ public final class ContextUtils implements Serializable {
                 .cast(SecurityDetails.class);
     }
 
-    public static <T> Mono<T> userAuditorSerializable(T obejct) {
-        PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(obejct.getClass());
+    public static <T> Mono<T> serializeUserAuditor(T object) {
+        PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(object.getClass());
         var setPropertyStream = Arrays.stream(propertyDescriptors)
                 .filter(propertyDescriptor -> propertyDescriptor.getPropertyType() == UserAuditor.class);
-        var propertyFlux = Flux.fromStream(setPropertyStream).flatMap(propertyDescriptor -> {
-            try {
-                UserAuditor userAuditor = (UserAuditor) propertyDescriptor.getReadMethod().invoke(obejct);
-                if (ObjectUtils.isEmpty(userAuditor)) {
-                    return Mono.just(obejct);
-                }
-                return USERS_SERVICE.loadByCode(userAuditor.code()).flatMap(user -> {
-                    try {
-                        propertyDescriptor.getWriteMethod().invoke(obejct, UserAuditor.withUser(user));
-                        return Mono.just(obejct);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        return Mono.error(RestServerException.withMsg(
-                                "User auditor serialization getWriteMethod invoke error!", e));
-                    }
-                });
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                return Mono.error(RestServerException.withMsg(
-                        "User auditor serialization getReadMethod invoke error!", e));
+        var propertyFlux = Flux.fromStream(setPropertyStream)
+                .flatMap(propertyDescriptor -> handlePropertyDescriptor(object, propertyDescriptor));
+        return propertyFlux.then(Mono.just(object));
+    }
+
+    private static <T> Mono<String> handlePropertyDescriptor(T object, PropertyDescriptor propertyDescriptor) {
+        try {
+            UserAuditor userAuditor = (UserAuditor) propertyDescriptor.getReadMethod().invoke(object);
+            if (ObjectUtils.isEmpty(userAuditor)) {
+                return Mono.just("User auditor is empty, No serializable." + propertyDescriptor.getName());
             }
-        });
-        return propertyFlux.then(Mono.just(obejct));
+            return USERS_SERVICE.loadByCode(userAuditor.code()).flatMap(user -> {
+                try {
+                    propertyDescriptor.getWriteMethod().invoke(object, UserAuditor.withUser(user));
+                    return Mono.just("User auditor serializable success. " + propertyDescriptor.getName());
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    return Mono.error(RestServerException.withMsg(
+                            "User auditor serialization getWriteMethod invoke error!", e));
+                }
+            });
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            return Mono.error(RestServerException.withMsg(
+                    "User auditor serialization getReadMethod invoke error!", e));
+        }
     }
 
     public static String nextId() {

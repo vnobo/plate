@@ -98,19 +98,19 @@ public class SecurityManager extends AbstractDatabase
     private Mono<List<GroupMemberResponse>> loadGroups(String userCode) {
         return this.queryWithCache("USER_GROUPS-" + userCode,
                         QUERY_GROUP_MEMBERS_SQL, Map.of("userCode", userCode), GroupMemberResponse.class)
-                .flatMap(ContextUtils::userAuditorSerializable).collectList();
+                .flatMap(ContextUtils::serializeUserAuditor).collectList();
     }
 
     private Mono<List<TenantMemberResponse>> loadTenants(String userCode) {
         return this.queryWithCache("USER_TENANTS-" + userCode,
                         QUERY_TENANT_MEMBERS_SQL, Map.of("userCode", userCode), TenantMemberResponse.class)
-                .flatMap(ContextUtils::userAuditorSerializable).collectList();
+                .flatMap(ContextUtils::serializeUserAuditor).collectList();
     }
 
     private Mono<List<GrantedAuthority>> authorities(String userCode) {
         return this.getAuthorities(userCode)
                 .concatWith(this.getGroupAuthorities(userCode))
-                .flatMap(ContextUtils::userAuditorSerializable).distinct().collectList();
+                .flatMap(ContextUtils::serializeUserAuditor).distinct().collectList();
     }
 
     private Flux<GrantedAuthority> getAuthorities(String userCode) {
