@@ -153,7 +153,7 @@
         </unit>
     <unit id="siteTitlePrefix">
           <notes>
-            <note category="location">src/app/shared/page-title-strategy.service.ts:16</note>
+            <note category="location">src/app/shared/title-strategy.service.ts:16</note>
           </notes>
           <segment>
             <source>盘子管理平台 | <ph id="0" equiv="PH" disp="title"/></source>

@@ -1,13 +1,21 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {LoadingService} from "./shared/loading.service";
 
 @Component({
-  // Selector for the component
   selector: 'app-root',
-  // Template URL for the component
   templateUrl: './app.component.html',
-  // Styles URL for the component
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+
+  loadingShow: boolean;
+
+  constructor(private loading: LoadingService) {
+    this.loadingShow = false;
+  }
+
+  ngOnInit(): void {
+    this.loading.progress$.subscribe(res => this.loadingShow = res);
+  }
 
 }

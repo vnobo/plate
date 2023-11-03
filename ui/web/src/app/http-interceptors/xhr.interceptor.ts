@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
 import {finalize, Observable} from 'rxjs';
-import {ProgressBarService} from "../shared/progress-bar.service";
+import {LoadingService} from "../shared/loading.service";
 
 /**
  * This code is an interceptor that adds a header to the request and shows a progress bar while the request is being processed. It then sends the request to the next handler and hides the progress bar when the request is finished.
@@ -16,17 +16,17 @@ import {ProgressBarService} from "../shared/progress-bar.service";
 @Injectable()
 export class XhrInterceptor implements HttpInterceptor {
 
-  constructor(private progressBar: ProgressBarService) {
+  constructor(private loading: LoadingService) {
   }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    this.progressBar.show();
+    this.loading.show();
     const originalUrl = '/api' + req.url;
     const xhrReq = req.clone({
       headers: req.headers.set('X-Requested-With', 'XMLHttpRequest'),
       url: originalUrl
     });
-    return next.handle(xhrReq).pipe(finalize(() => this.progressBar.hide()));
+    return next.handle(xhrReq).pipe(finalize(() => this.loading.hide()));
   }
 
 }

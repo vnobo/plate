@@ -9,6 +9,9 @@ import {httpInterceptorProviders} from "./http-interceptors";
 import {HttpClientXsrfModule} from "@angular/common/http";
 import {SharedModule} from "./shared/shared.module";
 import {PageNotFoundComponent} from "./pages/page-not-found/page-not-found.component";
+import {NzSpinModule} from "ng-zorro-antd/spin";
+import {NzBackTopModule} from "ng-zorro-antd/back-top";
+import {NzResultModule} from "ng-zorro-antd/result";
 
 @NgModule({
   declarations: [
@@ -29,7 +32,10 @@ import {PageNotFoundComponent} from "./pages/page-not-found/page-not-found.compo
     }),
     RouterModule,
     AppRoutingModule,
-    SharedModule
+    SharedModule,
+    NzSpinModule,
+    NzBackTopModule,
+    NzResultModule
   ],
   providers: [
     httpInterceptorProviders,

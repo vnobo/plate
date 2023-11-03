@@ -1,10 +1,8 @@
 import {Injectable} from '@angular/core';
 import {Observable, Subject} from "rxjs";
 
-@Injectable({
-  providedIn: 'root'
-})
-export class ProgressBarService {
+@Injectable({providedIn: "root"})
+export class LoadingService {
 
   // Observable string sources
   private progressSource: Subject<boolean> = new Subject<boolean>();

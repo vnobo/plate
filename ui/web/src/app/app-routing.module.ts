@@ -1,10 +1,10 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes, TitleStrategy} from '@angular/router';
 import {PageNotFoundComponent} from "./pages/page-not-found/page-not-found.component";
-import {PageTitleStrategy} from "./shared/page-title-strategy.service";
+import {PageTitleStrategy} from "./shared/title-strategy.service";
 
 const routes: Routes = [
-  {path: 'welcome', loadChildren: () => import('./pages/welcome/welcome.module').then(m => m.WelcomeModule)},
+  {path: 'welcome', loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule)},
   {
     path: 'auth', loadChildren: () => import('./security/security.module').then(m => m.SecurityModule),
     title: "系统登录"
