@@ -1,34 +1,51 @@
 <nz-layout class="layout">
-  <nz-sider [nzCollapsedWidth]="0" nzBreakpoint="lg" nzCollapsible>
+  <nz-header>
     <div class="logo"></div>
-    <ul [nzInlineCollapsed]="isCollapsed" nz-menu nzMode="inline" nzTheme="dark">
-      <li nz-submenu nzIcon="dashboard" nzOpen nzTitle="Dashboard">
-        <ul>
-          <li nz-menu-item nzMatchRouter>
-            <a routerLink="/welcome">Welcome</a>
-          </li>
-          <li nz-menu-item nzMatchRouter>
-            <a>Monitor</a>
-          </li>
-          <li nz-menu-item nzMatchRouter>
-            <a>Workplace</a>
-          </li>
-        </ul>
-      </li>
-      <li nz-submenu nzIcon="form" nzOpen nzTitle="Form">
-        <ul>
-          <li nz-menu-item nzMatchRouter>
-            <a>Basic Form</a>
-          </li>
-        </ul>
-      </li>
+    <ul class="header-menu" nz-menu nzMode="horizontal" nzTheme="dark">
+      <li nz-menu-item nzSelected>nav 1</li>
+      <li nz-menu-item>nav 2</li>
+      <li nz-menu-item>nav 3</li>
     </ul>
-  </nz-sider>
+  </nz-header>
   <nz-layout>
-    <nz-header></nz-header>
-    <nz-content>
-      <div class="inner-content">Content</div>
-    </nz-content>
-    <nz-footer>Ant Design ©2020 Implement By Angular</nz-footer>
+    <nz-sider nzTheme="light" nzWidth="14.5rem">
+      <ul class="sider-menu" nz-menu nzMode="inline">
+        <li nz-submenu nzIcon="user" nzOpen nzTitle="subnav 1">
+          <ul>
+            <li nz-menu-item nzSelected>option1</li>
+            <li nz-menu-item>option2</li>
+            <li nz-menu-item>option3</li>
+            <li nz-menu-item>option4</li>
+          </ul>
+        </li>
+        <li nz-submenu nzIcon="laptop" nzTitle="subnav 2">
+          <ul>
+            <li nz-menu-item>option5</li>
+            <li nz-menu-item>option6</li>
+            <li nz-menu-item>option7</li>
+            <li nz-menu-item>option8</li>
+          </ul>
+        </li>
+        <li nz-submenu nzIcon="notification" nzTitle="subnav 3">
+          <ul>
+            <li nz-menu-item>option9</li>
+            <li nz-menu-item>option10</li>
+            <li nz-menu-item>option11</li>
+            <li nz-menu-item>option12</li>
+          </ul>
+        </li>
+      </ul>
+    </nz-sider>
+    <nz-layout class="inner-layout">
+      <nz-breadcrumb>
+        <nz-breadcrumb-item>Home</nz-breadcrumb-item>
+        <nz-breadcrumb-item>List</nz-breadcrumb-item>
+        <nz-breadcrumb-item>App</nz-breadcrumb-item>
+      </nz-breadcrumb>
+      <nz-content>
+        <div class="inner-content">Content</div>
+      </nz-content>
+      <nz-footer>Ant Design ©2020 Implement By Angular</nz-footer>
+    </nz-layout>
   </nz-layout>
 </nz-layout>

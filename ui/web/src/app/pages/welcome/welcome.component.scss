@@ -8,26 +8,31 @@
 }
 
 .logo {
+  width: 9.8rem;
   height: 2.5rem;
-  background: rgba(217, 33, 33, 0.2);
-  margin: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0.8rem 2.2rem 1rem 0;
+  float: left;
 }
 
-nz-header {
-  background: #173494;
-  padding: 0;
+.header-menu {
+  line-height: 4rem;
+}
+
+.sider-menu {
+  height: 100%;
+  border-right: 0;
+}
+
+.inner-layout {
+  padding: 0 1.2rem 1.2rem;
+}
+
+nz-breadcrumb {
+  margin: 1rem 0;
 }
 
 nz-content {
-  margin: 0.5rem 0.2rem 0;
-}
-
-.inner-content {
-  padding: 2rem;
   background: #fff;
-  min-height: 12rem;
-}
-
-nz-footer {
-  text-align: center;
+  padding: 1rem;
 }

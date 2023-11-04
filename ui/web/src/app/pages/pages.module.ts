@@ -4,16 +4,15 @@ import {PagesRoutingModule} from './pages-routing.module';
 
 import {WelcomeComponent} from './welcome/welcome.component';
 import {PageNotFoundComponent} from "./page-not-found/page-not-found.component";
-import {SecurityModule} from "./security/security.module";
 import {SharedModule} from "../shared/shared.module";
 
 @NgModule({
   imports: [
     PagesRoutingModule,
-    SecurityModule,
     SharedModule
   ],
-  declarations: [WelcomeComponent, PageNotFoundComponent]
+  declarations: [WelcomeComponent, PageNotFoundComponent],
+  exports: [PageNotFoundComponent]
 })
 export class PagesModule {
   constructor(@Optional() @SkipSelf() parentModule?: PagesModule) {

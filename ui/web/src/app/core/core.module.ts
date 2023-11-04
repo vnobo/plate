@@ -1,8 +1,11 @@
 import {NgModule, Optional, SkipSelf} from '@angular/core';
+import {httpInterceptorProviders} from "./http-interceptors";
 
 
 @NgModule({
-  providers: []
+  providers: [
+    httpInterceptorProviders
+  ]
 })
 export class CoreModule {
   constructor(@Optional() @SkipSelf() parentModule?: CoreModule) {

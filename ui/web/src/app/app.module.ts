@@ -4,7 +4,6 @@ import {AppComponent} from './app.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ServiceWorkerModule} from '@angular/service-worker';
 import {TitleStrategy} from '@angular/router';
-import {httpInterceptorProviders} from "./core/http-interceptors";
 import {HttpClientXsrfModule} from "@angular/common/http";
 import {SharedModule} from "./shared/shared.module";
 import {PagesModule} from "./pages/pages.module";
@@ -30,7 +29,6 @@ import {CoreModule} from "./core/core.module";
     PagesModule
   ],
   providers: [
-    httpInterceptorProviders,
     {provide: APP_ID, useValue: 'serverApp'},
     {provide: TitleStrategy, useClass: PageTitleStrategy}
   ],
