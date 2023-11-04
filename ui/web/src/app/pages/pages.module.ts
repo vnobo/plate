@@ -1,28 +1,25 @@
-import {NgModule} from '@angular/core';
+import {NgModule, Optional, SkipSelf} from '@angular/core';
 
 import {PagesRoutingModule} from './pages-routing.module';
 
 import {WelcomeComponent} from './welcome/welcome.component';
-import {NzIconModule} from "ng-zorro-antd/icon";
-import {NzLayoutModule} from "ng-zorro-antd/layout";
-import {NzMenuModule} from "ng-zorro-antd/menu";
-import {NzSliderModule} from "ng-zorro-antd/slider";
-import {NzResultModule} from "ng-zorro-antd/result";
+import {PageNotFoundComponent} from "./page-not-found/page-not-found.component";
+import {SecurityModule} from "./security/security.module";
+import {SharedModule} from "../shared/shared.module";
 
 @NgModule({
   imports: [
     PagesRoutingModule,
-    NzIconModule,
-    NzLayoutModule,
-    NzMenuModule,
-    NzSliderModule,
-    NzLayoutModule,
-    NzMenuModule,
-    NzIconModule,
-    NzResultModule
+    SecurityModule,
+    SharedModule
   ],
-  declarations: [WelcomeComponent],
-  exports: [WelcomeComponent]
+  declarations: [WelcomeComponent, PageNotFoundComponent]
 })
 export class PagesModule {
+  constructor(@Optional() @SkipSelf() parentModule?: PagesModule) {
+    if (parentModule) {
+      throw new Error(
+        'PagesModule is already loaded. Import it in the AppModule only');
+    }
+  }
 }

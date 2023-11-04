@@ -37,8 +37,9 @@ public class MenusService extends AbstractDatabase {
 
     public Flux<Menu> search(MenuRequest request) {
         var cacheKey = ContextUtils.cacheKey(request);
-        Query query = Query.query(request.toCriteria()).sort(Sort.by("sort"));
-        return this.queryWithCache(cacheKey, query, Menu.class);
+        Query query = Query.query(request.toCriteria()).sort(Sort.by("id").descending());
+        return this.queryWithCache(cacheKey, query, Menu.class)
+                .flatMap(ContextUtils::serializeUserAuditor);
     }
 
     public Mono<Menu> add(MenuRequest request) {
@@ -46,7 +47,7 @@ public class MenusService extends AbstractDatabase {
         return this.entityTemplate.exists(Query.query(criteria), Menu.class).filter(isExists -> !isExists)
                 .switchIfEmpty(Mono.error(RestServerException
                         .withMsg("Add menu[" + request.getName() + "] is exists",
-                                "Menu already exists, Please choose another name. is params: " + criteria)))
+                                "The menu already exists, please try another name. is params: " + criteria)))
                 .flatMap((b) -> this.operate(request));
     }
 
@@ -54,7 +55,7 @@ public class MenusService extends AbstractDatabase {
         var oldMunuMono = this.menusRepository.findByCode(request.getCode())
                 .switchIfEmpty(Mono.error(RestServerException.withMsg(
                         "Modify menu [" + request.getName() + "] is empty",
-                        "Menu does not exist, Please choose another name. is code: " + request.getCode())));
+                        "The menu does not exist, please choose another name. is code: " + request.getCode())));
         oldMunuMono = oldMunuMono.flatMap(old -> {
             request.setId(old.getId());
             request.setAuthority(old.getAuthority());

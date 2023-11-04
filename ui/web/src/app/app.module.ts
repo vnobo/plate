@@ -1,23 +1,18 @@
 import {APP_ID, isDevMode, NgModule} from '@angular/core';
 
-import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ServiceWorkerModule} from '@angular/service-worker';
-import {RouterModule} from '@angular/router';
-import {httpInterceptorProviders} from "./http-interceptors";
+import {TitleStrategy} from '@angular/router';
+import {httpInterceptorProviders} from "./core/http-interceptors";
 import {HttpClientXsrfModule} from "@angular/common/http";
 import {SharedModule} from "./shared/shared.module";
-import {PageNotFoundComponent} from "./pages/page-not-found/page-not-found.component";
-import {NzSpinModule} from "ng-zorro-antd/spin";
-import {NzBackTopModule} from "ng-zorro-antd/back-top";
-import {NzResultModule} from "ng-zorro-antd/result";
+import {PagesModule} from "./pages/pages.module";
+import {PageTitleStrategy} from "./core/title-strategy.service";
+import {CoreModule} from "./core/core.module";
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    PageNotFoundComponent
-  ],
+  declarations: [AppComponent],
   imports: [
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
@@ -30,16 +25,14 @@ import {NzResultModule} from "ng-zorro-antd/result";
       cookieName: 'XSRF-TOKEN',
       headerName: 'X-XSRF-TOKEN'
     }),
-    RouterModule,
-    AppRoutingModule,
+    CoreModule,
     SharedModule,
-    NzSpinModule,
-    NzBackTopModule,
-    NzResultModule
+    PagesModule
   ],
   providers: [
     httpInterceptorProviders,
-    {provide: APP_ID, useValue: 'serverApp'}
+    {provide: APP_ID, useValue: 'serverApp'},
+    {provide: TitleStrategy, useClass: PageTitleStrategy}
   ],
   bootstrap: [AppComponent]
 })

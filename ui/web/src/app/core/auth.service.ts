@@ -24,12 +24,11 @@ export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = () => 
 })
 export class AuthService {
 
-  private sessionKey = 'x-auth-token';
-  private authenticatedSource = new Subject<boolean>();
   isLoggedIn = false;
   // store the URL so we can redirect after logging in
   loginUrl = '/auth/login';
-
+  private sessionKey = 'x-auth-token';
+  private authenticatedSource = new Subject<boolean>();
   authenticated$ = this.authenticatedSource.asObservable();
 
   authToken(): string {

@@ -2,7 +2,7 @@ import {NgModule, Optional, SkipSelf} from '@angular/core';
 
 import {SecurityRoutingModule} from './security-routing.module';
 import {LoginComponent} from './login/login.component';
-import {SharedModule} from "../shared/shared.module";
+import {SharedModule} from "../../shared/shared.module";
 import {MAT_SNACK_BAR_DEFAULT_OPTIONS} from "@angular/material/snack-bar";
 import {NzDividerModule} from "ng-zorro-antd/divider";
 
