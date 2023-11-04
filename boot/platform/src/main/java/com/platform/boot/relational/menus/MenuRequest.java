@@ -22,9 +22,9 @@ import java.util.Set;
 @ToString(callSuper = true)
 public class MenuRequest extends Menu {
 
-    private String icons;
-
     private Set<String> rules;
+
+    private String icons;
 
     @Valid
     private Set<MenuRequest> menus;
@@ -57,15 +57,17 @@ public class MenuRequest extends Menu {
     public Criteria toCriteria() {
         Criteria criteria = criteria(Set.of("permissions", "tenantCode", "icons", "menus", "rules"));
 
-        if (StringUtils.hasLength(getTenantCode())) {
-            criteria = criteria.and("tenantCode").is(this.getTenantCode());
+        Criteria tenantCriteria = Criteria.where("tenantCode").is("0");
+        if (StringUtils.hasLength(this.getTenantCode())) {
+            tenantCriteria = tenantCriteria.or("tenantCode").is(this.getTenantCode());
         }
+        criteria = criteria.and(tenantCriteria);
 
-        if (StringUtils.hasLength(getAuthority())) {
+        if (StringUtils.hasLength(this.getAuthority())) {
             criteria = criteria.and("authority").is(this.getAuthority());
         }
 
-        if (!ObjectUtils.isEmpty(getRules())) {
+        if (!ObjectUtils.isEmpty(this.getRules())) {
             criteria = criteria.and("authority").in(this.getRules());
         }
 
