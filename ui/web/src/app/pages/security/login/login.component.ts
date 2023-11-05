@@ -42,7 +42,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.loginService.clearRememberMe();
     }
     this.loginService.login(credentials).subscribe((res) => {
-      this.router.navigate(['/welcome'], {relativeTo: this.route}).then();
+        this.router.navigate(['/index'], {relativeTo: this.route}).then();
     });
   }
 

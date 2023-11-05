@@ -28,3 +28,12 @@ insert into se_menus(code, pcode, type, authority, name, path, creator, updater,
 values ('1001', '1000', 'MENU', 'ROLE_MENU_SYSTEM_MENUS', 'MENUS', '/system/menus', 'U1000', 'U1000', '{
   "icons": "menu-2"
 }');
+insert into se_menus(code, type, authority, name, path, creator, updater, extend)
+values ('1002', 'FOLDER', 'ROLE_FOLDER_SYSTEM1', 'System manager1', '', 'U1000', 'U1000', '{
+  "icons": "settings"
+}');
+
+insert into se_menus(code, pcode, type, authority, name, path, creator, updater, extend)
+values ('1003', '1002', 'MENU', 'ROLE_MENU_SYSTEM_MENUS!', 'MENUS1', '/system/menus', 'U1000', 'U1000', '{
+  "icons": "menu-2"
+}');

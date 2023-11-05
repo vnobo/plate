@@ -1,5 +1,5 @@
 <nz-layout class="layout">
-  <nz-header>
+  <nz-header class="nz-header">
     <div class="logo"></div>
     <ul class="header-menu" nz-menu nzMode="horizontal" nzTheme="dark">
       <li nz-menu-item nzSelected>nav 1</li>
@@ -9,10 +9,13 @@
   </nz-header>
   <nz-layout>
     <nz-sider [nzCollapsedWidth]="0" nzBreakpoint="lg" nzCollapsible nzTheme="light" nzWidth="14.5rem">
-      <ul class="sider-menu" nz-menu nzMode="inline">
-        <li nz-submenu nzIcon="user" nzOpen nzTitle="subnav 1">
+      <ul class="sider-menu" nz-menu nzMode="inline" nzTheme="dark">
+        <li *ngFor="let menu of menus$|async; index as i" nz-submenu nzIcon="user" nzOpen
+            nzTitle="{{menu.name}}">
           <ul>
-            <li nz-menu-item nzSelected>option1</li>
+            <li *ngFor="let child of  menu.children; index as i" nz-menu-item nzSelected>
+              {{child.name}}
+            </li>
             <li nz-menu-item>option2</li>
             <li nz-menu-item>option3</li>
             <li nz-menu-item>option4</li>

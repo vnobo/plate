@@ -13,7 +13,7 @@ export class HandleErrorInterceptor implements HttpInterceptor {
   }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(request).pipe(timeout({each: 10000}),
+    return next.handle(request).pipe(timeout({first: 30_000, each: 10_000}),
       catchError(err => this.handleError(err)));
   }
 
