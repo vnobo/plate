@@ -15,13 +15,13 @@ export class MenusService {
         let params = new HttpParams({fromObject: request as any});
         return this.http.get<Menu[]>('/menus/me', {params: params})
             .pipe(switchMap(items => {
-                return from(items).pipe(delay(20),
+                return from(items).pipe(delay(100),
                     mergeMap(item => {
                         return this.getChildren({pcode: item.code}).pipe(map(children => {
                             item.children = children;
                             return item;
                         }));
-                    }));
+                    }), retry(3));
             }), toArray(), retry(3));
     }
 
