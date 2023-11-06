@@ -22,9 +22,6 @@ import org.springframework.web.server.ServerWebInputException;
 import java.util.List;
 
 /**
- * This class provides global exception handling for the application.
- * It handles various types of exceptions and returns an appropriate error response.
- *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @ControllerAdvice
@@ -32,13 +29,6 @@ public class GlobalExceptionHandler {
 
     private static final Log log = LogFactory.getLog(GlobalExceptionHandler.class);
 
-    /**
-     * Handles exceptions thrown when there is an error in the input provided by the client.
-     *
-     * @param exchange the server web exchange
-     * @param ex       the exception thrown
-     * @return a response entity with an error response
-     */
     @ExceptionHandler(ServerWebInputException.class)
     public ResponseEntity<ErrorResponse> handleBindException(ServerWebExchange exchange, ServerWebInputException ex) {
         List<String> errors = Lists.newArrayList(ex.getLocalizedMessage());
@@ -62,14 +52,6 @@ public class GlobalExceptionHandler {
                         4170, "请求参数验证失败!", errors));
     }
 
-
-    /**
-     * Handles exceptions thrown when there is an error in the database operation.
-     *
-     * @param exchange the server web exchange
-     * @param ex       the exception thrown
-     * @return a response entity with an error response
-     */
     @ExceptionHandler({DataAccessException.class, R2dbcException.class})
     public ResponseEntity<ErrorResponse> handleFailureException(ServerWebExchange exchange, RuntimeException ex) {
         List<String> errors = Lists.newArrayList(ex.getLocalizedMessage());
@@ -92,13 +74,6 @@ public class GlobalExceptionHandler {
                         5070, "数据库操作错误!", errors));
     }
 
-    /**
-     * Handles exceptions thrown when there is an error in the client request.
-     *
-     * @param exchange the server web exchange
-     * @param ex       the exception thrown
-     * @return a response entity with an error response
-     */
     @ExceptionHandler(ClientException.class)
     public ResponseEntity<ErrorResponse> handleClientException(ServerWebExchange exchange, ClientException ex) {
         log.error("%s内部服务访问错误! 信息: %s".formatted(exchange.getLogPrefix(), ex.getMessage()));
@@ -110,13 +85,6 @@ public class GlobalExceptionHandler {
                         ex.getCode(), ex.getServiceId() + "内部服务访问错误!", ex.getMsg()));
     }
 
-    /**
-     * Handles exceptions thrown when there is an error in the server.
-     *
-     * @param exchange the server web exchange
-     * @param ex       the exception thrown
-     * @return a response entity with an error response
-     */
     @ExceptionHandler(RestServerException.class)
     public ResponseEntity<ErrorResponse> handleRestServerException(ServerWebExchange exchange, RestServerException ex) {
         log.error("%s服务器自定义错误! 信息: %s".formatted(exchange.getLogPrefix(), ex.getMessage()));

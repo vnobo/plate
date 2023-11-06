@@ -35,10 +35,6 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * This class contains the security configuration for the application.
- * It sets up the security filters and rules for the application.
- * It also defines the beans required for the security configuration.
- *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Configuration(proxyBeanMethods = false)

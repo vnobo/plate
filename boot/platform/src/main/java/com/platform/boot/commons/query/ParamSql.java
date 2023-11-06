@@ -7,9 +7,6 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 /**
- * ParamSql represents a SQL query with parameters.
- * It includes a SQL string and a map of parameter values.
- * The whereSql() method returns the WHERE clause of the SQL query.
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 public record ParamSql(StringJoiner sql, Map<String, Object> params) implements Serializable {

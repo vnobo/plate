@@ -38,12 +38,6 @@ public abstract class AbstractService implements InitializingBean {
         this.cacheManager = cacheManager;
     }
 
-    /**
-     * Initializes the cache using the cacheManager and cacheName provided.
-     * If the cacheManager is null, a new ConcurrentMapCache is created.
-     *
-     * @param cacheName the name of the cache to be initialized
-     */
     protected void initializingCache(String cacheName) {
         this.cache = Optional.ofNullable(this.cacheManager).map(manager -> manager.getCache(cacheName))
                 .orElse(new ConcurrentMapCache(cacheName));

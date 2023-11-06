@@ -12,16 +12,11 @@ import java.time.LocalDateTime;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
- * This class represents a logger entity with various properties stored in a database table
- * named "se_loggers". It implements the BaseEntity interface with a type parameter of Long.
  */
 @Data
 @Table("se_loggers")
 public class Logger implements BaseEntity<Long> {
 
-    /**
-     * The unique identifier of the logger entity that serves as the primary key of the database table.
-     */
     @Id
     private Long id;
 

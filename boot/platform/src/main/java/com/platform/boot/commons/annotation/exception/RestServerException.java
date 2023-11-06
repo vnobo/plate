@@ -7,11 +7,6 @@ import lombok.EqualsAndHashCode;
 import java.io.Serializable;
 
 /**
- * This class represents a custom exception for the system.
- * It extends the RuntimeException class and implements Serializable.
- * It contains a message and a code to identify the error.
- * The class also provides static methods to create instances of the exception.
- *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Data

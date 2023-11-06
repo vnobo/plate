@@ -17,10 +17,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import java.util.List;
 
 /**
- * Configuration class for R2DBC autoconfiguration.
- * This class extends AbstractR2dbcConfiguration and enables R2DBC auditing and transaction management.
- * It also provides a custom ConnectionFactory and custom converters for JSON nodes and user auditing.
- *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Configuration(proxyBeanMethods = false)

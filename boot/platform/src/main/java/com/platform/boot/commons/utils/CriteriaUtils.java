@@ -3,7 +3,6 @@ package com.platform.boot.commons.utils;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.platform.boot.commons.query.ParamSql;
-import lombok.Data;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Criteria;
@@ -164,11 +163,5 @@ public final class CriteriaUtils {
             }
         }).collect(Collectors.toList());
         return Criteria.from(criteriaList);
-    }
-
-    @Data(staticConstructor = "of")
-    public static class Parameter {
-        private final String sql;
-        private final Map<String, Object> params;
     }
 }

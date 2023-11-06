@@ -73,7 +73,6 @@ public final class ContextUtils implements Serializable {
     }
 
     public static StringJoiner cacheKey(Object... objects) {
-        // Convert objects to a map using ObjectMapper
         StringJoiner keyBuilder = new StringJoiner("&");
         for (Object object : objects) {
             if (object instanceof Pageable pageable) {
@@ -83,19 +82,14 @@ public final class ContextUtils implements Serializable {
                 keyBuilder.add("offset=" + pageable.getOffset());
                 continue;
             }
-            // Convert object to a map using ObjectMapper
             Map<String, Object> objectMap = com.platform.boot.commons.utils.BeanUtils
                     .beanToMap(object, true);
-            // Check if the object map is empty
             if (ObjectUtils.isEmpty(objectMap)) {
-                // Append the class name of the object to the key builder
                 keyBuilder.add(object.getClass().getName());
                 continue;
             }
-            // Append each key-value pair from the object map to the key builder
             objectMap.forEach((k, v) -> keyBuilder.add(k + "=" + v));
         }
-        // Return the final cache key as a string
         return keyBuilder;
     }
 

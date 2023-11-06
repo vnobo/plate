@@ -6,10 +6,7 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 
 /**
- * This configuration class sets up a Snowflake ID generator using Redis, and also configures a custom argument resolver for Reactive Spring WebFlux.
- * The Snowflake ID generator is used to generate unique IDs for entities in the application, and the custom argument resolver allows for easier pagination of large data sets.
- *
- * @author billb
+ * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Configuration(proxyBeanMethods = false)
 public class WebConfiguration implements WebFluxConfigurer {

@@ -5,8 +5,6 @@ import com.platform.boot.commons.annotation.exception.RestServerException;
 import java.io.Serializable;
 
 /**
- * Snowflake 算法生成分布式唯一 ID
- *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 public class Snowflake implements Serializable {

@@ -13,14 +13,7 @@ import org.springframework.web.server.session.WebSessionIdResolver;
 import java.util.List;
 
 /**
- * This configuration class is used to configure the session for the application. It is using
- * HeaderWebSessionIdResolver and CookieWebSessionIdResolver to resolve the session id. The setHeaderName
- * method of HeaderWebSessionIdResolver is used to set the name of the header which contains the session
- * id while resolving. It is also overriding setSessionId, resolveSessionIds and expireSession methods
- * of its parent class to add custom functionality.
- * Configuration class for session management.
- *
- * @author billb
+ * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Configuration(proxyBeanMethods = false)
 public class SessionConfiguration {

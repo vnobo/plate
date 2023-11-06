@@ -7,10 +7,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Set;
 
 import static com.platform.boot.commons.utils.ContextUtils.RULE_ADMINISTRATORS;
 
@@ -38,7 +41,11 @@ public class MenusController {
             Authentication authentication = securityContext.getAuthentication();
             var rules = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
             if (!rules.contains(RULE_ADMINISTRATORS)) {
-                request.setRules(rules);
+                if (ObjectUtils.isEmpty(rules)) {
+                    request.setRules(Set.of("NONE_AUTHORITY"));
+                } else {
+                    request.setRules(rules);
+                }
             }
             return this.search(request);
         });

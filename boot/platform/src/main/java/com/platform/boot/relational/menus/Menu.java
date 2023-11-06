@@ -95,7 +95,7 @@ public class Menu implements BaseEntity<Integer> {
 
     /**
      * Additional data for this menu.
-     * The extend field can be null and is used to store additional data for this menu in JSON format.
+     * The extent field can be null and is used to store additional data for this menu in JSON format.
      */
     private JsonNode extend;
 

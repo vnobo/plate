@@ -11,11 +11,6 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
- * Configuration class for Redis.
- * Contains a bean for ReactiveRedisTemplate.
- * Uses StringRedisSerializer for keys and GenericJackson2JsonRedisSerializer for values.
- * Enables caching.
- *
  * @author Alex Bob (<a href="https://github.com/vnobo">Alex Bob</a>)
  */
 @Configuration(proxyBeanMethods = false)

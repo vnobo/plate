@@ -3,10 +3,6 @@ package com.platform.boot.commons.annotation.exception;
 import lombok.Getter;
 
 /**
- * This class represents an exception that occurs when a client request is invalid.
- * It extends the RestServerException class.
- * It contains a serviceId field and methods to set and get it.
- *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Getter
