@@ -1,7 +1,9 @@
 package com.platform.boot.commons.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.platform.boot.commons.Snowflake;
+import com.platform.boot.commons.annotation.exception.JsonException;
 import com.platform.boot.commons.annotation.exception.RestServerException;
 import com.platform.boot.security.SecurityDetails;
 import com.platform.boot.security.UserAuditor;
@@ -58,6 +60,14 @@ public final class ContextUtils implements Serializable {
         ContextUtils.SNOW_FLAKE = new Snowflake(1, 1);
         ContextUtils.OBJECT_MAPPER = objectMapper;
         ContextUtils.USERS_SERVICE = usersService;
+    }
+
+    public static byte[] objectToBytes(Object object) {
+        try {
+            return ContextUtils.OBJECT_MAPPER.writeValueAsBytes(object);
+        } catch (JsonProcessingException e) {
+            throw JsonException.withError(e);
+        }
     }
 
     public static String getClientIpAddress(ServerHttpRequest httpRequest) {

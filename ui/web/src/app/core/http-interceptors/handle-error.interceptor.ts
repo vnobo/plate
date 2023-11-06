@@ -17,27 +17,27 @@ export class HandleErrorInterceptor implements HttpInterceptor {
       catchError(err => this.handleError(err)));
   }
 
-  private handleError(error: HttpErrorResponse) {
+  private handleError(errorResponse: HttpErrorResponse) {
 
-    this._snackBar.open(error.message, $localize`:@@snackBarAction:Close`, {
+    this._snackBar.open(errorResponse.error.message, $localize`:@@snackBarAction:Close`, {
       duration: 3000, verticalPosition: 'top', horizontalPosition: 'center'
     });
 
-    if (error.status === 401) {
+    if (errorResponse.status === 401) {
       this.authService.logout();
       this.router.navigate([this.authService.loginUrl]).then();
       return throwError(() => $localize`:@@errorMessage401:Authenticate is noniff ,please login again.`);
-    } else if (error.status === 407) {
+    } else if (errorResponse.status === 407) {
       this.authService.logout();
       this.router.navigate([this.authService.loginUrl]).then();
       return throwError(() => $localize`:@@errorMessage407:Authenticate is incorrectness,please login again.`);
-    } else if (error.status === 403) {
+    } else if (errorResponse.status === 403) {
       this.authService.logout();
       this.router.navigate([this.authService.loginUrl]).then();
       return throwError(() => $localize`:@@errorMessage403:Captcha Token is incorrectness,please login again.`);
     }
-    console.error($localize`:@@errorMessage:Backend returned code ${error.status}, body was: `, error.error);
+    console.error($localize`:@@errorMessage:Backend returned code ${errorResponse.status}, body was: `, errorResponse.error);
     // return an observable with a user-facing error message
-    return throwError(() => error);
+    return throwError(() => errorResponse);
   }
 }

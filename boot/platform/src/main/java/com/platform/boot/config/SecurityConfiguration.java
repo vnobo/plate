@@ -1,5 +1,7 @@
 package com.platform.boot.config;
 
+import com.platform.boot.commons.ErrorResponse;
+import com.platform.boot.commons.utils.ContextUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.autoconfigure.security.reactive.PathRequest;
@@ -9,6 +11,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -107,7 +110,8 @@ public class SecurityConfiguration {
         public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException e) {
             String xRequestedWith = "X-Requested-With";
             String xmlHttpRequest = "XMLHttpRequest";
-            String requestedWith = exchange.getRequest().getHeaders().getFirst(xRequestedWith);
+            ServerHttpRequest request = exchange.getRequest();
+            String requestedWith = request.getHeaders().getFirst(xRequestedWith);
 
             log.error("认证失败! 信息: %s".formatted(e.getMessage()));
 
@@ -115,12 +119,11 @@ public class SecurityConfiguration {
                 var response = exchange.getResponse();
                 response.setStatusCode(HttpStatus.UNAUTHORIZED);
                 response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-                var body = """
-                        {"code":401,"msg":"认证失败,检查你的用户名,密码是否正确或安全密钥是否过期!","errors":"%s"}
-                        """;
-                body = body.formatted(e.getMessage());
+                ErrorResponse errorResponse = ErrorResponse.of(request.getId(), request.getPath().value(),
+                        4010, "认证失败,检查你的用户名,密码是否正确或安全密钥是否过期!", List.of(e.getMessage()));
+                var body = ContextUtils.objectToBytes(errorResponse);
                 var dataBufferFactory = response.bufferFactory();
-                var bodyBuffer = dataBufferFactory.wrap(body.getBytes());
+                var bodyBuffer = dataBufferFactory.wrap(body);
                 return response.writeAndFlushWith(Flux.just(bodyBuffer).windowUntilChanged())
                         .doOnError((error) -> DataBufferUtils.release(bodyBuffer));
             }
