@@ -1,29 +1,29 @@
 import {Component, OnInit} from '@angular/core';
 import {MenusService} from "../../core/menus.service";
 import {Menu} from "../../core/interfaces/menu";
-import {Observable, of} from "rxjs";
+import {Observable} from "rxjs";
 
 @Component({
-    selector: 'app-welcome',
-    templateUrl: './index.component.html',
-    styleUrls: ['./index.component.scss']
+  selector: 'app-welcome',
+  templateUrl: './index.component.html',
+  styleUrls: ['./index.component.scss']
 })
 export class IndexComponent implements OnInit {
 
-    menus$: Observable<Menu[]> = of([]);
+  menus$: Observable<Menu[]> | undefined;
 
-    constructor(private menusService: MenusService) {
-    }
+  constructor(private menusService: MenusService) {
+  }
 
-    ngOnInit() {
-        this.initMenu();
-    }
+  ngOnInit() {
+    this.initMenu();
+  }
 
-    initMenu() {
-        let menuRequest: Menu = {
-            pcode: "0",
-            tenantCode: "0"
-        };
-        this.menus$ = this.menusService.getMenus(menuRequest);
-    }
+  initMenu() {
+    const menuRequest: Menu = {
+      pcode: "0",
+      tenantCode: "0"
+    };
+    this.menus$ = this.menusService.getMenus(menuRequest);
+  }
 }

@@ -8,8 +8,8 @@ import {SharedModule} from "../shared/shared.module";
 
 @NgModule({
   imports: [
-    PagesRoutingModule,
-    SharedModule
+    SharedModule,
+    PagesRoutingModule
   ],
   declarations: [IndexComponent, PageNotFoundComponent],
   exports: [PageNotFoundComponent]

@@ -16,11 +16,11 @@ spring:
     username: farmer
     password: q1w2e3..
     pool:
-      max-idle-time: 10m
       max-size: 32
+      initial-size: 16
+      max-idle-time: 10m
       max-create-connection-time: 10s
       max-validation-time: 10s
-      max-acquire-time: 5s
       validation-query: "select version()"
   sql.init:
     mode: always

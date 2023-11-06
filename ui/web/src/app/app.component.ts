@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {LoadingService} from "./core/loading.service";
-import {Observable} from "rxjs";
+import {debounceTime, distinctUntilChanged, Observable, tap} from "rxjs";
 
 @Component({
   selector: 'app-root',
@@ -15,7 +15,12 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadingShow$ = this.loading.progress$;
+    this.loadingShow$ = this.loading.progress$
+      .pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        tap((res) => console.log(`Loading show is: ${res}`))
+      );
   }
 
 }

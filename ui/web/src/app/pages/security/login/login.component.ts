@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, FormControl, Validators} from "@angular/forms";
 import {Credentials, LoginService} from "./login.service";
 import {ActivatedRoute, Router} from "@angular/router";
-import {Subject, takeUntil} from "rxjs";
+import {delay, Subject, takeUntil} from "rxjs";
 
 @Component({
   selector: 'app-login',
@@ -43,7 +43,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     } else {
       this.loginService.clearRememberMe();
     }
-    this.loginService.login(credentials).pipe(takeUntil(this._subject)).subscribe(() => {
+    this.loginService.login(credentials).pipe(
+      takeUntil(this._subject),
+      delay(2000)
+    ).subscribe(() => {
       this.router.navigate(['/index'], {relativeTo: this.route}).then();
     });
   }
