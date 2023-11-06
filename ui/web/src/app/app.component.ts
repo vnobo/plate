@@ -1,26 +1,21 @@
-import {AfterContentInit, Component, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {LoadingService} from "./core/loading.service";
-import {Observable, of} from "rxjs";
+import {Observable} from "rxjs";
 
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss']
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit, AfterContentInit {
+export class AppComponent implements OnInit {
 
-    loadingShow$: Observable<boolean> = of(false);
+  loadingShow$: Observable<boolean> | undefined;
 
-    constructor(private loading: LoadingService) {
-        this.loadingShow$ = of(false);
-    }
+  constructor(private loading: LoadingService) {
+  }
 
-    ngOnInit(): void {
-        //this.loadingShow$ = this.loading.progress$;
-    }
-
-    ngAfterContentInit(): void {
-        this.loadingShow$ = this.loading.progress$;
-    }
+  ngOnInit(): void {
+    this.loadingShow$ = this.loading.progress$;
+  }
 
 }

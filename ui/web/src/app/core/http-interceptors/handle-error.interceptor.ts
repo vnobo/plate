@@ -19,7 +19,7 @@ export class HandleErrorInterceptor implements HttpInterceptor {
 
   private handleError(error: HttpErrorResponse) {
 
-    this._snackBar.open(error.error.msg, $localize`:@@snackBarAction:Close`, {
+    this._snackBar.open(error.message, $localize`:@@snackBarAction:Close`, {
       duration: 3000, verticalPosition: 'top', horizontalPosition: 'center'
     });
 

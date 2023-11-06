@@ -11,7 +11,7 @@ import {SharedModule} from "../shared/shared.module";
     PagesRoutingModule,
     SharedModule
   ],
-    declarations: [IndexComponent, PageNotFoundComponent],
+  declarations: [IndexComponent, PageNotFoundComponent],
   exports: [PageNotFoundComponent]
 })
 export class PagesModule {

@@ -2,6 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, FormControl, Validators} from "@angular/forms";
 import {Credentials, LoginService} from "./login.service";
 import {ActivatedRoute, Router} from "@angular/router";
+import {Subject, takeUntil} from "rxjs";
 
 @Component({
   selector: 'app-login',
@@ -23,6 +24,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     ]),
     rememberMe: new FormControl(false)
   });
+  private _subject: Subject<void> = new Subject<void>();
 
   constructor(private router: Router,
               private route: ActivatedRoute,
@@ -41,8 +43,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     } else {
       this.loginService.clearRememberMe();
     }
-    this.loginService.login(credentials).subscribe((res) => {
-        this.router.navigate(['/index'], {relativeTo: this.route}).then();
+    this.loginService.login(credentials).pipe(takeUntil(this._subject)).subscribe(() => {
+      this.router.navigate(['/index'], {relativeTo: this.route}).then();
     });
   }
 
@@ -58,6 +60,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this._subject.next();
+    this._subject.complete();
   }
-
 }

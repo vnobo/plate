@@ -1,8 +1,12 @@
 import {NgModule, Optional, SkipSelf} from '@angular/core';
 import {httpInterceptorProviders} from "./http-interceptors";
+import {HttpClientModule} from "@angular/common/http";
 
 
 @NgModule({
+  imports: [
+    HttpClientModule
+  ],
   providers: [
     httpInterceptorProviders
   ]

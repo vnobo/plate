@@ -9,6 +9,7 @@ import {SharedModule} from "./shared/shared.module";
 import {PagesModule} from "./pages/pages.module";
 import {PageTitleStrategy} from "./core/title-strategy.service";
 import {CoreModule} from "./core/core.module";
+import {AppRoutingModule} from "./app-routing.module";
 
 @NgModule({
   declarations: [AppComponent],
@@ -24,6 +25,7 @@ import {CoreModule} from "./core/core.module";
       cookieName: 'XSRF-TOKEN',
       headerName: 'X-XSRF-TOKEN'
     }),
+    AppRoutingModule,
     CoreModule,
     SharedModule,
     PagesModule
