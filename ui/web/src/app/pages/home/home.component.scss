@@ -1,0 +1,42 @@
+:host {
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.layout {
+  min-height: 100vh;
+}
+
+.nz-header {
+  padding-left: 1rem !important;
+}
+
+.logo {
+  width: 12.8rem;
+  height: 2.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0.8rem 0.8rem 0.1rem 0;
+  float: left;
+}
+
+.header-menu {
+  line-height: 4rem;
+}
+
+.sider-menu {
+  height: 100%;
+  border-right: 0;
+}
+
+.inner-layout {
+  padding: 0 1.2rem 1.2rem;
+}
+
+nz-breadcrumb {
+  margin: 1rem 0;
+}
+
+nz-content {
+  background: #fff;
+  padding: 1rem;
+}

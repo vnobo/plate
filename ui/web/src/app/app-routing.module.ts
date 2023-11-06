@@ -4,7 +4,7 @@ import {PageNotFoundComponent} from "./pages/page-not-found/page-not-found.compo
 
 const routes: Routes = [
   {
-    path: 'index', loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule),
+    path: 'home', loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule),
     title: '主页'
   },
   {

@@ -47,7 +47,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       takeUntil(this._subject),
       delay(2000)
     ).subscribe(() => {
-      this.router.navigate(['/index'], {relativeTo: this.route}).then();
+      this.router.navigate(['/home'], {relativeTo: this.route}).then();
     });
   }
 

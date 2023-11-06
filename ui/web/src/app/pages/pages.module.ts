@@ -5,13 +5,14 @@ import {PagesRoutingModule} from './pages-routing.module';
 import {IndexComponent} from './index/index.component';
 import {PageNotFoundComponent} from "./page-not-found/page-not-found.component";
 import {SharedModule} from "../shared/shared.module";
+import {HomeComponent} from './home/home.component';
 
 @NgModule({
   imports: [
     SharedModule,
     PagesRoutingModule
   ],
-  declarations: [IndexComponent, PageNotFoundComponent],
+  declarations: [IndexComponent, PageNotFoundComponent, HomeComponent],
   exports: [PageNotFoundComponent]
 })
 export class PagesModule {
