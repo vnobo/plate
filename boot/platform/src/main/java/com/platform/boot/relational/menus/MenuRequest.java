@@ -11,6 +11,7 @@ import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -57,11 +58,9 @@ public class MenuRequest extends Menu {
     public Criteria toCriteria() {
         Criteria criteria = criteria(Set.of("permissions", "tenantCode", "icons", "menus", "rules"));
 
-        Criteria tenantCriteria = Criteria.where("tenantCode").is("0");
         if (StringUtils.hasLength(this.getTenantCode())) {
-            tenantCriteria = tenantCriteria.or("tenantCode").is(this.getTenantCode());
+            criteria = criteria.and("tenantCode").in(List.of(this.getTenantCode(), "0"));
         }
-        criteria = criteria.and(tenantCriteria);
 
         if (StringUtils.hasLength(this.getAuthority())) {
             criteria = criteria.and("authority").is(this.getAuthority());
