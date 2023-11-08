@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {Subject} from "rxjs";
 import {HttpErrorResponse} from "@angular/common/http";
-import {ActivatedRoute, CanActivateChildFn, CanActivateFn, CanMatchFn, Router} from "@angular/router";
+import {CanActivateChildFn, CanActivateFn, CanMatchFn, Router} from "@angular/router";
 
 /**
  * A function that acts as an authentication guard.
@@ -11,10 +11,9 @@ import {ActivatedRoute, CanActivateChildFn, CanActivateFn, CanMatchFn, Router} f
 export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  const route = inject(ActivatedRoute);
   const navigation = router.getCurrentNavigation();
   const objects = navigation?.extras.state;
-  console.log(objects);
+  console.debug(objects);
   if (auth.isLoggedIn) {
     return true;
   }
@@ -34,12 +33,32 @@ export class AuthService {
   private authenticatedSource = new Subject<boolean>();
   authenticated$ = this.authenticatedSource.asObservable();
 
+  constructor() {
+    this.autoLogin();
+  }
+
+  autoLogin() {
+    const authToken = this.loadSessionByStorage();
+    if (authToken != null) {
+      this.isLoggedIn = true;
+      this.authenticatedSource.next(true);
+    }
+  }
+
   authToken(): string {
-    const authToken = sessionStorage.getItem(this.sessionKey);
+    const authToken = this.loadSessionByStorage();
     if (authToken == null) {
       throw new HttpErrorResponse({error: "Authenticate is incorrectness,please login again.", status: 401});
     }
     return authToken;
+  }
+
+  loadSessionByStorage(): string | null {
+    const authToken = sessionStorage.getItem(this.sessionKey);
+    if (authToken != null) {
+      return authToken;
+    }
+    return null;
   }
 
   login(authentication: string) {

@@ -7,20 +7,19 @@ import {authGuard} from "../core/auth.service";
 const routes: Routes = [
   {
     path: '',
-    component: HomeComponent, title: '主页',
     canActivate: [authGuard],
+    component: HomeComponent, title: '主页',
     children: [
       {
         path: 'system',
         canActivateChild: [authGuard],
         loadChildren: () => import('./system/system.module').then(m => m.SystemModule),
-        title: '系统管理'
+        title: '系统管理',
       },
       {
         path: '',
         canActivateChild: [authGuard],
-        component: IndexComponent,
-        title: '首页'
+        component: IndexComponent, title: '首页'
       }
     ]
   },

@@ -19,9 +19,11 @@ export class HandleErrorInterceptor implements HttpInterceptor {
 
   private handleError(errorResponse: HttpErrorResponse) {
 
-    this._snackBar.open(errorResponse.error.message, $localize`:@@snackBarAction:Close`, {
-      duration: 3000, verticalPosition: 'top', horizontalPosition: 'center'
-    });
+    if (errorResponse.error.message) {
+      this._snackBar.open(errorResponse.error.message, $localize`:@@snackBarAction:Close`, {
+        duration: 3000, verticalPosition: 'top', horizontalPosition: 'center'
+      });
+    }
 
     if (errorResponse.status === 401) {
       this.authService.logout();

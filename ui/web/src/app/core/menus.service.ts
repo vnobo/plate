@@ -12,7 +12,7 @@ export class MenusService {
     }
 
     getMenus(request: Menu): Observable<Menu[]> {
-        let params = new HttpParams({fromObject: request as any});
+      const params = new HttpParams({fromObject: request as any});
         return this.http.get<Menu[]>('/menus/me', {params: params})
             .pipe(switchMap(items => {
                 return from(items).pipe(delay(100),
@@ -26,7 +26,7 @@ export class MenusService {
     }
 
     getChildren(request: Menu): Observable<Menu[]> {
-        let params = new HttpParams({fromObject: request as any});
+      const params = new HttpParams({fromObject: request as any});
         return this.http.get<Menu[]>('/menus/me', {params: params});
     }
 }

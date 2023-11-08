@@ -4,7 +4,12 @@ import {MenusComponent} from "./menus/menus.component";
 import {authGuard} from "../../core/auth.service";
 
 const routes: Routes = [
-  {path: 'menus', canActivate: [authGuard], component: MenusComponent, title: '菜单管理'}
+  {
+    path: 'menus',
+    canActivate: [authGuard],
+    component: MenusComponent,
+    title: '菜单管理'
+  }
 ];
 
 @NgModule({
