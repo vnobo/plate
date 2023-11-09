@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {IndexComponent} from "./index/index.component";
+import {IndexComponent} from "./home/index/index.component";
 import {HomeComponent} from "./home/home.component";
 import {authGuard} from "../core/auth.service";
 
@@ -8,7 +8,7 @@ const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
-    component: HomeComponent, title: '主页',
+    component: HomeComponent,
     children: [
       {
         path: 'system',
@@ -19,7 +19,8 @@ const routes: Routes = [
       {
         path: '',
         canActivateChild: [authGuard],
-        component: IndexComponent, title: '首页'
+        component: IndexComponent,
+        title: '首页'
       }
     ]
   },

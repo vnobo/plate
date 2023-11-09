@@ -2,7 +2,7 @@ import {NgModule, Optional, SkipSelf} from '@angular/core';
 
 import {PagesRoutingModule} from './pages-routing.module';
 
-import {IndexComponent} from './index/index.component';
+import {IndexComponent} from './home/index/index.component';
 import {PageNotFoundComponent} from "./page-not-found/page-not-found.component";
 import {SharedModule} from "../shared/shared.module";
 import {HomeComponent} from './home/home.component';

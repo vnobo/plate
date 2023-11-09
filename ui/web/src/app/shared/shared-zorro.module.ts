@@ -10,6 +10,7 @@ import {NzMenuModule} from "ng-zorro-antd/menu";
 import {NzSliderModule} from "ng-zorro-antd/slider";
 import {NzBreadCrumbModule} from "ng-zorro-antd/breadcrumb";
 import {NzButtonModule} from "ng-zorro-antd/button";
+import {NzTableModule} from "ng-zorro-antd/table";
 
 
 @NgModule({
@@ -27,8 +28,9 @@ import {NzButtonModule} from "ng-zorro-antd/button";
     NzMenuModule,
     NzIconModule,
     NzResultModule,
-      NzBreadCrumbModule,
-      NzButtonModule
+    NzBreadCrumbModule,
+    NzButtonModule,
+    NzTableModule
   ]
 })
 export class SharedZorroModule {
