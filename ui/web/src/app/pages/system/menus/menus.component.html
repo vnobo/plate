@@ -15,7 +15,7 @@
       <tr>
         <td (nzExpandChange)="collapse(mapOfExpandedData[data.code?data.code:'0'], item, $event)"
             [(nzExpand)]="item.expand"
-            [nzIndentSize]="20"
+            [nzIndentSize]="item.level! * 20"
             [nzShowExpand]="!!item.children">
           {{ item.code }}
         </td>
