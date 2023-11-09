@@ -11,7 +11,7 @@ export class PageTitleStrategy extends TitleStrategy {
   override updateTitle(routerState: RouterStateSnapshot) {
     const title: string | undefined = this.buildTitle(routerState);
     if (title !== undefined) {
-      this.title.setTitle($localize`:@@siteTitlePrefix:Plate Platform | ${title}`);
+      this.title.setTitle(`盘子管理平台-${title}`);
     }
   }
 }

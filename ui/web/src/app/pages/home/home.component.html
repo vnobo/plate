@@ -1,6 +1,7 @@
 <nz-layout class="layout">
   <nz-header class="nz-header">
-    <div class="logo"></div>
+    <div class="logo"><span nz-icon nzTheme="fill" nzType="html5" style="font-size: 2rem"></span>
+      <h1 class="fs-2">PLATE</h1></div>
     <ul class="header-menu" nz-menu nzMode="horizontal" nzTheme="dark">
       <li nz-menu-item nzSelected><a routerLink="/home">首页</a></li>
       <li nz-menu-item>nav 2</li>
@@ -8,7 +9,7 @@
     </ul>
   </nz-header>
   <nz-layout>
-    <nz-sider [nzCollapsedWidth]="0" nzBreakpoint="md" nzCollapsible nzTheme="light" nzWidth="14.5rem">
+    <nz-sider [nzCollapsedWidth]="0" nzBreakpoint="md" nzCollapsible nzWidth="14.6rem">
       <ul class="sider-menu" nz-menu nzMode="inline" nzTheme="dark">
         <li *ngFor="let menu of menus$|async; index as i" nz-submenu nzIcon="user" nzOpen
             nzTitle="{{menu.name}}">
@@ -19,22 +20,6 @@
             <li nz-menu-item><a routerLink="/home">首页</a></li>
             <li nz-menu-item>option3</li>
             <li nz-menu-item>option4</li>
-          </ul>
-        </li>
-        <li nz-submenu nzIcon="laptop" nzTitle="subnav 2">
-          <ul>
-            <li nz-menu-item>option5</li>
-            <li nz-menu-item>option6</li>
-            <li nz-menu-item>option7</li>
-            <li nz-menu-item>option8</li>
-          </ul>
-        </li>
-        <li nz-submenu nzIcon="notification" nzTitle="subnav 3">
-          <ul>
-            <li nz-menu-item>option9</li>
-            <li nz-menu-item>option10</li>
-            <li nz-menu-item>option11</li>
-            <li nz-menu-item>option12</li>
           </ul>
         </li>
       </ul>

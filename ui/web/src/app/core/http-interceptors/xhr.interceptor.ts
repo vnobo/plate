@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
 import {finalize, Observable} from 'rxjs';
 import {LoadingService} from "../loading.service";
+import {environment} from "../../../environments/environment";
 
 /**
  * This code is an interceptor that adds a header to the request and shows a progress bar while the request is being processed. It then sends the request to the next handler and hides the progress bar when the request is finished.
@@ -21,7 +22,11 @@ export class XhrInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     this.loading.show();
-    const originalUrl = '/api' + req.url;
+    if (req.url.indexOf('assets/') > -1) {
+      return next.handle(req);
+    }
+    // clone request and replace 'http://' with 'https://' at the same time
+    const originalUrl = req.url.indexOf('http') > -1 ? req.url : environment.host + req.url;
     const xhrReq = req.clone({
       headers: req.headers.set('X-Requested-With', 'XMLHttpRequest'),
       url: originalUrl

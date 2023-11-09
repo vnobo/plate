@@ -4,12 +4,10 @@ import {PageNotFoundComponent} from "./pages/page-not-found/page-not-found.compo
 
 const routes: Routes = [
   {
-    path: 'home', loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule),
-    title: '主页'
+    path: 'home', loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule)
   },
   {
-    path: 'auth', loadChildren: () => import('./pages/security/security.module').then(m => m.SecurityModule),
-    title: '认证'
+    path: 'auth', loadChildren: () => import('./pages/security/security.module').then(m => m.SecurityModule)
   },
   {path: '', pathMatch: 'full', redirectTo: '/auth'},
   {path: '**', component: PageNotFoundComponent}

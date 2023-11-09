@@ -1,11 +1,10 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, Type} from '@angular/core';
 import {distinctUntilChanged, filter, map, Observable} from "rxjs";
-import {Menu} from "../../core/interfaces/menu";
-import {MenusService} from "../../core/menus.service";
-import {ActivatedRoute, NavigationEnd, Params, PRIMARY_OUTLET, Router} from "@angular/router";
+import {Menu, MenusService} from "../system/menus/menus.service";
+import {ActivatedRoute, NavigationEnd, Params, PRIMARY_OUTLET, Resolve, ResolveFn, Router} from "@angular/router";
 
 export interface Breadcrumb {
-  label: string;
+  label: string | Type<Resolve<string>> | ResolveFn<string>;
   params: Params;
   url: string;
 }
@@ -36,7 +35,7 @@ export class HomeComponent implements OnInit {
       pcode: "0",
       tenantCode: "0"
     };
-    this.menus$ = this.menusService.getMenus(menuRequest);
+    this.menus$ = this.menusService.getMeMenus(menuRequest);
   }
 
   initBreadcrumb() {
@@ -50,36 +49,32 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  getBreadcrumbs(route: ActivatedRoute, url = '', breadcrumbs: Array<Breadcrumb> = []): Breadcrumb[] {
-    const routeDataBreadcrumbs = 'title';
+  getBreadcrumbs(route: ActivatedRoute, url = '', breads: Array<Breadcrumb> = []): Breadcrumb[] {
     const children: Array<ActivatedRoute> = route.children;
     if (children.length === 0) {
-      return breadcrumbs;
+      return breads;
     }
     for (const child of children) {
       // verify primary route
       if (child.outlet !== PRIMARY_OUTLET) {
         continue;
       }
-      const routeData = child.snapshot.data;
-      const hasBreadcrumb = !Object.prototype.hasOwnProperty.call(routeData, routeDataBreadcrumbs);
-      if (!child.snapshot.url.length || hasBreadcrumb) {
-        return this.getBreadcrumbs(child, url, breadcrumbs);
+      if (!child.snapshot.routeConfig?.title || !child.snapshot.url.length) {
+        return this.getBreadcrumbs(child, url, breads)
       }
+      const title = child.snapshot.routeConfig?.title;
       const routeURL: string = child.snapshot.url.map(segment => segment.path).join('/');
 
       url += `/${routeURL}`;
-
       const breadcrumb: Breadcrumb = {
-        label: child.snapshot.data[routeDataBreadcrumbs] || this.breadcrumbData,
+        label: title ? title : 'title',
         params: child.snapshot.params,
         url
       };
-      this.breadcrumbs.push(breadcrumb);
-
-      return this.getBreadcrumbs(child, url, breadcrumbs);
+      breads.push(breadcrumb);
+      return this.getBreadcrumbs(child, url, breads);
     }
-    return breadcrumbs;
+    return breads;
   }
 
 }

@@ -9,6 +9,12 @@ const routes: Routes = [
     canActivate: [authGuard],
     component: MenusComponent,
     title: '菜单管理'
+  },
+  {
+    path: '',
+    canActivate: [authGuard],
+    component: MenusComponent,
+    title: '菜单管理'
   }
 ];
 

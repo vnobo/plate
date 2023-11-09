@@ -15,12 +15,11 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadingShow$ = this.loading.progress$
-      .pipe(
-        debounceTime(500),
-        distinctUntilChanged(),
-        tap((res) => console.log(`Loading show is: ${res}`))
-      );
+    this.loadingShow$ = this.loading.progress$.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      tap((res) => console.log(`Loading show is: ${res}`))
+    );
   }
 
 }
