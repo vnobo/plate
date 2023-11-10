@@ -21,9 +21,11 @@ export class MenusComponent implements OnInit, OnDestroy {
     if (!$event) {
       if (data.children) {
         data.children.forEach(d => {
-          const target = array.find(a => a.code === d.code)!;
-          target.expand = false;
-          this.collapse(array, target, false);
+          const target = array.find(a => a.code === d.code);
+          if (target) {
+            target.expand = false;
+            this.collapse(array, target, false);
+          }
         });
       } else {
         return;
@@ -38,11 +40,14 @@ export class MenusComponent implements OnInit, OnDestroy {
     stack.push({...root, level: 0, expand: false});
 
     while (stack.length !== 0) {
-      const node = stack.pop()!;
+      const node = stack.pop();
+      if (!node) {
+        continue;
+      }
       this.visitNode(node, hashMap, array);
       if (node.children) {
         for (let i = node.children.length - 1; i >= 0; i--) {
-          stack.push({...node.children[i], level: node.level! + 1, expand: false, parent: node});
+          stack.push({...node.children[i], level: node.level ? node.level + 1 : 1, expand: false, parent: node});
         }
       }
     }

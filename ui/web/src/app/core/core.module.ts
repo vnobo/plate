@@ -1,19 +1,18 @@
 import {NgModule, Optional, SkipSelf} from '@angular/core';
-import {httpInterceptorProviders} from "./http-interceptors";
 import {HttpClientModule, HttpClientXsrfModule} from "@angular/common/http";
-
+import {httpInterceptorProviders} from "./http-interceptors";
 
 @NgModule({
-  imports: [
-    HttpClientModule,
+  imports: [HttpClientModule,
     HttpClientXsrfModule.withOptions({
       cookieName: 'XSRF-TOKEN',
       headerName: 'X-XSRF-TOKEN'
-    })
+    })],
+  exports: [
+    HttpClientModule,
+    HttpClientXsrfModule
   ],
-  providers: [
-    httpInterceptorProviders
-  ]
+  providers: [httpInterceptorProviders]
 })
 export class CoreModule {
   constructor(@Optional() @SkipSelf() parentModule?: CoreModule) {

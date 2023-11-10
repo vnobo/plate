@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "i18n": "ng extract-i18n --format xlf2 --output-path src/locale --out-file source.xlf"
   },
   "private": true,
   "dependencies": {

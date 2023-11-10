@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="2.0" xmlns="urn:oasis:names:tc:xliff:document:2.0" srcLang="en-US">
+  <file id="ngi18n" original="ng.template">
+    <unit id="snackBarAction">
+      <notes>
+        <note category="location">src/app/core/http-interceptors/handle-error.interceptor.ts:28</note>
+      </notes>
+      <segment>
+        <source>Close</source>
+      </segment>
+    </unit>
+    <unit id="errorMessage401">
+      <notes>
+        <note category="location">src/app/core/http-interceptors/handle-error.interceptor.ts:37</note>
+      </notes>
+      <segment>
+        <source>Authenticate is noniff ,please login again.</source>
+      </segment>
+    </unit>
+    <unit id="errorMessage407">
+      <notes>
+        <note category="location">src/app/core/http-interceptors/handle-error.interceptor.ts:41</note>
+      </notes>
+      <segment>
+        <source>Authenticate is incorrectness,please login again.</source>
+      </segment>
+    </unit>
+    <unit id="errorMessage403">
+      <notes>
+        <note category="location">src/app/core/http-interceptors/handle-error.interceptor.ts:45</note>
+      </notes>
+      <segment>
+        <source>Captcha Token is incorrectness,please login again.</source>
+      </segment>
+    </unit>
+    <unit id="errorMessage">
+      <notes>
+        <note category="location">src/app/core/http-interceptors/handle-error.interceptor.ts:47</note>
+      </notes>
+      <segment>
+        <source>Backend returned code <ph id="0" equiv="PH" disp="errorResponse.status"/>, body was: </source>
+      </segment>
+    </unit>
+    <unit id="app.login.title">
+      <notes>
+        <note category="location">src/app/pages/security/login/login.component.html:5,6</note>
+      </notes>
+      <segment>
+        <source> Plate Platform Manager</source>
+      </segment>
+    </unit>
+    <unit id="1274686598843595771">
+      <notes>
+        <note category="location">src/app/pages/security/login/login.component.html:9</note>
+      </notes>
+      <segment>
+        <source>Login to your account</source>
+      </segment>
+    </unit>
+    <unit id="8209975069103412781">
+      <notes>
+        <note category="location">src/app/pages/security/login/login.component.html:30,33</note>
+      </notes>
+      <segment>
+        <source> Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces, special characters, or emoji. </source>
+      </segment>
+    </unit>
+    <unit id="2161528641772974097">
+      <notes>
+        <note category="location">src/app/pages/security/login/login.component.html:34,36</note>
+      </notes>
+      <segment>
+        <source> Password is required. </source>
+      </segment>
+    </unit>
+    <unit id="menuTypes">
+      <notes>
+        <note category="location">src/app/pages/system/menus/menus.component.html:20</note>
+      </notes>
+      <segment>
+        <source>{VAR_SELECT, select, FOLDER {FOLDER} MENU {MENU} LINK {LINK} API {API}}</source>
+      </segment>
+    </unit>
+  </file>
+</xliff>

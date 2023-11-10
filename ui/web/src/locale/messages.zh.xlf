@@ -159,5 +159,14 @@
             <source>盘子管理平台 | <ph id="0" equiv="PH" disp="title"/></source>
           </segment>
         </unit>
+ <unit id="menuTypes">
+      <notes>
+        <note category="location">src/app/pages/system/menus/menus.component.html:20</note>
+      </notes>
+      <segment>
+        <source>{VAR_SELECT, select, FOLDER {FOLDER} MENU {MENU} LINK {LINK} API {API}}</source>
+        <target>{VAR_SELECT, select, FOLDER {目录} MENU {菜单} LINK {链接} API {接口}}</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

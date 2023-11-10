@@ -39,14 +39,12 @@ export class HomeComponent implements OnInit {
   }
 
   initBreadcrumb() {
+    this.breadcrumbs = this.getBreadcrumbs(this.activatedRoute.root);
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       distinctUntilChanged(),
       map(() => this.getBreadcrumbs(this.activatedRoute.root))
-    ).subscribe(event => {
-      this.breadcrumbs = event;
-      console.log(this.breadcrumbs)
-    });
+    ).subscribe(event => this.breadcrumbs = event);
   }
 
   getBreadcrumbs(route: ActivatedRoute, url = '', breads: Array<Breadcrumb> = []): Breadcrumb[] {

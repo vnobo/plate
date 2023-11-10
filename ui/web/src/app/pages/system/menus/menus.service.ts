@@ -34,6 +34,8 @@ export interface UserAuditor {
 export enum MenuType {
   FOLDER = "FOLDER",
   MENU = "MENU",
+  LINK = 'LINK',
+  API = 'API'
 }
 
 export enum HttpMethod {
