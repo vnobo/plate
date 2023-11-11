@@ -1,5 +1,5 @@
 import {NgModule, Optional, SkipSelf} from '@angular/core';
-import {HttpClientModule, HttpClientXsrfModule} from "@angular/common/http";
+import {HttpClientModule, HttpClientXsrfModule, provideHttpClient, withFetch} from "@angular/common/http";
 import {httpInterceptorProviders} from "./http-interceptors";
 
 @NgModule({
@@ -12,7 +12,10 @@ import {httpInterceptorProviders} from "./http-interceptors";
     HttpClientModule,
     HttpClientXsrfModule
   ],
-  providers: [httpInterceptorProviders]
+  providers: [
+    httpInterceptorProviders,
+    provideHttpClient(withFetch())
+  ]
 })
 export class CoreModule {
   constructor(@Optional() @SkipSelf() parentModule?: CoreModule) {

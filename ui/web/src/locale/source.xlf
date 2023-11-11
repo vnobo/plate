@@ -41,33 +41,17 @@
         <source>登录你的账号</source>
       </segment>
     </unit>
-    <unit id="5825392054634606539">
-      <notes>
-        <note category="location">src/app/pages/security/login/login.component.html:17,19</note>
-      </notes>
-      <segment>
-        <source> 请输入电子邮件或手机号。 </source>
-      </segment>
-    </unit>
-    <unit id="3341361061558171514">
-      <notes>
-        <note category="location">src/app/pages/security/login/login.component.html:30,32</note>
-      </notes>
-      <segment>
-        <source> 密码长度为8 ~ 20个字符，由字母和数字组成，不能包含空格、特殊字符或表情符号。 </source>
-      </segment>
-    </unit>
-    <unit id="9107755752965474463">
-      <notes>
-        <note category="location">src/app/pages/security/login/login.component.html:33,35</note>
-      </notes>
-      <segment>
-        <source> 请输入密码。 </source>
-      </segment>
-    </unit>
     <unit id="menuTypes">
       <notes>
-        <note category="location">src/app/pages/system/menus/menus.component.html:20</note>
+        <note category="location">src/app/pages/system/menus/menus.component.html:22</note>
+      </notes>
+      <segment>
+        <source> <ph id="0" equiv="ICU" disp="{item.type, select, FOLDER{FOLDER} MENU{MENU} LINK{LINK} API{API}}" subFlows="8728665068812588897"/></source>
+      </segment>
+    </unit>
+    <unit id="8728665068812588897">
+      <notes>
+        <note category="location">src/app/pages/system/menus/menus.component.html:22</note>
       </notes>
       <segment>
         <source>{VAR_SELECT, select, FOLDER {FOLDER} MENU {MENU} LINK {LINK} API {API}}</source>
