@@ -55,19 +55,17 @@
                 "bundleName": "bootstrap-module"
               },
               {
-                "input": "@angular/material/prebuilt-themes/indigo-pink.css",
-                "bundleName": "material-module"
+                "input": "bootstrap-icons/font/bootstrap-icons.css",
+                "bundleName": "icons-module"
               },
-
               {
                 "input": "ng-zorro-antd/ng-zorro-antd.css",
                 "bundleName": "ng-zorro-antd-module"
               },
               {
-                "input": "layui/dist/css/layui.css",
-                "bundleName": "layui-module"
-              },
-              "src/styles.scss"
+                "input": "src/styles.scss",
+                "bundleName": "main-module"
+              }
             ],
             "scripts": [
               {

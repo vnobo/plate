@@ -51,7 +51,7 @@
         <target>盘子管理平台</target>
       </segment>
     </unit>
-    <unit id="1274686598843595771">
+    <unit id="app.login.subtitle">
       <notes>
         <note category="location">src/app/security/login/login.component.html:16</note>
       </notes>

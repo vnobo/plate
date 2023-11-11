@@ -1,15 +1,15 @@
 import {Injectable} from '@angular/core';
 import {HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
 import {catchError, Observable, throwError, timeout} from 'rxjs';
-import {MatSnackBar} from "@angular/material/snack-bar";
 import {Router} from "@angular/router";
 import {AuthService} from "../auth.service";
+import {NzMessageService} from "ng-zorro-antd/message";
 
 @Injectable()
 export class HandleErrorInterceptor implements HttpInterceptor {
   constructor(private router: Router,
               private authService: AuthService,
-              private _snackBar: MatSnackBar) {
+              private _message: NzMessageService) {
   }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -17,17 +17,10 @@ export class HandleErrorInterceptor implements HttpInterceptor {
       catchError(err => this.handleError(err)));
   }
 
-  /**
-   *
-   * @param errorResponse
-   * @private
-   */
   private handleError(errorResponse: HttpErrorResponse) {
 
     if (errorResponse.error.message) {
-      this._snackBar.open(errorResponse.error.message, $localize`:@@snackBarAction:Close`, {
-        duration: 3000, verticalPosition: 'top', horizontalPosition: 'center'
-      });
+      this._message.error(errorResponse.error.message);
       return throwError(() => errorResponse.error.message);
     }
 

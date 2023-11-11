@@ -18,7 +18,6 @@ export class HomeComponent implements OnInit {
 
   menus$: Observable<Menu[]> | undefined;
   breadcrumbs: Breadcrumb[] = [];
-  breadcrumbData: string | undefined;
 
   constructor(private router: Router,
               private activatedRoute: ActivatedRoute,
