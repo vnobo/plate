@@ -15,12 +15,12 @@ export class LoginComponent implements OnInit, OnDestroy {
     username: new FormControl('', [
       Validators.required,
       Validators.minLength(5),
-      Validators.maxLength(32)
+      Validators.maxLength(64)
     ]),
     password: new FormControl('', [
       Validators.required,
       Validators.minLength(6),
-      Validators.maxLength(32)
+      Validators.maxLength(64)
     ]),
     rememberMe: new FormControl(false)
   });
