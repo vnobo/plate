@@ -14,13 +14,7 @@
       "sourceRoot": "src",
       "prefix": "app",
       "i18n": {
-        "sourceLocale": "en-US",
-        "locales": {
-          "zh-Hans": {
-            "translation": "src/locale/messages.zh.xlf",
-            "baseHref": ""
-          }
-        }
+        "sourceLocale": "zh"
       },
       "architect": {
         "build": {
@@ -118,7 +112,7 @@
               "browserTarget": "plate-ui:build:production"
             },
             "development": {
-              "browserTarget": "plate-ui:build:development,zh",
+              "browserTarget": "plate-ui:build:development",
               "proxyConfig": "proxy.conf.json"
             }
           },

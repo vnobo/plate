@@ -1,4 +1,4 @@
-import {APP_ID, isDevMode, LOCALE_ID, NgModule} from '@angular/core';
+import {APP_ID, isDevMode, NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -26,7 +26,6 @@ import {GlobalConfigModule} from "./global-config.module";
     SharedModule
   ],
   providers: [
-    {provide: LOCALE_ID, useValue: 'zh'},
     {provide: APP_ID, useValue: 'PlateApp'},
     {provide: TitleStrategy, useClass: PageTitleStrategy}
   ],

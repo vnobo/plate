@@ -17,8 +17,8 @@ export interface Menu {
   updater?: UserAuditor;
   createdTime?: Date;
   updatedTime?: Date;
-  getPermissions?: Permission[];
-  getIcons?: string;
+  permissions?: Permission[];
+  icons?: string;
   children?: Menu[];
   level?: number;
   expand?: boolean;

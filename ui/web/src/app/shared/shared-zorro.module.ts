@@ -9,6 +9,9 @@ import {NzBreadCrumbModule} from "ng-zorro-antd/breadcrumb";
 import {NzButtonModule} from "ng-zorro-antd/button";
 import {NzTableModule} from "ng-zorro-antd/table";
 import {NzMessageModule} from "ng-zorro-antd/message";
+import {NzModalModule} from "ng-zorro-antd/modal";
+import {NzFormModule} from "ng-zorro-antd/form";
+import {NzInputModule} from "ng-zorro-antd/input";
 
 
 @NgModule({
@@ -25,7 +28,10 @@ import {NzMessageModule} from "ng-zorro-antd/message";
     NzResultModule,
     NzBreadCrumbModule,
     NzButtonModule,
-    NzTableModule
+    NzTableModule,
+    NzModalModule,
+    NzFormModule,
+    NzInputModule
   ]
 })
 export class SharedZorroModule {

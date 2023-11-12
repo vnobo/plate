@@ -12,9 +12,8 @@ const routes: Routes = [
   },
   {
     path: '',
-    canActivate: [authGuard],
-    component: MenusComponent,
-    title: '菜单管理'
+    redirectTo: 'menus',
+    pathMatch: 'full'
   }
 ];
 
