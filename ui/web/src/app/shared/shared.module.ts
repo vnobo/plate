@@ -3,6 +3,7 @@ import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {SharedZorroModule} from "./shared-zorro.module";
 import {RouterModule} from "@angular/router";
+import {IconsProviderModule} from "./icons-provider.module";
 
 @NgModule({
   imports: [
@@ -11,6 +12,7 @@ import {RouterModule} from "@angular/router";
     ReactiveFormsModule,
     RouterModule,
     ReactiveFormsModule,
+    IconsProviderModule,
     SharedZorroModule
   ],
   declarations: [],
@@ -19,7 +21,8 @@ import {RouterModule} from "@angular/router";
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-    SharedZorroModule
+    SharedZorroModule,
+    IconsProviderModule
   ]
 })
 export class SharedModule {

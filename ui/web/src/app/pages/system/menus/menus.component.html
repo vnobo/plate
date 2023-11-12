@@ -10,24 +10,20 @@
   </tr>
   </thead>
   <tbody>
-  @for(data of expandTable.data; track data.id; let idx = $index, e = $even){
-    <ng-container>
-      @for(item of mapOfExpandedData[data.code ? data.code : '0']; track item.id;){
-        <ng-container>
-        <tr * ngIf = "(item.parent && item.parent.expand) || !item.parent" >
-        <td (nzExpandChange) = "collapse(mapOfExpandedData[data.code?data.code:'0'], item, $event)"
-            [(nzExpand)] = "item.expand" [nzIndentSize] = "item.level! * 20" [nzShowExpand] = "!!item.children" >
-            {{item.code }}
+  <ng-container *ngFor="let data of expandTable.data">
+    <ng-container *ngFor="let item of data.children;">
+      <tr *ngIf="(item.parent && item.parent.expand) || !item.parent">
+        <td (nzExpandChange)="collapse(mapOfExpandedData[data.code?data.code:'0'], item, $event)"
+            [(nzExpand)]="item.expand" [nzIndentSize]="item.level! * 20" [nzShowExpand]="!!item.children">
+          {{item.code }}
         </td>
-        <td i18n="@@menuTypes"> {item.type, select, FOLDER{FOLDER} MENU{MENU} LINK{LINK} API{API}}</td>
+        <td i18n="@@menuTypes">{item.type, select, FOLDER{FOLDER} MENU{MENU} LINK{LINK} API{API}}</td>
         <td>{{ item.name }}</td>
-  <td>{{ item.authority }}</td>
-  <td>{{ item.path }}</td>
-  <td>{{ item.sort }}</td>
-  </tr>
+        <td>{{ item.authority }}</td>
+        <td>{{ item.path }}</td>
+        <td>{{ item.sort }}</td>
+      </tr>
+    </ng-container>
   </ng-container>
-  }
-  </ng-container>
-  }
   </tbody>
 </nz-table>

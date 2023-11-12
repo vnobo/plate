@@ -8,20 +8,17 @@
 }
 
 .nz-header {
-  padding-left: 1rem !important;
+  padding-left: 0 !important;
 }
 
 .logo {
-  width: 12.8rem;
-  height: 2.5rem;
+  width: 14rem;
   color: white;
-  margin: 0.8rem 0.8rem 0.1rem 0;
   float: left;
-
-  h1 {
-    color: #fff;
-    text-align: center;
-  }
+  font-size: 2rem;
+  justify-content: center;
+  align-items: center;
+  padding-left: 2rem;
 }
 
 .header-menu {

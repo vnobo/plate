@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "platform-ui": {
+    "plate-ui": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -18,7 +18,7 @@
         "locales": {
           "zh-Hans": {
             "translation": "src/locale/messages.zh.xlf",
-            "baseHref": "zh-cn"
+            "baseHref": ""
           }
         }
       },
@@ -28,7 +28,7 @@
           "options": {
             "localize": true,
             "i18nMissingTranslation": "warning",
-            "outputPath": "dist/platform-ui/browser",
+            "outputPath": "dist/plate-ui/browser",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
@@ -42,12 +42,7 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/manifest.webmanifest",
-              {
-                "glob": "**/*",
-                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
-                "output": "/assets/"
-              }
+              "src/manifest.webmanifest"
             ],
             "styles": [
               {
@@ -120,11 +115,11 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "platform-ui:build:production"
+              "browserTarget": "plate-ui:build:production"
             },
             "development": {
-              "proxyConfig": "proxy.conf.json",
-              "buildTarget": "platform-ui:build:development,zh"
+              "browserTarget": "plate-ui:build:development,zh",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
@@ -132,7 +127,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "platform-ui:build"
+            "browserTarget": "plate-ui:build"
           }
         },
         "test": {
@@ -150,7 +145,6 @@
               "src/manifest.webmanifest"
             ],
             "styles": [
-              "@angular/material/prebuilt-themes/pink-bluegrey.css",
               "src/styles.scss"
             ],
             "scripts": []
@@ -159,7 +153,7 @@
         "server": {
           "builder": "@angular-devkit/build-angular:server",
           "options": {
-            "outputPath": "dist/platform-ui/server",
+            "outputPath": "dist/plate-ui/server",
             "main": "src/main.server.ts",
             "tsConfig": "tsconfig.server.json",
             "inlineStyleLanguage": "scss"
@@ -184,12 +178,12 @@
           },
           "configurations": {
             "production": {
-              "browserTarget": "platform-ui:build:production",
-              "serverTarget": "platform-ui:server:production"
+              "browserTarget": "plate-ui:build:production",
+              "serverTarget": "plate-ui:server:production"
             },
             "development": {
-              "browserTarget": "platform-ui:build:development",
-              "serverTarget": "platform-ui:server:development"
+              "browserTarget": "plate-ui:build:development",
+              "serverTarget": "plate-ui:server:development"
             }
           },
           "defaultConfiguration": "production"
