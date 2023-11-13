@@ -51,7 +51,7 @@ public final class ContextUtils implements Serializable {
     };
     public final static String RULE_ADMINISTRATORS = "ROLE_ADMINISTRATORS";
     public final static String CSRF_TOKEN_CONTEXT = "CSRF_TOKEN_CONTEXT";
-    public final static String SECURITY_AUTH_TOKEN_HEADER = "X-Auth-Token";
+
     public static ObjectMapper OBJECT_MAPPER;
     public static Snowflake SNOW_FLAKE;
     public static UsersService USERS_SERVICE;

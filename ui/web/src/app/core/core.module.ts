@@ -26,7 +26,7 @@ export function defaultInterceptor(req: HttpRequest<unknown>, next: HttpHandlerF
     return next(req);
   }
   const originalUrl = req.url.indexOf('http') > -1 ? req.url : environment.host + req.url;
-  let xRequestedReq = req.clone({
+  const xRequestedReq = req.clone({
     headers: req.headers.append('X-Requested-With', 'XMLHttpRequest'),
     url: originalUrl
   });

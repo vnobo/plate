@@ -14,7 +14,12 @@
       "sourceRoot": "src",
       "prefix": "app",
       "i18n": {
-        "sourceLocale": "zh"
+        "sourceLocale": "zh",
+        "locales": {
+          "en": {
+            "translation": "src/locale/messages.en.xlf"
+          }
+        }
       },
       "architect": {
         "build": {

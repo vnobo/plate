@@ -29,7 +29,7 @@ public class UsersService extends AbstractDatabase {
 
     public Flux<UserResponse> search(UserRequest request, Pageable pageable) {
         var cacheKey = ContextUtils.cacheKey(request, pageable);
-        ParamSql paramSql = QueryJson.queryJson(request.getQuery());
+        ParamSql paramSql = request.bindParamSql();
         String query = "select * from se_users" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
         return super.queryWithCache(cacheKey, query, paramSql.params(), UserResponse.class)
                 .flatMapSequential(ContextUtils::serializeUserAuditor);
@@ -47,10 +47,6 @@ public class UsersService extends AbstractDatabase {
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
-    public Mono<User> loadByUsername(String username) {
-        var userMono = this.usersRepository.findByUsernameIgnoreCase(username).flux();
-        return queryWithCache(username, userMono).next();
-    }
 
     public Mono<User> loadByCode(String code) {
         var userMono = this.usersRepository.findByCode(code).flux();
@@ -79,11 +75,6 @@ public class UsersService extends AbstractDatabase {
 
     public Mono<Void> delete(UserRequest request) {
         return this.usersRepository.delete(request.toUser())
-                .doAfterTerminate(() -> this.cache.clear());
-    }
-
-    public Mono<Void> changePassword(String username, String newPassword) {
-        return this.usersRepository.changePassword(username, newPassword).then()
                 .doAfterTerminate(() -> this.cache.clear());
     }
 

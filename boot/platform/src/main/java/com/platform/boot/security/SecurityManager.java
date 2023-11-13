@@ -17,6 +17,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsPasswordService;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -53,24 +54,27 @@ public class SecurityManager extends AbstractDatabase
             where gm.user_code = :userCode
             """;
 
-    private final UsersService usersService;
-
     @Override
-    public Mono<UserDetails> updatePassword(UserDetails user, String newPassword) {
-        return Mono.just(withNewPassword(user, newPassword))
-                .delayUntil((userDetails) -> this.usersService.changePassword(userDetails.getUsername(), newPassword))
+    public Mono<UserDetails> updatePassword(UserDetails userDetails, String newPassword) {
+        SecurityDetails securityDetails = (SecurityDetails) userDetails;
+        securityDetails.password(newPassword);
+        Query query = Query.query(Criteria.where("username").is(userDetails.getUsername()).ignoreCase(true));
+        Update update = Update.update("password", newPassword);
+        return this.entityTemplate.update(User.class).matching(query).apply(update)
+                .flatMap(result -> Mono.just((UserDetails) securityDetails))
                 .doAfterTerminate(() -> this.cache.clear());
     }
 
-    private UserDetails withNewPassword(UserDetails userDetails, String newPassword) {
-        SecurityDetails securityDetails = (SecurityDetails) userDetails;
-        return securityDetails.password(newPassword);
+    public Mono<User> loadByUsername(String username) {
+        Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
+        var userMono = this.entityTemplate.select(query, User.class);
+        return queryWithCache(username, userMono).next();
     }
 
     @Override
     public Mono<UserDetails> findByUsername(String username) {
 
-        var userMono = this.usersService.loadByUsername(username)
+        var userMono = this.loadByUsername(username)
                 .zipWhen(user -> this.authorities(user.getCode()));
 
         var userDetailsMono = userMono

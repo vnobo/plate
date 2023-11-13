@@ -24,14 +24,12 @@ public class UsersController {
 
     @GetMapping("search")
     public Flux<UserResponse> search(UserRequest request, Pageable pageable) {
-        return ContextUtils.securityDetails().flatMapMany(securityDetails -> this.usersService.search(
-                request.securityCode(securityDetails.getTenantCode()), pageable));
+        return this.usersService.search(request, pageable);
     }
 
     @GetMapping("page")
     public Mono<Page<UserResponse>> page(UserRequest request, Pageable pageable) {
-        return ContextUtils.securityDetails().flatMap(securityDetails -> this.usersService.page(
-                request.securityCode(securityDetails.getTenantCode()), pageable));
+        return this.usersService.page(request, pageable);
     }
 
     @PostMapping("add")
