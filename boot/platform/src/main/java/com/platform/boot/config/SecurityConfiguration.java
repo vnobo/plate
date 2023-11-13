@@ -51,7 +51,6 @@ public class SecurityConfiguration {
         this.authenticationSuccessHandler = authenticationSuccessHandler;
     }
 
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
