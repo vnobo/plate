@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.CaseFormat;
 import com.platform.boot.commons.base.BaseEntity;
 import com.platform.boot.commons.utils.ContextUtils;
-import com.platform.boot.security.UserAuditor;
+import com.platform.boot.security.core.UserAuditor;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

@@ -2,6 +2,9 @@ package com.platform.boot.security;
 
 import com.platform.boot.commons.annotation.exception.RestServerException;
 import com.platform.boot.commons.utils.ContextUtils;
+import com.platform.boot.security.SecurityDetails;
+import com.platform.boot.security.SecurityManager;
+import com.platform.boot.security.core.AuthenticationToken;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

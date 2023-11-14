@@ -1,6 +1,6 @@
 package com.platform.boot.converters;
 
-import com.platform.boot.security.UserAuditor;
+import com.platform.boot.security.core.UserAuditor;
 import lombok.NonNull;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;

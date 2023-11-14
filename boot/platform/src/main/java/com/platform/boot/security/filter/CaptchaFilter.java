@@ -1,7 +1,7 @@
 package com.platform.boot.security.filter;
 
-import com.platform.boot.security.captcha.CaptchaRepository;
-import com.platform.boot.security.captcha.CaptchaToken;
+import com.platform.boot.security.core.captcha.CaptchaRepository;
+import com.platform.boot.security.core.captcha.CaptchaToken;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;

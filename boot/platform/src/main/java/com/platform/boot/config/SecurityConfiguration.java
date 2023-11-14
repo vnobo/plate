@@ -2,7 +2,7 @@ package com.platform.boot.config;
 
 import com.platform.boot.commons.ErrorResponse;
 import com.platform.boot.commons.utils.ContextUtils;
-import com.platform.boot.security.Oauth2AuthenticationSuccessHandler;
+import com.platform.boot.security.oauth2.Oauth2SuccessHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.autoconfigure.security.reactive.PathRequest;
@@ -45,9 +45,9 @@ import java.util.Set;
 @EnableReactiveMethodSecurity
 public class SecurityConfiguration {
 
-    private final Oauth2AuthenticationSuccessHandler authenticationSuccessHandler;
+    private final Oauth2SuccessHandler authenticationSuccessHandler;
 
-    public SecurityConfiguration(Oauth2AuthenticationSuccessHandler authenticationSuccessHandler) {
+    public SecurityConfiguration(Oauth2SuccessHandler authenticationSuccessHandler) {
         this.authenticationSuccessHandler = authenticationSuccessHandler;
     }
 

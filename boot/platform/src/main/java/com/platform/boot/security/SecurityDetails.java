@@ -2,33 +2,31 @@ package com.platform.boot.security;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.platform.boot.security.group.member.GroupMemberResponse;
-import com.platform.boot.security.tenant.member.TenantMemberResponse;
-import lombok.Data;
+import com.platform.boot.security.core.group.member.GroupMemberResponse;
+import com.platform.boot.security.core.tenant.member.TenantMemberResponse;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.Assert;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.util.ObjectUtils;
 
-import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Represents a SecurityDetails object that implements UserDetails and holds
- * user-related information such as username, password, and granted authorities.
- *
  * @author Alex bob(<a href="https://github.com/vnobo">Alex bob</a>)
  */
-@Data
-public final class SecurityDetails implements UserDetails {
+@Setter
+@Getter
+public final class SecurityDetails extends DefaultOAuth2User implements UserDetails {
 
     private String code;
 
     private String username;
 
-    private String name;
-
-    private Set<GrantedAuthority> authorities;
+    private String nickname;
 
     private Set<TenantMemberResponse> tenants;
 
@@ -49,12 +47,34 @@ public final class SecurityDetails implements UserDetails {
     @JsonIgnore
     private Boolean credentialsExpired;
 
-    public static SecurityDetails of(String code, String username, String name, String password, Boolean disabled,
-                                     Boolean accountExpired, Boolean accountLocked, Boolean credentialsExpired) {
-        SecurityDetails securityDetails = new SecurityDetails();
+    public SecurityDetails(Collection<? extends GrantedAuthority> authorities,
+                           Map<String, Object> attributes, String nameAttributeKey) {
+        super(authorities, attributes, nameAttributeKey);
+    }
+
+    /**
+     * 根据给定参数创建一个SecurityDetails对象
+     *
+     * @param code               唯一标识码
+     * @param username           用户名
+     * @param name               昵称
+     * @param password           密码
+     * @param disabled           禁用标志
+     * @param accountExpired     账号过期标志
+     * @param accountLocked      账号被锁定标志
+     * @param credentialsExpired 密码过期标志
+     * @param authorities        授权信息集合
+     * @param attributes         属性集合
+     * @return 创建的SecurityDetails对象
+     */
+    public static SecurityDetails of(String code, String username, String nickname, String password, Boolean disabled,
+                                     Boolean accountExpired, Boolean accountLocked, Boolean credentialsExpired,
+                                     Collection<? extends GrantedAuthority> authorities,
+                                     Map<String, Object> attributes) {
+        SecurityDetails securityDetails = new SecurityDetails(authorities, attributes, username);
         securityDetails.setCode(code);
         securityDetails.setUsername(username);
-        securityDetails.setName(name);
+        securityDetails.setNickname(nickname);
         securityDetails.setPassword(password);
         securityDetails.setDisabled(disabled);
         securityDetails.setAccountExpired(accountExpired);
@@ -63,26 +83,10 @@ public final class SecurityDetails implements UserDetails {
         return securityDetails;
     }
 
-    public SecurityDetails authorities(Set<GrantedAuthority> authorities) {
-        this.setAuthorities(Collections.unmodifiableSet(sortAuthorities(authorities)));
-        return this;
-    }
 
     public SecurityDetails password(String password) {
         this.setPassword(password);
         return this;
-    }
-
-    private static SortedSet<GrantedAuthority> sortAuthorities(Collection<? extends GrantedAuthority> authorities) {
-        Assert.notNull(authorities, "Cannot pass a null GrantedAuthority collection");
-        // Ensure array iteration order is predictable (as per
-        // UserDetails.getAuthorities() contract and SEC-717)
-        SortedSet<GrantedAuthority> sortedAuthorities = new TreeSet<>(new AuthorityComparator());
-        for (GrantedAuthority grantedAuthority : authorities) {
-            Assert.notNull(grantedAuthority, "GrantedAuthority list cannot contain any null elements");
-            sortedAuthorities.add(grantedAuthority);
-        }
-        return sortedAuthorities;
     }
 
     public String getTenantCode() {
@@ -120,18 +124,5 @@ public final class SecurityDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return !this.disabled;
-    }
-
-    private static class AuthorityComparator implements Comparator<GrantedAuthority>, Serializable {
-        @Override
-        public int compare(GrantedAuthority g1, GrantedAuthority g2) {
-            if (g2.getAuthority() == null) {
-                return -1;
-            }
-            if (g1.getAuthority() == null) {
-                return 1;
-            }
-            return g1.getAuthority().compareTo(g2.getAuthority());
-        }
     }
 }

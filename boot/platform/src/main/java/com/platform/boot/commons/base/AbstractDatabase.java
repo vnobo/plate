@@ -43,12 +43,12 @@ public abstract class AbstractDatabase extends AbstractService {
         return queryWithCache(key, source);
     }
 
-    protected <T> Flux<T> queryWithCache(Object key, Flux<T> sourceMono) {
+    protected <T> Flux<T> queryWithCache(Object key, Flux<T> sourceFlux) {
         String cacheKey = key + ":data";
         Collection<T> cacheData = this.cache.get(cacheKey, ArrayList::new);
         assert cacheData != null;
 
-        Flux<T> source = sourceMono
+        Flux<T> source = sourceFlux
                 .doOnNext(cacheData::add)
                 .doAfterTerminate(() -> this.cachePut(cacheKey, cacheData));
         return Flux.fromIterable(ObjectUtils.isEmpty(cacheData) ? Collections.emptyList() : cacheData)

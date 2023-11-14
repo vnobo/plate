@@ -1,3 +1,19 @@
+drop table if exists oauth2_authorized_client;
+create table oauth2_authorized_client
+(
+    client_registration_id  varchar(100)                            not null,
+    principal_name          varchar(200)                            not null,
+    access_token_type       varchar(100)                            not null,
+    access_token_value      bytea                                   not null,
+    access_token_issued_at  timestamp                               not null,
+    access_token_expires_at timestamp                               not null,
+    access_token_scopes     varchar(1000) default null,
+    refresh_token_value     bytea         default null,
+    refresh_token_issued_at timestamp     default null,
+    created_at              timestamp     default current_timestamp not null,
+    primary key (client_registration_id, principal_name)
+);
+
 drop table if exists se_users;
 create table if not exists se_users
 (
@@ -11,6 +27,9 @@ create table if not exists se_users
     account_locked      boolean      not null default false,
     credentials_expired boolean      not null default false,
     name                varchar(512),
+    email               varchar(512),
+    avatar              text,
+    bio              text,
     extend              jsonb,
     creator             varchar(64),
     updater             varchar(64),
@@ -45,8 +64,8 @@ create table if not exists se_groups
     tenant_code  varchar(64)  not null default '0',
     name         varchar(512) not null,
     extend       jsonb,
-    creator varchar(64),
-    updater varchar(64),
+    creator      varchar(64),
+    updater      varchar(64),
     created_time timestamp             default current_timestamp,
     updated_time timestamp             default current_timestamp
 );
@@ -88,12 +107,12 @@ drop table if exists se_tenants;
 create table if not exists se_tenants
 (
     id           serial primary key,
-    code    varchar(64)  not null unique,
-    name    varchar(512) not null,
+    code         varchar(64)  not null unique,
+    name         varchar(512) not null,
     description  text,
     extend       jsonb,
-    creator varchar(64),
-    updater varchar(64),
+    creator      varchar(64),
+    updater      varchar(64),
     created_time timestamp default current_timestamp,
     updated_time timestamp default current_timestamp
 );
@@ -133,7 +152,7 @@ create table if not exists se_menus
     creator      varchar(64),
     updater      varchar(64),
     created_time timestamp             default current_timestamp,
-    updated_time timestamp default current_timestamp
+    updated_time timestamp             default current_timestamp
 );
 create index se_menus_pcode_tenant_code_type_name_idx on se_menus (pcode, tenant_code, type, name);
 create index se_menus_extend_gin_idx on se_menus using gin (extend);
@@ -143,12 +162,12 @@ drop table if exists se_loggers;
 create table if not exists se_loggers
 (
     id           serial8 primary key,
-    code        varchar(64) not null unique,
-    tenant_code varchar(64) not null default '0',
-    prefix      varchar(64),
-    operator    varchar(64),
-    status      varchar(64),
-    method      varchar(64),
+    code         varchar(64) not null unique,
+    tenant_code  varchar(64) not null default '0',
+    prefix       varchar(64),
+    operator     varchar(64),
+    status       varchar(64),
+    method       varchar(64),
     url          text,
     context      jsonb,
     created_time timestamp            default current_timestamp,
