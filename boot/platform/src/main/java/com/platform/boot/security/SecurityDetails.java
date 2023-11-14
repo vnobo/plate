@@ -52,26 +52,11 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
         super(authorities, attributes, nameAttributeKey);
     }
 
-    /**
-     * 根据给定参数创建一个SecurityDetails对象
-     *
-     * @param code               唯一标识码
-     * @param username           用户名
-     * @param name               昵称
-     * @param password           密码
-     * @param disabled           禁用标志
-     * @param accountExpired     账号过期标志
-     * @param accountLocked      账号被锁定标志
-     * @param credentialsExpired 密码过期标志
-     * @param authorities        授权信息集合
-     * @param attributes         属性集合
-     * @return 创建的SecurityDetails对象
-     */
     public static SecurityDetails of(String code, String username, String nickname, String password, Boolean disabled,
                                      Boolean accountExpired, Boolean accountLocked, Boolean credentialsExpired,
                                      Collection<? extends GrantedAuthority> authorities,
-                                     Map<String, Object> attributes) {
-        SecurityDetails securityDetails = new SecurityDetails(authorities, attributes, username);
+                                     Map<String, Object> attributes, String nameAttributeKey) {
+        SecurityDetails securityDetails = new SecurityDetails(authorities, attributes, nameAttributeKey);
         securityDetails.setCode(code);
         securityDetails.setUsername(username);
         securityDetails.setNickname(nickname);

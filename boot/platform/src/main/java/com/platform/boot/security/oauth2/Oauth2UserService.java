@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.security.SecurityDetails;
 import com.platform.boot.security.SecurityManager;
+import com.platform.boot.security.core.user.User;
 import com.platform.boot.security.core.user.UserRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -39,12 +39,12 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
     }
 
     public Mono<OAuth2User> loadLocalUser(String registrationId, OAuth2User oAuth2User) {
-        return this.securityManager.findByOauth2(registrationId, oAuth2User.getName())
+        return this.securityManager.loadByOauth2(registrationId, oAuth2User.getName())
                 .switchIfEmpty(this.registerUser(registrationId, oAuth2User))
-                .map(securityUser -> this.convertToOauth2User(securityUser, oAuth2User));
+                .map(user -> this.convertToOauth2User(user, oAuth2User));
     }
 
-    public Mono<SecurityDetails> registerUser(String registrationId, OAuth2User oAuth2User) {
+    public Mono<User> registerUser(String registrationId, OAuth2User oAuth2User) {
         var request = this.convertToUserRequest(registrationId, oAuth2User);
         return this.securityManager.register(request);
     }
@@ -72,10 +72,10 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
         return request;
     }
 
-    public OAuth2User convertToOauth2User(SecurityDetails details, OAuth2User oAuth2User) {
-        return SecurityDetails.of(details.getCode(), details.getUsername(), details.getNickname(),
+    public OAuth2User convertToOauth2User(User details, OAuth2User oAuth2User) {
+        return SecurityDetails.of(details.getCode(), details.getUsername(), details.getName(),
                 details.getPassword(), details.getDisabled(), details.getAccountExpired(), details.getAccountLocked(),
-                details.getCredentialsExpired(), oAuth2User.getAuthorities(), oAuth2User.getAttributes());
+                details.getCredentialsExpired(), oAuth2User.getAuthorities(), oAuth2User.getAttributes(), oAuth2User.getName());
     }
 
     public static String generateRandoPassword() {

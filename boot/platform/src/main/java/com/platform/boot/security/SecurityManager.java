@@ -16,7 +16,6 @@ import org.springframework.data.relational.core.query.Query;
 import org.springframework.data.relational.core.query.Update;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsPasswordService;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +24,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -67,23 +69,8 @@ public class SecurityManager extends AbstractDatabase
                 .doAfterTerminate(() -> this.cache.clear());
     }
 
-    public Mono<SecurityDetails> register(UserRequest request) {
-        var userMono = this.usersService.add(request)
-                .zipWhen(user -> this.authorities(user.getCode()));
-
-        var userDetailsMono = userMono
-                .flatMap(tuple2 -> buildUserDetails(tuple2.getT1(), new HashSet<>(tuple2.getT2())));
-
-        return userDetailsMono
-                .onErrorResume(throwable -> Mono.error(new AuthenticationServiceException(
-                        throwable.getLocalizedMessage(), throwable)));
-
-    }
-
-    public Mono<User> loadByUsername(String username) {
-        Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
-        var userMono = this.entityTemplate.select(query, User.class);
-        return queryWithCache(username, userMono).singleOrEmpty();
+    public Mono<User> register(UserRequest request) {
+        return this.usersService.add(request);
     }
 
     public Mono<User> loadByOauth2(String bindType, String openid) {
@@ -95,13 +82,10 @@ public class SecurityManager extends AbstractDatabase
         return queryWithCache(bindType + openid, userMono).singleOrEmpty();
     }
 
-    public Mono<SecurityDetails> findByOauth2(String bindType, String openid) {
-        return this.loadByOauth2(bindType, openid).map(user ->
-                SecurityDetails.of(user.getCode(), user.getUsername(), user.getName(),
-                        user.getPassword(), user.getDisabled(), user.getAccountExpired(),
-                        user.getAccountLocked(), user.getCredentialsExpired(),
-                        Set.of(new SimpleGrantedAuthority("RULE_USER")),
-                        Map.of("username", user.getUsername())));
+    public Mono<User> loadByUsername(String username) {
+        Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
+        var userMono = this.entityTemplate.select(query, User.class);
+        return queryWithCache(username, userMono).singleOrEmpty();
     }
 
     @Override
@@ -122,16 +106,16 @@ public class SecurityManager extends AbstractDatabase
         // 构建用户详细信息
         SecurityDetails userDetails = SecurityDetails.of(user.getCode(), user.getUsername(), user.getName(),
                 user.getPassword(), user.getDisabled(), user.getAccountExpired(),
-                user.getAccountLocked(), user.getCredentialsExpired(), authorities,
-                Map.of("username", user.getUsername()));
+                user.getAccountLocked(), user.getCredentialsExpired(), authorities, Map.of("id", user.getId()),
+                user.getUsername());
         // 使用 Mono.zip 同时加载用户的组和租户信息
         var tuple2Mono = Mono.zip(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
         // 将组和租户信息设置到用户详细信息中
         return tuple2Mono.flatMap(tuple2 -> {
             userDetails.setGroups(new HashSet<>(tuple2.getT1()));
             userDetails.setTenants(new HashSet<>(tuple2.getT2()));
-            return Mono.just(userDetails);
-        });
+            return Mono.defer(() -> Mono.just(userDetails));
+        }).switchIfEmpty(Mono.just(userDetails));
     }
 
     private Mono<List<GroupMemberResponse>> loadGroups(String userCode) {
