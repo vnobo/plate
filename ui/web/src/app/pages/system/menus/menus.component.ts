@@ -1,6 +1,6 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Menu, MenusService} from "./menus.service";
-import {Subject, takeUntil} from "rxjs";
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Menu, MenusService } from "./menus.service";
+import { Subject, takeUntil } from "rxjs";
 
 @Component({
   selector: 'app-menus',
@@ -37,8 +37,7 @@ export class MenusComponent implements OnInit, OnDestroy {
     const stack: Menu[] = [];
     const array: Menu[] = [];
     const hashMap = {};
-    stack.push({...root, level: 0, expand: false});
-
+    stack.push({ ...root, level: 0, expand: false });
     while (stack.length !== 0) {
       const node = stack.pop();
       if (!node) {
@@ -47,7 +46,7 @@ export class MenusComponent implements OnInit, OnDestroy {
       this.visitNode(node, hashMap, array);
       if (node.children) {
         for (let i = node.children.length - 1; i >= 0; i--) {
-          stack.push({...node.children[i], level: node.level ? node.level + 1 : 1, expand: false, parent: node});
+          stack.push({ ...node.children[i], level: node.level ? node.level + 1 : 1, expand: false, parent: node });
         }
       }
     }

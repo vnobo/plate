@@ -106,8 +106,8 @@ public class SecurityManager extends AbstractDatabase
         // 构建用户详细信息
         SecurityDetails userDetails = SecurityDetails.of(user.getCode(), user.getUsername(), user.getName(),
                 user.getPassword(), user.getDisabled(), user.getAccountExpired(),
-                user.getAccountLocked(), user.getCredentialsExpired(), authorities, Map.of("id", user.getId()),
-                user.getUsername());
+                user.getAccountLocked(), user.getCredentialsExpired(), authorities, Map.of("username", user.getUsername()),
+                "username");
         // 使用 Mono.zip 同时加载用户的组和租户信息
         var tuple2Mono = Mono.zip(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
         // 将组和租户信息设置到用户详细信息中
