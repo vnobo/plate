@@ -31,8 +31,3 @@ spring:
     connect-timeout: 10s
     timeout: 30s
     repositories.enabled: false
-  security.oauth2.client.registration:
-    github:
-      client-id: Iv1.14a97a700a228437
-      client-secret: 5f6bd189f4eb1ff2e62e6bac90d503de4afc5a89
-      scope: user
