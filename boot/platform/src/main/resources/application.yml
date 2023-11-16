@@ -16,7 +16,7 @@ spring:
     locale: zh_CN
   codec:
     max-in-memory-size: 512KB
-    log-request-details: true
+    log-request-details: false
   cache:
     type: redis
     redis:
