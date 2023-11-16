@@ -100,8 +100,8 @@ public class CaptchaFilter implements WebFilter, Ordered {
         Assert.notNull(exchange, "exchange cannot be null");
         Assert.notNull(captchaToken, "captchaToken cannot be null");
         return exchange.getFormData().flatMap((data) -> Mono.justOrEmpty(data.getFirst(captchaToken.getParameterName())))
-                .switchIfEmpty(
-                        Mono.justOrEmpty(exchange.getRequest().getHeaders().getFirst(captchaToken.getHeaderName())));
+                .switchIfEmpty(Mono.defer(() ->
+                        Mono.justOrEmpty(exchange.getRequest().getHeaders().getFirst(captchaToken.getHeaderName()))));
     }
 
     @Override

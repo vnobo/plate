@@ -26,7 +26,8 @@ public class UserAuthoritiesService extends AbstractDatabase {
 
     public Mono<UserAuthority> operate(UserAuthorityRequest request) {
         var dataMono = this.entityTemplate.selectOne(Query.query(request.toCriteria()), UserAuthority.class);
-        return dataMono.switchIfEmpty(this.save(request.toAuthority())).doAfterTerminate(() -> this.cache.clear());
+        return dataMono.switchIfEmpty(Mono.defer(() -> this.save(request.toAuthority())))
+                .doAfterTerminate(() -> this.cache.clear());
     }
 
     public Mono<Void> delete(UserAuthorityRequest request) {

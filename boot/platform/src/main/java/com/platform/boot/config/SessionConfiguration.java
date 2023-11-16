@@ -3,10 +3,15 @@ package com.platform.boot.config;
 import com.platform.boot.commons.annotation.exception.RestServerException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.NonNull;
+import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.security.oauth2.client.R2dbcReactiveOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -22,7 +27,12 @@ import java.util.regex.Pattern;
  */
 @Configuration(proxyBeanMethods = false)
 public class SessionConfiguration {
-
+    @Bean
+    @Primary
+    public ReactiveOAuth2AuthorizedClientService oAuth2ClientService(DatabaseClient databaseClient,
+                                                                     ReactiveClientRegistrationRepository clientRepository) {
+        return new R2dbcReactiveOAuth2AuthorizedClientService(databaseClient, clientRepository);
+    }
     @Bean
     public WebSessionIdResolver webSessionIdResolver() {
         return new CustomBearerWebSessionIdResolver();

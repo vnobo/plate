@@ -50,7 +50,6 @@ public class SecurityConfiguration {
     public SecurityConfiguration(Oauth2SuccessHandler authenticationSuccessHandler) {
         this.authenticationSuccessHandler = authenticationSuccessHandler;
     }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -104,10 +103,10 @@ public class SecurityConfiguration {
             Mono<MatchResult> ignoreMono = new OrServerWebExchangeMatcher(allowedMatchers)
                     .matches(exchange).filter(MatchResult::isMatch)
                     .flatMap(res -> MatchResult.notMatch())
-                    .switchIfEmpty(MatchResult.match());
+                    .switchIfEmpty(Mono.defer(MatchResult::match));
             var request = exchange.getRequest();
             return Mono.justOrEmpty(request.getMethod()).filter(allowedMethods::contains)
-                    .flatMap((m) -> MatchResult.notMatch()).switchIfEmpty(ignoreMono);
+                    .flatMap((m) -> MatchResult.notMatch()).switchIfEmpty(Mono.defer(() -> ignoreMono));
         }
     }
 

@@ -52,7 +52,7 @@ public abstract class AbstractDatabase extends AbstractService {
                 .doOnNext(cacheData::add)
                 .doAfterTerminate(() -> this.cachePut(cacheKey, cacheData));
         return Flux.fromIterable(ObjectUtils.isEmpty(cacheData) ? Collections.emptyList() : cacheData)
-                .switchIfEmpty(source);
+                .switchIfEmpty(Flux.defer(() -> source));
     }
 
     protected <T> Mono<Long> countWithCache(Object key, Query query, Class<T> entityClass) {
@@ -74,7 +74,7 @@ public abstract class AbstractDatabase extends AbstractService {
         String cacheKey = key + ":count";
         Long cacheCount = this.cache.get(cacheKey, () -> null);
         Mono<Long> source = sourceMono.doOnNext(count -> this.cachePut(cacheKey, count));
-        return Mono.justOrEmpty(cacheCount).switchIfEmpty(source);
+        return Mono.justOrEmpty(cacheCount).switchIfEmpty(Mono.defer(() -> source));
     }
 
     private void cachePut(String cacheKey, Object obj) {

@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.ReactiveUserDetailsPassword
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -69,7 +70,10 @@ public class SecurityManager extends AbstractDatabase
                 .doAfterTerminate(() -> this.cache.clear());
     }
 
-    public Mono<User> register(UserRequest request) {
+    public Mono<User> registerOrModifyUser(UserRequest request) {
+        if (StringUtils.hasLength(request.getCode())) {
+            return this.usersService.operate(request);
+        }
         return this.usersService.add(request);
     }
 
@@ -115,7 +119,7 @@ public class SecurityManager extends AbstractDatabase
             userDetails.setGroups(new HashSet<>(tuple2.getT1()));
             userDetails.setTenants(new HashSet<>(tuple2.getT2()));
             return Mono.defer(() -> Mono.just(userDetails));
-        }).switchIfEmpty(Mono.just(userDetails));
+        }).switchIfEmpty(Mono.defer(() -> Mono.just(userDetails)));
     }
 
     private Mono<List<GroupMemberResponse>> loadGroups(String userCode) {

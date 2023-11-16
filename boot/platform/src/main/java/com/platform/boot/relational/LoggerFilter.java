@@ -208,7 +208,7 @@ public class LoggerFilter implements WebFilter {
         if (validContentTypeIsJson(exchange)) {
             return this.requireCsrfProtectionMatcher.matches(exchange)
                     .filter(ServerWebExchangeMatcher.MatchResult::isMatch)
-                    .switchIfEmpty(continueFilterChain(exchange, chain).then(Mono.empty()))
+                    .switchIfEmpty(Mono.defer(() -> continueFilterChain(exchange, chain).then(Mono.empty())))
                     .flatMap((m) -> nextMono);
         }
         return continueFilterChain(exchange, chain).then(Mono.empty());

@@ -16,13 +16,6 @@ public interface UsersRepository extends R2dbcRepository<User, Long> {
      * @return tenant result
      */
     Mono<User> findByCode(String code);
-    /**
-     * get by username
-     *
-     * @param username user id
-     * @return user model
-     */
-    Mono<User> findByUsernameIgnoreCase(String username);
 
     /**
      * check exists by username

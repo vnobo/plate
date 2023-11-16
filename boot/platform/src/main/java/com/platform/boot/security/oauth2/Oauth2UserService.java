@@ -16,7 +16,9 @@ import reactor.core.publisher.Mono;
 
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static org.springframework.security.config.oauth2.client.CommonOAuth2Provider.GITHUB;
@@ -34,26 +36,44 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
     public Mono<OAuth2User> loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         Function<OAuth2User, Mono<OAuth2User>> loadByLocalUser = oAuth2User ->
                 this.loadLocalUser(userRequest.getClientRegistration().getRegistrationId(), oAuth2User)
-                        .switchIfEmpty(Mono.just(oAuth2User));
+                        .switchIfEmpty(Mono.defer(() -> Mono.just(oAuth2User)));
         return super.loadUser(userRequest).flatMap(loadByLocalUser);
     }
 
     public Mono<OAuth2User> loadLocalUser(String registrationId, OAuth2User oAuth2User) {
         return this.securityManager.loadByOauth2(registrationId, oAuth2User.getName())
-                .switchIfEmpty(this.registerUser(registrationId, oAuth2User))
+                .delayUntil(user -> this.modifyUser(user, registrationId, oAuth2User))
+                .switchIfEmpty(Mono.defer(() -> this.registerUser(registrationId, oAuth2User)))
                 .map(user -> this.convertToOauth2User(user, oAuth2User));
+    }
+
+    public Mono<Void> modifyUser(User user, String registrationId, OAuth2User oAuth2User) {
+        var request = this.convertToUserRequest(registrationId, oAuth2User);
+        request.setId(user.getId());
+        request.setUsername(user.getUsername());
+        request.setCode(user.getCode());
+        ObjectNode oldExtend = Optional.ofNullable(user.getExtend())
+                .map(node -> (ObjectNode) node.deepCopy())
+                .orElse(ContextUtils.OBJECT_MAPPER.createObjectNode());
+        ObjectNode oauth2 = Optional.ofNullable(oldExtend.get("oauth2"))
+                .map(node -> (ObjectNode) node.deepCopy())
+                .orElse(ContextUtils.OBJECT_MAPPER.createObjectNode());
+        oauth2.set("registrationId", request.getExtend().get("oauth2").get(registrationId));
+        oldExtend.set("oauth2", oauth2);
+        request.setExtend(oldExtend);
+        return this.securityManager.registerOrModifyUser(request).then();
     }
 
     public Mono<User> registerUser(String registrationId, OAuth2User oAuth2User) {
         var request = this.convertToUserRequest(registrationId, oAuth2User);
-        return this.securityManager.register(request);
+        return this.securityManager.registerOrModifyUser(request);
     }
 
     public UserRequest convertToUserRequest(String registrationId, OAuth2User oAuth2User) {
         UserRequest request = new UserRequest();
         request.setPassword(generateRandoPassword());
         ObjectNode extend = ContextUtils.OBJECT_MAPPER.createObjectNode();
-        if (registrationId.equalsIgnoreCase(GITHUB.name())) {
+        if (registrationId.equalsIgnoreCase(GITHUB.name()) || "gitee".equalsIgnoreCase(registrationId)) {
             String username = registrationId + "#" + oAuth2User.getAttribute("login")
                     + "-" + oAuth2User.getAttribute("id");
             request.setUsername(username);
@@ -67,15 +87,19 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
             extend.set("oauth2", registrationNode);
             request.setExtend(extend);
         } else {
+            //todo register other oauth2 default username
             request.setUsername(oAuth2User.getName());
         }
         return request;
     }
 
     public OAuth2User convertToOauth2User(User details, OAuth2User oAuth2User) {
-        return SecurityDetails.of(details.getCode(), details.getUsername(), details.getName(),
-                details.getPassword(), details.getDisabled(), details.getAccountExpired(), details.getAccountLocked(),
-                details.getCredentialsExpired(), oAuth2User.getAuthorities(), oAuth2User.getAttributes(), oAuth2User.getName());
+        Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
+        attributes.put("username", details.getUsername());
+        return SecurityDetails.of(details.getCode(), details.getUsername(), details.getName(), details.getPassword(),
+                details.getDisabled(), details.getAccountExpired(),
+                details.getAccountLocked(), details.getCredentialsExpired(),
+                oAuth2User.getAuthorities(), attributes, "username");
     }
 
     public static String generateRandoPassword() {

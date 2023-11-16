@@ -23,9 +23,12 @@
   </thead>
   <tbody>
     @for(let data of expandTable.data){
-
-    }@else{
-
+      <ng - container >
+        @for(let item of mapOfExpandedData[data.code ? data.code : '0']){
+      < ng - container >
+      < / ng - container >
+        }
+        </ng - container >
     }
     <ng-container *ngFor="let data of expandTable.data">
       <ng-container *ngFor="let item of mapOfExpandedData[data.code ? data.code : '0']">
