@@ -12,7 +12,7 @@ export interface Menu {
   name?: string;
   path?: string;
   sort?: number;
-  extend?: any;
+  extend?: never;
   creator?: UserAuditor;
   updater?: UserAuditor;
   createdTime?: Date;
@@ -72,19 +72,19 @@ export class MenusService {
   }
 
   getMenus(request: Menu): Observable<Menu[]> {
-    const params = new HttpParams({fromObject: request as any});
+    const params = new HttpParams({fromObject: request as never});
     return this.http.get<Menu[]>('/menus/search', {params: params})
       .pipe(concatMap(this.childrenMap), toArray(), retry(3));
   }
 
   getMeMenus(request: Menu): Observable<Menu[]> {
-    const params = new HttpParams({fromObject: request as any});
+    const params = new HttpParams({fromObject: request as never});
     return this.http.get<Menu[]>('/menus/me', {params: params})
       .pipe(concatMap(this.childrenMap), toArray(), retry(3));
   }
 
   getChildren(request: Menu): Observable<Menu[]> {
-    const params = new HttpParams({fromObject: request as any});
+    const params = new HttpParams({fromObject: request as never});
     return this.http.get<Menu[]>('/menus/me', {params: params});
   }
 

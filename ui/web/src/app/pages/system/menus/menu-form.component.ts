@@ -97,13 +97,13 @@ export class MenuFormComponent {
       sort: [null, Validators.required],
       extend: [null],
       permissions: [null],
-      icons: ['']
+      icons: [null]
     });
   }
 
+  //表单提交
   onSubmit() {
-    // 这里可以添加逻辑来处理表单提交，例如将数据发送到后端API
-    console.log(this.menuForm.value);
+
   }
 
   showModal(): void {

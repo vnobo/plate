@@ -14,12 +14,7 @@
       "sourceRoot": "src",
       "prefix": "app",
       "i18n": {
-        "sourceLocale": "zh",
-        "locales": {
-          "en": {
-            "translation": "src/locale/messages.en.xlf"
-          }
-        }
+        "sourceLocale": "zh"
       },
       "architect": {
         "build": {
@@ -101,11 +96,6 @@
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
-            },
-            "zh": {
-              "localize": [
-                "zh-Hans"
-              ]
             }
           },
           "defaultConfiguration": "production"
