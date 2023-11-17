@@ -31,3 +31,32 @@ spring:
     connect-timeout: 10s
     timeout: 30s
     repositories.enabled: false
+  security.oauth2.client:
+    registration:
+      github:
+        client-id: Iv1.14a97a700a228437
+        client-secret: 94d4fa39efc5677ea75f5dfae533191c00f76f99
+        scope: user
+      gitee:
+        client-id: 86e0daac5760ab030e679612a490296925534c07d94b9f21ceca0d224797a878
+        client-secret: 1bbf140f587f45a4503cf71e6ffe19496a17557839a79e5e6564074f21712a82
+        authorization-grant-type: authorization_code
+        scope: user_info
+        redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+      weixin:
+        client-id: wx7bea3517d081b5ec
+        client-secret: 55976d59b94518bb190e8d5db4bb06c5
+        authorization-grant-type: authorization_code
+        scope: snsapi_login
+        redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+    provider:
+      gitee:
+        authorization-uri: https://gitee.com/oauth/authorize
+        token-uri: https://gitee.com/oauth/token
+        user-info-uri: https://gitee.com/api/v5/user
+        user-name-attribute: "id"
+      weixin:
+        authorization-uri: https://open.weixin.qq.com/connect/qrconnect
+        token-uri: https://api.weixin.qq.com/sns/oauth2/access_token
+        user-info-uri: https://api.weixin.qq.com/sns/userinfo
+        user-name-attribute: openid
