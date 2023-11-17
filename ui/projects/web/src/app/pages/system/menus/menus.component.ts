@@ -1,6 +1,6 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Menu, MenusService } from "./menus.service";
-import { Subject, takeUntil } from "rxjs";
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Menu, MenusService} from "./menus.service";
+import {Subject, takeUntil} from "rxjs";
 
 @Component({
   selector: 'app-menus',
