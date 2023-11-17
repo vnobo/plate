@@ -3,13 +3,10 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "serve:ssr:commons": "node dist/commons/server/server.mjs",
-    "serve:ssr:web": "node dist/web/server/server.mjs",
-    "serve:ssr:app": "node dist/app/server/server.mjs"
+    "startWeb": "ng serve web",
+    "buildWeb": "ng build web",
+    "watchWeb": "ng build web --watch --configuration development",
+    "test": "ng test"
   },
   "private": true,
   "dependencies": {

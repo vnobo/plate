@@ -11,9 +11,6 @@ import {CanActivateChildFn, CanActivateFn, CanMatchFn, Router} from "@angular/ro
 export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
-  const navigation = router.getCurrentNavigation();
-  const objects = navigation?.extras.state;
-  console.debug(objects);
   if (auth.isLoggedIn) {
     return true;
   }
