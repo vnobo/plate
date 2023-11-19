@@ -19,11 +19,13 @@ values ('610115', '默认租户', 'U1000', 'U1000');
 insert into se_tenant_members(code, tenant_code, user_code, creator, updater)
 values ('TM1000', '610115', 'U1000', 'U1000', 'U1000');
 
+/**
+ * 菜单数据初始化.
+ */
 insert into se_menus(code, type, authority, name, path, creator, updater, extend)
 values ('1000', 'FOLDER', 'ROLE_FOLDER_SYSTEM', '系统管理', '', 'U1000', 'U1000', '{
   "icons": "settings"
 }');
-
 insert into se_menus(code, pcode, type, authority, name, path, creator, updater, extend)
 values ('1001', '1000', 'MENU', 'ROLE_MENU_SYSTEM_MENUS', '菜单管理', '/system/menus', 'U1000', 'U1000', '{
   "icons": "menu-2"

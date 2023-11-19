@@ -50,7 +50,7 @@ export function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandle
   }
 
   const authReq = req.clone({
-    headers: req.headers.append('x-auth-token', _auth.authToken())
+    headers: req.headers.set('Authorization', `Bearer ${_auth.authToken()}`),
   });
 
   return next(authReq).pipe(catchError(errorResponse => {

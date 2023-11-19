@@ -5,6 +5,7 @@ import {routes} from './app.routes';
 import {NzConfig, provideNzConfig} from 'ng-zorro-antd/core/config';
 import {PageTitleStrategy} from './core/title-strategy.service';
 import {CoreModule} from './core/core.module';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 const ngZorroConfig: NzConfig = {
   // 注意组件名称没有 nz 前缀
@@ -24,5 +25,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideNzConfig(ngZorroConfig),
     importProvidersFrom(CoreModule),
+    importProvidersFrom(BrowserAnimationsModule)
   ],
 };
