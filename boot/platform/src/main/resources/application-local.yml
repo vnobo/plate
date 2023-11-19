@@ -12,7 +12,7 @@ server.port: 8080
 spring:
   application.name: plate
   r2dbc:
-    url: r2dbc:postgres://192.168.1.2:5432/plate?fetchSize=5000
+    url: r2dbc:postgres://127.0.0.1:5432/plate?fetchSize=5000
     username: farmer
     password: q1w2e3..
     pool:
@@ -27,7 +27,7 @@ spring:
     platform: postgres
     encoding: utf-8
   data.redis:
-    host: 192.168.1.2
-    connect-timeout: 10s
+    host: 127.0.0.1
     timeout: 30s
+    connect-timeout: 10s
     repositories.enabled: false
