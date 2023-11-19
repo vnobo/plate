@@ -201,7 +201,7 @@ public class LoggerFilter implements WebFilter {
     }
 
     @Override
-    public @NotNull Mono<Void> filter(@NotNull ServerWebExchange exchange, @NotNull WebFilterChain chain) {
+    public @NotNull Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         var nextMono = cacheFilterChain(exchange, chain).then(Mono.defer(ContextUtils::securityDetails)
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(userDetails -> logRequest(exchange, userDetails)).then());

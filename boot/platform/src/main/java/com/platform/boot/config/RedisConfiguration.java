@@ -1,14 +1,7 @@
 package com.platform.boot.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
  * @author Alex Bob (<a href="https://github.com/vnobo">Alex Bob</a>)
@@ -16,17 +9,4 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration(proxyBeanMethods = false)
 @EnableCaching
 public class RedisConfiguration {
-
-    @Bean
-    public ReactiveRedisTemplate<String, Object> redisTemplate(ReactiveRedisConnectionFactory factory,
-                                                               ObjectMapper objectMapper) {
-        StringRedisSerializer keySerializer = new StringRedisSerializer();
-        GenericJackson2JsonRedisSerializer redisSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
-        RedisSerializationContext.RedisSerializationContextBuilder<String, Object> builder =
-                RedisSerializationContext.newSerializationContext(redisSerializer);
-        RedisSerializationContext<String, Object> context = builder.key(keySerializer).value(redisSerializer)
-                .hashKey(keySerializer).hashValue(redisSerializer).build();
-        return new ReactiveRedisTemplate<>(factory, context);
-    }
-
 }
