@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "i18n": " ng extract-i18n",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
