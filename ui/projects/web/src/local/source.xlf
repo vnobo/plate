@@ -55,7 +55,6 @@
       </notes>
       <segment>
         <source>{VAR_SELECT, select, FOLDER {FOLDER} MENU {MENU} LINK {LINK} API {API}}</source>
-        <target>{VAR_SELECT, select, FOLDER {FOLDER} MENU {MENU} LINK {LINK} API {API}}</target>
       </segment>
     </unit>
   </file>
