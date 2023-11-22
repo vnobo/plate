@@ -5,14 +5,24 @@ import {FormBuilder, FormGroup, Validators} from "@angular/forms";
   selector: 'app-menu-form',
   template: `
     <nz-modal [(nzVisible)]="isVisible" nzTitle="菜单编辑" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
-      <form nz-form class="login-form" [formGroup]="menuForm" (ngSubmit)="onSubmit()">
-        <ng-container *nzModalContent>
-          <div class="row g-3">
+      <form nz-form [formGroup]="menuForm" (ngSubmit)="onSubmit()">
+        <ng-container *nzModalContent class="p-3">
+          <div class="row g-3 ">
             <nz-form-item class="col-md">
-              <nz-form-label [nzSpan]="7" nzRequired nzFor="code">编码</nz-form-label>
-              <nz-form-control [nzSpan]="7" nzHasFeedback nzValidatingTip="Validating..." [nzErrorTip]="userErrorTpl">
+              <nz-form-label [nzSpan]="6" nzRequired nzFor="code">编码</nz-form-label>
+              <nz-form-control [nzSpan]="18" nzHasFeedback nzValidatingTip="验证中..." [nzErrorTip]="codeErrorTpl">
                 <input nz-input type="text" id="code" formControlName="code">
-                <ng-template #userErrorTpl let-control>
+                <ng-template #codeErrorTpl let-control>
+                  <ng-container *ngIf="control.hasError('required')">Please input your username!</ng-container>
+                  <ng-container *ngIf="control.hasError('duplicated')">The username is redundant!</ng-container>
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item class="col-md">
+              <nz-form-label [nzSpan]="6" nzRequired nzFor="pcode">父级</nz-form-label>
+              <nz-form-control [nzSpan]="18" nzHasFeedback nzValidatingTip="验证中..." [nzErrorTip]="pcodeErrorTpl">
+                <input nz-input type="text" id="pcode" formControlName="pcode">
+                <ng-template #pcodeErrorTpl let-control>
                   <ng-container *ngIf="control.hasError('required')">Please input your username!</ng-container>
                   <ng-container *ngIf="control.hasError('duplicated')">The username is redundant!</ng-container>
                 </ng-template>
