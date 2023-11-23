@@ -47,7 +47,6 @@ public class UsersService extends AbstractDatabase {
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
-
     public Mono<User> loadByCode(String code) {
         var userMono = this.usersRepository.findByCode(code).flux();
         return queryWithCache(code, userMono).next();
