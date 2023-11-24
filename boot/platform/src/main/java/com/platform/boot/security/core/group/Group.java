@@ -42,4 +42,8 @@ public class Group implements BaseEntity<Integer> {
     @LastModifiedDate
     private LocalDateTime updatedTime;
 
+    @Override
+    public void setCode(String code) {
+        this.code = code.startsWith("G") ? code : "G" + code;
+    }
 }

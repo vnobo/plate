@@ -4,7 +4,8 @@ server:
   compression.enabled: true
 
 spring:
-  main.keep-alive: true
+  threads.virtual.enabled: true
+  #main.keep-alive: true
   application.name: plate
   webflux.format:
     time: HH:mm:ss

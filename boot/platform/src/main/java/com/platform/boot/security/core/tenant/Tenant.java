@@ -1,6 +1,5 @@
 package com.platform.boot.security.core.tenant;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.platform.boot.commons.base.BaseEntity;
 import com.platform.boot.security.core.UserAuditor;
@@ -8,7 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.springframework.data.annotation.*;
 import org.springframework.data.relational.core.mapping.Table;
-import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
 
@@ -47,8 +45,7 @@ public class Tenant implements BaseEntity<Integer> {
     private LocalDateTime updatedTime;
 
     @Override
-    @JsonIgnore
-    public boolean isNew() {
-        return ObjectUtils.isEmpty(getId());
+    public void setCode(String code) {
+        this.code = code.startsWith("T") ? code : "T" + code;
     }
 }

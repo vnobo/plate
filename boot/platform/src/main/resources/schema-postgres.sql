@@ -29,7 +29,7 @@ create table if not exists se_users
     name                varchar(512),
     email               varchar(512),
     avatar              text,
-    bio              text,
+    bio text,
     extend              jsonb,
     creator             varchar(64),
     updater             varchar(64),

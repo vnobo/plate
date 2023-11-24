@@ -1,7 +1,6 @@
 package com.platform.boot.commons.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.commons.utils.CriteriaUtils;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.query.Criteria;
@@ -25,15 +24,6 @@ import java.util.Collection;
 public interface BaseEntity<T> extends Serializable, Persistable<T> {
 
     /**
-     * Gets the code of the entity.
-     *
-     * @return the code of the entity
-     */
-    default String getCode() {
-        return null;
-    }
-
-    /**
      * Sets the code of the entity.
      *
      * @param code the code to set
@@ -52,9 +42,7 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
     default boolean isNew() {
         boolean isNew = ObjectUtils.isEmpty(getId());
         if (isNew) {
-            if (ObjectUtils.isEmpty(getCode())) {
-                setCode(ContextUtils.nextId());
-            }
+            setCode(String.valueOf(getId()));
         }
         return isNew;
     }

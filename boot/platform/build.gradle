@@ -3,6 +3,7 @@ plugins {
     id "idea"
     id "org.springframework.boot"
     id "io.spring.dependency-management"
+    id 'org.graalvm.buildtools.native'
 }
 
 configurations {
@@ -16,26 +17,27 @@ tasks.named("bootBuildImage") {
     imageName = ("${dockerPrefix}/${project.name}:${project.version}")
     publish = true
     pullPolicy = "IF_NOT_PRESENT"
-    /*bindings = [
-            "/mnt/build-image/jre:/platform/bindings/jre",
-            "/mnt/build-image/syft:/platform/bindings/syft",
-            "/mnt/build-image/boot:/platform/bindings/spring-boot"
-    ]*/
     environment = [
             "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
             "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError"
     ]
+    buildWorkspace {
+        bind {
+            source = "/tmp/cache-${rootProject.name}-${project.name}.work"
+        }
+    }
     buildCache {
-        volume {
-            name = "cache.${rootProject.name}.${project.name}.build"
+        bind {
+            source = "/tmp/cache-${rootProject.name}-${project.name}.build"
         }
     }
     launchCache {
-        volume {
-            name = "cache.${rootProject.name}.${project.name}.launch"
+        bind {
+            source = "/tmp/cache-${rootProject.name}-${project.name}.launch"
         }
     }
     docker {
+        host = "tcp://192.168.1.2:2376"
         publishRegistry {
             username = "${dockerUsername}"
             password = "${dockerPassword}"

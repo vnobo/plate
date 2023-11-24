@@ -40,4 +40,9 @@ public class TenantMember implements BaseEntity<Long> {
 
     @LastModifiedDate
     private LocalDateTime updatedTime;
+
+    @Override
+    public void setCode(String code) {
+        this.code = code.startsWith("TM") ? code : "TM" + code;
+    }
 }

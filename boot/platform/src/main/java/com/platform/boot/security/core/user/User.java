@@ -71,4 +71,8 @@ public class User implements BaseEntity<Long> {
     @CreatedDate
     private LocalDateTime createdTime;
 
+    @Override
+    public void setCode(String code) {
+        this.code = code.startsWith("U") ? code : "U" + code;
+    }
 }

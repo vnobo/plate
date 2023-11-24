@@ -38,4 +38,9 @@ public class GroupMember implements BaseEntity<Long> {
 
     @LastModifiedDate
     private LocalDateTime updatedTime;
+
+    @Override
+    public void setCode(String code) {
+        this.code = code.startsWith("GM") ? code : "GM" + code;
+    }
 }

@@ -46,4 +46,9 @@ public class GroupAuthority implements GrantedAuthority, BaseEntity<Integer> {
         this.groupCode = groupCode;
         this.authority = authority;
     }
+
+    @Override
+    public void setCode(String code) {
+        this.code = code.startsWith("GA") ? code : "GA" + code;
+    }
 }
