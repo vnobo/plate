@@ -3,7 +3,6 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "defaultProject": "web",
     "web": {
       "projectType": "application",
       "schematics": {
@@ -138,14 +137,11 @@
           }
         },
         "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "tsConfig": [
-              "projects/web/tsconfig.app.json",
-              "projects/web/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
+            "lintFilePatterns": [
+              "projects/web/**/*.ts",
+              "projects/web/**/*.html"
             ]
           }
         },
@@ -198,6 +194,15 @@
             "polyfills": [
               "zone.js",
               "zone.js/testing"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/commons/**/*.ts",
+              "projects/commons/**/*.html"
             ]
           }
         }
