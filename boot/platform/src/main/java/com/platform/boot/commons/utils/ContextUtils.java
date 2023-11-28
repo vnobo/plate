@@ -2,7 +2,6 @@ package com.platform.boot.commons.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.platform.boot.commons.Snowflake;
 import com.platform.boot.commons.exception.JsonException;
 import com.platform.boot.commons.exception.RestServerException;
 import com.platform.boot.security.SecurityDetails;
@@ -24,10 +23,7 @@ import reactor.core.publisher.Mono;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
 
 /**
  * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
@@ -53,11 +49,9 @@ public final class ContextUtils implements Serializable {
     public final static String CSRF_TOKEN_CONTEXT = "CSRF_TOKEN_CONTEXT";
 
     public static ObjectMapper OBJECT_MAPPER;
-    public static Snowflake SNOW_FLAKE;
     public static UsersService USERS_SERVICE;
 
     ContextUtils(ObjectMapper objectMapper, UsersService usersService) {
-        ContextUtils.SNOW_FLAKE = new Snowflake(1, 1);
         ContextUtils.OBJECT_MAPPER = objectMapper;
         ContextUtils.USERS_SERVICE = usersService;
     }
@@ -153,10 +147,6 @@ public final class ContextUtils implements Serializable {
     }
 
     public static String nextId() {
-        if (ObjectUtils.isEmpty(SNOW_FLAKE)) {
-            throw RestServerException.withMsg(
-                    "Snowflake not found!", "Snowflake server is not found, init snowflake first.");
-        }
-        return SNOW_FLAKE.nextIdStr();
+        return UUID.randomUUID().toString();
     }
 }
