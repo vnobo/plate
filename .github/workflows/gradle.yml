@@ -36,9 +36,7 @@ jobs:
 
     - name: Set Gradle action
       uses: gradle/gradle-build-action@v2
-        
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
+
     - run: |
         echo "${{ env.DOCKER_USERNAME }}"
         echo "${{ env.DOCKER_PASSWORD }}"
@@ -49,6 +47,10 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         DOCKER_PREFIX: ${{ env.DOCKER_PREFIX }}
         DOCKER_EMAIL: ${{ env.DOCKER_EMAIL }}
+
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+
     - name: Execute Gradle bootBuildImage
       run: ./gradlew bootBuildImage
       env:
