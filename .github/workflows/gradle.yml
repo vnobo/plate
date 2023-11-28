@@ -18,8 +18,12 @@ permissions:
   packages: write
   
 jobs:
-  build-and-push-image:
+  bootBuildImage:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
     steps:
     - uses: actions/checkout@v3
     - name: Set up JDK 21 for x64
