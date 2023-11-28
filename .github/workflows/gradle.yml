@@ -42,3 +42,4 @@ jobs:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         DOCKER_PREFIX: ${{ secrets.DOCKER_PREFIX }}
+        DOCKER_EMAIL: ${{ secrets.DOCKER_EMAIL }}
