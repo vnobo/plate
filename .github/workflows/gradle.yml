@@ -39,10 +39,11 @@ jobs:
       uses: gradle/gradle-build-action@v2
 
     - run: |
-        echo "${{ env.DOCKER_USERNAME }}"
-        echo "${{ env.DOCKER_PASSWORD }}"
-        echo "${{ env.DOCKER_PREFIX }}"
-        echo "${{ env.DOCKER_EMAIL }}"
+        echo ${{ env.DOCKER_USERNAME }}
+        echo ${{ env.DOCKER_PASSWORD }}
+        echo ${{ env.DOCKER_PREFIX }}
+        echo ${{ env.DOCKER_EMAIL }}
+        echo ${{ secrets.QODANA_TOKEN }}
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
