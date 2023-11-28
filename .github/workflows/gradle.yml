@@ -39,7 +39,11 @@ jobs:
         
     - name: Make gradlew executable
       run: chmod +x ./gradlew
-    - run: echo 'Hi ${{ env.DOCKER_USERNAME }},${{ env.DOCKER_PASSWORD }},${{ env.DOCKER_PREFIX }},${{ env.DOCKER_EMAIL }}'
+    - run: |
+        echo "${{ env.DOCKER_USERNAME }}"
+        echo "${{ env.DOCKER_PASSWORD }}"
+        echo "${{ env.DOCKER_PREFIX }}"
+        echo "${{ env.DOCKER_EMAIL }}"
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
