@@ -9,10 +9,10 @@ ext {
     def usernameStr = System.getenv("DOCKER_USERNAME")
     def passwordStr = System.getenv("DOCKER_PASSWORD")
     def emailStr = System.getenv("DOCKER_EMAIL")
-    dockerUsername = Objects.isNull(usernameStr) ? "${dusername}" : usernameStr
-    dockerPassword = Objects.isNull(passwordStr) ? "${dpassword}" : passwordStr
-    dockerPrefix = Objects.isNull(prefixStr) ? "${dprefix}" : prefixStr
-    dockerEmail = Objects.isNull(emailStr) ? "${demail}" : emailStr
+    dockerUsername = Objects.isNull(usernameStr) ? "Your username" : usernameStr
+    dockerPassword = Objects.isNull(passwordStr) ? "Your password" : passwordStr
+    dockerPrefix = Objects.isNull(prefixStr) ? "Your prefix" : prefixStr
+    dockerEmail = Objects.isNull(emailStr) ? "Your email" : emailStr
 }
 
 configure(allprojects) { project ->
