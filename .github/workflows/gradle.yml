@@ -58,5 +58,5 @@ jobs:
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        DOCKER_PREFIX: ${{ vars.DOCKER_PREFIX }}
+        DOCKER_PREFIX: alexbob
         DOCKER_EMAIL: ${{ vars.DOCKER_EMAIL }}
