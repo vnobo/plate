@@ -18,6 +18,14 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
           fetch-depth: 0  # a full history is required for pull request analysis
+      - run: |
+          echo ${{ env.DOCKER_EMAIL }}
+          echo ${{ secrets.QODANA_TOKEN }}
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_PREFIX: ${{ env.DOCKER_PREFIX }}
+          DOCKER_EMAIL: ${{ secrets.QODANA_TOKEN }}
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2023.2
         env:
