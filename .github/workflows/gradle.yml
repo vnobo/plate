@@ -50,8 +50,8 @@ jobs:
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        DOCKER_PREFIX: ${{ env.DOCKER_PREFIX }}
-        DOCKER_EMAIL: ${{ env.DOCKER_EMAIL }}
+        DOCKER_PREFIX: ${{ vars.DOCKER_PREFIX }}
+        DOCKER_EMAIL: ${{ vars.DOCKER_EMAIL }}
 
     - name: Make gradlew executable
       run: chmod +x ./gradlew
@@ -61,5 +61,5 @@ jobs:
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        DOCKER_PREFIX: ${{ env.DOCKER_PREFIX }}
+        DOCKER_PREFIX: ${{ vars.DOCKER_PREFIX }}
         DOCKER_EMAIL: ${{ vars.DOCKER_EMAIL }}
