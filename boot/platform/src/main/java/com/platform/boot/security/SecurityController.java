@@ -29,6 +29,7 @@ public class SecurityController {
 
     private final PasswordEncoder passwordEncoder;
     private final ServerOAuth2AuthorizedClientRepository clientRepository;
+
     @GetMapping("token")
     public Mono<AuthenticationToken> token(WebSession session) {
         return Mono.defer(() -> Mono.justOrEmpty(AuthenticationToken.build(session)));
@@ -72,7 +73,7 @@ public class SecurityController {
     }
 
     @Data
-    static class ChangePasswordRequest {
+    public static class ChangePasswordRequest {
 
         @NotBlank(message = "Password not empty!")
         private String password;
