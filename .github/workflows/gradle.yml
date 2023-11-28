@@ -39,11 +39,16 @@ jobs:
         
     - name: Make gradlew executable
       run: chmod +x ./gradlew
-
-    - name: Execute Gradle bootBuildImage
-      run: ./gradlew bootBuildImage
+    - run: echo 'Hi ${{ env.DOCKER_USERNAME }},${{ env.DOCKER_PASSWORD }},${{ env.DOCKER_PREFIX }},${{ env.DOCKER_EMAIL }}'
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         DOCKER_PREFIX: ${{ env.DOCKER_PREFIX }}
         DOCKER_EMAIL: ${{ env.DOCKER_EMAIL }}
+    - name: Execute Gradle bootBuildImage
+      run: ./gradlew bootBuildImage
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        DOCKER_PREFIX: ${{ vars.DOCKER_PREFIX }}
+        DOCKER_EMAIL: ${{ vars.DOCKER_EMAIL }}
