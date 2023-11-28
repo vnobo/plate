@@ -47,7 +47,6 @@ jobs:
         echo ${{ env.DOCKER_PASSWORD }}
         echo ${{ env.DOCKER_PREFIX }}
         echo ${{ env.DOCKER_EMAIL }}
-        echo ${{ secrets.QODANA_TOKEN }}
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -62,5 +61,5 @@ jobs:
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        DOCKER_PREFIX: alexbob
+        DOCKER_PREFIX: ${{ env.DOCKER_PREFIX }}
         DOCKER_EMAIL: ${{ vars.DOCKER_EMAIL }}
