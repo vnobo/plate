@@ -147,6 +147,6 @@ public final class ContextUtils implements Serializable {
     }
 
     public static String nextId() {
-        return UUID.randomUUID().toString();
+        return UUID.randomUUID().toString().replace("-", "");
     }
 }
