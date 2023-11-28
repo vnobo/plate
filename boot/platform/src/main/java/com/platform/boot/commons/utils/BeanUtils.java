@@ -5,8 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.google.common.collect.Maps;
-import com.platform.boot.commons.annotation.exception.JsonException;
-import com.platform.boot.commons.annotation.exception.RestServerException;
+import com.platform.boot.commons.exception.JsonException;
+import com.platform.boot.commons.exception.RestServerException;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.unit.DataSize;
 

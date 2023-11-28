@@ -1,6 +1,6 @@
 package com.platform.boot.security;
 
-import com.platform.boot.commons.annotation.exception.RestServerException;
+import com.platform.boot.commons.exception.RestServerException;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.security.core.AuthenticationToken;
 import jakarta.validation.Valid;

@@ -1,7 +1,7 @@
 package com.platform.boot.security.core.user;
 
-import com.platform.boot.commons.annotation.exception.RestServerException;
 import com.platform.boot.commons.base.AbstractDatabase;
+import com.platform.boot.commons.exception.RestServerException;
 import com.platform.boot.commons.query.ParamSql;
 import com.platform.boot.commons.query.QueryJson;
 import com.platform.boot.commons.utils.BeanUtils;

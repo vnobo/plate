@@ -2,7 +2,7 @@ package com.platform.boot.relational;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.platform.boot.commons.annotation.exception.JsonException;
+import com.platform.boot.commons.exception.JsonException;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.relational.logger.LoggerRequest;
 import com.platform.boot.relational.logger.LoggersService;

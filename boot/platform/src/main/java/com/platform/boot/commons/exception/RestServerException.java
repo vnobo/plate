@@ -1,5 +1,5 @@
 // Define the package name
-package com.platform.boot.commons.annotation.exception;
+package com.platform.boot.commons.exception;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

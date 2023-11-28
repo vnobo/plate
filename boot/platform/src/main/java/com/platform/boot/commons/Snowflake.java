@@ -1,6 +1,6 @@
 package com.platform.boot.commons;
 
-import com.platform.boot.commons.annotation.exception.RestServerException;
+import com.platform.boot.commons.exception.RestServerException;
 
 import java.io.Serializable;
 

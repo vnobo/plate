@@ -2,7 +2,7 @@ package com.platform.boot.converters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.platform.boot.commons.annotation.exception.JsonException;
+import com.platform.boot.commons.exception.JsonException;
 import com.platform.boot.commons.utils.ContextUtils;
 import io.r2dbc.postgresql.codec.Json;
 import lombok.NonNull;

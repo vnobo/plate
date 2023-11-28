@@ -1,6 +1,6 @@
 package com.platform.boot.config;
 
-import com.platform.boot.commons.annotation.exception.RestServerException;
+import com.platform.boot.commons.exception.RestServerException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
