@@ -6,6 +6,10 @@ plugins {
     id 'org.graalvm.buildtools.native'
 }
 
+java {
+    sourceCompatibility = '21'
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -18,22 +22,24 @@ tasks.named("bootBuildImage") {
     publish = true
     pullPolicy = "IF_NOT_PRESENT"
     environment = [
+            "BP_JVM_VERSION" : "21",
+            "BP_NATIVE_IMAGE": "true",
             "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
             "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError"
     ]
     buildWorkspace {
         bind {
-            source = "/tmp/cache-${rootProject.name}-${project.name}.work"
+            source = "cache-${rootProject.name}-${project.name}.work"
         }
     }
     buildCache {
         bind {
-            source = "/tmp/cache-${rootProject.name}-${project.name}.build"
+            source = "cache-${rootProject.name}-${project.name}.build"
         }
     }
     launchCache {
         bind {
-            source = "/tmp/cache-${rootProject.name}-${project.name}.launch"
+            source = "cache-${rootProject.name}-${project.name}.launch"
         }
     }
     docker {

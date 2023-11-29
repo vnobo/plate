@@ -12,6 +12,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.ReactiveAuditorAware;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
 import org.springframework.data.r2dbc.config.EnableR2dbcAuditing;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.List;
@@ -27,11 +28,13 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
 
     private final List<Converter<?, ?>> customConverters;
 
+    @NonNull
     @Override
     public ConnectionFactory connectionFactory() {
         return ConnectionFactories.get("r2dbc:..");
     }
 
+    @NonNull
     @Override
     public List<Object> getCustomConverters() {
         return Lists.newArrayList(customConverters);
