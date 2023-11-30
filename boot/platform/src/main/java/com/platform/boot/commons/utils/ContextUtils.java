@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.platform.boot.commons.exception.JsonException;
 import com.platform.boot.commons.exception.RestServerException;
+import com.platform.boot.commons.ulid.Ulid;
+import com.platform.boot.commons.ulid.UlidCreator;
 import com.platform.boot.security.SecurityDetails;
 import com.platform.boot.security.core.UserAuditor;
 import com.platform.boot.security.core.user.UsersService;
@@ -23,7 +25,10 @@ import reactor.core.publisher.Mono;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
@@ -147,6 +152,7 @@ public final class ContextUtils implements Serializable {
     }
 
     public static String nextId() {
-        return UUID.randomUUID().toString().replace("-", "");
+        Ulid ulid = UlidCreator.getUlid();
+        return ulid.toLowerCase();
     }
 }

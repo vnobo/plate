@@ -33,7 +33,6 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
     public ConnectionFactory connectionFactory() {
         return ConnectionFactories.get("r2dbc:..");
     }
-
     @NonNull
     @Override
     public List<Object> getCustomConverters() {
