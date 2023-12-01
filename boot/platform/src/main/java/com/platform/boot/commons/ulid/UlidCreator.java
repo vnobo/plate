@@ -146,16 +146,16 @@ public final class UlidCreator {
      */
     public static Ulid getHashUlid(final long time, byte[] bytes) {
         // Calculate the hash and take the first 10 bytes
-        byte[] hash = hasher("SHA-256").digest(bytes);
+        byte[] hash = hashes().digest(bytes);
         byte[] rand = Arrays.copyOf(hash, 10);
         return new Ulid(time, rand);
     }
 
-    private static MessageDigest hasher(final String algorithm) {
+    private static MessageDigest hashes() {
         try {
-            return MessageDigest.getInstance(algorithm);
+            return MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(String.format("%s not supported", algorithm));
+            throw new RuntimeException(String.format("%s not supported", "SHA-256"));
         }
     }
 
