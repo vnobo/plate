@@ -36,7 +36,7 @@ public class BeanUtils {
         }
         try {
             BYTE_ARRAY_OUTPUT_STREAM.reset();
-            OBJECT_OUTPUT_STREAM.write(ContextUtils.objectToBytes(obj));
+            OBJECT_OUTPUT_STREAM.writeObject(obj);
             OBJECT_OUTPUT_STREAM.flush();
             return DataSize.ofBytes(BYTE_ARRAY_OUTPUT_STREAM.size());
         } catch (IOException e) {
