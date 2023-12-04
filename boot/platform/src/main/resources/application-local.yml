@@ -23,7 +23,7 @@ spring:
       max-validation-time: 10s
       validation-query: "select version()"
   sql.init:
-    mode: always
+    mode: never
     platform: postgres
     encoding: utf-8
   data.redis:
