@@ -23,7 +23,13 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
                 nzValidatingTip="验证中..."
                 [nzErrorTip]="codeErrorTpl"
               >
-                <input nz-input type="text" id="code" formControlName="code" />
+                <input
+                  nz-input
+                  type="text"
+                  id="code"
+                  formControlName="code"
+                  [disabled]="true"
+                />
                 <ng-template #codeErrorTpl let-control>
                   <ng-container *ngIf="control.hasError('required')"
                     >Please input your username!</ng-container
@@ -45,6 +51,7 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
                 [nzErrorTip]="pcodeErrorTpl"
               >
                 <input
+                  [disabled]="true"
                   nz-input
                   type="text"
                   id="pcode"
@@ -62,28 +69,65 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
             </nz-form-item>
           </div>
           <div class="row g-3">
-            <div class="form-group col-md">
-              <label for="tenantCode">Tenant Code</label>
-              <input
-                type="text"
-                class="form-control"
-                id="tenantCode"
-                formControlName="tenantCode"
-              />
-            </div>
+            <nz-form-item class="col-md">
+              <nz-form-label
+                [nzSpan]="6"
+                nzRequired
+                nzFor="code"
+                for="tenantCode"
+                >租户</nz-form-label
+              >
+              <nz-form-control
+                [nzSpan]="18"
+                nzHasFeedback
+                nzValidatingTip="验证中..."
+                [nzErrorTip]="tenantCodeErrorTpl"
+              >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="tenantCode"
+                  formControlName="tenantCode"
+                />
+                <ng-template #tenantCodeErrorTpl let-control>
+                  <ng-container *ngIf="control.hasError('required')"
+                    >Please input your username!</ng-container
+                  >
+                  <ng-container *ngIf="control.hasError('duplicated')"
+                    >The username is redundant!</ng-container
+                  >
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item class="col-md">
+              <nz-form-label [nzSpan]="6" nzRequired nzFor="code" for="type"
+                >类型</nz-form-label
+              >
+              <nz-form-control
+                [nzSpan]="18"
+                nzHasFeedback
+                nzValidatingTip="验证中..."
+                [nzErrorTip]="typeErrorTpl"
+              >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="type"
+                  formControlName="type"
+                />
+                <ng-template #typeErrorTpl let-control>
+                  <ng-container *ngIf="control.hasError('required')"
+                    >Please input your username!</ng-container
+                  >
+                  <ng-container *ngIf="control.hasError('duplicated')"
+                    >The username is redundant!</ng-container
+                  >
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
           </div>
           <div class="form-group">
-            <label for="type">Type</label>
-            <input
-              type="text"
-              class="form-control"
-              id="type"
-              formControlName="type"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="authority">Authority</label>
+            <label for="authority">权&nbsp;&nbsp;&nbsp;&nbsp;限</label>
             <input
               type="text"
               class="form-control"
