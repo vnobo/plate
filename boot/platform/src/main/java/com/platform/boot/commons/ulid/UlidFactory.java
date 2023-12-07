@@ -288,7 +288,7 @@ public final class UlidFactory {
     // Package-private inner classes
     // ******************************
 
-    static interface IRandom {
+    interface IRandom {
 
         static IRandom newInstance() {
             return new ByteRandom();
