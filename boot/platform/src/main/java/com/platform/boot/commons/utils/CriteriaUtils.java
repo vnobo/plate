@@ -6,6 +6,7 @@ import com.platform.boot.commons.query.ParamSql;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Criteria;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
+@Component
 public final class CriteriaUtils {
     public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend", "createdTime", "updatedTime");
 

@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.google.common.collect.Maps;
 import com.platform.boot.commons.exception.JsonException;
 import com.platform.boot.commons.exception.RestServerException;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.unit.DataSize;
 
@@ -18,7 +20,8 @@ import java.util.Map;
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
-public class BeanUtils {
+@Component
+public class BeanUtils implements InitializingBean {
     private final static ByteArrayOutputStream BYTE_ARRAY_OUTPUT_STREAM = new ByteArrayOutputStream();
     private final static ObjectOutputStream OBJECT_OUTPUT_STREAM;
 
@@ -87,4 +90,7 @@ public class BeanUtils {
         });
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+    }
 }

@@ -1,5 +1,6 @@
 package com.platform.boot.commons.utils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.platform.boot.commons.exception.JsonException;
@@ -26,7 +27,6 @@ import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -82,6 +82,9 @@ public final class ContextUtils implements Serializable {
     }
 
     public static StringJoiner cacheKey(Object... objects) {
+        ObjectMapper objectMapper = ContextUtils.OBJECT_MAPPER.copy();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
         StringJoiner keyBuilder = new StringJoiner("&");
         for (Object object : objects) {
             if (object instanceof Pageable pageable) {
@@ -91,13 +94,12 @@ public final class ContextUtils implements Serializable {
                 keyBuilder.add("offset=" + pageable.getOffset());
                 continue;
             }
-            Map<String, Object> objectMap = com.platform.boot.commons.utils.BeanUtils
-                    .beanToMap(object, true);
-            if (ObjectUtils.isEmpty(objectMap)) {
-                keyBuilder.add(object.getClass().getName());
-                continue;
+            try {
+                String objectJson = objectMapper.writeValueAsString(object);
+                keyBuilder.add(objectJson);
+            } catch (JsonProcessingException e) {
+                throw JsonException.withError(e);
             }
-            objectMap.forEach((k, v) -> keyBuilder.add(k + "=" + v));
         }
         return keyBuilder;
     }
