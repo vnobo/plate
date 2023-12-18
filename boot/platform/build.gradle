@@ -73,6 +73,7 @@ idea {
 dependencies {
 
     implementation("com.google.guava:guava:32.+")
+    implementation("com.github.f4b6a3:uuid-creator:5.+")
 
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")

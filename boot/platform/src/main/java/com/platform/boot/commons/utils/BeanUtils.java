@@ -91,6 +91,6 @@ public class BeanUtils implements InitializingBean {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
     }
 }
