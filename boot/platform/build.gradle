@@ -73,11 +73,9 @@ idea {
 dependencies {
 
     implementation("com.google.guava:guava:32.+")
-    implementation("com.github.f4b6a3:uuid-creator:5.+")
 
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-    //implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.session:spring-session-data-redis")
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -89,15 +87,13 @@ dependencies {
     implementation("org.postgresql:r2dbc-postgresql")
     implementation("io.r2dbc:r2dbc-spi")
 
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    annotationProcessor("org.projectlombok:lombok")
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("io.projectreactor:reactor-test")
-    testImplementation("org.springframework.security:spring-security-test")
-
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.springframework.security:spring-security-test'
 }
 
 tasks.named("test") {

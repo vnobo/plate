@@ -3,9 +3,9 @@ package com.platform.boot.commons.utils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.f4b6a3.uuid.UuidCreator;
 import com.platform.boot.commons.exception.JsonException;
 import com.platform.boot.commons.exception.RestServerException;
+import com.platform.boot.commons.ulid.ULID;
 import com.platform.boot.security.SecurityDetails;
 import com.platform.boot.security.core.UserAuditor;
 import com.platform.boot.security.core.user.UsersService;
@@ -28,7 +28,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.StringJoiner;
-import java.util.UUID;
 
 /**
  * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
@@ -154,7 +153,6 @@ public final class ContextUtils implements Serializable {
     }
 
     public static String nextId() {
-        UUID uuid = UuidCreator.getTimeOrderedEpoch();
-        return uuid.toString();
+        return ULID.random();
     }
 }
