@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.r2dbc.BadSqlGrammarException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -23,11 +24,11 @@ import java.util.List;
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @ControllerAdvice
-public class ExceptionHandler {
+public class GlobalExceptionHandler {
 
-    private static final Log log = LogFactory.getLog(ExceptionHandler.class);
+    private static final Log log = LogFactory.getLog(GlobalExceptionHandler.class);
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(ServerWebInputException.class)
+    @ExceptionHandler(ServerWebInputException.class)
     public ResponseEntity<ErrorResponse> handleBindException(ServerWebExchange exchange, ServerWebInputException ex) {
         List<String> errors = Lists.newArrayList(ex.getLocalizedMessage());
         if (ex instanceof WebExchangeBindException bindException) {
@@ -50,7 +51,7 @@ public class ExceptionHandler {
                         4170, "请求参数验证失败!", errors));
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler({DataAccessException.class, R2dbcException.class})
+    @ExceptionHandler({DataAccessException.class, R2dbcException.class})
     public ResponseEntity<ErrorResponse> handleFailureException(ServerWebExchange exchange, RuntimeException ex) {
         List<String> errors = Lists.newArrayList(ex.getLocalizedMessage());
         if (ex instanceof R2dbcException r2dbcException) {
@@ -72,7 +73,7 @@ public class ExceptionHandler {
                         5070, "数据库操作错误!", errors));
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(ClientException.class)
+    @ExceptionHandler(ClientException.class)
     public ResponseEntity<ErrorResponse> handleClientException(ServerWebExchange exchange, ClientException ex) {
         log.error("%s内部服务访问错误! 信息: %s".formatted(exchange.getLogPrefix(), ex.getMessage()));
         if (log.isDebugEnabled()) {
@@ -83,7 +84,7 @@ public class ExceptionHandler {
                         ex.getCode(), ex.getServiceId() + "内部服务访问错误!", ex.getMsg()));
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(RestServerException.class)
+    @ExceptionHandler(RestServerException.class)
     public ResponseEntity<ErrorResponse> handleRestServerException(ServerWebExchange exchange, RestServerException ex) {
         log.error("%s服务器自定义错误! 信息: %s".formatted(exchange.getLogPrefix(), ex.getMessage()));
         if (log.isDebugEnabled()) {
@@ -94,7 +95,7 @@ public class ExceptionHandler {
                         ex.getCode(), "服务自定义错误!", ex.getMsg()));
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
+    @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(ServerWebExchange exchange, Exception ex) {
         log.error("%s服务器未知错误! 信息: %s".formatted(exchange.getLogPrefix(), ex.getMessage()));
         if (log.isDebugEnabled()) {
