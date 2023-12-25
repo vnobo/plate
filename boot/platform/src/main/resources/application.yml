@@ -8,13 +8,13 @@ spring:
   #main.keep-alive: true
   application.name: plate
   webflux.format:
-    time: HH:mm:ss
-    date-time: yyyy-MM-dd HH:mm:ss
-    date: yyyy-MM-dd
+    time: "HH:mm:ss"
+    date-time: "yyyy-MM-dd HH:mm:ss"
+    date: "yyyy-MM-dd"
   jackson:
-    date-format: yyyy-MM-dd HH:mm:ss
-    time-zone: GMT+8
-    locale: zh_CN
+    date-format: "yyyy-MM-dd HH:mm:ss"
+    time-zone: "GMT+8"
+    locale: "zh_CN"
   codec:
     max-in-memory-size: 2MB
     log-request-details: false
