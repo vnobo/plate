@@ -20,7 +20,6 @@ configurations {
 tasks.named("bootBuildImage") {
     tags = ["${dockerPrefix}/${rootProject.name}-${project.name}:latest"]
     imageName = ("${dockerPrefix}/${rootProject.name}-${project.name}:${project.version}")
-    publish = true
     environment = [
             "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
             "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8"
@@ -40,6 +39,7 @@ tasks.named("bootBuildImage") {
             source = "cache-${rootProject.name}-${project.name}.launch"
         }
     }
+    publish = true
     docker {
         publishRegistry {
             username = "${dockerUsername}"
