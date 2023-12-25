@@ -23,7 +23,7 @@ tasks.named("bootBuildImage") {
     publish = true
     environment = [
             "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
-            "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError"
+            "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8"
     ]
     buildWorkspace {
         bind {
