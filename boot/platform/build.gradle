@@ -21,10 +21,7 @@ tasks.named("bootBuildImage") {
     tags = ["${dockerPrefix}/${rootProject.name}-${project.name}:latest"]
     imageName = ("${dockerPrefix}/${rootProject.name}-${project.name}:${project.version}")
     publish = true
-    pullPolicy = "IF_NOT_PRESENT"
     environment = [
-            "BP_JVM_VERSION" : "21",
-            "BP_NATIVE_IMAGE": "true",
             "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
             "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError"
     ]
@@ -72,7 +69,7 @@ idea {
 
 dependencies {
 
-    implementation("com.google.guava:guava:32.+")
+    implementation("com.google.guava:guava:33.+")
 
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
