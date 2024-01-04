@@ -21,10 +21,10 @@ public class Tenant implements BaseEntity<Integer> {
     @Id
     private Integer id;
 
-    @NotBlank(message = "租户编码[code]不能为空!")
+    @NotBlank(message = "编码[code]不能为空!")
     private String code;
 
-    @NotBlank(message = "租户父级[pcode]不能为空!")
+    @NotBlank(message = "父级[pcode]不能为空!")
     private String pcode;
 
     @NotBlank(message = "租户名[name]不能为空!")
