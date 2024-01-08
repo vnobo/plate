@@ -1,7 +1,6 @@
 package com.platform.boot.commons;
 
 import com.google.common.collect.Lists;
-import com.platform.boot.commons.exception.ClientException;
 import com.platform.boot.commons.exception.RestServerException;
 import io.r2dbc.spi.R2dbcException;
 import org.apache.commons.logging.Log;
@@ -71,17 +70,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
                         5070, "数据库操作错误!", errors));
-    }
-
-    @ExceptionHandler(ClientException.class)
-    public ResponseEntity<ErrorResponse> handleClientException(ServerWebExchange exchange, ClientException ex) {
-        log.error("%s内部服务访问错误! 信息: %s".formatted(exchange.getLogPrefix(), ex.getMessage()));
-        if (log.isDebugEnabled()) {
-            log.error("内部服务访问错误!", ex);
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
-                .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
-                        ex.getCode(), ex.getServiceId() + "内部服务访问错误!", ex.getMsg()));
     }
 
     @ExceptionHandler(RestServerException.class)

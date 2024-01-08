@@ -35,6 +35,8 @@ import java.util.Random;
  * @see <a href="https://github.com/ulid/spec">ULID</a>
  */
 public class ULID {
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     /**
      * ULID string length.
      */
@@ -148,8 +150,7 @@ public class ULID {
      */
     public static String random() {
         byte[] entropy = new byte[10];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(entropy);
+        SECURE_RANDOM.nextBytes(entropy);
         return generate(System.currentTimeMillis(), entropy);
     }
 
