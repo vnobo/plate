@@ -1,7 +1,5 @@
 package com.platform.boot.commons.query;
 
-import com.google.common.collect.Maps;
-
 import java.io.Serializable;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -10,8 +8,6 @@ import java.util.StringJoiner;
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 public record ParamSql(StringJoiner sql, Map<String, Object> params) implements Serializable {
-    public final static ParamSql EMPTY = ParamSql.of(new StringJoiner(" AND "), Maps.newHashMap());
-
     /**
      * Creates a new ParamSql instance with the given SQL string and parameters.
      *

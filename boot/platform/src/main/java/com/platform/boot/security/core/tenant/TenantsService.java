@@ -1,14 +1,15 @@
 package com.platform.boot.security.core.tenant;
 
 import com.platform.boot.commons.base.AbstractDatabase;
+import com.platform.boot.commons.query.ParamSql;
 import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
+import com.platform.boot.commons.utils.CriteriaUtils;
 import com.platform.boot.security.core.tenant.member.TenantMembersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -25,8 +26,9 @@ public class TenantsService extends AbstractDatabase {
 
     public Flux<Tenant> search(TenantRequest request, Pageable pageable) {
         var cacheKey = ContextUtils.cacheKey(request, pageable);
-        var query = Query.query(request.toCriteria()).with(pageable);
-        return super.queryWithCache(cacheKey, query, Tenant.class)
+        ParamSql paramSql = request.bindParamSql();
+        String query = "select * from se_tenants" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
+        return super.queryWithCache(cacheKey, query, paramSql.params(), Tenant.class)
                 .flatMap(ContextUtils::serializeUserAuditor);
     }
 
@@ -34,8 +36,9 @@ public class TenantsService extends AbstractDatabase {
         var tenantsMono = this.search(request, pageable).collectList();
 
         var cacheKey = ContextUtils.cacheKey(request);
-        Query query = Query.query(request.toCriteria());
-        var countMono = this.countWithCache(cacheKey, query, Tenant.class);
+        ParamSql paramSql = request.bindParamSql();
+        String query = "select count(*) from se_tenants" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
+        var countMono = this.countWithCache(cacheKey, query, paramSql.params());
 
         return Mono.zip(tenantsMono, countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));

@@ -1,5 +1,6 @@
 package com.platform.boot.security.core.user;
 
+import com.platform.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,12 +24,14 @@ public class UsersController {
 
     @GetMapping("search")
     public Flux<UserResponse> search(UserRequest request, Pageable pageable) {
-        return this.usersService.search(request, pageable);
+        return ContextUtils.securityDetails().flatMapMany(securityDetails ->
+                this.usersService.search(request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 
     @GetMapping("page")
     public Mono<Page<UserResponse>> page(UserRequest request, Pageable pageable) {
-        return this.usersService.page(request, pageable);
+        return ContextUtils.securityDetails().flatMap(securityDetails ->
+                this.usersService.page(request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 
     @PostMapping("add")

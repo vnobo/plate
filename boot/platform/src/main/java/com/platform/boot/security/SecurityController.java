@@ -26,7 +26,6 @@ import reactor.core.publisher.Mono;
 public class SecurityController {
 
     private final SecurityManager securityManager;
-
     private final PasswordEncoder passwordEncoder;
     private final ServerOAuth2AuthorizedClientRepository clientRepository;
 

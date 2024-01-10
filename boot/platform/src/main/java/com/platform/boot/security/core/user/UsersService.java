@@ -3,7 +3,6 @@ package com.platform.boot.security.core.user;
 import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.exception.RestServerException;
 import com.platform.boot.commons.query.ParamSql;
-import com.platform.boot.commons.query.QueryJson;
 import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.commons.utils.CriteriaUtils;
@@ -39,7 +38,7 @@ public class UsersService extends AbstractDatabase {
         var searchMono = this.search(request, pageable).collectList();
 
         var cacheKey = ContextUtils.cacheKey(request);
-        ParamSql paramSql = QueryJson.queryJson(request.getQuery());
+        ParamSql paramSql = request.bindParamSql();
         String query = "select count(*) from se_users" + paramSql.whereSql();
         var countMono = super.countWithCache(cacheKey, query, paramSql.params());
 

@@ -3,6 +3,7 @@ package com.platform.boot.commons.utils;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.platform.boot.commons.query.ParamSql;
+import com.platform.boot.commons.query.QueryJson;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Criteria;
@@ -54,15 +55,17 @@ public final class CriteriaUtils {
         if (sort == null || sort.isUnsorted()) {
             return "";
         }
+        sort = QueryJson.sortJson(sort, prefix);
         StringJoiner sortSql = new StringJoiner(", ");
-        sort.iterator().forEachRemaining((o) -> {
-            String sortedPropertyName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, o.getProperty());
-            String sortedProperty = o.isIgnoreCase() ? "lower(" + sortedPropertyName + ")" : sortedPropertyName;
+        for (Sort.Order order : sort) {
+            String sortedPropertyName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, order.getProperty());
+            String sortedProperty = order.isIgnoreCase() ? "lower(" + sortedPropertyName + ")" : sortedPropertyName;
             if (StringUtils.hasLength(prefix)) {
                 sortedProperty = prefix + "." + sortedProperty;
             }
-            sortSql.add(sortedProperty + (o.isAscending() ? " asc" : " desc"));
-        });
+            sortSql.add(sortedProperty + (order.isAscending() ? " asc" : " desc"));
+        }
+
         return " order by " + sortSql;
     }
 
@@ -74,20 +77,38 @@ public final class CriteriaUtils {
      * @param prefix   the prefix for the SQL clause
      * @return the generated WHERE SQL clause
      */
+    @SuppressWarnings("unchecked")
     public static ParamSql buildParamSql(Object object, Collection<String> skipKeys, String prefix) {
 
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         if (ObjectUtils.isEmpty(objectMap)) {
-            return ParamSql.EMPTY;
+            return ParamSql.of(new StringJoiner(" AND "), Maps.newHashMap());
+        }
+        ParamSql jsonParamSql = QueryJson.queryJson((Map<String, Object>) objectMap.get("query"), prefix);
+        Map<String, Object> params = jsonParamSql.params();
+        StringJoiner sql = jsonParamSql.sql();
+
+        if (!ObjectUtils.isEmpty(objectMap.get("securityCode"))) {
+            String key = "tenant_code";
+            if (StringUtils.hasLength(prefix)) {
+                key = prefix + "." + key;
+            }
+            sql.add(key + " like :securityCode");
+            params.put("securityCode", objectMap.get("securityCode"));
         }
 
         Set<String> removeKeys = new HashSet<>(SKIP_CRITERIA_KEYS);
+        removeKeys.add("query");
+        removeKeys.add("securityCode");
         if (!ObjectUtils.isEmpty(skipKeys)) {
             removeKeys.addAll(skipKeys);
         }
 
         objectMap = Maps.filterKeys(objectMap, key -> !removeKeys.contains(key));
-        return buildParamSql(objectMap, prefix);
+        ParamSql entityParamSql = buildParamSql(objectMap, prefix);
+        params.putAll(entityParamSql.params());
+        sql.merge(entityParamSql.sql());
+        return ParamSql.of(sql, params);
     }
 
     /**
@@ -100,20 +121,20 @@ public final class CriteriaUtils {
     public static ParamSql buildParamSql(Map<String, Object> objectMap, String prefix) {
         StringJoiner whereSql = new StringJoiner(" and ");
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-            String key = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey());
+            String column = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey());
             if (StringUtils.hasLength(prefix)) {
-                key = prefix + "." + key;
+                column = prefix + "." + column;
             }
 
             Object value = entry.getValue();
             String paramName = ":" + entry.getKey();
 
             if (value instanceof String) {
-                whereSql.add(key + " like " + paramName);
+                whereSql.add(column + " like " + paramName);
             } else if (value instanceof Collection<?>) {
-                whereSql.add(key + " in :" + paramName);
+                whereSql.add(column + " in :" + paramName);
             } else {
-                whereSql.add(key + " = " + paramName);
+                whereSql.add(column + " = " + paramName);
             }
         }
         return ParamSql.of(whereSql, objectMap);

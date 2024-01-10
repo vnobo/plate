@@ -1,15 +1,15 @@
 package com.platform.boot.security.core.tenant;
 
+import com.platform.boot.commons.query.ParamSql;
 import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.CriteriaUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.springframework.data.relational.core.query.Criteria;
-import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -18,6 +18,8 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class TenantRequest extends Tenant implements Serializable {
+
+    private Map<String, Object> query;
 
     private String securityCode;
 
@@ -30,14 +32,7 @@ public class TenantRequest extends Tenant implements Serializable {
         return BeanUtils.copyProperties(this, Tenant.class);
     }
 
-    public Criteria toCriteria() {
-
-        Criteria criteria = CriteriaUtils.build(this, Set.of("securityCode"));
-
-        if (StringUtils.hasLength(this.securityCode)) {
-            criteria = criteria.and("code").like(this.securityCode + "%");
-        }
-
-        return criteria;
+    public ParamSql bindParamSql() {
+        return CriteriaUtils.buildParamSql(this, List.of(), null);
     }
 }
