@@ -85,7 +85,6 @@ public class QueryJson {
         StringBuilder jsonPath = new StringBuilder(colum);
 
         String[] joinKeys = Arrays.copyOfRange(keys, 1, keys.length - 1);
-        ;
         for (String path : joinKeys) {
             var capath = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, path);
             jsonPath.append("->'").append(capath).append("'");
