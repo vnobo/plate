@@ -50,6 +50,7 @@ public class SecurityConfiguration {
     public SecurityConfiguration(Oauth2SuccessHandler authenticationSuccessHandler) {
         this.authenticationSuccessHandler = authenticationSuccessHandler;
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -58,9 +59,11 @@ public class SecurityConfiguration {
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http.authorizeExchange(exchange -> {
-            exchange.pathMatchers("/captcha/code").permitAll();
-            exchange.pathMatchers("/oauth2/qr/code").permitAll();
+            exchange.pathMatchers("/captcha/code", "/oauth2/qr/code").permitAll();
             exchange.matchers(PathRequest.toStaticResources().atCommonLocations()).permitAll();
+            exchange.pathMatchers("/tenants/**", "/users/**", "/groups/**")
+                    .hasAnyRole("SYSTEM_ADMINISTRATORS", "ADMINISTRATORS");
+            exchange.pathMatchers("/menus/**", "/loggers/**").hasRole("SYSTEM_ADMINISTRATORS");
             exchange.anyExchange().authenticated();
         });
         http.securityContextRepository(new WebSessionServerSecurityContextRepository());

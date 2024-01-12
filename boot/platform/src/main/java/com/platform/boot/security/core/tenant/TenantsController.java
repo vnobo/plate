@@ -1,11 +1,11 @@
 package com.platform.boot.security.core.tenant;
 
 
-import com.platform.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -22,18 +22,19 @@ public class TenantsController {
     private final TenantsService tenantsService;
 
     @GetMapping("search")
+    @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Flux<Tenant> search(TenantRequest request, Pageable pageable) {
-        return ContextUtils.securityDetails().flatMapMany(securityDetails ->
-                this.tenantsService.search(request.securityCode(securityDetails.getTenantCode()), pageable));
+        return this.tenantsService.search(request, pageable);
     }
 
     @GetMapping("page")
+    @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Page<Tenant>> page(TenantRequest request, Pageable pageable) {
-        return ContextUtils.securityDetails().flatMap(securityDetails ->
-                this.tenantsService.page(request.securityCode(securityDetails.getTenantCode()), pageable));
+        return this.tenantsService.page(request, pageable);
     }
 
     @PostMapping("add")
+    @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Tenant> add(@Valid @RequestBody TenantRequest request) {
         // Check that the Tenant ID is null (i.e. this is a new Tenant)
         Assert.isTrue(request.isNew(), "When adding a new Tenant, the ID must be null");
@@ -42,6 +43,7 @@ public class TenantsController {
     }
 
     @PutMapping("modify")
+    @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Tenant> modify(@Valid @RequestBody TenantRequest request) {
         // Check that the Tenant ID is not null (i.e. this is an existing Tenant)
         Assert.isTrue(!request.isNew(), "When modifying an existing Tenant, the ID must not be null");
@@ -50,6 +52,7 @@ public class TenantsController {
     }
 
     @DeleteMapping("delete")
+    @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Void> delete(@Valid @RequestBody TenantRequest request) {
         // Check that the Tenant ID is not null (i.e. this is an existing Tenant)
         Assert.isTrue(!request.isNew(), "When deleting a Tenant, the ID must not be null");

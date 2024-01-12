@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -33,6 +34,7 @@ public class GroupsController {
     }
 
     @PostMapping("add")
+    @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Group> add(@Valid @RequestBody GroupRequest request) {
         // Check that the Group ID is null (i.e. this is a new Group)
         Assert.isTrue(request.isNew(), "When adding a new Group, the ID must be null");
@@ -41,6 +43,7 @@ public class GroupsController {
     }
 
     @PutMapping("modify")
+    @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Group> modify(@Valid @RequestBody GroupRequest request) {
         // Check that the Group ID is not null (i.e. this is an existing Group)
         Assert.isTrue(!request.isNew(), "When modifying an existing Group, the ID must not be null");
@@ -49,6 +52,7 @@ public class GroupsController {
     }
 
     @DeleteMapping("delete")
+    @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Void> delete(@Valid @RequestBody GroupRequest request) {
         // Check that the Group ID is not null (i.e. this is an existing Group)
         Assert.isTrue(!request.isNew(), "When deleting a Group, the ID must not be null");

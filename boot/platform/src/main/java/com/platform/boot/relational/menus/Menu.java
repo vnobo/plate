@@ -38,23 +38,10 @@ public class Menu implements BaseEntity<Integer> {
     @Id
     private Integer id;
 
-    /**
-     * The code for this menu.
-     */
     private String code;
 
-    /**
-     * The parent code of this menu.
-     * The parent code can be blank if this menu is a root menu.
-     */
-    @NotBlank(message = "Parent code cannot be blank!")
     private String pcode;
 
-    /**
-     * The tenant code of this menu.
-     * The tenant code cannot be blank and identifies the tenant to which this menu belongs.
-     */
-    @NotBlank(message = "Tenant code cannot be blank!")
     private String tenantCode;
 
     /**

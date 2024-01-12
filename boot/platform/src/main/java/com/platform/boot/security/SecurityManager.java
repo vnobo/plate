@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -52,8 +53,10 @@ public class SecurityManager extends AbstractDatabase
             select * from se_authorities where user_code = :userCode
             """;
     private final static String QUERY_GROUP_AUTHORITY_SQL = """
-            select ga.*
-            from se_group_authorities ga join se_group_members gm on ga.group_code = gm.group_code
+            select ga.* from se_group_authorities ga
+            join se_group_members gm on ga.group_code = gm.group_code
+            join se_users su on gm.user_code = su.code
+            join se_groups sg on gm.group_code = sg.code and sg.tenant_code = su.tenant_code
             where gm.user_code = :userCode
             """;
 
@@ -103,18 +106,18 @@ public class SecurityManager extends AbstractDatabase
 
         return userDetailsMono.cast(UserDetails.class)
                 .onErrorResume(throwable -> Mono.error(new AuthenticationServiceException(
-                        throwable.getLocalizedMessage(), throwable)));
+                        throwable.getLocalizedMessage(), throwable)))
+                .publishOn(Schedulers.boundedElastic())
+                .doOnSuccess(securityDetails -> this.loginSuccess(securityDetails.getUsername())
+                        .subscribe(res -> log.debug("登录成功：" + res)));
     }
 
     private Mono<SecurityDetails> buildUserDetails(User user, Set<GrantedAuthority> authorities) {
-        // 构建用户详细信息
         SecurityDetails userDetails = SecurityDetails.of(user.getCode(), user.getUsername(), user.getName(),
                 user.getPassword(), user.getDisabled(), user.getAccountExpired(),
                 user.getAccountLocked(), user.getCredentialsExpired(), authorities, Map.of("username", user.getUsername()),
                 "username");
-        // 使用 Mono.zip 同时加载用户的组和租户信息
         var tuple2Mono = Mono.zip(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
-        // 将组和租户信息设置到用户详细信息中
         return tuple2Mono.flatMap(tuple2 -> {
             userDetails.setGroups(new HashSet<>(tuple2.getT1()));
             userDetails.setTenants(new HashSet<>(tuple2.getT2()));
@@ -152,10 +155,10 @@ public class SecurityManager extends AbstractDatabase
                 .cast(GrantedAuthority.class);
     }
 
-    public Mono<Void> loginSuccess(String username) {
+    private Mono<Long> loginSuccess(String username) {
         Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
         Update update = Update.update("loginTime", LocalDateTime.now());
-        return this.entityTemplate.update(User.class).matching(query).apply(update).then();
+        return this.entityTemplate.update(User.class).matching(query).apply(update);
     }
 
 }

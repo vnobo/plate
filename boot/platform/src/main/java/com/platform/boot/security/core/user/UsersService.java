@@ -48,7 +48,7 @@ public class UsersService extends AbstractDatabase {
 
     public Mono<User> loadByCode(String code) {
         var userMono = this.usersRepository.findByCode(code).flux();
-        return queryWithCache(code, userMono).singleOrEmpty();
+        return super.queryWithCache(code, userMono).singleOrEmpty();
     }
 
     public Mono<User> add(UserRequest request) {

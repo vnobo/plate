@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import org.springframework.data.annotation.*;
 import org.springframework.data.relational.core.mapping.Table;
-import org.springframework.data.relational.core.query.Update;
 
 import java.time.LocalDateTime;
 
@@ -22,10 +21,8 @@ public class User implements BaseEntity<Long> {
     @Id
     private Long id;
 
-    @NotBlank(message = "user code [code] cannot be empty!", groups = Update.class)
     private String code;
 
-    @NotBlank(message = "Tenant [tenantCode] not be empty!")
     private String tenantCode;
 
     @NotBlank(message = "Login username [username] cannot be empty!")
@@ -47,9 +44,11 @@ public class User implements BaseEntity<Long> {
 
     private Boolean credentialsExpired;
 
-    private String name;
-
     private String email;
+
+    private String phone;
+
+    private String name;
 
     private String avatar;
 

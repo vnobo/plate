@@ -44,9 +44,7 @@ public class SecurityController {
 
     @GetMapping("me")
     public Mono<SecurityDetails> me() {
-        Mono<SecurityDetails> securityDetailsMono = ContextUtils.securityDetails();
-        return securityDetailsMono
-                .delayUntil(securityDetails -> this.securityManager.loginSuccess(securityDetails.getUsername()));
+        return ContextUtils.securityDetails();
     }
 
     @GetMapping("bind")

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.relational.core.sql.Update;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -23,18 +24,21 @@ public class UsersController {
     private final UsersService usersService;
 
     @GetMapping("search")
+    @PreAuthorize("hasAuthority('users:read')")
     public Flux<UserResponse> search(UserRequest request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMapMany(securityDetails ->
                 this.usersService.search(request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 
     @GetMapping("page")
+    @PreAuthorize("hasAuthority('users:read')")
     public Mono<Page<UserResponse>> page(UserRequest request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMap(securityDetails ->
                 this.usersService.page(request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 
     @PostMapping("add")
+    @PreAuthorize("hasAuthority('users:write')")
     public Mono<User> add(@Valid @RequestBody UserRequest request) {
         // Check that the user ID is null (i.e. this is a new user)
         Assert.isTrue(request.isNew(), "When adding a new user, the ID must be null");
@@ -43,6 +47,7 @@ public class UsersController {
     }
 
     @PutMapping("modify")
+    @PreAuthorize("hasAuthority('users:write')")
     public Mono<User> modify(@Validated(Update.class) @RequestBody UserRequest request) {
         // Check that the user ID is not null (i.e. this is an existing user)
         Assert.isTrue(!request.isNew(), "When modifying an existing user, the ID must not be null");
@@ -51,6 +56,7 @@ public class UsersController {
     }
 
     @DeleteMapping("delete")
+    @PreAuthorize("hasAuthority('users:delete')")
     public Mono<Void> delete(@Valid @RequestBody UserRequest request) {
         // Check that the user ID is not null (i.e. this is an existing user)
         Assert.isTrue(!request.isNew(), "When deleting a user, the ID must not be null");

@@ -53,7 +53,7 @@ public final class CriteriaUtils {
      */
     public static String applySort(Sort sort, String prefix) {
         if (sort == null || sort.isUnsorted()) {
-            return "";
+            return " order by id ";
         }
         sort = QueryJson.sortJson(sort, prefix);
         StringJoiner sortSql = new StringJoiner(", ");
@@ -88,7 +88,7 @@ public final class CriteriaUtils {
         Map<String, Object> params = jsonParamSql.params();
         StringJoiner sql = jsonParamSql.sql();
 
-        if (!ObjectUtils.isEmpty(objectMap.get("securityCode"))) {
+        if (!skipKeys.contains("securityCode") && !ObjectUtils.isEmpty(objectMap.get("securityCode"))) {
             String key = "tenant_code";
             if (StringUtils.hasLength(prefix)) {
                 key = prefix + "." + key;

@@ -19,7 +19,7 @@ create table if not exists se_users
 (
     id                  serial8 primary key,
     code                varchar(64)  not null unique,
-    tenant_code varchar(64) not null default 'T1000',
+    tenant_code varchar(64) not null default '0',
     username            varchar(256) not null unique,
     password            text         not null,
     disabled            boolean      not null default false,
@@ -28,6 +28,7 @@ create table if not exists se_users
     credentials_expired boolean      not null default false,
     name                varchar(512),
     email               varchar(512),
+    phone       varchar(32),
     avatar              text,
     bio text,
     extend              jsonb,
@@ -61,7 +62,7 @@ create table if not exists se_groups
 (
     id           serial8 primary key,
     code         varchar(64)  not null unique,
-    tenant_code varchar(64) not null default 'T1000',
+    tenant_code varchar(64) not null default '0',
     name         varchar(512) not null,
     extend       jsonb,
     creator      varchar(64),
@@ -142,7 +143,7 @@ create table if not exists se_menus
     id           serial8 primary key,
     code         varchar(64)  not null unique,
     pcode        varchar(64)  not null default '0',
-    tenant_code varchar(64) not null default 'T1000',
+    tenant_code varchar(64) not null default '0',
     type         varchar(20)  not null default 'MENU',
     authority    varchar(512) not null unique,
     name         varchar(512) not null,
@@ -163,7 +164,7 @@ create table if not exists se_loggers
 (
     id           serial8 primary key,
     code         varchar(64) not null unique,
-    tenant_code varchar(64) not null default 'T1000',
+    tenant_code varchar(64) not null default '0',
     prefix       varchar(64),
     operator     varchar(64),
     status       varchar(64),

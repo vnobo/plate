@@ -21,18 +21,11 @@ public class TenantRequest extends Tenant implements Serializable {
 
     private Map<String, Object> query;
 
-    private String securityCode;
-
-    public TenantRequest securityCode(String securityCode) {
-        this.setSecurityCode(securityCode);
-        return this;
-    }
-
     public Tenant toTenant() {
         return BeanUtils.copyProperties(this, Tenant.class);
     }
 
     public ParamSql bindParamSql() {
-        return CriteriaUtils.buildParamSql(this, List.of(), null);
+        return CriteriaUtils.buildParamSql(this, List.of("securityCode"), null);
     }
 }
