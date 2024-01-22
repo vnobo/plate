@@ -22,15 +22,14 @@ public class UserAuthoritiesController {
         return this.authoritiesService.search(request);
     }
 
-    @PostMapping("add")
-    public Mono<UserAuthority> add(@Valid @RequestBody UserAuthorityRequest request) {
-        Assert.isTrue(request.isNew(), "新增用户时，[ID]必须为空");
+    @PostMapping("save")
+    public Mono<UserAuthority> save(@Valid @RequestBody UserAuthorityRequest request) {
         return this.authoritiesService.operate(request);
     }
 
     @DeleteMapping("delete")
     public Mono<Void> delete(@Valid @RequestBody UserAuthorityRequest request) {
-        Assert.isTrue(!request.isNew(), "删除用户时，[ID]不能为空");
+        Assert.notNull(request.getId(), "删除用户时，[ID]不能为空");
         return this.authoritiesService.delete(request);
     }
 

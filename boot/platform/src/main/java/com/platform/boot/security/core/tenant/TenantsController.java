@@ -36,27 +36,21 @@ public class TenantsController {
     @PostMapping("add")
     @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Tenant> add(@Valid @RequestBody TenantRequest request) {
-        // Check that the Tenant ID is null (i.e. this is a new Tenant)
-        Assert.isTrue(request.isNew(), "When adding a new Tenant, the ID must be null");
-        // Call the Tenants service to add the Tenant and return the result as a Mono
+        Assert.isNull(request.getId(), "When adding a new Tenant, the ID must be null");
         return this.tenantsService.operate(request);
     }
 
     @PutMapping("modify")
     @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Tenant> modify(@Valid @RequestBody TenantRequest request) {
-        // Check that the Tenant ID is not null (i.e. this is an existing Tenant)
-        Assert.isTrue(!request.isNew(), "When modifying an existing Tenant, the ID must not be null");
-        // Call the Tenants service to modify the Tenant and return the result as a Mono
+        Assert.notNull(request.getId(), "When modifying an existing Tenant, the ID must not be null");
         return this.tenantsService.operate(request);
     }
 
     @DeleteMapping("delete")
     @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Void> delete(@Valid @RequestBody TenantRequest request) {
-        // Check that the Tenant ID is not null (i.e. this is an existing Tenant)
-        Assert.isTrue(!request.isNew(), "When deleting a Tenant, the ID must not be null");
-        // Call the Tenants service to delete the Tenant and return the result as a Mono
+        Assert.notNull(request.getId(), "When deleting a Tenant, the ID must not be null");
         return this.tenantsService.delete(request);
     }
 

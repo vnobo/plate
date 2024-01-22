@@ -36,27 +36,21 @@ public class GroupsController {
     @PostMapping("add")
     @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Group> add(@Valid @RequestBody GroupRequest request) {
-        // Check that the Group ID is null (i.e. this is a new Group)
-        Assert.isTrue(request.isNew(), "When adding a new Group, the ID must be null");
-        // Call the Groups service to add the Group and return the result as a Mono
+        Assert.isNull(request.getId(), "When adding a new Group, the ID must be null");
         return this.groupsService.operate(request);
     }
 
     @PutMapping("modify")
     @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Group> modify(@Valid @RequestBody GroupRequest request) {
-        // Check that the Group ID is not null (i.e. this is an existing Group)
-        Assert.isTrue(!request.isNew(), "When modifying an existing Group, the ID must not be null");
-        // Call the Groups service to modify the Group and return the result as a Mono
+        Assert.notNull(request.getId(), "When modifying an existing Group, the ID must not be null");
         return this.groupsService.operate(request);
     }
 
     @DeleteMapping("delete")
     @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Void> delete(@Valid @RequestBody GroupRequest request) {
-        // Check that the Group ID is not null (i.e. this is an existing Group)
-        Assert.isTrue(!request.isNew(), "When deleting a Group, the ID must not be null");
-        // Call the Groups service to delete the Group and return the result as a Mono
+        Assert.notNull(request.getId(), "When deleting a Group, the ID must not be null");
         return this.groupsService.delete(request);
     }
 

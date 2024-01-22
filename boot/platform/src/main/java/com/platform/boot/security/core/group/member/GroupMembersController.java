@@ -37,9 +37,7 @@ public class GroupMembersController {
 
     @DeleteMapping("delete")
     public Mono<Void> delete(@Valid @RequestBody GroupMemberRequest request) {
-        // Check that the Tenant ID is not null (i.e. this is an existing Tenant)
-        Assert.isTrue(!request.isNew(), "When deleting a Tenant, the ID must not be null");
-        // Call the Tenants service to delete the Tenant and return the result as a Mono
+        Assert.notNull(request.getId(), "When deleting a Tenant, the ID must not be null");
         return this.groupMembersService.delete(request);
     }
 

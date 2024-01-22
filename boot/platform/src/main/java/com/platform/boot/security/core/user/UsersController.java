@@ -40,27 +40,21 @@ public class UsersController {
     @PostMapping("add")
     @PreAuthorize("hasAuthority('users:write')")
     public Mono<User> add(@Valid @RequestBody UserRequest request) {
-        // Check that the user ID is null (i.e. this is a new user)
-        Assert.isTrue(request.isNew(), "When adding a new user, the ID must be null");
-        // Call the users service to add the user and return the result as a Mono
+        Assert.isNull(request.getId(), "When adding a new user, the ID must be null");
         return this.usersService.add(request);
     }
 
     @PutMapping("modify")
     @PreAuthorize("hasAuthority('users:write')")
     public Mono<User> modify(@Validated(Update.class) @RequestBody UserRequest request) {
-        // Check that the user ID is not null (i.e. this is an existing user)
-        Assert.isTrue(!request.isNew(), "When modifying an existing user, the ID must not be null");
-        // Call the users service to modify the user and return the result as a Mono
+        Assert.notNull(request.getId(), "When modifying an existing user, the ID must not be null");
         return this.usersService.operate(request);
     }
 
     @DeleteMapping("delete")
     @PreAuthorize("hasAuthority('users:delete')")
     public Mono<Void> delete(@Valid @RequestBody UserRequest request) {
-        // Check that the user ID is not null (i.e. this is an existing user)
-        Assert.isTrue(!request.isNew(), "When deleting a user, the ID must not be null");
-        // Call the users service to delete the user and return the result as a Mono
+        Assert.notNull(request.getId(), "When deleting a user, the ID must not be null");
         return this.usersService.delete(request);
     }
 }

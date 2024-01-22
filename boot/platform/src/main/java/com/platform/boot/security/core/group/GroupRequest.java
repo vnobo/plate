@@ -1,12 +1,14 @@
 package com.platform.boot.security.core.group;
 
+import com.platform.boot.commons.query.ParamSql;
 import com.platform.boot.commons.utils.BeanUtils;
+import com.platform.boot.commons.utils.CriteriaUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.springframework.data.relational.core.query.Criteria;
 
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -15,6 +17,8 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class GroupRequest extends Group {
+
+    private Map<String, Object> query;
 
     private String securityCode;
 
@@ -27,7 +31,7 @@ public class GroupRequest extends Group {
         return BeanUtils.copyProperties(this, Group.class);
     }
 
-    public Criteria toCriteria() {
-        return criteria(Set.of("securityCode"));
+    public ParamSql bindParamSql() {
+        return CriteriaUtils.buildParamSql(this, List.of(), null);
     }
 }

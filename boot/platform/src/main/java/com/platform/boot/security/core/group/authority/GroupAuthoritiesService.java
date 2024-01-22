@@ -4,8 +4,6 @@ package com.platform.boot.security.core.group.authority;
 import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -36,18 +34,6 @@ public class GroupAuthoritiesService extends AbstractDatabase {
 
         return super.queryWithCache(cacheKey, query, GroupAuthority.class)
                 .flatMap(ContextUtils::serializeUserAuditor);
-    }
-
-    public Mono<Page<GroupAuthority>> page(GroupAuthorityRequest request, Pageable pageable) {
-
-        var searchMono = this.search(request, pageable).collectList();
-
-        var cacheKey = ContextUtils.cacheKey(request);
-        Query query = Query.query(request.toCriteria());
-        var countMono = super.countWithCache(cacheKey, query, GroupAuthority.class);
-
-        return Mono.zip(searchMono, countMono)
-                .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
     @Transactional(rollbackFor = Exception.class)

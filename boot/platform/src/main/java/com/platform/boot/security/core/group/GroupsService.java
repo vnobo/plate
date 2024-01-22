@@ -1,13 +1,14 @@
 package com.platform.boot.security.core.group;
 
 import com.platform.boot.commons.base.AbstractDatabase;
+import com.platform.boot.commons.query.ParamSql;
 import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
+import com.platform.boot.commons.utils.CriteriaUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,16 +24,20 @@ public class GroupsService extends AbstractDatabase {
 
     public Flux<Group> search(GroupRequest request, Pageable pageable) {
         var cacheKey = ContextUtils.cacheKey(request, pageable);
-        Query query = Query.query(request.toCriteria()).with(pageable);
-        return super.queryWithCache(cacheKey, query, Group.class)
+        ParamSql paramSql = request.bindParamSql();
+        String query = "select * from se_groups" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
+        return super.queryWithCache(cacheKey, query, paramSql.params(), Group.class)
                 .flatMap(ContextUtils::serializeUserAuditor);
     }
 
     public Mono<Page<Group>> page(GroupRequest request, Pageable pageable) {
-        var cacheKey = ContextUtils.cacheKey(request);
-        Query query = Query.query(request.toCriteria());
         var searchMono = this.search(request, pageable).collectList();
-        var countMono = this.countWithCache(cacheKey, query, Group.class);
+
+        var cacheKey = ContextUtils.cacheKey(request);
+        ParamSql paramSql = request.bindParamSql();
+        String query = "select count(*) from se_groups" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
+        var countMono = this.countWithCache(cacheKey, query, paramSql.params());
+
         return Mono.zip(searchMono, countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
