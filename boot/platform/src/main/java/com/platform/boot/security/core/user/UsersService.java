@@ -75,7 +75,6 @@ public class UsersService extends AbstractDatabase {
         return this.usersRepository.delete(request.toUser())
                 .doAfterTerminate(() -> this.cache.clear());
     }
-
     public Mono<User> save(User user) {
         if (user.isNew()) {
             return this.usersRepository.save(user);
