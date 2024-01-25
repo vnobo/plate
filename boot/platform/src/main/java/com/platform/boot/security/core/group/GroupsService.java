@@ -35,7 +35,7 @@ public class GroupsService extends AbstractDatabase {
 
         var cacheKey = ContextUtils.cacheKey(request);
         ParamSql paramSql = request.bindParamSql();
-        String query = "select count(*) from se_groups" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
+        String query = "select count(*) from se_groups" + paramSql.whereSql();
         var countMono = this.countWithCache(cacheKey, query, paramSql.params());
 
         return Mono.zip(searchMono, countMono)
@@ -46,7 +46,7 @@ public class GroupsService extends AbstractDatabase {
         var dataMono = this.groupsRepository.findByCode(request.getCode())
                 .defaultIfEmpty(request.toGroup());
         dataMono = dataMono.flatMap(data -> {
-            BeanUtils.copyProperties(request, data);
+            BeanUtils.copyProperties(request, data, true);
             return this.save(data);
         });
         return dataMono.doAfterTerminate(() -> this.cache.clear());

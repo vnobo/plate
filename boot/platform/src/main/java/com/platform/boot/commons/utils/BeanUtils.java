@@ -49,12 +49,12 @@ public class BeanUtils implements InitializingBean {
 
     public static <T> T copyProperties(Object source, Class<T> clazz) {
         T target = org.springframework.beans.BeanUtils.instantiateClass(clazz);
-        BeanUtils.copyProperties(source, target, false);
+        BeanUtils.copyProperties(source, target, true);
         return target;
     }
 
     public static void copyProperties(Object source, Object target) {
-        BeanUtils.copyProperties(source, target, true);
+        BeanUtils.copyProperties(source, target, false);
     }
 
     public static void copyProperties(Object source, Object target, boolean ignoreNullValue) {
@@ -64,7 +64,11 @@ public class BeanUtils implements InitializingBean {
             nullKeys = Maps.filterEntries(targetMap, entry -> ObjectUtils.isEmpty(entry.getValue()))
                     .keySet().toArray(String[]::new);
         }
-        org.springframework.beans.BeanUtils.copyProperties(source, target, nullKeys);
+        if (nullKeys.length > 0) {
+            org.springframework.beans.BeanUtils.copyProperties(source, target, nullKeys);
+        } else {
+            org.springframework.beans.BeanUtils.copyProperties(source, target);
+        }
     }
 
     public static <T> Map<String, Object> beanToMap(T bean) {
