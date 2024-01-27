@@ -9,7 +9,6 @@ import com.platform.boot.commons.ulid.ULID;
 import com.platform.boot.security.SecurityDetails;
 import com.platform.boot.security.core.UserAuditor;
 import com.platform.boot.security.core.user.UsersService;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -32,7 +31,6 @@ import java.util.StringJoiner;
 /**
  * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
  */
-@Log4j2
 @Component
 public final class ContextUtils implements Serializable {
     private static final String[] IP_HEADER_CANDIDATES = {

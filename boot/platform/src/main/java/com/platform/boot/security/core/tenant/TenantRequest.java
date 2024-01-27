@@ -1,8 +1,8 @@
 package com.platform.boot.security.core.tenant;
 
+import com.platform.boot.commons.query.CriteriaUtils;
 import com.platform.boot.commons.query.ParamSql;
 import com.platform.boot.commons.utils.BeanUtils;
-import com.platform.boot.commons.utils.CriteriaUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

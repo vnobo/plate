@@ -32,9 +32,7 @@ import java.util.Set;
 @Table("se_menus")
 public class Menu implements BaseEntity<Integer> {
 
-    /**
-     * The unique identifier of this menu.
-     */
+
     @Id
     private Integer id;
 
@@ -44,46 +42,20 @@ public class Menu implements BaseEntity<Integer> {
 
     private String tenantCode;
 
-    /**
-     * The type of this menu.
-     * The type cannot be null and must be one of the values from the MenuType enum.
-     */
     @NotNull(message = "Menu type cannot be null!")
     private MenuType type;
 
-    /**
-     * The authority of this menu.
-     * The authority cannot be blank and must contain only English letters or '_' symbols.
-     * For example: user, user_add, user_delete.
-     */
     @NotBlank(message = "Authority cannot be blank!")
     @Pattern(regexp = "^[a-zA-Z_]{1,50}$", message = "Authority can only contain English letters or '_' symbols.")
     private String authority;
 
-    /**
-     * The name of this menu.
-     * The name cannot be blank and is used to display the menu in the application.
-     */
     @NotBlank(message = "Name cannot be blank!")
     private String name;
 
-    /**
-     * The path of this menu.
-     * The path can be blank if this menu does not have a path.
-     */
     private String path;
 
-    /**
-     * The sort  of this menu.
-     * The sort  can be null and is used to sort menus in the application.
-     * A lower sort  means the menu will be displayed before menus with a higher sort index.
-     */
     private Short sort;
 
-    /**
-     * Additional data for this menu.
-     * The extent field can be null and is used to store additional data for this menu in JSON format.
-     */
     private JsonNode extend;
 
     @CreatedBy
@@ -92,35 +64,16 @@ public class Menu implements BaseEntity<Integer> {
     @LastModifiedBy
     private UserAuditor updater;
 
-    /**
-     * The date and time that this menu was created.
-     * The createdTime field cannot be null and is set automatically by the database.
-     */
     @CreatedDate
     private LocalDateTime createdTime;
 
-    /**
-     * The date and time that this menu was last modified.
-     * The updatedTime field cannot be null and is set automatically by the database.
-     */
     @LastModifiedDate
     private LocalDateTime updatedTime;
 
-    /**
-     * Sets the authority for this permission, upgrading to uppercase and adding prefix if necessary.
-     *
-     * @param authority the original authority to set for this permission
-     */
     public void setAuthority(String authority) {
         this.authority = upgradeAuthorityUpperCase(authority);
     }
 
-    /**
-     * Upgrades the authority string to uppercase and adds prefix if necessary.
-     *
-     * @param authority original authority string
-     * @return upgraded and prefixed authority string in uppercase
-     */
     private String upgradeAuthorityUpperCase(String authority) {
         if (!StringUtils.hasLength(authority)) {
             return null;
@@ -134,11 +87,6 @@ public class Menu implements BaseEntity<Integer> {
         return role;
     }
 
-    /**
-     * Retrieves the permissions associated with this object.
-     *
-     * @return a set of permissions associated with this object, or null if none exist
-     */
     @JsonGetter
     public Set<Permission> getPermissions() {
         return Optional.ofNullable(this.getExtend()).map(node -> node.get("permissions"))
@@ -146,20 +94,12 @@ public class Menu implements BaseEntity<Integer> {
                 })).orElse(null);
     }
 
-    /**
-     * Retrieves the icon associated with this object.
-     *
-     * @return the icon associated with this object, or null if none exists
-     */
     @JsonGetter
     public String getIcons() {
         return Optional.ofNullable(this.getExtend()).map(node -> node.get("icons"))
                 .map(JsonNode::asText).orElse(null);
     }
 
-    /**
-     *
-     */
     enum MenuType {
         /**
          * folder
@@ -194,52 +134,25 @@ public class Menu implements BaseEntity<Integer> {
         ALL
     }
 
-    /**
-     * Permission class represents permissions for a certain API endpoint.
-     * It includes the HTTP method, name, URL path, and authority required to access the API.
-     */
     @Data
     public static class Permission implements Serializable {
 
-        /**
-         * HTTP method required to access the API endpoint.
-         */
         @NotNull(message = "Permission api [method] not null!")
         private HttpMethod method;
 
-        /**
-         * Name of the API endpoint.
-         */
         @NotBlank(message = "Permission api [name] not blank!")
         private String name;
 
-        /**
-         * URL path of the API endpoint.
-         */
         @NotBlank(message = "Permission api [url] not blank!")
         private String path;
 
-        /**
-         * Authority required to access the API endpoint.
-         */
         @NotBlank(message = "Permission api [role] not blank!")
         private String authority;
 
-        /**
-         * Sets the authority for this permission and upgrades it to uppercase.
-         *
-         * @param authority original authority string
-         */
         public void setAuthority(String authority) {
             this.authority = upgradeAuthorityUpperCase(authority);
         }
 
-        /**
-         * Upgrades the authority string to uppercase and adds prefix if necessary.
-         *
-         * @param authority original authority string
-         * @return upgraded authority string
-         */
         private String upgradeAuthorityUpperCase(String authority) {
             if (!StringUtils.hasLength(authority)) {
                 return null;

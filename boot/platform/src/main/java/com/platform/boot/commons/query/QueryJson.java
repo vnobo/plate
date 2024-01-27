@@ -67,7 +67,7 @@ public class QueryJson {
                 if (StringUtils.hasLength(prefix)) {
                     sortedProperty = prefix + "." + sortedProperty;
                 }
-                String sortReplace = sortedProperty + jsonPathKey(sortReplaceArray).append("->>'")
+                String sortReplace = sortedProperty + jsonPathAppend(sortReplaceArray).append("->>'")
                         .append(keys[lastIndex]).append("'");
                 orders.add(Sort.Order.by(sortReplace).with(order.getDirection()));
             } else {
@@ -100,22 +100,22 @@ public class QueryJson {
 
     private static Map.Entry<String, List<String>> jsonPathKeyAndParamName(String[] keys, String prefix) {
         int lastIndex = keys.length - 1;
+        String lastKey = keys[lastIndex];
+        Map.Entry<String, String> exps = findKeyWord(lastKey);
+        String key = lastKey.substring(0, lastKey.length() - exps.getKey().length());
+
         String column = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, keys[0]);
         if (StringUtils.hasLength(prefix)) {
             column = prefix + "." + keys[0];
         }
         StringBuilder jsonPath = new StringBuilder("(" + column);
         String[] joinKeys = Arrays.copyOfRange(keys, 1, lastIndex);
-        jsonPath.append(jsonPathKey(joinKeys));
-
-        String lastKey = keys[lastIndex];
-        Map.Entry<String, String> exps = exitsKeyWords(lastKey);
-        String key = lastKey.substring(0, lastKey.length() - exps.getKey().length());
+        jsonPath.append(jsonPathAppend(joinKeys));
 
         List<String> paramNames = new ArrayList<>();
         String paramName = StringUtils.arrayToDelimitedString(keys, "_");
         if (!ObjectUtils.isEmpty(exps)) {
-            if ("Between".equals(exps.getKey())) {
+            if ("Between".equals(exps.getKey()) || "NotBetween".equals(exps.getKey())) {
                 jsonPath.append("->>'").append(key).append("' ");
                 String startKey = paramName + "_start";
                 String endKey = paramName + "_end";
@@ -134,7 +134,7 @@ public class QueryJson {
         return Map.entry(jsonPath.append(")").toString(), paramNames);
     }
 
-    private static StringBuilder jsonPathKey(String[] joinKeys) {
+    private static StringBuilder jsonPathAppend(String[] joinKeys) {
         StringBuilder jsonPath = new StringBuilder();
         for (String path : joinKeys) {
             jsonPath.append("->'").append(path).append("'");
@@ -142,7 +142,7 @@ public class QueryJson {
         return jsonPath;
     }
 
-    private static Map.Entry<String, String> exitsKeyWords(String inputStr) {
+    private static Map.Entry<String, String> findKeyWord(String inputStr) {
         Set<Map.Entry<String, String>> entries = KEYWORDS.entrySet().stream()
                 .filter(entry -> StringUtils.endsWithIgnoreCase(inputStr, entry.getKey()))
                 .collect(Collectors.toSet());

@@ -1,10 +1,10 @@
 package com.platform.boot.security.core.tenant;
 
 import com.platform.boot.commons.base.AbstractDatabase;
+import com.platform.boot.commons.query.CriteriaUtils;
 import com.platform.boot.commons.query.ParamSql;
 import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
-import com.platform.boot.commons.utils.CriteriaUtils;
 import com.platform.boot.security.core.tenant.member.TenantMembersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

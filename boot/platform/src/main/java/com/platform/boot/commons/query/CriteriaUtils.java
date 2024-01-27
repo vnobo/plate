@@ -1,13 +1,11 @@
-package com.platform.boot.commons.utils;
+package com.platform.boot.commons.query;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
-import com.platform.boot.commons.query.ParamSql;
-import com.platform.boot.commons.query.QueryJson;
+import com.platform.boot.commons.utils.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Criteria;
-import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -17,7 +15,6 @@ import java.util.stream.Collectors;
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
-@Component
 public final class CriteriaUtils {
     public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend", "createdTime", "updatedTime");
 
@@ -58,7 +55,9 @@ public final class CriteriaUtils {
         sort = QueryJson.sortJson(sort, prefix);
         StringJoiner sortSql = new StringJoiner(", ");
         for (Sort.Order order : sort) {
-            String sortedPropertyName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, order.getProperty());
+            String sortedPropertyName = order.getProperty();
+            sortedPropertyName = sortedPropertyName.contains("->>") ? sortedPropertyName :
+                    CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, sortedPropertyName);
             String sortedProperty = order.isIgnoreCase() ? "lower(" + sortedPropertyName + ")" : sortedPropertyName;
             if (StringUtils.hasLength(prefix)) {
                 sortedProperty = prefix + "." + sortedProperty;

@@ -1,8 +1,8 @@
 package com.platform.boot.commons.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.platform.boot.commons.query.CriteriaUtils;
 import com.platform.boot.commons.utils.ContextUtils;
-import com.platform.boot.commons.utils.CriteriaUtils;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
