@@ -67,7 +67,7 @@ public class QueryJson {
                 if (StringUtils.hasLength(prefix)) {
                     sortedProperty = prefix + "." + sortedProperty;
                 }
-                String sortReplace = sortedProperty + jsonPathAppend(sortReplaceArray).append("->>'")
+                String sortReplace = sortedProperty + appendIntermediateKeys(sortReplaceArray).append("->>'")
                         .append(keys[lastIndex]).append("'");
                 orders.add(Sort.Order.by(sortReplace).with(order.getDirection()));
             } else {
@@ -110,7 +110,7 @@ public class QueryJson {
         }
         StringBuilder jsonPath = new StringBuilder("(" + column);
         String[] joinKeys = Arrays.copyOfRange(keys, 1, lastIndex);
-        jsonPath.append(jsonPathAppend(joinKeys));
+        jsonPath.append(appendIntermediateKeys(joinKeys));
 
         List<String> paramNames = new ArrayList<>();
         String paramName = StringUtils.arrayToDelimitedString(keys, "_");
@@ -134,7 +134,7 @@ public class QueryJson {
         return Map.entry(jsonPath.append(")").toString(), paramNames);
     }
 
-    private static StringBuilder jsonPathAppend(String[] joinKeys) {
+    private static StringBuilder appendIntermediateKeys(String[] joinKeys) {
         StringBuilder jsonPath = new StringBuilder();
         for (String path : joinKeys) {
             jsonPath.append("->'").append(path).append("'");
