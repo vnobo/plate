@@ -25,6 +25,7 @@ import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -78,7 +79,7 @@ public final class ContextUtils implements Serializable {
         return Objects.requireNonNull(httpRequest.getRemoteAddress()).getAddress().getHostAddress();
     }
 
-    public static StringJoiner cacheKey(Object... objects) {
+    public static String cacheKey(Object... objects) {
         ObjectMapper objectMapper = ContextUtils.OBJECT_MAPPER.copy();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
@@ -98,7 +99,7 @@ public final class ContextUtils implements Serializable {
                 throw JsonException.withError(e);
             }
         }
-        return keyBuilder;
+        return Base64.getEncoder().encodeToString(keyBuilder.toString().getBytes());
     }
 
     private static StringJoiner applySort(Sort sort) {
