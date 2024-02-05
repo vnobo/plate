@@ -12,12 +12,6 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import java.util.Optional;
 
 /**
- * This is an abstract class that provides a basic implementation of InitializingBean.
- * It also provides a method for initializing cache.
- * <p>
- * The cache is initialized using the cacheManager and cacheName provided.
- * If the cacheManager is null, a new ConcurrentMapCache is created.
- *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 public abstract class AbstractService implements InitializingBean {

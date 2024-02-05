@@ -18,36 +18,15 @@ import java.util.stream.Collectors;
 public final class CriteriaUtils {
     public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend", "createdTime", "updatedTime");
 
-
-    /**
-     * Generates a SQL query for applying pagination to a result set.
-     *
-     * @param pageable the pageable object containing the pagination information
-     * @return the SQL query with applied pagination
-     */
     public static String applyPage(Pageable pageable) {
         return applySort(pageable.getSort(), null);
     }
 
-    /**
-     * Applies pagination to a SQL query by generating the LIMIT and OFFSET clauses.
-     *
-     * @param pageable the pagination information
-     * @param prefix   the prefix for the column names in the SQL query
-     * @return the SQL query with the LIMIT and OFFSET clauses applied
-     */
     public static String applyPage(Pageable pageable, String prefix) {
         String orderSql = applySort(pageable.getSort(), prefix);
         return String.format(orderSql + " limit %d offset %d", pageable.getPageSize(), pageable.getOffset());
     }
 
-    /**
-     * Applies the specified sort to the given prefix.
-     *
-     * @param sort   the sort to be applied
-     * @param prefix the prefix to be used in the sorting
-     * @return the SQL representation of the sorting
-     */
     public static String applySort(Sort sort, String prefix) {
         if (sort == null || sort.isUnsorted()) {
             return " order by id ";
@@ -68,14 +47,6 @@ public final class CriteriaUtils {
         return " order by " + sortSql;
     }
 
-    /**
-     * Generates a WHERE SQL clause based on the given object, skip keys, and prefix.
-     *
-     * @param object   the object to generate the WHERE SQL clause from
-     * @param skipKeys the collection of keys to skip
-     * @param prefix   the prefix for the SQL clause
-     * @return the generated WHERE SQL clause
-     */
     @SuppressWarnings("unchecked")
     public static ParamSql buildParamSql(Object object, Collection<String> skipKeys, String prefix) {
 
@@ -110,13 +81,6 @@ public final class CriteriaUtils {
         return ParamSql.of(sql, params);
     }
 
-    /**
-     * Generates a WHERE clause for an SQL query based on the provided objectMap and prefix.
-     *
-     * @param objectMap a map containing key-value pairs representing the columns and values for filtering
-     * @param prefix    a prefix to be added to each column in the WHERE clause
-     * @return a string representing the WHERE clause for the SQL query
-     */
     public static ParamSql buildParamSql(Map<String, Object> objectMap, String prefix) {
         StringJoiner whereSql = new StringJoiner(" and ");
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
@@ -139,14 +103,6 @@ public final class CriteriaUtils {
         return ParamSql.of(whereSql, objectMap);
     }
 
-    /**
-     * Builds a Criteria object from the given object excluding the given keys.
-     * The static skip keys such as {@link CriteriaUtils} are also excluded.
-     *
-     * @param object  the object from which to build the Criteria
-     * @param skipKes the keys to skip
-     * @return the built Criteria
-     */
     public static Criteria build(Object object, Collection<String> skipKes) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
         if (!ObjectUtils.isEmpty(objectMap)) {
@@ -159,18 +115,6 @@ public final class CriteriaUtils {
         return build(objectMap);
     }
 
-    /**
-     * A utility class to build a {@link Criteria} from a {@link Map} of key value pairs.
-     *
-     * <p>The keys are used as the field names and the values can be either {@link String}, {@link Collection},
-     * or any other object type. For a string value, the criteria performs a LIKE operation
-     * with a wildcard added to the end of the string. For a collection type, the criteria performs
-     * an IN operation. For all other object types, the criteria performs an IS operation.
-     * </p>
-     *
-     * @param objectMap The {@link Map} of key value pairs
-     * @return A {@link Criteria} built from the input.
-     */
     public static Criteria build(Map<String, Object> objectMap) {
         if (ObjectUtils.isEmpty(objectMap)) {
             return Criteria.empty();

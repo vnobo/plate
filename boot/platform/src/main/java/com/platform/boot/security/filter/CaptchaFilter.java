@@ -22,6 +22,8 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static com.platform.boot.security.core.captcha.CaptchaRepository.DEFAULT_CAPTCHA_TOKEN_ATTR_NAME;
+
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
@@ -40,7 +42,10 @@ public class CaptchaFilter implements WebFilter, Ordered {
     }
 
     /**
-     * Filter to handle server-side captcha protection. If a captcha token is present in theSession Attributes, and validation is successful, the filter chain is invoked. Otherwise, an access denied exception is thrown.
+     * Filter to handle server-side captcha protection.
+     * If a captcha token is present in theSession Attributes,
+     * and validation is successful, the filter chain is invoked.
+     * Otherwise, an access denied exception is thrown.
      *
      * @param exchange The {@code ServerWebExchange} object
      * @param chain    The {@code WebFilterChain} object
@@ -49,18 +54,13 @@ public class CaptchaFilter implements WebFilter, Ordered {
     @Override
     @NonNull
     public Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
-        // Check if captcha protection is required
-        return this.requireCaptchaProtectionMatcher.matches(exchange)
+        return requireCaptchaProtectionMatcher.matches(exchange)
                 .filter(ServerWebExchangeMatcher.MatchResult::isMatch)
-                // Check if captcha token is present in session
-                .filterWhen((matchResult) -> exchange.getSession().map(webSession -> webSession.getAttributes()
-                        .containsKey(CaptchaRepository.DEFAULT_CAPTCHA_TOKEN_ATTR_NAME)))
-                // Validate the token
-                .flatMap((m) -> validateToken(exchange))
-                // If no exception, proceed with the filter chain
-                .switchIfEmpty(Mono.defer(() -> chain.filter(exchange)))
-                // Handle captcha exception
-                .onErrorResume(CaptchaException.class, (ex) -> this.accessDeniedHandler.handle(exchange, ex));
+                .flatMap(matchResult -> exchange.getSession()
+                        .filter(webSession -> webSession.getAttributes().containsKey(DEFAULT_CAPTCHA_TOKEN_ATTR_NAME))
+                        .flatMap(webSession -> validateToken(exchange)))
+                .switchIfEmpty(chain.filter(exchange))
+                .onErrorResume(CaptchaException.class, ex -> accessDeniedHandler.handle(exchange, ex));
     }
 
     /**

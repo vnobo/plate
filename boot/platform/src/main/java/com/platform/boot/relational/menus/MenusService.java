@@ -21,10 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * MenusService is a class to provide service operations for menus.
- * It uses the MenusRepository for database operations.
- *
- * @author billb
+ * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
 @Service
 @RequiredArgsConstructor

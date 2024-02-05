@@ -45,14 +45,18 @@ import static com.platform.boot.commons.utils.ContextUtils.getClientIpAddress;
 import static org.springframework.security.web.server.csrf.CsrfWebFilter.DEFAULT_CSRF_MATCHER;
 
 /**
- * This code is a web filter that logs requests and responses. It checks if the content type is JSON, and if it is, it caches the request body, logs the request, and then continues the filter chain. It has a getOrder() method which returns the lowest precedence of the filter. It also has a requireCsrfProtectionMatcher which is used to check if the request needs protection from CSRF attacks.
+ * This code is a web filter that logs requests and responses. It checks if the content type is JSON,
+ * and if it is, it caches the request body, logs the request, and then continues the filter chain.
+ * It has a getOrder() method which returns the lowest precedence of the filter.
+ * It also has a requireCsrfProtectionMatcher which is used to check if the request needs protection from CSRF attacks.
  * Step by step explanation:
  * 1. The code starts off by declaring the package and importing necessary classes.
  * 2. It then declares the class LoggerFilter which implements WebFilter and Ordered.
  * 3. It declares a ServerWebExchangeMatcher called requireCsrfProtectionMatcher which is used to check if the request needs protection from CSRF attacks.
  * 4. It also declares a LoggersService object which is used to log the request.
  * 5. The getOrder() method is then declared which returns the lowest precedence of the filter.
- * 6. The filter() method is then declared which checks if the content type is JSON, and if it is, it caches the request body, logs the request, and then continues the filter chain.
+ * 6. The filter() method is then declared which checks if the content type is JSON, and if it is,
+ * it caches the request body, logs the request, and then continues the filter chain.
  * 7. The continueFilterChain() method is then declared which continues the filter chain.
  * 8. The cacheFilterChain() method is then declared which caches the request body.
  * 9. The logRequest() method is then declared which logs the request.
@@ -181,7 +185,7 @@ public class LoggerFilter implements WebFilter {
      * a new NettyDataBuffer is wrapped around the retained slice
      * of the given input NettyDataBuffer.
      * If the given DataBuffer is a DefaultDataBuffer,
-     * a new DataBuffer generated from Unpoo
+     * a new DataBuffer generated from Unpivot
      * led.wrappedBuffer
      * is returned.
      */

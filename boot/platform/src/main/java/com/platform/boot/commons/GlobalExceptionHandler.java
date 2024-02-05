@@ -39,12 +39,10 @@ public class GlobalExceptionHandler {
             errors.add("Cause message %s.".formatted(ex.getCause().getMessage()));
             errors.add("Exception reason %s".formatted(ex.getReason()));
         }
-        // Log error
         log.error("%s请求参数验证失败! 信息: %s".formatted(exchange.getLogPrefix(), ex.getMessage()));
         if (log.isDebugEnabled()) {
             log.error("请求参数验证失败!", ex);
         }
-        // Return response entity
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
                         4170, "请求参数验证失败!", errors));

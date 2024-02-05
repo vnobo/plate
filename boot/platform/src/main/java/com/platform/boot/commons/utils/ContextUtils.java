@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.platform.boot.commons.exception.JsonException;
 import com.platform.boot.commons.exception.RestServerException;
-import com.platform.boot.commons.ulid.ULID;
+import com.platform.boot.commons.ulid.Ulid;
 import com.platform.boot.security.SecurityDetails;
 import com.platform.boot.security.core.UserAuditor;
 import com.platform.boot.security.core.user.UsersService;
@@ -152,6 +152,6 @@ public final class ContextUtils implements Serializable {
     }
 
     public static String nextId() {
-        return ULID.random();
+        return Ulid.random();
     }
 }

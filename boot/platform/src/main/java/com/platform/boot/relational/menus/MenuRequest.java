@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * @author Alex bob
+ * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

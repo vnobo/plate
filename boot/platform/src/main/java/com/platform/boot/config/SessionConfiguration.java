@@ -91,7 +91,7 @@ public class SessionConfiguration {
                 return null;
             }
             if (parameterTokens.size() == 1) {
-                return parameterTokens.get(0);
+                return parameterTokens.getFirst();
             }
             throw invalidTokenError("Found multiple bearer tokens in the request");
         }

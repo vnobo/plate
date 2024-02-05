@@ -11,15 +11,6 @@ import java.io.Serializable;
 import java.util.Collection;
 
 /**
- * This interface defines the base entity for all entities in the application.
- * It extends the Spring Data Perishable interface and adds additional functionality.
- * <p>
- * The setCode method is used to set the code of the entity.
- * <p>
- * The isNew method is used to determine if the entity is new or not.
- * If it is new, it sets the code of the entity using the ContextHolder utility class.
- *
- * @param <T> the type of the entity's id
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 public interface BaseEntity<T> extends Serializable, Persistable<T> {

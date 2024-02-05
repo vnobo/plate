@@ -18,8 +18,6 @@ import java.util.Set;
 import static com.platform.boot.commons.utils.ContextUtils.RULE_ADMINISTRATORS;
 
 /**
- * Controller for the Menus resource that handles all the incoming requests for Menus
- *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @RestController

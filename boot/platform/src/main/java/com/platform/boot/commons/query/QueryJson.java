@@ -3,13 +3,12 @@ package com.platform.boot.commons.query;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.platform.boot.commons.exception.RestServerException;
 import org.springframework.data.domain.Sort;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -143,14 +142,13 @@ public class QueryJson {
     }
 
     private static Map.Entry<String, String> findKeyWord(String inputStr) {
-        Set<Map.Entry<String, String>> entries = KEYWORDS.entrySet().stream()
+        return KEYWORDS.entrySet().stream()
                 .filter(entry -> StringUtils.endsWithIgnoreCase(inputStr, entry.getKey()))
-                .collect(Collectors.toSet());
-        Assert.notNull(entries, "Not support key words: " + inputStr);
-        return entries.stream().max((entry1, entry2) -> {
-            int entry1Length = entry1.getKey().length();
-            int entry2Length = entry2.getKey().length();
-            return Integer.compare(entry1Length, entry2Length);
-        }).orElseThrow();
+                .max((entry1, entry2) -> {
+                    int entry1Length = entry1.getKey().length();
+                    int entry2Length = entry2.getKey().length();
+                    return Integer.compare(entry1Length, entry2Length);
+                }).orElseThrow(() -> RestServerException.withMsg("Not support key words!",
+                        "Not support key words: " + inputStr));
     }
 }

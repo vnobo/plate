@@ -21,11 +21,6 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * A representation of a menu in the application.
- * Menus are stored in the "se_menus" table in the database.
- * This class implements the BaseEntity interface and has an Integer id field.
- * BaseEntity <Integer> the type of the id field
- *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
 @Data

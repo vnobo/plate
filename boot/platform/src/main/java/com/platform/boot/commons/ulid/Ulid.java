@@ -34,7 +34,7 @@ import java.util.Random;
  * @see <a href="http://www.crockford.com/wrmg/base32.html">Base32 Encoding</a>
  * @see <a href="https://github.com/ulid/spec">ULID</a>
  */
-public class ULID {
+public class Ulid {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     /**
@@ -256,7 +256,7 @@ public class ULID {
                     "Time is too long, or entropy is less than 10 bytes or null");
         }
 
-        byte[] bytes = new byte[ULID.ULID_BINARY_LENGTH];
+        byte[] bytes = new byte[Ulid.ULID_BINARY_LENGTH];
 
         // Long to big endian byte array up to 6 bytes
         long ts = time;
