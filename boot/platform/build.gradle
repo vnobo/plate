@@ -41,7 +41,6 @@ tasks.named("bootBuildImage") {
     }
     publish = true
     docker {
-        host = "tcp://192.168.1.2:2376"
         publishRegistry {
             username = "${dockerUsername}"
             password = "${dockerPassword}"
