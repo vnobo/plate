@@ -1,6 +1,5 @@
 package com.platform.boot.commons.utils;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.platform.boot.commons.exception.JsonException;
@@ -10,8 +9,6 @@ import com.platform.boot.security.SecurityDetails;
 import com.platform.boot.security.core.UserAuditor;
 import com.platform.boot.security.core.user.UsersService;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -25,16 +22,14 @@ import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Objects;
-import java.util.StringJoiner;
 
 /**
  * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
  */
 @Component
 public final class ContextUtils implements Serializable {
-    private static final String[] IP_HEADER_CANDIDATES = {
+    private final static String[] IP_HEADER_CANDIDATES = {
             "X-Forwarded-For",
             "X-Real-IP",
             "Proxy-Client-IP",
@@ -48,6 +43,7 @@ public final class ContextUtils implements Serializable {
             "HTTP_VIA",
             "REMOTE_ADDR"
     };
+
     public final static String RULE_ADMINISTRATORS = "ROLE_ADMINISTRATORS";
     public final static String CSRF_TOKEN_CONTEXT = "CSRF_TOKEN_CONTEXT";
 
@@ -77,42 +73,6 @@ public final class ContextUtils implements Serializable {
             }
         }
         return Objects.requireNonNull(httpRequest.getRemoteAddress()).getAddress().getHostAddress();
-    }
-
-    public static String cacheKey(Object... objects) {
-        ObjectMapper objectMapper = ContextUtils.OBJECT_MAPPER.copy();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-
-        StringJoiner keyBuilder = new StringJoiner("&");
-        for (Object object : objects) {
-            if (object instanceof Pageable pageable) {
-                keyBuilder.merge(applySort(pageable.getSort()));
-                keyBuilder.add("page=" + pageable.getPageNumber());
-                keyBuilder.add("size=" + pageable.getPageSize());
-                keyBuilder.add("offset=" + pageable.getOffset());
-                continue;
-            }
-            try {
-                String objectJson = objectMapper.writeValueAsString(object);
-                keyBuilder.add(objectJson);
-            } catch (JsonProcessingException e) {
-                throw JsonException.withError(e);
-            }
-        }
-        return Base64.getEncoder().encodeToString(keyBuilder.toString().getBytes());
-    }
-
-    private static StringJoiner applySort(Sort sort) {
-        StringJoiner sortKey = new StringJoiner("&");
-        if (sort == null || sort.isUnsorted()) {
-            return sortKey;
-        }
-        for (Sort.Order order : sort) {
-            String sortedPropertyName = order.getProperty();
-            String sortedProperty = order.isIgnoreCase() ? "lower(" + sortedPropertyName + ")" : sortedPropertyName;
-            sortKey.add(sortedProperty + "=" + (order.isAscending() ? "asc" : "desc"));
-        }
-        return sortKey;
     }
 
     public static Mono<SecurityDetails> securityDetails() {

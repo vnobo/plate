@@ -23,7 +23,7 @@ public class GroupsService extends AbstractDatabase {
     private final GroupsRepository groupsRepository;
 
     public Flux<Group> search(GroupRequest request, Pageable pageable) {
-        var cacheKey = ContextUtils.cacheKey(request, pageable);
+        var cacheKey = BeanUtils.cacheKey(request, pageable);
         ParamSql paramSql = request.bindParamSql();
         String query = "select * from se_groups" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
         return super.queryWithCache(cacheKey, query, paramSql.params(), Group.class)
@@ -33,7 +33,7 @@ public class GroupsService extends AbstractDatabase {
     public Mono<Page<Group>> page(GroupRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
 
-        var cacheKey = ContextUtils.cacheKey(request);
+        var cacheKey = BeanUtils.cacheKey(request);
         ParamSql paramSql = request.bindParamSql();
         String query = "select count(*) from se_groups" + paramSql.whereSql();
         var countMono = this.countWithCache(cacheKey, query, paramSql.params());

@@ -25,7 +25,7 @@ public class TenantsService extends AbstractDatabase {
     private final TenantMembersRepository membersRepository;
 
     public Flux<Tenant> search(TenantRequest request, Pageable pageable) {
-        var cacheKey = ContextUtils.cacheKey(request, pageable);
+        var cacheKey = BeanUtils.cacheKey(request, pageable);
         ParamSql paramSql = request.bindParamSql();
         String query = "select * from se_tenants" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
         return super.queryWithCache(cacheKey, query, paramSql.params(), Tenant.class)
@@ -35,7 +35,7 @@ public class TenantsService extends AbstractDatabase {
     public Mono<Page<Tenant>> page(TenantRequest request, Pageable pageable) {
         var tenantsMono = this.search(request, pageable).collectList();
 
-        var cacheKey = ContextUtils.cacheKey(request);
+        var cacheKey = BeanUtils.cacheKey(request);
         ParamSql paramSql = request.bindParamSql();
         String query = "select count(*) from se_tenants" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
         var countMono = this.countWithCache(cacheKey, query, paramSql.params());

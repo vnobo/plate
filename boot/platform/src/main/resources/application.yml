@@ -16,7 +16,7 @@ spring:
     time-zone: "GMT+8"
     locale: "zh_CN"
   codec:
-    max-in-memory-size: 5MB
+    max-in-memory-size: 10MB
     log-request-details: false
   cache:
     type: redis

@@ -1,4 +1,4 @@
-package com.platform.boot.converters;
+package com.platform.boot.commons.converters;
 
 import com.platform.boot.security.core.UserAuditor;
 import lombok.NonNull;

@@ -27,7 +27,6 @@ import java.util.Set;
 @Table("se_menus")
 public class Menu implements BaseEntity<Integer> {
 
-
     @Id
     private Integer id;
 

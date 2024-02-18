@@ -1,7 +1,7 @@
 package com.platform.boot.relational.logger;
 
 import com.platform.boot.commons.base.AbstractDatabase;
-import com.platform.boot.commons.utils.ContextUtils;
+import com.platform.boot.commons.utils.BeanUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,13 +21,13 @@ public class LoggersService extends AbstractDatabase {
     private final LoggersRepository loggersRepository;
 
     public Flux<Logger> search(LoggerRequest request, Pageable pageable) {
-        var cacheKey = ContextUtils.cacheKey(request, pageable);
+        var cacheKey = BeanUtils.cacheKey(request, pageable);
         Query query = Query.query(request.toCriteria()).with(pageable);
         return this.queryWithCache(cacheKey, query, Logger.class);
     }
 
     public Mono<Page<Logger>> page(LoggerRequest request, Pageable pageable) {
-        var cacheKey = ContextUtils.cacheKey(request);
+        var cacheKey = BeanUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria());
         var searchMono = this.search(request, pageable).collectList();
         var countMono = this.countWithCache(cacheKey, query, Logger.class);

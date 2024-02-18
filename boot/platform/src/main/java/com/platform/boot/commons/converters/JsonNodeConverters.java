@@ -1,4 +1,4 @@
-package com.platform.boot.converters;
+package com.platform.boot.commons.converters;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.platform.boot.commons.exception.JsonException;

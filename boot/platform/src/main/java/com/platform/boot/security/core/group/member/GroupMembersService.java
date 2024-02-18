@@ -3,7 +3,7 @@ package com.platform.boot.security.core.group.member;
 import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.query.CriteriaUtils;
 import com.platform.boot.commons.query.ParamSql;
-import com.platform.boot.commons.utils.ContextUtils;
+import com.platform.boot.commons.utils.BeanUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -34,7 +34,7 @@ public class GroupMembersService extends AbstractDatabase {
     private final GroupMembersRepository memberRepository;
 
     public Flux<GroupMemberResponse> search(GroupMemberRequest request, Pageable pageable) {
-        var cacheKey = ContextUtils.cacheKey(request, pageable);
+        var cacheKey = BeanUtils.cacheKey(request, pageable);
         ParamSql paramSql = request.toParamSql();
         String query = QUERY_SQL + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
         return super.queryWithCache(cacheKey, query, paramSql.params(), GroupMemberResponse.class);
@@ -43,7 +43,7 @@ public class GroupMembersService extends AbstractDatabase {
     public Mono<Page<GroupMemberResponse>> page(GroupMemberRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
 
-        var cacheKey = ContextUtils.cacheKey(request);
+        var cacheKey = BeanUtils.cacheKey(request);
         ParamSql paramSql = request.toParamSql();
         String query = COUNT_SQL + paramSql.whereSql();
         var countMono = this.countWithCache(cacheKey, query, paramSql.params());

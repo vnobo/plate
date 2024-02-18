@@ -3,6 +3,7 @@ package com.platform.boot.relational.menus;
 
 import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.exception.RestServerException;
+import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.security.core.group.authority.GroupAuthoritiesRepository;
 import com.platform.boot.security.core.user.authority.UserAuthoritiesRepository;
@@ -33,7 +34,7 @@ public class MenusService extends AbstractDatabase {
     private final UserAuthoritiesRepository userAuthoritiesRepository;
 
     public Flux<Menu> search(MenuRequest request) {
-        var cacheKey = ContextUtils.cacheKey(request);
+        var cacheKey = BeanUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria()).sort(Sort.by("sort"));
         return this.queryWithCache(cacheKey, query, Menu.class)
                 .flatMap(ContextUtils::serializeUserAuditor);

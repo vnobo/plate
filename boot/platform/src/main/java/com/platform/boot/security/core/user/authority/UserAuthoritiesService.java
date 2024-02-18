@@ -1,6 +1,7 @@
 package com.platform.boot.security.core.user.authority;
 
 import com.platform.boot.commons.base.AbstractDatabase;
+import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.relational.core.query.Query;
@@ -18,7 +19,7 @@ public class UserAuthoritiesService extends AbstractDatabase {
     private final UserAuthoritiesRepository userAuthoritiesRepository;
 
     public Flux<UserAuthority> search(UserAuthorityRequest request) {
-        var cacheKey = ContextUtils.cacheKey(request);
+        var cacheKey = BeanUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria());
         return super.queryWithCache(cacheKey, query, UserAuthority.class)
                 .flatMap(ContextUtils::serializeUserAuditor);

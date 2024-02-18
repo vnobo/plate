@@ -1,13 +1,12 @@
 package com.platform.boot.commons.base;
 
+import com.platform.boot.commons.utils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.r2dbc.convert.R2dbcConverter;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.unit.DataSize;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -21,8 +20,6 @@ import java.util.Map;
  */
 public abstract class AbstractDatabase extends AbstractService {
 
-    @Value("${spring.codec.max-in-memory-size:256kb}")
-    private DataSize maxInMemorySize;
     protected R2dbcEntityTemplate entityTemplate;
     protected DatabaseClient databaseClient;
     protected R2dbcConverter r2dbcConverter;
@@ -42,22 +39,22 @@ public abstract class AbstractDatabase extends AbstractService {
 
     /**
      * 查询带有缓存的对象
-     * @param key 缓存键
-     * @param query 查询语句
-     * @param bindParams 绑定参数
+     *
+     * @param key         缓存键
+     * @param sql         查询语句
+     * @param bindParams  绑定参数
      * @param entityClass 实体类
      * @return 带有缓存的查询结果
      */
-    protected <T> Flux<T> queryWithCache(Object key, String query,
+    protected <T> Flux<T> queryWithCache(Object key, String sql,
                                          Map<String, Object> bindParams, Class<T> entityClass) {
         // 构建数据库执行规范
-        DatabaseClient.GenericExecuteSpec executeSpec = this.databaseClient.sql(() -> query);
-        for (Map.Entry<String, Object> e : bindParams.entrySet()) {
-            executeSpec = executeSpec.bind(e.getKey(), e.getValue());
-        }
+        var executeSpec = this.databaseClient.sql(() -> sql);
+        executeSpec = executeSpec.bindValues(bindParams);
         // 执行查询并映射结果
         Flux<T> source = executeSpec
-                .map((row, rowMetadata) -> this.r2dbcConverter.read(entityClass, row, rowMetadata)).all();
+                .map((row, rowMetadata) -> this.r2dbcConverter.read(entityClass, row, rowMetadata))
+                .all();
         // 调用带有缓存的查询方法
         return queryWithCache(key, source);
     }
@@ -65,7 +62,7 @@ public abstract class AbstractDatabase extends AbstractService {
     /**
      * 使用缓存和源Flux查询数据。
      *
-     * @param key   用于标识数据的键
+     * @param key        用于标识数据的键
      * @param sourceFlux 数据源Flux
      * @return 查询到的数据流
      */
@@ -79,7 +76,7 @@ public abstract class AbstractDatabase extends AbstractService {
         // 将源Flux的数据添加到缓存数据集合，并在其完成时将更新后的数据放入缓存
         Flux<T> source = sourceFlux
                 .doOnNext(cacheData::add)
-                .doAfterTerminate(() -> this.cachePut(cacheKey, cacheData));
+                .doAfterTerminate(() -> BeanUtils.cachePut(cacheKey, cacheData, this.cache));
 
         // 如果缓存数据不为空，则直接返回缓存数据流；否则，当数据流为空时切换为从源Flux获取数据
         return Flux.fromIterable(ObjectUtils.isEmpty(cacheData) ? Collections.emptyList() : cacheData)
@@ -92,33 +89,18 @@ public abstract class AbstractDatabase extends AbstractService {
         return countWithCache(key, source);
     }
 
-    protected Mono<Long> countWithCache(Object key, String query, Map<String, Object> bindParams) {
-        DatabaseClient.GenericExecuteSpec executeSpec = this.databaseClient.sql(() -> query);
-        for (Map.Entry<String, Object> e : bindParams.entrySet()) {
-            executeSpec = executeSpec.bind(e.getKey(), e.getValue());
-        }
-        Mono<Long> source = executeSpec
-                .map(readable -> readable.get(0, Long.class)).one();
+    protected Mono<Long> countWithCache(Object key, String sql, Map<String, Object> bindParams) {
+        var executeSpec = this.databaseClient.sql(() -> sql);
+        executeSpec = executeSpec.bindValues(bindParams);
+        Mono<Long> source = executeSpec.mapValue(Long.class).first();
         return countWithCache(key, source);
     }
 
     protected Mono<Long> countWithCache(Object key, Mono<Long> sourceMono) {
         String cacheKey = key + ":count";
         Long cacheCount = this.cache.get(cacheKey, () -> null);
-        Mono<Long> source = sourceMono.doOnNext(count -> this.cachePut(cacheKey, count));
+        Mono<Long> source = sourceMono.doOnNext(count -> BeanUtils.cachePut(cacheKey, count, this.cache));
         return Mono.justOrEmpty(cacheCount).switchIfEmpty(Mono.defer(() -> source));
-    }
-
-    private void cachePut(String cacheKey, Object obj) {
-        if (ObjectUtils.isEmpty(obj)) {
-            return;
-        }
-        DataSize objectSize = com.platform.boot.commons.utils.BeanUtils.getBeanSize(obj);
-        if (objectSize.toBytes() > this.maxInMemorySize.toBytes()) {
-            log.warn("Object size is too large,Max memory size is " + this.maxInMemorySize + "," +
-                    " Object size is " + objectSize + ".");
-        }
-        this.cache.put(cacheKey, obj);
     }
 
     @Autowired
