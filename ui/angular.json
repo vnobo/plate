@@ -40,7 +40,7 @@
         "locales": {
           "en": {
             "translation": "web/src/locale/messages.en.xlf",
-            "baseHref": ""
+            "baseHref": "/en"
           }
         }
       },
