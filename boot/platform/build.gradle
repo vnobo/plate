@@ -26,21 +26,22 @@ tasks.named("bootBuildImage") {
     ]
     buildWorkspace {
         bind {
-            source = "cache-${rootProject.name}-${project.name}.work"
+            source = "cache.${rootProject.name}-${project.name}.work"
         }
     }
     buildCache {
         bind {
-            source = "cache-${rootProject.name}-${project.name}.build"
+            source = "cache.${rootProject.name}-${project.name}.build"
         }
     }
     launchCache {
         bind {
-            source = "cache-${rootProject.name}-${project.name}.launch"
+            source = "cache.${rootProject.name}-${project.name}.launch"
         }
     }
     publish = true
     docker {
+        host = "tcp://192.168.1.2:2376"
         publishRegistry {
             username = "${dockerUsername}"
             password = "${dockerPassword}"
@@ -63,7 +64,6 @@ idea {
         inheritOutputDirs = false
         outputDir = file('muchBetterOutputDir') as File
         testOutputDir = file('muchBetterTestOutputDir') as File
-
     }
 }
 
