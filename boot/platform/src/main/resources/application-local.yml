@@ -19,9 +19,8 @@ spring:
       max-size: 32
       initial-size: 16
       max-idle-time: 10m
-      max-create-connection-time: 10s
-      max-validation-time: 10s
-      validation-query: "select version()"
+      max-create-connection-time: 2s
+      max-validation-time: 2s
   sql.init:
     mode: never
     platform: postgres

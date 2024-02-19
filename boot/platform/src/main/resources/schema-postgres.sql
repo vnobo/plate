@@ -30,7 +30,7 @@ create table if not exists se_users
     email               varchar(512),
     phone       varchar(32),
     avatar              text,
-    bio text,
+    bio         text,
     extend              jsonb,
     creator             varchar(64),
     updater             varchar(64),
@@ -38,7 +38,7 @@ create table if not exists se_users
     created_time        timestamp             default current_timestamp,
     updated_time        timestamp             default current_timestamp
 );
-create index se_users_tenant_code_username_idx on se_users (tenant_code, username);
+create index se_users_tu_idx on se_users (tenant_code, username);
 create index se_users_extend_gin_idx on se_users using gin (extend);
 comment on table se_users is '用户表';
 
@@ -70,7 +70,7 @@ create table if not exists se_groups
     created_time timestamp             default current_timestamp,
     updated_time timestamp             default current_timestamp
 );
-create index se_groups_tenant_code_name_idx on se_groups (tenant_code, name);
+create index se_groups_tn_idx on se_groups (tenant_code, name);
 create index se_groups_extend_gin_idx on se_groups using gin (extend);
 comment on table se_groups is '角色表';
 
@@ -155,7 +155,7 @@ create table if not exists se_menus
     created_time timestamp             default current_timestamp,
     updated_time timestamp             default current_timestamp
 );
-create index se_menus_pcode_tenant_code_type_name_idx on se_menus (pcode, tenant_code, type, name);
+create index se_menus_pttn_idx on se_menus (pcode, tenant_code, type, name);
 create index se_menus_extend_gin_idx on se_menus using gin (extend);
 comment on table se_menus is '菜单权限表';
 
@@ -174,6 +174,6 @@ create table if not exists se_loggers
     created_time timestamp            default current_timestamp,
     updated_time timestamp            default current_timestamp
 );
-create index se_loggers_tenant_code_posm_idx on se_loggers (tenant_code, prefix, operator, status, method);
+create index se_loggers_tposm_idx on se_loggers (tenant_code, prefix, operator, status, method);
 create index se_loggers_extend_gin_idx on se_loggers using gin (context);
 comment on table se_loggers is '操作日志表';

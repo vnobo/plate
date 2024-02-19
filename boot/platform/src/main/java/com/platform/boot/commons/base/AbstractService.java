@@ -16,7 +16,7 @@ import java.util.Optional;
  */
 public abstract class AbstractService implements InitializingBean {
 
-    protected final Log log = LogFactory.getLog(AbstractService.class);
+    private final static Log log = LogFactory.getLog(AbstractService.class);
 
     protected Cache cache;
     protected CacheManager cacheManager;
