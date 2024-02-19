@@ -120,7 +120,9 @@ public class BeanUtils implements InitializingBean {
         return BeanUtils.beanToMap(bean, false, ignoreNullValue);
     }
 
-    public static <T> Map<String, Object> beanToMap(T bean, final boolean isToUnderlineCase, final boolean ignoreNullValue) {
+    public static <T> Map<String, Object> beanToMap(T bean,
+                                                    final boolean isToUnderlineCase,
+                                                    final boolean ignoreNullValue) {
         if (ObjectUtils.isEmpty(bean)) {
             return null;
         }
@@ -131,8 +133,9 @@ public class BeanUtils implements InitializingBean {
         if (ignoreNullValue) {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         }
-        return objectMapper.convertValue(bean, new TypeReference<>() {
-        });
+        var type = new TypeReference<Map<String, Object>>() {
+        };
+        return objectMapper.convertValue(bean, type);
     }
 
     @Override
