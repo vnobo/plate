@@ -120,6 +120,14 @@ public class BeanUtils implements InitializingBean {
         return BeanUtils.beanToMap(bean, false, ignoreNullValue);
     }
 
+    /**
+     * 将对象转换为Map对象
+     *
+     * @param bean              要转换的对象
+     * @param isToUnderlineCase 是否转换为下划线命名方式
+     * @param ignoreNullValue   是否忽略空值
+     * @return 转换后的Map对象
+     */
     public static <T> Map<String, Object> beanToMap(T bean,
                                                     final boolean isToUnderlineCase,
                                                     final boolean ignoreNullValue) {
@@ -137,6 +145,7 @@ public class BeanUtils implements InitializingBean {
         };
         return objectMapper.convertValue(bean, type);
     }
+
 
     @Override
     public void afterPropertiesSet() {
