@@ -33,7 +33,7 @@ public class Oauth2SuccessHandler extends RedirectServerAuthenticationSuccessHan
             response.setStatusCode(HttpStatus.OK);
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             return exchange.getSession().flatMap(session -> {
-                AuthenticationToken authenticationToken = AuthenticationToken.build(session);
+                AuthenticationToken authenticationToken = AuthenticationToken.build(session, token);
                 var body = ContextUtils.objectToBytes(authenticationToken);
                 var dataBufferFactory = response.bufferFactory();
                 var bodyBuffer = dataBufferFactory.wrap(body);

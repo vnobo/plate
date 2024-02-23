@@ -30,8 +30,8 @@ public class SecurityController {
     private final ServerOAuth2AuthorizedClientRepository clientRepository;
 
     @GetMapping("token")
-    public Mono<AuthenticationToken> token(WebSession session) {
-        return Mono.defer(() -> Mono.justOrEmpty(AuthenticationToken.build(session)));
+    public Mono<AuthenticationToken> token(WebSession session, Authentication authentication) {
+        return Mono.defer(() -> Mono.just(AuthenticationToken.build(session, authentication)));
     }
 
     @GetMapping("csrf")
@@ -40,11 +40,6 @@ public class SecurityController {
             CsrfToken ctk = contextView.get(ContextUtils.CSRF_TOKEN_CONTEXT);
             return Mono.justOrEmpty(ctk);
         });
-    }
-
-    @GetMapping("me")
-    public Mono<SecurityDetails> me() {
-        return ContextUtils.securityDetails();
     }
 
     @GetMapping("bind")
