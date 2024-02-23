@@ -19,7 +19,7 @@ public final class CriteriaUtils {
     public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend", "createdTime", "updatedTime");
 
     public static String applyPage(Pageable pageable) {
-        return applySort(pageable.getSort(), null);
+        return applyPage(pageable, null);
     }
 
     public static String applyPage(Pageable pageable, String prefix) {
