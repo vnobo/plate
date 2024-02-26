@@ -32,6 +32,18 @@ public class SecurityController {
     private final PasswordEncoder passwordEncoder;
     private final ServerOAuth2AuthorizedClientRepository clientRepository;
 
+    /**
+     * This endpoint is used to generate an authentication token.
+     *
+     * @param session        The current web session.
+     * @param authentication The authentication object containing the user's credentials.
+     * @return A Mono<AuthenticationToken> object containing the authentication token.
+     * &#064;GetMapping  annotation is used to handle GET type requests. This endpoint is mapped to "/oauth2/token".
+     * The method uses the WebSession and Authentication parameters to build an AuthenticationToken.
+     * The building of the AuthenticationToken is deferred until subscription time to ensure that it is built with the most up-to-date session and authentication information.
+     * <p>
+     * The built AuthenticationToken is then wrapped in a Mono and returned.
+     */
     @GetMapping("token")
     public Mono<AuthenticationToken> token(WebSession session, Authentication authentication) {
         return Mono.defer(() -> Mono.just(AuthenticationToken.build(session, authentication)));
