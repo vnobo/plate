@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {AsyncPipe, CommonModule} from '@angular/common';
 import {RouterOutlet} from '@angular/router';
 import {NzBackTopModule} from "ng-zorro-antd/back-top";
@@ -13,7 +13,7 @@ import {LoadingService} from "./core/loading.service";
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   loadingShow$: Observable<boolean> | undefined;
 
   constructor(private loading: LoadingService) {

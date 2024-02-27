@@ -30,13 +30,14 @@ export function defaultInterceptor(req: HttpRequest<unknown>, next: HttpHandlerF
     headers: req.headers.append('X-Requested-With', 'XMLHttpRequest'),
     url: originalUrl
   });
-  return next(xRequestedReq).pipe(timeout({first: 50_000, each: 100_000}),
+  return next(xRequestedReq).pipe(timeout({first: 5_000, each: 10_000}),
     catchError(errorResponse => {
       if (errorResponse.error.message) {
         _message.error(errorResponse.error.message);
         return throwError(() => errorResponse.error.message);
       }
-      console.error($localize`:@@errorMessage:Backend returned code ${errorResponse.status}, body was: `, errorResponse.error);
+      console.error($localize`:@@errorMessage:Backend returned code ${errorResponse.status},
+       body was: ${errorResponse.message}`);
       return throwError(() => errorResponse);
     }), finalize(() => _loading.hide()));
 }

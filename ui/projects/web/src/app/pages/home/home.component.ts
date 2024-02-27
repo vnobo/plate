@@ -4,7 +4,7 @@ import {Menu, MenusService} from "../system/menus/menus.service";
 import {ActivatedRoute, NavigationEnd, Params, PRIMARY_OUTLET, Resolve, ResolveFn, Router} from "@angular/router";
 
 export interface Breadcrumb {
-  label: string | Type<Resolve<string>> | ResolveFn<string>;
+  label: string | ResolveFn<string> | Type<Resolve<string>>;
   params: Params;
   url: string;
 }
