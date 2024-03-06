@@ -1,0 +1,26 @@
+server:
+  shutdown: graceful
+  http2.enabled: true
+  compression.enabled: true
+
+spring:
+  threads.virtual.enabled: true
+  #main.keep-alive: true
+  application.name: authorization
+  mvc.format:
+    time: "HH:mm:ss"
+    date-time: "yyyy-MM-dd HH:mm:ss"
+    date: "yyyy-MM-dd"
+  jackson:
+    date-format: "yyyy-MM-dd HH:mm:ss"
+    time-zone: "GMT+8"
+    locale: "zh_CN"
+  codec:
+    max-in-memory-size: 10MB
+    log-request-details: false
+  cache:
+    type: redis
+    redis:
+      key-prefix: "authorization:caches:"
+      time-to-live: 300s
+      enable-statistics: true
