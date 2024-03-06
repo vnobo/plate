@@ -25,8 +25,7 @@ basic system information such as users, roles, tenants, menus, etc., and provide
 ## 🖥 Environment Support
 
 * Spring boot `3.3.2`
-*
-Angular `^17.2.1` [![npm package](https://img.shields.io/npm/v/ng-zorro-antd.svg?style=flat-square)](https://www.npmjs.org/package/ng-zorro-antd)
+* Angular `^17.2.1` [![npm package](https://img.shields.io/npm/v/ng-zorro-antd.svg?style=flat-square)](https://www.npmjs.org/package/ng-zorro-antd)
 * ng-zorro-antd `17.2.0`
 * Server-side Rendering
 * Modern browsers including the following [specific versions](https://angular.io/guide/browser-support)
