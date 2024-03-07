@@ -5,7 +5,7 @@ server:
 
 spring:
   threads.virtual.enabled: true
-  #main.keep-alive: true
+  main.keep-alive: true
   application.name: authorization
   mvc.format:
     time: "HH:mm:ss"
@@ -22,5 +22,47 @@ spring:
     type: redis
     redis:
       key-prefix: "authorization:caches:"
-      time-to-live: 300s
+      time-to-live: "300s"
       enable-statistics: true
+  jpa:
+    open-in-view: true
+    show-sql: true
+  security:
+    user:
+      name: "admin"
+      password: "{noop}admin"
+    oauth2:
+      authorizationserver:
+        client:
+          my-client-1:
+            registration:
+              client-id: "abcd"
+              client-secret: "{noop}secret1"
+              client-authentication-methods:
+                - "client_secret_basic"
+              authorization-grant-types:
+                - "authorization_code"
+                - "refresh_token"
+              redirect-uris:
+                - "https://my-client-1.com/login/oauth2/code/abcd"
+                - "https://my-client-1.com/authorized"
+              scopes:
+                - "openid"
+                - "profile"
+                - "email"
+                - "phone"
+                - "address"
+            require-authorization-consent: true
+          my-client-2:
+            registration:
+              client-id: "efgh"
+              client-secret: "{noop}secret2"
+              client-authentication-methods:
+                - "client_secret_jwt"
+              authorization-grant-types:
+                - "client_credentials"
+              scopes:
+                - "user.read"
+                - "user.write"
+            jwk-set-uri: "https://my-client-2.com/jwks"
+            token-endpoint-authentication-signing-algorithm: "RS256"
