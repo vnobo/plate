@@ -4,19 +4,23 @@ import {SecurityRoutingModule} from './security-routing.module';
 import {LoginComponent} from './login/login.component';
 import {NzDividerModule} from "ng-zorro-antd/divider";
 import {SharedModule} from '../../shared/shared.module';
-
+import {LoginV1Component} from "./loginv1/login.component";
+import {NzCheckboxModule} from "ng-zorro-antd/checkbox";
 
 @NgModule({
   imports: [
     SharedModule,
     SecurityRoutingModule,
-    NzDividerModule
+    NzDividerModule,
+    NzCheckboxModule
   ],
   declarations: [
-    LoginComponent
+    LoginComponent,
+    LoginV1Component
   ],
   exports: [
-    LoginComponent
+    LoginComponent,
+    LoginV1Component
   ],
   providers: [
   ]
