@@ -70,9 +70,3 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-hibernate {
-    enhancement {
-        enableAssociationManagement = true
-    }
-}
