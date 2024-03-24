@@ -27,7 +27,7 @@ import java.util.Objects;
 /**
  * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
  */
-@Component
+@Component("contextUtils")
 public final class ContextUtils implements Serializable {
     private final static String[] IP_HEADER_CANDIDATES = {
             "X-Forwarded-For",
