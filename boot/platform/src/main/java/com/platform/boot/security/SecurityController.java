@@ -12,10 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
 import org.springframework.security.web.server.csrf.CsrfToken;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
@@ -91,6 +88,7 @@ public class SecurityController {
      * @throws RestServerException if the new password is the same as the current password.
      * @throws RestServerException if the presented password does not match the current password.
      */
+    @PostMapping("/change/password")
     public Mono<UserDetails> changePassword(@Valid @RequestBody ChangePasswordRequest request,
                                             Authentication authentication) {
         // Check if the new password is the same as the current password.
