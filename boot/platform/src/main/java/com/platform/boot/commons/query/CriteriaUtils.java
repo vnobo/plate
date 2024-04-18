@@ -52,7 +52,7 @@ public final class CriteriaUtils {
 
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         if (ObjectUtils.isEmpty(objectMap)) {
-            return ParamSql.of(new StringJoiner(" and "), Maps.newHashMap());
+            return ParamSql.of(new StringJoiner(" AND "), Maps.newHashMap());
         }
         ParamSql jsonParamSql = QueryJson.queryJson((Map<String, Object>) objectMap.get("query"), prefix);
         Map<String, Object> params = jsonParamSql.params();

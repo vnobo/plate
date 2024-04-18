@@ -45,7 +45,7 @@ public class MenusController {
                     request.setRules(rules);
                 }
             }
-            return this.search(request);
+            return this.menusService.search(request).distinct(Menu::getAuthority);
         });
     }
 

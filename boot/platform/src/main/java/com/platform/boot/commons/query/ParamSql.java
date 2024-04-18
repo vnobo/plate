@@ -15,7 +15,7 @@ public record ParamSql(StringJoiner sql, Map<String, Object> params) implements 
 
     public String whereSql() {
         if (this.sql.length() > 0) {
-            return " where " + this.sql;
+            return " Where " + this.sql;
         }
         return "";
     }

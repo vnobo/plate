@@ -144,9 +144,9 @@ public class Ulid {
     };
 
     /**
-     * Generate random UID string using {@link Random} instance.
+     * Generate random ULID string using {@link Random} instance.
      *
-     * @return UID string
+     * @return ULID string
      */
     public static String random() {
         byte[] entropy = new byte[10];

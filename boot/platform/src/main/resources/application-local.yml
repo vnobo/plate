@@ -22,7 +22,7 @@ spring:
       max-create-connection-time: 2s
       max-validation-time: 2s
   sql.init:
-    mode: never
+    mode: always
     platform: postgres
     encoding: utf-8
   data.redis:
@@ -30,3 +30,8 @@ spring:
     timeout: 30s
     connect-timeout: 10s
     repositories.enabled: false
+  security.oauth2.client.registration:
+    github:
+      client-id: Iv1.14a97a700a228437
+      client-secret: 94d4fa39efc5677ea75f5dfae533191c00f76f99
+      scope: user
