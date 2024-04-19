@@ -26,21 +26,6 @@ tasks.named("bootBuildImage") {
             "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
             "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8"
     ]
-    buildWorkspace {
-        bind {
-            source = "cache.${rootProject.name}-${project.name}.work"
-        }
-    }
-    buildCache {
-        bind {
-            source = "cache.${rootProject.name}-${project.name}.build"
-        }
-    }
-    launchCache {
-        bind {
-            source = "cache.${rootProject.name}-${project.name}.launch"
-        }
-    }
     publish = true
     docker {
         publishRegistry {
@@ -69,10 +54,4 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
-}
-
-hibernate {
-    enhancement {
-        enableAssociationManagement = true
-    }
 }
