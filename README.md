@@ -126,7 +126,7 @@ Thanks to [JetBrains](https://www.jetbrains.com/?from=ng-zorro-antd) for support
 
 ## ❓ Help from the Community
 
-For questions on how to use ng-zorro-antd, please post questions
+For questions on how to use plate-platform, please post questions
 to [<img alt="Stack Overflow" src="https://cdn.sstatic.net/Sites/stackoverflow/company/img/logos/so/so-logo.svg?v=2bb144720a66" width="140" />](http://stackoverflow.com/questions/tagged/ng-zorro-antd)
 using the `plate-platform` tag. If you're not finding what you need on stackoverflow, you can find us
 on [![Discord](https://img.shields.io/discord/748677963142135818?label=Discord&style=flat-square)](https://discord.com/channels/748677963142135818/764322550712893451)
