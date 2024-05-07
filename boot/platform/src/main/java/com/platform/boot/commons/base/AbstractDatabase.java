@@ -94,11 +94,21 @@ public abstract class AbstractDatabase extends AbstractService {
                 .switchIfEmpty(Flux.defer(() -> source));
     }
 
-
-    protected <T> Mono<Long> countWithCache(Object key, Query query, Class<T> entityClass) {
-        Mono<Long> source = this.entityTemplate.count(query, entityClass);
+    /**
+     * 使用缓存计算给定查询条件的结果数量。
+     *
+     * @param key   用于缓存的键，用于标识缓存中的数据。
+     * @param query 查询条件，用于从数据库中获取数据。
+     * @param <T>   泛型参数，指示查询结果的类型。
+     * @return 返回一个包含查询结果数量的Mono对象。
+     */
+    protected <T> Mono<Long> countWithCache(Object key, Query query) {
+        // 通过查询条件，从数据库中计算记录数
+        Mono<Long> source = this.entityTemplate.count(query, com.platform.boot.relational.logger.Logger.class);
+        // 将计算结果缓存起来，并返回缓存的结果
         return countWithCache(key, source);
     }
+
 
     /**
      * 使用缓存计算给定SQL和参数的计数结果。

@@ -30,7 +30,7 @@ public class LoggersService extends AbstractDatabase {
         var cacheKey = BeanUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria());
         var searchMono = this.search(request, pageable).collectList();
-        var countMono = this.countWithCache(cacheKey, query, Logger.class);
+        var countMono = this.countWithCache(cacheKey, query);
         return Mono.zip(searchMono, countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
