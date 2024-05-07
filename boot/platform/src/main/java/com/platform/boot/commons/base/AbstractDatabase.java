@@ -20,8 +20,19 @@ import java.util.Map;
  */
 public abstract class AbstractDatabase extends AbstractService {
 
+    /**
+     * 保护类型的R2dbcEntityTemplate实例，用于数据操作。
+     */
     protected R2dbcEntityTemplate entityTemplate;
+
+    /**
+     * 保护类型的DatabaseClient实例，提供数据库客户端功能。
+     */
     protected DatabaseClient databaseClient;
+
+    /**
+     * 保护类型的R2dbcConverter实例，用于R2DBC的转换功能。
+     */
     protected R2dbcConverter r2dbcConverter;
 
     /**
