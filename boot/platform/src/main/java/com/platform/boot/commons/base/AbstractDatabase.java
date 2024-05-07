@@ -100,12 +100,26 @@ public abstract class AbstractDatabase extends AbstractService {
         return countWithCache(key, source);
     }
 
+    /**
+     * 使用缓存计算给定SQL和参数的计数结果。
+     *
+     * @param key        用于缓存的键，确保相同的查询使用相同的缓存键。
+     * @param sql        要执行的SQL查询语句。
+     * @param bindParams SQL查询中要绑定的参数。
+     * @return 返回查询结果的Mono对象，包含查询到的行数。
+     */
     protected Mono<Long> countWithCache(Object key, String sql, Map<String, Object> bindParams) {
+        // 构建执行规范，设置SQL语句并绑定参数
         var executeSpec = this.databaseClient.sql(() -> sql);
         executeSpec = executeSpec.bindValues(bindParams);
+
+        // 执行查询并仅获取第一个结果的行数
         Mono<Long> source = executeSpec.mapValue(Long.class).first();
+
+        // 使用给定的键和查询结果源对结果进行缓存
         return countWithCache(key, source);
     }
+
 
     protected Mono<Long> countWithCache(Object key, Mono<Long> sourceMono) {
         String cacheKey = key + ":count";
