@@ -20,8 +20,19 @@ import java.util.Map;
  */
 public abstract class AbstractDatabase extends AbstractService {
 
+    /**
+     * 保护类型的R2dbcEntityTemplate实例，用于数据操作。
+     */
     protected R2dbcEntityTemplate entityTemplate;
+
+    /**
+     * 保护类型的DatabaseClient实例，提供数据库客户端功能。
+     */
     protected DatabaseClient databaseClient;
+
+    /**
+     * 保护类型的R2dbcConverter实例，用于R2DBC的转换功能。
+     */
     protected R2dbcConverter r2dbcConverter;
 
     /**
@@ -83,18 +94,42 @@ public abstract class AbstractDatabase extends AbstractService {
                 .switchIfEmpty(Flux.defer(() -> source));
     }
 
-
-    protected <T> Mono<Long> countWithCache(Object key, Query query, Class<T> entityClass) {
-        Mono<Long> source = this.entityTemplate.count(query, entityClass);
+    /**
+     * 使用缓存计算给定查询条件的结果数量。
+     *
+     * @param key   用于缓存的键，用于标识缓存中的数据。
+     * @param query 查询条件，用于从数据库中获取数据。
+     * @param <T>   泛型参数，指示查询结果的类型。
+     * @return 返回一个包含查询结果数量的Mono对象。
+     */
+    protected <T> Mono<Long> countWithCache(Object key, Query query) {
+        // 通过查询条件，从数据库中计算记录数
+        Mono<Long> source = this.entityTemplate.count(query, com.platform.boot.relational.logger.Logger.class);
+        // 将计算结果缓存起来，并返回缓存的结果
         return countWithCache(key, source);
     }
 
+
+    /**
+     * 使用缓存计算给定SQL和参数的计数结果。
+     *
+     * @param key        用于缓存的键，确保相同的查询使用相同的缓存键。
+     * @param sql        要执行的SQL查询语句。
+     * @param bindParams SQL查询中要绑定的参数。
+     * @return 返回查询结果的Mono对象，包含查询到的行数。
+     */
     protected Mono<Long> countWithCache(Object key, String sql, Map<String, Object> bindParams) {
+        // 构建执行规范，设置SQL语句并绑定参数
         var executeSpec = this.databaseClient.sql(() -> sql);
         executeSpec = executeSpec.bindValues(bindParams);
+
+        // 执行查询并仅获取第一个结果的行数
         Mono<Long> source = executeSpec.mapValue(Long.class).first();
+
+        // 使用给定的键和查询结果源对结果进行缓存
         return countWithCache(key, source);
     }
+
 
     protected Mono<Long> countWithCache(Object key, Mono<Long> sourceMono) {
         String cacheKey = key + ":count";

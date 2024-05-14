@@ -4,7 +4,7 @@ logging:
     web: debug
     com.platform.boot.*: debug
     org.springframework.r2dbc: debug
-    #io.r2dbc.postgresql.QUERY: debug
+    io.r2dbc.postgresql.QUERY: debug
     io.r2dbc.postgresql.PARAM: debug
 
 server.port: 8080
@@ -17,10 +17,9 @@ spring:
     password: q1w2e3..
     pool:
       max-size: 32
-      initial-size: 16
       max-idle-time: 10m
-      max-create-connection-time: 2s
-      max-validation-time: 2s
+      validation-query: select 1
+      max-validation-time: 10s
   sql.init:
     mode: always
     platform: postgres

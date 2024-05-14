@@ -1,8 +1,8 @@
-<h1 align="center">
+<h1 style="text-align: center;align-content: center">
 Platform For Plate
 </h1>
 
-<div align="center">
+<div style="text-align: center;align-content: center">
 
 The system management platform is an application developed based on Spring Boot 3 and Angular. It is used to manage
 basic system information such as users, roles, tenants, menus, etc., and provides basic platform functions.
@@ -25,7 +25,9 @@ basic system information such as users, roles, tenants, menus, etc., and provide
 ## 🖥 Environment Support
 
 * Spring boot `3.3.2`
-* Angular `^17.2.1` [![npm package](https://img.shields.io/npm/v/ng-zorro-antd.svg?style=flat-square)](https://www.npmjs.org/package/ng-zorro-antd)
+*
+
+Angular `^17.2.1` [![npm package](https://img.shields.io/npm/v/ng-zorro-antd.svg?style=flat-square)](https://www.npmjs.org/package/ng-zorro-antd)
 * ng-zorro-antd `17.2.0`
 * Server-side Rendering
 * Modern browsers including the following [specific versions](https://angular.io/guide/browser-support)
@@ -65,7 +67,7 @@ export class AppModule {
 }
 ```
 
-> `@angular/cli` users won't have to worry about the things below but it's good to know.
+> `@angular/cli` users won't have to worry about the things below, but it's good to know.
 
 And import style and SVG icon assets file link in `angular.json`.
 
@@ -124,7 +126,7 @@ Thanks to [JetBrains](https://www.jetbrains.com/?from=ng-zorro-antd) for support
 
 ## ❓ Help from the Community
 
-For questions on how to use ng-zorro-antd, please post questions
+For questions on how to use plate-platform, please post questions
 to [<img alt="Stack Overflow" src="https://cdn.sstatic.net/Sites/stackoverflow/company/img/logos/so/so-logo.svg?v=2bb144720a66" width="140" />](http://stackoverflow.com/questions/tagged/ng-zorro-antd)
 using the `plate-platform` tag. If you're not finding what you need on stackoverflow, you can find us
 on [![Discord](https://img.shields.io/discord/748677963142135818?label=Discord&style=flat-square)](https://discord.com/channels/748677963142135818/764322550712893451)
