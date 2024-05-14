@@ -17,7 +17,7 @@ ext {
 
 configure(allprojects) { project ->
 
-    group "com.plate.boot"
+    group "com.alex.plate"
 
     repositories {
         mavenLocal()
