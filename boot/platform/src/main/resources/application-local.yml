@@ -16,10 +16,8 @@ spring:
     username: farmer
     password: q1w2e3..
     pool:
-      max-size: 32
       max-idle-time: 10m
       validation-query: select 1
-      max-validation-time: 10s
   sql.init:
     mode: always
     platform: postgres
