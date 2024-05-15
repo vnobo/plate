@@ -25,12 +25,13 @@ import java.util.Objects;
  */
 @Log4j2
 @Component
-public class BeanUtils implements InitializingBean {
-    private final static ByteArrayOutputStream BYTE_ARRAY_OUTPUT_STREAM = new ByteArrayOutputStream();
+public final class BeanUtils implements InitializingBean {
+    private final static ByteArrayOutputStream BYTE_ARRAY_OUTPUT_STREAM;
     private final static ObjectOutputStream OBJECT_OUTPUT_STREAM;
 
     static {
         try {
+            BYTE_ARRAY_OUTPUT_STREAM = new ByteArrayOutputStream();
             OBJECT_OUTPUT_STREAM = new ObjectOutputStream(BYTE_ARRAY_OUTPUT_STREAM);
         } catch (IOException e) {
             throw RestServerException.withMsg("Init static ObjectOutputStream error.", e);
@@ -56,8 +57,8 @@ public class BeanUtils implements InitializingBean {
 
         // 如果对象的大小超过了最大内存大小，则输出警告信息
         if (objectSize.toBytes() > MAX_IN_MEMORY_SIZE.toBytes()) {
-            log.warn("Object size is too large, Max memory size is " + MAX_IN_MEMORY_SIZE
-                    + ", Object size is " + objectSize + ".");
+            log.warn("Object size is too large, Max memory size is {}, Object size is {}.",
+                    MAX_IN_MEMORY_SIZE, objectSize);
         }
 
         // 将对象缓存到指定的缓存中
@@ -146,8 +147,8 @@ public class BeanUtils implements InitializingBean {
         return objectMapper.convertValue(bean, type);
     }
 
-
     @Override
     public void afterPropertiesSet() {
+        log.info("BeanUtils Initializing ...");
     }
 }

@@ -8,7 +8,9 @@ import com.platform.boot.commons.ulid.Ulid;
 import com.platform.boot.security.SecurityDetails;
 import com.platform.boot.security.core.UserAuditor;
 import com.platform.boot.security.core.user.UsersService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -19,7 +21,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.beans.PropertyDescriptor;
-import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Objects;
@@ -27,8 +28,9 @@ import java.util.Objects;
 /**
  * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
  */
-@Component("contextUtils")
-public final class ContextUtils implements Serializable {
+@Log4j2
+@Component
+public final class ContextUtils implements InitializingBean {
     private final static String[] IP_HEADER_CANDIDATES = {
             "X-Forwarded-For",
             "X-Real-IP",
@@ -113,5 +115,10 @@ public final class ContextUtils implements Serializable {
 
     public static String nextId() {
         return Ulid.random();
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        log.info("ContextUtils Initializing ...");
     }
 }
