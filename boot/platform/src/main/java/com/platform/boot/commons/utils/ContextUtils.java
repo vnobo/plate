@@ -120,6 +120,6 @@ public final class ContextUtils implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        log.info("Initializing ContextUtils...");
+        log.info("Initializing utils [ContextUtils]...");
     }
 }
