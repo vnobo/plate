@@ -129,6 +129,6 @@ public final class BeanUtils implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        log.info("Initializing BeanUtils...");
+        log.info("Initializing utils [BeanUtils] ...");
     }
 }
