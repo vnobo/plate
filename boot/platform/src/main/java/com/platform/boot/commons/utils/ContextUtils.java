@@ -31,6 +31,7 @@ import java.util.Objects;
 @Log4j2
 @Component
 public final class ContextUtils implements InitializingBean {
+
     private final static String[] IP_HEADER_CANDIDATES = {
             "X-Forwarded-For",
             "X-Real-IP",
@@ -119,6 +120,6 @@ public final class ContextUtils implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        log.info("ContextUtils Initializing ...");
+        log.info("Initializing ContextUtils...");
     }
 }

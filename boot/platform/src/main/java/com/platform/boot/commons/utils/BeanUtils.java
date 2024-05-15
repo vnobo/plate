@@ -26,6 +26,7 @@ import java.util.Objects;
 @Log4j2
 @Component
 public final class BeanUtils implements InitializingBean {
+
     private final static ByteArrayOutputStream BYTE_ARRAY_OUTPUT_STREAM;
     private final static ObjectOutputStream OBJECT_OUTPUT_STREAM;
 
@@ -40,28 +41,16 @@ public final class BeanUtils implements InitializingBean {
 
     public static DataSize MAX_IN_MEMORY_SIZE;
 
-    /**
-     * 将对象缓存到指定的缓存中
-     *
-     * @param cacheKey 缓存的key
-     * @param obj      缓存的对象
-     */
-    public static void cachePut(String cacheKey, Object obj, Cache cache) {
-        // 如果对象为空，则直接返回
+    public static void cachePut(Cache cache, String cacheKey, Object obj) {
         if (ObjectUtils.isEmpty(obj)) {
             return;
         }
-
-        // 获取对象的大小
         DataSize objectSize = getBeanSize(obj);
-
-        // 如果对象的大小超过了最大内存大小，则输出警告信息
         if (objectSize.toBytes() > MAX_IN_MEMORY_SIZE.toBytes()) {
             log.warn("Object size is too large, Max memory size is {}, Object size is {}.",
                     MAX_IN_MEMORY_SIZE, objectSize);
+            return;
         }
-
-        // 将对象缓存到指定的缓存中
         cache.put(cacheKey, obj);
     }
 
@@ -72,7 +61,8 @@ public final class BeanUtils implements InitializingBean {
 
     public static DataSize getBeanSize(Object obj) {
         if (ObjectUtils.isEmpty(obj)) {
-            throw RestServerException.withMsg("Object is empty!", "This object not null.");
+            log.warn("Object is empty,This object not null.");
+            return DataSize.ofBytes(0);
         }
         try {
             BYTE_ARRAY_OUTPUT_STREAM.reset();
@@ -80,7 +70,8 @@ public final class BeanUtils implements InitializingBean {
             OBJECT_OUTPUT_STREAM.flush();
             return DataSize.ofBytes(BYTE_ARRAY_OUTPUT_STREAM.size());
         } catch (IOException e) {
-            throw RestServerException.withMsg("Bean Size IO exception!", e);
+            log.error("Bean Size IO exception! msg: {}", e.getLocalizedMessage());
+            return DataSize.ofBytes(0);
         }
     }
 
@@ -103,8 +94,7 @@ public final class BeanUtils implements InitializingBean {
         Map<String, Object> targetMap = BeanUtils.beanToMap(source);
         String[] nullKeys = new String[0];
         if (ignoreNullValue) {
-            nullKeys = Maps.filterEntries(targetMap, entry -> ObjectUtils.isEmpty(entry.getValue()))
-                    .keySet().toArray(String[]::new);
+            nullKeys = Maps.filterEntries(targetMap, entry -> ObjectUtils.isEmpty(entry.getValue())).keySet().toArray(String[]::new);
         }
         if (nullKeys.length > 0) {
             org.springframework.beans.BeanUtils.copyProperties(source, target, nullKeys);
@@ -121,17 +111,7 @@ public final class BeanUtils implements InitializingBean {
         return BeanUtils.beanToMap(bean, false, ignoreNullValue);
     }
 
-    /**
-     * 将对象转换为Map对象
-     *
-     * @param bean              要转换的对象
-     * @param isToUnderlineCase 是否转换为下划线命名方式
-     * @param ignoreNullValue   是否忽略空值
-     * @return 转换后的Map对象
-     */
-    public static <T> Map<String, Object> beanToMap(T bean,
-                                                    final boolean isToUnderlineCase,
-                                                    final boolean ignoreNullValue) {
+    public static <T> Map<String, Object> beanToMap(T bean, final boolean isToUnderlineCase, final boolean ignoreNullValue) {
         if (ObjectUtils.isEmpty(bean)) {
             return null;
         }
@@ -149,6 +129,6 @@ public final class BeanUtils implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        log.info("BeanUtils Initializing ...");
+        log.info("Initializing BeanUtils...");
     }
 }

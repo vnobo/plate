@@ -1,8 +1,7 @@
 package com.platform.boot.commons.base;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -14,12 +13,13 @@ import java.util.Optional;
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
+@Log4j2
 public abstract class AbstractService implements InitializingBean {
 
-    private final static Log log = LogFactory.getLog(AbstractService.class);
-
     protected Cache cache;
+
     protected CacheManager cacheManager;
+
     protected ObjectMapper objectMapper;
 
     @Autowired
