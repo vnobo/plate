@@ -117,7 +117,6 @@ create table if not exists se_tenants
     created_time timestamp default current_timestamp,
     updated_time timestamp default current_timestamp
 );
-create index se_tenants_name_idx on se_tenants (name);
 create index se_tenants_extend_gin_idx on se_tenants using gin (extend);
 comment on table se_tenants is '租户表';
 
