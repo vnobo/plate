@@ -16,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.session.CookieWebSessionIdResolver;
+import org.springframework.web.server.session.HeaderWebSessionIdResolver;
 import org.springframework.web.server.session.WebSessionIdResolver;
 
 import java.util.List;
@@ -27,18 +28,25 @@ import java.util.regex.Pattern;
  */
 @Configuration(proxyBeanMethods = false)
 public class SessionConfiguration {
+
+    public final static String HEADER_SESSION_ID_NAME = "X-Auth-Token";
+    public static final String HEADER_REQUESTED_WITH_NAME = "X-Requested-With";
+
     @Bean
     @Primary
     public ReactiveOAuth2AuthorizedClientService oAuth2ClientService(DatabaseClient databaseClient,
                                                                      ReactiveClientRegistrationRepository clientRepository) {
         return new R2dbcReactiveOAuth2AuthorizedClientService(databaseClient, clientRepository);
     }
+
     @Bean
     public WebSessionIdResolver webSessionIdResolver() {
-        return new CustomBearerWebSessionIdResolver();
+        HeaderWebSessionIdResolver resolver = new CustomWebSessionIdResolver();
+        resolver.setHeaderName(HEADER_SESSION_ID_NAME);
+        return resolver;
     }
 
-    static class CustomBearerWebSessionIdResolver implements WebSessionIdResolver {
+    static class CustomWebSessionIdResolver extends HeaderWebSessionIdResolver {
         private static final Pattern AUTHORIZATION_PATTERN = Pattern.compile("^Bearer (?<token>[a-zA-Z0-9-._~+/]+=*)$",
                 Pattern.CASE_INSENSITIVE);
 
@@ -46,17 +54,24 @@ public class SessionConfiguration {
 
         @Override
         public void setSessionId(@NonNull ServerWebExchange exchange, @NonNull String id) {
-            cookieWebSessionIdResolver.setSessionId(exchange, id);
+            if (exchange.getRequest().getHeaders().containsKey(HEADER_REQUESTED_WITH_NAME)) {
+                super.setSessionId(exchange, id);
+            } else {
+                cookieWebSessionIdResolver.setSessionId(exchange, id);
+            }
         }
 
         @NonNull
         @Override
         public List<String> resolveSessionIds(@NonNull ServerWebExchange exchange) {
-            List<String> requestedWith = List.of();
-            if ("XMLHttpRequest".equalsIgnoreCase(exchange.getRequest().getHeaders().getFirst("X-Requested-With"))) {
+            List<String> requestedWith;
+            HttpHeaders httpHeaders = exchange.getRequest().getHeaders();
+            if ("XMLHttpRequest".equalsIgnoreCase(httpHeaders.getFirst(HEADER_REQUESTED_WITH_NAME))) {
                 String token = token(exchange.getRequest());
                 if (StringUtils.hasLength(token)) {
                     requestedWith = List.of(token);
+                } else {
+                    requestedWith = super.resolveSessionIds(exchange);
                 }
             } else {
                 requestedWith = cookieWebSessionIdResolver.resolveSessionIds(exchange);
