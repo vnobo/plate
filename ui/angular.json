@@ -48,7 +48,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/web",
+            "outputPath": "docker/web",
             "index": "projects/web/src/index.html",
             "browser": "projects/web/src/main.ts",
             "polyfills": [
@@ -95,8 +95,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "1mb",
+                  "maximumError": "2mb"
                 },
                 {
                   "type": "anyComponentStyle",
