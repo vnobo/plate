@@ -33,14 +33,14 @@ public class TenantsService extends AbstractDatabase {
     }
 
     public Mono<Page<Tenant>> page(TenantRequest request, Pageable pageable) {
-        var tenantsMono = this.search(request, pageable).collectList();
+        var searchMono = this.search(request, pageable).collectList();
 
         var cacheKey = BeanUtils.cacheKey(request);
         ParamSql paramSql = request.bindParamSql();
         String query = "select count(*) from se_tenants" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
         var countMono = this.countWithCache(cacheKey, query, paramSql.params());
 
-        return Mono.zip(tenantsMono, countMono)
+        return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 

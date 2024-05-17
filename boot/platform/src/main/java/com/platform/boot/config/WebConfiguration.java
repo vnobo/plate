@@ -1,6 +1,7 @@
 package com.platform.boot.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -19,7 +20,8 @@ public class WebConfiguration implements WebFluxConfigurer {
     public void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
         ReactivePageableHandlerMethodArgumentResolver pageableResolver =
                 new ReactivePageableHandlerMethodArgumentResolver();
-        pageableResolver.setMaxPageSize(25);
+        pageableResolver.setMaxPageSize(100);
+        pageableResolver.setFallbackPageable(Pageable.ofSize(50));
         configurer.addCustomResolver(pageableResolver);
     }
 

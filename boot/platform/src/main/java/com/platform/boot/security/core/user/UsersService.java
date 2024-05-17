@@ -42,7 +42,7 @@ public class UsersService extends AbstractDatabase {
         String query = "select count(*) from se_users" + paramSql.whereSql();
         var countMono = super.countWithCache(cacheKey, query, paramSql.params());
 
-        return Mono.zip(searchMono, countMono)
+        return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 

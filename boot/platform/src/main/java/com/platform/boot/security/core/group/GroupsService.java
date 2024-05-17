@@ -38,7 +38,7 @@ public class GroupsService extends AbstractDatabase {
         String query = "select count(*) from se_groups" + paramSql.whereSql();
         var countMono = this.countWithCache(cacheKey, query, paramSql.params());
 
-        return Mono.zip(searchMono, countMono)
+        return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
