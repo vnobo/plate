@@ -286,7 +286,7 @@ public class LoggerFilter implements WebFilter {
 
     private JsonNode readResponseBody(ServerWebExchange exchange) {
         DataBuffer dataBuffer = exchange.getRequiredAttribute(CACHED_RESPONSE_BODY_ATTR);
-        if (dataBuffer.readableByteCount() == 0) {
+        if (dataBuffer.capacity() < 2) {
             return ContextUtils.OBJECT_MAPPER.createObjectNode();
         }
         try (var byteBufferIterator = dataBuffer.readableByteBuffers()) {

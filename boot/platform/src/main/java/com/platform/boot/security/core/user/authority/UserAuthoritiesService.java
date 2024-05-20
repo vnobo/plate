@@ -4,6 +4,7 @@ import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -20,7 +21,7 @@ public class UserAuthoritiesService extends AbstractDatabase {
 
     public Flux<UserAuthority> search(UserAuthorityRequest request) {
         var cacheKey = BeanUtils.cacheKey(request);
-        Query query = Query.query(request.toCriteria());
+        Query query = Query.query(request.toCriteria()).sort(Sort.by("id").descending());
         return super.queryWithCache(cacheKey, query, UserAuthority.class)
                 .flatMap(ContextUtils::serializeUserAuditor);
     }

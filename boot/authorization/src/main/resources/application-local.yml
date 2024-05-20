@@ -14,9 +14,9 @@ spring:
     platform: postgres
     encoding: utf-8
   datasource:
-    url: jdbc:postgresql://192.168.1.2:5432/plate?fetchSize=2000
+    url: jdbc:postgresql://127.0.0.1:5432/plate?fetchSize=2000
     username: farmer
     password: q1w2e3..
   data.redis:
-    host: 192.168.1.2
+    host: 127.0.0.1
     repositories.enabled: false
