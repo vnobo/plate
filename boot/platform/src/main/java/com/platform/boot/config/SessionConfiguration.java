@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 public class SessionConfiguration {
 
     public final static String HEADER_SESSION_ID_NAME = "X-Auth-Token";
-    public static final String HEADER_REQUESTED_WITH_NAME = "X-Requested-With";
+    public final static String HEADER_REQUESTED_WITH_NAME = "X-Requested-With";
 
     @Bean
     @Primary

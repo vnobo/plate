@@ -1,10 +1,12 @@
 package com.platform.boot.security.oauth2;
 
+import com.platform.boot.commons.exception.RestServerException;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.security.core.AuthenticationToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.server.WebFilterExchange;
@@ -14,32 +16,57 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 /**
  * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
  */
 @Component
 public class Oauth2SuccessHandler extends RedirectServerAuthenticationSuccessHandler {
 
+
+    private static final String X_REQUESTED_WITH = "X-Requested-With";
+    private static final String XML_HTTP_REQUEST = "XMLHttpRequest";
+    private static final MediaType APPLICATION_JSON_TYPE = MediaType.APPLICATION_JSON;
+
     @Override
     public Mono<Void> onAuthenticationSuccess(WebFilterExchange webFilterExchange, Authentication authentication) {
+        if (!(authentication instanceof OAuth2AuthenticationToken)) {
+            // 如果不是预期的认证类型，可以选择记录日志或返回错误响应
+            throw RestServerException.withMsg("Authentication token must be an instance of OAuth2AuthenticationToken",
+                    List.of());
+        }
+
         ServerWebExchange exchange = webFilterExchange.getExchange();
         ServerHttpRequest request = exchange.getRequest();
-        String xRequestedWith = "X-Requested-With";
-        String requestedWith = request.getHeaders().getFirst(xRequestedWith);
-        OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
-        String xmlHttpRequest = "XMLHttpRequest";
-        if (requestedWith != null && requestedWith.contains(xmlHttpRequest)) {
-            var response = exchange.getResponse();
-            response.setStatusCode(HttpStatus.OK);
-            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-            return exchange.getSession().flatMap(session -> {
-                AuthenticationToken authenticationToken = AuthenticationToken.build(session, token);
-                var body = ContextUtils.objectToBytes(authenticationToken);
-                var dataBufferFactory = response.bufferFactory();
-                var bodyBuffer = dataBufferFactory.wrap(body);
-                return response.writeAndFlushWith(Flux.just(bodyBuffer).windowUntilChanged());
-            });
+        String requestedWith = request.getHeaders().getFirst(X_REQUESTED_WITH);
+
+        if (isXmlHttpRequest(requestedWith)) {
+            return handleXmlHttpRequest(exchange, (OAuth2AuthenticationToken) authentication);
         }
         return super.onAuthenticationSuccess(webFilterExchange, authentication);
+    }
+
+    private boolean isXmlHttpRequest(String requestedWith) {
+        return requestedWith != null && requestedWith.contains(XML_HTTP_REQUEST);
+    }
+
+    private Mono<Void> handleXmlHttpRequest(ServerWebExchange exchange, OAuth2AuthenticationToken token) {
+        ServerHttpResponse response = exchange.getResponse();
+        response.setStatusCode(HttpStatus.OK);
+        response.getHeaders().setContentType(APPLICATION_JSON_TYPE);
+
+        return exchange.getSession()
+                .flatMap(session -> {
+                    AuthenticationToken authenticationToken = AuthenticationToken.build(session, token);
+                    return writeAuthenticationToken(response, authenticationToken);
+                });
+    }
+
+    private Mono<Void> writeAuthenticationToken(ServerHttpResponse response, AuthenticationToken authenticationToken) {
+        var body = ContextUtils.objectToBytes(authenticationToken);
+        var dataBufferFactory = response.bufferFactory();
+        var bodyBuffer = dataBufferFactory.wrap(body);
+        return response.writeAndFlushWith(Flux.just(bodyBuffer).windowUntilChanged());
     }
 }

@@ -10,13 +10,10 @@ import com.platform.boot.security.SecurityDetails;
 import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
 import io.netty.util.internal.EmptyArrays;
-import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.log4j.Log4j2;
 import org.reactivestreams.Publisher;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.io.buffer.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -25,7 +22,6 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.server.HandlerStrategies;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.ServerWebExchange;
@@ -45,51 +41,25 @@ import static com.platform.boot.commons.utils.ContextUtils.getClientIpAddress;
 import static org.springframework.security.web.server.csrf.CsrfWebFilter.DEFAULT_CSRF_MATCHER;
 
 /**
- * This code is a web filter that logs requests and responses. It checks if the content type is JSON,
- * and if it is, it caches the request body, logs the request, and then continues the filter chain.
- * It has a getOrder() method which returns the lowest precedence of the filter.
- * It also has a requireCsrfProtectionMatcher which is used to check if the request needs protection from CSRF attacks.
- * Step by step explanation:
- * 1. The code starts off by declaring the package and importing necessary classes.
- * 2. It then declares the class LoggerFilter which implements WebFilter and Ordered.
- * 3. It declares a ServerWebExchangeMatcher called requireCsrfProtectionMatcher which is used to check if the request needs protection from CSRF attacks.
- * 4. It also declares a LoggersService object which is used to log the request.
- * 5. The getOrder() method is then declared which returns the lowest precedence of the filter.
- * 6. The filter() method is then declared which checks if the content type is JSON, and if it is,
- * it caches the request body, logs the request, and then continues the filter chain.
- * 7. The continueFilterChain() method is then declared which continues the filter chain.
- * 8. The cacheFilterChain() method is then declared which caches the request body.
- * 9. The logRequest() method is then declared which logs the request.
- * 10. The readRequestBody() method is then declared which reads the request body.
- * 11. The validContentTypeIsJson() method is then declared which checks if the content type is JSON.
- *
  * @author Alex bob(<a href="https://github.com/vnobo">https://github.com/vnobo</a>)
  */
+@Log4j2
 @Component
 @RequiredArgsConstructor
-@Order(Ordered.LOWEST_PRECEDENCE - 1024)
 public class LoggerFilter implements WebFilter {
-    private static final Log log = LogFactory.getLog(LoggerFilter.class);
 
     public static final String CACHED_REQUEST_BODY_ATTR = "cachedRequestBody";
     public static final String CACHED_RESPONSE_BODY_ATTR = "cachedResponseBody";
     public static final String CACHED_SERVER_HTTP_REQUEST_DECORATOR_ATTR = "cachedServerHttpRequestDecorator";
     public static final String CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR = "cachedServerHttpResponseDecorator";
 
-    /**
-     * Matcher used to check if CSRF protection is required
-     */
     private final ServerWebExchangeMatcher requireCsrfProtectionMatcher = DEFAULT_CSRF_MATCHER;
-    /**
-     * Service used to log requests
-     */
     private final LoggersService loggerService;
 
     public static <T> Mono<T> cacheRequestBody(ServerWebExchange exchange,
                                                Function<ServerHttpRequest, Mono<T>> function) {
         ServerHttpResponse response = exchange.getResponse();
         DataBufferFactory factory = response.bufferFactory();
-        // Join all the DataBuffers so we have a single DataBuffer for the body
         return DataBufferUtils.join(exchange.getRequest().getBody())
                 .defaultIfEmpty(factory.wrap(EmptyArrays.EMPTY_BYTES))
                 .flatMap(dataBuffer -> Mono.just(requestDecorate(exchange, dataBuffer)))
@@ -100,13 +70,12 @@ public class LoggerFilter implements WebFilter {
         var response = exchange.getResponse();
         var factory = response.bufferFactory();
         var dataBuffer = factory.wrap("{\"message\":\"No response body available!\"}".getBytes());
-        // Don't cache if body is already cached
         exchange.getAttributes().put(CACHED_RESPONSE_BODY_ATTR, dataBuffer);
         exchange.getAttributes().put("cachedOriginalResponseBodyBackup", dataBuffer);
 
         ServerHttpResponseDecorator decorator = new ServerHttpResponseDecorator(exchange.getResponse()) {
             @Override
-            public @NotNull Mono<Void> writeWith(@NotNull Publisher<? extends DataBuffer> body) {
+            public @NonNull Mono<Void> writeWith(@NonNull Publisher<? extends DataBuffer> body) {
                 var cachedDataBuffer = DataBufferUtils.join(body).doOnNext(dataBuffer -> {
                             Object previousCachedBody = exchange.getAttributes().put(CACHED_RESPONSE_BODY_ATTR, dataBuffer);
                             if (previousCachedBody != null) {
@@ -121,15 +90,8 @@ public class LoggerFilter implements WebFilter {
         return decorator;
     }
 
-    /**
-     * Decorates the given {@code ServerHttpRequest} with cached request body data buffer.
-     *
-     * @param exchange   the server web exchange
-     * @param dataBuffer the data buffer to cache
-     * @return the decorated server http request
-     */
     private static ServerHttpRequest requestDecorate(ServerWebExchange exchange, DataBuffer dataBuffer) {
-        if (dataBuffer.readableByteCount() > 0) {
+        if (dataBuffer.capacity() > 0) {
             if (log.isTraceEnabled()) {
                 log.trace("Retaining body in exchange attribute");
             }
@@ -142,10 +104,9 @@ public class LoggerFilter implements WebFilter {
         }
         var decorator = new ServerHttpRequestDecorator(exchange.getRequest()) {
             @Override
-            public @NotNull Flux<DataBuffer> getBody() {
+            public @NonNull Flux<DataBuffer> getBody() {
                 return Mono.fromSupplier(() -> {
                     if (exchange.getAttribute(CACHED_REQUEST_BODY_ATTR) == null) {
-                        // Probably downstream closed or no body
                         return null;
                     }
                     return buildDataBuffer(dataBuffer);
@@ -177,18 +138,6 @@ public class LoggerFilter implements WebFilter {
         }
     }
 
-    /**
-     * This method builds a DataBuffer from the given input.
-     * It checks the type of the input DataBuffer and constructs
-     * a new DataBuffer based on the type of the input.
-     * If the input DataBuffer is a NettyDataBuffer,
-     * a new NettyDataBuffer is wrapped around the retained slice
-     * of the given input NettyDataBuffer.
-     * If the given DataBuffer is a DefaultDataBuffer,
-     * a new DataBuffer generated from Unpivot
-     * led.wrappedBuffer
-     * is returned.
-     */
     private static DataBuffer buildDataBuffer(DataBuffer dataBuffer) {
         if (dataBuffer instanceof NettyDataBuffer pdb) {
             return pdb.factory().wrap(pdb.getNativeBuffer().retainedSlice());
@@ -205,7 +154,7 @@ public class LoggerFilter implements WebFilter {
     }
 
     @Override
-    public @NotNull Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+    public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         var nextMono = cacheFilterChain(exchange, chain).then(Mono.defer(ContextUtils::securityDetails)
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(userDetails -> logRequest(exchange, userDetails)).then());
@@ -218,42 +167,55 @@ public class LoggerFilter implements WebFilter {
         return continueFilterChain(exchange, chain).then(Mono.empty());
     }
 
-    /**
-     * Cache the filter chain with the given exchange and chain.
-     *
-     * @param exchange The exchange
-     * @param chain    The chain
-     * @return A {@link Mono} of void
-     */
     private Mono<Void> cacheFilterChain(ServerWebExchange exchange, WebFilterChain chain) {
-        return cacheRequestBody(exchange, serverHttpRequest -> {
-            ServerHttpResponse cachedResponse = responseDecorate(exchange);
-            ServerRequest serverRequest = ServerRequest.create(exchange.mutate()
-                            .request(serverHttpRequest).response(cachedResponse).build(),
-                    HandlerStrategies.withDefaults().messageReaders());
-            return serverRequest.bodyToMono(String.class).doOnNext((objectValue) -> {
-                Object previousCachedBody = exchange.getAttributes().put(CACHED_REQUEST_BODY_ATTR, objectValue);
-                log.debug("%sCache request body: %s".formatted(exchange.getLogPrefix(), previousCachedBody));
-            });
-        }).then(Mono.defer(() -> {
-            ServerHttpRequest cachedRequest = exchange.getAttribute(CACHED_SERVER_HTTP_REQUEST_DECORATOR_ATTR);
-            ServerHttpResponse cachedResponse = exchange.getAttribute(CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR);
-            Assert.notNull(cachedRequest, "cache request shouldn't be null");
-            Assert.notNull(cachedResponse, "cache Response shouldn't be null");
-            exchange.getAttributes().remove(CACHED_SERVER_HTTP_REQUEST_DECORATOR_ATTR);
-            exchange.getAttributes().remove(CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR);
-            return chain.filter(exchange.mutate().request(cachedRequest).response(cachedResponse).build())
-                    .doFinally((s) -> {
-                        Object backupCachedBody = exchange.getAttributes().get("cachedOriginalRequestBodyBackup");
-                        Object backupCachedBody1 = exchange.getAttributes().get("cachedOriginalResponseBodyBackup");
-                        if (backupCachedBody instanceof DataBuffer dataBuffer) {
-                            DataBufferUtils.release(dataBuffer);
-                        }
-                        if (backupCachedBody1 instanceof DataBuffer dataBuffer) {
-                            DataBufferUtils.release(dataBuffer);
-                        }
-                    });
-        }));
+        return cacheRequestBody(exchange, serverHttpRequest -> processRequestBody(exchange, serverHttpRequest))
+                .then(Mono.defer(() -> processFilter(exchange, chain)));
+    }
+
+    private Mono<String> processRequestBody(ServerWebExchange exchange, ServerHttpRequest serverHttpRequest) {
+        ServerHttpResponse cachedResponse = responseDecorate(exchange);
+        ServerRequest serverRequest = ServerRequest.create(exchange.mutate()
+                        .request(serverHttpRequest).response(cachedResponse).build(),
+                HandlerStrategies.withDefaults().messageReaders());
+        return serverRequest.bodyToMono(String.class).doOnNext((objectValue) -> {
+            Object previousCachedBody = exchange.getAttributes().put(CACHED_REQUEST_BODY_ATTR, objectValue);
+            log.debug("%sCache request body: %s".formatted(exchange.getLogPrefix(), previousCachedBody));
+        });
+    }
+
+    private Mono<Void> processFilter(ServerWebExchange exchange, WebFilterChain chain) {
+        ServerHttpRequest cachedRequest = exchange.getAttribute(CACHED_SERVER_HTTP_REQUEST_DECORATOR_ATTR);
+        ServerHttpResponse cachedResponse = exchange.getAttribute(CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR);
+
+        if (cachedRequest == null || cachedResponse == null) {
+            // Log error or handle null case gracefully instead of throwing an exception
+            log.error("Cached request or response is null. Abort processing.");
+            return Mono.empty();
+        }
+
+        exchange.getAttributes().remove(CACHED_SERVER_HTTP_REQUEST_DECORATOR_ATTR);
+        exchange.getAttributes().remove(CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR);
+
+        return chain.filter(exchange.mutate().request(cachedRequest).response(cachedResponse).build())
+                .doFinally(s -> releaseResources(exchange));
+    }
+
+    private void releaseResources(ServerWebExchange exchange) {
+        Object backupCachedBody = exchange.getAttributes().get("cachedOriginalRequestBodyBackup");
+        Object backupCachedBody1 = exchange.getAttributes().get("cachedOriginalResponseBodyBackup");
+
+        releaseDataBuffer(backupCachedBody);
+        releaseDataBuffer(backupCachedBody1);
+    }
+
+    private void releaseDataBuffer(Object dataBufferObject) {
+        if (dataBufferObject instanceof DataBuffer dataBuffer) {
+            try {
+                DataBufferUtils.release(dataBuffer);
+            } catch (Exception e) {
+                log.error("Failed to release DataBuffer resource.", e);
+            }
+        }
     }
 
     private void logRequest(ServerWebExchange exchange, SecurityDetails userDetails) {

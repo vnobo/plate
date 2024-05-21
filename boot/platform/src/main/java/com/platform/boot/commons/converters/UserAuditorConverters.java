@@ -25,12 +25,6 @@ public class UserAuditorConverters implements InitializingBean {
     @Component
     @WritingConverter
     public static class UserAuditorWriteConverter implements Converter<UserAuditor, String> {
-        /**
-         * Converts a UserAuditor object to a string.
-         *
-         * @param source the UserAuditor object to convert
-         * @return the username of the UserAuditor object
-         */
         @Override
         public String convert(@NonNull UserAuditor source) {
             return source.code();
@@ -40,13 +34,6 @@ public class UserAuditorConverters implements InitializingBean {
     @Component
     @ReadingConverter
     public static class UserAuditorReadConverter implements Converter<String, UserAuditor> {
-
-        /**
-         * Converts a string to a UserAuditor object.
-         *
-         * @param source the string to convert
-         * @return a UserAuditor object with the given username
-         */
         @Override
         public UserAuditor convert(@NonNull String source) {
             return UserAuditor.withCode(source);

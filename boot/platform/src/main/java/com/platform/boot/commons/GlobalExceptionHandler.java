@@ -3,8 +3,7 @@ package com.platform.boot.commons;
 import com.google.common.collect.Lists;
 import com.platform.boot.commons.exception.RestServerException;
 import io.r2dbc.spi.R2dbcException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,14 +21,12 @@ import java.util.List;
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
+@Log4j2
 @ControllerAdvice
 public class GlobalExceptionHandler {
-
-    private static final Log log = LogFactory.getLog(GlobalExceptionHandler.class);
-
     @ExceptionHandler(ServerWebInputException.class)
     public ResponseEntity<ErrorResponse> handleBindException(ServerWebExchange exchange, ServerWebInputException ex) {
-        List<String> errors = Lists.newArrayList();
+        List<String> errors = Lists.newArrayList(ex.getReason());
         if (ex instanceof WebExchangeBindException bindException) {
             for (ObjectError objectError : bindException.getBindingResult().getAllErrors()) {
                 errors.add("Error field: %s, msg: %s.".formatted(objectError.getObjectName(),
@@ -49,11 +46,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({DataAccessException.class, R2dbcException.class})
     public ResponseEntity<ErrorResponse> handleFailureException(ServerWebExchange exchange, RuntimeException ex) {
-        List<String> errors = Lists.newArrayList();
+        List<String> errors = Lists.newArrayList("Database exec exception!");
         if (ex instanceof R2dbcException r2dbcException) {
-            errors.add(r2dbcException.getMessage());
             errors.add(r2dbcException.getSql());
             errors.add(r2dbcException.getSqlState());
+            errors.add(r2dbcException.getMessage());
         } else if (ex instanceof BadSqlGrammarException grammarException) {
             errors.add(grammarException.getMessage());
             errors.add(grammarException.getSql());

@@ -30,13 +30,6 @@ public class JsonNodeConverters implements InitializingBean {
     @Component
     @WritingConverter
     public static class JsonToNodeWriteConverter implements Converter<JsonNode, Json> {
-
-        /**
-         * Convert JsonNode to Json
-         *
-         * @param source JsonNode
-         * @return Json
-         */
         @Override
         public Json convert(@NonNull JsonNode source) {
             return Json.of(source.toString());
@@ -46,13 +39,6 @@ public class JsonNodeConverters implements InitializingBean {
     @Component
     @ReadingConverter
     public static class JsonToNodeReadConverter implements Converter<Json, JsonNode> {
-
-        /**
-         * Convert Json to JsonNode
-         *
-         * @param source Json
-         * @return JsonNode
-         */
         @Override
         public JsonNode convert(@NonNull Json source) {
             try {

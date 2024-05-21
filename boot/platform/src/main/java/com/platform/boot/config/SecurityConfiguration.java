@@ -3,8 +3,7 @@ package com.platform.boot.config;
 import com.platform.boot.commons.ErrorResponse;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.security.oauth2.Oauth2SuccessHandler;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.autoconfigure.security.reactive.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -113,31 +112,45 @@ public class SecurityConfiguration {
         }
     }
 
+    @Log4j2
     static class CustomServerAuthenticationEntryPoint extends HttpBasicServerAuthenticationEntryPoint {
-        private static final Log log = LogFactory.getLog(CustomServerAuthenticationEntryPoint.class);
+
+        private static final String X_REQUESTED_WITH = "X-Requested-With";
+        private static final String XML_HTTP_REQUEST = "XMLHttpRequest";
 
         @Override
         public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException e) {
-            String xRequestedWith = "X-Requested-With";
-            String xmlHttpRequest = "XMLHttpRequest";
             ServerHttpRequest request = exchange.getRequest();
-            String requestedWith = request.getHeaders().getFirst(xRequestedWith);
+            String requestedWith = request.getHeaders().getFirst(X_REQUESTED_WITH);
 
-            log.error("认证失败! 信息: %s".formatted(e.getMessage()));
-
-            if (requestedWith != null && requestedWith.contains(xmlHttpRequest)) {
-                var response = exchange.getResponse();
-                response.setStatusCode(HttpStatus.UNAUTHORIZED);
-                response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-                ErrorResponse errorResponse = ErrorResponse.of(request.getId(), request.getPath().value(),
-                        4010, "认证失败,检查你的用户名,密码是否正确或安全密钥是否过期!", List.of(e.getMessage()));
-                var body = ContextUtils.objectToBytes(errorResponse);
-                var dataBufferFactory = response.bufferFactory();
-                var bodyBuffer = dataBufferFactory.wrap(body);
-                return response.writeAndFlushWith(Flux.just(bodyBuffer).windowUntilChanged())
-                        .doOnError((error) -> DataBufferUtils.release(bodyBuffer));
+            log.error("认证失败! 信息: {}", e.getMessage());
+            if (isXmlHttpRequest(requestedWith)) {
+                return handleXmlHttpRequestFailure(exchange, e);
             }
             return super.commence(exchange, e);
+        }
+
+        private boolean isXmlHttpRequest(String requestedWith) {
+            return requestedWith != null && requestedWith.contains(XML_HTTP_REQUEST);
+        }
+
+        private Mono<Void> handleXmlHttpRequestFailure(ServerWebExchange exchange, AuthenticationException e) {
+            var response = exchange.getResponse();
+            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+            ErrorResponse errorResponse = createErrorResponse(exchange, e);
+            var body = ContextUtils.objectToBytes(errorResponse);
+            var dataBufferFactory = response.bufferFactory();
+            var bodyBuffer = dataBufferFactory.wrap(body);
+
+            return response.writeAndFlushWith(Flux.just(bodyBuffer).windowUntilChanged())
+                    .doOnError((error) -> DataBufferUtils.release(bodyBuffer));
+        }
+
+        private ErrorResponse createErrorResponse(ServerWebExchange exchange, AuthenticationException e) {
+            return ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
+                    401, "认证失败,检查你的用户名,密码是否正确或安全密钥是否过期!", List.of(e.getMessage()));
         }
 
     }
