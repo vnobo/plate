@@ -41,10 +41,12 @@ public final class BeanUtils implements InitializingBean {
 
     public static DataSize MAX_IN_MEMORY_SIZE;
 
+    public static String cacheKey(Object... objects) {
+        int hashCode = Objects.hash(objects);
+        return String.valueOf(hashCode);
+    }
+
     public static void cachePut(Cache cache, String cacheKey, Object obj) {
-        if (ObjectUtils.isEmpty(obj)) {
-            return;
-        }
         DataSize objectSize = getBeanSize(obj);
         if (objectSize.toBytes() > MAX_IN_MEMORY_SIZE.toBytes()) {
             log.warn("Object size is too large, Max memory size is {}, Object size is {}.",
@@ -52,11 +54,6 @@ public final class BeanUtils implements InitializingBean {
             return;
         }
         cache.put(cacheKey, obj);
-    }
-
-    public static String cacheKey(Object... objects) {
-        int hashCode = Objects.hash(objects);
-        return String.valueOf(hashCode);
     }
 
     public static DataSize getBeanSize(Object obj) {
