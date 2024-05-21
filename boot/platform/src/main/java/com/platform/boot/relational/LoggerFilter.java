@@ -226,7 +226,7 @@ public class LoggerFilter implements WebFilter {
         LoggerRequest logger = LoggerRequest.of(tenantCode, userDetails.getUsername(), prefix,
                 method, status, path, contentNode);
         this.loggerService.operate(logger).share().subscribe(res ->
-                log.debug("{}**操作日志**: {},MessageBody: {}",
+                log.debug("{}**操作日志** Method: {},MessageBody: {}",
                         exchange.getLogPrefix(), exchange.getRequest().getMethod().name(), res));
     }
 
