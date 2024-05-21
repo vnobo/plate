@@ -37,6 +37,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.platform.boot.config.SessionConfiguration.XML_HTTP_REQUEST;
+import static com.platform.boot.config.SessionConfiguration.X_REQUESTED_WITH;
+
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
@@ -114,9 +117,6 @@ public class SecurityConfiguration {
 
     @Log4j2
     static class CustomServerAuthenticationEntryPoint extends HttpBasicServerAuthenticationEntryPoint {
-
-        private static final String X_REQUESTED_WITH = "X-Requested-With";
-        private static final String XML_HTTP_REQUEST = "XMLHttpRequest";
 
         @Override
         public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException e) {

@@ -97,12 +97,16 @@ public final class ContextUtils implements InitializingBean {
         try {
             UserAuditor userAuditor = (UserAuditor) propertyDescriptor.getReadMethod().invoke(object);
             if (ObjectUtils.isEmpty(userAuditor)) {
-                return Mono.just("User auditor is empty, No serializable." + propertyDescriptor.getName());
+                String msg = "User auditor is empty, No serializable." + propertyDescriptor.getName();
+                log.warn(msg);
+                return Mono.just(msg);
             }
-            return USERS_SERVICE.loadByCode(userAuditor.code()).flatMap(user -> {
+            return USERS_SERVICE.loadByCode(userAuditor.code()).cache().flatMap(user -> {
                 try {
                     propertyDescriptor.getWriteMethod().invoke(object, UserAuditor.withUser(user));
-                    return Mono.just("User auditor serializable success. " + propertyDescriptor.getName());
+                    String msg = "User auditor serializable success. " + propertyDescriptor.getName();
+                    log.debug(msg);
+                    return Mono.just(msg);
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     return Mono.error(RestServerException.withMsg(
                             "User auditor serialization getWriteMethod invoke error!", e));

@@ -18,15 +18,15 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+import static com.platform.boot.config.SessionConfiguration.XML_HTTP_REQUEST;
+import static com.platform.boot.config.SessionConfiguration.X_REQUESTED_WITH;
+
 /**
  * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
  */
 @Component
 public class Oauth2SuccessHandler extends RedirectServerAuthenticationSuccessHandler {
 
-
-    private static final String X_REQUESTED_WITH = "X-Requested-With";
-    private static final String XML_HTTP_REQUEST = "XMLHttpRequest";
     private static final MediaType APPLICATION_JSON_TYPE = MediaType.APPLICATION_JSON;
 
     @Override

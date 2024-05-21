@@ -29,8 +29,9 @@ import java.util.regex.Pattern;
 @Configuration(proxyBeanMethods = false)
 public class SessionConfiguration {
 
-    public final static String HEADER_SESSION_ID_NAME = "X-Auth-Token";
-    public final static String HEADER_REQUESTED_WITH_NAME = "X-Requested-With";
+    public static final String HEADER_SESSION_ID_NAME = "X-Auth-Token";
+    public static final String X_REQUESTED_WITH = "X-Requested-With";
+    public static final String XML_HTTP_REQUEST = "XMLHttpRequest";
 
     @Bean
     @Primary
@@ -54,7 +55,7 @@ public class SessionConfiguration {
 
         @Override
         public void setSessionId(@NonNull ServerWebExchange exchange, @NonNull String id) {
-            if (exchange.getRequest().getHeaders().containsKey(HEADER_REQUESTED_WITH_NAME)) {
+            if (exchange.getRequest().getHeaders().containsKey(X_REQUESTED_WITH)) {
                 super.setSessionId(exchange, id);
             } else {
                 cookieWebSessionIdResolver.setSessionId(exchange, id);
@@ -66,7 +67,7 @@ public class SessionConfiguration {
         public List<String> resolveSessionIds(@NonNull ServerWebExchange exchange) {
             List<String> requestedWith;
             HttpHeaders httpHeaders = exchange.getRequest().getHeaders();
-            if ("XMLHttpRequest".equalsIgnoreCase(httpHeaders.getFirst(HEADER_REQUESTED_WITH_NAME))) {
+            if (XML_HTTP_REQUEST.equalsIgnoreCase(httpHeaders.getFirst(X_REQUESTED_WITH))) {
                 String token = token(exchange.getRequest());
                 if (StringUtils.hasLength(token)) {
                     requestedWith = List.of(token);

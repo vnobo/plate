@@ -1,5 +1,6 @@
 package com.platform.boot.security.core.user;
 
+import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,19 +36,19 @@ public class UsersController {
     }
 
     @PostMapping("add")
-    public Mono<User> add(@Valid @RequestBody UserRequest request) {
+    public Mono<UserResponse> add(@Valid @RequestBody UserRequest request) {
         Assert.isNull(request.getId(), "When adding a new user, the ID must be null");
-        return this.usersService.add(request);
+        return this.usersService.add(request).map(user -> BeanUtils.copyProperties(user, UserResponse.class));
     }
 
     @PutMapping("modify")
-    public Mono<User> modify(@Validated(Update.class) @RequestBody UserRequest request) {
+    public Mono<UserResponse> modify(@Validated(Update.class) @RequestBody UserRequest request) {
         Assert.notNull(request.getId(), "When modifying an existing user, the ID must not be null");
-        return this.usersService.operate(request);
+        return this.usersService.modify(request).map(user -> BeanUtils.copyProperties(user, UserResponse.class));
     }
 
     @DeleteMapping("delete")
-    public Mono<Void> delete(@Valid @RequestBody UserRequest request) {
+    public Mono<Void> delete(@RequestBody UserRequest request) {
         Assert.notNull(request.getId(), "When deleting a user, the ID must not be null");
         return this.usersService.delete(request);
     }

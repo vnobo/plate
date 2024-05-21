@@ -61,6 +61,22 @@ public class UsersService extends AbstractDatabase {
         });
     }
 
+    public Mono<User> modify(UserRequest request) {
+        return this.usersRepository.findByCode(request.getCode())
+                .switchIfEmpty(Mono.defer(() -> Mono.error(RestServerException.withMsg(417,
+                        "User not found!", "User by code [" + request.getCode() + "] not found!"))))
+                .flatMap(user -> this.usersRepository.existsByUsernameIgnoreCase(request.getUsername())
+                        .flatMap(exists -> {
+                            if (exists) {
+                                return Mono.error(RestServerException.withMsg(417,
+                                        "Username already exists!",
+                                        "Username [" + request.getUsername() + "] already exists!"));
+                            }
+                            BeanUtils.copyProperties(request, user, true);
+                            return this.save(user);
+                        })).doAfterTerminate(() -> this.cache.clear());
+    }
+
     public Mono<User> operate(UserRequest request) {
         request.setPassword(this.upgradeEncodingIfPassword(request.getPassword()));
         var userMono = this.usersRepository.findByCode(request.getCode()).defaultIfEmpty(request.toUser());
@@ -75,6 +91,7 @@ public class UsersService extends AbstractDatabase {
         return this.usersRepository.delete(request.toUser())
                 .doAfterTerminate(() -> this.cache.clear());
     }
+
     public Mono<User> save(User user) {
         if (user.isNew()) {
             return this.usersRepository.save(user);
