@@ -10,12 +10,20 @@ import reactor.core.publisher.Mono;
  */
 public interface UsersRepository extends R2dbcRepository<User, Long> {
     /**
-     * get tenant by code
+     * find by user code
      *
-     * @param code tenant code
-     * @return tenant result
+     * @param code user code
+     * @return user response
      */
     Mono<User> findByCode(String code);
+
+    /**
+     * get tenant by username
+     *
+     * @param username username
+     * @return user entity
+     */
+    Mono<User> findByUsername(String username);
 
     /**
      * check exists by username
