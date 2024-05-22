@@ -10,8 +10,7 @@ import reactor.core.publisher.Mono;
  */
 public class UserAuditorAware implements ReactiveAuditorAware<UserAuditor> {
     @Override
-    @NonNull
-    public Mono<UserAuditor> getCurrentAuditor() {
+    public @NonNull Mono<UserAuditor> getCurrentAuditor() {
         return ContextUtils.securityDetails().map(UserAuditor::withDetails);
     }
 
