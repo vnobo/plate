@@ -58,6 +58,7 @@ public abstract class AbstractDatabase extends AbstractService {
     protected <T> Mono<Long> countWithCache(Object key, Query query, Class<T> entityClass) {
         Mono<Long> source = this.entityTemplate.count(query, entityClass);
         return countWithCache(key, source);
+
     }
 
     protected Mono<Long> countWithCache(Object key, String sql, Map<String, Object> bindParams) {
