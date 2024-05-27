@@ -81,13 +81,17 @@ public class MenusService extends AbstractDatabase {
 
     @Transactional(rollbackFor = Exception.class)
     public Mono<Void> delete(MenuRequest request) {
-        List<String> rules = new ArrayList<>(Collections.singletonList(request.getAuthority()));
-        if (!ObjectUtils.isEmpty(request.getPermissions())) {
-            rules.addAll(request.getPermissions().stream().map(Menu.Permission::getAuthority).toList());
+        if (ObjectUtils.nullSafeEquals(request.getTenantCode(), "0")) {
+            List<String> rules = new ArrayList<>(Collections.singletonList(request.getAuthority()));
+            if (!ObjectUtils.isEmpty(request.getPermissions())) {
+                rules.addAll(request.getPermissions().stream().map(Menu.Permission::getAuthority).toList());
+            }
+            var deleteAuthorityMono = Flux.concatDelayError(this.groupAuthoritiesRepository.deleteByAuthorityIn(rules),
+                    this.userAuthoritiesRepository.deleteByAuthorityIn(rules));
+            var deleteNextMono = Flux.concatDelayError(this.menusRepository.delete(request.toMenu()), deleteAuthorityMono);
+            return deleteNextMono.then().doAfterTerminate(() -> this.cache.clear());
+        } else {
+            return this.menusRepository.delete(request.toMenu()).doAfterTerminate(() -> this.cache.clear());
         }
-        var deleteAuthorityMono = Flux.concatDelayError(this.groupAuthoritiesRepository.deleteByAuthorityIn(rules),
-                this.userAuthoritiesRepository.deleteByAuthorityIn(rules));
-        var deleteNextMono = Flux.concatDelayError(this.menusRepository.delete(request.toMenu()), deleteAuthorityMono);
-        return deleteNextMono.then().doAfterTerminate(() -> this.cache.clear());
     }
 }
