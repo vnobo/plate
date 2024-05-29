@@ -32,6 +32,8 @@ public class SessionConfiguration {
     public static final String HEADER_SESSION_ID_NAME = "X-Auth-Token";
     public static final String X_REQUESTED_WITH = "X-Requested-With";
     public static final String XML_HTTP_REQUEST = "XMLHttpRequest";
+    public static final Pattern AUTHORIZATION_PATTERN = Pattern.compile(
+            "^Bearer (?<token>[a-zA-Z0-9-._~+/]+=*)$", Pattern.CASE_INSENSITIVE);
 
     @Bean
     @Primary
@@ -48,8 +50,6 @@ public class SessionConfiguration {
     }
 
     static class CustomWebSessionIdResolver extends HeaderWebSessionIdResolver {
-        private static final Pattern AUTHORIZATION_PATTERN = Pattern.compile("^Bearer (?<token>[a-zA-Z0-9-._~+/]+=*)$",
-                Pattern.CASE_INSENSITIVE);
 
         private final CookieWebSessionIdResolver cookieWebSessionIdResolver = new CookieWebSessionIdResolver();
 
@@ -62,9 +62,8 @@ public class SessionConfiguration {
             }
         }
 
-        @NonNull
         @Override
-        public List<String> resolveSessionIds(@NonNull ServerWebExchange exchange) {
+        public @NonNull List<String> resolveSessionIds(@NonNull ServerWebExchange exchange) {
             List<String> requestedWith;
             HttpHeaders httpHeaders = exchange.getRequest().getHeaders();
             if (XML_HTTP_REQUEST.equalsIgnoreCase(httpHeaders.getFirst(X_REQUESTED_WITH))) {
