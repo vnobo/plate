@@ -6,7 +6,7 @@ import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Mono;
 
 /**
- * @author Alex bob(<a href="https://github.com/vnobo">https://github.com/vnobo</a>)
+ * @author <a href="https://github.com/vnobo">AlexBob</a>
  */
 public interface UsersRepository extends R2dbcRepository<User, Long> {
     /**

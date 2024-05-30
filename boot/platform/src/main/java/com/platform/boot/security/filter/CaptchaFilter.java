@@ -44,8 +44,7 @@ public class CaptchaFilter implements WebFilter, Ordered {
     }
 
     @Override
-    @NonNull
-    public Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
+    public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         return REQUIRE_CAPTCHA_PROTECTION_MATCHER.matches(exchange)
                 .filter(ServerWebExchangeMatcher.MatchResult::isMatch)
                 .switchIfEmpty(Mono.defer(() -> continueFilterChain(exchange, chain).then(Mono.empty())))

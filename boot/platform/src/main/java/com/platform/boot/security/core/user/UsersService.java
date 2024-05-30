@@ -54,7 +54,7 @@ public class UsersService extends AbstractDatabase {
     public Mono<User> add(UserRequest request) {
         return this.usersRepository.existsByUsernameIgnoreCase(request.getUsername()).flatMap(exists -> {
             if (exists) {
-                return Mono.error(RestServerException.withMsg(1101, "User already exists",
+                return Mono.error(RestServerException.withMsg(417, "User already exists",
                         "Username [" + request.getUsername() + "] already exists!"));
             }
             return this.operate(request);
@@ -110,7 +110,6 @@ public class UsersService extends AbstractDatabase {
     private String upgradeEncodingIfPassword(String password) {
         if (StringUtils.hasLength(password) &&
                 this.passwordEncoder.upgradeEncoding(password)) {
-            // Encode the password
             return this.passwordEncoder.encode(password);
         }
         return password;
