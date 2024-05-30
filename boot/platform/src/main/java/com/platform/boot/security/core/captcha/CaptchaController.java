@@ -33,14 +33,14 @@ public class CaptchaController {
                 .publishOn(Schedulers.boundedElastic()).flatMap(captchaToken -> {
                     try (OutputStream outputStream = dataBuffer.asOutputStream()) {
                         outputStream.write(captchaToken.getCaptcha().getBytes());
-                return Mono.just(ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(dataBuffer))
-                        .delayUntil((a) -> this.captchaTokenRepository.saveToken(exchange, captchaToken));
-            } catch (IOException e) {
-                return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .body(dataBuffer.read(e.getMessage().getBytes(StandardCharsets.UTF_8))));
-            }
-        });
+                        return Mono.just(ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(dataBuffer))
+                                .delayUntil((a) -> this.captchaTokenRepository.saveToken(exchange, captchaToken));
+                    } catch (IOException e) {
+                        return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .contentType(MediaType.TEXT_PLAIN)
+                                .body(dataBuffer.read(e.getMessage().getBytes(StandardCharsets.UTF_8))));
+                    }
+                });
     }
 
 }
