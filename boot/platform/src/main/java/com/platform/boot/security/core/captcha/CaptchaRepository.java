@@ -22,13 +22,6 @@ public class CaptchaRepository {
     protected String headerName = DEFAULT_CAPTCHA_HEADER_NAME;
     protected String sessionAttributeName = DEFAULT_CAPTCHA_TOKEN_ATTR_NAME;
 
-    /**
-     * This method is used to generate a CaptchaToken and store it in the exchange
-     * for later use.
-     *
-     * @param exchange the exchange
-     * @return a Mono that encapsulates the CaptchaToken
-     */
     public Mono<CaptchaToken> generateToken(ServerWebExchange exchange) {
         return Mono.fromCallable(this::createCaptchaToken)
                 .doOnNext(captchaToken -> exchange.getAttributes().put(CaptchaToken.class.getName(), captchaToken))
@@ -59,11 +52,9 @@ public class CaptchaRepository {
     }
 
     protected CaptchaToken createCaptchaToken() {
-        // 定义图形验证码的长、宽、验证码字符数、干扰元素个数
-        // LineCaptcha captcha = CaptchaUtil.createLineCaptcha(200, 100, 4, 10);
-        // captcha.setGenerator(new RandomGenerator("0123456789", 4));
-        return CaptchaToken.of(this.headerName, this.parameterName, null);
-
+        //LineCaptcha captcha = CaptchaUtil.createLineCaptcha(200, 100, 4, 10);
+        //captcha.setGenerator(new RandomGenerator("0123456789", 4));
+        return CaptchaToken.of(this.headerName, this.parameterName, "54321");
     }
 
 }

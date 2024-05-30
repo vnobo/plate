@@ -2,6 +2,7 @@ package com.platform.boot.security.filter;
 
 import com.platform.boot.security.core.captcha.CaptchaRepository;
 import com.platform.boot.security.core.captcha.CaptchaToken;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -14,7 +15,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -28,29 +28,24 @@ import static com.platform.boot.security.core.captcha.CaptchaRepository.DEFAULT_
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Log4j2
-@Component
+@RequiredArgsConstructor
 public class CaptchaFilter implements WebFilter, Ordered {
 
-    public static final ServerWebExchangeMatcher DEFAULT_CAPTCHA_MATCHER =
+    private static final ServerAccessDeniedHandler ACCESS_DENIED_HANDLER =
+            new CaptchaServerAccessDeniedHandler(HttpStatus.FORBIDDEN);
+    private static final ServerWebExchangeMatcher REQUIRE_CAPTCHA_PROTECTION_MATCHER =
             new PathPatternParserServerWebExchangeMatcher("/oauth2/token");
-    private static final ServerAccessDeniedHandler ACCESS_DENIED_HANDLER = new CaptchaServerAccessDeniedHandler(
-            HttpStatus.FORBIDDEN);
-    private static final ServerWebExchangeMatcher REQUIRE_CAPTCHA_PROTECTION_MATCHER = DEFAULT_CAPTCHA_MATCHER;
 
     private final CaptchaRepository captchaTokenRepository;
-
-    public CaptchaFilter(CaptchaRepository captchaTokenRepository) {
-        this.captchaTokenRepository = captchaTokenRepository;
-    }
 
     @Override
     public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         return REQUIRE_CAPTCHA_PROTECTION_MATCHER.matches(exchange)
                 .filter(ServerWebExchangeMatcher.MatchResult::isMatch)
-                .switchIfEmpty(Mono.defer(() -> continueFilterChain(exchange, chain).then(Mono.empty())))
                 .flatMap(matchResult -> exchange.getSession()
                         .filter(webSession -> webSession.getAttributes().containsKey(DEFAULT_CAPTCHA_TOKEN_ATTR_NAME))
                         .flatMap(webSession -> validateToken(exchange)))
+                .then(Mono.defer(() -> continueFilterChain(exchange, chain)))
                 .onErrorResume(CaptchaException.class, ex -> ACCESS_DENIED_HANDLER.handle(exchange, ex));
     }
 
@@ -61,22 +56,22 @@ public class CaptchaFilter implements WebFilter, Ordered {
 
     private Mono<Void> validateToken(ServerWebExchange exchange) {
         return this.captchaTokenRepository.loadToken(exchange)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new CaptchaException("An expected Captcha token cannot be found"))))
-                .filterWhen((expected) -> containsValidCaptchaToken(exchange, expected))
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new CaptchaException("Invalid Captcha Token"))))
+                .switchIfEmpty(Mono.defer(() ->
+                        Mono.error(new CaptchaException("An expected Captcha token cannot be found"))))
+                .filterWhen((captchaToken) -> containsValidCaptchaToken(exchange, captchaToken))
+                .switchIfEmpty(Mono.defer(() ->
+                        Mono.error(new CaptchaException("Invalid Captcha Token"))))
                 .then(this.captchaTokenRepository.clearToken(exchange));
     }
 
-    private Mono<Boolean> containsValidCaptchaToken(ServerWebExchange exchange, CaptchaToken expected) {
-        return this.resolveCaptchaTokenValue(exchange, expected).map((actual) -> true);
+    private Mono<Boolean> containsValidCaptchaToken(ServerWebExchange exchange, CaptchaToken captchaToken) {
+        return this.resolveCaptchaTokenValue(exchange, captchaToken)
+                .map((actual) -> captchaToken.getCaptcha().equals(actual));
     }
 
     private Mono<String> resolveCaptchaTokenValue(ServerWebExchange exchange, CaptchaToken captchaToken) {
-        Assert.notNull(exchange, "exchange cannot be null");
-        Assert.notNull(captchaToken, "captchaToken cannot be null");
-        return exchange.getFormData().flatMap((data) -> Mono.justOrEmpty(data.getFirst(captchaToken.getParameterName())))
-                .switchIfEmpty(Mono.defer(() ->
-                        Mono.justOrEmpty(exchange.getRequest().getHeaders().getFirst(captchaToken.getHeaderName()))));
+        String captchaCode = exchange.getRequest().getHeaders().getFirst(captchaToken.getHeaderName());
+        return Mono.justOrEmpty(captchaCode);
     }
 
     @Override

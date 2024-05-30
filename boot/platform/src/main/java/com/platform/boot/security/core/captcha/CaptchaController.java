@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,9 +29,10 @@ public class CaptchaController {
     @GetMapping("code")
     public Mono<ResponseEntity<DataBuffer>> getCaptcha(ServerWebExchange exchange) {
         DataBuffer dataBuffer = exchange.getResponse().bufferFactory().allocateBuffer(2048);
-        return captchaTokenRepository.loadToken(exchange).flatMap(captchaToken -> {
-            try (OutputStream ignored = dataBuffer.asOutputStream()) {
-                //captchaToken.getCaptcha().write(outputStream);
+        return this.captchaTokenRepository.generateToken(exchange)
+                .publishOn(Schedulers.boundedElastic()).flatMap(captchaToken -> {
+                    try (OutputStream outputStream = dataBuffer.asOutputStream()) {
+                        outputStream.write(captchaToken.getCaptcha().getBytes());
                 return Mono.just(ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(dataBuffer))
                         .delayUntil((a) -> this.captchaTokenRepository.saveToken(exchange, captchaToken));
             } catch (IOException e) {
