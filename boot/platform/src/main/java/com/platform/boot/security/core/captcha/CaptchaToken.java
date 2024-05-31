@@ -1,28 +1,22 @@
 package com.platform.boot.security.core.captcha;
 
-import lombok.Data;
+import org.springframework.util.Assert;
 
 import java.io.Serializable;
 
 /**
- * captcha token entity class
- *
+ * @param headerName    http captcha header name
+ * @param parameterName http captcha parameter name
+ * @param captcha       captcha
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
-@Data(staticConstructor = "of")
-public class CaptchaToken implements Serializable {
-    /**
-     * http captcha header name
-     */
-    private final String headerName;
+public record CaptchaToken(String headerName, String parameterName, String captcha) implements Serializable {
+    public static CaptchaToken of(String headerName, String parameterName, String captcha) {
+        return new CaptchaToken(headerName, parameterName, captcha);
+    }
 
-    /**
-     * http captcha parameter name
-     */
-    private final String parameterName;
-
-    /**
-     * captcha
-     */
-    private final String captcha;
+    public Boolean validate(String code) {
+        Assert.notNull(code, "captcha code must not be null");
+        return this.captcha.equalsIgnoreCase(code);
+    }
 }

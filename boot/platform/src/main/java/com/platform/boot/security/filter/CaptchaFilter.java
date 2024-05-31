@@ -65,12 +65,11 @@ public class CaptchaFilter implements WebFilter, Ordered {
     }
 
     private Mono<Boolean> containsValidCaptchaToken(ServerWebExchange exchange, CaptchaToken captchaToken) {
-        return this.resolveCaptchaTokenValue(exchange, captchaToken)
-                .map((actual) -> captchaToken.getCaptcha().equals(actual));
+        return this.resolveCaptchaTokenValue(exchange, captchaToken).map(captchaToken::validate);
     }
 
     private Mono<String> resolveCaptchaTokenValue(ServerWebExchange exchange, CaptchaToken captchaToken) {
-        String captchaCode = exchange.getRequest().getHeaders().getFirst(captchaToken.getHeaderName());
+        String captchaCode = exchange.getRequest().getHeaders().getFirst(captchaToken.headerName());
         return Mono.justOrEmpty(captchaCode);
     }
 

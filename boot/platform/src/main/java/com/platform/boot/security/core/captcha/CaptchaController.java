@@ -32,7 +32,7 @@ public class CaptchaController {
         return this.captchaTokenRepository.generateToken(exchange)
                 .publishOn(Schedulers.boundedElastic()).flatMap(captchaToken -> {
                     try (OutputStream outputStream = dataBuffer.asOutputStream()) {
-                        outputStream.write(captchaToken.getCaptcha().getBytes());
+                        outputStream.write(captchaToken.captcha().getBytes());
                         return Mono.just(ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(dataBuffer))
                                 .delayUntil((a) -> this.captchaTokenRepository.saveToken(exchange, captchaToken));
                     } catch (IOException e) {
