@@ -4,6 +4,7 @@ import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.query.CriteriaUtils;
 import com.platform.boot.commons.query.ParamSql;
 import com.platform.boot.commons.utils.BeanUtils;
+import com.platform.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -40,7 +41,8 @@ public class TenantMembersService extends AbstractDatabase {
         var cacheKey = BeanUtils.cacheKey(request, pageable);
         ParamSql paramSql = request.toParamSql();
         String query = QUERY_SQL + paramSql.whereSql() + CriteriaUtils.applyPage(pageable, "a");
-        return super.queryWithCache(cacheKey, query, paramSql.params(), TenantMemberResponse.class);
+        return super.queryWithCache(cacheKey, query, paramSql.params(), TenantMemberResponse.class)
+                .flatMapSequential(ContextUtils::serializeUserAuditor);
     }
 
     public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {

@@ -29,7 +29,7 @@ public class TenantsService extends AbstractDatabase {
         ParamSql paramSql = request.bindParamSql();
         String query = "select * from se_tenants" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
         return super.queryWithCache(cacheKey, query, paramSql.params(), Tenant.class)
-                .flatMap(ContextUtils::serializeUserAuditor);
+                .flatMapSequential(ContextUtils::serializeUserAuditor);
     }
 
     public Mono<Page<Tenant>> page(TenantRequest request, Pageable pageable) {

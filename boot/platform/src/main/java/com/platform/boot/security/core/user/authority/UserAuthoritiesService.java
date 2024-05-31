@@ -23,7 +23,7 @@ public class UserAuthoritiesService extends AbstractDatabase {
         var cacheKey = BeanUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria()).sort(Sort.by("id").descending());
         return super.queryWithCache(cacheKey, query, UserAuthority.class)
-                .flatMap(ContextUtils::serializeUserAuditor);
+                .flatMapSequential(ContextUtils::serializeUserAuditor);
     }
 
     public Mono<UserAuthority> operate(UserAuthorityRequest request) {

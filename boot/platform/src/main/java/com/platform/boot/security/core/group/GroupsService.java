@@ -27,7 +27,7 @@ public class GroupsService extends AbstractDatabase {
         ParamSql paramSql = request.bindParamSql();
         String query = "select * from se_groups" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
         return super.queryWithCache(cacheKey, query, paramSql.params(), Group.class)
-                .flatMap(ContextUtils::serializeUserAuditor);
+                .flatMapSequential(ContextUtils::serializeUserAuditor);
     }
 
     public Mono<Page<Group>> page(GroupRequest request, Pageable pageable) {

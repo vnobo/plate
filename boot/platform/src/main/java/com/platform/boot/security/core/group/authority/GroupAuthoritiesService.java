@@ -34,7 +34,7 @@ public class GroupAuthoritiesService extends AbstractDatabase {
         Query query = Query.query(request.toCriteria()).with(pageable);
 
         return super.queryWithCache(cacheKey, query, GroupAuthority.class)
-                .flatMap(ContextUtils::serializeUserAuditor);
+                .flatMapSequential(ContextUtils::serializeUserAuditor);
     }
 
     @Transactional(rollbackFor = Exception.class)

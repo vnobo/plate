@@ -37,7 +37,7 @@ public class MenusService extends AbstractDatabase {
         var cacheKey = BeanUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria()).sort(Sort.by("sort"));
         return this.queryWithCache(cacheKey, query, Menu.class)
-                .flatMap(ContextUtils::serializeUserAuditor);
+                .flatMapSequential(ContextUtils::serializeUserAuditor);
     }
 
     public Mono<Menu> add(MenuRequest request) {
