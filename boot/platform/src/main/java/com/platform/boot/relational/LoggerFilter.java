@@ -28,7 +28,6 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -52,18 +51,17 @@ public class LoggerFilter implements WebFilter {
     public static final String CACHED_SERVER_HTTP_REQUEST_DECORATOR_ATTR = "cachedServerHttpRequestDecorator";
     public static final String CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR = "cachedServerHttpResponseDecorator";
 
-    private static final ServerWebExchangeMatcher REQUIRE_CSRF_PROTECTION_MATCHER = DEFAULT_CSRF_MATCHER;
-
+    private final ServerWebExchangeMatcher defaultLoggerMatcher = DEFAULT_CSRF_MATCHER;
     private final LoggersService loggerService;
 
     public static <T> Mono<T> cacheRequestBody(ServerWebExchange exchange,
                                                Function<ServerHttpRequest, Mono<T>> function) {
         ServerHttpResponse response = exchange.getResponse();
         DataBufferFactory factory = response.bufferFactory();
-        return DataBufferUtils.join(exchange.getRequest().getBody())
-                .defaultIfEmpty(factory.wrap(EmptyArrays.EMPTY_BYTES))
-                .flatMap(dataBuffer -> Mono.just(requestDecorate(exchange, dataBuffer)))
-                .flatMap(function);
+        var requestBody = DataBufferUtils.join(exchange.getRequest().getBody());
+        requestBody = requestBody.defaultIfEmpty(factory.wrap(EmptyArrays.EMPTY_BYTES));
+        var requestDecorate = requestBody.flatMap(dataBuffer -> Mono.just(requestDecorate(exchange, dataBuffer)));
+        return requestDecorate.flatMap(function);
     }
 
     public static ServerHttpResponse responseDecorate(ServerWebExchange exchange) {
@@ -137,21 +135,20 @@ public class LoggerFilter implements WebFilter {
 
     @Override
     public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
-        var nextMono = cacheFilterChain(exchange, chain).then(Mono.defer(ContextUtils::securityDetails)
-                .publishOn(Schedulers.boundedElastic())
+        var filterMono = defaultLoggerMatcher.matches(exchange);
+        filterMono = filterMono.filter(ServerWebExchangeMatcher.MatchResult::isMatch);
+        filterMono = filterMono.switchIfEmpty(continueFilterChain(exchange, chain).then(Mono.empty()));
+        return filterMono.flatMap((m) -> cacheFilterChain(exchange, chain).then(Mono.defer(ContextUtils::securityDetails))
                 .doOnNext(userDetails -> logRequest(exchange, userDetails)).then());
-        return REQUIRE_CSRF_PROTECTION_MATCHER.matches(exchange)
-                .filter(ServerWebExchangeMatcher.MatchResult::isMatch)
-                .switchIfEmpty(Mono.defer(() -> continueFilterChain(exchange, chain).then(Mono.empty())))
-                .flatMap((m) -> nextMono);
     }
 
     private Mono<Void> continueFilterChain(ServerWebExchange exchange, WebFilterChain chain) {
-        log.debug("{}Logger filter chain continue next.", exchange.getLogPrefix());
+        log.debug("{}Logger filter chain [continueFilterChain] next.", exchange.getLogPrefix());
         return Mono.defer(() -> chain.filter(exchange));
     }
 
     private Mono<Void> cacheFilterChain(ServerWebExchange exchange, WebFilterChain chain) {
+        log.debug("{}Logger filter chain [cacheRequestBody] next.", exchange.getLogPrefix());
         return cacheRequestBody(exchange, serverHttpRequest -> processRequestBody(exchange, serverHttpRequest))
                 .then(Mono.defer(() -> processFilter(exchange, chain)));
     }
@@ -163,7 +160,7 @@ public class LoggerFilter implements WebFilter {
                 HandlerStrategies.withDefaults().messageReaders());
         return serverRequest.bodyToMono(String.class).doOnNext((objectValue) -> {
             Object previousCachedBody = exchange.getAttributes().put(CACHED_REQUEST_BODY_ATTR, objectValue);
-            log.debug("{}Logger filter cache request body: {}", exchange.getLogPrefix(), previousCachedBody);
+            log.debug("{}Logger filter [processRequestBody] body: {}", exchange.getLogPrefix(), previousCachedBody);
         });
     }
 
@@ -172,7 +169,7 @@ public class LoggerFilter implements WebFilter {
         ServerHttpResponse cachedResponse = exchange.getAttribute(CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR);
 
         if (cachedRequest == null || cachedResponse == null) {
-            log.error("{}Logger filter cached request or response is null. Abort processing.",
+            log.error("{}Logger filter cached request or response is null, Abort processing.",
                     exchange.getLogPrefix());
             return Mono.empty();
         }
