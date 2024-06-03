@@ -21,7 +21,7 @@ public class WebConfiguration implements WebFluxConfigurer {
         ReactivePageableHandlerMethodArgumentResolver pageableResolver =
                 new ReactivePageableHandlerMethodArgumentResolver();
         pageableResolver.setMaxPageSize(100);
-        pageableResolver.setFallbackPageable(Pageable.ofSize(50));
+        pageableResolver.setFallbackPageable(Pageable.ofSize(25));
         configurer.addCustomResolver(pageableResolver);
     }
 
