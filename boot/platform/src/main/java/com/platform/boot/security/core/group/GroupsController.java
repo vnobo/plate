@@ -33,17 +33,9 @@ public class GroupsController {
                 this.groupsService.page(request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 
-    @PostMapping("add")
+    @PostMapping("save")
     @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Group> add(@Valid @RequestBody GroupRequest request) {
-        Assert.isNull(request.getId(), "When adding a new Group, the ID must be null");
-        return this.groupsService.operate(request);
-    }
-
-    @PutMapping("modify")
-    @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
-    public Mono<Group> modify(@Valid @RequestBody GroupRequest request) {
-        Assert.notNull(request.getId(), "When modifying an existing Group, the ID must not be null");
         return this.groupsService.operate(request);
     }
 

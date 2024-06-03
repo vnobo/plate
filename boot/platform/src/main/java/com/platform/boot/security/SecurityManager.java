@@ -88,24 +88,21 @@ public class SecurityManager extends AbstractDatabase
                 .bind("bindType", bindType).bind("openid", openid)
                 .map((row, metadata) -> this.r2dbcConverter.read(User.class, row, metadata))
                 .all();
-        return queryWithCache(bindType + openid, userMono).singleOrEmpty();
+        return this.queryWithCache(bindType + openid, userMono).singleOrEmpty();
     }
 
     public Mono<User> loadByUsername(String username) {
         Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
         var userMono = this.entityTemplate.select(query, User.class);
-        return queryWithCache(username, userMono).singleOrEmpty();
+        return this.queryWithCache(username, userMono).singleOrEmpty();
     }
 
     @Override
     public Mono<UserDetails> findByUsername(String username) {
 
-        var userMono = this.loadByUsername(username)
-                .zipWhen(user -> this.authorities(user.getCode()));
-
+        var userMono = this.loadByUsername(username).zipWhen(user -> this.authorities(user.getCode()));
         var userDetailsMono = userMono
                 .flatMap(tuple2 -> buildUserDetails(tuple2.getT1(), new HashSet<>(tuple2.getT2())));
-
         return userDetailsMono.cast(UserDetails.class)
                 .onErrorResume(throwable -> Mono.error(new AuthenticationServiceException(
                         throwable.getLocalizedMessage(), throwable)))
@@ -117,14 +114,14 @@ public class SecurityManager extends AbstractDatabase
     private Mono<SecurityDetails> buildUserDetails(User user, Set<GrantedAuthority> authorities) {
         SecurityDetails userDetails = SecurityDetails.of(user.getCode(), user.getUsername(), user.getName(),
                 user.getPassword(), user.getDisabled(), user.getAccountExpired(),
-                user.getAccountLocked(), user.getCredentialsExpired(), authorities, Map.of("username", user.getUsername()),
-                "username");
-        var tuple2Mono = Mono.zip(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
-        return tuple2Mono.flatMap(tuple2 -> {
+                user.getAccountLocked(), user.getCredentialsExpired(), authorities,
+                Map.of("username", user.getUsername()), "username");
+        var tuple2Mono = Mono.zipDelayError(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
+        return tuple2Mono.mapNotNull(tuple2 -> {
             userDetails.setGroups(new HashSet<>(tuple2.getT1()));
             userDetails.setTenants(new HashSet<>(tuple2.getT2()));
-            return Mono.defer(() -> Mono.just(userDetails));
-        }).switchIfEmpty(Mono.defer(() -> Mono.just(userDetails)));
+            return userDetails;
+        }).then(Mono.defer(() -> Mono.just(userDetails)));
     }
 
     private Mono<List<GroupMemberResponse>> loadGroups(String userCode) {

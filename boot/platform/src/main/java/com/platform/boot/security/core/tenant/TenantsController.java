@@ -33,17 +33,9 @@ public class TenantsController {
         return this.tenantsService.page(request, pageable);
     }
 
-    @PostMapping("add")
+    @PostMapping("save")
     @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
-    public Mono<Tenant> add(@Valid @RequestBody TenantRequest request) {
-        Assert.isNull(request.getId(), "When adding a new Tenant, the ID must be null");
-        return this.tenantsService.operate(request);
-    }
-
-    @PutMapping("modify")
-    @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
-    public Mono<Tenant> modify(@Valid @RequestBody TenantRequest request) {
-        Assert.notNull(request.getId(), "When modifying an existing Tenant, the ID must not be null");
+    public Mono<Tenant> operate(@Valid @RequestBody TenantRequest request) {
         return this.tenantsService.operate(request);
     }
 

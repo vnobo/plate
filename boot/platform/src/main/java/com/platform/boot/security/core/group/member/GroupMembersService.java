@@ -70,12 +70,6 @@ public class GroupMembersService extends AbstractDatabase {
         }
     }
 
-    /**
-     * Deletes a tenant.
-     *
-     * @param request the tenant request
-     * @return a Mono of void
-     */
     public Mono<Void> delete(GroupMemberRequest request) {
         return this.memberRepository.delete(request.toGroupMember()).doAfterTerminate(() -> this.cache.clear());
     }

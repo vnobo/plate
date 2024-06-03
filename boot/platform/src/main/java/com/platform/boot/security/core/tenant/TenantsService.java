@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 public class TenantsService extends AbstractDatabase {
 
     private final TenantsRepository tenantsRepository;
+
     private final TenantMembersRepository membersRepository;
 
     public Flux<Tenant> search(TenantRequest request, Pageable pageable) {

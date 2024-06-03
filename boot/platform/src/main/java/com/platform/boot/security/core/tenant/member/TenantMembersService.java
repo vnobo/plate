@@ -57,7 +57,6 @@ public class TenantMembersService extends AbstractDatabase {
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
-
     @Transactional(rollbackFor = Exception.class)
     public Mono<TenantMember> operate(TenantMemberRequest request) {
         var tenantMemberMono = this.entityTemplate.selectOne(Query.query(request.toCriteria()), TenantMember.class)

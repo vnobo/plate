@@ -24,7 +24,9 @@ import java.util.StringJoiner;
 public class TenantMemberRequest extends TenantMember {
 
     private Set<String> users;
+
     private String username;
+
     private String securityCode;
 
     public TenantMemberRequest securityCode(String securityCode) {

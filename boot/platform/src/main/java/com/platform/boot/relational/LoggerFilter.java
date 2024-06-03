@@ -160,7 +160,8 @@ public class LoggerFilter implements WebFilter {
                 HandlerStrategies.withDefaults().messageReaders());
         return serverRequest.bodyToMono(String.class).doOnNext((objectValue) -> {
             Object previousCachedBody = exchange.getAttributes().put(CACHED_REQUEST_BODY_ATTR, objectValue);
-            log.debug("{}Logger filter [processRequestBody] body: {}", exchange.getLogPrefix(), previousCachedBody);
+            log.debug("{}Logger filter chain [processRequestBody] body: {}",
+                    exchange.getLogPrefix(), previousCachedBody);
         });
     }
 

@@ -10,7 +10,6 @@ import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,9 +21,10 @@ import java.util.StringJoiner;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class GroupMemberRequest extends GroupMember implements Serializable {
+public class GroupMemberRequest extends GroupMember {
 
     private Set<String> users;
+
     private String username;
 
     public GroupMember toGroupMember() {

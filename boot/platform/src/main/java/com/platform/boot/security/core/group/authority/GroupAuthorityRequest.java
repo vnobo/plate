@@ -1,7 +1,6 @@
 package com.platform.boot.security.core.group.authority;
 
 import com.platform.boot.commons.utils.BeanUtils;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -18,7 +17,6 @@ import java.util.Set;
 @ToString(callSuper = true)
 public class GroupAuthorityRequest extends GroupAuthority implements Serializable {
 
-    @NotNull(message = "权限[authorities]不能为空!")
     private Set<String> authorities;
 
     public GroupAuthority toGroupAuthority() {
