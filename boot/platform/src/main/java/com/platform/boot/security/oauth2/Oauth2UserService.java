@@ -30,6 +30,8 @@ import static org.springframework.security.config.oauth2.client.CommonOAuth2Prov
 @RequiredArgsConstructor
 public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     private final SecurityManager securityManager;
 
     @Override
@@ -104,8 +106,7 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
 
     public static String generateRandoPassword() {
         byte[] randomBytes = new byte[16];
-        SecureRandom secureRandom = new SecureRandom();
-        secureRandom.nextBytes(randomBytes);
+        SECURE_RANDOM.nextBytes(randomBytes);
         return Base64.getEncoder().encodeToString(randomBytes);
     }
 }

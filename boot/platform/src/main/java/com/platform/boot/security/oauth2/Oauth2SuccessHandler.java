@@ -32,7 +32,6 @@ public class Oauth2SuccessHandler extends RedirectServerAuthenticationSuccessHan
     @Override
     public Mono<Void> onAuthenticationSuccess(WebFilterExchange webFilterExchange, Authentication authentication) {
         if (!(authentication instanceof OAuth2AuthenticationToken)) {
-            // 如果不是预期的认证类型，可以选择记录日志或返回错误响应
             throw RestServerException.withMsg("Authentication token must be an instance of OAuth2AuthenticationToken",
                     List.of());
         }

@@ -25,6 +25,21 @@ tasks.named("bootBuildImage") {
                     "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
     ]
     publish = true
+    buildWorkspace {
+        bind {
+            source = "/tmp/cache-${rootProject.name}.work"
+        }
+    }
+    buildCache {
+        bind {
+            source = "/tmp/cache-${rootProject.name}.build"
+        }
+    }
+    launchCache {
+        bind {
+            source = "/tmp/cache-${rootProject.name}.launch"
+        }
+    }
     docker {
         publishRegistry {
             username = "${dockerUsername}"

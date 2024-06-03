@@ -75,20 +75,22 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
     }
 
     public String getTenantCode() {
+        var defaultTenantCode = "0";
         if (ObjectUtils.isEmpty(this.getTenants())) {
-            return null;
+            return defaultTenantCode;
         }
         return this.getTenants().stream().filter(TenantMemberResponse::getEnabled).findAny()
-                .map(TenantMemberResponse::getTenantCode).orElse(null);
+                .map(TenantMemberResponse::getTenantCode).orElse(defaultTenantCode);
     }
 
     @JsonGetter
     public String getTenantName() {
+        var defaultTenantName = "默认租户";
         if (ObjectUtils.isEmpty(this.getTenants())) {
-            return null;
+            return defaultTenantName;
         }
         return this.getTenants().stream().filter(TenantMemberResponse::getEnabled).findAny()
-                .map(TenantMemberResponse::getName).orElse(null);
+                .map(TenantMemberResponse::getName).orElse(defaultTenantName);
     }
 
     @Override
