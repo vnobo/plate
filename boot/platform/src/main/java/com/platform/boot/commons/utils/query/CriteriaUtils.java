@@ -1,4 +1,4 @@
-package com.platform.boot.commons.query;
+package com.platform.boot.commons.utils.query;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
@@ -30,7 +30,7 @@ public final class CriteriaUtils {
 
     public static String applySort(Sort sort, String prefix) {
         if (sort == null || sort.isUnsorted()) {
-            return " order by id ";
+            return " order by id desc ";
         }
         sort = QueryJson.sortJson(sort, prefix);
         StringJoiner sortSql = new StringJoiner(", ");

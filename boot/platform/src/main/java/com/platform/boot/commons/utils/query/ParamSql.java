@@ -1,4 +1,4 @@
-package com.platform.boot.commons.query;
+package com.platform.boot.commons.utils.query;
 
 import java.io.Serializable;
 import java.util.Map;

@@ -22,7 +22,7 @@ import static com.platform.boot.config.SessionConfiguration.XML_HTTP_REQUEST;
 import static com.platform.boot.config.SessionConfiguration.X_REQUESTED_WITH;
 
 /**
- * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
+ * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
 @Component
 public class Oauth2SuccessHandler extends RedirectServerAuthenticationSuccessHandler {

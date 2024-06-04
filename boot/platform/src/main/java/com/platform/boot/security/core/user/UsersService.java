@@ -2,10 +2,10 @@ package com.platform.boot.security.core.user;
 
 import com.platform.boot.commons.base.AbstractDatabase;
 import com.platform.boot.commons.exception.RestServerException;
-import com.platform.boot.commons.query.CriteriaUtils;
-import com.platform.boot.commons.query.ParamSql;
 import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
+import com.platform.boot.commons.utils.query.CriteriaUtils;
+import com.platform.boot.commons.utils.query.ParamSql;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

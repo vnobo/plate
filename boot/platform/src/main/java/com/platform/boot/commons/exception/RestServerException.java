@@ -13,8 +13,8 @@ import java.io.Serializable;
 @EqualsAndHashCode(callSuper = true)
 public class RestServerException extends RuntimeException implements Serializable {
 
-    protected Object msg;
-    protected int code;
+    private Object msg;
+    private int code;
 
     public RestServerException(int code, String message, Object msg) {
         super(message);
@@ -23,7 +23,7 @@ public class RestServerException extends RuntimeException implements Serializabl
     }
 
     public static RestServerException withMsg(String message, Object msg) {
-        return withMsg(5000, message, msg);
+        return withMsg(500, message, msg);
     }
 
     public static RestServerException withMsg(int code, String message, Object msg) {

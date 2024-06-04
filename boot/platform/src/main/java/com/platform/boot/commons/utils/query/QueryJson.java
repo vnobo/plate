@@ -1,4 +1,4 @@
-package com.platform.boot.commons.query;
+package com.platform.boot.commons.utils.query;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;

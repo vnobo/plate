@@ -20,18 +20,6 @@ public class LoggerRequest extends Logger {
 
     private String securityCode;
 
-    /**
-     * Factory method to create a LoggerRequest
-     *
-     * @param tenantCode the tenant code
-     * @param operator   the operator
-     * @param prefix     the prefix
-     * @param method     the method
-     * @param status     the status
-     * @param url        the url
-     * @param context    the context
-     * @return a LoggerRequest object
-     */
     public static LoggerRequest of(String tenantCode, String operator, String prefix, String method,
                                    String status, String url, JsonNode context) {
         LoggerRequest request = new LoggerRequest();
@@ -45,20 +33,10 @@ public class LoggerRequest extends Logger {
         return request;
     }
 
-    /**
-     * Method to convert this LoggerRequest to a Logger
-     *
-     * @return a Logger object
-     */
     public Logger toLogger() {
         return BeanUtils.copyProperties(this, Logger.class);
     }
 
-    /**
-     * Method to convert this LoggerRequest to a Criteria
-     *
-     * @return a Criteria object
-     */
     public Criteria toCriteria() {
 
         Criteria criteria = criteria(Set.of("securityCode", "context"));

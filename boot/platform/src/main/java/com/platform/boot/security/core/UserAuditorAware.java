@@ -13,5 +13,4 @@ public class UserAuditorAware implements ReactiveAuditorAware<UserAuditor> {
     public @NonNull Mono<UserAuditor> getCurrentAuditor() {
         return ContextUtils.securityDetails().map(UserAuditor::withDetails);
     }
-
 }
