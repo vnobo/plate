@@ -2,6 +2,8 @@ package com.platform.boot.commons.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.f4b6a3.ulid.Ulid;
+import com.github.f4b6a3.ulid.UlidCreator;
 import com.platform.boot.commons.exception.JsonException;
 import com.platform.boot.commons.exception.RestServerException;
 import com.platform.boot.security.SecurityDetails;
@@ -114,6 +116,11 @@ public final class ContextUtils implements InitializingBean {
             return Mono.error(RestServerException.withMsg(
                     "User auditor serialization getReadMethod invoke error!", e));
         }
+    }
+
+    public static String nextId() {
+        Ulid ulid = UlidCreator.getMonotonicUlid();
+        return ulid.toString();
     }
 
     @Override

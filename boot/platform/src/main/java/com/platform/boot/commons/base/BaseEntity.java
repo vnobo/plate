@@ -1,7 +1,7 @@
 package com.platform.boot.commons.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.platform.boot.commons.utils.Ulid;
+import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.commons.utils.query.CriteriaUtils;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.query.Criteria;
@@ -34,7 +34,7 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
     default boolean isNew() {
         boolean isNew = ObjectUtils.isEmpty(getId());
         if (isNew) {
-            setCode(Ulid.random());
+            setCode(ContextUtils.nextId());
         }
         return isNew;
     }
