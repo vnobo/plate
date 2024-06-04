@@ -76,10 +76,7 @@ export function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandle
 
 
 @NgModule({
-  exports: [
-    HttpClientModule,
-    HttpClientXsrfModule
-  ], imports: [], providers: [
+  exports: [], imports: [], providers: [
     provideHttpClient(withFetch(), withInterceptors([defaultInterceptor, authTokenInterceptor])),
     provideHttpClient(withInterceptorsFromDi(), withXsrfConfiguration({
       cookieName: 'XSRF-TOKEN',
