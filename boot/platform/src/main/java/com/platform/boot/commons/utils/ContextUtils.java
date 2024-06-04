@@ -15,13 +15,13 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -68,10 +68,9 @@ public final class ContextUtils implements InitializingBean {
     public static String getClientIpAddress(ServerHttpRequest httpRequest) {
         HttpHeaders headers = httpRequest.getHeaders();
         for (String header : IP_HEADER_CANDIDATES) {
-            String ipList = headers.getFirst(header);
-            if (ipList != null && !ipList.isEmpty() && !"unknown".equalsIgnoreCase(ipList)) {
-                String[] ipArray = StringUtils.commaDelimitedListToStringArray(ipList);
-                return ipArray[0];
+            List<String> ipList = headers.get(header);
+            if (ipList != null && !ipList.isEmpty()) {
+                return ipList.getFirst();
             }
         }
         return Objects.requireNonNull(httpRequest.getRemoteAddress()).getAddress().getHostAddress();
