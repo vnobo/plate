@@ -1,13 +1,13 @@
 import {inject, NgModule, Optional, SkipSelf} from '@angular/core';
 import {
-  HttpClientModule,
-  HttpClientXsrfModule,
   HttpEvent,
   HttpHandlerFn,
   HttpRequest,
   provideHttpClient,
   withFetch,
-  withInterceptors
+  withInterceptors,
+  withInterceptorsFromDi,
+  withXsrfConfiguration
 } from "@angular/common/http";
 import {catchError, finalize, Observable, throwError, timeout} from "rxjs";
 import {AuthService} from "./auth.service";
@@ -76,20 +76,15 @@ export function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandle
 
 
 @NgModule({
-  imports: [HttpClientModule,
-    HttpClientXsrfModule.withOptions({
-      cookieName: 'XSRF-TOKEN',
-      headerName: 'X-XSRF-TOKEN'
-    })],
   exports: [
     HttpClientModule,
     HttpClientXsrfModule
-  ],
-  providers: [
-    provideHttpClient(
-      withFetch(),
-      withInterceptors([defaultInterceptor, authTokenInterceptor])
-    )
+  ], imports: [], providers: [
+    provideHttpClient(withFetch(), withInterceptors([defaultInterceptor, authTokenInterceptor])),
+    provideHttpClient(withInterceptorsFromDi(), withXsrfConfiguration({
+      cookieName: 'XSRF-TOKEN',
+      headerName: 'X-XSRF-TOKEN'
+    }))
   ]
 })
 export class CoreModule {
