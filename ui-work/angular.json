@@ -62,12 +62,33 @@
               {
                 "glob": "**/*",
                 "input": "projects/web/public"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                "output": "/assets/"
               }
             ],
             "styles": [
-              "projects/web/src/styles.scss"
+              {
+                "input": "bootstrap/dist/css/bootstrap.css",
+                "bundleName": "bootstrap-module"
+              },
+              {
+                "input": "bootstrap-icons/font/bootstrap-icons.css",
+                "bundleName": "icons-module"
+              },
+              {
+                "input": "projects/web/src/styles.scss",
+                "bundleName": "main-module"
+              }
             ],
-            "scripts": [],
+            "scripts": [
+              {
+                "input": "bootstrap/dist/js/bootstrap.js",
+                "bundleName": "bootstrap-module"
+              }
+            ],
             "server": "projects/web/src/main.server.ts",
             "prerender": true,
             "ssr": {
@@ -79,13 +100,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "1024kB",
+                  "maximumError": "2MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kB",
-                  "maximumError": "4kB"
+                  "maximumWarning": "32kB",
+                  "maximumError": "64kB"
                 }
               ],
               "outputHashing": "all"
@@ -105,7 +126,8 @@
               "buildTarget": "web:build:production"
             },
             "development": {
-              "buildTarget": "web:build:development"
+              "buildTarget": "web:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
