@@ -88,7 +88,8 @@ public class MenusService extends AbstractDatabase {
             }
             var deleteAuthorityMono = Flux.concatDelayError(this.groupAuthoritiesRepository.deleteByAuthorityIn(rules),
                     this.userAuthoritiesRepository.deleteByAuthorityIn(rules));
-            var deleteNextMono = Flux.concatDelayError(this.menusRepository.delete(request.toMenu()), deleteAuthorityMono);
+            var deleteNextMono = Flux.concatDelayError(this.menusRepository.deleteByAuthority(
+                    request.getAuthority()), deleteAuthorityMono);
             return deleteNextMono.then().doAfterTerminate(() -> this.cache.clear());
         } else {
             return this.menusRepository.delete(request.toMenu()).doAfterTerminate(() -> this.cache.clear());

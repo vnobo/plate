@@ -9,9 +9,18 @@ import reactor.core.publisher.Mono;
 public interface MenusRepository extends R2dbcRepository<Menu, Integer> {
 
     /**
-     *  findByCode
+     * findByCode
+     *
      * @param code entity code
      * @return entity
      */
     Mono<Menu> findByCode(String code);
+
+    /**
+     * deleteByAuthority
+     *
+     * @param authority entity authority
+     * @return entity
+     */
+    Mono<Long> deleteByAuthority(String authority);
 }
