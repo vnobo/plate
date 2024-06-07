@@ -1,21 +1,17 @@
 import {NgModule} from '@angular/core';
-import {RouterModule, Routes, TitleStrategy} from '@angular/router';
+import {RouterModule, Routes} from '@angular/router';
 import {LoginComponent} from "./login/login.component";
-import {PageTitleStrategy} from "../../core/title-strategy.service";
 import {LoginV1Component} from "./loginv1/login.component";
 
 const routes: Routes = [
-  {path: 'login', component: LoginComponent, title: "系统登录"},
-  {path: 'login1', component: LoginV1Component, title: "系统登录"},
-  {path: '', component: LoginComponent}
+  {path: 'login', component: LoginComponent, title: '登录'},
+  {path: 'login1', component: LoginV1Component, title: '登录V1'},
+  {path: '', redirectTo: 'login', pathMatch: 'full'}
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-  providers: [
-    {provide: TitleStrategy, useClass: PageTitleStrategy},
-  ]
+  exports: [RouterModule]
 })
 export class SecurityRoutingModule {
 }

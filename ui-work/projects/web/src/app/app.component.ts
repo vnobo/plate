@@ -1,4 +1,4 @@
-import {Component, OnInit, Signal} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {AsyncPipe} from "@angular/common";
 import {NzBackTopModule} from "ng-zorro-antd/back-top";
@@ -16,7 +16,7 @@ import {toSignal} from "@angular/core/rxjs-interop";
 })
 export class AppComponent implements OnInit {
 
-  loadingShow: Signal<boolean> = toSignal(this.loading.progress$.pipe(
+  loadingShow = toSignal(this.loading.progress$.pipe(
     debounceTime(500),
     distinctUntilChanged(),
     tap((res) => console.log(`Loading show is: ${res}`))
@@ -26,6 +26,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loading.show();
   }
 
 }

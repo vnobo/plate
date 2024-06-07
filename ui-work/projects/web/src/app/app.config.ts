@@ -1,9 +1,4 @@
-import {
-  APP_ID,
-  ApplicationConfig,
-  importProvidersFrom,
-  provideExperimentalZonelessChangeDetection,
-} from '@angular/core';
+import {ApplicationConfig, importProvidersFrom, provideExperimentalZonelessChangeDetection,} from '@angular/core';
 import {provideRouter, TitleStrategy} from '@angular/router';
 
 import {routes} from './app.routes';
@@ -16,13 +11,12 @@ import {provideHttpClient, withFetch} from "@angular/common/http";
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    {provide: APP_ID, useValue: 'PlateApp'},
-    {provide: TitleStrategy, useClass: PageTitleStrategy},
     importProvidersFrom(BrowserAnimationsModule),
     provideAnimationsAsync(),
     provideNzConfig(ngZorroConfig),
     provideRouter(routes),
     provideHttpClient(withFetch()),
-    provideExperimentalZonelessChangeDetection()
+    provideExperimentalZonelessChangeDetection(),
+    {provide: TitleStrategy, useClass: PageTitleStrategy},
   ]
 };
