@@ -3,7 +3,7 @@
   <file id="ngi18n" original="ng.template">
     <unit id="errorMessage">
       <notes>
-        <note category="location">projects/web/src/app/core/core.module.ts:39</note>
+        <note category="location">projects/web/src/app/core/http.Interceptor.ts:39</note>
       </notes>
       <segment>
         <source>Backend returned code <ph id="0" equiv="PH" disp="errorResponse.status"/>, body was: </source>
@@ -11,7 +11,7 @@
     </unit>
     <unit id="errorMessage401">
       <notes>
-        <note category="location">projects/web/src/app/core/core.module.ts:60</note>
+        <note category="location">projects/web/src/app/core/http.Interceptor.ts:60</note>
       </notes>
       <segment>
         <source>身份验证无效，请重新登录。</source>
@@ -19,7 +19,7 @@
     </unit>
     <unit id="errorMessage407">
       <notes>
-        <note category="location">projects/web/src/app/core/core.module.ts:64</note>
+        <note category="location">projects/web/src/app/core/http.Interceptor.ts:64</note>
       </notes>
       <segment>
         <source>认证不正确，请重新登录。</source>
@@ -27,7 +27,7 @@
     </unit>
     <unit id="errorMessage403">
       <notes>
-        <note category="location">projects/web/src/app/core/core.module.ts:68</note>
+        <note category="location">projects/web/src/app/core/http.Interceptor.ts:68</note>
       </notes>
       <segment>
         <source>验证码令牌错误，请重新登录。</source>

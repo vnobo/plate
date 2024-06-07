@@ -7,7 +7,14 @@ import {provideNzConfig} from "ng-zorro-antd/core/config";
 import {ngZorroConfig} from "../shared/shared-zorro.module";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {provideAnimationsAsync} from "@angular/platform-browser/animations/async";
-import {provideHttpClient, withFetch} from "@angular/common/http";
+import {
+  provideHttpClient,
+  withFetch,
+  withInterceptors,
+  withInterceptorsFromDi,
+  withXsrfConfiguration
+} from "@angular/common/http";
+import {authTokenInterceptor, defaultInterceptor} from "../core/http.Interceptor";
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,8 +22,12 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     provideNzConfig(ngZorroConfig),
     provideRouter(routes),
-    provideHttpClient(withFetch()),
     provideExperimentalZonelessChangeDetection(),
     {provide: TitleStrategy, useClass: PageTitleStrategy},
+    provideHttpClient(
+      withFetch(), withInterceptorsFromDi(),
+      withInterceptors([defaultInterceptor, authTokenInterceptor]),
+      withXsrfConfiguration({cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN'})
+    )
   ]
 };

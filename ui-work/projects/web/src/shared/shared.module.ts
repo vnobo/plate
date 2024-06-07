@@ -27,3 +27,4 @@ import {IconsProviderModule} from "./icons-provider.module";
 })
 export class SharedModule {
 }
+

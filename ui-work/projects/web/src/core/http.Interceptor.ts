@@ -1,14 +1,5 @@
-import {inject, NgModule, Optional, SkipSelf} from '@angular/core';
-import {
-  HttpEvent,
-  HttpHandlerFn,
-  HttpRequest,
-  provideHttpClient,
-  withFetch,
-  withInterceptors,
-  withInterceptorsFromDi,
-  withXsrfConfiguration
-} from "@angular/common/http";
+import {inject} from '@angular/core';
+import {HttpEvent, HttpHandlerFn, HttpRequest} from "@angular/common/http";
 import {catchError, finalize, Observable, throwError, timeout} from "rxjs";
 import {AuthService} from "./auth.service";
 import {LoadingService} from "./loading.service";
@@ -72,23 +63,4 @@ export function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandle
       return throwError(() => errorResponse);
     }
   }));
-}
-
-
-@NgModule({
-  exports: [], imports: [], providers: [
-    provideHttpClient(withFetch(), withInterceptors([defaultInterceptor, authTokenInterceptor])),
-    provideHttpClient(withInterceptorsFromDi(), withXsrfConfiguration({
-      cookieName: 'XSRF-TOKEN',
-      headerName: 'X-XSRF-TOKEN'
-    }))
-  ]
-})
-export class CoreModule {
-  constructor(@Optional() @SkipSelf() parentModule?: CoreModule) {
-    if (parentModule) {
-      throw new Error(
-        'CoreModule is already loaded. Import it in the AppModule only');
-    }
-  }
 }
