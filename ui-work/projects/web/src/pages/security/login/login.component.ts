@@ -46,23 +46,15 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     if (this.loginForm.value.rememberMe) {
       this.loginService.rememberMe(credentials);
-    } else {
-      this.loginService.clearRememberMe();
     }
-    this.loginService.login(credentials).pipe(takeUntil(this._subject)).subscribe(() => {
+    const login = this.loginService.login(credentials);
+    const result = login.pipe(takeUntil(this._subject));
+    result.subscribe(() => {
       this.router.navigate(['/home'], {relativeTo: this.route}).then();
     });
   }
 
   ngOnInit(): void {
-    if (this.loginService.getRememberMe()) {
-      const credentials = JSON.parse(localStorage.getItem('credentials') || '{}');
-      this.loginForm.patchValue({
-        username: credentials.username,
-        password: credentials.password,
-        rememberMe: false
-      });
-    }
   }
 
   ngOnDestroy(): void {
