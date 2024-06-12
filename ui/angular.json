@@ -40,7 +40,7 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss"
+          "style": "sass"
         }
       },
       "root": "projects/web",
