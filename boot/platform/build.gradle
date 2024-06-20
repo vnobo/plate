@@ -20,6 +20,8 @@ tasks.named("bootBuildImage") {
     tags = ["${dockerPrefix}/${rootProject.name}-${project.name}:latest"]
     imageName.set("${dockerPrefix}/${rootProject.name}-${project.name}:${project.version}")
     environment = [
+            "HTTP_PROXY"         : "http://127.0.0.1:65324",
+            "HTTPS_PROXY"        : "http://127.0.0.1:65324",
             "BP_JVM_VERSION"     : "21",
             "BP_JVM_VERSION_TYPE": "jre",
             "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
