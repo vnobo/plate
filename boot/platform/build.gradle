@@ -18,8 +18,10 @@ configurations {
 
 tasks.named("bootBuildImage") {
     tags = ["${dockerPrefix}/${rootProject.name}-${project.name}:latest"]
-    imageName = ("${dockerPrefix}/${rootProject.name}-${project.name}:${project.version}")
+    imageName.set("${dockerPrefix}/${rootProject.name}-${project.name}:${project.version}")
     environment = [
+            "BP_JVM_VERSION"     : "21",
+            "BP_JVM_VERSION_TYPE": "jre",
             "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
             "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 " +
                     "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
@@ -30,6 +32,16 @@ tasks.named("bootBuildImage") {
             username = "${dockerUsername}"
             password = "${dockerPassword}"
             email = "${dockerEmail}"
+        }
+    }
+    buildCache {
+        volume {
+            name = "cache-${rootProject.name}.build"
+        }
+    }
+    launchCache {
+        volume {
+            name = "cache-${rootProject.name}.launch"
         }
     }
 }
