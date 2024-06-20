@@ -32,16 +32,6 @@ tasks.named("bootBuildImage") {
             email = "${dockerEmail}"
         }
     }
-    buildCache {
-        volume {
-            name = "cache-${rootProject.name}.build"
-        }
-    }
-    launchCache {
-        volume {
-            name = "cache-${rootProject.name}.launch"
-        }
-    }
 }
 
 dependencies {
