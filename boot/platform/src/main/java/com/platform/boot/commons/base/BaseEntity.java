@@ -15,20 +15,9 @@ import java.util.Collection;
  */
 public interface BaseEntity<T> extends Serializable, Persistable<T> {
 
-    /**
-     * Sets the code of the entity.
-     *
-     * @param code the code to set
-     */
     default void setCode(String code) {
     }
 
-    /**
-     * Determines if the entity is new or not.
-     * If it is new, it sets the code of the entity using the ContextHolder utility class.
-     *
-     * @return true if the entity is new, false otherwise
-     */
     @Override
     @JsonIgnore
     default boolean isNew() {
@@ -39,12 +28,6 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
         return isNew;
     }
 
-    /**
-     * Method to convert this BaseEntity to a Criteria
-     *
-     * @param skipKeys the keys to skip
-     * @return the criteria
-     */
     default Criteria criteria(Collection<String> skipKeys) {
         return CriteriaUtils.build(this, skipKeys);
     }

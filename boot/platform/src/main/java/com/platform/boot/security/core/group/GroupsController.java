@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @RestController
-@RequestMapping("/groups")
+@RequestMapping("groups")
 @RequiredArgsConstructor
 public class GroupsController {
 

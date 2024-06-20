@@ -3,6 +3,7 @@ package com.platform.boot.config;
 import com.platform.boot.commons.ErrorResponse;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.security.oauth2.Oauth2SuccessHandler;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.autoconfigure.security.reactive.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -45,13 +46,10 @@ import static com.platform.boot.config.SessionConfiguration.X_REQUESTED_WITH;
  */
 @Configuration(proxyBeanMethods = false)
 @EnableReactiveMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfiguration {
 
     private final Oauth2SuccessHandler authenticationSuccessHandler;
-
-    public SecurityConfiguration(Oauth2SuccessHandler authenticationSuccessHandler) {
-        this.authenticationSuccessHandler = authenticationSuccessHandler;
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

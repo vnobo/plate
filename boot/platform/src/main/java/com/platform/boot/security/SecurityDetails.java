@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author Alex bob(<a href="https://github.com/vnobo">Alex bob</a>)
+ * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Setter
 @Getter

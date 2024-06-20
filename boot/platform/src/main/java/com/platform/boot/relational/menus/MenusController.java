@@ -2,7 +2,6 @@ package com.platform.boot.relational.menus;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -28,7 +27,6 @@ public class MenusController {
     private final MenusService menusService;
 
     @GetMapping("search")
-    @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Flux<Menu> search(MenuRequest request) {
         return this.menusService.search(request).distinct(Menu::getAuthority);
     }
@@ -50,7 +48,6 @@ public class MenusController {
     }
 
     @PostMapping("save")
-    @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Menu> save(@Valid @RequestBody MenuRequest request) {
         Assert.isTrue(request.isNew(), "This is a message for developers indicating that when " +
                 "adding a new menu,the ID field must not have a value," +
@@ -62,7 +59,6 @@ public class MenusController {
     }
 
     @DeleteMapping("delete")
-    @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Void> delete(@Valid @RequestBody MenuRequest request) {
         Assert.isTrue(!request.isNew(), "Delete [ID] cannot be empty!");
         Assert.notNull(request.getCode(), "Delete [CODE] cannot be empty!");

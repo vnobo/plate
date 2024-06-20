@@ -6,7 +6,7 @@ import org.springframework.lang.NonNull;
 import reactor.core.publisher.Mono;
 
 /**
- * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
+ * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
 public class UserAuditorAware implements ReactiveAuditorAware<UserAuditor> {
     @Override
