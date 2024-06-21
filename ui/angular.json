@@ -53,7 +53,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/web",
+            "outputPath": "dist/plate/web",
             "index": "projects/web/src/index.html",
             "browser": "projects/web/src/main.ts",
             "polyfills": [],

@@ -1,5 +1,5 @@
 {
-  "name": "commons",
+  "name": "@plate/commons",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^18.0.0",

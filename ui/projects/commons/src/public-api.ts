@@ -4,3 +4,4 @@
 
 export * from './lib/commons.service';
 export * from './lib/commons.component';
+export * from './lib/service/BrowserStorage.service';
