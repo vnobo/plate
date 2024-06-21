@@ -6,7 +6,7 @@ export const routes: Routes = [
     path: 'home', loadChildren: () => import('../pages/pages.module').then(m => m.PagesModule)
   },
   {
-    path: 'auth', loadChildren: () => import('../pages/security/security.module').then(m => m.SecurityModule)
+    path: 'auth', loadChildren: () => import('../core/security/security.module').then(m => m.SecurityModule)
   },
   {path: '', pathMatch: 'full', redirectTo: 'auth'},
   {path: '**', component: PageNotFoundComponent}
