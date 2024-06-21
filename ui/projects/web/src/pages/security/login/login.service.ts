@@ -1,7 +1,8 @@
-import {afterNextRender, Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {Observable, tap} from "rxjs";
-import {AuthService} from "../../../core/auth.service";
+import {Inject, Injectable, PLATFORM_ID,} from '@angular/core';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {Observable, tap} from 'rxjs';
+import {AuthService} from '../../../core/auth.service';
+import {isPlatformBrowser} from '@angular/common';
 
 export interface Authentication {
   token: string;
@@ -15,33 +16,62 @@ export interface Credentials {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LoginService {
+  private afterNextRender: boolean = false;
+  private credentials: Credentials | null | undefined = null;
 
-  constructor(private http: HttpClient, private auth: AuthService) {
+  constructor(
+    private http: HttpClient,
+    private auth: AuthService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    if (isPlatformBrowser(this.platformId)) {
+      this.afterNextRender = true;
+    }
   }
 
   login(credentials: Credentials): Observable<Authentication> {
-    const headers: HttpHeaders = new HttpHeaders(credentials ? {
-      authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password)
-    } : {});
-    return this.http.get<Authentication>('/oauth2/token', {headers: headers})
-      .pipe(tap(authentication => this.auth.login(authentication.token)));
+    const headers: HttpHeaders = new HttpHeaders(
+      credentials
+        ? {
+          authorization:
+            'Basic ' +
+            btoa(credentials.username + ':' + credentials.password),
+        }
+        : {}
+    );
+    return this.http
+      .get<Authentication>('/oauth2/token', {headers: headers})
+      .pipe(tap((authentication) => this.auth.login(authentication.token)));
   }
 
-  rememberMe(credentials: Credentials) {
-    //todo save credentials in local storage
-    afterNextRender(() => {
-      // Safe to check `scrollHeight` because this will only run in the browser, not the server.
-    });
+  setRememberMe(credentials: Credentials) {
+    if (this.afterNextRender) {
+      let creStr = JSON.stringify(credentials);
+      creStr = btoa(creStr);
+      sessionStorage.setItem('credentials', creStr);
+    }
+    this.credentials = credentials;
+  }
+
+  getRememberMe() {
+    if (this.afterNextRender) {
+      let creStr = sessionStorage.getItem('credentials');
+      if (creStr) {
+        creStr = atob(creStr);
+        this.credentials = JSON.parse(creStr);
+      }
+    }
+    return this.credentials;
   }
 
   logout() {
-    //todo remove credentials from local storage
     this.auth.logout();
-    afterNextRender(() => {
-      // Safe to check `scrollHeight` because this will only run in the browser, not the server.
-    });
+    if (this.afterNextRender) {
+      sessionStorage.removeItem('credentials');
+    }
+    this.credentials = null;
   }
 }
