@@ -9,11 +9,12 @@ export class BrowserStorageServerService extends BrowserStorageService {
     super({
       clear: () => {
       },
-      getItem: (key: string) => JSON.stringify({key}),
-      setItem: (key: string, value: string) => JSON.stringify({[key]: value}),
+      getItem: (key: string) => btoa(JSON.stringify({key})),
+      setItem: (key: string, value: string) =>
+        btoa(JSON.stringify({[key]: value})),
       key: (index: number) => index.toString(),
       length: 0,
-      removeItem: (key: string) => JSON.stringify({key}),
+      removeItem: (key: string) => btoa(JSON.stringify({key})),
     });
   }
 }
