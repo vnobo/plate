@@ -1,4 +1,4 @@
-import {Inject, Injectable, PLATFORM_ID,} from '@angular/core';
+import {Inject, Injectable, PLATFORM_ID} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable, tap} from 'rxjs';
 import {AuthService} from '../../../core/auth.service';
@@ -19,7 +19,18 @@ export interface Credentials {
   providedIn: 'root',
 })
 export class LoginService {
-  private afterNextRender: boolean = false;
+  private readonly storageKey = 'credentials';
+  private readonly storage: Storage = {
+    clear: () => {
+    },
+    getItem: (key: string) => JSON.stringify({key}),
+    setItem: (key: string, value: string) => JSON.stringify({[key]: value}),
+    key: (index: number) => index.toString(),
+    length: 0,
+    removeItem: (key: string) => JSON.stringify({key}),
+  };
+  private readonly afterNextRender: boolean = false;
+
   private credentials: Credentials | null | undefined = null;
 
   constructor(
@@ -28,6 +39,7 @@ export class LoginService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     if (isPlatformBrowser(this.platformId)) {
+      this.storage = localStorage;
       this.afterNextRender = true;
     }
   }
@@ -51,14 +63,14 @@ export class LoginService {
     if (this.afterNextRender) {
       let creStr = JSON.stringify(credentials);
       creStr = btoa(creStr);
-      sessionStorage.setItem('credentials', creStr);
+      this.storage.setItem(this.storageKey, creStr);
     }
     this.credentials = credentials;
   }
 
   getRememberMe() {
     if (this.afterNextRender) {
-      let creStr = sessionStorage.getItem('credentials');
+      let creStr = this.storage.getItem(this.storageKey);
       if (creStr) {
         creStr = atob(creStr);
         this.credentials = JSON.parse(creStr);
@@ -70,7 +82,7 @@ export class LoginService {
   logout() {
     this.auth.logout();
     if (this.afterNextRender) {
-      sessionStorage.removeItem('credentials');
+      this.storage.removeItem(this.storageKey);
     }
     this.credentials = null;
   }

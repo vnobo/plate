@@ -53,7 +53,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const credentials = this.loginSer.getRememberMe();
-    console.log(credentials);
     if (credentials && credentials != null) {
       this.login(credentials);
     }
