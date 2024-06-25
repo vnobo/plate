@@ -96,7 +96,7 @@
             ],
             "scripts": [
               {
-                "input": "bootstrap/dist/js/bootstrap.js",
+                "input": "bootstrap/dist/js/bootstrap.bundle.js",
                 "bundleName": "bootstrap-module"
               }
             ],

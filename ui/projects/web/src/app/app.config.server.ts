@@ -1,7 +1,7 @@
 import {ApplicationConfig, mergeApplicationConfig} from '@angular/core';
 import {provideServerRendering} from '@angular/platform-server';
 import {appConfig} from './app.config';
-import {BrowserStorageServerService, BrowserStorageService,} from '@plate/commons';
+import {BrowserStorageServerService, BrowserStorageService,} from 'commons';
 
 const serverConfig: ApplicationConfig = {
   providers: [
