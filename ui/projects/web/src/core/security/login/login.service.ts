@@ -62,18 +62,9 @@ export class LoginService {
     return this.credentials;
   }
 
-  /**
-   * 登出功能实现。
-   * 该方法负责协调登录状态的解除和相关登录信息的清除工作。
-   * 它调用认证模块的登出方法来解除用户认证状态，然后从存储中移除登录凭证，
-   * 最后将本地持有的凭证信息置为null，表示登出成功。
-   */
   logout() {
-    // 调用认证模块的登出方法，解除用户认证状态
     this.auth.logout();
-    // 从存储中移除登录凭证，确保凭证信息不被非法访问
     this.storage.remove(this.storageKey);
-    // 将本地持有的凭证信息置为null，表示当前用户已登出
     this.credentials = null;
   }
 }
