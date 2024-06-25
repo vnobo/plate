@@ -1,8 +1,8 @@
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {BrowserStorageService} from '@plate/commons';
 import {Observable, tap, throwError} from 'rxjs';
 import {AuthService} from '../../../core/auth.service';
+import {BrowserStorageService} from 'commons';
 
 export interface Authentication {
   token: string;
@@ -42,9 +42,7 @@ export class LoginService {
         ? {
           authorization:
             'Basic ' +
-            btoa(
-              credentials.username + ':' + credentials.password
-            ),
+            btoa(credentials.username + ':' + credentials.password),
         }
         : {}
     );
