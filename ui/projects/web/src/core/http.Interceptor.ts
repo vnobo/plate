@@ -51,10 +51,7 @@ export function authTokenInterceptor(
   }
 
   const authReq = req.clone({
-    headers: req.headers.set(
-      'Authorization',
-      `Bearer ${_auth.authToken()}`
-    ),
+    headers: req.headers.set('Authorization', `Bearer ${_auth.authToken()}`),
   });
 
   return next(authReq).pipe(
@@ -63,8 +60,7 @@ export function authTokenInterceptor(
         _auth.logout();
         _route.navigate([_auth.loginUrl]).then();
         return throwError(
-          () =>
-            $localize`:@@errorMessage401:身份验证无效，请重新登录。`
+          () => $localize`:@@errorMessage401:身份验证无效，请重新登录。`
         );
       } else if (errorResponse.status === 407) {
         _auth.logout();
@@ -76,8 +72,7 @@ export function authTokenInterceptor(
         _auth.logout();
         _route.navigate([_auth.loginUrl]).then();
         return throwError(
-          () =>
-            $localize`:@@errorMessage403:验证码令牌错误，请重新登录。`
+          () => $localize`:@@errorMessage403:验证码令牌错误，请重新登录。`
         );
       } else {
         console.error(

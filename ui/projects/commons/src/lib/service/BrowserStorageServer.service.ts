@@ -8,6 +8,7 @@ export class BrowserStorageServerService extends BrowserStorageService {
   constructor() {
     super({
       clear: () => {
+        console.log('clear');
       },
       getItem: (key: string) => btoa(JSON.stringify({key})),
       setItem: (key: string, value: string) =>

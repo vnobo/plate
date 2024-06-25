@@ -67,10 +67,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     const login = this.loginSer.login(credentials);
     const result = login.pipe(takeUntil(this.componentDestroyed$));
     result.subscribe({
-      next: v => {
-        this.router
-          .navigate(['/home'], {relativeTo: this.route})
-          .then();
+      next: () => {
+        this.router.navigate(['/home'], {relativeTo: this.route}).then();
       },
       error: e => console.log(e),
     });

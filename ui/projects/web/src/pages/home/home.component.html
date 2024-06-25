@@ -1,14 +1,8 @@
 <nz-layout class="layout">
   <nz-header
     class="nz-header d-flex justify-content-between align-content-between">
-    <div class="logo mx-2">
-      <i class="bi bi-p-circle-fill mx-2"></i>PLATE
-    </div>
-    <ul
-      class="header-menu ms-auto"
-      nz-menu
-      nzMode="horizontal"
-      nzTheme="dark">
+    <div class="logo mx-2"><i class="bi bi-p-circle-fill mx-2"></i>PLATE</div>
+    <ul class="header-menu ms-auto" nz-menu nzMode="horizontal" nzTheme="dark">
       <li nz-menu-item><a routerLink="/home">我的</a></li>
     </ul>
   </nz-header>
@@ -20,15 +14,10 @@
       nzWidth="14.6rem">
       <ul class="sider-menu" nz-menu nzMode="inline" nzTheme="dark">
         <li nz-menu-item>
-          <i class="bi bi-p-circle-fill mx-2"></i
-          ><a routerLink="/home">首页</a>
+          <i class="bi bi-p-circle-fill mx-2"></i><a routerLink="/home">首页</a>
         </li>
         @for (menu of menus$ | async; track menu) {
-          <li
-            nz-submenu
-            nzIcon="user"
-            nzOpen
-            nzTitle="{{ menu.name }}">
+          <li nz-submenu nzIcon="user" nzOpen nzTitle="{{ menu.name }}">
             <ul>
               @for (child of menu.children; track child) {
                 <li nz-menu-item>
@@ -50,9 +39,7 @@
           nzOpen
           nzTitle="{{ menu.name }}">
           <ul>
-            <li
-              *ngFor="let child of menu.children; index as i"
-              nz-menu-item>
+            <li *ngFor="let child of menu.children; index as i" nz-menu-item>
               <a
                 [state]="child"
                 routerLink=".{{ child.path }}"

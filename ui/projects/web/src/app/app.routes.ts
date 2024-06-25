@@ -10,9 +10,7 @@ export const routes: Routes = [
   {
     path: 'auth',
     loadChildren: () =>
-      import('../core/security/security.module').then(
-        m => m.SecurityModule
-      ),
+      import('../core/security/security.module').then(m => m.SecurityModule),
   },
   {path: '', pathMatch: 'full', redirectTo: 'auth'},
   {path: '**', component: PageNotFoundComponent},

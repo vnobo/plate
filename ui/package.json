@@ -4,11 +4,12 @@
   "scripts": {
     "ng": "ng",
     "start": "ng lint --fix && ng serve",
-    "build": "ng build",
+    "build": "ng lint --fix && ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:web": "node dist/web/server/server.mjs",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "serve:ssr:app": "node dist/app/server/server.mjs"
   },
   "private": true,
   "dependencies": {
@@ -26,9 +27,9 @@
     "bootstrap-icons": "^1.11.3",
     "express": "^4.18.2",
     "ng-zorro-antd": "^18.0.0",
+    "plate-commons": "latest",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "plate-commons": "latest"
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^18.0.2",

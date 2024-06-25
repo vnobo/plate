@@ -11,7 +11,7 @@
   },
   "sideEffects": false,
   "description": "plate dev commons",
-  "main": "index.js",
+  "main": "public-api.ts",
   "scripts": {
     "test": "ng test"
   },

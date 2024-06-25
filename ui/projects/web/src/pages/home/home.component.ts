@@ -52,9 +52,9 @@ export class HomeComponent implements OnInit {
   getBreadcrumbs(
     route: ActivatedRoute,
     url = '',
-    breads: Array<Breadcrumb> = []
+    breads: Breadcrumb[] = []
   ): Breadcrumb[] {
-    const children: Array<ActivatedRoute> = route.children;
+    const children: ActivatedRoute[] = route.children;
     if (children.length === 0) {
       return breads;
     }
@@ -63,10 +63,7 @@ export class HomeComponent implements OnInit {
       if (child.outlet !== PRIMARY_OUTLET) {
         continue;
       }
-      if (
-        !child.snapshot.routeConfig?.title ||
-        !child.snapshot.url.length
-      ) {
+      if (!child.snapshot.routeConfig?.title || !child.snapshot.url.length) {
         return this.getBreadcrumbs(child, url, breads);
       }
       const title = child.snapshot.routeConfig?.title;

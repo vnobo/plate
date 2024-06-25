@@ -9,7 +9,7 @@ import {Subject, takeUntil} from 'rxjs';
 })
 export class MenusComponent implements OnInit, OnDestroy {
   listMenus: Menu[] = [];
-  mapOfExpandedData: { [key: string]: Menu[] } = {};
+  mapOfExpandedData: Record<string, Menu[]> = {};
 
   private _subject: Subject<void> = new Subject<void>();
 
@@ -60,7 +60,7 @@ export class MenusComponent implements OnInit, OnDestroy {
 
   visitNode(
     node: Menu,
-    hashMap: { [code: string]: boolean },
+    hashMap: Record<string, boolean>,
     array: Menu[]
   ): void {
     if (!hashMap[node.code ? node.code : '0']) {

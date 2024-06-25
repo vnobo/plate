@@ -20,7 +20,7 @@ export class AuthService {
   private authenticatedSource = new Subject<boolean>();
   public readonly loginUrl = '/auth/login';
   isLoggedIn = false;
-  private token: string = '';
+  private token = '';
   authenticated$ = this.authenticatedSource.asObservable();
 
   authToken(): string {

@@ -14,9 +14,8 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
           <div class="row g-3 ">
             <nz-form-item class="col-md">
               <nz-form-label [nzSpan]="6" nzRequired nzFor="code"
-              >编码
-              </nz-form-label
-              >
+                >编码
+              </nz-form-label>
               <nz-form-control
                 [nzSpan]="18"
                 nzHasFeedback
@@ -27,28 +26,21 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
                   type="text"
                   id="code"
                   formControlName="code"
-                  [disabled]="true"/>
+                  [disabled]="true" />
                 <ng-template #codeErrorTpl let-control>
-                  <ng-container
-                    *ngIf="control.hasError('required')"
-                  >Please input your
-                    username!
-                  </ng-container
-                  >
-                  <ng-container
-                    *ngIf="control.hasError('duplicated')"
-                  >The username is
-                    redundant!
-                  </ng-container
-                  >
+                  <ng-container *ngIf="control.hasError('required')"
+                    >Please input your username!
+                  </ng-container>
+                  <ng-container *ngIf="control.hasError('duplicated')"
+                    >The username is redundant!
+                  </ng-container>
                 </ng-template>
               </nz-form-control>
             </nz-form-item>
             <nz-form-item class="col-md">
               <nz-form-label [nzSpan]="6" nzRequired nzFor="pcode"
-              >父级
-              </nz-form-label
-              >
+                >父级
+              </nz-form-label>
               <nz-form-control
                 [nzSpan]="18"
                 nzHasFeedback
@@ -59,20 +51,14 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
                   nz-input
                   type="text"
                   id="pcode"
-                  formControlName="pcode"/>
+                  formControlName="pcode" />
                 <ng-template #pcodeErrorTpl let-control>
-                  <ng-container
-                    *ngIf="control.hasError('required')"
-                  >Please input your
-                    username!
-                  </ng-container
-                  >
-                  <ng-container
-                    *ngIf="control.hasError('duplicated')"
-                  >The username is
-                    redundant!
-                  </ng-container
-                  >
+                  <ng-container *ngIf="control.hasError('required')"
+                    >Please input your username!
+                  </ng-container>
+                  <ng-container *ngIf="control.hasError('duplicated')"
+                    >The username is redundant!
+                  </ng-container>
                 </ng-template>
               </nz-form-control>
             </nz-form-item>
@@ -84,9 +70,8 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
                 nzRequired
                 nzFor="code"
                 for="tenantCode"
-              >租户
-              </nz-form-label
-              >
+                >租户
+              </nz-form-label>
               <nz-form-control
                 [nzSpan]="18"
                 nzHasFeedback
@@ -96,32 +81,21 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
                   type="text"
                   class="form-control"
                   id="tenantCode"
-                  formControlName="tenantCode"/>
+                  formControlName="tenantCode" />
                 <ng-template #tenantCodeErrorTpl let-control>
-                  <ng-container
-                    *ngIf="control.hasError('required')"
-                  >Please input your
-                    username!
-                  </ng-container
-                  >
-                  <ng-container
-                    *ngIf="control.hasError('duplicated')"
-                  >The username is
-                    redundant!
-                  </ng-container
-                  >
+                  <ng-container *ngIf="control.hasError('required')"
+                    >Please input your username!
+                  </ng-container>
+                  <ng-container *ngIf="control.hasError('duplicated')"
+                    >The username is redundant!
+                  </ng-container>
                 </ng-template>
               </nz-form-control>
             </nz-form-item>
             <nz-form-item class="col-md">
-              <nz-form-label
-                [nzSpan]="6"
-                nzRequired
-                nzFor="code"
-                for="type"
-              >类型
-              </nz-form-label
-              >
+              <nz-form-label [nzSpan]="6" nzRequired nzFor="code" for="type"
+                >类型
+              </nz-form-label>
               <nz-form-control
                 [nzSpan]="18"
                 nzHasFeedback
@@ -131,33 +105,25 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
                   type="text"
                   class="form-control"
                   id="type"
-                  formControlName="type"/>
+                  formControlName="type" />
                 <ng-template #typeErrorTpl let-control>
-                  <ng-container
-                    *ngIf="control.hasError('required')"
-                  >Please input your
-                    username!
-                  </ng-container
-                  >
-                  <ng-container
-                    *ngIf="control.hasError('duplicated')"
-                  >The username is
-                    redundant!
-                  </ng-container
-                  >
+                  <ng-container *ngIf="control.hasError('required')"
+                    >Please input your username!
+                  </ng-container>
+                  <ng-container *ngIf="control.hasError('duplicated')"
+                    >The username is redundant!
+                  </ng-container>
                 </ng-template>
               </nz-form-control>
             </nz-form-item>
           </div>
           <div class="form-group">
-            <label for="authority"
-            >权&nbsp;&nbsp;&nbsp;&nbsp;限</label
-            >
+            <label for="authority">权&nbsp;&nbsp;&nbsp;&nbsp;限</label>
             <input
               type="text"
               class="form-control"
               id="authority"
-              formControlName="authority"/>
+              formControlName="authority" />
           </div>
 
           <div class="form-group">
@@ -166,7 +132,7 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
               type="text"
               class="form-control"
               id="name"
-              formControlName="name"/>
+              formControlName="name" />
           </div>
 
           <div class="form-group">
@@ -175,7 +141,7 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
               type="text"
               class="form-control"
               id="path"
-              formControlName="path"/>
+              formControlName="path" />
           </div>
 
           <div class="form-group">
@@ -184,7 +150,7 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
               type="text"
               class="form-control"
               id="sort"
-              formControlName="sort"/>
+              formControlName="sort" />
           </div>
 
           <div class="form-group">
@@ -193,7 +159,7 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
               type="text"
               class="form-control"
               id="extend"
-              formControlName="extend"/>
+              formControlName="extend" />
           </div>
 
           <div class="form-group">
@@ -202,7 +168,7 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
               type="text"
               class="form-control"
               id="permissions"
-              formControlName="permissions"/>
+              formControlName="permissions" />
           </div>
 
           <div class="form-group">
@@ -211,13 +177,11 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
               type="text"
               class="form-control"
               id="icons"
-              formControlName="icons"/>
+              formControlName="icons" />
           </div>
         </ng-container>
         <ng-container *nzModalFooter>
-          <button class="btn btn-outline-dark me-3" type="reset">
-            重置
-          </button>
+          <button class="btn btn-outline-dark me-3" type="reset">重置</button>
           <button class="btn btn-primary" type="submit">确认</button>
         </ng-container>
       </form>
@@ -232,7 +196,7 @@ export class MenuFormComponent {
   @Output() event = new EventEmitter<{
     btn: string;
     status: number;
-    data: any;
+    data: null;
   }>();
 
   menuForm: FormGroup;
@@ -265,6 +229,7 @@ export class MenuFormComponent {
 
   //表单提交
   onSubmit() {
+    console.log(this.menuForm.value);
   }
 
   showModal(): void {
