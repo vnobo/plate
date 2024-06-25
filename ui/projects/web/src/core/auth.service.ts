@@ -1,20 +1,22 @@
 import {inject, Injectable} from '@angular/core';
-import {Subject} from "rxjs";
-import {HttpErrorResponse} from "@angular/common/http";
-import {CanActivateChildFn, CanActivateFn, CanMatchFn, Router} from "@angular/router";
+import {Subject} from 'rxjs';
+import {HttpErrorResponse} from '@angular/common/http';
+import {CanActivateChildFn, CanActivateFn, CanMatchFn, Router,} from '@angular/router';
 
-export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = () => {
+export const authGuard:
+  | CanMatchFn
+  | CanActivateFn
+  | CanActivateChildFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
   if (auth.isLoggedIn) {
     return true;
   }
   return router.parseUrl(auth.loginUrl);
-}
+};
 
 @Injectable({providedIn: 'root'})
 export class AuthService {
-
   private authenticatedSource = new Subject<boolean>();
   public readonly loginUrl = '/auth/login';
   isLoggedIn = false;
@@ -23,7 +25,10 @@ export class AuthService {
 
   authToken(): string {
     if (!this.isLoggedIn) {
-      throw new HttpErrorResponse({error: "Authenticate is incorrectness,please login again.", status: 401});
+      throw new HttpErrorResponse({
+        error: 'Authenticate is incorrectness,please login again.',
+        status: 401,
+      });
     }
     return this.token;
   }
@@ -39,5 +44,4 @@ export class AuthService {
     this.authenticatedSource.next(false);
     this.token = '';
   }
-
 }

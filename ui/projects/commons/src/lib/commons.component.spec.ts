@@ -8,9 +8,8 @@ describe('CommonsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CommonsComponent]
-    })
-      .compileComponents();
+      imports: [CommonsComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CommonsComponent);
     component = fixture.componentInstance;

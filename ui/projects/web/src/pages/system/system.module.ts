@@ -7,7 +7,12 @@ import {GroupsComponent} from './groups/groups.component';
 import {UsersComponent} from './users/users.component';
 
 @NgModule({
-  declarations: [MenusComponent, MenuFormComponent, GroupsComponent, UsersComponent],
+  declarations: [
+    MenusComponent,
+    MenuFormComponent,
+    GroupsComponent,
+    UsersComponent,
+  ],
   imports: [SharedModule, SystemRoutingModule],
 })
 export class SystemModule {

@@ -6,7 +6,7 @@ export const environment = {
   production: false,
   debug: true,
   wssHost: '/socket',
-  host: '/api'
+  host: '/api',
 };
 
 /*

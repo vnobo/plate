@@ -6,7 +6,7 @@ const icons = [UserOutline];
 
 @NgModule({
   imports: [NzIconModule.forRoot(icons)],
-  exports: [NzIconModule]
+  exports: [NzIconModule],
 })
 export class IconsProviderModule {
 }

@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit,} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, Validators,} from '@angular/forms';
 import {Credentials, LoginService} from './login.service';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -67,10 +67,12 @@ export class LoginComponent implements OnInit, OnDestroy {
     const login = this.loginSer.login(credentials);
     const result = login.pipe(takeUntil(this.componentDestroyed$));
     result.subscribe({
-      next: (v) => {
-        this.router.navigate(['/home'], {relativeTo: this.route}).then();
+      next: v => {
+        this.router
+          .navigate(['/home'], {relativeTo: this.route})
+          .then();
       },
-      error: (e) => console.log(e),
+      error: e => console.log(e),
     });
   }
 }

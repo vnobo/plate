@@ -4,13 +4,8 @@ import {Component} from '@angular/core';
   selector: 'lib-commons',
   standalone: true,
   imports: [],
-  template: `
-    <p>
-      commons works!
-    </p>
-  `,
-  styles: ``
+  template: ` <p>commons works!</p> `,
+  styles: ``,
 })
 export class CommonsComponent {
-
 }

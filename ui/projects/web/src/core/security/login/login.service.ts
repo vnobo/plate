@@ -1,7 +1,7 @@
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {BrowserStorageService} from '@plate/commons';
-import {Observable, tap} from 'rxjs';
+import {Observable, tap, throwError} from 'rxjs';
 import {AuthService} from '../../../core/auth.service';
 
 export interface Authentication {
@@ -31,18 +31,26 @@ export class LoginService {
   }
 
   login(credentials: Credentials): Observable<Authentication> {
+    if (
+      credentials.username == undefined &&
+      credentials.password == undefined
+    ) {
+      return throwError(() => '用户名和密码不能为[undefined]!');
+    }
     const headers: HttpHeaders = new HttpHeaders(
       credentials
         ? {
           authorization:
             'Basic ' +
-            btoa(credentials.username + ':' + credentials.password),
+            btoa(
+              credentials.username + ':' + credentials.password
+            ),
         }
         : {}
     );
     return this.http
       .get<Authentication>('/oauth2/token', {headers: headers})
-      .pipe(tap((authentication) => this.auth.login(authentication.token)));
+      .pipe(tap(authentication => this.auth.login(authentication.token)));
   }
 
   setRememberMe(credentials: Credentials) {

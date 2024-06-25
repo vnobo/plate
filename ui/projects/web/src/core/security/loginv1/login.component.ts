@@ -1,10 +1,10 @@
 import {Component} from '@angular/core';
-import {FormControl, FormGroup, NonNullableFormBuilder, Validators} from '@angular/forms';
+import {FormControl, FormGroup, NonNullableFormBuilder, Validators,} from '@angular/forms';
 
 @Component({
   selector: 'app-login-v1',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrls: ['./login.component.scss'],
 })
 export class LoginV1Component {
   validateForm: FormGroup<{
@@ -14,7 +14,7 @@ export class LoginV1Component {
   }> = this.fb.group({
     userName: ['', [Validators.required]],
     password: ['', [Validators.required]],
-    remember: [true]
+    remember: [true],
   });
 
   constructor(private fb: NonNullableFormBuilder) {

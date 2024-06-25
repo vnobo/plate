@@ -1,9 +1,8 @@
 import {Injectable} from '@angular/core';
-import {Observable, Subject} from "rxjs";
+import {Observable, Subject} from 'rxjs';
 
-@Injectable({providedIn: "root"})
+@Injectable({providedIn: 'root'})
 export class LoadingService {
-
   // Observable string sources
   private progressSource: Subject<boolean> = new Subject<boolean>();
   progress$: Observable<boolean> = this.progressSource.asObservable();

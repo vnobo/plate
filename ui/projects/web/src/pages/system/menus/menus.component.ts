@@ -1,14 +1,13 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Menu, MenusService} from "./menus.service";
-import {Subject, takeUntil} from "rxjs";
+import {Menu, MenusService} from './menus.service';
+import {Subject, takeUntil} from 'rxjs';
 
 @Component({
   selector: 'app-menus',
   templateUrl: './menus.component.html',
-  styleUrls: ['./menus.component.scss']
+  styleUrls: ['./menus.component.scss'],
 })
 export class MenusComponent implements OnInit, OnDestroy {
-
   listMenus: Menu[] = [];
   mapOfExpandedData: { [key: string]: Menu[] } = {};
 
@@ -46,7 +45,12 @@ export class MenusComponent implements OnInit, OnDestroy {
       this.visitNode(node, hashMap, array);
       if (node.children) {
         for (let i = node.children.length - 1; i >= 0; i--) {
-          stack.push({...node.children[i], level: node.level ? node.level + 1 : 1, expand: false, parent: node});
+          stack.push({
+            ...node.children[i],
+            level: node.level ? node.level + 1 : 1,
+            expand: false,
+            parent: node,
+          });
         }
       }
     }
@@ -54,7 +58,11 @@ export class MenusComponent implements OnInit, OnDestroy {
     return array;
   }
 
-  visitNode(node: Menu, hashMap: { [code: string]: boolean }, array: Menu[]): void {
+  visitNode(
+    node: Menu,
+    hashMap: { [code: string]: boolean },
+    array: Menu[]
+  ): void {
     if (!hashMap[node.code ? node.code : '0']) {
       hashMap[node.code ? node.code : '0'] = true;
       array.push(node);
@@ -63,15 +71,19 @@ export class MenusComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const menuRequest: Menu = {
-      pcode: "0",
-      tenantCode: "0"
+      pcode: '0',
+      tenantCode: '0',
     };
-    this.menusService.getMenus(menuRequest).pipe(takeUntil(this._subject)).subscribe(result => {
-      this.listMenus = result;
-      this.listMenus.forEach(item => {
-        this.mapOfExpandedData[item.code ? item.code : '0'] = this.convertTreeToList(item);
+    this.menusService
+      .getMenus(menuRequest)
+      .pipe(takeUntil(this._subject))
+      .subscribe(result => {
+        this.listMenus = result;
+        this.listMenus.forEach(item => {
+          this.mapOfExpandedData[item.code ? item.code : '0'] =
+            this.convertTreeToList(item);
+        });
       });
-    });
   }
 
   ngOnDestroy(): void {
