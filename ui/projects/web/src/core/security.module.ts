@@ -4,10 +4,8 @@ import {BrowserStorageService} from 'commons';
 import {SecurityRoutingModule} from './security-routing.module';
 
 @NgModule({
-  imports: [
-    SecurityRoutingModule
-  ],
-  providers: [BrowserStorageService]
+  imports: [SecurityRoutingModule],
+  providers: [BrowserStorageService],
 })
 export class SecurityModule {
   constructor(@Optional() @SkipSelf() parentModule?: SecurityModule) {

@@ -11,7 +11,7 @@ import {
   withInterceptorsFromDi,
   withXsrfConfiguration,
 } from '@angular/common/http';
-import {BrowserStorageServerService, BrowserStorageService} from 'commons';
+import {BrowserStorageServerService, BrowserStorageService,} from 'plate-commons';
 import {authTokenInterceptor, defaultInterceptor} from './http.Interceptor';
 import {PageTitleStrategy} from './title-strategy.service';
 import {routes} from './app.routes';
