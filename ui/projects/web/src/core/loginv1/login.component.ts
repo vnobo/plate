@@ -1,8 +1,28 @@
+import {NgIf} from '@angular/common';
 import {Component} from '@angular/core';
-import {FormControl, FormGroup, NonNullableFormBuilder, Validators,} from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  FormsModule,
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import {NzButtonModule} from 'ng-zorro-antd/button';
+import {NzFormModule} from 'ng-zorro-antd/form';
+import {NzInputModule} from 'ng-zorro-antd/input';
 
 @Component({
   selector: 'app-login-v1',
+  standalone: true,
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    NzFormModule,
+    NzInputModule,
+    NzButtonModule,
+    NgIf,
+  ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })

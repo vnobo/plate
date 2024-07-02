@@ -9,18 +9,7 @@ import {NzMessageModule} from 'ng-zorro-antd/message';
 import {NzModalModule} from 'ng-zorro-antd/modal';
 import {NzFormModule} from 'ng-zorro-antd/form';
 import {NzInputModule} from 'ng-zorro-antd/input';
-import {NzConfig} from 'ng-zorro-antd/core/config';
 
-export const ngZorroConfig: NzConfig = {
-  // 注意组件名称没有 nz 前缀
-  message: {
-    nzTop: 50,
-    nzDuration: 5000,
-    nzAnimate: true,
-    nzPauseOnHover: true,
-  },
-  notification: {nzTop: 240},
-};
 
 @NgModule({
   exports: [

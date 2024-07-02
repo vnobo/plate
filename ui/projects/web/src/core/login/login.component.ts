@@ -1,11 +1,15 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, Validators,} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators,} from '@angular/forms';
 import {Credentials, LoginService} from './login.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Subject, takeUntil} from 'rxjs';
+import {NzFormModule} from 'ng-zorro-antd/form';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
+  imports: [FormsModule, ReactiveFormsModule, NzFormModule, NgIf],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })

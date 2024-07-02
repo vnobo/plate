@@ -1,10 +1,7 @@
 import {ApplicationConfig, importProvidersFrom, provideExperimentalZonelessChangeDetection,} from '@angular/core';
 import {provideRouter, TitleStrategy} from '@angular/router';
 
-import {routes} from './app.routes';
-import {PageTitleStrategy} from './title-strategy.service';
-import {provideNzConfig} from 'ng-zorro-antd/core/config';
-import {ngZorroConfig} from '../shared/shared-zorro.module';
+import {NzConfig, provideNzConfig} from 'ng-zorro-antd/core/config';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {
@@ -14,7 +11,21 @@ import {
   withInterceptorsFromDi,
   withXsrfConfiguration,
 } from '@angular/common/http';
-import {authTokenInterceptor, defaultInterceptor,} from './http.Interceptor';
+import {BrowserStorageServerService, BrowserStorageService} from 'commons';
+import {authTokenInterceptor, defaultInterceptor} from './http.Interceptor';
+import {PageTitleStrategy} from './title-strategy.service';
+import {routes} from './app.routes';
+
+export const ngZorroConfig: NzConfig = {
+  // 注意组件名称没有 nz 前缀
+  message: {
+    nzTop: 50,
+    nzDuration: 5000,
+    nzAnimate: true,
+    nzPauseOnHover: true,
+  },
+  notification: {nzTop: 240},
+};
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -33,5 +44,6 @@ export const appConfig: ApplicationConfig = {
         headerName: 'X-XSRF-TOKEN',
       })
     ),
+    {provide: BrowserStorageService, useClass: BrowserStorageServerService},
   ],
 };

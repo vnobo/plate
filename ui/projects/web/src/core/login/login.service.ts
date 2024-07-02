@@ -1,7 +1,7 @@
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {Observable, tap, throwError} from 'rxjs';
-import {AuthService} from '../../../core/auth.service';
+import {AuthService} from '../../core/auth.service';
 import {BrowserStorageService} from 'commons';
 
 export interface Authentication {
