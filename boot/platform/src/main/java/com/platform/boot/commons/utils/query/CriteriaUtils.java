@@ -58,19 +58,19 @@ public final class CriteriaUtils {
         ParamSql jsonParamSql = QueryJson.queryJson((Map<String, Object>) objectMap.get("query"), prefix);
         Map<String, Object> params = jsonParamSql.params();
         StringJoiner sql = jsonParamSql.sql();
-
-        if (!skipKeys.contains("securityCode") && !ObjectUtils.isEmpty(objectMap.get("securityCode"))) {
+        String securityCodeKey = "securityCode";
+        if (!skipKeys.contains(securityCodeKey) && !ObjectUtils.isEmpty(objectMap.get(securityCodeKey))) {
             String key = "tenant_code";
             if (StringUtils.hasLength(prefix)) {
                 key = prefix + "." + key;
             }
             sql.add(key + " like :securityCode");
-            params.put("securityCode", objectMap.get("securityCode"));
+            params.put(securityCodeKey, objectMap.get(securityCodeKey));
         }
 
         Set<String> removeKeys = new HashSet<>(SKIP_CRITERIA_KEYS);
         removeKeys.add("query");
-        removeKeys.add("securityCode");
+        removeKeys.add(securityCodeKey);
         if (!ObjectUtils.isEmpty(skipKeys)) {
             removeKeys.addAll(skipKeys);
         }
