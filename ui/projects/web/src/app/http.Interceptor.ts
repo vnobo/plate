@@ -1,7 +1,7 @@
 import {inject} from '@angular/core';
 import {HttpEvent, HttpHandlerFn, HttpRequest} from '@angular/common/http';
 import {catchError, finalize, Observable, throwError, timeout} from 'rxjs';
-import {AuthService} from './auth.service';
+import {AuthService} from '../core/auth.service';
 import {LoadingService} from './loading.service';
 import {MessageService} from '../shared/message.service';
 import {Router} from '@angular/router';

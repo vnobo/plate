@@ -83,21 +83,21 @@
             "styles": [
               {
                 "input": "bootstrap/dist/css/bootstrap.css",
-                "bundleName": "bootstrap-module"
+                "bundleName": "bootstrap"
               },
               {
                 "input": "bootstrap-icons/font/bootstrap-icons.css",
-                "bundleName": "icons-module"
+                "bundleName": "icons"
               },
               {
                 "input": "projects/web/src/styles.scss",
-                "bundleName": "main-module"
+                "bundleName": "main"
               }
             ],
             "scripts": [
               {
                 "input": "bootstrap/dist/js/bootstrap.bundle.js",
-                "bundleName": "bootstrap-module"
+                "bundleName": "bootstrap"
               }
             ],
             "server": "projects/web/src/main.server.ts",

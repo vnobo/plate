@@ -1,5 +1,5 @@
 import {Routes} from '@angular/router';
-import {PageNotFoundComponent} from '../pages/page-not-found/page-not-found.component';
+import {NotFoundComponent} from './not-found.component';
 
 export const routes: Routes = [
   {
@@ -13,5 +13,5 @@ export const routes: Routes = [
       import('../core/security/security.module').then(m => m.SecurityModule),
   },
   {path: '', pathMatch: 'full', redirectTo: 'auth'},
-  {path: '**', component: PageNotFoundComponent},
+  {path: '**', component: NotFoundComponent},
 ];

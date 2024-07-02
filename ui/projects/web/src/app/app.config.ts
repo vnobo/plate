@@ -2,7 +2,7 @@ import {ApplicationConfig, importProvidersFrom, provideExperimentalZonelessChang
 import {provideRouter, TitleStrategy} from '@angular/router';
 
 import {routes} from './app.routes';
-import {PageTitleStrategy} from '../core/title-strategy.service';
+import {PageTitleStrategy} from './title-strategy.service';
 import {provideNzConfig} from 'ng-zorro-antd/core/config';
 import {ngZorroConfig} from '../shared/shared-zorro.module';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -14,7 +14,7 @@ import {
   withInterceptorsFromDi,
   withXsrfConfiguration,
 } from '@angular/common/http';
-import {authTokenInterceptor, defaultInterceptor,} from '../core/http.Interceptor';
+import {authTokenInterceptor, defaultInterceptor,} from './http.Interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [

@@ -4,7 +4,7 @@ import {AsyncPipe} from '@angular/common';
 import {NzBackTopModule} from 'ng-zorro-antd/back-top';
 import {NzSpinModule} from 'ng-zorro-antd/spin';
 import {debounceTime, distinctUntilChanged, tap} from 'rxjs';
-import {LoadingService} from '../core/loading.service';
+import {LoadingService} from './loading.service';
 import {toSignal} from '@angular/core/rxjs-interop';
 
 @Component({
