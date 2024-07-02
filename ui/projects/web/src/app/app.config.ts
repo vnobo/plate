@@ -12,8 +12,8 @@ import {
   withXsrfConfiguration,
 } from '@angular/common/http';
 import {BrowserStorageServerService, BrowserStorageService,} from 'plate-commons';
-import {authTokenInterceptor, defaultInterceptor} from './http.Interceptor';
-import {PageTitleStrategy} from './title-strategy.service';
+import {authTokenInterceptor, defaultInterceptor} from '../core/http.Interceptor';
+import {PageTitleStrategy} from '../core/title-strategy.service';
 import {routes} from './app.routes';
 
 export const ngZorroConfig: NzConfig = {

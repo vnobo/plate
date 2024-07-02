@@ -82,11 +82,11 @@
             ],
             "styles": [
               {
-                "input": "bootstrap/dist/css/bootstrap.css",
+                "input": "node_modules/bootstrap/dist/css/bootstrap.css",
                 "bundleName": "bootstrap"
               },
               {
-                "input": "bootstrap-icons/font/bootstrap-icons.css",
+                "input": "node_modules/bootstrap-icons/font/bootstrap-icons.css",
                 "bundleName": "icons"
               },
               {
@@ -96,7 +96,7 @@
             ],
             "scripts": [
               {
-                "input": "bootstrap/dist/js/bootstrap.bundle.js",
+                "input": "node_modules/bootstrap/dist/js/bootstrap.bundle.js",
                 "bundleName": "bootstrap"
               }
             ],

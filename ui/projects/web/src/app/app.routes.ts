@@ -1,5 +1,5 @@
 import {Routes} from '@angular/router';
-import {NotFoundComponent} from './not-found.component';
+import {NotFoundComponent} from '../core/not-found.component';
 
 export const routes: Routes = [
   {

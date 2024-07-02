@@ -1,6 +1,5 @@
 import {NgModule, Optional, SkipSelf} from '@angular/core';
-import {BrowserStorageService} from 'commons';
-
+import {BrowserStorageService} from 'plate-commons';
 import {SecurityRoutingModule} from './security-routing.module';
 
 @NgModule({
