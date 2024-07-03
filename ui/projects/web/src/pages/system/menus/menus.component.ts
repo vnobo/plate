@@ -58,11 +58,7 @@ export class MenusComponent implements OnInit, OnDestroy {
     return array;
   }
 
-  visitNode(
-    node: Menu,
-    hashMap: Record<string, boolean>,
-    array: Menu[]
-  ): void {
+  visitNode(node: Menu, hashMap: Record<string, boolean>, array: Menu[]): void {
     if (!hashMap[node.code ? node.code : '0']) {
       hashMap[node.code ? node.code : '0'] = true;
       array.push(node);
