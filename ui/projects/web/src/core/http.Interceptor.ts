@@ -5,7 +5,7 @@ import {AuthService} from './auth.service';
 import {LoadingService} from './loading.service';
 import {MessageService} from '../shared/message.service';
 import {Router} from '@angular/router';
-import {environment} from '../../environments/environment';
+import {environment} from '../environments/environment';
 
 export function defaultInterceptor(
   req: HttpRequest<unknown>,
