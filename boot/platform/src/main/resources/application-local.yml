@@ -6,7 +6,7 @@ logging:
     org.springframework.r2dbc: debug
     io.r2dbc.postgresql.PARAM: debug
 
-server.port: 8081
+server.port: 8080
 
 spring:
   application.name: plate

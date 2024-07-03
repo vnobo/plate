@@ -7,6 +7,9 @@ spring:
   threads.virtual.enabled: true
   main.keep-alive: true
   application.name: plate
+  rsocket.server:
+    mapping-path: /rsocket
+    transport: websocket
   webflux.format:
     time: "HH:mm:ss"
     date-time: "yyyy-MM-dd HH:mm:ss"
@@ -18,9 +21,7 @@ spring:
   codec:
     max-in-memory-size: 10MB
     log-request-details: false
-  cache:
-    type: redis
-    redis:
-      key-prefix: "plate:caches:"
-      time-to-live: 300s
-      enable-statistics: true
+  cache.redis:
+    key-prefix: "plate:caches:"
+    time-to-live: 5M
+    enable-statistics: true
