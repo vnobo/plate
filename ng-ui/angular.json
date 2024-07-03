@@ -1,0 +1,171 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "web": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "sass"
+        }
+      },
+      "root": "projects/web",
+      "sourceRoot": "projects/web/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "outputPath": "dist/web",
+            "index": "projects/web/src/index.html",
+            "browser": "projects/web/src/main.ts",
+            "polyfills": [],
+            "tsConfig": "projects/web/tsconfig.app.json",
+            "inlineStyleLanguage": "sass",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/web/public"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/@ant-design/icons-angular/src/inline-svg",
+                "output": "/assets/"
+              }
+            ],
+            "styles": [
+              {
+                "input": "node_modules/bootstrap/dist/css/bootstrap.css",
+                "inject": false,
+                "bundleName": "bootstrap"
+              },
+              {
+                "input": "node_modules/bootstrap-icons/font/bootstrap-icons.css",
+                "inject": false,
+                "bundleName": "icons"
+              },
+              {
+                "input": "projects/web/src/styles.sass",
+                "inject": false,
+                "bundleName": "main"
+              }
+            ],
+            "scripts": [
+              {
+                "input": "node_modules/bootstrap/dist/js/bootstrap.bundle.js",
+                "inject": false,
+                "bundleName": "bootstrap"
+              }
+            ],
+            "optimization": {
+              "scripts": true,
+              "styles": {
+                "minify": true,
+                "inlineCritical": true
+              },
+              "fonts": true
+            },
+            "server": "projects/web/src/main.server.ts",
+            "prerender": true,
+            "ssr": {
+              "entry": "projects/web/server.ts"
+            }
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "2kB",
+                  "maximumError": "4kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "web:build:production"
+            },
+            "development": {
+              "buildTarget": "web:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [],
+            "tsConfig": "projects/web/tsconfig.spec.json",
+            "inlineStyleLanguage": "sass",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "projects/web/public"
+              }
+            ],
+            "styles": [
+              "projects/web/src/styles.sass"
+            ],
+            "scripts": []
+          }
+        }
+      }
+    },
+    "commons": {
+      "projectType": "library",
+      "root": "projects/commons",
+      "sourceRoot": "projects/commons/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/commons/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/commons/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/commons/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "projects/commons/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": "3628d578-a7a7-4b2e-9d28-7fd3455050c7"
+  }
+}

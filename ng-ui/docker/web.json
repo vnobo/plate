@@ -1,0 +1,35 @@
+{
+  "listeners": {
+    "*:80": {
+      "pass": "routes"
+    }
+  },
+  "routes": [
+    {
+      "match": {
+        "uri": "/api/*"
+      },
+      "action": {
+        "proxy": "http://127.0.0.1:8080"
+      }
+    },
+    {
+      "action": {
+        "share": "/www/web$uri",
+        "index": "index.html",
+        "types": [
+          "image/*",
+          "font/*",
+          "text/*"
+        ],
+        "response_headers": {
+          "Cache-Control": "max-age=1209600"
+        },
+        "fallback": {
+          "share": "/www/web$uri",
+          "index": "index.html"
+        }
+      }
+    }
+  ]
+}

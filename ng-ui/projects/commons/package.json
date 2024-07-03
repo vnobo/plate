@@ -1,0 +1,31 @@
+{
+  "name": "plate-commons",
+  "version": "0.0.4",
+  "author": "Alex Bob <billbob.dong@gmail.com>",
+  "peerDependencies": {
+    "@angular/common": "^18.0.0",
+    "@angular/core": "^18.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false,
+  "description": "plate dev commons",
+  "main": "public-api.ts",
+  "scripts": {
+    "test": "ng test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vnobo/plate.git"
+  },
+  "keywords": [
+    "plate",
+    "commons"
+  ],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/vnobo/plate/issues"
+  },
+  "homepage": "https://github.com/vnobo/plate#readme"
+}
