@@ -1,0 +1,72 @@
+<nz-layout class="layout">
+  <nz-header
+    class="nz-header d-flex justify-content-between align-content-between">
+    <div class="logo mx-2"><i class="bi bi-p-circle-fill mx-2"></i>PLATE</div>
+    <ul class="header-menu ms-auto" nz-menu nzMode="horizontal" nzTheme="dark">
+      <li nz-menu-item><a routerLink="/home">我的</a></li>
+    </ul>
+  </nz-header>
+  <nz-layout>
+    <nz-sider
+      [nzCollapsedWidth]="0"
+      nzBreakpoint="md"
+      nzCollapsible
+      nzWidth="14.6rem">
+      <ul class="sider-menu" nz-menu nzMode="inline" nzTheme="dark">
+        <li nz-menu-item>
+          <i class="bi bi-p-circle-fill mx-2"></i><a routerLink="/home">首页</a>
+        </li>
+        @for (menu of menus$ | async; track menu) {
+          <li nz-submenu nzIcon="user" nzOpen nzTitle="{{ menu.name }}">
+            <ul>
+              @for (child of menu.children; track child) {
+                <li nz-menu-item>
+                  <a
+                    [state]="child"
+                    routerLink=".{{ child.path }}"
+                    routerLinkActive="active"
+                  >{{ child.name }}</a
+                  >
+                </li>
+              }
+            </ul>
+          </li>
+        }
+        <li
+          *ngFor="let menu of menus$ | async; index as i"
+          nz-submenu
+          nzIcon="user"
+          nzOpen
+          nzTitle="{{ menu.name }}">
+          <ul>
+            <li *ngFor="let child of menu.children; index as i" nz-menu-item>
+              <a
+                [state]="child"
+                routerLink=".{{ child.path }}"
+                routerLinkActive="active"
+              >{{ child.name }}</a
+              >
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </nz-sider>
+    <nz-layout class="inner-layout">
+      <nz-breadcrumb>
+        @for (breadcrumb of breadcrumbs; track breadcrumb) {
+          <nz-breadcrumb-item
+          ><a routerLink=".{{ breadcrumb.url }}">{{
+              breadcrumb.label
+            }}</a></nz-breadcrumb-item
+          >
+        }
+      </nz-breadcrumb>
+      <nz-content>
+        <div class="inner-content">
+          <router-outlet></router-outlet>
+        </div>
+      </nz-content>
+      <nz-footer>Ant Design ©2020 Implement By Angular</nz-footer>
+    </nz-layout>
+  </nz-layout>
+</nz-layout>

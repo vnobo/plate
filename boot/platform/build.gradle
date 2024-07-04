@@ -51,6 +51,7 @@ dependencies {
     implementation("com.google.guava:guava:33.+")
     implementation("com.github.f4b6a3:ulid-creator:5.+")
 
+    implementation("org.springframework.security:spring-security-rsocket")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 

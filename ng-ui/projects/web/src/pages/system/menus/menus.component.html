@@ -1,0 +1,66 @@
+<div class="row justify-content-between mb-2">
+  <div class="col-1">
+    <button (click)="menuFormModal.showModal()" class="btn btn-primary">
+      <i class="bi bi-plus me-1"></i>新增
+    </button>
+  </div>
+  <div class="col-auto float-end">
+    <button class="btn btn-primary">数据列</button>
+  </div>
+</div>
+<nz-table
+  #expandTable
+  [nzData]="listMenus"
+  [nzPageIndex]="0"
+  nzFrontPagination="false"
+  nzTableLayout="fixed">
+  <thead>
+  <tr>
+    <th>编码</th>
+    <th>排序</th>
+    <th>菜单名称</th>
+    <th>权限标识</th>
+    <th>菜单类型</th>
+    <th>组件路径</th>
+    <th>创建时间</th>
+    <th>操作</th>
+  </tr>
+  </thead>
+  <tbody>
+  <ng-container *ngFor="let data of expandTable.data">
+    <ng-container
+      *ngFor="let item of mapOfExpandedData[data.code ? data.code : '0']">
+      <tr *ngIf="(item.parent && item.parent.expand) || !item.parent">
+        <td
+          (nzExpandChange)="
+              collapse(
+                mapOfExpandedData[data.code ? data.code : '0'],
+                item,
+                $event
+              )
+            "
+          [(nzExpand)]="item.expand"
+          [nzIndentSize]="item.level! * 20"
+          [nzShowExpand]="!!item.children">
+          {{ item.code }}
+        </td>
+        <td>{{ item.sort }}</td>
+        <td>{{ item.name }}</td>
+        <td>{{ item.authority }}</td>
+        <td i18n="@@menuTypes">
+          {item.type, select,
+            FOLDER {FOLDER}
+            MENU {MENU}
+            LINK {LINK}
+            API {API}
+            }
+        </td>
+        <td>{{ item.path }}</td>
+        <td>{{ item.createdTime | date: 'short' }}</td>
+        <td>{{ item.path }}</td>
+      </tr>
+    </ng-container>
+  </ng-container>
+  </tbody>
+</nz-table>
+<app-menu-form #menuFormModal></app-menu-form>

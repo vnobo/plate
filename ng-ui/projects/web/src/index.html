@@ -1,13 +1,23 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Web</title>
-  <base href="/">
-  <meta content="width=device-width, initial-scale=1" name="viewport">
-  <link href="favicon.ico" rel="icon" type="image/x-icon">
-</head>
-<body>
-<app-root></app-root>
-</body>
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport" />
+    <meta content="ie=edge" http-equiv="X-UA-Compatible" />
+    <title>Loading page ....</title>
+    <base href="/" />
+    <link href="favicon.ico" rel="icon" type="image/x-icon" />
+  </head>
+  <body>
+    <app-root>
+      <div class="d-flex justify-content-center align-items-center h-100 bg-success">
+        <div class="d-block text-center">
+          <div class="spinner-border text-warning" role="status" style="width: 5rem; height: 5rem">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <span class="d-flex align-self-center" role="status" style="font-size: 3rem">Loading...</span>
+        </div>
+      </div>
+    </app-root>
+  </body>
 </html>

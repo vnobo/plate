@@ -7,7 +7,7 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "sass"
+          "style": "scss"
         }
       },
       "root": "projects/web",
@@ -20,9 +20,9 @@
             "outputPath": "dist/web",
             "index": "projects/web/src/index.html",
             "browser": "projects/web/src/main.ts",
-            "polyfills": [],
+            "polyfills": ["@angular/localize/init", "zone.js"],
             "tsConfig": "projects/web/tsconfig.app.json",
-            "inlineStyleLanguage": "sass",
+            "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
@@ -37,24 +37,20 @@
             "styles": [
               {
                 "input": "node_modules/bootstrap/dist/css/bootstrap.css",
-                "inject": false,
                 "bundleName": "bootstrap"
               },
               {
                 "input": "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-                "inject": false,
                 "bundleName": "icons"
               },
               {
-                "input": "projects/web/src/styles.sass",
-                "inject": false,
+                "input": "projects/web/src/styles.scss",
                 "bundleName": "main"
               }
             ],
             "scripts": [
               {
                 "input": "node_modules/bootstrap/dist/js/bootstrap.bundle.js",
-                "inject": false,
                 "bundleName": "bootstrap"
               }
             ],
@@ -91,7 +87,13 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/web/environments/environment.ts",
+                  "with": "projects/web/environments/environment.development.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -103,7 +105,8 @@
               "buildTarget": "web:build:production"
             },
             "development": {
-              "buildTarget": "web:build:development"
+              "buildTarget": "web:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
@@ -114,7 +117,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": [],
+            "polyfills": ["@angular/localize/init", "zone.js", "zone.js/testing"],
             "tsConfig": "projects/web/tsconfig.spec.json",
             "inlineStyleLanguage": "sass",
             "assets": [
@@ -123,9 +126,7 @@
                 "input": "projects/web/public"
               }
             ],
-            "styles": [
-              "projects/web/src/styles.sass"
-            ],
+            "styles": ["projects/web/src/styles.sass"],
             "scripts": []
           }
         }
@@ -156,10 +157,7 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "tsConfig": "projects/commons/tsconfig.spec.json",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ]
+            "polyfills": ["zone.js", "zone.js/testing"]
           }
         }
       }

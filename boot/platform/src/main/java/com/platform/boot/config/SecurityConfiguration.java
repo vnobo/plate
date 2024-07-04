@@ -15,10 +15,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
+import org.springframework.security.config.annotation.rsocket.RSocketSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.rsocket.core.PayloadSocketAcceptorInterceptor;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.HttpBasicServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.authentication.logout.*;
@@ -57,9 +59,16 @@ public class SecurityConfiguration {
     }
 
     @Bean
+    public PayloadSocketAcceptorInterceptor rsocketInterceptor(RSocketSecurity rsocket) {
+        rsocket.authorizePayload(authorize -> authorize.anyRequest().permitAll().anyExchange().permitAll())
+                .simpleAuthentication(Customizer.withDefaults());
+        return rsocket.build();
+    }
+
+    @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http.authorizeExchange(exchange -> {
-            exchange.pathMatchers("/captcha/code", "/oauth2/qr/code").permitAll();
+            exchange.pathMatchers("/captcha/code", "/oauth2/qr/code","/command/v1/send").permitAll();
             exchange.matchers(PathRequest.toStaticResources().atCommonLocations()).permitAll();
             exchange.pathMatchers("/tenants/**", "/users/**", "/groups/**")
                     .hasAnyRole("SYSTEM_ADMINISTRATORS", "ADMINISTRATORS");
