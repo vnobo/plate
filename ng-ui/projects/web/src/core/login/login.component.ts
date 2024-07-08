@@ -1,10 +1,10 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators,} from '@angular/forms';
-import {Credentials, LoginService} from './login.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {Subject, takeUntil} from 'rxjs';
-import {NzFormModule} from 'ng-zorro-antd/form';
-import {NgIf} from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Credentials, LoginService } from './login.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-login',
@@ -29,16 +29,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private loginSer: LoginService
   ) {
     this.loginForm = this.formBuilder.group({
-      username: new FormControl('', [
-        Validators.required,
-        Validators.minLength(5),
-        Validators.maxLength(64),
-      ]),
-      password: new FormControl('', [
-        Validators.required,
-        Validators.minLength(6),
-        Validators.maxLength(64),
-      ]),
+      username: new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(64)]),
+      password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(64)]),
       remember: new FormControl(false),
     });
   }
@@ -68,13 +60,14 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   login(credentials: Credentials) {
-    const login = this.loginSer.login(credentials);
-    const result = login.pipe(takeUntil(this.componentDestroyed$));
-    result.subscribe({
-      next: () => {
-        this.router.navigate(['/home'], {relativeTo: this.route}).then();
-      },
-      error: e => console.log(e),
-    });
+    this.loginSer
+      .login(credentials)
+      .pipe(takeUntil(this.componentDestroyed$), debounceTime(100), distinctUntilChanged())
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/home'], { relativeTo: this.route }).then();
+        },
+        error: e => console.log(e),
+      });
   }
 }

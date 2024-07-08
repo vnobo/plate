@@ -7,6 +7,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { NzBackTopModule } from 'ng-zorro-antd/back-top';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { LoadingService } from '../core/loading.service';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +20,7 @@ export class AppComponent {
   loadingShow = toSignal(this.loading.progress$, { initialValue: false });
   progressShow = signal(true);
   constructor(private loading: LoadingService, private router: Router) {
-    router.events.subscribe(event => {
+    router.events.pipe(debounceTime(100), distinctUntilChanged()).subscribe(event => {
       if (event instanceof NavigationStart) {
         this.progressShow.set(true);
       }

@@ -51,7 +51,6 @@ export class LoginService {
   getRememberMe() {
     let creStr = this.storage.get(this.storageKey);
     if (creStr) {
-      console.log(creStr);
       creStr = atob(creStr);
       this.credentials = JSON.parse(creStr);
     }
