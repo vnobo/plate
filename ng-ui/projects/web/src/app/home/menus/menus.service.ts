@@ -7,6 +7,9 @@ import { Menu } from './menu.types';
   providedIn: 'root',
 })
 export class MenusService {
+  pipe(arg0: any) {
+    throw new Error('Method not implemented.');
+  }
   constructor(private http: HttpClient) {
   }
 

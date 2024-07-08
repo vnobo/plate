@@ -35,11 +35,12 @@
               }
             ],
             "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.css",
-              "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-              "node_modules/ng-zorro-antd/ng-zorro-antd.css",
-              "node_modules/ng-zorro-antd/ng-zorro-antd.dark.css",
-              "node_modules/ng-zorro-antd/ng-zorro-antd.compact.css",
+              "@angular/material/prebuilt-themes/magenta-violet.css",
+              "bootstrap/dist/css/bootstrap.css",
+              "bootstrap-icons/font/bootstrap-icons.css",
+              "ng-zorro-antd/ng-zorro-antd.css",
+              "ng-zorro-antd/ng-zorro-antd.dark.css",
+              "ng-zorro-antd/ng-zorro-antd.compact.css",
               "projects/web/src/styles.scss"
             ],
             "scripts": ["node_modules/bootstrap/dist/js/bootstrap.bundle.js"],
@@ -115,7 +116,7 @@
                 "input": "projects/web/public"
               }
             ],
-            "styles": ["projects/web/src/styles.sass"],
+            "styles": ["@angular/material/prebuilt-themes/magenta-violet.css", "projects/web/src/styles.sass"],
             "scripts": []
           }
         }

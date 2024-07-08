@@ -20,7 +20,7 @@ import {
   withXsrfConfiguration,
 } from '@angular/common/http';
 import { authTokenInterceptor, defaultInterceptor } from '../core/http.Interceptor';
-import { BrowserStorageServerService, BrowserStorageService } from 'plate-commons';
+import { BrowserStorageService } from 'plate-commons';
 import { en_US, NZ_I18N, zh_CN } from 'ng-zorro-antd/i18n';
 
 export const ngZorroConfig: NzConfig = {
@@ -48,7 +48,7 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     { provide: TitleStrategy, useClass: PageTitleStrategy },
-    { provide: BrowserStorageService, useClass: BrowserStorageServerService },
+    { provide: BrowserStorageService, useClass: BrowserStorageService },
     {
       provide: NZ_I18N,
       useFactory: () => {
@@ -64,6 +64,6 @@ export const appConfig: ApplicationConfig = {
       },
     },
     provideExperimentalZonelessChangeDetection(),
-    provideRouter(routes, withComponentInputBinding()),
+    provideRouter(routes, withComponentInputBinding()), provideAnimationsAsync(),
   ],
 };

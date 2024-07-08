@@ -9,16 +9,19 @@
 
 .nz-header {
   padding: 0 !important;
+  a {
+    font-size: 0.9rem;
+  }
 }
 
 .logo {
   width: 14rem;
   color: white;
   float: left;
-  font-size: 2rem;
+  font-size: 1.4rem;
   justify-content: center;
   align-items: center;
-  padding-left: 2rem;
+  padding-left: 0.5rem;
 }
 
 .header-menu {

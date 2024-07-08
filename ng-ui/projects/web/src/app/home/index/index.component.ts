@@ -1,4 +1,4 @@
-import { Component, signal, Type } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, Type } from '@angular/core';
 import {
   ActivatedRoute,
   NavigationEnd,
@@ -11,7 +11,7 @@ import {
 } from '@angular/router';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { distinctUntilChanged, filter, map } from 'rxjs';
+import { distinctUntilChanged, filter, map, Subject, takeUntil } from 'rxjs';
 import { Menu } from '../menus/menu.types';
 import { MenusService } from '../menus/menus.service';
 import { CommonModule } from '@angular/common';
@@ -30,11 +30,18 @@ export interface Breadcrumb {
   templateUrl: './index.component.html',
   styleUrl: './index.component.scss',
 })
-export class IndexComponent {
+export class IndexComponent implements OnInit, OnDestroy {
   menus = signal([] as Menu[]);
-  breadcrumbs: Breadcrumb[] = [];
+  breadcrumbs = signal([] as Breadcrumb[]);
+
+  private _subject: Subject<void> = new Subject<void>();
 
   constructor(private router: Router, private activatedRoute: ActivatedRoute, private menusService: MenusService) {}
+
+  ngOnDestroy(): void {
+    this._subject.next();
+    this._subject.complete();
+  }
 
   ngOnInit() {
     this.initMenu();
@@ -46,18 +53,25 @@ export class IndexComponent {
       pcode: '0',
       tenantCode: '0',
     };
-    this.menusService.getMeMenus(menuRequest);
+    this.menusService
+      .getMeMenus(menuRequest)
+      .pipe(takeUntil(this._subject))
+      .subscribe(
+        menus => this.menus.set(menus),
+        err => console.log(err)
+      );
   }
 
   initBreadcrumb() {
-    this.breadcrumbs = this.getBreadcrumbs(this.activatedRoute.root);
+    this.breadcrumbs.set(this.getBreadcrumbs(this.activatedRoute.root));
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
         distinctUntilChanged(),
-        map(() => this.getBreadcrumbs(this.activatedRoute.root))
+        map(() => this.getBreadcrumbs(this.activatedRoute.root)),
+        takeUntil(this._subject)
       )
-      .subscribe(event => (this.breadcrumbs = event));
+      .subscribe(event => this.breadcrumbs.set(event));
   }
 
   getBreadcrumbs(route: ActivatedRoute, url = '', breads: Breadcrumb[] = []): Breadcrumb[] {
