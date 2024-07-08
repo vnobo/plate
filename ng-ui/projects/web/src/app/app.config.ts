@@ -1,5 +1,11 @@
-import { ApplicationConfig, importProvidersFrom, provideExperimentalZonelessChangeDetection } from '@angular/core';
-import { provideRouter, TitleStrategy } from '@angular/router';
+import {
+  ApplicationConfig,
+  importProvidersFrom,
+  inject,
+  LOCALE_ID,
+  provideExperimentalZonelessChangeDetection,
+} from '@angular/core';
+import { provideRouter, TitleStrategy, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
 import { NzConfig, provideNzConfig } from 'ng-zorro-antd/core/config';
@@ -15,6 +21,7 @@ import {
 } from '@angular/common/http';
 import { authTokenInterceptor, defaultInterceptor } from '../core/http.Interceptor';
 import { BrowserStorageServerService, BrowserStorageService } from 'plate-commons';
+import { en_US, NZ_I18N, zh_CN } from 'ng-zorro-antd/i18n';
 
 export const ngZorroConfig: NzConfig = {
   message: {
@@ -23,7 +30,7 @@ export const ngZorroConfig: NzConfig = {
     nzAnimate: true,
     nzPauseOnHover: true,
   },
-  notification: {nzTop: 240},
+  notification: { nzTop: 240 },
 };
 
 export const appConfig: ApplicationConfig = {
@@ -40,8 +47,23 @@ export const appConfig: ApplicationConfig = {
         headerName: 'X-XSRF-TOKEN',
       })
     ),
-    {provide: TitleStrategy, useClass: PageTitleStrategy},
-    {provide: BrowserStorageService, useClass: BrowserStorageServerService},
-    provideExperimentalZonelessChangeDetection(), provideRouter(routes)
+    { provide: TitleStrategy, useClass: PageTitleStrategy },
+    { provide: BrowserStorageService, useClass: BrowserStorageServerService },
+    {
+      provide: NZ_I18N,
+      useFactory: () => {
+        const localId = inject(LOCALE_ID);
+        switch (localId) {
+          case 'en':
+            return en_US;
+          case 'zh':
+            return zh_CN;
+          default:
+            return zh_CN;
+        }
+      },
+    },
+    provideExperimentalZonelessChangeDetection(),
+    provideRouter(routes, withComponentInputBinding()),
   ],
 };

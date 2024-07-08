@@ -1,7 +1,7 @@
-import {inject, Injectable} from '@angular/core';
-import {Subject} from 'rxjs';
-import {HttpErrorResponse} from '@angular/common/http';
-import {CanActivateChildFn, CanActivateFn, CanMatchFn, Router,} from '@angular/router';
+import { inject, Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { CanActivateChildFn, CanActivateFn, CanMatchFn, Router } from '@angular/router';
 
 export const authGuard:
   | CanMatchFn
@@ -15,7 +15,7 @@ export const authGuard:
   return router.parseUrl(auth.loginUrl);
 };
 
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   public readonly loginUrl = '/auth/login';
   isLoggedIn = false;
@@ -32,7 +32,6 @@ export class AuthService {
     }
     return this.token;
   }
-
   login(token: string) {
     this.isLoggedIn = true;
     this.authenticatedSource.next(true);

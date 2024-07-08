@@ -37,6 +37,9 @@
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.css",
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
+              "node_modules/ng-zorro-antd/ng-zorro-antd.css",
+              "node_modules/ng-zorro-antd/ng-zorro-antd.dark.css",
+              "node_modules/ng-zorro-antd/ng-zorro-antd.compact.css",
               "projects/web/src/styles.scss"
             ],
             "scripts": ["node_modules/bootstrap/dist/js/bootstrap.bundle.js"],

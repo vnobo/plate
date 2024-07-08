@@ -1,12 +1,11 @@
-import {AsyncPipe} from '@angular/common';
-import {Component} from '@angular/core';
-import {RouterOutlet} from '@angular/router';
-import {toSignal} from '@angular/core/rxjs-interop';
+import { AsyncPipe } from '@angular/common';
+import { Component } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { RouterOutlet } from '@angular/router';
 
-import {NzBackTopModule} from 'ng-zorro-antd/back-top';
-import {NzSpinModule} from 'ng-zorro-antd/spin';
-import {debounceTime, distinctUntilChanged, tap} from 'rxjs';
-import {LoadingService} from '../core/loading.service';
+import { NzBackTopModule } from 'ng-zorro-antd/back-top';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { LoadingService } from '../core/loading.service';
 
 @Component({
   selector: 'app-root',
@@ -16,18 +15,7 @@ import {LoadingService} from '../core/loading.service';
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  loadingShow = toSignal(
-    this.loading.progress$.pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      tap(res => console.log(`Loading show is: ${res}`))
-    ),
-    { initialValue: false }
-  );
+  loadingShow = toSignal(this.loading.progress$, { initialValue: true });
 
   constructor(private loading: LoadingService) {}
-
-  ngOnInit(): void {
-    this.loading.show();
-  }
 }
