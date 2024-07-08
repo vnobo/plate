@@ -1,6 +1,7 @@
 package com.platform.boot.security;
 
 import com.platform.boot.commons.exception.RestServerException;
+import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
 import com.platform.boot.security.core.AuthenticationToken;
 import jakarta.validation.Valid;
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -29,10 +33,17 @@ public class SecurityController {
     private final PasswordEncoder passwordEncoder;
     private final ServerOAuth2AuthorizedClientRepository clientRepository;
 
+    @GetMapping("/realms/issuer")
+    public Mono<Map<String,Object>> issuer(SecurityDetails principal) {
+        return ReactiveSecurityContextHolder.getContext().map(securityContext -> BeanUtils.beanToMap(securityContext
+                .getAuthentication().getDetails()));
+    }
     @GetMapping("token")
     public Mono<AuthenticationToken> token(WebSession session, Authentication authentication) {
         return Mono.defer(() -> Mono.just(AuthenticationToken.build(session, authentication)));
     }
+
+
 
     @GetMapping("csrf")
     public Mono<CsrfToken> csrfToken() {

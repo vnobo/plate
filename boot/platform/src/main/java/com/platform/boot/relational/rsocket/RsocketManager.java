@@ -2,6 +2,7 @@ package com.platform.boot.relational.rsocket;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.messaging.rsocket.RSocketRequester;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -47,13 +48,15 @@ public class RsocketManager {
         }
     }
 
+    @Scheduled(fixedDelay = 10000)
     public void taskTest() {
         if (this.clients.isEmpty() || !this.clients.containsKey("CommandClient")) {
             return;
         }
         ConnectedClient connectedClient = this.clients.get("CommandClient");
-        connectedClient.getRequester().route("user.message")
-                .data(MessageOut.of(MessageType.COMMAND, "test", "test").status(200))
-                .send().subscribe();
+        connectedClient.getRequester().route("request.sender")
+                .data(MessageIn.of(MessageType.COMMAND, "test", "test"))
+                .retrieveMono(MessageOut.class).subscribe(out ->
+                        log.debug("CommandClient send message result : {}", out));
     }
 }

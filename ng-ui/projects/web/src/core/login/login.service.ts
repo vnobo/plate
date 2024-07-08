@@ -1,8 +1,8 @@
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {Injectable} from '@angular/core';
-import {Observable, tap, throwError} from 'rxjs';
-import {AuthService} from '../../core/auth.service';
-import {BrowserStorageService} from 'plate-commons';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable, tap, throwError } from 'rxjs';
+import { BrowserStorageService } from 'plate-commons';
+import { AuthService } from '../auth.service';
 
 export interface Authentication {
   token: string;
@@ -23,31 +23,21 @@ export class LoginService {
 
   private credentials: Credentials | null | undefined = null;
 
-  constructor(
-    private http: HttpClient,
-    private auth: AuthService,
-    private storage: BrowserStorageService
-  ) {
-  }
+  constructor(private http: HttpClient, private auth: AuthService, private storage: BrowserStorageService) {}
 
   login(credentials: Credentials): Observable<Authentication> {
-    if (
-      credentials.username == undefined &&
-      credentials.password == undefined
-    ) {
+    if (credentials.username == undefined && credentials.password == undefined) {
       return throwError(() => '用户名和密码不能为[undefined]!');
     }
     const headers: HttpHeaders = new HttpHeaders(
       credentials
         ? {
-          authorization:
-            'Basic ' +
-            btoa(credentials.username + ':' + credentials.password),
-        }
+            authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
+          }
         : {}
     );
     return this.http
-      .get<Authentication>('/oauth2/token', {headers: headers})
+      .get<Authentication>('/oauth2/token', { headers: headers })
       .pipe(tap(authentication => this.auth.login(authentication.token)));
   }
 

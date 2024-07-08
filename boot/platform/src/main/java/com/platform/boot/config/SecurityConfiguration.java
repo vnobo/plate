@@ -15,11 +15,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
+import org.springframework.security.config.annotation.rsocket.EnableRSocketSecurity;
 import org.springframework.security.config.annotation.rsocket.RSocketSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtException;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoders;
 import org.springframework.security.rsocket.core.PayloadSocketAcceptorInterceptor;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.HttpBasicServerAuthenticationEntryPoint;
@@ -48,6 +53,7 @@ import static com.platform.boot.config.SessionConfiguration.X_REQUESTED_WITH;
  */
 @Configuration(proxyBeanMethods = false)
 @EnableReactiveMethodSecurity
+@EnableRSocketSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
@@ -60,15 +66,24 @@ public class SecurityConfiguration {
 
     @Bean
     public PayloadSocketAcceptorInterceptor rsocketInterceptor(RSocketSecurity rsocket) {
-        rsocket.authorizePayload(authorize -> authorize.anyRequest().permitAll().anyExchange().permitAll())
+        rsocket.authorizePayload(authorize ->
+                        authorize
+                                .route("request.stream").authenticated()
+                                .anyRequest().authenticated()
+                                .anyExchange().permitAll()
+                )
                 .simpleAuthentication(Customizer.withDefaults());
         return rsocket.build();
+    }
+
+    public ReactiveJwtDecoder jwtDecoder() {
+        return ReactiveJwtDecoders.fromIssuerLocation("http://localhost:8080/oauth2/realms/issuer");
     }
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http.authorizeExchange(exchange -> {
-            exchange.pathMatchers("/captcha/code", "/oauth2/qr/code","/command/v1/send").permitAll();
+            exchange.pathMatchers("/captcha/code", "/oauth2/qr/code","/oauth2/realms/issuer/**").permitAll();
             exchange.matchers(PathRequest.toStaticResources().atCommonLocations()).permitAll();
             exchange.pathMatchers("/tenants/**", "/users/**", "/groups/**")
                     .hasAnyRole("SYSTEM_ADMINISTRATORS", "ADMINISTRATORS");
@@ -83,6 +98,13 @@ public class SecurityConfiguration {
         http.logout(this::setLogout);
         http.oauth2Login(oAuth2LoginSpec -> oAuth2LoginSpec.authenticationSuccessHandler(authenticationSuccessHandler));
         return http.build();
+    }
+
+    static class ReactiveJwtDecoderToken implements ReactiveJwtDecoder {
+        @Override
+        public Mono<Jwt> decode(String token) throws JwtException {
+            return null;
+        }
     }
 
     private void setCsrfSpec(ServerHttpSecurity.CsrfSpec csrfSpec) {

@@ -1,11 +1,11 @@
-import {inject} from '@angular/core';
-import {HttpEvent, HttpHandlerFn, HttpRequest} from '@angular/common/http';
-import {catchError, finalize, Observable, throwError, timeout} from 'rxjs';
-import {AuthService} from './auth.service';
-import {LoadingService} from './loading.service';
-import {MessageService} from '../shared/message.service';
-import {Router} from '@angular/router';
-import {environment} from '../../environments/environment';
+import { inject } from '@angular/core';
+import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
+import { catchError, finalize, Observable, throwError, timeout } from 'rxjs';
+import { LoadingService } from './loading.service';
+import { MessageService } from '../shared/message.service';
+import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 export function defaultInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
   const _loading = inject(LoadingService);
