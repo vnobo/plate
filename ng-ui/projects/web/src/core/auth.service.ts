@@ -25,7 +25,7 @@ export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = () => 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   readonly loginUrl = '/auth/login';
-  _storage = inject(SessionStorageService);
+  _storage: SessionStorageService = inject(SessionStorageService);
   private readonly authenticationKey = 'authentication';
   private isLoggedIn = signal(false);
   authenticated$: Observable<boolean> = toObservable(this.isLoggedIn);
@@ -60,7 +60,7 @@ export class AuthService {
 
   authenticationLoadStorage(): Authentication | null {
     const authenticationJsonStr = this._storage.get(this.authenticationKey);
-    if (authenticationJsonStr && authenticationJsonStr != null && authenticationJsonStr != 'null') {
+    if (authenticationJsonStr) {
       const authentication: Authentication = JSON.parse(authenticationJsonStr);
       const lastAccessTime = dayjs(authentication.lastAccessTime);
       if (dayjs().diff(lastAccessTime) < authentication.expires) {

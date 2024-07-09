@@ -26,7 +26,6 @@ export class LoginService {
       this._auth.login(authentication);
       return authentication;
     }
-    this.logout();
     return null;
   }
 
