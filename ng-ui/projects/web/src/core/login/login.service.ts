@@ -1,14 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable, tap, throwError } from 'rxjs';
+import { inject, Injectable, signal } from '@angular/core';
 import { BrowserStorageService } from 'plate-commons';
-import { AuthService } from '../auth.service';
-
-export interface Authentication {
-  token: string;
-  expires: number;
-  lastAccessTime: Date;
-}
+import { tap } from 'rxjs';
+import { Authentication, AuthService } from '../auth.service';
 
 export interface Credentials {
   password: string | null | undefined;
@@ -20,15 +14,12 @@ export interface Credentials {
 })
 export class LoginService {
   private readonly storageKey = 'credentials';
+  _http = inject(HttpClient);
+  _storage = inject(BrowserStorageService);
+  _auth = inject(AuthService);
+  private credentials = signal({} as Credentials);
 
-  private credentials: Credentials | null | undefined = null;
-
-  constructor(private http: HttpClient, private auth: AuthService, private storage: BrowserStorageService) {}
-
-  login(credentials: Credentials): Observable<Authentication> {
-    if (credentials.username == undefined && credentials.password == undefined) {
-      return throwError(() => '用户名和密码不能为[undefined]!');
-    }
+  login(credentials: Credentials) {
     const headers: HttpHeaders = new HttpHeaders(
       credentials
         ? {
@@ -36,30 +27,30 @@ export class LoginService {
           }
         : {}
     );
-    return this.http
+    return this._http
       .get<Authentication>('/oauth2/token', { headers: headers })
-      .pipe(tap(authentication => this.auth.login(authentication.token)));
+      .pipe(tap(authentication => this._auth.login(authentication)));
   }
 
   setRememberMe(credentials: Credentials) {
     let creStr = JSON.stringify(credentials);
     creStr = btoa(creStr);
-    this.storage.set(this.storageKey, creStr);
-    this.credentials = credentials;
+    this._storage.set(this.storageKey, creStr);
+    this.credentials.set(credentials);
   }
 
   getRememberMe() {
-    let creStr = this.storage.get(this.storageKey);
+    let creStr = this._storage.get(this.storageKey);
     if (creStr) {
       creStr = atob(creStr);
-      this.credentials = JSON.parse(creStr);
+      this.credentials.set(JSON.parse(creStr));
     }
-    return this.credentials;
+    return this.credentials();
   }
 
   logout() {
-    this.auth.logout();
-    this.storage.remove(this.storageKey);
-    this.credentials = null;
+    this._auth.logout();
+    this._storage.remove(this.storageKey);
+    this.credentials.set({} as Credentials);
   }
 }

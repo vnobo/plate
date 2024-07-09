@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Credentials, LoginService } from './login.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,20 +14,15 @@ import { NgIf } from '@angular/common';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
+  _loginSer = inject(LoginService);
   loginForm: FormGroup<{
     username: FormControl<string | null>;
     password: FormControl<string | null>;
     remember: FormControl<boolean | null>;
   }>;
-
   private componentDestroyed$: Subject<void> = new Subject<void>();
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private formBuilder: FormBuilder,
-    private loginSer: LoginService
-  ) {
+  constructor(private router: Router, private route: ActivatedRoute, private formBuilder: FormBuilder) {
     this.loginForm = this.formBuilder.group({
       username: new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(64)]),
       password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(64)]),
@@ -42,14 +37,17 @@ export class LoginComponent implements OnInit, OnDestroy {
     };
 
     if (this.loginForm.value.remember) {
-      this.loginSer.setRememberMe(credentials);
+      this._loginSer.setRememberMe(credentials);
     }
     this.login(credentials);
   }
 
   ngOnInit(): void {
-    const credentials = this.loginSer.getRememberMe();
-    if (credentials && credentials != null) {
+    const credentials = this._loginSer.getRememberMe();
+    if (credentials) {
+      if (credentials.username == undefined && credentials.password == undefined) {
+        return;
+      }
       this.login(credentials);
     }
   }
@@ -60,7 +58,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   login(credentials: Credentials) {
-    this.loginSer
+    this._loginSer
       .login(credentials)
       .pipe(takeUntil(this.componentDestroyed$), debounceTime(100), distinctUntilChanged())
       .subscribe({

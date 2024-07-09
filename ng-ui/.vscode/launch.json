@@ -15,13 +15,6 @@
       "request": "launch",
       "preLaunchTask": "npm: test",
       "url": "http://localhost:9876/debug.html"
-    },
-    {
-      "type": "msedge",
-      "request": "launch",
-      "name": "Launch Edge against localhost",
-      "url": "http://localhost:4200",
-      "webRoot": "${workspaceFolder}"
     }
   ]
 }

@@ -20,8 +20,15 @@ import {
   withXsrfConfiguration,
 } from '@angular/common/http';
 import { authTokenInterceptor, defaultInterceptor } from '../core/http.Interceptor';
-import { BrowserStorageService } from 'plate-commons';
+import { BrowserStorageService, SessionStorageService } from 'plate-commons';
 import { en_US, NZ_I18N, zh_CN } from 'ng-zorro-antd/i18n';
+
+import dayjs from 'dayjs';
+import isLeapYear from 'dayjs/plugin/isLeapYear';
+import 'dayjs/locale/zh-cn';
+
+dayjs.extend(isLeapYear); 
+dayjs.locale('zh-cn');
 
 export const ngZorroConfig: NzConfig = {
   message: {
@@ -49,6 +56,7 @@ export const appConfig: ApplicationConfig = {
     ),
     { provide: TitleStrategy, useClass: PageTitleStrategy },
     { provide: BrowserStorageService, useClass: BrowserStorageService },
+    { provide: SessionStorageService, useClass: SessionStorageService },
     {
       provide: NZ_I18N,
       useFactory: () => {
@@ -64,6 +72,7 @@ export const appConfig: ApplicationConfig = {
       },
     },
     provideExperimentalZonelessChangeDetection(),
-    provideRouter(routes, withComponentInputBinding()), provideAnimationsAsync(),
+    provideRouter(routes, withComponentInputBinding()),
+    provideAnimationsAsync(),
   ],
 };

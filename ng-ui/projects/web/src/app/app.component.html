@@ -1,4 +1,6 @@
-<mat-progress-bar *ngIf="loadingShow()" mode="query"></mat-progress-bar>
+<div class="fixed-top">
+  <mat-progress-bar *ngIf="loadingShow()" mode="query"></mat-progress-bar>
+</div>
 <div class="layout">
   <nz-spin [nzSpinning]="progressShow()">
     <router-outlet></router-outlet>

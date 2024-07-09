@@ -7,7 +7,9 @@
     "types": [
       "node",
       "@angular/localize"
-    ]
+    ],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
   },
   "files": [
     "src/main.ts",

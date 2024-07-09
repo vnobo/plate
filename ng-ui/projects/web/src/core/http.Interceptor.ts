@@ -39,7 +39,7 @@ export function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandle
   const _auth = inject(AuthService);
   const _route = inject(Router);
 
-  if (!_auth.isLoggedIn) {
+  if (!_auth.isLogged()) {
     return next(req);
   }
 
