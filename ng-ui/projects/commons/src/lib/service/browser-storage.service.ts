@@ -12,11 +12,16 @@ export class BrowserStorageService {
   constructor(@Inject(BROWSER_STORAGE) public storage: Storage) {}
 
   get(key: string) {
-    return this.storage.getItem(key);
+    const itemStr = this.storage.getItem(key);
+    if (itemStr) {
+      return atob(itemStr);
+    }
+    return null;
   }
 
   set(key: string, value: string) {
-    this.storage.setItem(key, value);
+    const btoaStr = btoa(value);
+    this.storage.setItem(key, btoaStr);
   }
 
   remove(key: string) {

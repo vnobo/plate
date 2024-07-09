@@ -1,6 +1,6 @@
 {
   "name": "plate-commons",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "author": "Alex Bob <billbob.dong@gmail.com>",
   "peerDependencies": {
     "@angular/common": "^18.0.0",

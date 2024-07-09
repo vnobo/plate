@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { BrowserStorageService } from 'plate-commons';
-import { tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Authentication, AuthService } from '../auth.service';
 
 export interface Credentials {
@@ -19,7 +19,18 @@ export class LoginService {
   _auth = inject(AuthService);
   private credentials = signal({} as Credentials);
 
-  login(credentials: Credentials) {
+  autoLogin(): Authentication | null {
+    const authentication = this._auth.authenticationLoadStorage();
+    if (authentication) {
+      authentication.lastAccessTime = new Date();
+      this._auth.login(authentication);
+      return authentication;
+    }
+    this.logout();
+    return null;
+  }
+
+  login(credentials: Credentials): Observable<Authentication> {
     const headers: HttpHeaders = new HttpHeaders(
       credentials
         ? {
@@ -34,7 +45,6 @@ export class LoginService {
 
   setRememberMe(credentials: Credentials) {
     let creStr = JSON.stringify(credentials);
-    creStr = btoa(creStr);
     this._storage.set(this.storageKey, creStr);
     this.credentials.set(credentials);
   }
@@ -42,7 +52,6 @@ export class LoginService {
   getRememberMe() {
     let creStr = this._storage.get(this.storageKey);
     if (creStr) {
-      creStr = atob(creStr);
       this.credentials.set(JSON.parse(creStr));
     }
     return this.credentials();

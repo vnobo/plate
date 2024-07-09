@@ -33,19 +33,11 @@ export class AuthService {
   authentication$: Observable<Authentication> = toObservable(this.authentication);
 
   isLogged(): boolean {
-    const loadResult = this.authenticationLoadStorage();
-    if (loadResult) {
-      console.log('自动认证: {}', loadResult);
-    }
     return this.isLoggedIn();
   }
 
   authToken(): string {
     if (this.isLoggedIn()) {
-      return this.authentication().token;
-    }
-    const loadResult = this.authenticationLoadStorage();
-    if (loadResult) {
       return this.authentication().token;
     }
     throw new HttpErrorResponse({
@@ -54,7 +46,7 @@ export class AuthService {
     });
   }
 
-  login(authentication: Authentication) {
+  login(authentication: Authentication): void {
     this.isLoggedIn.set(true);
     this.authentication.set(authentication);
     this._storage.set(this.authenticationKey, JSON.stringify(authentication));
@@ -66,19 +58,15 @@ export class AuthService {
     this._storage.remove(this.authenticationKey);
   }
 
-  private authenticationLoadStorage() {
+  authenticationLoadStorage(): Authentication | null {
     const authenticationJsonStr = this._storage.get(this.authenticationKey);
     if (authenticationJsonStr && authenticationJsonStr != null && authenticationJsonStr != 'null') {
       const authentication: Authentication = JSON.parse(authenticationJsonStr);
       const lastAccessTime = dayjs(authentication.lastAccessTime);
-      if (dayjs().diff(lastAccessTime) > authentication.expires) {
-        this.logout();
-        return false;
+      if (dayjs().diff(lastAccessTime) < authentication.expires) {
+        return authentication;
       }
-      authentication.lastAccessTime = new Date();
-      this.login(authentication);
-      return true;
     }
-    return false;
+    return null;
   }
 }
