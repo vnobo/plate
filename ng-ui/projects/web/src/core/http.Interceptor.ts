@@ -23,12 +23,7 @@ export function defaultInterceptor(req: HttpRequest<unknown>, next: HttpHandlerF
   return next(xRequestedReq).pipe(
     timeout({ first: 5_000, each: 10_000 }),
     catchError(errorResponse => {
-      if (errorResponse.error.message) {
-        _message.error(errorResponse.error.message);
-        return throwError(() => errorResponse.error.message);
-      }
-      console.error($localize`:@@errorMessage:Backend returned code ${errorResponse.status},
-       body was: ${errorResponse.message}`);
+      _message.error(errorResponse.message);
       return throwError(() => errorResponse);
     }),
     finalize(() => _loading.hide())

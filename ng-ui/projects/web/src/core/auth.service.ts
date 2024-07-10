@@ -80,6 +80,7 @@ export class AuthService {
       if (diffSec < authentication.expires) {
         return authentication;
       }
+      this._storage.remove(this.authenticationKey);
     }
     return null;
   }

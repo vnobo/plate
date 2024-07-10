@@ -31,13 +31,9 @@ export class LoginService {
   }
 
   login(credentials: Credentials): Observable<Authentication> {
-    const headers: HttpHeaders = new HttpHeaders(
-      credentials
-        ? {
-            authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
-          }
-        : {}
-    );
+    const headers: HttpHeaders = new HttpHeaders({
+      authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
+    });
     return this._http
       .get<Authentication>('/oauth2/token', { headers: headers })
       .pipe(tap(authentication => this._auth.login(authentication)));
