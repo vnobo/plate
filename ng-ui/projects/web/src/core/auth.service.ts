@@ -77,7 +77,6 @@ export class AuthService {
       const authentication: Authentication = JSON.parse(authenticationJsonStr);
       const lastAccessTime = dayjs.unix(authentication.lastAccessTime);
       const diffSec = dayjs().diff(lastAccessTime, 'second');
-      console.log('authenticationLoadStorage expires', diffSec);
       if (diffSec < authentication.expires) {
         return authentication;
       }
