@@ -6,7 +6,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { NzBackTopModule } from 'ng-zorro-antd/back-top';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { LoadingService } from '../core/loading.service';
+import { LoadingService } from '../core/services/loading.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({

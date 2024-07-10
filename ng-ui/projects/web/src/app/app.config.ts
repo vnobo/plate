@@ -11,7 +11,7 @@ import { routes } from './app.routes';
 import { NzConfig, provideNzConfig } from 'ng-zorro-antd/core/config';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { PageTitleStrategy } from '../core/title-strategy.service';
+import { PageTitleStrategy } from '../core/services/title-strategy.service';
 import {
   provideHttpClient,
   withFetch,
@@ -20,14 +20,13 @@ import {
   withXsrfConfiguration,
 } from '@angular/common/http';
 import { authTokenInterceptor, defaultInterceptor } from '../core/http.Interceptor';
-import { BrowserStorageService, SessionStorageService } from 'plate-commons';
 import { en_US, NZ_I18N, zh_CN } from 'ng-zorro-antd/i18n';
 
 import dayjs from 'dayjs';
 import isLeapYear from 'dayjs/plugin/isLeapYear';
 import 'dayjs/locale/zh-cn';
 
-dayjs.extend(isLeapYear); 
+dayjs.extend(isLeapYear);
 dayjs.locale('zh-cn');
 
 export const ngZorroConfig: NzConfig = {
@@ -55,8 +54,6 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     { provide: TitleStrategy, useClass: PageTitleStrategy },
-    { provide: BrowserStorageService, useClass: BrowserStorageService },
-    { provide: SessionStorageService, useClass: SessionStorageService },
     {
       provide: NZ_I18N,
       useFactory: () => {

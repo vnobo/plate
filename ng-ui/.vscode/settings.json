@@ -1,20 +1,9 @@
 {
-  "[html]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit"
-    },
-    "editor.formatOnSave": false
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit"
-    },
-    "editor.formatOnSave": false
+  "[css]": {
+    "editor.foldingStrategy": "indentation"
   },
   "files.autoSave": "afterDelay",
-  "angular.forceStrictTemplates": false,
+  "angular.forceStrictTemplates": true,
   "editor.suggest.snippetsPreventQuickSuggestions": false,
   "editor.inlineSuggest.enabled": true,
   "editor.codeActionsOnSave": {
@@ -22,4 +11,9 @@
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
+  "angular.view-engine": false,
+  "Codegeex.CompletionModel": "CodeGeeX Pro[Beta]",
+  "Codegeex.Privacy": true,
+  "merge-conflict.autoNavigateNextConflict.enabled": true,
+  "css.styleSheets": []
 }

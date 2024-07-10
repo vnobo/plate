@@ -2,14 +2,14 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CanActivateChildFn, CanActivateFn, CanMatchFn, Router } from '@angular/router';
-import { SessionStorageService } from 'plate-commons';
 import { Observable } from 'rxjs';
 import dayjs from 'dayjs';
+import { SessionStorageService } from './services/session-storage.service';
 
 export interface Authentication {
   token: string;
   expires: number;
-  lastAccessTime: Date;
+  lastAccessTime: number;
   details: any;
 }
 
@@ -33,12 +33,25 @@ export class AuthService {
   authentication$: Observable<Authentication> = toObservable(this.authentication);
 
   isLogged(): boolean {
-    return this.isLoggedIn();
+    if (this.isLoggedIn()) {
+      return true;
+    }
+    const authentication = this.authenticationLoadStorage();
+    if (authentication) {
+      return true;
+    }
+    return false;
   }
 
   authToken(): string {
     if (this.isLoggedIn()) {
       return this.authentication().token;
+    }
+    const authentication = this.authenticationLoadStorage();
+    if (authentication) {
+      authentication.lastAccessTime = dayjs().unix();
+      this.login(authentication);
+      return authentication.token;
     }
     throw new HttpErrorResponse({
       error: 'Authenticate is incorrectness,please login again.',
@@ -62,8 +75,10 @@ export class AuthService {
     const authenticationJsonStr = this._storage.get(this.authenticationKey);
     if (authenticationJsonStr) {
       const authentication: Authentication = JSON.parse(authenticationJsonStr);
-      const lastAccessTime = dayjs(authentication.lastAccessTime);
-      if (dayjs().diff(lastAccessTime) < authentication.expires) {
+      const lastAccessTime = dayjs.unix(authentication.lastAccessTime);
+      const diffSec = dayjs().diff(lastAccessTime, 'second');
+      console.log('authenticationLoadStorage expires', diffSec);
+      if (diffSec < authentication.expires) {
         return authentication;
       }
     }

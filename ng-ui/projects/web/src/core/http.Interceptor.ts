@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { catchError, finalize, Observable, throwError, timeout } from 'rxjs';
-import { LoadingService } from './loading.service';
+import { LoadingService } from './services/loading.service';
 import { MessageService } from '../shared/message.service';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { NotFoundComponent } from '../core/not-found.component';
+import { NotFoundComponent } from '../core/components/not-found.component';
 import { authGuard } from '../core/auth.service';
 
 export const routes: Routes = [
