@@ -1,4 +1,4 @@
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, NavigationStart, Router, RouterOutlet } from '@angular/router';
@@ -6,13 +6,14 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { NzBackTopModule } from 'ng-zorro-antd/back-top';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { LoadingService } from '../core/services/loading.service';
+import { LoadingService } from '../shared/loading.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { NzLayoutModule } from 'ng-zorro-antd/layout';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AsyncPipe, NzBackTopModule, NzSpinModule, MatProgressBarModule, NgIf],
+  imports: [RouterOutlet, AsyncPipe, NzBackTopModule, NzSpinModule, MatProgressBarModule, CommonModule, NzLayoutModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })

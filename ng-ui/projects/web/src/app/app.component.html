@@ -1,11 +1,11 @@
 <div class="fixed-top">
   <mat-progress-bar *ngIf="loadingShow()" mode="query"></mat-progress-bar>
 </div>
-<div class="layout">
-  <nz-spin [nzSpinning]="progressShow()">
+<nz-layout class="layout">
+  <nz-spin [nzSpinning]="progressShow()" nzSize="large">
     <router-outlet></router-outlet>
   </nz-spin>
-</div>
+</nz-layout>
 <nz-back-top [nzTemplate]="tpl" [nzVisibilityHeight]="100">
   <ng-template #tpl>
     <div class="ant-back-top-inner">UP</div>

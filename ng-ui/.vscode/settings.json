@@ -15,5 +15,8 @@
   "Codegeex.CompletionModel": "CodeGeeX Pro[Beta]",
   "Codegeex.Privacy": true,
   "merge-conflict.autoNavigateNextConflict.enabled": true,
-  "css.styleSheets": []
+  "css.styleSheets": [],
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  }
 }

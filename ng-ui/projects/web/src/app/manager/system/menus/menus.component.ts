@@ -1,20 +1,25 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Menu, MenusService} from './menus.service';
-import {Subject, takeUntil} from 'rxjs';
+import { Component, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
+import { MenusService } from './menus.service';
+import { Subject, takeUntil } from 'rxjs';
+import { Menu } from './menu.types';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { MenuFormComponent } from './menu-form.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-menus',
+  standalone: true,
   templateUrl: './menus.component.html',
   styleUrls: ['./menus.component.scss'],
+  imports: [NzTableModule, MenuFormComponent, CommonModule],
 })
 export class MenusComponent implements OnInit, OnDestroy {
-  listMenus: Menu[] = [];
+  listMenus: WritableSignal<Menu[]> = signal([]);
   mapOfExpandedData: Record<string, Menu[]> = {};
 
   private _subject: Subject<void> = new Subject<void>();
 
-  constructor(private menusService: MenusService) {
-  }
+  constructor(private menusService: MenusService) {}
 
   collapse(array: Menu[], data: Menu, $event: boolean): void {
     if (!$event) {
@@ -36,7 +41,7 @@ export class MenusComponent implements OnInit, OnDestroy {
     const stack: Menu[] = [];
     const array: Menu[] = [];
     const hashMap = {};
-    stack.push({...root, level: 0, expand: false});
+    stack.push({ ...root, level: 0, expand: false });
     while (stack.length !== 0) {
       const node = stack.pop();
       if (!node) {
@@ -74,10 +79,9 @@ export class MenusComponent implements OnInit, OnDestroy {
       .getMenus(menuRequest)
       .pipe(takeUntil(this._subject))
       .subscribe(result => {
-        this.listMenus = result;
-        this.listMenus.forEach(item => {
-          this.mapOfExpandedData[item.code ? item.code : '0'] =
-            this.convertTreeToList(item);
+        this.listMenus.set(result);
+        this.listMenus().forEach(item => {
+          this.mapOfExpandedData[item.code ? item.code : '0'] = this.convertTreeToList(item);
         });
       });
   }

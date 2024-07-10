@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { Authentication, AuthService } from '../../auth.service';
-import { BrowserStorageService } from '../../services/browser-storage.service';
+import { BrowserStorageService } from '../../../shared/browser-storage.service';
 import dayjs from 'dayjs';
 
 export interface Credentials {

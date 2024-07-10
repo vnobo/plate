@@ -4,7 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { CanActivateChildFn, CanActivateFn, CanMatchFn, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import dayjs from 'dayjs';
-import { SessionStorageService } from './services/session-storage.service';
+import { SessionStorageService } from '../shared/session-storage.service';
 
 export interface Authentication {
   token: string;

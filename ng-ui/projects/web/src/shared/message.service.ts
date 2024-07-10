@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {NzMessageService} from 'ng-zorro-antd/message';
+import { Injectable } from '@angular/core';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Injectable({
   providedIn: 'root',
@@ -11,8 +11,7 @@ export class MessageService {
     nzPauseOnHover: true,
   };
 
-  constructor(private _message: NzMessageService) {
-  }
+  constructor(private _message: NzMessageService) {}
 
   success(message: string, duration?: number): void {
     this.options.nzDuration = duration ? duration : this.options.nzDuration;

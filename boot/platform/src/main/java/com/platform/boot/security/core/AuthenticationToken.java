@@ -6,7 +6,8 @@ import org.springframework.web.server.WebSession;
 import java.io.Serializable;
 
 /**
- * @author billb
+ * Authentication token
+ * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 public record AuthenticationToken(String token, Long expires, Long lastAccessTime,
                                   Object details) implements Serializable {

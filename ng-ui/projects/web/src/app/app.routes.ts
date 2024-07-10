@@ -12,6 +12,11 @@ export const routes: Routes = [
     loadChildren: () => import('./home/home.module').then(m => m.HomeModule),
     canActivate: [authGuard],
   },
+  {
+    path: 'manager',
+    loadChildren: () => import('./manager/manager.module').then(m => m.ManagerModule),
+    canActivate: [authGuard],
+  },
   { path: '', pathMatch: 'full', redirectTo: 'auth' },
   { path: '**', component: NotFoundComponent },
 ];

@@ -11,7 +11,7 @@ import { routes } from './app.routes';
 import { NzConfig, provideNzConfig } from 'ng-zorro-antd/core/config';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { PageTitleStrategy } from '../core/services/title-strategy.service';
+import { PageTitleStrategy } from '../shared/title-strategy.service';
 import {
   provideHttpClient,
   withFetch,
