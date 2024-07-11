@@ -49,9 +49,6 @@ public class MenusController {
 
     @PostMapping("save")
     public Mono<Menu> save(@Valid @RequestBody MenuRequest request) {
-        Assert.isTrue(request.isNew(), "This is a message for developers indicating that when " +
-                "adding a new menu,the ID field must not have a value," +
-                " and if you need to modify an existing menu, the [/modify] endpoint should be used instead.");
         if (StringUtils.hasLength(request.getCode())) {
             return this.menusService.modify(request);
         }
