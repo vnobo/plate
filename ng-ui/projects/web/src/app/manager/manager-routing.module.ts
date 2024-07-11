@@ -7,7 +7,7 @@ const routes: Routes = [
   {
     path: 'system',
     component: ManagerComponent,
-    title: '管理',
+    title: '系统管理',
     canActivate: [authGuard],
     loadChildren: () => import('./system/system.module').then(m => m.SystemModule),
   },

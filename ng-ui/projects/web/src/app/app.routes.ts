@@ -9,11 +9,13 @@ export const routes: Routes = [
   },
   {
     path: 'home',
+    title: 'Home',
     loadChildren: () => import('./home/home.module').then(m => m.HomeModule),
     canActivate: [authGuard],
   },
   {
     path: 'manager',
+    title: 'Manager',
     loadChildren: () => import('./manager/manager.module').then(m => m.ManagerModule),
     canActivate: [authGuard],
   },

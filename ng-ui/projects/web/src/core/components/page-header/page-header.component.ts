@@ -1,26 +1,39 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
+import { LoginService } from '../login/login.service';
+import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 
 @Component({
   selector: 'app-page-header',
   standalone: true,
-  imports: [NzLayoutModule, NzMenuModule, RouterModule],
+  imports: [NzLayoutModule, NzMenuModule, RouterModule, NzDropDownModule, NzIconModule, NzButtonModule, NzAvatarModule],
   template: `
     <nz-header class="nz-header d-flex justify-content-between align-content-between">
       <div class="logo"><i class="bi bi-p-circle-fill mx-2"></i>PLATE</div>
       <ul class="header-menu" nz-menu nzMode="horizontal" nzTheme="dark"></ul>
       <ul class="header-menu ms-auto" nz-menu nzMode="horizontal" nzTheme="dark">
         <li nz-menu-item>
-          <a routerLink="/home" routerLinkActive="active">首&nbsp;&nbsp;&nbsp;&nbsp;页</a>
+          <a routerLink="/home" routerLinkActive="active">首页</a>
         </li>
         <li nz-menu-item>
           <a routerLink="/manager" routerLinkActive="active">管理平台</a>
         </li>
-        <li nz-menu-item>
-          <a routerLink="/profie" routerLinkActive="active">我&nbsp;&nbsp;&nbsp;&nbsp;的</a>
+        <li nz-menu-item nz-dropdown nzTrigger="click" [nzDropdownMenu]="menu" [nzPlacement]="'bottomRight'">
+          <nz-avatar nzIcon="user" style="color:#f56a00; background-color:#fde3cf;"></nz-avatar>
+          <a class="ms-1 pt-2" href="javascript:void(0);">我的<span nz-icon nzType="down"></span></a>
         </li>
+        <nz-dropdown-menu #menu="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-menu-item>
+              <a nz-button nzType="link" nzDanger (click)="loginOut()">账号退出</a>
+            </li>
+          </ul>
+        </nz-dropdown-menu>
       </ul>
     </nz-header>
   `,
@@ -54,4 +67,10 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
 }
   `,
 })
-export class PageHeaderComponent {}
+export class PageHeaderComponent {
+  constructor(private _loginSer: LoginService, private _route: Router) {}
+
+  loginOut() {
+    this._loginSer.logout().subscribe(res => this._route.navigate([this._loginSer._auth.loginUrl]).then());
+  }
+}

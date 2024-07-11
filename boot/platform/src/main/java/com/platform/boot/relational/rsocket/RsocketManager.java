@@ -50,6 +50,7 @@ public class RsocketManager {
 
     @Scheduled(fixedDelay = 10000)
     public void taskTest() {
+        log.info("Clients connect count {}",this.clients.size());
         if (this.clients.isEmpty() || !this.clients.containsKey("CommandClient")) {
             return;
         }

@@ -17,6 +17,7 @@
   "merge-conflict.autoNavigateNextConflict.enabled": true,
   "css.styleSheets": [],
   "[html]": {
-    "editor.defaultFormatter": "vscode.html-language-features"
-  }
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "prettier.bracketSameLine": true
 }

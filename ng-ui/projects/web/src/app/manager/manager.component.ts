@@ -15,6 +15,11 @@ import { RouterModule } from '@angular/router';
       </div>
     </app-page-content>
   `,
-  styles: ``,
+  styles: `
+  :host {
+    min-height: 100%;
+    min-width: 100%;
+  }
+  `,
 })
 export class ManagerComponent {}

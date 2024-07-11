@@ -1,9 +1,11 @@
 <div class="row justify-content-between mb-2">
   <div class="col-1">
-    <button (click)="menuFormModal.showModal()" class="btn btn-primary"><i class="bi bi-plus me-1"></i>新增</button>
+    <button (click)="menuForm.showModal()" class="btn btn-primary btn-sm" type="button">
+      <i class="bi bi-plus me-1"></i>新增
+    </button>
   </div>
   <div class="col-auto float-end">
-    <button class="btn btn-primary">数据列</button>
+    <button class="btn btn-primary btn-sm" type="button">数据列</button>
   </div>
 </div>
 <nz-table #expandTable [nzData]="listMenus()" [nzPageIndex]="0" nzFrontPagination="false" nzTableLayout="fixed">
@@ -20,9 +22,12 @@
     </tr>
   </thead>
   <tbody>
-    <ng-container *ngFor="let data of expandTable.data">
-      <ng-container *ngFor="let item of mapOfExpandedData[data.code ? data.code : '0']">
-        <tr *ngIf="(item.parent && item.parent.expand) || !item.parent">
+    @for (data of expandTable.data; track $index) {
+    <ng-container>
+      @for (item of mapOfExpandedData[data.code ? data.code : '0']; track $index) {
+      <ng-container>
+        @if ((item.parent && item.parent.expand) || !item.parent) {
+        <tr>
           <td
             (nzExpandChange)="collapse(mapOfExpandedData[data.code ? data.code : '0'], item, $event)"
             [(nzExpand)]="item.expand"
@@ -33,13 +38,18 @@
           <td>{{ item.sort }}</td>
           <td>{{ item.name }}</td>
           <td>{{ item.authority }}</td>
-          <td i18n="@@menuTypes">{item.type, select, FOLDER {FOLDER} MENU {MENU} LINK {LINK} API {API} }</td>
+          <td i18n="@@menuTypes">
+            {item.type, select, FOLDER {文件夹} MENU {菜单} LINK {链接} API {接口} OTHER {其他} }
+          </td>
           <td>{{ item.path }}</td>
           <td>{{ item.createdTime | date : 'short' }}</td>
-          <td>{{ item.path }}</td>
+          <td><a href="javascript:void(0)">编辑</a> | <a href="javascript:void(0)">删除</a></td>
         </tr>
+        }
       </ng-container>
+      }
     </ng-container>
+    }
   </tbody>
 </nz-table>
-<menu-form #menuFormModal></menu-form>
+<system-menu-form #menuForm></system-menu-form>

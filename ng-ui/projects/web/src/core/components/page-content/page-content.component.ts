@@ -1,19 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, signal, Type } from '@angular/core';
-import {
-  ActivatedRoute,
-  NavigationEnd,
-  Params,
-  PRIMARY_OUTLET,
-  Resolve,
-  ResolveFn,
-  Router,
-  RouterModule,
-} from '@angular/router';
+import { ActivatedRoute, Params, PRIMARY_OUTLET, Resolve, ResolveFn, Router, RouterModule } from '@angular/router';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { distinctUntilChanged, filter, map, Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { MenusService } from '../../../app/manager/system/menus/menus.service';
 import { Menu } from '../../../app/manager/system/menus/menu.types';
 
@@ -102,7 +93,7 @@ export class PageContentComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.initMenu();
-    this.initBreadcrumb();
+    this.breadcrumbs.set(this.initBreadcrumbs(this.activatedRoute.root));
   }
 
   initMenu() {
@@ -116,19 +107,7 @@ export class PageContentComponent implements OnInit, OnDestroy {
       .subscribe(menus => this.menus.set(menus));
   }
 
-  initBreadcrumb() {
-    this.breadcrumbs.set(this.getBreadcrumbs(this.activatedRoute.root));
-    this.router.events
-      .pipe(
-        filter(event => event instanceof NavigationEnd),
-        distinctUntilChanged(),
-        map(() => this.getBreadcrumbs(this.activatedRoute.root)),
-        takeUntil(this._subject)
-      )
-      .subscribe(event => this.breadcrumbs.set(event));
-  }
-
-  getBreadcrumbs(route: ActivatedRoute, url = '', breads: Breadcrumb[] = []): Breadcrumb[] {
+  private initBreadcrumbs(route: ActivatedRoute, url = '', breads: Breadcrumb[] = []): Breadcrumb[] {
     const children: ActivatedRoute[] = route.children;
     if (children.length === 0) {
       return breads;
@@ -138,8 +117,8 @@ export class PageContentComponent implements OnInit, OnDestroy {
       if (child.outlet !== PRIMARY_OUTLET) {
         continue;
       }
-      if (!child.snapshot.routeConfig?.title || !child.snapshot.url.length) {
-        return this.getBreadcrumbs(child, url, breads);
+      if (!child.snapshot.url.length) {
+        return this.initBreadcrumbs(child, url, breads);
       }
       const title = child.snapshot.routeConfig?.title;
       const routeURL: string = child.snapshot.url.map(segment => segment.path).join('/');
@@ -151,7 +130,7 @@ export class PageContentComponent implements OnInit, OnDestroy {
         url,
       };
       breads.push(breadcrumb);
-      return this.getBreadcrumbs(child, url, breads);
+      return this.initBreadcrumbs(child, url, breads);
     }
     return breads;
   }

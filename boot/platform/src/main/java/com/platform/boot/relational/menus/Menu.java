@@ -15,7 +15,7 @@ import org.springframework.data.annotation.*;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.StringUtils;
 
-import java.io.Serializable;
+import java.security.Permission;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
@@ -102,62 +102,15 @@ public class Menu implements BaseEntity<Integer> {
         /**
          * menu
          */
-        MENU
+        MENU,
+        /**
+         * 链接
+         */
+        LINK,
+        /**
+         * 接口
+         */
+        API;
     }
 
-    enum HttpMethod {
-        /**
-         * GET 查询
-         */
-        GET,
-        /**
-         * POST 增加
-         */
-        POST,
-        /**
-         * PUT 修改
-         */
-        PUT,
-        /**
-         * DELETE 删除
-         */
-        DELETE,
-        /**
-         * 包含所有
-         */
-        ALL
-    }
-
-    @Data
-    public static class Permission implements Serializable {
-
-        @NotNull(message = "Permission api [method] not null!")
-        private HttpMethod method;
-
-        @NotBlank(message = "Permission api [name] not blank!")
-        private String name;
-
-        @NotBlank(message = "Permission api [url] not blank!")
-        private String path;
-
-        @NotBlank(message = "Permission api [role] not blank!")
-        private String authority;
-
-        public void setAuthority(String authority) {
-            this.authority = upgradeAuthorityUpperCase(authority);
-        }
-
-        private String upgradeAuthorityUpperCase(String authority) {
-            if (!StringUtils.hasLength(authority)) {
-                return null;
-            }
-            String role = authority;
-            if (!authority.startsWith(MenusService.AUTHORITY_PREFIX)) {
-                role = MenusService.AUTHORITY_PREFIX + "BTN_" +
-                        CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, authority);
-            }
-            role = role.toUpperCase();
-            return role;
-        }
-    }
 }

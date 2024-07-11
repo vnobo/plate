@@ -83,9 +83,6 @@ public class MenusService extends AbstractDatabase {
     public Mono<Void> delete(MenuRequest request) {
         if (ObjectUtils.nullSafeEquals(request.getTenantCode(), "0")) {
             List<String> rules = new ArrayList<>(Collections.singletonList(request.getAuthority()));
-            if (!ObjectUtils.isEmpty(request.getPermissions())) {
-                rules.addAll(request.getPermissions().stream().map(Menu.Permission::getAuthority).toList());
-            }
             var deleteAuthorityMono = Flux.concatDelayError(this.groupAuthoritiesRepository.deleteByAuthorityIn(rules),
                     this.userAuthoritiesRepository.deleteByAuthorityIn(rules));
             var deleteNextMono = Flux.concatDelayError(

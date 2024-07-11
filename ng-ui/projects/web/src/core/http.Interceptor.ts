@@ -23,7 +23,18 @@ export function defaultInterceptor(req: HttpRequest<unknown>, next: HttpHandlerF
   return next(xRequestedReq).pipe(
     timeout({ first: 5_000, each: 10_000 }),
     catchError(errorResponse => {
-      _message.error(errorResponse.message);
+      let alertMessage = '';
+      const status = errorResponse.status;
+      if (status > 0) {
+        if (errorResponse.error) {
+          alertMessage = errorResponse.error.message;
+        } else {
+          alertMessage = '服务器无响应,请稍后重试!';
+        }
+      } else {
+        alertMessage = errorResponse.message;
+      }
+      _message.error(alertMessage);
       return throwError(() => errorResponse);
     }),
     finalize(() => _loading.hide())
@@ -37,29 +48,15 @@ export function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandle
   if (!_auth.isLogged()) {
     return next(req);
   }
-
   const authReq = req.clone({
     headers: req.headers.set('Authorization', `Bearer ${_auth.authToken()}`),
   });
 
   return next(authReq).pipe(
     catchError(errorResponse => {
-      if (errorResponse.status === 401) {
-        _auth.logout();
-        _route.navigate([_auth.loginUrl]).then();
-        return throwError(() => $localize`:@@errorMessage401:身份验证无效，请重新登录。`);
-      } else if (errorResponse.status === 407) {
-        _auth.logout();
-        _route.navigate([_auth.loginUrl]).then();
-        return throwError(() => $localize`:@@errorMessage407:认证不正确，请重新登录。`);
-      } else if (errorResponse.status === 403) {
-        _auth.logout();
-        _route.navigate([_auth.loginUrl]).then();
-        return throwError(() => $localize`:@@errorMessage403:验证码令牌错误，请重新登录。`);
-      } else {
-        console.error(`Backend returned authToken code ${errorResponse.status}, body was: `, errorResponse.error);
-        return throwError(() => errorResponse);
-      }
+      _auth.logout();
+      _route.navigate([_auth.loginUrl]).then();
+      return throwError(() => errorResponse);
     })
   );
 }

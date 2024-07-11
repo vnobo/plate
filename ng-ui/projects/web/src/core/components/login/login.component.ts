@@ -4,12 +4,12 @@ import { Credentials, LoginService } from './login.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
 import { NzFormModule } from 'ng-zorro-antd/form';
-import { isPlatformBrowser, NgIf } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, NzFormModule, NgIf],
+  imports: [FormsModule, ReactiveFormsModule, NzFormModule, CommonModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
@@ -74,11 +74,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     this._loginSer
       .login(credentials)
       .pipe(takeUntil(this.componentDestroyed$), debounceTime(100), distinctUntilChanged())
-      .subscribe({
-        next: () => {
-          this.router.navigate(['/home'], { relativeTo: this.route }).then();
-        },
-        error: e => console.log(e),
-      });
+      .subscribe(res => this.router.navigate(['/home'], { relativeTo: this.route }).then());
   }
 }

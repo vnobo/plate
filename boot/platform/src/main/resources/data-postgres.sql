@@ -23,7 +23,7 @@ values ('GA1000', 'G1000', 'ROLE_ADMINISTRATORS', 'U1000', 'U1000'),
 
 /********Init menus****************/
 insert into se_menus(code, type, authority, name, path, creator, updater, extend)
-values ('M1000', 'FOLDER', 'ROLE_FOLDER_SYSTEM', '系统管理', '', 'U1000', 'U1000', '{
+values ('M1000', 'FOLDER', 'ROLE_FOLDER_SYSTEM', '系统管理', 'system', 'U1000', 'U1000', '{
   "icons": "settings"
 }');
 insert into se_menus(code, pcode, type, authority, name, path, creator, updater, extend)

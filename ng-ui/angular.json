@@ -39,7 +39,6 @@
               "bootstrap/dist/css/bootstrap.css",
               "bootstrap-icons/font/bootstrap-icons.css",
               "ng-zorro-antd/ng-zorro-antd.css",
-              "ng-zorro-antd/ng-zorro-antd.dark.css",
               "ng-zorro-antd/ng-zorro-antd.compact.css",
               "projects/web/src/styles.scss"
             ],

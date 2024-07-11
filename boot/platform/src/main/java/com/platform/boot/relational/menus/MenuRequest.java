@@ -30,9 +30,6 @@ public class MenuRequest extends Menu {
     @Valid
     private Set<MenuRequest> menus;
 
-    @Valid
-    private Set<Permission> permissions;
-
     public static MenuRequest of(String tenantCode, String authority) {
         MenuRequest menuRequest = new MenuRequest();
         menuRequest.setTenantCode(tenantCode);
@@ -45,9 +42,6 @@ public class MenuRequest extends Menu {
         ObjectNode objectNode = Optional.ofNullable(this.getExtend())
                 .map(node -> (ObjectNode) node.deepCopy())
                 .orElse(ContextUtils.OBJECT_MAPPER.createObjectNode());
-        if (!ObjectUtils.isEmpty(this.permissions)) {
-            objectNode.putPOJO("permissions", this.permissions);
-        }
         if (StringUtils.hasLength(this.icons)) {
             objectNode.put("icons", this.icons);
         }

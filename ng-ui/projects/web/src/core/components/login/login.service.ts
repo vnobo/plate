@@ -54,8 +54,12 @@ export class LoginService {
   }
 
   logout() {
-    this._auth.logout();
-    this._storage.remove(this.storageKey);
-    this.credentials.set({} as Credentials);
+    return this._http.get('/oauth2/logout').pipe(
+      tap(res => {
+        this._auth.logout();
+        this._storage.remove(this.storageKey);
+        this.credentials.set({} as Credentials);
+      })
+    );
   }
 }
