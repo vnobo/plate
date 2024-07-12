@@ -1,4 +1,4 @@
-import { AsyncPipe, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, NavigationStart, Router, RouterOutlet } from '@angular/router';
@@ -13,7 +13,7 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AsyncPipe, NzBackTopModule, NzSpinModule, MatProgressBarModule, CommonModule, NzLayoutModule],
+  imports: [RouterOutlet, NzBackTopModule, NzSpinModule, MatProgressBarModule, CommonModule, NzLayoutModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })

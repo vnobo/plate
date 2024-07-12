@@ -8,6 +8,15 @@ import { Subject, takeUntil } from 'rxjs';
 import { MenusService } from '../../../app/manager/system/menus/menus.service';
 import { Menu } from '../../../app/manager/system/menus/menu.types';
 
+import { IconDefinition } from '@ant-design/icons-angular';
+import { NzIconModule, NzIconService } from 'ng-zorro-antd/icon';
+import * as AllIcons from '@ant-design/icons-angular/icons';
+
+const antDesignIcons = AllIcons as {
+  [key: string]: IconDefinition;
+};
+const iconsAll: IconDefinition[] = Object.keys(antDesignIcons).map(key => antDesignIcons[key]);
+
 export interface Breadcrumb {
   label: string | ResolveFn<string> | Type<Resolve<string>>;
   params: Params;
@@ -17,17 +26,30 @@ export interface Breadcrumb {
 @Component({
   selector: 'app-page-content',
   standalone: true,
-  imports: [NzLayoutModule, NzMenuModule, CommonModule, RouterModule, NzBreadCrumbModule],
+  imports: [NzLayoutModule, NzMenuModule, CommonModule, RouterModule, NzBreadCrumbModule, NzIconModule],
   template: `
-    <nz-layout class="layout">
+    <nz-layout class="content-layout">
       <nz-sider [nzCollapsedWidth]="0" nzBreakpoint="md" nzCollapsible nzWidth="14.6rem">
         <ul nz-menu class="sider-menu" nzMode="inline" nzTheme="dark">
-          <li nz-menu-item><i class="bi bi-p-circle-fill mx-2"></i><a routerLink="/home">首页</a></li>
+          <li nz-menu-item>
+            <a routerLink="/home"
+              ><span nz-icon nzType="home" nzTheme="twotone" class="me-2" style="font-size: 1rem;"></span>首页</a
+            >
+          </li>
           @for (menu of menus(); track menu) {
-          <li nz-submenu nzIcon="user" nzOpen nzTitle="{{ menu.name }}">
+          <li nz-submenu nzOpen [nzTitle]="titleTpl">
+            <ng-template #titleTpl>
+              <span title
+                ><span nz-icon nzType="appstore" nzTheme="twotone" style="font-size: 1rem;"></span
+                ><span>{{ menu.name }}</span></span
+              ></ng-template
+            >
             <ul>
               @for (child of menu.children; track child) {
               <li nz-menu-item>
+                @if (child.icons) {
+                <i class="me-1" [class]="child.icons" style="font-size: 1rem; color: cornflowerblue;"></i>
+                }
                 <a [state]="child" routerLink="{{ child.path }}" routerLinkActive="active">{{ child.name }}</a>
               </li>
               }
@@ -57,12 +79,11 @@ export interface Breadcrumb {
   :host {
     min-height: 100%;
   }
-  .layout{
+  .content-layout{
     min-height: 91vh;
   }
   .sider-menu {
   min-height: 100%;
-  border-right: 0;
 }
 
 .inner-layout {
@@ -84,7 +105,16 @@ export class PageContentComponent implements OnInit, OnDestroy {
 
   private _subject: Subject<void> = new Subject<void>();
 
-  constructor(private router: Router, private activatedRoute: ActivatedRoute, private menusService: MenusService) {}
+  constructor(
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private iconService: NzIconService,
+    private menusService: MenusService
+  ) {
+    for (const icon of iconsAll) {
+      this.iconService.addIcon(icon);
+    }
+  }
 
   ngOnDestroy(): void {
     this._subject.next();

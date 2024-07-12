@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
-import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { LoginService } from '../login/login.service';
@@ -11,7 +10,7 @@ import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 @Component({
   selector: 'app-page-header',
   standalone: true,
-  imports: [NzLayoutModule, NzMenuModule, RouterModule, NzDropDownModule, NzIconModule, NzButtonModule, NzAvatarModule],
+  imports: [NzLayoutModule, NzMenuModule, RouterModule, NzDropDownModule, NzButtonModule, NzAvatarModule],
   template: `
     <nz-header class="nz-header d-flex justify-content-between align-content-between">
       <div class="logo"><i class="bi bi-p-circle-fill mx-2"></i>PLATE</div>

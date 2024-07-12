@@ -31,7 +31,7 @@ dayjs.locale('zh-cn');
 
 export const ngZorroConfig: NzConfig = {
   message: {
-    nzTop: 50,
+    nzTop: 100,
     nzDuration: 5000,
     nzAnimate: true,
     nzPauseOnHover: true,

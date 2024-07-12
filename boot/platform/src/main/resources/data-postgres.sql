@@ -28,13 +28,13 @@ values ('M1000', 'FOLDER', 'ROLE_FOLDER_SYSTEM', '系统管理', 'system', 'U100
 }');
 insert into se_menus(code, pcode, type, authority, name, path, creator, updater, extend)
 values ('M1001', 'M1000', 'MENU', 'ROLE_MENU_SYSTEM_USERS', '用户管理', 'users', 'U1000', 'U1000', '{
-  "icons": "lock"
+  "icons": "bi bi-people-fill"
 }');
 insert into se_menus(code, pcode, type, authority, name, path, creator, updater, extend)
 values ('M1002', 'M1000', 'MENU', 'ROLE_MENU_SYSTEM_GROUPS', '角色管理', 'roles', 'U1000', 'U1000', '{
-  "icons": "users"
+  "icons": "bi bi-collection-fill"
 }');
 insert into se_menus(code, pcode, type, authority, name, path, creator, updater, extend)
 values ('M1003', 'M1000', 'MENU', 'ROLE_MENU_SYSTEM_MENUS', '菜单管理', 'menus', 'U1000', 'U1000', '{
-  "icons": "menu-2"
+  "icons": "bi bi-menu-button-wide-fill"
 }');

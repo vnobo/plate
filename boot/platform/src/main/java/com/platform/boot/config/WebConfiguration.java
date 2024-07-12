@@ -16,8 +16,10 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
+import reactor.util.retry.Retry;
 
 import java.net.URI;
+import java.time.Duration;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -39,7 +41,10 @@ public class WebConfiguration implements WebFluxConfigurer {
         return requesterBuilder.setupData("CommandClient").setupRoute("connect.setup")
                 .setupMetadata(credentials, authenticationMimeType)
                 .rsocketStrategies(strategies->strategies.encoder(new SimpleAuthenticationEncoder()))
-                .rsocketConnector(connector -> connector.acceptor(handler.responder())).websocket(url);
+                .rsocketConnector(connector -> connector.acceptor(handler.responder())
+                        .keepAlive(Duration.ofSeconds(5),Duration.ofMinutes(100))
+                        .reconnect(Retry.backoff(100, Duration.ofMillis(500))))
+                .websocket(url);
     }
 
     @Override
