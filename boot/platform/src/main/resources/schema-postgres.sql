@@ -1,4 +1,14 @@
 drop table if exists oauth2_authorized_client;
+drop table if exists se_users;
+drop table if exists se_authorities;
+drop table if exists se_groups;
+drop table if exists se_group_authorities;
+drop table if exists se_group_members;
+drop table if exists se_tenants;
+drop table if exists se_tenant_members;
+drop table if exists se_menus;
+drop table if exists se_loggers;
+
 create table oauth2_authorized_client
 (
     client_registration_id  varchar(100)                            not null,
@@ -14,12 +24,11 @@ create table oauth2_authorized_client
     primary key (client_registration_id, principal_name)
 );
 
-drop table if exists se_users;
 create table if not exists se_users
 (
     id                  serial8 primary key,
     code                varchar(64)  not null unique,
-    tenant_code varchar(64) not null default '0',
+    tenant_code         varchar(64)  not null default '0',
     username            varchar(256) not null unique,
     password            text         not null,
     disabled            boolean      not null default false,
@@ -28,9 +37,9 @@ create table if not exists se_users
     credentials_expired boolean      not null default false,
     name                varchar(512),
     email               varchar(512),
-    phone       varchar(32),
+    phone               varchar(32),
     avatar              text,
-    bio         text,
+    bio                 text,
     extend              jsonb,
     creator             varchar(64),
     updater             varchar(64),
@@ -42,7 +51,6 @@ create index se_users_tu_idx on se_users (tenant_code, username);
 create index se_users_extend_gin_idx on se_users using gin (extend);
 comment on table se_users is '用户表';
 
-drop table if exists se_authorities;
 create table if not exists se_authorities
 (
     id           serial8 primary key,
@@ -57,12 +65,12 @@ create table if not exists se_authorities
 );
 comment on table se_authorities is '用户权限表';
 
-drop table if exists se_groups;
+
 create table if not exists se_groups
 (
     id           serial8 primary key,
     code         varchar(64)  not null unique,
-    tenant_code varchar(64) not null default '0',
+    tenant_code  varchar(64)  not null default '0',
     name         varchar(512) not null,
     extend       jsonb,
     creator      varchar(64),
@@ -74,7 +82,7 @@ create index se_groups_tn_idx on se_groups (tenant_code, name);
 create index se_groups_extend_gin_idx on se_groups using gin (extend);
 comment on table se_groups is '角色表';
 
-drop table if exists se_group_authorities;
+
 create table if not exists se_group_authorities
 (
     id           serial8 primary key,
@@ -89,7 +97,7 @@ create table if not exists se_group_authorities
 );
 comment on table se_group_authorities is '角色权限表';
 
-drop table if exists se_group_members;
+
 create table if not exists se_group_members
 (
     id           serial8 primary key,
@@ -104,7 +112,6 @@ create table if not exists se_group_members
 );
 comment on table se_group_members is '角色用户关系表';
 
-drop table if exists se_tenants;
 create table if not exists se_tenants
 (
     id           serial primary key,
@@ -120,7 +127,6 @@ create table if not exists se_tenants
 create index se_tenants_extend_gin_idx on se_tenants using gin (extend);
 comment on table se_tenants is '租户表';
 
-drop table if exists se_tenant_members;
 create table if not exists se_tenant_members
 (
     id           serial8 primary key,
@@ -136,16 +142,15 @@ create table if not exists se_tenant_members
 );
 comment on table se_tenant_members is '租户用户关系表';
 
-drop table if exists se_menus;
 create table if not exists se_menus
 (
     id           serial8 primary key,
     code         varchar(64)  not null unique,
     pcode        varchar(64)  not null default '0',
-    tenant_code varchar(64) not null default '0',
+    tenant_code  varchar(64)  not null default '0',
     type         varchar(20)  not null default 'MENU',
-    authority varchar(256) not null unique,
-    name      varchar(256) not null,
+    authority    varchar(256) not null unique,
+    name         varchar(256) not null,
     path         text,
     sort         int                   default 0,
     extend       jsonb,
@@ -158,12 +163,11 @@ create index se_menus_pttn_idx on se_menus (pcode, tenant_code, type, name);
 create index se_menus_extend_gin_idx on se_menus using gin (extend);
 comment on table se_menus is '菜单权限表';
 
-drop table if exists se_loggers;
 create table if not exists se_loggers
 (
     id           serial8 primary key,
     code         varchar(64) not null unique,
-    tenant_code varchar(64) not null default '0',
+    tenant_code  varchar(64) not null default '0',
     prefix       varchar(64),
     operator     varchar(64),
     status       varchar(64),

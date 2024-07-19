@@ -8,13 +8,14 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
+import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
 
 /**
@@ -25,13 +26,19 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class SecurityController {
 
-    private final SecurityManager securityManager;
+    private final WebSessionServerSecurityContextRepository securityContextRepository =
+            new WebSessionServerSecurityContextRepository();
+
+    private final UserSecurityManager userSecurityManager;
     private final PasswordEncoder passwordEncoder;
     private final ServerOAuth2AuthorizedClientRepository clientRepository;
 
     @GetMapping("token")
-    public Mono<AuthenticationToken> token(WebSession session, Authentication authentication) {
-        return Mono.defer(() -> Mono.just(AuthenticationToken.build(session, authentication)));
+    public Mono<AuthenticationToken> token(ServerWebExchange exchange, Authentication authentication) {
+        return ReactiveSecurityContextHolder.getContext()
+                .delayUntil(cts -> this.securityContextRepository.save(exchange, cts))
+                .flatMap(context -> exchange.getSession())
+                .flatMap(session -> Mono.just(AuthenticationToken.build(session, authentication)));
     }
 
     @GetMapping("csrf")
@@ -61,7 +68,7 @@ public class SecurityController {
         }
         String newPassword = this.passwordEncoder.encode(request.getNewPassword());
         UserDetails userDetails = (UserDetails) authentication.getDetails();
-        return this.securityManager.updatePassword(userDetails, newPassword);
+        return this.userSecurityManager.updatePassword(userDetails, newPassword);
     }
 
     @Data

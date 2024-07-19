@@ -18,7 +18,7 @@ spring:
       max-idle-time: 10m
       validation-query: select 1
   sql.init:
-    mode: always
+    mode: never
     platform: postgres
     encoding: utf-8
   data.redis:

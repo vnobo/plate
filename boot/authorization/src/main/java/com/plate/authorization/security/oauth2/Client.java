@@ -1,4 +1,4 @@
-package com.plate.authorization.core;
+package com.plate.authorization.security.oauth2;
 
 
 import jakarta.persistence.*;
@@ -12,7 +12,7 @@ import java.time.Instant;
  */
 @Data
 @Entity
-@Table(name = "oauth2_client")
+@Table(name = "se_oauth2_client")
 public class Client implements Serializable {
 
     @Id

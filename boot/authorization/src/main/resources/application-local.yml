@@ -2,8 +2,9 @@ logging:
   register-shutdown-hook: true
   level:
     web: debug
-    com.platform.boot.*: debug
+    com.platform.authorization.*: debug
     org.springframework.jdbc: DEBUG
+    org.springframework.jpa: DEBUG
 
 server.port: 9000
 

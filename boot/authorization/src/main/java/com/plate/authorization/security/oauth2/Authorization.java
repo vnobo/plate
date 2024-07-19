@@ -1,4 +1,4 @@
-package com.plate.authorization.core;
+package com.plate.authorization.security.oauth2;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -11,7 +11,7 @@ import java.time.Instant;
  */
 @Data
 @Entity
-@Table(name = "oauth2_authorization")
+@Table(name = "se_oauth2_authorization")
 public class Authorization implements Serializable {
 
     @Id

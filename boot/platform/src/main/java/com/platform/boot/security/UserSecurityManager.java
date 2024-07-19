@@ -10,8 +10,7 @@ import com.platform.boot.security.core.user.UserRequest;
 import com.platform.boot.security.core.user.UsersService;
 import com.platform.boot.security.core.user.authority.UserAuthority;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.data.relational.core.query.Update;
@@ -36,11 +35,11 @@ import java.util.Set;
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
+@Log4j2
 @Service
 @RequiredArgsConstructor
-public class SecurityManager extends AbstractDatabase
+public class UserSecurityManager extends AbstractDatabase
         implements ReactiveUserDetailsService, ReactiveUserDetailsPasswordService {
-    private final static Log log = LogFactory.getLog(SecurityManager.class);
 
     private final static String QUERY_GROUP_MEMBERS_SQL = """
             select a.*,b.name,b.extend
@@ -110,7 +109,7 @@ public class SecurityManager extends AbstractDatabase
                         throwable.getLocalizedMessage(), throwable)))
                 .publishOn(Schedulers.boundedElastic())
                 .doOnSuccess(securityDetails -> this.loginSuccess(securityDetails.getUsername())
-                        .subscribe(res -> log.debug("登录成功! 登录信息修改: " + res)));
+                        .subscribe(res -> log.debug("登录成功! 登录信息修改: {}", res)));
     }
 
     private Mono<SecurityDetails> buildUserDetails(User user, Set<GrantedAuthority> authorities) {
