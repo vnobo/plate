@@ -25,3 +25,8 @@ spring:
     key-prefix: "plate:caches:"
     time-to-live: 5M
     enable-statistics: true
+  session:
+    timeout: 8H
+    redis:
+      flush-mode: on_save
+      repository-type: indexed

@@ -7,7 +7,6 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -19,14 +18,6 @@ import reactor.core.publisher.Mono;
 public class LoggersController {
 
     private final LoggersService loggersService;
-
-    @GetMapping("search")
-    public Flux<Logger> search(LoggerRequest request, Pageable pageable) {
-        return ContextUtils.securityDetails().flatMapMany(userDetails -> {
-            request.setSecurityCode(userDetails.getTenantCode());
-            return this.loggersService.search(request, pageable);
-        });
-    }
 
     @GetMapping("page")
     public Mono<PagedModel<Logger>> page(LoggerRequest request, Pageable pageable) {

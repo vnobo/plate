@@ -81,6 +81,9 @@ public final class ContextUtils implements InitializingBean {
     public static Mono<SecurityDetails> securityDetails() {
         return ReactiveSecurityContextHolder.getContext()
                 .map(securityContext -> securityContext.getAuthentication().getPrincipal())
+                .doOnNext(securityDetails ->
+                        log.debug("Security details: {}", securityDetails)
+                )
                 .cast(SecurityDetails.class);
     }
 

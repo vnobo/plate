@@ -48,7 +48,7 @@ public class Menu implements BaseEntity<Integer> {
 
     private String path;
 
-    private Short sort;
+    private Short sortNo;
 
     private JsonNode extend;
 

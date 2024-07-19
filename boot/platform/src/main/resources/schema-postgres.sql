@@ -152,7 +152,7 @@ create table if not exists se_menus
     authority    varchar(256) not null unique,
     name         varchar(256) not null,
     path         text,
-    sort         int                   default 0,
+    sort_no      int                   default 0,
     extend       jsonb,
     creator      varchar(64),
     updater      varchar(64),
