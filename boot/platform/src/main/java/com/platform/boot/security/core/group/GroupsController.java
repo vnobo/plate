@@ -3,8 +3,8 @@ package com.platform.boot.security.core.group;
 import com.platform.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -28,9 +28,10 @@ public class GroupsController {
     }
 
     @GetMapping("page")
-    public Mono<Page<Group>> page(GroupRequest request, Pageable pageable) {
+    public Mono<PagedModel<Group>> page(GroupRequest request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMap(securityDetails ->
-                this.groupsService.page(request.securityCode(securityDetails.getTenantCode()), pageable));
+                this.groupsService.page(request.securityCode(securityDetails.getTenantCode()), pageable))
+                .map(PagedModel::new);
     }
 
     @PostMapping("save")

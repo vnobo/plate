@@ -3,8 +3,8 @@ package com.platform.boot.security.core.tenant;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -26,8 +26,8 @@ public class TenantsController {
     }
 
     @GetMapping("page")
-    public Mono<Page<Tenant>> page(TenantRequest request, Pageable pageable) {
-        return this.tenantsService.page(request, pageable);
+    public Mono<PagedModel<Tenant>> page(TenantRequest request, Pageable pageable) {
+        return this.tenantsService.page(request, pageable).map(PagedModel::new);
     }
 
     @PostMapping("save")

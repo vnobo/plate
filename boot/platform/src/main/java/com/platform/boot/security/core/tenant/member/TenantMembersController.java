@@ -4,8 +4,8 @@ package com.platform.boot.security.core.tenant.member;
 import com.platform.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -29,10 +29,11 @@ public class TenantMembersController {
     }
 
     @GetMapping("page")
-    public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
+    public Mono<PagedModel<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMap(securityDetails ->
                 this.tenantMembersService.page(request
-                        .securityCode(securityDetails.getTenantCode()), pageable));
+                        .securityCode(securityDetails.getTenantCode()), pageable))
+                .map(PagedModel::new);
     }
 
     @PostMapping("save")
