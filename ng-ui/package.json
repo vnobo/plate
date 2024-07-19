@@ -1,6 +1,9 @@
 {
   "name": "ng-ui",
   "version": "0.0.1",
+  "description": "platform for angular applications",
+  "license": "MIT",
+  "author": "Alex Bob <billbob.dong@gmail.com>",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
