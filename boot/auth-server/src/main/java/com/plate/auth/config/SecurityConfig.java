@@ -2,12 +2,16 @@ package com.plate.auth.config;
 
 import com.plate.auth.commons.ErrorResponse;
 import com.plate.auth.commons.utils.ContextUtils;
+import com.plate.auth.security.core.UserAuditor;
+import com.plate.auth.security.core.UserAuditorAware;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.AuditorAware;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
@@ -37,7 +41,13 @@ import static org.springframework.security.web.header.writers.ClearSiteDataHeade
  */
 
 @Configuration(proxyBeanMethods = false)
+@EnableJpaAuditing
 public class SecurityConfig {
+
+    @Bean
+    public AuditorAware<UserAuditor> auditorProvider() {
+        return new UserAuditorAware();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

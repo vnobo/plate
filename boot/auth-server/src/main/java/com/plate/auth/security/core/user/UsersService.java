@@ -9,6 +9,7 @@ import com.plate.auth.commons.utils.query.ParamSql;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,7 @@ public class UsersService extends AbstractDatabase {
     private final PasswordEncoder passwordEncoder;
     private final UsersRepository usersRepository;
 
+    @Cacheable(value = "users-search")
     public List<UserResponse> search(UserRequest request, Pageable pageable) {
         ParamSql paramSql = request.bindParamSql();
         String query = "select * from se_users" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
@@ -37,6 +39,7 @@ public class UsersService extends AbstractDatabase {
                 .stream().map(ContextUtils::serializeUserAuditor).toList();
     }
 
+    @Cacheable(value = "users-page")
     public Page<UserResponse> page(UserRequest request, Pageable pageable) {
         var searchList = this.search(request, pageable);
         ParamSql paramSql = request.bindParamSql();
@@ -46,12 +49,12 @@ public class UsersService extends AbstractDatabase {
         return new PageImpl<>(searchList, pageable, countMono);
     }
 
+    @Cacheable(value = "users-code")
     public User loadByCode(String code) {
         var userMono = this.usersRepository.findByCode(code);
         return userMono.orElse(null);
     }
 
-    @CachePut("users")
     public User add(UserRequest request) {
         Boolean exists = this.usersRepository.existsByUsername(request.getUsername());
         if (exists) {
@@ -61,7 +64,7 @@ public class UsersService extends AbstractDatabase {
         return this.operate(request);
     }
 
-    @CachePut("users")
+
     public User modify(UserRequest request) {
         User user = this.usersRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> RestServerException.withMsg(404, "User not found!",
@@ -72,7 +75,6 @@ public class UsersService extends AbstractDatabase {
         return this.operate(request);
     }
 
-    @CachePut("users")
     public User operate(UserRequest request) {
         request.setPassword(this.upgradeEncodingIfPassword(request.getPassword()));
         var user = this.usersRepository.findByCode(request.getCode()).orElse(request.toUser());
@@ -80,11 +82,12 @@ public class UsersService extends AbstractDatabase {
         return this.save(user);
     }
 
-    @CacheEvict("users")
+    @CacheEvict({"users-search", "users-page", "users-code"})
     public void delete(UserRequest request) {
         this.usersRepository.delete(request.toUser());
     }
 
+    @CachePut({"users-search", "users-page", "users-code"})
     public User save(User user) {
         if (!user.isNew()) {
             assert user.getId() != null;

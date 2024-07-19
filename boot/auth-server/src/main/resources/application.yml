@@ -22,12 +22,11 @@ spring:
     type: redis
     redis:
       key-prefix: "plate:auth:caches:"
-      time-to-live: "300s"
+      time-to-live: "10m"
       enable-statistics: true
   jpa:
     open-in-view: true
     show-sql: true
-    properties.hibernate.format_sql: true
   session:
     timeout: 8H
     redis:
