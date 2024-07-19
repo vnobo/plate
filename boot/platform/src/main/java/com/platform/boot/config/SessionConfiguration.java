@@ -3,15 +3,11 @@ package com.platform.boot.config;
 import com.platform.boot.commons.exception.RestServerException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.NonNull;
-import org.springframework.r2dbc.core.DatabaseClient;
-import org.springframework.security.oauth2.client.R2dbcReactiveOAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
+import org.springframework.session.data.redis.config.annotation.web.server.EnableRedisIndexedWebSession;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -27,6 +23,7 @@ import java.util.regex.Pattern;
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Configuration(proxyBeanMethods = false)
+@EnableRedisIndexedWebSession
 public class SessionConfiguration {
 
     public static final String HEADER_SESSION_ID_NAME = "X-Auth-Token";
@@ -34,13 +31,6 @@ public class SessionConfiguration {
     public static final String XML_HTTP_REQUEST = "XMLHttpRequest";
     public static final Pattern AUTHORIZATION_PATTERN = Pattern.compile(
             "^Bearer (?<token>[a-zA-Z0-9-._~+/]+=*)$", Pattern.CASE_INSENSITIVE);
-
-    @Bean
-    @Primary
-    public ReactiveOAuth2AuthorizedClientService oAuth2ClientService(DatabaseClient databaseClient,
-                                                                     ReactiveClientRegistrationRepository clientRepository) {
-        return new R2dbcReactiveOAuth2AuthorizedClientService(databaseClient, clientRepository);
-    }
 
     @Bean
     public WebSessionIdResolver webSessionIdResolver() {

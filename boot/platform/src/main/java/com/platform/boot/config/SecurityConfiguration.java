@@ -8,11 +8,13 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.autoconfigure.security.reactive.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.rsocket.EnableRSocketSecurity;
@@ -21,6 +23,9 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.R2dbcReactiveOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.rsocket.core.PayloadSocketAcceptorInterceptor;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.HttpBasicServerAuthenticationEntryPoint;
@@ -31,6 +36,10 @@ import org.springframework.security.web.server.header.ClearSiteDataServerHttpHea
 import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
+import org.springframework.session.ReactiveFindByIndexNameSessionRepository;
+import org.springframework.session.ReactiveSessionRepository;
+import org.springframework.session.Session;
+import org.springframework.session.security.SpringSessionBackedReactiveSessionRegistry;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -55,6 +64,20 @@ public class SecurityConfiguration {
     private final Oauth2SuccessHandler authenticationSuccessHandler;
 
     @Bean
+    @Primary
+    public ReactiveOAuth2AuthorizedClientService oAuth2ClientService(DatabaseClient databaseClient,
+                                                                     ReactiveClientRegistrationRepository clientRepository) {
+        return new R2dbcReactiveOAuth2AuthorizedClientService(databaseClient, clientRepository);
+    }
+
+    @Bean
+    public <S extends Session> SpringSessionBackedReactiveSessionRegistry<S> sessionRegistry(
+            ReactiveSessionRepository<S> sessionRepository,
+            ReactiveFindByIndexNameSessionRepository<S> indexedSessionRepository) {
+        return new SpringSessionBackedReactiveSessionRegistry<>(sessionRepository, indexedSessionRepository);
+    }
+
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
@@ -71,16 +94,21 @@ public class SecurityConfiguration {
         return rsocket.build();
     }
 
+
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http.authorizeExchange(exchange -> {
             exchange.pathMatchers("/captcha/code", "/oauth2/qr/code", "/oauth2/realms/issuer/**").permitAll();
             exchange.matchers(PathRequest.toStaticResources().atCommonLocations()).permitAll();
-            exchange.pathMatchers("/tenants/**", "/users/**", "/groups/**")
-                    .hasAnyRole("SYSTEM_ADMINISTRATORS", "ADMINISTRATORS");
-            exchange.pathMatchers("/menus/**", "/loggers/**").hasRole("SYSTEM_ADMINISTRATORS");
             exchange.anyExchange().authenticated();
         });
+        http.sessionManagement((sessions) -> sessions
+                .concurrentSessions((concurrency) -> concurrency.maximumSessions((authentication) -> {
+                    if (authentication.getName().equals("admin")) {
+                        return Mono.empty(); // unlimited sessions for admin
+                    }
+                    return Mono.just(1); // one session for every other user
+                })));
         http.httpBasic(httpBasicSpec -> httpBasicSpec
                 .authenticationEntryPoint(new CustomServerAuthenticationEntryPoint()));
         http.formLogin(Customizer.withDefaults());

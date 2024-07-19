@@ -24,6 +24,7 @@ import java.util.List;
 @Log4j2
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(ServerWebInputException.class)
     public ResponseEntity<ErrorResponse> handleBindException(ServerWebExchange exchange, ServerWebInputException ex) {
         List<String> errors = Lists.newArrayList(ex.getReason());
