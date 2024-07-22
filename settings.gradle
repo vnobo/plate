@@ -9,5 +9,4 @@ pluginManagement {
 rootProject.name = "plate"
 
 include ":boot:platform"
-include ":boot:authorization"
 include ":boot:auth-server"
