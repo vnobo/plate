@@ -1,5 +1,6 @@
 package com.platform.boot.security;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.platform.boot.security.core.group.member.GroupMemberResponse;
@@ -7,10 +8,13 @@ import com.platform.boot.security.core.tenant.member.TenantMemberResponse;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.SpringSecurityCoreVersion;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.util.ObjectUtils;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +25,9 @@ import java.util.Set;
 @Setter
 @Getter
 public final class SecurityDetails extends DefaultOAuth2User implements UserDetails {
+
+    @Serial
+    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
 
     private String code;
 
@@ -46,6 +53,12 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
 
     @JsonIgnore
     private Boolean credentialsExpired;
+
+    @JsonCreator
+    public SecurityDetails() {
+        super(Set.of(new SimpleGrantedAuthority("ROLE_NONE")),
+                Map.of("username", "any_none"), "username");
+    }
 
     public SecurityDetails(Collection<? extends GrantedAuthority> authorities,
                            Map<String, Object> attributes, String nameAttributeKey) {

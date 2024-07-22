@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  */
 @Configuration(proxyBeanMethods = false)
 @EnableRedisIndexedWebSession
-public class SessionConfiguration {
+public class SessionConfiguration{
 
     public static final String HEADER_SESSION_ID_NAME = "X-Auth-Token";
     public static final String X_REQUESTED_WITH = "X-Requested-With";

@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.function.Tuple2;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -101,8 +102,9 @@ public class UserSecurityManager extends AbstractDatabase
     @Override
     public Mono<UserDetails> findByUsername(String username) {
 
-        var userMono = this.loadByUsername(username).zipWhen(user -> this.authorities(user.getCode()));
-        var userDetailsMono = userMono
+        Mono<Tuple2<User, List<GrantedAuthority>>> userMono = this.loadByUsername(username)
+                .zipWhen(user -> this.authorities(user.getCode()));
+        Mono<SecurityDetails> userDetailsMono = userMono
                 .flatMap(tuple2 -> buildUserDetails(tuple2.getT1(), new HashSet<>(tuple2.getT2())));
         return userDetailsMono.cast(UserDetails.class)
                 .onErrorResume(throwable -> Mono.error(new AuthenticationServiceException(
@@ -117,24 +119,24 @@ public class UserSecurityManager extends AbstractDatabase
                 user.getPassword(), user.getDisabled(), user.getAccountExpired(),
                 user.getAccountLocked(), user.getCredentialsExpired(), authorities,
                 Map.of("username", user.getUsername()), "username");
-        var tuple2Mono = Mono.zipDelayError(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
-        return tuple2Mono.mapNotNull(tuple2 -> {
+        Mono<Tuple2<List<GroupMemberResponse>, List<TenantMemberResponse>>> groupsAndTenantsMono =
+                Mono.zipDelayError(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
+        return groupsAndTenantsMono.doOnNext(tuple2 -> {
             userDetails.setGroups(new HashSet<>(tuple2.getT1()));
             userDetails.setTenants(new HashSet<>(tuple2.getT2()));
-            return userDetails;
-        }).then(Mono.defer(() -> Mono.just(userDetails)));
+        }).then(Mono.just(userDetails));
     }
 
     private Mono<List<GroupMemberResponse>> loadGroups(String userCode) {
         return this.queryWithCache("USER_GROUPS-" + userCode,
                         QUERY_GROUP_MEMBERS_SQL, Map.of("userCode", userCode), GroupMemberResponse.class)
-                .flatMap(ContextUtils::serializeUserAuditor).collectList();
+                .flatMap(ContextUtils::serializeUserAuditor).collectSortedList();
     }
 
     private Mono<List<TenantMemberResponse>> loadTenants(String userCode) {
         return this.queryWithCache("USER_TENANTS-" + userCode,
                         QUERY_TENANT_MEMBERS_SQL, Map.of("userCode", userCode), TenantMemberResponse.class)
-                .flatMap(ContextUtils::serializeUserAuditor).collectList();
+                .flatMap(ContextUtils::serializeUserAuditor).collectSortedList();
     }
 
     private Mono<List<GrantedAuthority>> authorities(String userCode) {
