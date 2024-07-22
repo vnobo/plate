@@ -4,9 +4,9 @@ import com.platform.boot.commons.utils.BeanUtils;
 import com.platform.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.relational.core.sql.Update;
+import org.springframework.data.web.PagedModel;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,9 +30,10 @@ public class UsersController {
     }
 
     @GetMapping("page")
-    public Mono<Page<UserResponse>> page(UserRequest request, Pageable pageable) {
+    public Mono<PagedModel<UserResponse>> page(UserRequest request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMap(securityDetails ->
-                        this.usersService.page(request.securityCode(securityDetails.getTenantCode()), pageable));
+                        this.usersService.page(request.securityCode(securityDetails.getTenantCode()), pageable))
+                .map(PagedModel::new);
     }
 
     @PostMapping("add")
