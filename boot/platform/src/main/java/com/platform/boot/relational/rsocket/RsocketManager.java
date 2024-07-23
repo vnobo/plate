@@ -48,16 +48,8 @@ public class RsocketManager {
         }
     }
 
-    @Scheduled(fixedRate = Integer.MAX_VALUE)
+    @Scheduled(fixedRate = 10000)
     public void taskTest() {
-        log.debug("Clients connect count {}", this.clients.size());
-        if (this.clients.isEmpty() || !this.clients.containsKey("CommandClient")) {
-            return;
-        }
-        ConnectedClient connectedClient = this.clients.get("CommandClient");
-        connectedClient.getRequester().route("request.sender")
-                .data(MessageIn.of(MessageType.COMMAND, "test", "test"))
-                .retrieveMono(MessageOut.class).subscribe(out ->
-                        log.debug("CommandClient send message result : {}", out));
+      this.replaySink.tryEmitNext(MessageOut.of(MessageType.COMMAND, "test", "test"));
     }
 }

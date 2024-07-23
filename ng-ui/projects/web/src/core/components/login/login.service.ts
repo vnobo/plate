@@ -21,7 +21,7 @@ export class LoginService {
   private credentials = signal({} as Credentials);
 
   autoLogin(): Authentication | null {
-    const authentication = this._auth.authenticationLoadStorage();
+    const authentication = this._auth.authenticationToken();
     if (authentication) {
       authentication.lastAccessTime = dayjs().unix();
       this._auth.login(authentication);

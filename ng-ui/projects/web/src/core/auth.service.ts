@@ -1,8 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { CanActivateChildFn, CanActivateFn, CanMatchFn, Router } from '@angular/router';
-import { Observable } from 'rxjs';
 import dayjs from 'dayjs';
 import { SessionStorageService } from '../shared/session-storage.service';
 
@@ -25,12 +23,26 @@ export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = () => 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   readonly loginUrl = '/auth/login';
-  _storage: SessionStorageService = inject(SessionStorageService);
+  private _storage: SessionStorageService = inject(SessionStorageService);
   private readonly authenticationKey = 'authentication';
   private isLoggedIn = signal(false);
-  authenticated$: Observable<boolean> = toObservable(this.isLoggedIn);
   private authentication = signal({} as Authentication);
-  authentication$: Observable<Authentication> = toObservable(this.authentication);
+
+  authenticationToken() {
+    if (this.isLoggedIn()) {
+      return this.authentication();
+    }
+    const authentication = this.authenticationLoadStorage();
+    if (authentication) {
+      authentication.lastAccessTime = dayjs().unix();
+      this.login(authentication);
+      return authentication;
+    }
+    throw new HttpErrorResponse({
+      error: 'Authenticate is incorrectness,please login again.',
+      status: 401,
+    });
+  }
 
   isLogged(): boolean {
     if (this.isLoggedIn()) {
@@ -71,7 +83,7 @@ export class AuthService {
     this._storage.remove(this.authenticationKey);
   }
 
-  authenticationLoadStorage(): Authentication | null {
+  private authenticationLoadStorage(): Authentication | null {
     const authenticationJsonStr = this._storage.get(this.authenticationKey);
     if (authenticationJsonStr) {
       const authentication: Authentication = JSON.parse(authenticationJsonStr);
