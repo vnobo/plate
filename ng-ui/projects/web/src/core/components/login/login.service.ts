@@ -14,9 +14,10 @@ export interface Credentials {
   providedIn: 'root',
 })
 export class LoginService {
+  _auth = inject(AuthService);
   _http = inject(HttpClient);
   _storage = inject(BrowserStorageService);
-  _auth = inject(AuthService);
+
   private readonly storageKey = 'credentials';
   private credentials = signal({} as Credentials);
 

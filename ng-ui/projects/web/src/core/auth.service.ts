@@ -3,6 +3,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { CanActivateChildFn, CanActivateFn, CanMatchFn, Router } from '@angular/router';
 import dayjs from 'dayjs';
 import { SessionStorageService } from '../shared/session-storage.service';
+import { RSocketCLientService } from './rsocket.service';
 
 export interface Authentication {
   token: string;
@@ -22,6 +23,8 @@ export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = () => 
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private _socket = inject(RSocketCLientService);
+
   readonly loginUrl = '/auth/login';
   private _storage: SessionStorageService = inject(SessionStorageService);
   private readonly authenticationKey = 'authentication';
@@ -48,10 +51,6 @@ export class AuthService {
     if (this.isLoggedIn()) {
       return true;
     }
-    const authentication = this.authenticationLoadStorage();
-    if (authentication) {
-      return true;
-    }
     return false;
   }
 
@@ -75,6 +74,7 @@ export class AuthService {
     this.isLoggedIn.set(true);
     this.authentication.set(authentication);
     this._storage.set(this.authenticationKey, JSON.stringify(authentication));
+    this._socket.connect(authentication.token);
   }
 
   logout(): void {

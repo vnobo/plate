@@ -4,10 +4,12 @@
       <div class="card-body">
         <h5 class="text-center mb-4" i18n="@@app.login.subtitle">登录你的账号</h5>
         <form
-          (ngSubmit)="onSubmit()"
           [class.was-validated]="loginForm.invalid && (loginForm.dirty || loginForm.touched)"
           [formGroup]="loginForm"
-          autocomplete="off">
+          autocomplete="off"
+          (ngSubmit)="onSubmit()"
+          class="row g-3 needs-validation"
+          novalidate>
           <div class="container container-sm">
             <div class="input-group input-group-sm mb-3 has-validation">
               <div class="input-group-text">
@@ -68,7 +70,7 @@
               <a class="mt-1 float-end" href="./">忘记密码？</a>
             </div>
             <div class="d-grid gap-2">
-              <button [disabled]="loginForm.invalid" class="btn btn-primary" type="submit">登录</button>
+              <button [disabled]="!loginForm.valid" class="btn btn-primary" type="submit">登录</button>
             </div>
           </div>
         </form>

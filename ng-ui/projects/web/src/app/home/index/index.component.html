@@ -1,8 +1,8 @@
 <app-page-header></app-page-header>
 <div class="container-fluid">
   <ul>
-    @for (item of dataSet(); track $index) {
-    <li>{{ $index }}{{ item.type }}-{{ item.data }}-{{ item.content }}</li>
+    @for (item of dataSet(); track item) {
+    <li>{{ $index }}-{{ item.type }}-{{ item.data }}-{{ item.content }}</li>
     }
   </ul>
   <router-outlet>view content</router-outlet>

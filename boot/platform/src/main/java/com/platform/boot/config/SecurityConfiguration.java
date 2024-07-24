@@ -94,7 +94,6 @@ public class SecurityConfiguration {
         return rsocket.build();
     }
 
-
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http.authorizeExchange(exchange -> {
