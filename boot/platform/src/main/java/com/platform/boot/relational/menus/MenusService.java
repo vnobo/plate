@@ -35,7 +35,7 @@ public class MenusService extends AbstractDatabase {
 
     public Flux<Menu> search(MenuRequest request) {
         var cacheKey = BeanUtils.cacheKey(request);
-        Query query = Query.query(request.toCriteria()).sort(Sort.by("sort"));
+        Query query = Query.query(request.toCriteria()).sort(Sort.by("sortNo"));
         return this.queryWithCache(cacheKey, query, Menu.class)
                 .flatMapSequential(ContextUtils::serializeUserAuditor);
     }

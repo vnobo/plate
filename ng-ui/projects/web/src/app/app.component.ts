@@ -13,7 +13,7 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NzBackTopModule, NzSpinModule, MatProgressBarModule, CommonModule, NzLayoutModule],
+  imports: [CommonModule, RouterOutlet, NzBackTopModule, NzSpinModule, MatProgressBarModule, NzLayoutModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })

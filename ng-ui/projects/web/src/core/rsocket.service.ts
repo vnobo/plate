@@ -10,7 +10,6 @@ import {
   MESSAGE_RSOCKET_ROUTING,
   RSocketClient,
 } from 'rsocket-core';
-import { Single } from 'rsocket-flowable';
 import { ReactiveSocket } from 'rsocket-types';
 import RSocketWebSocketClient from 'rsocket-websocket-client';
 import { Observable } from 'rxjs';
@@ -35,11 +34,11 @@ export class RSocketCLientService {
     BufferEncoders
   );
 
-  private socketClient: Single<ReactiveSocket<Buffer, Buffer>> | null = null;
+  private socketClient: ReactiveSocket<Buffer, Buffer> | null = null;
   private token: string | null = null;
 
   connect(token: string) {
-    const socketClient = new RSocketClient({
+    const client = new RSocketClient({
       setup: {
         // ms btw sending keepalive to server
         keepAlive: 6000,
@@ -58,18 +57,30 @@ export class RSocketCLientService {
       transport: this.transport,
     });
     this.token = token;
-    this.socketClient = socketClient.connect();
+    client.connect().subscribe({
+      onComplete: socket => (this.socketClient = socket),
+      onError: error => console.error(error),
+    });
   }
+
   connectionStatus() {
     if (this.socketClient === null) {
       throw new Error('socketClient is null');
     }
-    this.socketClient.then(socket => {
-      socket.connectionStatus().subscribe(event => console.log(`connectionStatus :${event.kind}`));
+    this.socketClient.connectionStatus().subscribe(event => {
+      console.log(`connectionStatus :${event.kind}`);
+      if (event.kind !== 'CONNECTED') {
+        if (this.token === null) {
+          console.error('token 不能为空!,请先调用 connect 方法设置!');
+          return;
+        }
+        this.connect(this.token);
+      }
     });
   }
 
   requestStream(route?: string): Observable<MessageOut> {
+    console.log('requestStream');
     route = route || 'request.stream';
     const observable = new Observable<MessageOut>(subscriber => {
       if (this.socketClient === null) {
@@ -81,39 +92,32 @@ export class RSocketCLientService {
         return;
       }
       const token = this.token;
-      this.socketClient.subscribe({
-        onComplete: socket =>
-          socket
-            .requestStream({
-              data: Buffer.from(token),
-              metadata: encodeCompositeMetadata([[MESSAGE_RSOCKET_ROUTING, encodeRoute(route)]]),
-            })
-            .subscribe({
-              onComplete: () => {
-                console.log('complete');
-                subscriber.complete();
-              },
-              onError: error => {
-                console.log('Connection has been closed due to:: ' + error);
-                subscriber.error(error);
-              },
-              onNext: value => {
-                const jsonStr = value.data?.toString();
-                if (jsonStr !== undefined && jsonStr !== null) {
-                  console.log('onNext: %s,%s', value.data, value.metadata);
-                  subscriber.next(JSON.parse(jsonStr));
-                }
-              },
-              onSubscribe: subscription => {
-                console.log('onNext: %s,%s', subscription);
-                subscription.request(2147483647);
-              },
-            }),
-        onError: error => {
-          console.log('error:', error);
-          subscriber.error(error);
-        },
-      });
+      this.socketClient
+        .requestStream({
+          data: Buffer.from(token),
+          metadata: encodeCompositeMetadata([[MESSAGE_RSOCKET_ROUTING, encodeRoute(route)]]),
+        })
+        .subscribe({
+          onComplete: () => {
+            console.log('complete');
+            subscriber.complete();
+          },
+          onError: error => {
+            console.log('Connection has been closed due to:: ' + error);
+            subscriber.error(error);
+          },
+          onNext: value => {
+            const jsonStr = value.data?.toString();
+            if (jsonStr !== undefined && jsonStr !== null) {
+              console.log('onNext: %s,%s', value.data, value.metadata);
+              subscriber.next(JSON.parse(jsonStr));
+            }
+          },
+          onSubscribe: subscription => {
+            console.log('onNext: %s,%s', subscription);
+            subscription.request(2147483647);
+          },
+        });
     });
     return observable;
   }

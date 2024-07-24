@@ -4,6 +4,7 @@ import { Observable, tap } from 'rxjs';
 import { Authentication, AuthService } from '../../auth.service';
 import { BrowserStorageService } from '../../../shared/browser-storage.service';
 import dayjs from 'dayjs';
+import { RSocketCLientService } from '../../rsocket.service';
 
 export interface Credentials {
   password: string | null | undefined;
@@ -15,8 +16,9 @@ export interface Credentials {
 })
 export class LoginService {
   _auth = inject(AuthService);
-  _http = inject(HttpClient);
-  _storage = inject(BrowserStorageService);
+  private _http = inject(HttpClient);
+  private _storage = inject(BrowserStorageService);
+  private _socket = inject(RSocketCLientService);
 
   private readonly storageKey = 'credentials';
   private credentials = signal({} as Credentials);
@@ -26,6 +28,7 @@ export class LoginService {
     if (authentication) {
       authentication.lastAccessTime = dayjs().unix();
       this._auth.login(authentication);
+      this._socket.connect(authentication.token);
       return authentication;
     }
     return null;
@@ -35,9 +38,12 @@ export class LoginService {
     const headers: HttpHeaders = new HttpHeaders({
       authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
     });
-    return this._http
-      .get<Authentication>('/oauth2/token', { headers: headers })
-      .pipe(tap(authentication => this._auth.login(authentication)));
+    return this._http.get<Authentication>('/oauth2/token', { headers: headers }).pipe(
+      tap(authentication => {
+        this._auth.login(authentication);
+        this._socket.connect(authentication.token);
+      })
+    );
   }
 
   setRememberMe(credentials: Credentials) {

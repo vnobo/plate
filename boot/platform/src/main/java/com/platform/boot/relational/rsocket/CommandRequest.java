@@ -9,9 +9,7 @@ import java.io.Serializable;
  */
 @Data
 public class CommandRequest implements Serializable {
-
     private MessageType type;
     private String command;
     private String content;
-
 }

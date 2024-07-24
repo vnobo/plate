@@ -54,8 +54,10 @@ export function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandle
 
   return next(authReq).pipe(
     catchError(errorResponse => {
-      _auth.logout();
-      _route.navigate([_auth.loginUrl]).then();
+      if (errorResponse.status === 401) {
+        _auth.logout();
+        _route.navigate([_auth.loginUrl]).then();
+      }
       return throwError(() => errorResponse);
     })
   );
