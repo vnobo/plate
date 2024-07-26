@@ -29,12 +29,13 @@ configure(allprojects) { project ->
     configurations.configureEach {
         resolutionStrategy.cacheChangingModulesFor 0, "minutes"
     }
-
 }
 
-configurations(subprojects) { project ->
+configure(subprojects - project(":boot")) { project ->
 
+    apply plugin: "java"
     apply plugin: "org.springframework.boot"
+    apply plugin: "io.spring.dependency-management"
 
     tasks.named("bootBuildImage") {
         tags = ["${dockerPrefix}/${rootProject.name}-${project.name}:latest"]
@@ -54,4 +55,40 @@ configurations(subprojects) { project ->
             }
         }
     }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    dependencies {
+
+        implementation("com.google.guava:guava:33.+")
+        implementation("com.github.f4b6a3:ulid-creator:5.+")
+
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation("org.springframework.boot:spring-boot-starter-validation")
+
+        implementation("org.springframework.boot:spring-boot-starter-log4j2")
+        modules {
+            module("org.springframework.boot:spring-boot-starter-logging") {
+                replacedBy("org.springframework.boot:spring-boot-starter-log4j2", "Use Log4j2 instead of Logback")
+            }
+        }
+
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+        annotationProcessor 'org.projectlombok:lombok'
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'io.projectreactor:reactor-test'
+    }
+
 }
