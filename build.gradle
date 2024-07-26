@@ -31,3 +31,27 @@ configure(allprojects) { project ->
     }
 
 }
+
+configurations(subprojects) { project ->
+
+    apply plugin: "org.springframework.boot"
+
+    tasks.named("bootBuildImage") {
+        tags = ["${dockerPrefix}/${rootProject.name}-${project.name}:latest"]
+        imageName.set("${dockerPrefix}/${rootProject.name}-${project.name}:${project.version}")
+        environment = [
+                "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
+                "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 " +
+                        "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
+        ]
+        publish = true
+        docker {
+            host = "//./pipe/dockerDesktopLinuxEngine"
+            publishRegistry {
+                username = "${dockerUsername}"
+                password = "${dockerPassword}"
+                email = "${dockerEmail}"
+            }
+        }
+    }
+}
