@@ -2,7 +2,6 @@ package com.plate.boot.security.core.user.authority;
 
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Query;
@@ -20,10 +19,8 @@ public class UserAuthoritiesService extends AbstractDatabase {
     private final UserAuthoritiesRepository userAuthoritiesRepository;
 
     public Flux<UserAuthority> search(UserAuthorityRequest request) {
-        var cacheKey = BeanUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria()).sort(Sort.by("id").descending());
-        return super.queryWithCache(cacheKey, query, UserAuthority.class)
-                .flatMapSequential(ContextUtils::serializeUserAuditor);
+        return super.queryWithCache(BeanUtils.cacheKey(request), query, UserAuthority.class);
     }
 
     public Mono<UserAuthority> operate(UserAuthorityRequest request) {

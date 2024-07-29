@@ -3,7 +3,6 @@ package com.plate.boot.security.core.group.authority;
 
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.relational.core.query.Query;
@@ -29,12 +28,8 @@ public class GroupAuthoritiesService extends AbstractDatabase {
     private final GroupAuthoritiesRepository authoritiesRepository;
 
     public Flux<GroupAuthority> search(GroupAuthorityRequest request, Pageable pageable) {
-
-        var cacheKey = BeanUtils.cacheKey(request, pageable);
         Query query = Query.query(request.toCriteria()).with(pageable);
-
-        return super.queryWithCache(cacheKey, query, GroupAuthority.class)
-                .flatMapSequential(ContextUtils::serializeUserAuditor);
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query, GroupAuthority.class);
     }
 
     @Transactional(rollbackFor = Exception.class)

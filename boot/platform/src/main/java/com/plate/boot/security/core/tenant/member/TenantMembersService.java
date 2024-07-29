@@ -2,7 +2,6 @@ package com.plate.boot.security.core.tenant.member;
 
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.commons.utils.query.CriteriaUtils;
 import com.plate.boot.commons.utils.query.ParamSql;
 import lombok.RequiredArgsConstructor;
@@ -38,21 +37,17 @@ public class TenantMembersService extends AbstractDatabase {
     private final TenantMembersRepository tenantMembersRepository;
 
     public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
-        var cacheKey = BeanUtils.cacheKey(request, pageable);
         ParamSql paramSql = request.toParamSql();
         String query = QUERY_SQL + paramSql.whereSql() + CriteriaUtils.applyPage(pageable, "a");
-        return super.queryWithCache(cacheKey, query, paramSql.params(), TenantMemberResponse.class)
-                .flatMapSequential(ContextUtils::serializeUserAuditor);
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query,
+                paramSql.params(), TenantMemberResponse.class);
     }
 
     public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-
-        var cacheKey = BeanUtils.cacheKey(request);
         ParamSql paramSql = request.toParamSql();
         String query = COUNT_SQL + paramSql.whereSql();
-        Mono<Long> countMono = this.countWithCache(cacheKey, query, paramSql.params());
-
+        Mono<Long> countMono = this.countWithCache(BeanUtils.cacheKey(request), query, paramSql.params());
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }

@@ -3,7 +3,6 @@ package com.plate.boot.security.core.user;
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.commons.utils.query.CriteriaUtils;
 import com.plate.boot.commons.utils.query.ParamSql;
 import lombok.RequiredArgsConstructor;
@@ -27,21 +26,17 @@ public class UsersService extends AbstractDatabase {
     private final UsersRepository usersRepository;
 
     public Flux<UserResponse> search(UserRequest request, Pageable pageable) {
-        var cacheKey = BeanUtils.cacheKey(request, pageable);
         ParamSql paramSql = request.bindParamSql();
         String query = "select * from se_users" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
-        return super.queryWithCache(cacheKey, query, paramSql.params(), UserResponse.class)
-                .flatMapSequential(ContextUtils::serializeUserAuditor);
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query,
+                paramSql.params(), UserResponse.class);
     }
 
     public Mono<Page<UserResponse>> page(UserRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-
-        var cacheKey = BeanUtils.cacheKey(request);
         ParamSql paramSql = request.bindParamSql();
         String query = "select count(*) from se_users" + paramSql.whereSql();
-        var countMono = super.countWithCache(cacheKey, query, paramSql.params());
-
+        var countMono = super.countWithCache(BeanUtils.cacheKey(request), query, paramSql.params());
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }

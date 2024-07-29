@@ -4,7 +4,6 @@ package com.plate.boot.relational.menus;
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.security.core.group.authority.GroupAuthoritiesRepository;
 import com.plate.boot.security.core.user.authority.UserAuthoritiesRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +33,8 @@ public class MenusService extends AbstractDatabase {
     private final UserAuthoritiesRepository userAuthoritiesRepository;
 
     public Flux<Menu> search(MenuRequest request) {
-        var cacheKey = BeanUtils.cacheKey(request);
         Query query = Query.query(request.toCriteria()).sort(Sort.by("sortNo"));
-        return this.queryWithCache(cacheKey, query, Menu.class)
-                .flatMapSequential(ContextUtils::serializeUserAuditor);
+        return this.queryWithCache(BeanUtils.cacheKey(request), query, Menu.class);
     }
 
     public Mono<Menu> add(MenuRequest request) {

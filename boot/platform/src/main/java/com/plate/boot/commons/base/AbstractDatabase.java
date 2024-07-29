@@ -1,6 +1,7 @@
 package com.plate.boot.commons.base;
 
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.convert.R2dbcConverter;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
@@ -37,7 +38,7 @@ public abstract class AbstractDatabase extends AbstractService {
         executeSpec = executeSpec.bindValues(bindParams);
         Flux<T> source = executeSpec
                 .map((row, rowMetadata) -> this.r2dbcConverter.read(entityClass, row, rowMetadata))
-                .all();
+                .all().flatMapSequential(ContextUtils::serializeUserAuditor);
 
         return queryWithCache(key, source);
     }
@@ -47,8 +48,7 @@ public abstract class AbstractDatabase extends AbstractService {
         Collection<T> cacheData = this.cache.get(cacheKey, ArrayList::new);
         assert cacheData != null;
 
-        Flux<T> source = sourceFlux
-                .doOnNext(cacheData::add)
+        Flux<T> source = sourceFlux.doOnNext(cacheData::add)
                 .doAfterTerminate(() -> BeanUtils.cachePut(this.cache, cacheKey, cacheData));
 
         return Flux.fromIterable(ObjectUtils.isEmpty(cacheData) ? Collections.emptyList() : cacheData)
@@ -57,7 +57,7 @@ public abstract class AbstractDatabase extends AbstractService {
 
     protected <T> Mono<Long> countWithCache(Object key, Query query, Class<T> entityClass) {
         Mono<Long> source = this.entityTemplate.count(query, entityClass);
-        return countWithCache(key, source);
+        return countWithCache(key, source).cache();
 
     }
 
