@@ -13,8 +13,9 @@ import java.io.Serializable;
 @EqualsAndHashCode(callSuper = true)
 public class RestServerException extends RuntimeException implements Serializable {
 
-    private Object msg;
-    private int code;
+    protected Object msg;
+
+    protected int code;
 
     public RestServerException(int code, String message, Object msg) {
         super(message);

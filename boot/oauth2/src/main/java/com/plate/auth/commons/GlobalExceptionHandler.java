@@ -24,7 +24,6 @@ import java.util.List;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-
     @ExceptionHandler({DataAccessException.class})
     public ResponseEntity<ErrorResponse> handleFailureException(HttpServletRequest exchange, RuntimeException ex) {
         List<String> errors = Lists.newArrayList("Database exec exception!");
