@@ -54,6 +54,16 @@ configure(subprojects - project(":boot")) { project ->
                 email = "${dockerEmail}"
             }
         }
+        buildCache {
+            volume {
+                name = "cache-${rootProject.name}-${project.name}.build"
+            }
+        }
+        launchCache {
+            volume {
+                name = "cache-${rootProject.name}-${project.name}.launch"
+            }
+        }
     }
 
     configurations {

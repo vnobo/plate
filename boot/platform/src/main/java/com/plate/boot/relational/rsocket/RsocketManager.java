@@ -52,4 +52,5 @@ public class RsocketManager {
     public void taskTest() {
       this.replaySink.tryEmitNext(MessageOut.of(MessageType.COMMAND, "test", "test"));
     }
+
 }
