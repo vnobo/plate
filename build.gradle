@@ -47,7 +47,6 @@ configure(subprojects - project(":boot")) { project ->
         ]
         publish = true
         docker {
-            host = "//./pipe/dockerDesktopLinuxEngine"
             publishRegistry {
                 username = "${dockerUsername}"
                 password = "${dockerPassword}"
