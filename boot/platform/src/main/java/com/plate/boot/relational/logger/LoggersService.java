@@ -38,9 +38,15 @@ public class LoggersService extends AbstractDatabase {
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
+    /**
+     * 操作日志记录器请求，将请求转换为日志记录器对象，保存并在完成后清除缓存。
+     * @param request 请求对象，包含创建或更新日志记录器所需的数据。
+     * @return 一个 Mono<Logger> 对象，代表保存操作的结果。
+     */
     public Mono<Logger> operate(LoggerRequest request) {
         return this.save(request.toLogger()).doAfterTerminate(() -> this.cache.clear());
     }
+
 
     public Mono<Logger> save(Logger logger) {
         if (logger.isNew()) {

@@ -5,50 +5,50 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
-name: Java CI with Gradle
-
+name: Gradle Package
+run-name: ${{ github.actor }} is bootBuildImage Actions
 on:
-  workflow_dispatch:
-    branches:
-      - main
+  release:
+    types: [ created ]
   pull_request:
-    branches:
-      - main
-  push:
     branches:
       - main
 
 permissions:
   contents: read
   packages: write
-  
+
 jobs:
   bootBuildImage:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
-      checks: write
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up JDK 21 for x64
-      uses: actions/setup-java@v3
-      with:
-        version: 'latest'
-        java-version: '21'
-        distribution: 'liberica'
-        architecture: x64
+      - name: Checkout repository
+      - uses: actions/checkout@v4
 
-    - name: Set Gradle action
-      uses: gradle/gradle-build-action@v2
+      - name: Set up JDK 21 for x64
+        uses: actions/setup-java@v4
+        with:
+          version: 'latest'
+          java-version: '21'
+          distribution: 'liberica'
+          architecture: x64
+          settings-path: ${{ github.workspace }}
 
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
 
-    - name: Execute Gradle bootBuildImage
-      run: ./gradlew bootBuildImage
-      env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        DOCKER_PREFIX: ${{ vars.DOCKER_PREFIX }}
-        DOCKER_EMAIL: ${{ vars.DOCKER_EMAIL }}
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Execute Gradle bootBuildImage
+        run: ./gradlew bootBuildImage
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_PREFIX: ${{ vars.DOCKER_PREFIX }}
+          DOCKER_EMAIL: ${{ vars.DOCKER_EMAIL }}
