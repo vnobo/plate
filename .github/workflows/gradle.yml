@@ -4,8 +4,7 @@
 # documentation.
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
-
-name: Gradle Package
+name: Gradle Build Docker Package
 run-name: ${{ github.actor }} is bootBuildImage Actions
 on:
   release:
@@ -14,18 +13,9 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
-  packages: write
-
 jobs:
   bootBuildImage:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
