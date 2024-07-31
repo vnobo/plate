@@ -9,10 +9,15 @@ run-name: ${{ github.actor }} is bootBuildImage Actions
 on:
   release:
     types: [ created ]
+  workflow_dispatch:
+    branches:
+      - main
   pull_request:
     branches:
       - main
-
+  push:
+    branches:
+      - main
 permissions:
   contents: read
   packages: write
