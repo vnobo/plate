@@ -29,7 +29,7 @@ public class SecurityController {
     private final WebSessionServerSecurityContextRepository securityContextRepository =
             new WebSessionServerSecurityContextRepository();
 
-    private final UserSecurityManager userSecurityManager;
+    private final SecurityManager securityManager;
     private final PasswordEncoder passwordEncoder;
     private final ServerOAuth2AuthorizedClientRepository clientRepository;
 
@@ -68,7 +68,7 @@ public class SecurityController {
         }
         String newPassword = this.passwordEncoder.encode(request.getNewPassword());
         UserDetails userDetails = (UserDetails) authentication.getDetails();
-        return this.userSecurityManager.updatePassword(userDetails, newPassword);
+        return this.securityManager.updatePassword(userDetails, newPassword);
     }
 
     @Data

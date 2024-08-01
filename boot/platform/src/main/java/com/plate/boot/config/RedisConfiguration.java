@@ -25,7 +25,6 @@ public class RedisConfiguration {
                         .fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair
                         .fromSerializer(new Jackson2JsonRedisSerializer<>(objectMapper, Object.class)));
-
     }
 
     @Bean

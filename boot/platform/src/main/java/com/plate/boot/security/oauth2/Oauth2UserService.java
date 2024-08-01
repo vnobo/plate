@@ -3,7 +3,7 @@ package com.plate.boot.security.oauth2;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.security.SecurityDetails;
-import com.plate.boot.security.UserSecurityManager;
+import com.plate.boot.security.SecurityManager;
 import com.plate.boot.security.core.user.User;
 import com.plate.boot.security.core.user.UserRequest;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    private final UserSecurityManager userSecurityManager;
+    private final SecurityManager securityManager;
 
     public static String generateRandoPassword() {
         byte[] randomBytes = new byte[16];
@@ -49,7 +49,7 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
     }
 
     public Mono<OAuth2User> loadLocalUser(String registrationId, OAuth2User oAuth2User) {
-        return this.userSecurityManager.loadByOauth2(registrationId, oAuth2User.getName())
+        return this.securityManager.loadByOauth2(registrationId, oAuth2User.getName())
                 .delayUntil(user -> this.modifyUser(user, registrationId, oAuth2User))
                 .switchIfEmpty(Mono.defer(() -> this.registerUser(registrationId, oAuth2User)))
                 .map(user -> this.convertToOauth2User(user, oAuth2User));
@@ -69,12 +69,12 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
         oauth2.set("registrationId", request.getExtend().get("oauth2").get(registrationId));
         oldExtend.set("oauth2", oauth2);
         request.setExtend(oldExtend);
-        return this.userSecurityManager.registerOrModifyUser(request).then();
+        return this.securityManager.registerOrModifyUser(request).then();
     }
 
     public Mono<User> registerUser(String registrationId, OAuth2User oAuth2User) {
         var request = this.convertToUserRequest(registrationId, oAuth2User);
-        return this.userSecurityManager.registerOrModifyUser(request);
+        return this.securityManager.registerOrModifyUser(request);
     }
 
     public UserRequest convertToUserRequest(String registrationId, OAuth2User oAuth2User) {

@@ -39,7 +39,6 @@ public abstract class AbstractDatabase extends AbstractService {
         Flux<T> source = executeSpec
                 .map((row, rowMetadata) -> this.r2dbcConverter.read(entityClass, row, rowMetadata))
                 .all().flatMapSequential(ContextUtils::serializeUserAuditor);
-
         return queryWithCache(key, source);
     }
 
@@ -47,10 +46,8 @@ public abstract class AbstractDatabase extends AbstractService {
         String cacheKey = key + ":data";
         Collection<T> cacheData = this.cache.get(cacheKey, ArrayList::new);
         assert cacheData != null;
-
         Flux<T> source = sourceFlux.doOnNext(cacheData::add)
                 .doAfterTerminate(() -> BeanUtils.cachePut(this.cache, cacheKey, cacheData));
-
         return Flux.fromIterable(ObjectUtils.isEmpty(cacheData) ? Collections.emptyList() : cacheData)
                 .switchIfEmpty(Flux.defer(() -> source));
     }
@@ -58,15 +55,12 @@ public abstract class AbstractDatabase extends AbstractService {
     protected <T> Mono<Long> countWithCache(Object key, Query query, Class<T> entityClass) {
         Mono<Long> source = this.entityTemplate.count(query, entityClass);
         return countWithCache(key, source).cache();
-
     }
 
     protected Mono<Long> countWithCache(Object key, String sql, Map<String, Object> bindParams) {
         var executeSpec = this.databaseClient.sql(() -> sql);
         executeSpec = executeSpec.bindValues(bindParams);
-
         Mono<Long> source = executeSpec.mapValue(Long.class).first();
-
         return countWithCache(key, source);
     }
 

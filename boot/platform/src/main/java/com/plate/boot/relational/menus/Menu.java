@@ -40,7 +40,7 @@ public class Menu implements BaseEntity<Integer> {
     private MenuType type;
 
     @NotBlank(message = "Authority cannot be blank!")
-    @Pattern(regexp = "^[a-zA-Z_]{1,50}$", message = "Authority can only contain English letters or '_' symbols.")
+    @Pattern(regexp = "^[a-zA-Z_]{1,256}$", message = "Authority can only contain English letters or '_' symbols.")
     private String authority;
 
     @NotBlank(message = "Name cannot be blank!")

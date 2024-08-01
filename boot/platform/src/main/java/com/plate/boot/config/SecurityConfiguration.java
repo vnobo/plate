@@ -49,6 +49,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.plate.boot.commons.utils.ContextUtils.RULE_ADMINISTRATORS;
 import static com.plate.boot.config.SessionConfiguration.XML_HTTP_REQUEST;
 import static com.plate.boot.config.SessionConfiguration.X_REQUESTED_WITH;
 
@@ -97,14 +98,14 @@ public class SecurityConfiguration {
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http.authorizeExchange(exchange -> {
-            exchange.pathMatchers("/captcha/code", "/oauth2/qr/code", "/oauth2/realms/issuer/**").permitAll();
+            exchange.pathMatchers("/captcha/code", "/oauth2/qr/code").permitAll();
             exchange.matchers(PathRequest.toStaticResources().atCommonLocations()).permitAll();
             exchange.anyExchange().authenticated();
         });
         http.sessionManagement((sessions) -> sessions
                 .concurrentSessions((concurrency) -> concurrency.maximumSessions((authentication) -> {
                     if (authentication.getAuthorities().stream()
-                            .anyMatch(a -> "ROLE_SYSTEM_ADMINISTRATORS".equals(a.getAuthority()))) {
+                            .anyMatch(a -> RULE_ADMINISTRATORS.equals(a.getAuthority()))) {
                         return Mono.empty();
                     }
                     return Mono.just(3);
