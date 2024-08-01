@@ -70,7 +70,6 @@ public abstract class AbstractDatabase extends AbstractService {
         return countWithCache(key, source);
     }
 
-
     protected Mono<Long> countWithCache(Object key, Mono<Long> sourceMono) {
         String cacheKey = key + ":count";
         Long cacheCount = this.cache.get(cacheKey, () -> null);
