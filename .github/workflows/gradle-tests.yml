@@ -29,20 +29,16 @@ jobs:
           distribution: 'liberica'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@dbbdc275be76ac10734476cc723d82dfe7ec6eda # v3.4.2
-
+        uses: gradle/actions/setup-gradle@dbbdc275be76ac10734476cc723d82dfe7ec6eda
       - name: Make gradlew executable
         run: chmod +x ./gradlew
-
       - name: Build with Gradle Wrapper
         run: ./gradlew build test
 
   dependency-submission:
-
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 21
@@ -50,8 +46,5 @@ jobs:
         with:
           java-version: '21'
           distribution: 'liberica'
-
-      # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
-      # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
       - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@dbbdc275be76ac10734476cc723d82dfe7ec6eda # v3.4.2
+        uses: gradle/actions/dependency-submission@dbbdc275be76ac10734476cc723d82dfe7ec6eda
