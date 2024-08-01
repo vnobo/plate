@@ -30,8 +30,10 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@dbbdc275be76ac10734476cc723d82dfe7ec6eda
+
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+
       - name: Build with Gradle Wrapper
         run: ./gradlew build test
 
