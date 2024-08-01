@@ -2,6 +2,7 @@ package com.plate.boot.commons.utils.query;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.plate.boot.commons.utils.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -107,7 +108,7 @@ public final class CriteriaUtils {
     public static Criteria build(Object object, Collection<String> skipKes) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
         if (!ObjectUtils.isEmpty(objectMap)) {
-            Set<String> mergeSet = new HashSet<>(SKIP_CRITERIA_KEYS);
+            Set<String> mergeSet = Sets.newHashSet(SKIP_CRITERIA_KEYS);
             if (!ObjectUtils.isEmpty(skipKes)) {
                 mergeSet.addAll(skipKes);
             }

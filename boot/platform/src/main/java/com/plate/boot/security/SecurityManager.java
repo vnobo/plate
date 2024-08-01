@@ -39,7 +39,7 @@ import java.util.Set;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class UserSecurityManager extends AbstractDatabase
+public class SecurityManager extends AbstractDatabase
         implements ReactiveUserDetailsService, ReactiveUserDetailsPasswordService {
 
     private final static String QUERY_GROUP_MEMBERS_SQL = """

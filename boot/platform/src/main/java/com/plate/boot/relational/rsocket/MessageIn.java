@@ -1,9 +1,11 @@
 package com.plate.boot.relational.rsocket;
 
+import com.plate.boot.commons.utils.ContextUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
@@ -12,6 +14,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class MessageIn implements Serializable {
 
+    private String code;
+    private LocalDateTime time;
     private MessageType type;
     private String content;
     private Object data;
@@ -22,6 +26,8 @@ public class MessageIn implements Serializable {
         this.type = type;
         this.content = content;
         this.data = data;
+        this.data = ContextUtils.nextId();
+        this.time = LocalDateTime.now();
     }
 
     public static MessageIn of(MessageType type, String content, Object data) {
