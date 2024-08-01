@@ -7,17 +7,15 @@
 name: Gradle Build Docker Package
 run-name: ${{ github.actor }} is bootBuildImage Actions
 on:
-  release:
-    types: [ created ]
-  workflow_dispatch:
+  push:
     branches:
       - main
   pull_request:
     branches:
       - main
-  push:
-    branches:
-      - main
+  release:
+    types: [ created ]
+
 permissions:
   contents: read
   packages: write
