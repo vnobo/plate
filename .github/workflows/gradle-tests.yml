@@ -14,8 +14,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  java-build-test:
     runs-on: ubuntu-latest
     permissions:
       contents: read
