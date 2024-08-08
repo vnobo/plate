@@ -97,7 +97,7 @@ public final class CriteriaUtils {
             if (value instanceof String) {
                 whereSql.add(column + " like " + paramName);
             } else if (value instanceof Collection<?>) {
-                whereSql.add(column + " in :" + paramName);
+                whereSql.add(column + " in " + paramName);
             } else {
                 whereSql.add(column + " = " + paramName);
             }
