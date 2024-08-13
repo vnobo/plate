@@ -19,7 +19,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsPasswordService;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
@@ -95,8 +94,7 @@ public class SecurityManager extends AbstractDatabase
     public Mono<User> loadByUsername(String username) {
         Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
         var userMono = this.entityTemplate.select(query, User.class);
-        return this.queryWithCache(username, userMono).singleOrEmpty()
-                .switchIfEmpty(Mono.error(new UsernameNotFoundException("登录用户名不存在!")));
+        return this.queryWithCache(username, userMono).singleOrEmpty();
     }
 
     @Override

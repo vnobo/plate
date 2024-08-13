@@ -38,6 +38,7 @@ configure(subprojects - project(":boot")) { project ->
     apply plugin: "io.spring.dependency-management"
 
     tasks.named("bootBuildImage") {
+        createdDate = "now"
         tags = ["${dockerPrefix}/${rootProject.name}-${project.name}:latest"]
         imageName.set("${dockerPrefix}/${rootProject.name}-${project.name}:${project.version}")
         environment = [
@@ -51,6 +52,11 @@ configure(subprojects - project(":boot")) { project ->
                 username = "${dockerUsername}"
                 password = "${dockerPassword}"
                 email = "${dockerEmail}"
+            }
+        }
+        buildWorkspace {
+            volume {
+                name = "cache-${rootProject.name}-${project.name}.work"
             }
         }
         buildCache {
