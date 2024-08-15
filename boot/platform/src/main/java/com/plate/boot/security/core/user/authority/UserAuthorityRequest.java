@@ -21,7 +21,7 @@ public class UserAuthorityRequest extends UserAuthority {
     }
 
     public Criteria toCriteria() {
-        return criteria(Set.of("authorities"));
+        return criteria(Set.of());
     }
 
 }

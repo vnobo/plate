@@ -9,7 +9,6 @@ import com.plate.auth.commons.exception.RestServerException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.Cache;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.unit.DataSize;
@@ -18,7 +17,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -38,21 +36,6 @@ public final class BeanUtils implements InitializingBean {
         } catch (IOException e) {
             throw RestServerException.withMsg("Init static ObjectOutputStream error.", e);
         }
-    }
-
-    public static String cacheKey(Object... objects) {
-        int hashCode = Objects.hash(objects);
-        return String.valueOf(hashCode);
-    }
-
-    public static void cachePut(Cache cache, String cacheKey, Object obj) {
-        DataSize objectSize = getBeanSize(obj);
-        if (objectSize.toBytes() > MAX_IN_MEMORY_SIZE.toBytes()) {
-            log.warn("Object size is too large, Max memory size is {}, Object size is {}.",
-                    MAX_IN_MEMORY_SIZE, objectSize);
-            return;
-        }
-        cache.put(cacheKey, obj);
     }
 
     public static DataSize getBeanSize(Object obj) {

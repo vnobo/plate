@@ -36,8 +36,8 @@ public abstract class AbstractService implements InitializingBean {
         this.cache = Optional.ofNullable(this.cacheManager).map(manager -> manager.getCache(cacheName))
                 .orElse(new ConcurrentMapCache(cacheName));
         this.cache.clear();
-        log.debug("Initializing provider [%s] cache names: %s".formatted(
-                this.cache.getNativeCache().getClass().getSimpleName(), this.cache.getName()));
+        log.debug("Initializing provider [{}] cache names: {}",
+                this.cache.getNativeCache().getClass().getSimpleName(), this.cache.getName());
     }
 
     @Override

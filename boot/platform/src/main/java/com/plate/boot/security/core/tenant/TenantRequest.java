@@ -25,6 +25,6 @@ public class TenantRequest extends Tenant {
     }
 
     public ParamSql bindParamSql() {
-        return CriteriaUtils.buildParamSql(this, List.of("securityCode"), null);
+        return CriteriaUtils.buildParamSql(this, List.of(), null);
     }
 }

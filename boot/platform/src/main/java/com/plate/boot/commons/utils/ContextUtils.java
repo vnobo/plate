@@ -1,10 +1,8 @@
 package com.plate.boot.commons.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.ulid.Ulid;
 import com.github.f4b6a3.ulid.UlidCreator;
-import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.security.SecurityDetails;
 import com.plate.boot.security.core.UserAuditor;
@@ -55,14 +53,6 @@ public final class ContextUtils implements InitializingBean {
     ContextUtils(ObjectMapper objectMapper, UsersService usersService) {
         ContextUtils.OBJECT_MAPPER = objectMapper;
         ContextUtils.USERS_SERVICE = usersService;
-    }
-
-    public static byte[] objectToBytes(Object object) {
-        try {
-            return ContextUtils.OBJECT_MAPPER.writeValueAsBytes(object);
-        } catch (JsonProcessingException e) {
-            throw JsonException.withError(e);
-        }
     }
 
     public static String getClientIpAddress(ServerHttpRequest httpRequest) {

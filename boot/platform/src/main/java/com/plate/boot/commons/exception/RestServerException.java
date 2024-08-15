@@ -1,4 +1,3 @@
-// Define the package name
 package com.plate.boot.commons.exception;
 
 import lombok.Data;

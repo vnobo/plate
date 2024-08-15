@@ -1,7 +1,7 @@
 package com.plate.boot.security.oauth2;
 
 import com.plate.boot.commons.exception.RestServerException;
-import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.security.core.AuthenticationToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -63,7 +63,7 @@ public class Oauth2SuccessHandler extends RedirectServerAuthenticationSuccessHan
     }
 
     private Mono<Void> writeAuthenticationToken(ServerHttpResponse response, AuthenticationToken authenticationToken) {
-        var body = ContextUtils.objectToBytes(authenticationToken);
+        var body = BeanUtils.objectToBytes(authenticationToken);
         var dataBufferFactory = response.bufferFactory();
         var bodyBuffer = dataBufferFactory.wrap(body);
         return response.writeAndFlushWith(Flux.just(bodyBuffer).windowUntilChanged());
