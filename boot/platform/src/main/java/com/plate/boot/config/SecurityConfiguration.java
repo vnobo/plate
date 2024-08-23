@@ -1,7 +1,7 @@
 package com.plate.boot.config;
 
 import com.plate.boot.commons.ErrorResponse;
-import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.security.oauth2.Oauth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -181,7 +181,7 @@ public class SecurityConfiguration {
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
             ErrorResponse errorResponse = createErrorResponse(exchange, e);
-            var body = ContextUtils.objectToBytes(errorResponse);
+            var body = BeanUtils.objectToBytes(errorResponse);
             var dataBufferFactory = response.bufferFactory();
             var bodyBuffer = dataBufferFactory.wrap(body);
 

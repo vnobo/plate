@@ -1,10 +1,14 @@
 package com.plate.boot.commons.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonPointer;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.google.common.collect.Maps;
+import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.exception.RestServerException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
@@ -12,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.util.unit.DataSize;
 
 import java.io.ByteArrayOutputStream;
@@ -19,6 +24,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -37,6 +43,33 @@ public final class BeanUtils implements InitializingBean {
             OBJECT_OUTPUT_STREAM = new ObjectOutputStream(BYTE_ARRAY_OUTPUT_STREAM);
         } catch (IOException e) {
             throw RestServerException.withMsg("Init static ObjectOutputStream error.", e);
+        }
+    }
+
+    public static <T> T jsonPathToBean(JsonNode json, String path, Class<T> clazz) {
+        try {
+            String[] paths = StringUtils.commaDelimitedListToStringArray(path);
+            StringJoiner pathJoiner = new StringJoiner("/");
+            for (String p : paths) {
+                pathJoiner.add(p);
+            }
+            JsonPointer jsonPointer = JsonPointer.valueOf(pathJoiner.toString());
+            JsonNode valueNode = json.at(jsonPointer);
+            if (valueNode.isMissingNode()) {
+                throw JsonException.withMsg("Json pointer path is not exist!",
+                        "JsonPointer path is not exist!");
+            }
+            return ContextUtils.OBJECT_MAPPER.convertValue(valueNode, clazz);
+        } catch (IllegalArgumentException e) {
+            throw JsonException.withMsg("转换JsonPointer字符转异常!", e.getMessage());
+        }
+    }
+
+    public static <T> byte[] objectToBytes(T object) {
+        try {
+            return ContextUtils.OBJECT_MAPPER.writeValueAsBytes(object);
+        } catch (JsonProcessingException e) {
+            throw JsonException.withError(e);
         }
     }
 

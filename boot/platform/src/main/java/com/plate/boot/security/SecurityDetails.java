@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.SpringSecurityCoreVersion;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.util.ObjectUtils;
@@ -56,8 +55,7 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
 
     @JsonCreator
     public SecurityDetails() {
-        super(Set.of(new SimpleGrantedAuthority("ROLE_NONE")),
-                Map.of("username", "any_none"), "username");
+        super(null, Map.of("username", "any_none"), "username");
     }
 
     public SecurityDetails(Collection<? extends GrantedAuthority> authorities,

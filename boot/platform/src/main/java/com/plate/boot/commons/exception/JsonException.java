@@ -8,7 +8,7 @@ import java.io.IOException;
 public class JsonException extends RestServerException {
 
     public JsonException(IOException jsonProcessingException) {
-        this(5010, "Json processing exception", jsonProcessingException);
+        this(500, "Json processing exception", jsonProcessingException);
     }
 
     public JsonException(int status, String message, Object msg) {

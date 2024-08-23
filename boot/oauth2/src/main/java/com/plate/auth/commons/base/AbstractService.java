@@ -20,6 +20,6 @@ public abstract class AbstractService implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        log.debug("Initializing provider names: %s".formatted(this.getClass().getName()));
+        log.debug("Initializing provider names: {}",this.getClass().getName());
     }
 }
