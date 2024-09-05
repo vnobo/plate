@@ -3,8 +3,8 @@ package com.plate.boot.security.core.user;
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.CriteriaUtils;
-import com.plate.boot.commons.utils.query.ParamSql;
+import com.plate.boot.commons.utils.query.QueryFragment;
+import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,17 +26,17 @@ public class UsersService extends AbstractDatabase {
     private final UsersRepository usersRepository;
 
     public Flux<UserResponse> search(UserRequest request, Pageable pageable) {
-        ParamSql paramSql = request.bindParamSql();
-        String query = "select * from se_users" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
+        QueryFragment QueryFragment = request.bindParamSql();
+        String query = "select * from se_users" + QueryFragment.whereSql() + QueryHelper.applyPage(pageable);
         return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query,
-                paramSql.params(), UserResponse.class);
+                QueryFragment.params(), UserResponse.class);
     }
 
     public Mono<Page<UserResponse>> page(UserRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        ParamSql paramSql = request.bindParamSql();
-        String query = "select count(*) from se_users" + paramSql.whereSql();
-        var countMono = super.countWithCache(BeanUtils.cacheKey(request), query, paramSql.params());
+        QueryFragment QueryFragment = request.bindParamSql();
+        String query = "select count(*) from se_users" + QueryFragment.whereSql();
+        var countMono = super.countWithCache(BeanUtils.cacheKey(request), query, QueryFragment.params());
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }

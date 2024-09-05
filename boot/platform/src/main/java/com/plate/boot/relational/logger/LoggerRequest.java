@@ -2,8 +2,8 @@ package com.plate.boot.relational.logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.CriteriaUtils;
-import com.plate.boot.commons.utils.query.ParamSql;
+import com.plate.boot.commons.utils.query.QueryFragment;
+import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -42,8 +42,9 @@ public class LoggerRequest extends Logger {
     public Logger toLogger() {
         return BeanUtils.copyProperties(this, Logger.class);
     }
-    public ParamSql bindParamSql() {
-        return CriteriaUtils.buildParamSql(this, List.of(), null);
+
+    public QueryFragment bindParamSql() {
+        return QueryHelper.buildParamSql(this, List.of(), null);
     }
     public Criteria toCriteria() {
 

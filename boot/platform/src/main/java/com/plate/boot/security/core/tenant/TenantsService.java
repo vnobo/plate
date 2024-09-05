@@ -2,8 +2,8 @@ package com.plate.boot.security.core.tenant;
 
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.CriteriaUtils;
-import com.plate.boot.commons.utils.query.ParamSql;
+import com.plate.boot.commons.utils.query.QueryFragment;
+import com.plate.boot.commons.utils.query.QueryHelper;
 import com.plate.boot.security.core.tenant.member.TenantMembersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,16 +25,16 @@ public class TenantsService extends AbstractDatabase {
     private final TenantMembersRepository membersRepository;
 
     public Flux<Tenant> search(TenantRequest request, Pageable pageable) {
-        ParamSql paramSql = request.bindParamSql();
-        String query = "select * from se_tenants" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
-        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query, paramSql.params(), Tenant.class);
+        QueryFragment QueryFragment = request.bindParamSql();
+        String query = "select * from se_tenants" + QueryFragment.whereSql() + QueryHelper.applyPage(pageable);
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query, QueryFragment.params(), Tenant.class);
     }
 
     public Mono<Page<Tenant>> page(TenantRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        ParamSql paramSql = request.bindParamSql();
-        String query = "select count(*) from se_tenants" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
-        var countMono = this.countWithCache(BeanUtils.cacheKey(request), query, paramSql.params());
+        QueryFragment QueryFragment = request.bindParamSql();
+        String query = "select count(*) from se_tenants" + QueryFragment.whereSql() + QueryHelper.applyPage(pageable);
+        var countMono = this.countWithCache(BeanUtils.cacheKey(request), query, QueryFragment.params());
 
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));

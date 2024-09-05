@@ -15,21 +15,21 @@ import java.util.StringJoiner;
  * @param params  A {@link Map} mapping parameter names to their respective values,
  *                which are intended to replace placeholders in the SQL query.
  */
-public record ParamSql(StringJoiner sql, Map<String, Object> params) implements Serializable {
+public record QueryFragment(StringJoiner sql, Map<String, Object> params) implements Serializable {
 
     /**
-     * Creates a new instance of {@link ParamSql} with the provided conditional SQL
+     * Creates a new instance of {@link QueryFragment} with the provided conditional SQL
      * fragment and parameters map.
      *
      * @param sql    A {@link StringJoiner} object containing the dynamically
      *               constructed WHERE clause segments of a SQL query, concatenated by 'and'.
      * @param params A {@link Map} of parameter names to values, which will be
      *               substituted for placeholders within the SQL query to prevent SQL injection.
-     * @return A new {@link ParamSql} instance encapsulating the given SQL fragment
+     * @return A new {@link QueryFragment} instance encapsulating the given SQL fragment
      * and parameters map, ready for use in preparing a parameterized SQL statement.
      */
-    public static ParamSql of(StringJoiner sql, Map<String, Object> params) {
-        return new ParamSql(sql, params);
+    public static QueryFragment of(StringJoiner sql, Map<String, Object> params) {
+        return new QueryFragment(sql, params);
     }
 
     /**

@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * This is particularly useful for dynamically constructing SQL queries
  * with bind variables in a structured manner.
  */
-public final class CriteriaUtils {
+public final class QueryHelper {
 
     public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend", "createdTime", "updatedTime");
 
@@ -64,7 +64,7 @@ public final class CriteriaUtils {
         if (sort == null || sort.isUnsorted()) {
             return " order by id desc ";
         }
-        sort = QueryJson.sortJson(sort, prefix);
+        sort = QueryJsonHelper.transformSortForJson(sort, prefix);
         StringJoiner sortSql = new StringJoiner(", ");
         for (Sort.Order order : sort) {
             String sortedPropertyName = order.getProperty();
@@ -97,15 +97,15 @@ public final class CriteriaUtils {
      *         (joined by 'and') and a map of parameters for prepared statement binding.
      */
     @SuppressWarnings("unchecked")
-    public static ParamSql buildParamSql(Object object, Collection<String> skipKeys, String prefix) {
+    public static QueryFragment buildParamSql(Object object, Collection<String> skipKeys, String prefix) {
 
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         if (ObjectUtils.isEmpty(objectMap)) {
-            return ParamSql.of(new StringJoiner(" and "), Maps.newHashMap());
+            return QueryFragment.of(new StringJoiner(" and "), Maps.newHashMap());
         }
-        ParamSql jsonParamSql = QueryJson.queryJson((Map<String, Object>) objectMap.get("query"), prefix);
-        Map<String, Object> params = jsonParamSql.params();
-        StringJoiner sql = jsonParamSql.sql();
+        QueryFragment jsonQueryFragment = QueryJsonHelper.queryJson((Map<String, Object>) objectMap.get("query"), prefix);
+        Map<String, Object> params = jsonQueryFragment.params();
+        StringJoiner sql = jsonQueryFragment.sql();
         String securityCodeKey = "securityCode";
         if (!skipKeys.contains(securityCodeKey) && !ObjectUtils.isEmpty(objectMap.get(securityCodeKey))) {
             String key = "tenant_code";
@@ -124,10 +124,10 @@ public final class CriteriaUtils {
         }
 
         objectMap = Maps.filterKeys(objectMap, key -> !removeKeys.contains(key));
-        ParamSql entityParamSql = buildParamSql(objectMap, prefix);
-        params.putAll(entityParamSql.params());
-        sql.merge(entityParamSql.sql());
-        return ParamSql.of(sql, params);
+        QueryFragment entityQueryFragment = buildParamSql(objectMap, prefix);
+        params.putAll(entityQueryFragment.params());
+        sql.merge(entityQueryFragment.sql());
+        return QueryFragment.of(sql, params);
     }
 
     /**
@@ -147,7 +147,7 @@ public final class CriteriaUtils {
      *         statement binding, where keys correspond to named parameters
      *         and values are the user-provided filter values.
      */
-    public static ParamSql buildParamSql(Map<String, Object> objectMap, String prefix) {
+    public static QueryFragment buildParamSql(Map<String, Object> objectMap, String prefix) {
         StringJoiner whereSql = new StringJoiner(" and ");
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
             String column = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey());
@@ -166,7 +166,7 @@ public final class CriteriaUtils {
                 whereSql.add(column + " = " + paramName);
             }
         }
-        return ParamSql.of(whereSql, objectMap);
+        return QueryFragment.of(whereSql, objectMap);
     }
 
     /**

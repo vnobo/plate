@@ -10,46 +10,48 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 
 /**
- * Searches for a keyword within the provided key and returns the keyword along with its SQL equivalent.
- * If no keyword match is found, returns null.
+ * Utility class providing helper methods to facilitate querying and sorting JSON data within SQL statements.
+ * This class maps operation keywords to their SQL equivalents and offers functionality to translate
+ * query parameters and sorting instructions into SQL-compatible formats, especially handy when working
+ * with JSON data stored in relational databases.
  */
-public class QueryJson {
+public final class QueryJsonHelper {
 
-    private final static Map<String, String> KEYWORDS = Maps.newHashMap();
+    private final static Map<String, String> SQL_OPERATION_MAPPING = Maps.newHashMap();
 
     static {
-        KEYWORDS.put("EQ", "=");
-        KEYWORDS.put("Equal", "=");
-        KEYWORDS.put("After", ">");
-        KEYWORDS.put("GreaterThanEqual", ">=");
-        KEYWORDS.put("GTE", ">=");
-        KEYWORDS.put("GreaterThan", ">");
-        KEYWORDS.put("GT", ">");
-        KEYWORDS.put("Before", "<");
-        KEYWORDS.put("LessThanEqual", "<=");
-        KEYWORDS.put("LTE", "<=");
-        KEYWORDS.put("LessThan", "<");
-        KEYWORDS.put("LT", "<");
-        KEYWORDS.put("Between", "between");
-        KEYWORDS.put("NotBetween", "not between");
-        KEYWORDS.put("NotIn", "not in");
-        KEYWORDS.put("In", "in");
-        KEYWORDS.put("IsNotNull", "is not null");
-        KEYWORDS.put("NotNull", "is not null");
-        KEYWORDS.put("IsNull", "is null");
-        KEYWORDS.put("Null", "is null");
-        KEYWORDS.put("NotLike", "not like");
-        KEYWORDS.put("Like", "like");
-        KEYWORDS.put("StartingWith", "like");
-        KEYWORDS.put("EndingWith", "like");
-        KEYWORDS.put("IsNotLike", "not like");
-        KEYWORDS.put("Containing", "like");
-        KEYWORDS.put("NotContaining", "not like");
-        KEYWORDS.put("Not", "!=");
-        KEYWORDS.put("IsTrue", "is true");
-        KEYWORDS.put("True", "is true");
-        KEYWORDS.put("IsFalse", "is false");
-        KEYWORDS.put("False", "is false");
+        SQL_OPERATION_MAPPING.put("EQ", "=");
+        SQL_OPERATION_MAPPING.put("Equal", "=");
+        SQL_OPERATION_MAPPING.put("After", ">");
+        SQL_OPERATION_MAPPING.put("GreaterThanEqual", ">=");
+        SQL_OPERATION_MAPPING.put("GTE", ">=");
+        SQL_OPERATION_MAPPING.put("GreaterThan", ">");
+        SQL_OPERATION_MAPPING.put("GT", ">");
+        SQL_OPERATION_MAPPING.put("Before", "<");
+        SQL_OPERATION_MAPPING.put("LessThanEqual", "<=");
+        SQL_OPERATION_MAPPING.put("LTE", "<=");
+        SQL_OPERATION_MAPPING.put("LessThan", "<");
+        SQL_OPERATION_MAPPING.put("LT", "<");
+        SQL_OPERATION_MAPPING.put("Between", "between");
+        SQL_OPERATION_MAPPING.put("NotBetween", "not between");
+        SQL_OPERATION_MAPPING.put("NotIn", "not in");
+        SQL_OPERATION_MAPPING.put("In", "in");
+        SQL_OPERATION_MAPPING.put("IsNotNull", "is not null");
+        SQL_OPERATION_MAPPING.put("NotNull", "is not null");
+        SQL_OPERATION_MAPPING.put("IsNull", "is null");
+        SQL_OPERATION_MAPPING.put("Null", "is null");
+        SQL_OPERATION_MAPPING.put("NotLike", "not like");
+        SQL_OPERATION_MAPPING.put("Like", "like");
+        SQL_OPERATION_MAPPING.put("StartingWith", "like");
+        SQL_OPERATION_MAPPING.put("EndingWith", "like");
+        SQL_OPERATION_MAPPING.put("IsNotLike", "not like");
+        SQL_OPERATION_MAPPING.put("Containing", "like");
+        SQL_OPERATION_MAPPING.put("NotContaining", "not like");
+        SQL_OPERATION_MAPPING.put("Not", "!=");
+        SQL_OPERATION_MAPPING.put("IsTrue", "is true");
+        SQL_OPERATION_MAPPING.put("True", "is true");
+        SQL_OPERATION_MAPPING.put("IsFalse", "is false");
+        SQL_OPERATION_MAPPING.put("False", "is false");
     }
 
     /**
@@ -65,7 +67,7 @@ public class QueryJson {
      * @param prefix An optional prefix to prepend to each sorting property, useful for aliasing in SQL queries.
      * @return A new Sort object with transformed sorting properties, ready for sorting queries that involve JSON columns.
      */
-    public static Sort sortJson(Sort sort, String prefix) {
+    public static Sort transformSortForJson(Sort sort, String prefix) {
         if (sort == null || sort.isEmpty()) {
             return Sort.unsorted();
         }
@@ -99,15 +101,15 @@ public class QueryJson {
      * @param params A map where each key represents a JSON path to a value that should be used in query conditions.
      *               The value associated with each key is the target value for comparison or range (for Between/NotBetween).
      * @param prefix An optional prefix to prepend to column names, useful when querying nested or aliased tables/views.
-     * @return A {@link ParamSql} object containing a {@link StringJoiner} with concatenated WHERE clause conditions
+     * @return A {@link QueryFragment} object containing a {@link StringJoiner} with concatenated WHERE clause conditions
      * and a map of bind parameters to be used in a prepared statement.
      */
-    public static ParamSql queryJson(Map<String, Object> params, String prefix) {
+    public static QueryFragment queryJson(Map<String, Object> params, String prefix) {
         Map<String, Object> bindParams = Maps.newHashMap();
         StringJoiner whereSql = new StringJoiner(" and ");
 
         if (ObjectUtils.isEmpty(params)) {
-            return ParamSql.of(whereSql, bindParams);
+            return QueryFragment.of(whereSql, bindParams);
         }
 
         for (Map.Entry<String, Object> entry : params.entrySet()) {
@@ -122,7 +124,7 @@ public class QueryJson {
                 bindParams.put(exps.getValue().getFirst(), entry.getValue());
             }
         }
-        return ParamSql.of(whereSql, bindParams);
+        return QueryFragment.of(whereSql, bindParams);
     }
 
     /**
@@ -209,7 +211,7 @@ public class QueryJson {
      * or null if no match is found.
      */
     private static Map.Entry<String, String> findKeyWord(String inputStr) {
-        return KEYWORDS.entrySet().stream()
+        return SQL_OPERATION_MAPPING.entrySet().stream()
                 .filter(entry -> StringUtils.endsWithIgnoreCase(inputStr, entry.getKey()))
                 .max((entry1, entry2) -> {
                     int entry1Length = entry1.getKey().length();

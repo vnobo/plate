@@ -2,7 +2,7 @@ package com.plate.boot.relational.logger;
 
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.CriteriaUtils;
+import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -28,7 +28,7 @@ public class LoggersService extends AbstractDatabase {
     public Flux<Logger> search(LoggerRequest request, Pageable pageable) {
         String querySql = "select * from se_loggers";
         var paramSql = request.bindParamSql();
-        var query = this.databaseClient.sql(() -> querySql + paramSql.whereSql() + CriteriaUtils.applyPage(pageable))
+        var query = this.databaseClient.sql(() -> querySql + paramSql.whereSql() + QueryHelper.applyPage(pageable))
                 .bindValues(paramSql.params())
                 .map((row, rowMetadata) -> r2dbcConverter.read(Logger.class, row, rowMetadata)).all();
         return this.queryWithCache(BeanUtils.cacheKey(request, pageable), query);
