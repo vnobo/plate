@@ -3,7 +3,6 @@ package com.plate.boot.commons.utils.query;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.plate.boot.commons.exception.RestServerException;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -148,7 +147,6 @@ public class QueryJson {
                     int entry1Length = entry1.getKey().length();
                     int entry2Length = entry2.getKey().length();
                     return Integer.compare(entry1Length, entry2Length);
-                }).orElseThrow(() -> RestServerException.withMsg("Not support key words!",
-                        "Not support key words: " + inputStr));
+                }).orElse(KEYWORDS.entrySet().iterator().next());
     }
 }
