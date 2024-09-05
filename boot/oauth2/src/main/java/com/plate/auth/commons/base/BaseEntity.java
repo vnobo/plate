@@ -8,29 +8,41 @@ import org.springframework.util.ObjectUtils;
 import java.io.Serializable;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Represents the base entity definition with common functionality shared across all entities.
+ * This interface extends {@link Serializable} and {@link Persistable}, ensuring entities can be serialized
+ * and have basic persistence-related operations defined.
+ *
+ * <p>{@code BaseEntity} introduces a default method to set a code value and overrides the `isNew` method
+ * to determine if an entity instance is new (typically based on the absence of an identifier).
+ * It also suggests a flexible way to handle entity identifiers through the `setCode` method.
+ *
+ * <h3>Key Methods:</h3>
+ * <ul>
+ *   <li>{@link #setCode(String)}: Assigns a code value to the entity, allowing customization of how codes are handled.</li>
+ *   <li>{@link #isNew()}: Determines whether the entity instance represents a new record that needs to be persisted.</li>
+ * </ul>
+ *
+ * @param <T> The type of the identifier for this entity.
  */
 public interface BaseEntity<T> extends Serializable, Persistable<T> {
 
     /**
-     * 设置代码值。
-     * <p>
-     * 此方法提供了一个接口来为相关对象设置一个代码值。具体的实现可能会根据实际需求来决定如何处理这个代码值。
-     * 由于这是一个默认方法，它为接口的实现提供了一种灵活的方式来处理代码值，而不需要强制实现这个方法。
+     * Assigns a code to the entity.
      *
-     * @param code 要设置的代码值。这个参数允许调用者指定一个代码值，该值可以是任何字符串，具体的含义和使用方式取决于实现。
+     * This method is intended to set a unique code identifier for an entity. The implementation should define
+     * how the `code` parameter is utilized, as the current implementation is a placeholder.
+     *
+     * @param code The code value to be assigned to the entity. The nature of this code is dependent on the
+     *             business logic or system requirements where this interface is implemented.
      */
     default void setCode(String code) {
-        //todo 方法体为空，具体的实现可能需要根据实际需求来决定如何处理code参数。
+        //todo
     }
 
     /**
-     * 判断当前对象是否为新对象，即是否具有ID。
-     * 如果对象尚未分配ID，则将其视为新对象，并生成一个新的ID。
-     * 此方法用于标识对象是否已存在于持久化存储中，如果没有ID，则认为是新对象需要进行持久化操作。
-     *
-     * @return 如果对象是新对象（没有ID），则返回true；否则返回false。
-     */
+     * Determines whether the entity instance represents a new record that has not yet been persisted.
+     * This method checks if the entity's identifier ({@code getId}) is empty to assess its novelty.
+     * If the entity is deemed new, it assigns a new unique code*/
     @Override
     @JsonIgnore
     default boolean isNew() {
