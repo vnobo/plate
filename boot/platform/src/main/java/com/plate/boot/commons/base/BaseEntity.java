@@ -11,28 +11,32 @@ import java.io.Serializable;
 import java.util.Collection;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Represents the base entity contract for entities that require common functionality
+ * such as having a unique code, being serializable, and persistable with a generic type identifier.
+ * Implementing classes should provide concrete behavior for these base operations.
  */
 public interface BaseEntity<T> extends Serializable, Persistable<T> {
 
     /**
-     * 设置代码值。
-     * <p>
-     * 此方法提供了一个接口来为相关对象设置一个代码值。具体的实现可能会根据实际需求来决定如何处理这个代码值。
-     * 由于这是一个默认方法，它为接口的实现提供了一种灵活的方式来处理代码值，而不需要强制实现这个方法。
+     * Sets the unique code for an entity.
+     * This method is intended to assign or update the code attribute of an entity,
+     * which serves as a unique identifier in accordance with the BaseEntity interface.
+     * The implementation should handle the logic of how the code is generated or validated,
+     * based on specific business rules, which may involve prefixing, formatting, or checking for uniqueness.
      *
-     * @param code 要设置的代码值。这个参数允许调用者指定一个代码值，该值可以是任何字符串，具体的含义和使用方式取决于实现。
+     * @param code The code to be set for the entity. It could be a plain string or follow a predefined format.
      */
     default void setCode(String code) {
-        //todo 方法体为空，具体的实现可能需要根据实际需求来决定如何处理code参数。
+        //todo
     }
 
     /**
-     * 判断当前对象是否为新对象，即是否具有ID。
-     * 如果对象尚未分配ID，则将其视为新对象，并生成一个新的ID。
-     * 此方法用于标识对象是否已存在于持久化存储中，如果没有ID，则认为是新对象需要进行持久化操作。
+     * Determines whether the entity instance is considered new.
+     * This is typically used to decide if the entity needs to be inserted or updated when persisted.
+     * The method checks if the identifier ({@code getId()}) is empty to assess newness.
+     * If the entity is determined to be new, it generates and assigns a new unique code ({@code setCode(ContextUtils.nextId());}).
      *
-     * @return 如果对象是新对象（没有ID），则返回true；否则返回false。
+     * @return {@code true} if the entity is considered new (i.e., its identifier is empty), otherwise {@code false}.
      */
     @Override
     @JsonIgnore
@@ -47,11 +51,13 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
     }
 
     /**
-     * 创建一个Criteria对象，用于构建查询条件。
-     * 此方法允许指定一组应被忽略的属性键，这些键不会被包含在查询条件中。
+     * Constructs a {@link Criteria} instance based on the current entity,
+     * allowing for the specification of properties to be excluded from criteria creation.
      *
-     * @param skipKeys 一个字符串集合，包含应被忽略的属性键。
-     * @return 返回一个Criteria对象，用于进一步构建查询条件。
+     * @param skipKeys A {@link Collection} of {@link String} property keys to be skipped when building the criteria.
+     *                 These properties will not be included in the generated criteria.
+     * @return A {@link Criteria} object tailored according to the current entity,
+     *         excluding the properties specified in the {@code skipKeys} collection.
      */
     default Criteria criteria(Collection<String> skipKeys) {
         // 调用CriteriaUtils的静态方法build来创建Criteria对象，并传入当前对象和要忽略的属性键集合。
