@@ -10,7 +10,8 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Searches for a keyword within the provided key and returns the keyword along with its SQL equivalent.
+ * If no keyword match is found, returns null.
  */
 public class QueryJson {
 
@@ -51,6 +52,19 @@ public class QueryJson {
         KEYWORDS.put("False", "is false");
     }
 
+    /**
+     * Transforms a Spring Sort object into a new Sort object suitable for sorting based on JSON properties,
+     * considering nested structures denoted by dot-separated keys. Optionally prefixes property keys.
+     * <p>
+     * This method processes each order in the provided Sort object. If a property key represents a nested
+     * JSON path (indicated by containing dots), it constructs a new sorting property that can be used
+     * directly in SQL queries involving JSON data, using the '->>' operator to access nested JSON fields.
+     * Non-nested properties or those not requiring transformation are preserved as is.
+     *
+     * @param sort   The original Spring Sort object defining the sorting orders. If null or empty, returns an unsorted Sort.
+     * @param prefix An optional prefix to prepend to each sorting property, useful for aliasing in SQL queries.
+     * @return A new Sort object with transformed sorting properties, ready for sorting queries that involve JSON columns.
+     */
     public static Sort sortJson(Sort sort, String prefix) {
         if (sort == null || sort.isEmpty()) {
             return Sort.unsorted();
@@ -75,6 +89,19 @@ public class QueryJson {
         return Sort.by(orders);
     }
 
+    /**
+     * Constructs a SQL parameter object based on a JSON-like map structure and an optional prefix for column names.
+     * <p>
+     * This method iterates through the provided map, treating keys as JSON paths to construct
+     * WHERE clause conditions and bind parameters accordingly. Supports complex JSON paths
+     * and keyword-based operations like 'Between' and 'NotBetween'.
+     *
+     * @param params A map where each key represents a JSON path to a value that should be used in query conditions.
+     *               The value associated with each key is the target value for comparison or range (for Between/NotBetween).
+     * @param prefix An optional prefix to prepend to column names, useful when querying nested or aliased tables/views.
+     * @return A {@link ParamSql} object containing a {@link StringJoiner} with concatenated WHERE clause conditions
+     * and a map of bind parameters to be used in a prepared statement.
+     */
     public static ParamSql queryJson(Map<String, Object> params, String prefix) {
         Map<String, Object> bindParams = Maps.newHashMap();
         StringJoiner whereSql = new StringJoiner(" and ");
@@ -98,6 +125,17 @@ public class QueryJson {
         return ParamSql.of(whereSql, bindParams);
     }
 
+    /**
+     * Generates a JSON path key along with the corresponding parameter name for constructing SQL queries.
+     * It supports handling special keywords in the last key segment for operations like 'Between' and 'NotBetween'.
+     *
+     * @param keys   An array of strings representing keys in a JSON path, typically derived from a dot-separated string.
+     * @param prefix An optional prefix to be prepended to the first key, used to namespace column names in SQL queries.
+     * @return A Map.Entry containing:
+     * - Key: A string representing the constructed JSON path expression suitable for SQL query with placeholders.
+     * - Value: A list of strings representing the parameter names to bind values to in the SQL prepared statement.
+     * @throws IllegalArgumentException If the keys array is null or empty.
+     */
     private static Map.Entry<String, List<String>> jsonPathKeyAndParamName(String[] keys, String prefix) {
         if (keys == null || keys.length < 1) {
             throw new IllegalArgumentException("Keys array cannot be null or empty.");
@@ -147,6 +185,13 @@ public class QueryJson {
     }
 
 
+    /**
+     * Appends intermediate keys from a given array into a StringBuilder to form a part of a JSON path expression.
+     * Each key is surrounded by '->' to denote nested elements in a JSON structure when used within SQL queries.
+     *
+     * @param joinKeys An array of strings representing intermediate keys in a JSON path.
+     * @return StringBuilder containing the concatenated intermediate keys formatted for a JSON path expression.
+     */
     private static StringBuilder appendIntermediateKeys(String[] joinKeys) {
         StringBuilder jsonPath = new StringBuilder();
         for (String path : joinKeys) {
@@ -155,6 +200,14 @@ public class QueryJson {
         return jsonPath;
     }
 
+    /**
+     * Searches for a keyword within a predefined map of keywords and returns the matching entry.
+     * The search prioritizes longer keywords and is case-insensitive, considering the end of the input string.
+     *
+     * @param inputStr The string to search for a matching keyword suffix.
+     * @return An entry containing the matched keyword and its associated value,
+     * or null if no match is found.
+     */
     private static Map.Entry<String, String> findKeyWord(String inputStr) {
         return KEYWORDS.entrySet().stream()
                 .filter(entry -> StringUtils.endsWithIgnoreCase(inputStr, entry.getKey()))

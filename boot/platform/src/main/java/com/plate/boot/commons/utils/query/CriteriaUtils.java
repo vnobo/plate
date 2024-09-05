@@ -14,21 +14,52 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Utility class to hold both SQL string segment and its related parameters.
+ * This is particularly useful for dynamically constructing SQL queries
+ * with bind variables in a structured manner.
  */
 public final class CriteriaUtils {
 
     public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend", "createdTime", "updatedTime");
 
+    /**
+     * Applies pagination to a SQL query string based on the provided {@link Pageable} object.
+     * This is a convenience overload that delegates to {@link #applyPage(Pageable, String)}
+     * with a null prefix, used primarily when no prefix is needed for generating the SQL LIMIT and OFFSET clauses.
+     *
+     * @param pageable The pagination information, including page size and offset.
+     * @return A string representing the pagination part of the SQL query, i.e., "LIMIT {pageSize} OFFSET {offset}".
+     */
     public static String applyPage(Pageable pageable) {
         return applyPage(pageable, null);
     }
 
+    /**
+     * Applies pagination to a SQL query string based on the provided {@link Pageable} object and an optional prefix.
+     * Generates a LIMIT and OFFSET clause with the specified page size and offset from the {@link Pageable} instance,
+     * optionally prefixed to align with a specific table alias or column name in the SQL query.
+     *
+     * @param pageable The pagination information containing the desired page size and offset for query pagination.
+     * @param prefix   An optional prefix to be applied before the LIMIT and OFFSET placeholders in the SQL query.
+     *                 This can be useful when addressing specific table aliases or column names.
+     * @return A string appended with the pagination SQL segment, formatted as "LIMIT {pageSize} OFFSET {offset}",
+     * with optional prefixing, ready to be integrated into a larger SQL query.
+     */
     public static String applyPage(Pageable pageable, String prefix) {
         String orderSql = applySort(pageable.getSort(), prefix);
         return String.format(orderSql + " limit %d offset %d", pageable.getPageSize(), pageable.getOffset());
     }
 
+    /**
+     * Applies sorting to a SQL query string based on the provided {@link Sort} object, with an optional prefix for property names.
+     * Transforms the sort orders into SQL-compatible sort clauses, considering case insensitivity and JSON field access notation.
+     * If the sort is unsorted or null, defaults to sorting by 'id' in descending order.
+     *
+     * @param sort   The sorting criteria specifying the properties and directions for sorting.
+     * @param prefix An optional prefix to prepend to each sorted property name, useful when dealing with table aliases or nested properties.
+     * @return A string representing the sorting part of the SQL query, starting with "ORDER BY",
+     *         followed by comma-separated sort clauses, each in the format "property_name ASC/DESC".
+     */
     public static String applySort(Sort sort, String prefix) {
         if (sort == null || sort.isUnsorted()) {
             return " order by id desc ";
@@ -49,6 +80,22 @@ public final class CriteriaUtils {
         return " order by " + sortSql;
     }
 
+    /**
+     * Constructs a ParamSql instance representing a part of an SQL WHERE clause
+     * and its corresponding parameters extracted from a given Java object, while
+     * providing options to skip certain keys and apply a prefix to the keys.
+     * The method first converts the object into a map and processes a special
+     * "query" key using QueryJson to generate SQL and parameters. It then handles
+     * a "securityCode" key if present and not skipped. Afterward, it filters out
+     * keys that should be skipped, including default ones defined in SKIP_CRITERIA_KEYS
+     * and combines these with additional parameters generated from the remaining object map.
+     * @param object   The source object from which SQL conditions and parameters are derived.
+     * @param skipKeys A collection of keys to be excluded from processing, can be null.
+     * @param prefix   A prefix to prepend to the keys in the generated SQL, useful for nested queries.
+
+     * @return A ParamSql object containing a StringJoiner with concatenated SQL conditions
+     *         (joined by 'and') and a map of parameters for prepared statement binding.
+     */
     @SuppressWarnings("unchecked")
     public static ParamSql buildParamSql(Object object, Collection<String> skipKeys, String prefix) {
 
@@ -83,6 +130,23 @@ public final class CriteriaUtils {
         return ParamSql.of(sql, params);
     }
 
+    /**
+     * Constructs a ParamSql instance for dynamic SQL WHERE clause generation
+     * based on a provided map of column-value pairs. Supports optional prefixing
+     * for column names to handle table aliases or nested properties. Determines
+     * the SQL condition type (equality, 'like', or 'in') dynamically based on
+     * the value's type, enabling flexible query construction.
+     *
+     * @param objectMap A map where keys represent column names (in camelCase)
+     *                  and values are the criteria for filtering. Values can be
+     *                  Strings, Collections, or other types supporting equality checks.
+     * @param prefix    An optional string prefix to prepend to each column name,
+     *                  typically used to reference specific tables or entities in a query.
+     * @return A ParamSql object encapsulating the constructed WHERE clause
+     *         conditions joined by 'and', and a map of parameters for prepared
+     *         statement binding, where keys correspond to named parameters
+     *         and values are the user-provided filter values.
+     */
     public static ParamSql buildParamSql(Map<String, Object> objectMap, String prefix) {
         StringJoiner whereSql = new StringJoiner(" and ");
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
@@ -105,6 +169,18 @@ public final class CriteriaUtils {
         return ParamSql.of(whereSql, objectMap);
     }
 
+    /**
+     * Constructs a Criteria instance by converting the provided object into a map,
+     * excluding specified keys, and then further processing this map to create
+     * the Criteria object. The method removes keys listed in the predefined
+     * SKIP_CRITERIA_KEYS set as well as any additional keys specified in the
+     * skipKes collection from the object map before constructing the Criteria.
+     *
+     * @param object  The Java object to convert into Criteria. Its properties will form the basis of the Criteria.
+     * @param skipKes A collection of strings representing keys to exclude from the object during conversion.
+     *                These are in addition to the default skipped keys predefined in SKIP_CRITERIA_KEYS.
+     * @return A Criteria instance representing the processed object, excluding the specified keys.
+     */
     public static Criteria build(Object object, Collection<String> skipKes) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
         if (!ObjectUtils.isEmpty(objectMap)) {
@@ -117,6 +193,18 @@ public final class CriteriaUtils {
         return build(objectMap);
     }
 
+    /**
+     * Constructs a Criteria instance from a map of search criteria.
+     * Each entry in the map represents a search criterion where the key is the field name
+     * and the value is the criterion value. The method supports String patterns with 'like',
+     * collections of values with 'in', and direct value matching for other types.
+     *
+     * @param objectMap A map mapping field names to their respective search criterion values.
+     *                 String values will be treated for 'like' matching,
+     *                 Collections will be used for 'in' clauses, and all other types for equality.
+     * @return A Criteria instance representing the combined search criteria.
+     *         Returns an empty Criteria if the input map is null or empty.
+     */
     public static Criteria build(Map<String, Object> objectMap) {
         if (ObjectUtils.isEmpty(objectMap)) {
             return Criteria.empty();
