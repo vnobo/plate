@@ -76,11 +76,13 @@ public class QueryJson {
     }
 
     public static ParamSql queryJson(Map<String, Object> params, String prefix) {
-        if (ObjectUtils.isEmpty(params)) {
-            return ParamSql.of(new StringJoiner(" and "), Maps.newHashMap());
-        }
         Map<String, Object> bindParams = Maps.newHashMap();
         StringJoiner whereSql = new StringJoiner(" and ");
+
+        if (ObjectUtils.isEmpty(params)) {
+            return ParamSql.of(whereSql, bindParams);
+        }
+
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             String[] keys = StringUtils.delimitedListToStringArray(entry.getKey(), ".");
             Map.Entry<String, List<String>> exps = jsonPathKeyAndParamName(keys, prefix);
@@ -97,40 +99,53 @@ public class QueryJson {
     }
 
     private static Map.Entry<String, List<String>> jsonPathKeyAndParamName(String[] keys, String prefix) {
+        if (keys == null || keys.length < 1) {
+            throw new IllegalArgumentException("Keys array cannot be null or empty.");
+        }
+
         int lastIndex = keys.length - 1;
         String lastKey = keys[lastIndex];
-        Map.Entry<String, String> exps = findKeyWord(lastKey);
-        String key = lastKey.substring(0, lastKey.length() - exps.getKey().length());
 
+        // 处理第一个键
         String column = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, keys[0]);
         if (StringUtils.hasLength(prefix)) {
             column = prefix + "." + keys[0];
         }
+
+        // 构建 JSON 路径
         StringBuilder jsonPath = new StringBuilder("(" + column);
-        String[] joinKeys = Arrays.copyOfRange(keys, 1, lastIndex);
-        jsonPath.append(appendIntermediateKeys(joinKeys));
+
+        // 处理中间键
+        if (lastIndex > 1) {
+            String[] joinKeys = Arrays.copyOfRange(keys, 1, lastIndex);
+            jsonPath.append(appendIntermediateKeys(joinKeys));
+        }
 
         List<String> paramNames = new ArrayList<>();
         String paramName = StringUtils.arrayToDelimitedString(keys, "_");
-        if (!ObjectUtils.isEmpty(exps)) {
+
+        Map.Entry<String, String> exps = findKeyWord(lastKey);
+        if (exps != null && !exps.getKey().isEmpty()) {
+            String key = lastKey.substring(0, lastKey.length() - exps.getKey().length());
+            jsonPath.append("->>'").append(key).append("' ");
+
             if ("Between".equals(exps.getKey()) || "NotBetween".equals(exps.getKey())) {
-                jsonPath.append("->>'").append(key).append("' ");
                 String startKey = paramName + "_start";
                 String endKey = paramName + "_end";
                 jsonPath.append(exps.getValue()).append(" :").append(startKey).append(" and :").append(endKey);
                 paramNames.add(startKey);
                 paramNames.add(endKey);
             } else {
-                jsonPath.append("->>'").append(key).append("' ");
                 jsonPath.append(exps.getValue()).append(" :").append(paramName);
                 paramNames.add(paramName);
             }
         } else {
-            jsonPath.append("=").append(" :").append(paramName);
+            jsonPath.append("->>'").append(lastKey).append("' ").append("=").append(" :").append(paramName);
             paramNames.add(paramName);
         }
         return Map.entry(jsonPath.append(")").toString(), paramNames);
     }
+
 
     private static StringBuilder appendIntermediateKeys(String[] joinKeys) {
         StringBuilder jsonPath = new StringBuilder();
@@ -147,6 +162,6 @@ public class QueryJson {
                     int entry1Length = entry1.getKey().length();
                     int entry2Length = entry2.getKey().length();
                     return Integer.compare(entry1Length, entry2Length);
-                }).orElse(KEYWORDS.entrySet().iterator().next());
+                }).orElse(null);
     }
 }

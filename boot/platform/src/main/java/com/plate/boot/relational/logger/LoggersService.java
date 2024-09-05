@@ -2,12 +2,12 @@ package com.plate.boot.relational.logger;
 
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.query.CriteriaUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.relational.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -26,20 +26,28 @@ public class LoggersService extends AbstractDatabase {
     private final LoggersRepository loggersRepository;
 
     public Flux<Logger> search(LoggerRequest request, Pageable pageable) {
-        Query query = Query.query(request.toCriteria()).with(pageable);
-        return this.queryWithCache(BeanUtils.cacheKey(request, pageable), query, Logger.class);
+        String querySql = "select * from se_loggers";
+        var paramSql = request.bindParamSql();
+        var query = this.databaseClient.sql(() -> querySql + paramSql.whereSql() + CriteriaUtils.applyPage(pageable))
+                .bindValues(paramSql.params())
+                .map((row, rowMetadata) -> r2dbcConverter.read(Logger.class, row, rowMetadata)).all();
+        return this.queryWithCache(BeanUtils.cacheKey(request, pageable), query);
     }
 
     public Mono<Page<Logger>> page(LoggerRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        var countMono = this.countWithCache(BeanUtils.cacheKey(request),
-                Query.query(request.toCriteria()), Logger.class);
+        String querySql = "select count(*) from se_loggers";
+        var paramSql = request.bindParamSql();
+        var query = this.databaseClient.sql(() -> querySql + paramSql.whereSql())
+                .bindValues(paramSql.params()).mapValue(Long.class).one();
+        var countMono = this.countWithCache(BeanUtils.cacheKey(request), query);
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
     /**
      * 操作日志记录器请求，将请求转换为日志记录器对象，保存并在完成后清除缓存。
+     *
      * @param request 请求对象，包含创建或更新日志记录器所需的数据。
      * @return 一个 Mono<Logger> 对象，代表保存操作的结果。
      */
