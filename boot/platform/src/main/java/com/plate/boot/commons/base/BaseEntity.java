@@ -27,7 +27,6 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
      * @param code The code to be set for the entity. It could be a plain string or follow a predefined format.
      */
     default void setCode(String code) {
-        //todo
     }
 
     /**
