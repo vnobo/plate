@@ -13,7 +13,7 @@ spring:
   r2dbc:
     url: r2dbc:postgres://127.0.0.1:5432/plate?fetchSize=5000
     username: farmer
-    password: q1w2e3..
+    password: 123456
     pool:
       max-idle-time: 10m
       validation-query: select 1
