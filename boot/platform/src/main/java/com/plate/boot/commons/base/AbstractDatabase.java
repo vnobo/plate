@@ -93,9 +93,8 @@ public abstract class AbstractDatabase extends AbstractService {
                                          Map<String, Object> bindParams, Class<T> entityClass) {
         var executeSpec = this.databaseClient.sql(() -> sql);
         executeSpec = executeSpec.bindValues(bindParams);
-        Flux<T> source = executeSpec
-                .map((row, rowMetadata) -> this.r2dbcConverter.read(entityClass, row, rowMetadata))
-                .all().flatMapSequential(ContextUtils::serializeUserAuditor);
+        Flux<T> source = executeSpec.mapProperties(entityClass).all();
+        source = source.flatMapSequential(ContextUtils::serializeUserAuditor);
         return queryWithCache(key, source);
     }
 

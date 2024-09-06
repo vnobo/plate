@@ -7,12 +7,12 @@ import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.springframework.data.relational.core.query.Criteria;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.StringJoiner;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -26,8 +26,8 @@ public class LoggerRequest extends Logger {
 
     private String securityCode;
 
-    public static LoggerRequest of(String tenantCode, String operator, String prefix, String method,
-                                   String status, String url, JsonNode context) {
+    public static LoggerRequest of(String tenantCode, String operator, String prefix,
+                                   String method, String status, String url, JsonNode context) {
         LoggerRequest request = new LoggerRequest();
         request.setTenantCode(tenantCode);
         request.setOperator(operator);
@@ -43,18 +43,14 @@ public class LoggerRequest extends Logger {
         return BeanUtils.copyProperties(this, Logger.class);
     }
 
-    public QueryFragment bindParamSql() {
-        return QueryHelper.buildParamSql(this, List.of(), null);
-    }
-    public Criteria toCriteria() {
-
-        Criteria criteria = criteria(Set.of("securityCode", "context","query"));
-
-        if (StringUtils.hasLength(this.getSecurityCode())) {
-            criteria = criteria.and("tenantCode").is(this.getSecurityCode());
+    public QueryFragment buildQueryFragment() {
+        QueryFragment fragment = QueryHelper.query(this, List.of("operator"), null);
+        StringJoiner criteria = fragment.sql();
+        Map<String, Object> params = fragment.params();
+        if (!ObjectUtils.isEmpty(this.getOperator())) {
+            criteria.add("operator in (:operator)");
+            params.put("operator", Arrays.asList("a", "b"));
         }
-
-        return criteria;
+        return QueryFragment.of(criteria, params);
     }
-
 }

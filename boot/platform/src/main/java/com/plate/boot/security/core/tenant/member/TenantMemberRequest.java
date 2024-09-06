@@ -43,11 +43,11 @@ public class TenantMemberRequest extends TenantMember {
     }
 
     public QueryFragment toParamSql() {
-        QueryFragment QueryFragment = QueryHelper
-                .buildParamSql(this, List.of("users", "securityCode", "username"), "a");
+        QueryFragment fragment = QueryHelper
+                .query(this, List.of("users", "securityCode", "username"), "a");
 
-        StringJoiner criteria = QueryFragment.sql();
-        Map<String, Object> params = QueryFragment.params();
+        StringJoiner criteria = fragment.sql();
+        Map<String, Object> params = fragment.params();
         if (!ObjectUtils.isEmpty(this.getUsers())) {
             criteria.add("a.user_code in :users");
             params.put("users", this.getUsers());

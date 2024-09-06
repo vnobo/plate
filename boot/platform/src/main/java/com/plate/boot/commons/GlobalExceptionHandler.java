@@ -60,6 +60,7 @@ public class GlobalExceptionHandler {
         }
         if (log.isDebugEnabled()) {
             log.error(ex.getLocalizedMessage(), ex);
+            log.error(ex.getCause().getMessage(), ex.getCause());
         }
         return ResponseEntity.status(HttpStatus.INSUFFICIENT_STORAGE).contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),

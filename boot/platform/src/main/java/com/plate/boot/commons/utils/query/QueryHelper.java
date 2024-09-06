@@ -58,25 +58,22 @@ public final class QueryHelper {
      * @param sort   The sorting criteria specifying the properties and directions for sorting.
      * @param prefix An optional prefix to prepend to each sorted property name, useful when dealing with table aliases or nested properties.
      * @return A string representing the sorting part of the SQL query, starting with "ORDER BY",
-     *         followed by comma-separated sort clauses, each in the format "property_name ASC/DESC".
+     * followed by comma-separated sort clauses, each in the format "property_name ASC/DESC".
      */
     public static String applySort(Sort sort, String prefix) {
         if (sort == null || sort.isUnsorted()) {
-            return " order by id desc ";
+            return StringUtils.hasLength(prefix) ? " order by " + prefix + ".id desc" : " order by id desc";
         }
-        sort = QueryJsonHelper.transformSortForJson(sort, prefix);
+        sort = QueryJsonHelper.transformSortForJson(sort);
         StringJoiner sortSql = new StringJoiner(", ");
         for (Sort.Order order : sort) {
             String sortedPropertyName = order.getProperty();
-            sortedPropertyName = sortedPropertyName.contains("->>") ? sortedPropertyName :
-                    CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, sortedPropertyName);
             String sortedProperty = order.isIgnoreCase() ? "lower(" + sortedPropertyName + ")" : sortedPropertyName;
             if (StringUtils.hasLength(prefix)) {
                 sortedProperty = prefix + "." + sortedProperty;
             }
             sortSql.add(sortedProperty + (order.isAscending() ? " asc" : " desc"));
         }
-
         return " order by " + sortSql;
     }
 
@@ -89,15 +86,15 @@ public final class QueryHelper {
      * a "securityCode" key if present and not skipped. Afterward, it filters out
      * keys that should be skipped, including default ones defined in SKIP_CRITERIA_KEYS
      * and combines these with additional parameters generated from the remaining object map.
+     *
      * @param object   The source object from which SQL conditions and parameters are derived.
      * @param skipKeys A collection of keys to be excluded from processing, can be null.
      * @param prefix   A prefix to prepend to the keys in the generated SQL, useful for nested queries.
-
      * @return A ParamSql object containing a StringJoiner with concatenated SQL conditions
-     *         (joined by 'and') and a map of parameters for prepared statement binding.
+     * (joined by 'and') and a map of parameters for prepared statement binding.
      */
     @SuppressWarnings("unchecked")
-    public static QueryFragment buildParamSql(Object object, Collection<String> skipKeys, String prefix) {
+    public static QueryFragment query(Object object, Collection<String> skipKeys, String prefix) {
 
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         if (ObjectUtils.isEmpty(objectMap)) {
@@ -124,7 +121,7 @@ public final class QueryHelper {
         }
 
         objectMap = Maps.filterKeys(objectMap, key -> !removeKeys.contains(key));
-        QueryFragment entityQueryFragment = buildParamSql(objectMap, prefix);
+        QueryFragment entityQueryFragment = query(objectMap, prefix);
         params.putAll(entityQueryFragment.params());
         sql.merge(entityQueryFragment.sql());
         return QueryFragment.of(sql, params);
@@ -143,11 +140,11 @@ public final class QueryHelper {
      * @param prefix    An optional string prefix to prepend to each column name,
      *                  typically used to reference specific tables or entities in a query.
      * @return A ParamSql object encapsulating the constructed WHERE clause
-     *         conditions joined by 'and', and a map of parameters for prepared
-     *         statement binding, where keys correspond to named parameters
-     *         and values are the user-provided filter values.
+     * conditions joined by 'and', and a map of parameters for prepared
+     * statement binding, where keys correspond to named parameters
+     * and values are the user-provided filter values.
      */
-    public static QueryFragment buildParamSql(Map<String, Object> objectMap, String prefix) {
+    public static QueryFragment query(Map<String, Object> objectMap, String prefix) {
         StringJoiner whereSql = new StringJoiner(" and ");
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
             String column = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey());
@@ -161,7 +158,7 @@ public final class QueryHelper {
             if (value instanceof String) {
                 whereSql.add(column + " like " + paramName);
             } else if (value instanceof Collection<?>) {
-                whereSql.add(column + " in " + paramName);
+                whereSql.add(column + " in (" + paramName + ")");
             } else {
                 whereSql.add(column + " = " + paramName);
             }
@@ -181,7 +178,7 @@ public final class QueryHelper {
      *                These are in addition to the default skipped keys predefined in SKIP_CRITERIA_KEYS.
      * @return A Criteria instance representing the processed object, excluding the specified keys.
      */
-    public static Criteria build(Object object, Collection<String> skipKes) {
+    public static Criteria criteria(Object object, Collection<String> skipKes) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
         if (!ObjectUtils.isEmpty(objectMap)) {
             Set<String> mergeSet = Sets.newHashSet(SKIP_CRITERIA_KEYS);
@@ -190,7 +187,7 @@ public final class QueryHelper {
             }
             mergeSet.forEach(objectMap::remove);
         }
-        return build(objectMap);
+        return criteria(objectMap);
     }
 
     /**
@@ -200,12 +197,12 @@ public final class QueryHelper {
      * collections of values with 'in', and direct value matching for other types.
      *
      * @param objectMap A map mapping field names to their respective search criterion values.
-     *                 String values will be treated for 'like' matching,
-     *                 Collections will be used for 'in' clauses, and all other types for equality.
+     *                  String values will be treated for 'like' matching,
+     *                  Collections will be used for 'in' clauses, and all other types for equality.
      * @return A Criteria instance representing the combined search criteria.
-     *         Returns an empty Criteria if the input map is null or empty.
+     * Returns an empty Criteria if the input map is null or empty.
      */
-    public static Criteria build(Map<String, Object> objectMap) {
+    public static Criteria criteria(Map<String, Object> objectMap) {
         if (ObjectUtils.isEmpty(objectMap)) {
             return Criteria.empty();
         }

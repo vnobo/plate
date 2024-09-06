@@ -36,7 +36,7 @@ public class GroupMemberRequest extends GroupMember {
     }
 
     public QueryFragment toParamSql() {
-        QueryFragment QueryFragment = QueryHelper.buildParamSql(this, List.of("users", "username"), "a");
+        QueryFragment QueryFragment = QueryHelper.query(this, List.of("users", "username"), "a");
 
         StringJoiner criteria = QueryFragment.sql();
         Map<String, Object> params = QueryFragment.params();

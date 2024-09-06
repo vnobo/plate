@@ -25,6 +25,6 @@ public class TenantRequest extends Tenant {
     }
 
     public QueryFragment bindParamSql() {
-        return QueryHelper.buildParamSql(this, List.of(), null);
+        return QueryHelper.query(this, List.of(), null);
     }
 }

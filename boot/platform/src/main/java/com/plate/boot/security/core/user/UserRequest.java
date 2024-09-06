@@ -32,6 +32,6 @@ public class UserRequest extends User {
     }
 
     public QueryFragment bindParamSql() {
-        return QueryHelper.buildParamSql(this, List.of(), null);
+        return QueryHelper.query(this, List.of(), null);
     }
 }

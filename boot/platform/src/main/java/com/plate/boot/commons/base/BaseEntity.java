@@ -60,6 +60,6 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
      */
     default Criteria criteria(Collection<String> skipKeys) {
         // 调用CriteriaUtils的静态方法build来创建Criteria对象，并传入当前对象和要忽略的属性键集合。
-        return QueryHelper.build(this, skipKeys);
+        return QueryHelper.criteria(this, skipKeys);
     }
 }

@@ -2,7 +2,7 @@ logging:
   register-shutdown-hook: true
   level:
     web: debug
-    com.platform.boot.*: debug
+    com.plate.boot.*: debug
     org.springframework.r2dbc: debug
     io.r2dbc.postgresql.PARAM: debug
 
@@ -18,7 +18,7 @@ spring:
       max-idle-time: 10m
       validation-query: select 1
   sql.init:
-    mode: always
+    mode: never
     platform: postgres
     encoding: utf-8
   data.redis:
