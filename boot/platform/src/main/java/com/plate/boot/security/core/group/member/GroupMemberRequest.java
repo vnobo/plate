@@ -1,8 +1,8 @@
 package com.plate.boot.security.core.group.member;
 
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.CriteriaUtils;
-import com.plate.boot.commons.utils.query.ParamSql;
+import com.plate.boot.commons.utils.query.QueryFragment;
+import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -35,11 +35,11 @@ public class GroupMemberRequest extends GroupMember {
         return criteria(Set.of("users", "username"));
     }
 
-    public ParamSql toParamSql() {
-        ParamSql paramSql = CriteriaUtils.buildParamSql(this, List.of("users", "username"), "a");
+    public QueryFragment toParamSql() {
+        QueryFragment QueryFragment = QueryHelper.query(this, List.of("users", "username"), "a");
 
-        StringJoiner criteria = paramSql.sql();
-        Map<String, Object> params = paramSql.params();
+        StringJoiner criteria = QueryFragment.sql();
+        Map<String, Object> params = QueryFragment.params();
 
         if (!ObjectUtils.isEmpty(this.getUsers())) {
             criteria.add("a.user_code in :users");
@@ -51,7 +51,7 @@ public class GroupMemberRequest extends GroupMember {
             params.put("username", this.getUsername());
         }
 
-        return ParamSql.of(criteria, params);
+        return QueryFragment.of(criteria, params);
     }
 
 }

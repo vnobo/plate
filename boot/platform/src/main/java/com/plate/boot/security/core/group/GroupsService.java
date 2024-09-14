@@ -2,8 +2,8 @@ package com.plate.boot.security.core.group;
 
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.CriteriaUtils;
-import com.plate.boot.commons.utils.query.ParamSql;
+import com.plate.boot.commons.utils.query.QueryFragment;
+import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,16 +22,16 @@ public class GroupsService extends AbstractDatabase {
     private final GroupsRepository groupsRepository;
 
     public Flux<Group> search(GroupRequest request, Pageable pageable) {
-        ParamSql paramSql = request.bindParamSql();
-        String query = "select * from se_groups" + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
-        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query, paramSql.params(), Group.class);
+        QueryFragment QueryFragment = request.bindParamSql();
+        String query = "select * from se_groups" + QueryFragment.whereSql() + QueryHelper.applyPage(pageable);
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query, QueryFragment.params(), Group.class);
     }
 
     public Mono<Page<Group>> page(GroupRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        ParamSql paramSql = request.bindParamSql();
-        String query = "select count(*) from se_groups" + paramSql.whereSql();
-        var countMono = this.countWithCache(BeanUtils.cacheKey(request), query, paramSql.params());
+        QueryFragment QueryFragment = request.bindParamSql();
+        String query = "select count(*) from se_groups" + QueryFragment.whereSql();
+        var countMono = this.countWithCache(BeanUtils.cacheKey(request), query, QueryFragment.params());
 
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));

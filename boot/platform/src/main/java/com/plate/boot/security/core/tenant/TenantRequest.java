@@ -1,8 +1,8 @@
 package com.plate.boot.security.core.tenant;
 
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.CriteriaUtils;
-import com.plate.boot.commons.utils.query.ParamSql;
+import com.plate.boot.commons.utils.query.QueryFragment;
+import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -24,7 +24,7 @@ public class TenantRequest extends Tenant {
         return BeanUtils.copyProperties(this, Tenant.class);
     }
 
-    public ParamSql bindParamSql() {
-        return CriteriaUtils.buildParamSql(this, List.of(), null);
+    public QueryFragment bindParamSql() {
+        return QueryHelper.query(this, List.of(), null);
     }
 }

@@ -2,8 +2,8 @@ package com.plate.boot.security.core.group.member;
 
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.CriteriaUtils;
-import com.plate.boot.commons.utils.query.ParamSql;
+import com.plate.boot.commons.utils.query.QueryFragment;
+import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -34,17 +34,17 @@ public class GroupMembersService extends AbstractDatabase {
     private final GroupMembersRepository memberRepository;
 
     public Flux<GroupMemberResponse> search(GroupMemberRequest request, Pageable pageable) {
-        ParamSql paramSql = request.toParamSql();
-        String query = QUERY_SQL + paramSql.whereSql() + CriteriaUtils.applyPage(pageable);
+        QueryFragment QueryFragment = request.toParamSql();
+        String query = QUERY_SQL + QueryFragment.whereSql() + QueryHelper.applyPage(pageable);
         return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query,
-                paramSql.params(), GroupMemberResponse.class);
+                QueryFragment.params(), GroupMemberResponse.class);
     }
 
     public Mono<Page<GroupMemberResponse>> page(GroupMemberRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        ParamSql paramSql = request.toParamSql();
-        String query = COUNT_SQL + paramSql.whereSql();
-        var countMono = this.countWithCache(BeanUtils.cacheKey(request), query, paramSql.params());
+        QueryFragment QueryFragment = request.toParamSql();
+        String query = COUNT_SQL + QueryFragment.whereSql();
+        var countMono = this.countWithCache(BeanUtils.cacheKey(request), query, QueryFragment.params());
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }

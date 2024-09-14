@@ -1,8 +1,8 @@
 package com.plate.boot.security.core.tenant.member;
 
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.CriteriaUtils;
-import com.plate.boot.commons.utils.query.ParamSql;
+import com.plate.boot.commons.utils.query.QueryFragment;
+import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -42,12 +42,12 @@ public class TenantMemberRequest extends TenantMember {
         return criteria(Set.of("securityCode", "users", "username"));
     }
 
-    public ParamSql toParamSql() {
-        ParamSql paramSql = CriteriaUtils
-                .buildParamSql(this, List.of("users", "securityCode", "username"), "a");
+    public QueryFragment toParamSql() {
+        QueryFragment fragment = QueryHelper
+                .query(this, List.of("users", "securityCode", "username"), "a");
 
-        StringJoiner criteria = paramSql.sql();
-        Map<String, Object> params = paramSql.params();
+        StringJoiner criteria = fragment.sql();
+        Map<String, Object> params = fragment.params();
         if (!ObjectUtils.isEmpty(this.getUsers())) {
             criteria.add("a.user_code in :users");
             params.put("users", this.getUsers());
@@ -63,6 +63,6 @@ public class TenantMemberRequest extends TenantMember {
             params.put("username", this.getUsername());
         }
 
-        return ParamSql.of(criteria, params);
+        return QueryFragment.of(criteria, params);
     }
 }

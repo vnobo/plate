@@ -80,7 +80,6 @@ export class RSocketCLientService {
   }
 
   requestStream(route?: string): Observable<MessageOut> {
-    console.log('requestStream');
     route = route || 'request.stream';
     const observable = new Observable<MessageOut>(subscriber => {
       if (this.socketClient === null) {
