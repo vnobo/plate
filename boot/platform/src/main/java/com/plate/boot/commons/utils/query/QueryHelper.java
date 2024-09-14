@@ -95,22 +95,24 @@ public final class QueryHelper {
      */
     @SuppressWarnings("unchecked")
     public static QueryFragment query(Object object, Collection<String> skipKeys, String prefix) {
+        StringJoiner whereSql = new StringJoiner(" and ");
+        Map<String, Object> bindParams = Maps.newHashMap();
 
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         if (ObjectUtils.isEmpty(objectMap)) {
-            return QueryFragment.of(new StringJoiner(" and "), Maps.newHashMap());
+            return QueryFragment.of(whereSql, bindParams);
         }
         QueryFragment jsonQueryFragment = QueryJsonHelper.queryJson((Map<String, Object>) objectMap.get("query"), prefix);
-        Map<String, Object> params = jsonQueryFragment.params();
-        StringJoiner sql = jsonQueryFragment.sql();
+        whereSql.merge(jsonQueryFragment.sql());
+        bindParams.putAll(jsonQueryFragment.params());
         String securityCodeKey = "securityCode";
         if (!skipKeys.contains(securityCodeKey) && !ObjectUtils.isEmpty(objectMap.get(securityCodeKey))) {
             String key = "tenant_code";
             if (StringUtils.hasLength(prefix)) {
                 key = prefix + "." + key;
             }
-            sql.add(key + " like :securityCode");
-            params.put(securityCodeKey, objectMap.get(securityCodeKey));
+            whereSql.add(key + " like :securityCode");
+            bindParams.put(securityCodeKey, objectMap.get(securityCodeKey));
         }
 
         Set<String> removeKeys = new HashSet<>(SKIP_CRITERIA_KEYS);
@@ -121,10 +123,12 @@ public final class QueryHelper {
         }
 
         objectMap = Maps.filterKeys(objectMap, key -> !removeKeys.contains(key));
+
         QueryFragment entityQueryFragment = query(objectMap, prefix);
-        params.putAll(entityQueryFragment.params());
-        sql.merge(entityQueryFragment.sql());
-        return QueryFragment.of(sql, params);
+
+        whereSql.merge(entityQueryFragment.sql());
+        bindParams.putAll(entityQueryFragment.params());
+        return QueryFragment.of(whereSql, bindParams);
     }
 
     /**

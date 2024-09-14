@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.google.common.collect.Maps;
 import com.plate.boot.commons.exception.JsonException;
+import com.plate.boot.commons.exception.JsonPointerException;
 import com.plate.boot.commons.exception.RestServerException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
@@ -23,8 +24,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Map;
-import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 /**
  * Converts a JavaBean object into a Map representation.
@@ -73,12 +74,12 @@ public final class BeanUtils implements InitializingBean {
             JsonPointer jsonPointer = JsonPointer.valueOf(pathJoiner.toString());
             JsonNode valueNode = json.at(jsonPointer);
             if (valueNode.isMissingNode()) {
-                throw JsonException.withMsg("Json pointer path is not exist!",
+                throw JsonPointerException.withMsg("Json pointer path error",
                         "JsonPointer path is not exist!");
             }
             return ContextUtils.OBJECT_MAPPER.convertValue(valueNode, clazz);
         } catch (IllegalArgumentException e) {
-            throw JsonException.withMsg("转换JsonPointer字符转异常!", e.getMessage());
+            throw JsonPointerException.withError("Json pointer covert error", e);
         }
     }
 
@@ -106,8 +107,14 @@ public final class BeanUtils implements InitializingBean {
      * @return A string representation of the combined hash code, serving as a unique cache key.
      */
     public static String cacheKey(Object... objects) {
-        int hashCode = Objects.hash(objects);
-        return String.valueOf(hashCode);
+        StringJoiner keyJoiner = new StringJoiner("&");
+        for (var obj : objects) {
+            var objMap = BeanUtils.beanToMap(obj, true);
+            var setStr = objMap.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue())
+                    .collect(Collectors.toSet());
+            setStr.forEach(keyJoiner::add);
+        }
+        return ContextUtils.encodeToMD5(keyJoiner.toString());
     }
 
     /**
@@ -252,6 +259,13 @@ public final class BeanUtils implements InitializingBean {
         return objectMapper.convertValue(bean, type);
     }
 
+    /**
+     * Sets the maximum size of data that can be stored in memory before being written to disk.
+     * This method allows configuration of the maximum in-memory size limit, which is particularly
+     * useful for managing memory usage when handling large amounts of data, such as file uploads.
+     *
+     * @param dataSize The maximum in-memory size limit defined as a {@link DataSize}. Defaults to 256 kilobytes if not explicitly set.
+     */
     @Value("${spring.codec.max-in-memory-size:256kb}")
     public void setMaxInMemorySize(DataSize dataSize) {
         MAX_IN_MEMORY_SIZE = dataSize;

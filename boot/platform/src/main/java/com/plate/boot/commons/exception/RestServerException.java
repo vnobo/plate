@@ -40,6 +40,21 @@ public class RestServerException extends RuntimeException implements Serializabl
     protected int code;
 
     /**
+     * Constructs a new instance of {@code RestServerException} with the specified error message and cause.
+     * This exception is typically used to convey that a RESTful service encountered an issue on the server side,
+     * where the provided message describes the error and the throwable denotes the underlying cause.
+     *
+     * @param message   The detailed message explaining the reason for the exception.
+     * @param throwable The cause of the exception, usually an instance of {@link Throwable}
+     *                  that triggered this exception.
+     */
+    public RestServerException(String message, Throwable throwable) {
+        super(message, throwable);
+        this.code = 500;
+        this.msg = throwable.fillInStackTrace().getMessage();
+    }
+
+    /**
      * Constructs a new instance of {@code RestServerException} with specified error code, message, and additional details.
      * This exception is intended for conveying REST server-side error conditions, providing a more granular error code
      * alongside a standard exception message and an optional object that can carry detailed contextual information.

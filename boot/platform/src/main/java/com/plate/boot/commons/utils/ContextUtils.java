@@ -20,7 +20,11 @@ import reactor.core.publisher.Mono;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 
@@ -47,12 +51,28 @@ public final class ContextUtils implements InitializingBean {
             "HTTP_VIA",
             "REMOTE_ADDR"
     };
+
+    public final static MessageDigest MD;
+
+    static {
+        try {
+            MD = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw RestServerException.withMsg("MD5 algorithm not found", e);
+        }
+    }
+
     public static ObjectMapper OBJECT_MAPPER;
     public static UsersService USERS_SERVICE;
 
     ContextUtils(ObjectMapper objectMapper, UsersService usersService) {
         ContextUtils.OBJECT_MAPPER = objectMapper;
         ContextUtils.USERS_SERVICE = usersService;
+    }
+
+    public static String encodeToMD5(String input) {
+        byte[] bytes = MD.digest(input.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(bytes);
     }
 
     public static String getClientIpAddress(ServerHttpRequest httpRequest) {

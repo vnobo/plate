@@ -138,7 +138,7 @@ public final class QueryJsonHelper {
      * @throws IllegalArgumentException If the keys array is null or empty.
      */
     private static QueryCondition prepareQueryPathAndParameters(Map.Entry<String, Object> entry, String prefix) {
-        String[] keys = StringUtils.commaDelimitedListToStringArray(entry.getKey());
+        String[] keys = StringUtils.delimitedListToStringArray(entry.getKey(), ".");
         // 处理第一个键
         String column = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, keys[0]);
         if (StringUtils.hasLength(prefix)) {
