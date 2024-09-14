@@ -14,10 +14,8 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
- * Utility class providing helper methods to facilitate querying and sorting JSON data within SQL statements.
- * This class maps operation keywords to their SQL equivalents and offers functionality to translate
- * query parameters and sorting instructions into SQL-compatible formats, especially handy when working
- * with JSON data stored in relational databases.
+ * Represents a query condition with its SQL fragment, operationSql),
+ Collections.singletonMap associated parameters, and operation details.
  */
 public final class QueryJsonHelper {
 
@@ -59,16 +57,12 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Transforms a Spring Sort object into a new Sort object suitable for sorting based on JSON properties,
-     * considering nested structures denoted by dot-separated keys. Optionally prefixes property keys.
-     * <p>
-     * This method processes each order in the provided Sort object. If a property key represents a nested
-     * JSON path (indicated by containing dots), it constructs a new sorting property that can be used
-     * directly in SQL queries involving JSON data, using the '->>' operator to access nested JSON fields.
-     * Non-nested properties or those not requiring transformation are preserved as is.
+     * Transforms the given Sort object into a new Sort object with property names converted to camelCase format,
+     * which is more suitable for JSON serialization. This method is particularly useful when preparing sorting criteria
+     * to be used in APIs or databases that expect properties in camelCase notation.
      *
-     * @param sort The original Spring Sort object defining the sorting orders. If null or empty, returns an unsorted Sort.
-     * @return A new Sort object with transformed sorting properties, ready for sorting queries that involve JSON columns.
+     * @param sort The Sort object whose properties are to be transformed. If null or empty, the method returns an unsorted Sort instance.
+     * @return A new Sort object with property names converted to camelCase, preserving the original sorting directions (ascending/descending).
      */
     public static Sort transformSortForJson(Sort sort) {
         if (sort == null || sort.isEmpty()) {
@@ -80,14 +74,14 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Converts the property of a Sort.Order into camelCase format suitable for certain SQL operations,
-     * especially when dealing with JSON data. If the property denotes a nested structure using dot-notation,
-     * it transforms the first key to camelCase and appends the rest with appropriate JSON path syntax.
+     * Converts a single Sort.Order's property into camelCase format, preparing it for SQL queries
+     * that involve JSON data. If the property denotes a nested JSON path, additional transformations
+     * are applied to construct a valid SQL query fragment.
      *
-     * @param order The Sort.Order whose property is to be converted to camelCase format, potentially
-     *              handling nested keys for JSON compatibility.
-     * @return A new Sort.Order instance with the property converted to camelCase format, ready
-     * for use in sorting operations that require specific property formatting, like JSON field sorting.
+     * @param order The Sort.Order object whose property needs to be converted to camelCase
+     *              and potentially transformed for nested JSON field access.
+     * @return A new Sort.Order instance with the property converted to camelCase and formatted
+     *         appropriately for nested JSON paths, maintaining the original direction of sorting.
      */
     private static Sort.Order convertSortOrderToCamelCase(Sort.Order order) {
         String[] keys = StringUtils.delimitedListToStringArray(order.getProperty(), ".");
