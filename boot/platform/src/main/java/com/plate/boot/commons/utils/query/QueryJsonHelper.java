@@ -157,7 +157,6 @@ public final class QueryJsonHelper {
         }
         // 构建 JSON 路径
         StringBuilder jsonPath = new StringBuilder("(" + sql);
-
         int lastIndex = keys.length - 1;
         // 处理中间键
         if (lastIndex > 1) {
