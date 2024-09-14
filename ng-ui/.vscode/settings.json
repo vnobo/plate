@@ -19,5 +19,6 @@
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "prettier.bracketSameLine": true
+  "prettier.bracketSameLine": true,
+  "Codegeex.CommitMessageStyle": "ConventionalCommits"
 }

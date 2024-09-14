@@ -101,17 +101,17 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Constructs a SQL parameter object based on a JSON-like map structure and an optional prefix for column names.
-     * <p>
-     * This method iterates through the provided map, treating keys as JSON paths to construct
-     * WHERE clause conditions and bind parameters accordingly. Supports complex JSON paths
-     * and keyword-based operations like 'Between' and 'NotBetween'.
+     * Constructs a QueryFragment representing a conditional SQL WHERE clause
+     * based on a map of parameters and an optional prefix for nested JSON keys.
+     * Each entry in the map is transformed into a condition that can query nested
+     * JSON properties in a SQL environment, considering the provided prefix.
      *
-     * @param params A map where each key represents a JSON path to a value that should be used in query conditions.
-     *               The value associated with each key is the target value for comparison or range (for Between/NotBetween).
-     * @param prefix An optional prefix to prepend to column names, useful when querying nested or aliased tables/views.
-     * @return A {@link QueryFragment} object containing a {@link StringJoiner} with concatenated WHERE clause conditions
-     * and a map of bind parameters to be used in a prepared statement.
+     * @param params A map where keys represent JSON property paths and values are the criteria
+     *               to match. If null or empty, the method returns a QueryFragment with no conditions.
+     * @param prefix An optional string to prefix before each JSON property path in the SQL query,
+     *               useful for namespacing or distinguishing JSON fields. Defaults to an empty string if not provided.
+     * @return A QueryFragment containing the concatenated SQL conditions joined by 'and',
+     * and a map of parameters for binding values to these conditions, ready to be used in a prepared statement.
      */
     public static QueryFragment queryJson(Map<String, Object> params, String prefix) {
         Map<String, Object> bindParams = Maps.newHashMap();
