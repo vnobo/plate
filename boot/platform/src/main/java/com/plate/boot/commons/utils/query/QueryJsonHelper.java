@@ -14,8 +14,10 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
- * Represents a query condition with its SQL fragment, operationSql),
- Collections.singletonMap associated parameters, and operation details.
+ * QueryJsonHelper is a utility class designed to facilitate the transformation of query parameters into
+ * SQL-compatible formats, particularly focusing on handling JSON-based queries. It provides methods to
+ * convert sort orders into camelCase for JSON serialization, construct conditional SQL clauses for querying
+ * nested JSON properties, and manage special operations like 'Between', 'In', and others within a SQL context.
  */
 public final class QueryJsonHelper {
 
@@ -57,12 +59,16 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Transforms the given Sort object into a new Sort object with property names converted to camelCase format,
-     * which is more suitable for JSON serialization. This method is particularly useful when preparing sorting criteria
-     * to be used in APIs or databases that expect properties in camelCase notation.
+     * Transforms a given Spring Framework Sort object into a new Sort object with properties
+     * converted to camelCase format, which is beneficial when sorting involves JSON fields in SQL queries.
+     * Nested JSON paths within sort properties are also adjusted to be compatible with SQL syntax.
+     * If the input Sort is null or empty, the method returns an unsorted Sort instance.
      *
-     * @param sort The Sort object whose properties are to be transformed. If null or empty, the method returns an unsorted Sort instance.
-     * @return A new Sort object with property names converted to camelCase, preserving the original sorting directions (ascending/descending).
+     * @param sort The Sort object to be transformed. Its properties may require conversion to camelCase
+     *             and adjustment for SQL-JSON compatibility.
+     * @return A new Sort object with properties converted into camelCase format and formatted
+     *         for proper handling of nested JSON paths in SQL queries. Returns an unsorted Sort if
+     *         the input is null or empty.
      */
     public static Sort transformSortForJson(Sort sort) {
         if (sort == null || sort.isEmpty()) {
@@ -74,14 +80,14 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Converts a single Sort.Order's property into camelCase format, preparing it for SQL queries
-     * that involve JSON data. If the property denotes a nested JSON path, additional transformations
-     * are applied to construct a valid SQL query fragment.
+     * Converts the property of a Sort.Order into camelCase format and adjusts nested JSON paths
+     * to be compatible with SQL syntax, particularly useful when sorting JSON fields within SQL queries.
+     * The first part of the property is converted to lower_camel_case, and the remaining parts,
+     * if any, are appended with appropriate '->>' operators to form a valid SQL-JSON path expression.
      *
-     * @param order The Sort.Order object whose property needs to be converted to camelCase
-     *              and potentially transformed for nested JSON field access.
-     * @return A new Sort.Order instance with the property converted to camelCase and formatted
-     *         appropriately for nested JSON paths, maintaining the original direction of sorting.
+     * @param order The Sort.Order whose property needs conversion and adjustment for SQL-JSON sorting.
+     * @return A new Sort.Order instance with the property formatted in camelCase and SQL-JSON compatible
+     * for sorting purposes, maintaining the original direction of sorting.
      */
     private static Sort.Order convertSortOrderToCamelCase(Sort.Order order) {
         String[] keys = StringUtils.delimitedListToStringArray(order.getProperty(), ".");
@@ -95,17 +101,22 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Constructs a QueryFragment representing a conditional SQL WHERE clause
-     * based on a map of parameters and an optional prefix for nested JSON keys.
-     * Each entry in the map is transformed into a condition that can query nested
-     * JSON properties in a SQL environment, considering the provided prefix.
+     * Constructs a QueryFragment representing a set of JSON-based query conditions.
+     * It iterates over provided parameters, converting each into a properly formatted
+     * SQL condition using the provided prefix to namespace JSON keys, suitable for querying
+     * JSON data stored in SQL databases.
      *
-     * @param params A map where keys represent JSON property paths and values are the criteria
-     *               to match. If null or empty, the method returns a QueryFragment with no conditions.
-     * @param prefix An optional string to prefix before each JSON property path in the SQL query,
-     *               useful for namespacing or distinguishing JSON fields. Defaults to an empty string if not provided.
-     * @return A QueryFragment containing the concatenated SQL conditions joined by 'and',
-     * and a map of parameters for binding values to these conditions, ready to be used in a prepared statement.
+     * @param params A map where each key represents a JSON path (possibly prefixed) and the value is the
+     *               condition's value or further criteria for complex operations like 'Between', 'In', etc.
+     * @param prefix A string prefix to prepend to each JSON key to form the full column name in SQL queries.
+     *               This helps address potential naming conflicts or scoping within the SQL context.
+     * @return A QueryFragment containing:
+     * - The 'sql' field as a StringJoiner with all conditions joined by 'and',
+     *   ready to be appended to a WHERE clause in a SQL query.
+     * - The 'params' map holding named parameters for binding values to the query,
+     *   enhancing security and performance.
+     * If 'params' is empty, a QueryFragment with an empty condition and no parameters is returned.
+     * @throws IllegalArgumentException If any processing error occurs due to invalid input structure or content.
      */
     public static QueryFragment queryJson(Map<String, Object> params, String prefix) {
         Map<String, Object> bindParams = Maps.newHashMap();
@@ -122,15 +133,20 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Generates a JSON path key along with the corresponding parameter name for constructing SQL queries.
-     * It supports handling special keywords in the last key segment for operations like 'Between' and 'NotBetween'.
+     * Constructs a {@link QueryCondition} based on the provided map entry and a prefix.
+     * The entry's key represents a JSON path, and the value is the condition's operand.
+     * The method supports nested JSON paths and translates them into equivalent SQL expressions
+     * compatible with JSON columns in SQL databases. It validates the path, processes the keys,
+     * and delegates the construction of the final condition part to {@link #buildLastCondition(String[], Object)}.
      *
-     * @param entry  An array of strings representing keys in a JSON path, typically derived from a dot-separated string.
-     * @param prefix An optional prefix to be prepended to the first key, used to namespace column names in SQL queries.
-     * @return A Map.Entry containing:
-     * - Key: A string representing the constructed JSON path expression suitable for SQL query with placeholders.
-     * - Value: A list of strings representing the parameter names to bind values to in the SQL prepared statement.
-     * @throws IllegalArgumentException If the keys array is null or empty.
+     * @param entry  A map entry where the key is a dot-delimited string indicating a JSON path
+     *               (e.g., "extend.usernameLike"), and the value is the target value for the condition.
+     * @param prefix A prefix to prepend to the first key of the JSON path to qualify column names
+     *               in the SQL query, ensuring correct scoping or avoiding naming collisions.
+     * @return A {@link QueryCondition} object representing the constructed SQL condition
+     * for querying JSON data, including the SQL fragment, parameters, and the operation detail.
+     * @throws RestServerException If the provided JSON path does not meet the minimum requirement of specifying
+     *                            at least one level of nesting after the prefix (if provided).
      */
     private static QueryCondition buildJsonCondition(Map.Entry<String, Object> entry, String prefix) {
         String[] keys = StringUtils.delimitedListToStringArray(entry.getKey(), ".");
@@ -164,18 +180,20 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Constructs the final part of a query condition based on the provided keys and a value.
-     * This method handles special keywords for operations such as 'Between', 'NotBetween', 'In', and 'NotIn',
-     * formatting the SQL condition accordingly and preparing the necessary bind parameters.
+     * Constructs the final part of a query condition based on an array of keys and a value.
+     * This method generates SQL fragments for different types of conditions such as equality,
+     * between, in, not in, etc., depending on the detected keyword in the last key of the keys array.
+     * It handles parameterization to prevent SQL injection and prepares the condition for dynamic
+     * query execution.
      *
-     * @param keys  An array of strings forming the path to the JSON attribute. The last key may contain
-     *              a keyword indicating a special operation.
-     * @param value The value or values to be used in the query condition. For 'In' and 'NotIn'
-     *              operations, this should be a comma-separated string or collection of values.
-     * @return A {@link QueryCondition} object containing:
-     * - The SQL fragment representing the condition with placeholders for parameters.
-     * - A map of parameter names to their bound values.
-     * - The operation details including the keyword and its SQL representation.
+     * @param keys An array of strings forming the path to the JSON attribute. The last element
+     *             may contain a keyword suffix for special operations.
+     * @param value The value to be compared against in the query condition. For 'In' and 'Between'
+     *              operations, this should be a comma-separated string or an array respectively.
+     * @return A QueryCondition object containing:
+     *         - The 'sql' field as a string of the SQL fragment representing the condition.
+     *         - The 'params' map holding named parameters and their values for the query.
+     *         - The 'operation' entry describing the operation type and its SQL syntax.
      */
     private static QueryCondition buildLastCondition(String[] keys, Object value) {
         StringBuilder conditionSql = new StringBuilder("->>'");
@@ -183,7 +201,7 @@ public final class QueryJsonHelper {
         String paramName = StringUtils.arrayToDelimitedString(keys, "_");
         String lastKey = keys[keys.length - 1];
 
-        Map.Entry<String, String> exps = retrieveKeywordMapping(lastKey);
+        Map.Entry<String, String> exps = queryKeywordMapper(lastKey);
         if (exps == null) {
             conditionSql.append(lastKey).append("' = :").append(paramName);
             return new QueryCondition(conditionSql.append(")").toString(), Map.of(paramName, value),
@@ -211,11 +229,14 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Appends intermediate keys from a given array into a StringBuilder to form a part of a JSON path expression.
-     * Each key is surrounded by '->' to denote nested elements in a JSON structure when used within SQL queries.
+     * Constructs a JSON path query string from an array of keys meant to be used in SQL queries
+     * targeting JSON data. Each key in the array is appended to the path with the appropriate
+     * SQL-JSON operator, allowing for traversal of nested JSON objects.
      *
-     * @param joinKeys An array of strings representing intermediate keys in a JSON path.
-     * @return StringBuilder containing the concatenated intermediate keys formatted for a JSON path expression.
+     * @param joinKeys An array of strings representing keys in a JSON object which will be combined
+     *                 to form a JSON path query expression.
+     * @return StringBuilder A StringBuilder object containing the concatenated JSON path
+     *                       query expression, suitable for use in SQL queries with JSON columns.
      */
     private static StringBuilder buildJsonQueryPath(String[] joinKeys) {
         StringBuilder jsonPath = new StringBuilder();
@@ -226,16 +247,18 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Searches for a keyword within a predefined map of keywords and returns the matching entry.
-     * The search prioritizes longer keywords and is case-insensitive, considering the end of the input string.
+     * Retrieves the longest keyword mapping from a predefined map for a given input string.
+     * The mapping is identified by checking if the input string ends with any of the keys
+     * in the SQL_OPERATION_MAPPING map, and then selecting the one with the maximum length.
+     * This is particularly useful for parsing or transforming strings based on known suffix patterns.
      *
-     * @param inputStr The string to search for a matching keyword suffix.
-     * @return An entry containing the matched keyword and its associated value,
-     * or null if no match is found.
+     * @param queryKeyword The string for which the longest matching keyword mapping is to be retrieved.
+     * @return An entry containing the matched keyword and its corresponding value from the SQL_OPERATION_MAPPING,
+     *         or null if no match is found.
      */
-    private static Map.Entry<String, String> retrieveKeywordMapping(String inputStr) {
+    private static Map.Entry<String, String> queryKeywordMapper(String queryKeyword) {
         return SQL_OPERATION_MAPPING.entrySet().stream()
-                .filter(entry -> StringUtils.endsWithIgnoreCase(inputStr, entry.getKey()))
+                .filter(entry -> StringUtils.endsWithIgnoreCase(queryKeyword, entry.getKey()))
                 .max((entry1, entry2) -> {
                     int entry1Length = entry1.getKey().length();
                     int entry2Length = entry2.getKey().length();
