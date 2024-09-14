@@ -2,7 +2,6 @@ package com.plate.boot.commons.utils.query;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.plate.boot.commons.utils.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,7 +19,8 @@ import java.util.stream.Collectors;
  */
 public final class QueryHelper {
 
-    public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend", "createdTime", "updatedTime");
+    public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend",
+            "createdTime", "updatedTime", "securityCode", "query");
 
     /**
      * Applies pagination to a SQL query string based on the provided {@link Pageable} object.
@@ -78,20 +78,20 @@ public final class QueryHelper {
     }
 
     /**
-     * Constructs a ParamSql instance representing a part of an SQL WHERE clause
-     * and its corresponding parameters extracted from a given Java object, while
-     * providing options to skip certain keys and apply a prefix to the keys.
-     * The method first converts the object into a map and processes a special
-     * "query" key using QueryJson to generate SQL and parameters. It then handles
-     * a "securityCode" key if present and not skipped. Afterward, it filters out
-     * keys that should be skipped, including default ones defined in SKIP_CRITERIA_KEYS
-     * and combines these with additional parameters generated from the remaining object map.
+     * Constructs a QueryFragment for dynamic SQL WHERE clause generation based on an object's properties.
+     * Excludes specified keys and allows for an optional prefix to be applied to column names.
+     * This method also processes a special "query" property within the object, which contains
+     * a nested map of conditions, and applies additional security-related conditions if present.
      *
-     * @param object   The source object from which SQL conditions and parameters are derived.
-     * @param skipKeys A collection of keys to be excluded from processing, can be null.
-     * @param prefix   A prefix to prepend to the keys in the generated SQL, useful for nested queries.
-     * @return A ParamSql object containing a StringJoiner with concatenated SQL conditions
-     * (joined by 'and') and a map of parameters for prepared statement binding.
+     * @param object   The source object whose properties will be used to construct the query conditions.
+     *                 Properties should map to filter values. A special property "query" can be used
+     *                 to pass a nested map of conditions.
+     * @param skipKeys A collection of strings representing property names to exclude from the query conditions.
+     *                 These properties will not be included in the generated WHERE clause.
+     * @param prefix   An optional prefix to prepend to each property name in the SQL query,
+     *                 useful for specifying table aliases or namespaces.
+     * @return A QueryFragment containing the concatenated SQL WHERE conditions and a map of parameters.
+     * The SQL conditions are joined by 'and', and the parameters map binds placeholders to actual values.
      */
     @SuppressWarnings("unchecked")
     public static QueryFragment query(Object object, Collection<String> skipKeys, String prefix) {
@@ -102,33 +102,39 @@ public final class QueryHelper {
         if (ObjectUtils.isEmpty(objectMap)) {
             return QueryFragment.of(whereSql, bindParams);
         }
-        QueryFragment jsonQueryFragment = QueryJsonHelper.queryJson((Map<String, Object>) objectMap.get("query"), prefix);
-        whereSql.merge(jsonQueryFragment.sql());
-        bindParams.putAll(jsonQueryFragment.params());
+
+        if (objectMap.containsKey("query")) {
+            var jsonMap = (Map<String, Object>) objectMap.get("query");
+            QueryFragment jsonQueryFragment = QueryJsonHelper.queryJson(jsonMap, prefix);
+            whereSql.merge(jsonQueryFragment.sql());
+            bindParams.putAll(jsonQueryFragment.params());
+        }
+
+
         String securityCodeKey = "securityCode";
-        if (!skipKeys.contains(securityCodeKey) && !ObjectUtils.isEmpty(objectMap.get(securityCodeKey))) {
-            String key = "tenant_code";
-            if (StringUtils.hasLength(prefix)) {
-                key = prefix + "." + key;
-            }
-            whereSql.add(key + " like :securityCode");
-            bindParams.put(securityCodeKey, objectMap.get(securityCodeKey));
+        if (!skipKeys.contains(securityCodeKey) && objectMap.containsKey(securityCodeKey)) {
+            var condition = securityCondition(objectMap.get(securityCodeKey), prefix);
+            whereSql.add(condition.sql());
+            bindParams.putAll(condition.params());
         }
 
-        Set<String> removeKeys = new HashSet<>(SKIP_CRITERIA_KEYS);
-        removeKeys.add("query");
-        removeKeys.add(securityCodeKey);
-        if (!ObjectUtils.isEmpty(skipKeys)) {
-            removeKeys.addAll(skipKeys);
+        objectMap = Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && !skipKeys.contains(key));
+        if (!ObjectUtils.isEmpty(objectMap)) {
+            QueryFragment entityQueryFragment = query(objectMap, prefix);
+            whereSql.merge(entityQueryFragment.sql());
+            bindParams.putAll(entityQueryFragment.params());
         }
 
-        objectMap = Maps.filterKeys(objectMap, key -> !removeKeys.contains(key));
-
-        QueryFragment entityQueryFragment = query(objectMap, prefix);
-
-        whereSql.merge(entityQueryFragment.sql());
-        bindParams.putAll(entityQueryFragment.params());
         return QueryFragment.of(whereSql, bindParams);
+    }
+
+    private static QueryCondition securityCondition(Object value, String prefix) {
+        String key = "tenant_code";
+        if (StringUtils.hasLength(prefix)) {
+            key = prefix + "." + key;
+        }
+        return new QueryCondition(key + " like :securityCode",
+                Map.of("securityCode", value), null);
     }
 
     /**
@@ -151,23 +157,40 @@ public final class QueryHelper {
     public static QueryFragment query(Map<String, Object> objectMap, String prefix) {
         StringJoiner whereSql = new StringJoiner(" and ");
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-            String column = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey());
-            if (StringUtils.hasLength(prefix)) {
-                column = prefix + "." + column;
-            }
-
-            Object value = entry.getValue();
-            String paramName = ":" + entry.getKey();
-
-            if (value instanceof String) {
-                whereSql.add(column + " like " + paramName);
-            } else if (value instanceof Collection<?>) {
-                whereSql.add(column + " in (" + paramName + ")");
-            } else {
-                whereSql.add(column + " = " + paramName);
-            }
+            QueryCondition condition = buildCondition(entry, prefix);
+            whereSql.add(condition.sql());
         }
         return QueryFragment.of(whereSql, objectMap);
+    }
+
+    /**
+     * Constructs a QueryCondition based on a map entry consisting of a column name and its value.
+     * The method dynamically determines the SQL condition (LIKE, IN, or EQ) based on the value's type,
+     * applies an optional prefix to the column name, and prepares the condition for use in a query.
+     *
+     * @param entry  A map entry where the key is the column name in camelCase format
+     *               and the value is the filter criterion which can be a String, Collection, or other type.
+     * @param prefix An optional prefix to prepend to the column name, useful for specifying table aliases or namespaces.
+     * @return A QueryCondition object containing:
+     * - The operation keyword and its associated SQL syntax as a Map.Entry<String, String>.
+     * - The SQL fragment representing the condition with placeholders for parameters.
+     * - A map of parameters mapping placeholders to the actual filter values.
+     */
+    public static QueryCondition buildCondition(Map.Entry<String, Object> entry, String prefix) {
+        String sql = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey());
+        if (StringUtils.hasLength(prefix)) {
+            sql = prefix + "." + sql;
+        }
+        Object value = entry.getValue();
+        String paramName = ":" + entry.getKey();
+        if (value instanceof String) {
+            sql = sql + " like " + paramName;
+        } else if (value instanceof Collection<?>) {
+            sql = sql + " in (" + paramName + ")";
+        } else {
+            sql = sql + " = " + paramName;
+        }
+        return new QueryCondition(sql, Map.of(paramName, value), null);
     }
 
     /**
@@ -177,20 +200,14 @@ public final class QueryHelper {
      * SKIP_CRITERIA_KEYS set as well as any additional keys specified in the
      * skipKes collection from the object map before constructing the Criteria.
      *
-     * @param object  The Java object to convert into Criteria. Its properties will form the basis of the Criteria.
-     * @param skipKes A collection of strings representing keys to exclude from the object during conversion.
-     *                These are in addition to the default skipped keys predefined in SKIP_CRITERIA_KEYS.
+     * @param object   The Java object to convert into Criteria. Its properties will form the basis of the Criteria.
+     * @param skipKeys A collection of strings representing keys to exclude from the object during conversion.
+     *                 These are in addition to the default skipped keys predefined in SKIP_CRITERIA_KEYS.
      * @return A Criteria instance representing the processed object, excluding the specified keys.
      */
-    public static Criteria criteria(Object object, Collection<String> skipKes) {
+    public static Criteria criteria(Object object, Collection<String> skipKeys) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
-        if (!ObjectUtils.isEmpty(objectMap)) {
-            Set<String> mergeSet = Sets.newHashSet(SKIP_CRITERIA_KEYS);
-            if (!ObjectUtils.isEmpty(skipKes)) {
-                mergeSet.addAll(skipKes);
-            }
-            mergeSet.forEach(objectMap::remove);
-        }
+        objectMap = Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && skipKeys.contains(key));
         return criteria(objectMap);
     }
 

@@ -7,12 +7,9 @@ import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.springframework.util.ObjectUtils;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 
 /**
  * Represents a logging request that extends the basic {@link Logger} functionality,
@@ -59,13 +56,6 @@ public class LoggerRequest extends Logger {
     }
 
     public QueryFragment buildQueryFragment() {
-        QueryFragment fragment = QueryHelper.query(this, List.of("operator"), null);
-        StringJoiner criteria = fragment.sql();
-        Map<String, Object> params = fragment.params();
-        if (!ObjectUtils.isEmpty(this.getOperator())) {
-            criteria.add("operator in (:operator)");
-            params.put("operator", Arrays.asList("a", "b"));
-        }
-        return QueryFragment.of(criteria, params);
+        return QueryHelper.query(this, List.of(), null);
     }
 }
