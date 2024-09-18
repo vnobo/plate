@@ -6,17 +6,34 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Defines the repository interface for interacting with logger entities within a reactive environment.
+ * Extending from R2dbcRepository, this interface inherits CRUD operations and adds a custom method
+ * to delete log records based on their creation time, facilitating efficient cleanup and management
+ * of log data.
+ *
+ * <p>This repository is designed specifically to work with the {@link Logger} entity and provides
+ * a reactive approach to data access, leveraging Project Reactor's Mono and Flux types for asynchronous,
+ * non-blocking interactions with the underlying data store.</p>
+ *
+ * <p>Notably, it includes:</p>
+ * <ul>
+ *   <li>{@link #deleteByCreatedTimeBefore(LocalDateTime)}: A method to remove outdated log entries
+ *       based on the specified creation time threshold.</li>
+ * </ul>
+ *
+ * <p>Usage of this repository promotes scalable and responsive logging systems, particularly in
+ * scenarios where high throughput and low latency are critical.</p>
+ *
+ * @see R2dbcRepository for the base repository functionality provided.
+ * @see Logger for the entity this repository manages.
  */
 public interface LoggersRepository extends R2dbcRepository<Logger, Long> {
 
     /**
-     * 根据创建时间删除数据
-     * 此方法用于删除数据库中所有创建时间早于指定时间的数据。它使用Reactive Streams API中的Mono类型来表示操作的结果，
-     * 即删除操作影响的行数。这种方法适用于那些需要根据时间戳进行批量删除操作的场景，例如定期清理过期数据。
+     * Deletes all log records from the database whose creation time is before the specified timestamp.
      *
-     * @param createdTime 一个LocalDateTime对象，表示需要删除的数据的创建时间上限。
-     * @return 返回一个Mono对象，该对象在处理完成后将包含被删除行的数量。这允许调用者知道操作的影响程度。
+     * @param createdTime The threshold LocalDateTime before which log records should be deleted.
+     * @return A Mono emitting the number of log records deleted upon successful execution.
      */
     Mono<Long> deleteByCreatedTimeBefore(LocalDateTime createdTime);
 }

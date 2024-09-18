@@ -50,10 +50,27 @@ public class QueryFragment extends HashMap<String, Object> {
         return this;
     }
 
+    /**
+     * Retrieves the {@link StringJoiner} instance containing the dynamically
+     * constructed SQL fragments of this {@link QueryFragment} object.
+     * <p>
+     * This method is useful for accessing the SQL fragment that represents
+     * a part of a query, such as a WHERE clause, which can be further
+     * incorporated into a complete SQL statement.
+     *
+     * @return The {@link StringJoiner} object holding the concatenated SQL segments.
+     */
     public StringJoiner sql() {
         return this.sql;
     }
 
+    /**
+     * Generates the WHERE clause part of a SQL query based on the stored conditions.
+     * If conditions have been accumulated, it prefixes the conditions with the 'WHERE' keyword;
+     * otherwise, it returns an empty string to indicate no conditions.
+     *
+     * @return A String forming the WHERE clause of the SQL query, or an empty string if no conditions are present.
+     */
     public String whereSql() {
         if (this.sql.length() > 0) {
             return " where " + this.sql;

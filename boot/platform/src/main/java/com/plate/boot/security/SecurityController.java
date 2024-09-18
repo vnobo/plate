@@ -6,7 +6,6 @@ import com.plate.boot.security.core.AuthenticationToken;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,28 +18,85 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Handles security-related endpoints for OAuth2 operations, password changes, and CSRF token retrieval.
+ * Utilizes WebSession-based security context repository, security manager, password encoding, and OAuth2 client repository.
  */
 @RestController
 @RequestMapping("/oauth2")
-@RequiredArgsConstructor
 public class SecurityController {
 
+    /**
+     * Repository responsible for managing the security context within the server's web sessions.
+     * It stores and retrieves the security context associated with each user's session, ensuring
+     * that security-related information persists across requests within the same session.
+     */
     private final WebSessionServerSecurityContextRepository securityContextRepository =
             new WebSessionServerSecurityContextRepository();
 
+    /**
+     * The {@code securityManager} field is a final instance of {@link SecurityManager}, responsible for handling
+     * security-related operations such as user authentication, password management, and authority provisioning within
+     * the application. It serves as the central authority for managing user details, roles, and permissions, ensuring
+     * secure access control based on defined security policies.
+     * <p>
+     * This component is injected via constructor dependency injection, providing reactive services for fetching user
+     * details, updating passwords, registering or modifying users, loading users by OAuth2 bindings, and more, thereby
+     * reinforcing the security infrastructure of the {@link SecurityController}.
+     */
     private final SecurityManager securityManager;
+    /**
+     * Encoder used for encoding and validating passwords securely.
+     * This field is responsible for hashing passwords upon user registration or password updates,
+     * and verifying passwords during authentication processes to ensure they match the stored hash.
+     */
     private final PasswordEncoder passwordEncoder;
+    /**
+     * Repository responsible for storing and retrieving authorized client information for OAuth2 server-side authorization.
+     * This instance specifically manages the authorized clients within the server context, ensuring secure access and
+     * persistence of client details necessary for OAuth2 flows.
+     */
     private final ServerOAuth2AuthorizedClientRepository clientRepository;
 
-    @GetMapping("token")
-    public Mono<AuthenticationToken> token(ServerWebExchange exchange, Authentication authentication) {
+    /**
+     * Constructs a new instance of SecurityController.
+     *
+     * @param securityManager  The SecurityManager instance responsible for security operations.
+     * @param passwordEncoder  The PasswordEncoder used for encoding and verifying passwords.
+     * @param clientRepository The ServerOAuth2AuthorizedClientRepository instance for managing OAuth2 authorized clients.
+     */
+    public SecurityController(SecurityManager securityManager, PasswordEncoder passwordEncoder,
+                              ServerOAuth2AuthorizedClientRepository clientRepository) {
+        this.securityManager = securityManager;
+        this.passwordEncoder = passwordEncoder;
+        this.clientRepository = clientRepository;
+    }
+
+    /**
+     * Retrieves an authentication token for the logged-in user by utilizing the provided server web exchange and authentication objects.
+     * The method leverages the security context repository to save the security context and then extracts session information
+     * combined with the authentication details to construct an {@link AuthenticationToken}.
+     *
+     * @param exchange       The {@link ServerWebExchange} representing the current server request and response.
+     * @param authentication The {@link Authentication} object representing the authenticated user.
+     * @return A {@link Mono} emitting the constructed {@link AuthenticationToken} containing session and authentication details.
+     */
+    @GetMapping("login")
+    public Mono<AuthenticationToken> loginToken(ServerWebExchange exchange, Authentication authentication) {
         return ReactiveSecurityContextHolder.getContext()
                 .delayUntil(cts -> this.securityContextRepository.save(exchange, cts))
                 .flatMap(context -> exchange.getSession())
                 .flatMap(session -> Mono.just(AuthenticationToken.build(session, authentication)));
     }
 
+    /**
+     * Retrieves the CSRF token from the context.
+     * <p>
+     * This endpoint is intended for obtaining a CSRF token which can be used to protect
+     * against cross-site request forgery attacks. It utilizes the context to fetch the
+     * CSRF token that has been stored there by the security framework.
+     *
+     * @return A Mono emitting the CsrfToken instance if present in the context, otherwise an empty Mono.
+     */
     @GetMapping("csrf")
     public Mono<CsrfToken> csrfToken() {
         return Mono.deferContextual((contextView) -> {
@@ -49,12 +105,34 @@ public class SecurityController {
         });
     }
 
+    /**
+     * Binds an OAuth2 authorized client to the current authentication context.
+     * <p>
+     * This method is responsible for loading the authorized client associated with the provided
+     * {@code clientRegistrationId} using the current {@link Authentication} and {@link ServerWebExchange}.
+     * It then extracts the access token from the authorized client and returns it as a Mono.
+     *
+     * @param clientRegistrationId The identifier for the client registration. This is used to look up the
+     *                             specific OAuth2 configuration details that the client is registered against.
+     * @param authentication       The current authentication context containing user details and credentials.
+     * @param exchange             The current server web exchange which holds information about the HTTP request and response.
+     * @return A Mono emitting the access token associated with the bound OAuth2 authorized client.
+     */
     @GetMapping("bind")
     public Mono<Object> bindOauth2(String clientRegistrationId, Authentication authentication, ServerWebExchange exchange) {
         return this.clientRepository.loadAuthorizedClient(clientRegistrationId, authentication, exchange)
                 .flatMap(oAuth2AuthorizedClient -> Mono.just(oAuth2AuthorizedClient.getAccessToken()));
     }
 
+    /**
+     * Changes the password for the authenticated user.
+     *
+     * @param request        A {@link ChangePasswordRequest} containing the current password and the new password.
+     * @param authentication The authentication object representing the currently authenticated user.
+     * @return A {@link Mono} emitting the updated {@link UserDetails} after the password change.
+     * @throws RestServerException if the provided password does not match the new password,
+     *                             or if the presented password does not match the current stored password.
+     */
     @PostMapping("/change/password")
     public Mono<UserDetails> changePassword(@Valid @RequestBody ChangePasswordRequest request,
                                             Authentication authentication) {

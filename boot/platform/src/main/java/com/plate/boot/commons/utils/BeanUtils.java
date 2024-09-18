@@ -28,16 +28,33 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
- * Converts a JavaBean object into a Map representation.
- * Each property of the bean is represented as a key-value pair in the map,
- * with the property name as the key and its corresponding value as the value.
+ * Retrieves a list of property names from the source object that have null values.
+ * This method is particularly useful when needing to filter out null properties during a copy operation.
  */
 @Log4j2
 @Component
 public final class BeanUtils implements InitializingBean {
 
+    /**
+     * A private constant field representing an instance of ByteArrayOutputStream.
+     * This is used for efficient byte array output operations, typically in scenarios
+     * where frequent writes to a byte stream are necessary before ultimately
+     * converting the data into a byte array. The ByteArrayOutputStream is mutable
+     * and can be reused after calling reset() method.
+     */
     private final static ByteArrayOutputStream BYTE_ARRAY_OUTPUT_STREAM;
+    /**
+     * A private constant field representing an object output stream.
+     * This stream is used for serializing objects and writing them to a byte stream.
+     * It is declared as final, indicating that once initialized, it should not be reassigned.
+     */
     private final static ObjectOutputStream OBJECT_OUTPUT_STREAM;
+
+    /**
+     * Represents the maximum size of data that can be held in memory.
+     * This threshold is utilized to determine when data should be processed differently,
+     * such as being written to disk, to avoid exceeding memory constraints.
+     */
     public static DataSize MAX_IN_MEMORY_SIZE;
 
     static {
@@ -271,6 +288,13 @@ public final class BeanUtils implements InitializingBean {
         MAX_IN_MEMORY_SIZE = dataSize;
     }
 
+    /**
+     * Initializes the utils bean by performing necessary setup steps.
+     * This method is called after all properties of this bean have been set.
+     * It is part of the Spring Framework's InitializingBean interface contract.
+     * <p>
+     * Logs a message indicating the start of the initialization process for BeanUtils.
+     */
     @Override
     public void afterPropertiesSet() {
         log.info("Initializing utils [BeanUtils]...");

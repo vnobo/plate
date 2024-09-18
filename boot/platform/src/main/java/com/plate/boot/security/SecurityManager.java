@@ -33,7 +33,27 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * SecurityManager is a service class that extends the functionality of AbstractDatabase
+ * to provide security-related operations, such as user details management, password updates,
+ * and authority handling for reactive applications. It integrates with database operations
+ * asynchronously and supports caching mechanisms for improved performance.
+ * This class also serves as a ReactiveUserDetailsService and ReactiveUserDetailsPasswordService,
+ * implementing methods to fetch user details by username and update user passwords respectively.
+ * <p>
+ * Key Responsibilities:
+ * - Manage user registration and modification through integration with UsersService.
+ * - Retrieve user information based on OAuth2 bindings for authentication purposes.
+ * - Load user details by username, including associated roles and permissions.
+ * - Cache query results to minimize direct database hits for frequently accessed data.
+ * - Handle password updates in a secure manner, clearing related caches post-update.
+ * - Populate SecurityDetails objects with comprehensive user and authorization data.
+ * <p>
+ * Dependencies:
+ * - UsersService: For CRUD operations on user entities.
+ * - R2DBC (reactive database access): To execute SQL queries asynchronously.
+ * - Cache: Utilized for storing query results to improve response times on subsequent requests.
+ * <p>
+ * Note: The class uses reactive types (Mono, Flux) to facilitate non-blocking, asynchronous processing.
  */
 @Log4j2
 @Service
@@ -62,8 +82,20 @@ public class SecurityManager extends AbstractDatabase
             where gm.user_code = :userCode
             """;
 
+    /**
+     * Represents the service layer for handling user-related operations.
+     * This field provides access to methods responsible for CRUD operations,
+     * authentication, and other business logic associated with users.
+     */
     private final UsersService usersService;
 
+    /**
+     * Updates the password for a given user's UserDetails.
+     *
+     * @param userDetails The current UserDetails of the user whose password is to be updated.
+     * @param newPassword The new password that will replace the existing one.
+     * @return A Mono emitting the updated UserDetails with the new password set.
+     */
     @Override
     public Mono<UserDetails> updatePassword(UserDetails userDetails, String newPassword) {
         SecurityDetails securityDetails = (SecurityDetails) userDetails;
@@ -75,6 +107,13 @@ public class SecurityManager extends AbstractDatabase
                 .doAfterTerminate(() -> this.cache.clear());
     }
 
+    /**
+     * Registers a new user or modifies an existing one based on the provided user request.
+     *
+     * @param request A UserRequest object containing the details necessary to register or modify a user.
+     *                If the request contains a non-empty 'code', it will be treated as a modification request.
+     * @return A Mono emitting the updated or newly registered User instance upon successful operation.
+     */
     public Mono<User> registerOrModifyUser(UserRequest request) {
         if (StringUtils.hasLength(request.getCode())) {
             return this.usersService.operate(request);
@@ -82,6 +121,16 @@ public class SecurityManager extends AbstractDatabase
         return this.usersService.add(request);
     }
 
+    /**
+     * Loads a User by OAuth2 binding information.
+     * <p>
+     * This method queries the database for a user record based on the provided OAuth2 binding type and the corresponding openid.
+     * It leverages R2DBC for reactive SQL operations and employs caching to optimize subsequent identical requests.
+     *
+     * @param bindType The type of OAuth2 binding used (e.g., 'google', 'facebook').
+     * @param openid   The unique identifier provided by the OAuth2 provider for the user.
+     * @return A Mono emitting the User if found, or an empty Mono if no user matches the given OAuth2 binding data.
+     */
     public Mono<User> loadByOauth2(String bindType, String openid) {
         String query = "select * from se_users where extend->'oauth2'->:bindType->>'openid'::varchar = :openid";
         var userMono = this.databaseClient.sql(query)
@@ -91,15 +140,31 @@ public class SecurityManager extends AbstractDatabase
         return this.queryWithCache(bindType + openid, userMono).singleOrEmpty();
     }
 
+    /**
+     * Loads a user by their username in a case-insensitive manner.
+     * Utilizes reactive programming to asynchronously fetch the user details.
+     *
+     * @param username The username of the user to be loaded.
+     * @return A Mono emitting the User object if found, or an empty Mono otherwise.
+     */
     public Mono<User> loadByUsername(String username) {
         Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
         var userMono = this.entityTemplate.select(query, User.class);
         return this.queryWithCache(username, userMono).singleOrEmpty();
     }
 
+    /**
+     * Locates a user based on the provided username.
+     * This method is an override that enhances the original functionality by fetching user details
+     * and populating them with granted authorities, error handling, threading, and logging upon success.
+     *
+     * @param username The unique username of the user to be located.
+     * @return A Mono emitting the UserDetails object representing the found user, or an error signal if not found.
+     * The emitted object includes user information along with their granted authorities.
+     * In case of failure, an AuthenticationServiceException is propagated with a relevant message.
+     */
     @Override
     public Mono<UserDetails> findByUsername(String username) {
-
         Mono<Tuple2<User, List<GrantedAuthority>>> userMono = this.loadByUsername(username)
                 .zipWhen(user -> this.authorities(user.getCode()));
         Mono<SecurityDetails> userDetailsMono = userMono
@@ -112,6 +177,14 @@ public class SecurityManager extends AbstractDatabase
                         .subscribe(res -> log.debug("登录成功! 登录信息修改: {}", res)));
     }
 
+    /**
+     * Constructs a SecurityDetails object based on the provided User and GrantedAuthority set.
+     * Additionally, asynchronously loads and attaches the user's group and tenant memberships.
+     *
+     * @param user        The User entity containing details necessary for security context construction.
+     * @param authorities A set of GrantedAuthority representing the user's permissions.
+     * @return A Mono emitting the fully constructed SecurityDetails object, including group and tenant memberships.
+     */
     private Mono<SecurityDetails> buildUserDetails(User user, Set<GrantedAuthority> authorities) {
         SecurityDetails userDetails = SecurityDetails.of(user.getCode(), user.getUsername(), user.getName(),
                 user.getPassword(), user.getDisabled(), user.getAccountExpired(),
@@ -125,36 +198,81 @@ public class SecurityManager extends AbstractDatabase
         }).then(Mono.just(userDetails));
     }
 
+    /**
+     * Loads a list of group members associated with a given user code asynchronously.
+     * Utilizes caching to enhance performance on subsequent calls with the same user code.
+     * The data is fetched from the database using a predefined SQL query and then serialized
+     * with user auditor context before being collected and sorted into a list.
+     *
+     * @param userCode The unique code identifying the user whose groups are to be loaded.
+     * @return A Mono emitting a sorted list of {@link GroupMemberResponse} representing the user's group memberships,
+     * once the asynchronous operation completes successfully.
+     */
     private Mono<List<GroupMemberResponse>> loadGroups(String userCode) {
         return this.queryWithCache("USER_GROUPS-" + userCode,
                         QUERY_GROUP_MEMBERS_SQL, Map.of("userCode", userCode), GroupMemberResponse.class)
                 .flatMap(ContextUtils::serializeUserAuditor).collectSortedList();
     }
 
+    /**
+     * Loads a list of tenant members associated with a given user code.
+     * The data is fetched using a cached query with specific SQL and parameters,
+     * then serialized with user auditor context, and finally collected into a sorted list.
+     *
+     * @param userCode The unique code identifying the user whose tenant members are to be loaded.
+     * @return A Mono that, when subscribed to, emits a sorted list of {@link TenantMemberResponse} objects representing the tenant members.
+     */
     private Mono<List<TenantMemberResponse>> loadTenants(String userCode) {
         return this.queryWithCache("USER_TENANTS-" + userCode,
                         QUERY_TENANT_MEMBERS_SQL, Map.of("userCode", userCode), TenantMemberResponse.class)
                 .flatMap(ContextUtils::serializeUserAuditor).collectSortedList();
     }
 
+    /**
+     * Retrieves a combined list of GrantedAuthority for a given user code.
+     * This method fetches the user's direct authorities and then concatenates them with
+     * the authorities derived from the user's groups, ensuring no duplicates.
+     *
+     * @param userCode The unique identifier for the user whose authorities are to be fetched.
+     * @return A Mono that, when subscribed to, emits a List containing all distinct GrantedAuthority
+     * instances granted to the user, including both individual and group authorities.
+     */
     private Mono<List<GrantedAuthority>> authorities(String userCode) {
         return this.getAuthorities(userCode)
                 .concatWith(this.getGroupAuthorities(userCode))
                 .flatMap(ContextUtils::serializeUserAuditor).distinct().collectList();
     }
 
+    /**
+     * Retrieves a flux of GrantedAuthority objects for a given user code.
+     *
+     * @param userCode The unique identifier for the user whose authorities are to be fetched.
+     * @return A Flux emitting GrantedAuthority instances representing the authorities assigned to the user.
+     */
     private Flux<GrantedAuthority> getAuthorities(String userCode) {
         return this.queryWithCache("USER_AUTHORITIES-" + userCode,
                         QUERY_USER_AUTHORITY_SQL, Map.of("userCode", userCode), UserAuthority.class)
                 .cast(GrantedAuthority.class);
     }
 
+    /**
+     * Retrieves a stream of authorities associated with the specified user group code.
+     *
+     * @param userCode The unique code identifying the user's group.
+     * @return A {@link Flux} emitting {@link GrantedAuthority} instances representing the authorities granted to the group.
+     */
     private Flux<GrantedAuthority> getGroupAuthorities(String userCode) {
         return this.queryWithCache("GROUP_AUTHORITIES-" + userCode,
                         QUERY_GROUP_AUTHORITY_SQL, Map.of("userCode", userCode), GroupAuthority.class)
                 .cast(GrantedAuthority.class);
     }
 
+    /**
+     * Logs a successful login attempt by updating the user's login time.
+     *
+     * @param username The username of the user who successfully logged in.
+     * @return A Mono emitting the count of documents updated, which should be 1 if the update was successful.
+     */
     private Mono<Long> loginSuccess(String username) {
         Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
         Update update = Update.update("loginTime", LocalDateTime.now());

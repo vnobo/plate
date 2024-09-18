@@ -51,10 +51,26 @@ public class LoggerRequest extends Logger {
         return request;
     }
 
+    /**
+     * Converts this {@link LoggerRequest} instance into a {@link Logger} instance.
+     * Utilizes bean copying to transfer properties from the request to the logger entity,
+     * which is suitable for persisting logging activities in the system.
+     *
+     * @return A {@link Logger} entity mirroring the properties of this request, ready for database storage.
+     */
     public Logger toLogger() {
         return BeanUtils.copyProperties(this, Logger.class);
     }
 
+    /**
+     * Constructs a {@link QueryFragment} instance representing a part of a SQL query
+     * based on the current {@link LoggerRequest} object. The generated QueryFragment
+     * can be used to dynamically construct SQL queries with placeholders for parameters,
+     * enhancing performance and preventing SQL injection.
+     *
+     * @return A {@link QueryFragment} object encapsulating a SQL fragment and its
+     * associated parameters derived from the current LoggerRequest instance.
+     */
     public QueryFragment buildQueryFragment() {
         return QueryHelper.query(this, List.of(), null);
     }

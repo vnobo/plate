@@ -229,7 +229,7 @@ public final class QueryHelper {
         }
         List<Criteria> criteriaList = objectMap.entrySet().parallelStream().map(entry -> {
             if (entry.getValue() instanceof String value) {
-                return Criteria.where(entry.getKey()).like(String.format("%s", value) + "%").ignoreCase(true);
+                return Criteria.where(entry.getKey()).like(String.format("%s", value)).ignoreCase(true);
             } else if (entry.getValue() instanceof Collection<?> values) {
                 return Criteria.where(entry.getKey()).in(values);
             } else {

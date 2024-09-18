@@ -97,7 +97,7 @@ public abstract class AbstractDatabase extends AbstractService {
                 .map((row, rowMetadata) -> this.r2dbcConverter.read(entityClass, row, rowMetadata))
                 .all();
         source = source.flatMapSequential(ContextUtils::serializeUserAuditor);
-        return queryWithCache(key, source);
+        return queryWithCache(key, source).cache();
     }
 
     /**
@@ -151,7 +151,7 @@ public abstract class AbstractDatabase extends AbstractService {
         var executeSpec = this.databaseClient.sql(() -> sql);
         executeSpec = executeSpec.bindValues(bindParams);
         Mono<Long> source = executeSpec.mapValue(Long.class).first();
-        return countWithCache(key, source);
+        return countWithCache(key, source).cache();
     }
 
     /**

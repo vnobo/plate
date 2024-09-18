@@ -47,6 +47,13 @@ public class UserAuditorConverters implements InitializingBean {
     @Component
     @WritingConverter
     public static class UserAuditorWriteConverter implements Converter<UserAuditor, String> {
+        /**
+         * Converts a {@link UserAuditor} object to its code represented as a String.
+         *
+         * @param source The {@link UserAuditor} instance to be converted. Must not be null.
+         * @return The code of the {@link UserAuditor} as a String.
+         * @throws NullPointerException if the source {@link UserAuditor} is null.
+         */
         @Override
         public String convert(@NonNull UserAuditor source) {
             return source.code();
@@ -72,6 +79,20 @@ public class UserAuditorConverters implements InitializingBean {
     @Component
     @ReadingConverter
     public static class UserAuditorReadConverter implements Converter<String, UserAuditor> {
+        /**
+         * Converts a given non-null String source representing a user auditor code
+         * into a {@link UserAuditor} instance.
+         * <p>
+         * This method is part of the read conversion process, used to transform auditor codes
+         * stored as strings (for example, in a database) back into rich {@link UserAuditor} objects.
+         * It delegates the conversion to the {@link UserAuditor#withCode(String)} factory method,
+         * which reconstructs the auditor with the provided code while setting default null values for
+         * the username and name fields.
+         *
+         * @param source The non-null String containing the user auditor code to convert.
+         * @return A {@link UserAuditor} instance created using the provided code.
+         * @throws NullPointerException if the source is null.
+         */
         @Override
         public UserAuditor convert(@NonNull String source) {
             return UserAuditor.withCode(source);

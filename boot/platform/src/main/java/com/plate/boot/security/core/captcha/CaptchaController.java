@@ -17,7 +17,9 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * REST controller responsible for handling captcha generation and validation operations.
+ * <p>
+ * This controller exposes endpoints to generate captcha images and manage captcha tokens within the application's sessions.
  */
 @RestController
 @RequestMapping("/captcha")

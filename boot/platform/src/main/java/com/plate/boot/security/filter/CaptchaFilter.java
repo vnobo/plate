@@ -25,7 +25,8 @@ import reactor.core.publisher.Mono;
 import static com.plate.boot.security.core.captcha.CaptchaRepository.DEFAULT_CAPTCHA_TOKEN_ATTR_NAME;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * A filter that provides captcha protection for specific endpoints, primarily used to secure OAuth2 token requests.
+ * It integrates with session management and captcha token validation to prevent unauthorized access.
  */
 @Log4j2
 @RequiredArgsConstructor
