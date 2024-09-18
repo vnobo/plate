@@ -4,19 +4,24 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Represents an error response structure that is used to convey detailed information
+ * about an error encountered during processing.
+ * This record encapsulates metadata such as the request identifier, the endpoint path,
+ * the error code, a descriptive message,
+ * additional error details, and the timestamp when the error occurred.
  */
 public record ErrorResponse(String requestId, String path, Integer code,
                             String message, Object errors, LocalDateTime time) implements Serializable {
     /**
-     * 创建一个错误响应对象
+     * Constructs a new {@link ErrorResponse} instance with the provided parameters,
+     * automatically setting the timestamp to the current date and time.
      *
-     * @param requestId 请求的唯一标识符
-     * @param path 请求的路径
-     * @param code 错误代码
-     * @param message 错误消息
-     * @param errors 附加错误信息
-     * @return 返回新创建的错误响应对象
+     * @param requestId The unique identifier for the request associated with the error.
+     * @param path The endpoint path where the error occurred.
+     * @param code The error code representing the type of error.
+     * @param message A descriptive message explaining the error.
+     * @param errors Additional details about the error, can be an object like a list of errors or a structured error message.
+     * @return A new {@link ErrorResponse} instance encapsulating the error details including the current timestamp.
      */
     public static ErrorResponse of(String requestId, String path, Integer code, String message, Object errors) {
         return new ErrorResponse(requestId, path, code, message, errors, LocalDateTime.now());

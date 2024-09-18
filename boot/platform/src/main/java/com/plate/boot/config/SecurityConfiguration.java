@@ -54,7 +54,9 @@ import static com.plate.boot.config.SessionConfiguration.XML_HTTP_REQUEST;
 import static com.plate.boot.config.SessionConfiguration.X_REQUESTED_WITH;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * SecurityConfiguration configures the application's security settings by defining beans and rules
+ * for authentication, authorization, session management, CSRF protection, logout behavior, and more.
+ * It leverages Spring Security features to secure both RESTful endpoints and RSocket interactions.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableReactiveMethodSecurity

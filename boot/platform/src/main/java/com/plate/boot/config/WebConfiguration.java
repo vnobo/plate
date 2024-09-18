@@ -22,7 +22,11 @@ import java.net.URI;
 import java.time.Duration;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Configures web-related settings and behaviors for an application, including RSocket setup,
+ * scheduling, asynchronous method handling, and custom argument resolvers for reactive environments.
+ * This configuration class integrates with Spring's WebFlux features to enable functionalities
+ * like scheduling tasks, processing asynchronous requests, and defining custom argument resolving
+ * strategies for handler methods.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableScheduling
@@ -32,6 +36,13 @@ public class WebConfiguration implements WebFluxConfigurer {
     @Value("${server.port:8080}")
     private Integer serverPort;
 
+    /**
+     * Creates and configures an RSocketRequester for establishing RSocket connections with authentication and specific setup parameters.
+     *
+     * @param requesterBuilder The builder instance to construct the RSocketRequester.
+     * @param handler          The RSocketMessageHandler for handling incoming and outgoing messages.
+     * @return An RSocketRequester configured with the provided parameters, ready to establish WebSocket connections.
+     */
     @Bean
     public RSocketRequester rSocketRequester(RSocketRequester.Builder requesterBuilder, RSocketMessageHandler handler) {
         MimeType authenticationMimeType =
@@ -47,6 +58,14 @@ public class WebConfiguration implements WebFluxConfigurer {
                 .websocket(url);
     }
 
+    /**
+     * Configures custom argument resolvers for handler methods in a reactive environment.
+     * This method specifically sets up a {@link ReactivePageableHandlerMethodArgumentResolver}
+     * to handle {@link Pageable} arguments, limiting the maximum page size and setting a default
+     * fallback page size when none is provided.
+     *
+     * @param configurer The {@link ArgumentResolverConfigurer} used to register custom argument resolvers.
+     */
     @Override
     public void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
         ReactivePageableHandlerMethodArgumentResolver pageableResolver =

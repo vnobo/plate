@@ -18,7 +18,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import java.util.List;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Configures R2DBC (Reactive Relational Database Connectivity) settings, converters, and auditing for the application.
+ * This class sets up the R2DBC connection factory, custom converters, enables transaction management,
+ * and provides an auditor aware component for reactive auditing purposes.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableTransactionManagement

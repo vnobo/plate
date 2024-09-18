@@ -17,7 +17,8 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Service class responsible for handling operations related to loggers, including searching,
+ * paging, saving, and scheduled cleanup of outdated log records.
  */
 @Log4j2
 @Service
@@ -26,6 +27,13 @@ public class LoggersService extends AbstractDatabase {
 
     private final LoggersRepository loggersRepository;
 
+    /**
+     * Searches for loggers based on the provided request and pagination information.
+     *
+     * @param request  A LoggerRequest object containing criteria for filtering loggers.
+     * @param pageable Pagination details defining how the results should be sliced.
+     * @return A Flux of Logger objects matching the search criteria, respecting the specified pagination.
+     */
     public Flux<Logger> search(LoggerRequest request, Pageable pageable) {
         String querySql = "select * from se_loggers";
         QueryFragment params = request.buildQueryFragment();
@@ -34,6 +42,15 @@ public class LoggersService extends AbstractDatabase {
         return this.queryWithCache(cacheKey, query, params, Logger.class);
     }
 
+    /**
+     * Retrieves a paginated list of loggers based on the provided request and pagination details.
+     *
+     * @param request  A {@link LoggerRequest} object containing criteria to filter loggers.
+     * @param pageable A {@link Pageable} instance specifying pagination information like page number, size, sorting, etc.
+     * @return A {@link Mono} emitting a {@link Page} of {@link Logger} objects that match the given criteria,
+     * respecting the specified pagination and sorted accordingly. The {@link Page} includes both content and
+     * metadata such as total elements, page number, and page size.
+     */
     public Mono<Page<Logger>> page(LoggerRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         String querySql = "select count(*) from se_loggers";
@@ -45,16 +62,28 @@ public class LoggersService extends AbstractDatabase {
     }
 
     /**
-     * 操作日志记录器请求，将请求转换为日志记录器对象，保存并在完成后清除缓存。
+     * Operates on a given {@link LoggerRequest} by converting it into a {@link Logger}
+     * entity and saving it using the {@link #save(Logger)} method. After the termination
+     * of the save operation, the cache is cleared to ensure fresh data is fetched on subsequent queries.
      *
-     * @param request 请求对象，包含创建或更新日志记录器所需的数据。
-     * @return 一个 Mono<Logger> 对象，代表保存操作的结果。
+     * @param request The {@link LoggerRequest} containing details necessary to create or update a {@link Logger} entity.
+     * @return A {@link Mono} emitting the saved {@link Logger} entity upon successful completion of the save operation.
      */
     public Mono<Logger> operate(LoggerRequest request) {
         return this.save(request.toLogger()).doAfterTerminate(() -> this.cache.clear());
     }
 
-
+    /**
+     * Persists a {@link Logger} entity to the database. Determines whether the operation
+     * should be an insert or an update based on the entity's state. If the logger is deemed
+     * new (its ID is not set), it will be inserted. Otherwise, it fetches the existing
+     * record from the database, preserves the creation timestamp, and updates the record.
+     *
+     * @param logger The {@link Logger} entity to save. Must not be {@code null}.
+     * @return A {@link Mono} emitting the saved {@link Logger} entity after the operation completes.
+     *         Emits the entity whether it was inserted or updated.
+     * @throws IllegalArgumentException if the {@code logger} is {@code null}.
+     */
     public Mono<Logger> save(Logger logger) {
         if (logger.isNew()) {
             return this.loggersRepository.save(logger);
