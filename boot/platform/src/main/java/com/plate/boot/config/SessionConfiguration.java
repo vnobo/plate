@@ -130,7 +130,7 @@ public class SessionConfiguration{
 
         /**
          * Expires the session associated with the given server web exchange.
-         *
+         * <p>
          * This method utilizes the {@code cookieWebSessionIdResolver} to expire the session,
          * effectively invalidating any session data linked to the provided exchange.
          *
