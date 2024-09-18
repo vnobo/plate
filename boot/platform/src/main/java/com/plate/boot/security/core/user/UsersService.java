@@ -49,7 +49,7 @@ public class UsersService extends AbstractDatabase {
     public Mono<User> add(UserRequest request) {
         return this.usersRepository.existsByUsernameIgnoreCase(request.getUsername()).flatMap(exists -> {
             if (exists) {
-                return Mono.error(RestServerException.withMsg(417, "User already exists",
+                return Mono.error(RestServerException.withMsg("User already exists",
                         "Username [" + request.getUsername() + "] already exists!"));
             }
             return this.operate(request);
@@ -58,7 +58,7 @@ public class UsersService extends AbstractDatabase {
 
     public Mono<User> modify(UserRequest request) {
         return this.usersRepository.findByUsername(request.getUsername())
-                .switchIfEmpty(Mono.defer(() -> Mono.error(RestServerException.withMsg(417,
+                .switchIfEmpty(Mono.defer(() -> Mono.error(RestServerException.withMsg(
                         "User not found!", "User by username [" + request.getUsername() + "] not found!"))))
                 .flatMap(user -> {
                     request.setId(user.getId());
@@ -89,7 +89,7 @@ public class UsersService extends AbstractDatabase {
         } else {
             assert user.getId() != null;
             return this.usersRepository.findById(user.getId())
-                    .switchIfEmpty(Mono.error(RestServerException.withMsg(1404, "User not found",
+                    .switchIfEmpty(Mono.error(RestServerException.withMsg("User not found",
                             "User by id [" + user.getId() + "] not found!")))
                     .flatMap(old -> {
                         user.setCreatedTime(old.getCreatedTime());

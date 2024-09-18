@@ -18,6 +18,8 @@ import org.springframework.web.server.ServerWebInputException;
 
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
 /**
  * GlobalExceptionHandler is a centralized exception handler that intercepts and processes
  * various exceptions thrown during the execution of REST endpoints within an application.
@@ -65,8 +67,8 @@ public class GlobalExceptionHandler {
             log.error(ex.getReason(), ex);
         }
         return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).contentType(MediaType.APPLICATION_JSON)
-                .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
-                        417, ex.getReason(), errors));
+                .body(ErrorResponse.of(exchange.getRequest().getId(), HttpStatus.BAD_REQUEST.value(),
+                        exchange.getRequest().getPath().value(), ex.getReason(), errors));
     }
 
     /**
@@ -99,8 +101,8 @@ public class GlobalExceptionHandler {
             log.error(ex.getCause().getMessage(), ex.getCause());
         }
         return ResponseEntity.status(HttpStatus.INSUFFICIENT_STORAGE).contentType(MediaType.APPLICATION_JSON)
-                .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
-                        507, ex.getLocalizedMessage(), errors));
+                .body(ErrorResponse.of(exchange.getRequest().getId(), HttpStatus.INSUFFICIENT_STORAGE.value(),
+                        exchange.getRequest().getPath().value(), ex.getLocalizedMessage(), errors));
     }
 
     /**
@@ -123,30 +125,10 @@ public class GlobalExceptionHandler {
         if (log.isDebugEnabled()) {
             log.error(ex.getLocalizedMessage(), ex);
         }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
-                .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
-                        ex.getCode(), ex.getLocalizedMessage(), ex.getMsg()));
+        return ResponseEntity.status(INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
+                .body(ErrorResponse.of(exchange.getRequest().getId(), ex.getStatusCode().value(),
+                        exchange.getRequest().getPath().value(), ex.getLocalizedMessage(), ex.getErrors()));
     }
 
-    /**
-     * Handles exceptions that occur during the processing of requests within the application.
-     * This method logs the exception details and constructs an appropriate error response
-     * to be sent back to the client.
-     *
-     * @param exchange The current server web exchange which holds the request and response information.
-     * @param ex The exception that was thrown during request processing.
-     * @return A ResponseEntity containing an ErrorResponse with details about the exception,
-     *         including the request ID, the endpoint path, HTTP status code 500 (Internal Server Error),
-     *         the exception message, and the cause message if available. The response body is in JSON format.
-     */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(ServerWebExchange exchange, Exception ex) {
-        if (log.isDebugEnabled()) {
-            log.error(ex.getLocalizedMessage(), ex);
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
-                .body(ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
-                        500, ex.getLocalizedMessage(), ex.getCause().getMessage()));
-    }
 
 }

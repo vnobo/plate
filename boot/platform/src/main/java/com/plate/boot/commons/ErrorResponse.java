@@ -4,26 +4,30 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * Represents an error response structure that is used to convey detailed information
- * about an error encountered during processing.
- * This record encapsulates metadata such as the request identifier, the endpoint path,
- * the error code, a descriptive message,
- * additional error details, and the timestamp when the error occurred.
+ * Represents an error response structure, encapsulating details about a specific error occurrence.
+ * This record is designed to be serialized and used for communicating error information between systems.
+ *
+ * @param requestId A unique identifier for the request that encountered the error.
+ * @param code      The HTTP status code representing the type of error.
+ * @param path      The endpoint or URI path where the error occurred.
+ * @param message   A human-readable description of the error.
+ * @param errors    Additional details or objects related to the error, can vary based on the context.
+ * @param time      The timestamp indicating when the error response was created.
  */
-public record ErrorResponse(String requestId, String path, Integer code,
+public record ErrorResponse(String requestId, Integer code, String path,
                             String message, Object errors, LocalDateTime time) implements Serializable {
+
     /**
-     * Constructs a new {@link ErrorResponse} instance with the provided parameters,
-     * automatically setting the timestamp to the current date and time.
+     * Creates an instance of {@link ErrorResponse} with the current local date and time.
      *
-     * @param requestId The unique identifier for the request associated with the error.
-     * @param path The endpoint path where the error occurred.
-     * @param code The error code representing the type of error.
-     * @param message A descriptive message explaining the error.
-     * @param errors Additional details about the error, can be an object like a list of errors or a structured error message.
-     * @return A new {@link ErrorResponse} instance encapsulating the error details including the current timestamp.
+     * @param requestId A unique identifier for the request associated with this error response.
+     * @param code      The HTTP status code reflecting the error type.
+     * @param path      The path or endpoint where the error was encountered.
+     * @param message   A descriptive message explaining the error.
+     * @param errors    Additional error-related data, which could include exception details, validation errors, etc.
+     * @return A new {@link ErrorResponse} instance initialized with the provided parameters and the current timestamp.
      */
-    public static ErrorResponse of(String requestId, String path, Integer code, String message, Object errors) {
-        return new ErrorResponse(requestId, path, code, message, errors, LocalDateTime.now());
+    public static ErrorResponse of(String requestId, Integer code, String path, String message, Object errors) {
+        return new ErrorResponse(requestId, code, path, message, errors, LocalDateTime.now());
     }
 }

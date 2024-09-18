@@ -325,9 +325,9 @@ public class SecurityConfiguration {
          *         from the original request and the exception message.
          */
         private ErrorResponse createErrorResponse(ServerWebExchange exchange, AuthenticationException e) {
-            return ErrorResponse.of(exchange.getRequest().getId(), exchange.getRequest().getPath().value(),
-                    401, "认证失败,检查你的用户名,密码是否正确或安全密钥是否过期!", List.of(e.getMessage()));
+            return ErrorResponse.of(exchange.getRequest().getId(), HttpStatus.UNAUTHORIZED.value(),
+                    exchange.getRequest().getPath().value(),
+                    "认证失败,检查你的用户名,密码是否正确或安全密钥是否过期!", List.of(e.getMessage()));
         }
-
     }
 }
