@@ -71,14 +71,32 @@ public class SecurityController {
         this.clientRepository = clientRepository;
     }
 
+    /**
+     * Retrieves an authentication token for the logged-in user by utilizing the provided server web exchange and authentication objects.
+     * The method leverages the security context repository to save the security context and then extracts session information
+     * combined with the authentication details to construct an {@link AuthenticationToken}.
+     *
+     * @param exchange       The {@link ServerWebExchange} representing the current server request and response.
+     * @param authentication The {@link Authentication} object representing the authenticated user.
+     * @return A {@link Mono} emitting the constructed {@link AuthenticationToken} containing session and authentication details.
+     */
     @GetMapping("login")
-    public Mono<AuthenticationToken> token(ServerWebExchange exchange, Authentication authentication) {
+    public Mono<AuthenticationToken> loginToken(ServerWebExchange exchange, Authentication authentication) {
         return ReactiveSecurityContextHolder.getContext()
                 .delayUntil(cts -> this.securityContextRepository.save(exchange, cts))
                 .flatMap(context -> exchange.getSession())
                 .flatMap(session -> Mono.just(AuthenticationToken.build(session, authentication)));
     }
 
+    /**
+     * Retrieves the CSRF token from the context.
+     * <p>
+     * This endpoint is intended for obtaining a CSRF token which can be used to protect
+     * against cross-site request forgery attacks. It utilizes the context to fetch the
+     * CSRF token that has been stored there by the security framework.
+     *
+     * @return A Mono emitting the CsrfToken instance if present in the context, otherwise an empty Mono.
+     */
     @GetMapping("csrf")
     public Mono<CsrfToken> csrfToken() {
         return Mono.deferContextual((contextView) -> {
@@ -87,12 +105,34 @@ public class SecurityController {
         });
     }
 
+    /**
+     * Binds an OAuth2 authorized client to the current authentication context.
+     * <p>
+     * This method is responsible for loading the authorized client associated with the provided
+     * {@code clientRegistrationId} using the current {@link Authentication} and {@link ServerWebExchange}.
+     * It then extracts the access token from the authorized client and returns it as a Mono.
+     *
+     * @param clientRegistrationId The identifier for the client registration. This is used to look up the
+     *                             specific OAuth2 configuration details that the client is registered against.
+     * @param authentication       The current authentication context containing user details and credentials.
+     * @param exchange             The current server web exchange which holds information about the HTTP request and response.
+     * @return A Mono emitting the access token associated with the bound OAuth2 authorized client.
+     */
     @GetMapping("bind")
     public Mono<Object> bindOauth2(String clientRegistrationId, Authentication authentication, ServerWebExchange exchange) {
         return this.clientRepository.loadAuthorizedClient(clientRegistrationId, authentication, exchange)
                 .flatMap(oAuth2AuthorizedClient -> Mono.just(oAuth2AuthorizedClient.getAccessToken()));
     }
 
+    /**
+     * Changes the password for the authenticated user.
+     *
+     * @param request        A {@link ChangePasswordRequest} containing the current password and the new password.
+     * @param authentication The authentication object representing the currently authenticated user.
+     * @return A {@link Mono} emitting the updated {@link UserDetails} after the password change.
+     * @throws RestServerException if the provided password does not match the new password,
+     *                             or if the presented password does not match the current stored password.
+     */
     @PostMapping("/change/password")
     public Mono<UserDetails> changePassword(@Valid @RequestBody ChangePasswordRequest request,
                                             Authentication authentication) {
