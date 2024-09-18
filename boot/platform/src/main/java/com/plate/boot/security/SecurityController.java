@@ -6,7 +6,6 @@ import com.plate.boot.security.core.AuthenticationToken;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,21 +18,60 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Handles security-related endpoints for OAuth2 operations, password changes, and CSRF token retrieval.
+ * Utilizes WebSession-based security context repository, security manager, password encoding, and OAuth2 client repository.
  */
 @RestController
 @RequestMapping("/oauth2")
-@RequiredArgsConstructor
 public class SecurityController {
 
+    /**
+     * Repository responsible for managing the security context within the server's web sessions.
+     * It stores and retrieves the security context associated with each user's session, ensuring
+     * that security-related information persists across requests within the same session.
+     */
     private final WebSessionServerSecurityContextRepository securityContextRepository =
             new WebSessionServerSecurityContextRepository();
 
+    /**
+     * The {@code securityManager} field is a final instance of {@link SecurityManager}, responsible for handling
+     * security-related operations such as user authentication, password management, and authority provisioning within
+     * the application. It serves as the central authority for managing user details, roles, and permissions, ensuring
+     * secure access control based on defined security policies.
+     * <p>
+     * This component is injected via constructor dependency injection, providing reactive services for fetching user
+     * details, updating passwords, registering or modifying users, loading users by OAuth2 bindings, and more, thereby
+     * reinforcing the security infrastructure of the {@link SecurityController}.
+     */
     private final SecurityManager securityManager;
+    /**
+     * Encoder used for encoding and validating passwords securely.
+     * This field is responsible for hashing passwords upon user registration or password updates,
+     * and verifying passwords during authentication processes to ensure they match the stored hash.
+     */
     private final PasswordEncoder passwordEncoder;
+    /**
+     * Repository responsible for storing and retrieving authorized client information for OAuth2 server-side authorization.
+     * This instance specifically manages the authorized clients within the server context, ensuring secure access and
+     * persistence of client details necessary for OAuth2 flows.
+     */
     private final ServerOAuth2AuthorizedClientRepository clientRepository;
 
-    @GetMapping("token")
+    /**
+     * Constructs a new instance of SecurityController.
+     *
+     * @param securityManager  The SecurityManager instance responsible for security operations.
+     * @param passwordEncoder  The PasswordEncoder used for encoding and verifying passwords.
+     * @param clientRepository The ServerOAuth2AuthorizedClientRepository instance for managing OAuth2 authorized clients.
+     */
+    public SecurityController(SecurityManager securityManager, PasswordEncoder passwordEncoder,
+                              ServerOAuth2AuthorizedClientRepository clientRepository) {
+        this.securityManager = securityManager;
+        this.passwordEncoder = passwordEncoder;
+        this.clientRepository = clientRepository;
+    }
+
+    @GetMapping("login")
     public Mono<AuthenticationToken> token(ServerWebExchange exchange, Authentication authentication) {
         return ReactiveSecurityContextHolder.getContext()
                 .delayUntil(cts -> this.securityContextRepository.save(exchange, cts))

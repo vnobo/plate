@@ -31,7 +31,7 @@ public class GroupRequest extends Group {
         return BeanUtils.copyProperties(this, Group.class);
     }
 
-    public QueryFragment bindParamSql() {
+    public QueryFragment qSql() {
         return QueryHelper.query(this, List.of(), null);
     }
 }

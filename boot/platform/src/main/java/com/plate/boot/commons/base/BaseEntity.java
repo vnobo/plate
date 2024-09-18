@@ -2,6 +2,7 @@ package com.plate.boot.commons.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.commons.utils.query.QueryHelper;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.query.Criteria;
@@ -30,20 +31,18 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
     }
 
     /**
-     * Determines whether the entity instance is considered new.
-     * This is typically used to decide if the entity needs to be inserted or updated when persisted.
-     * The method checks if the identifier ({@code getId()}) is empty to assess newness.
-     * If the entity is determined to be new, it generates and assigns a new unique code ({@code setCode(ContextUtils.nextId());}).
+     * Determines whether the entity is new, typically indicating it has not been persisted yet.
+     * This is assessed by checking if the entity's identifier ({@code getId}) is empty.
+     * If the entity is determined to be new, a unique code is generated using {@link ContextUtils#nextId()}
+     * and assigned to the entity via {@link #setCode(String)}.
      *
-     * @return {@code true} if the entity is considered new (i.e., its identifier is empty), otherwise {@code false}.
+     * @return {@code true} if the entity is considered new (i.e., lacks an identifier), otherwise {@code false}.
      */
     @Override
     @JsonIgnore
     default boolean isNew() {
-        // 判断对象是否为新对象，通过检查ID是否为空来确定
         boolean isNew = ObjectUtils.isEmpty(getId());
         if (isNew) {
-            // 如果是新对象，则生成并设置一个新的ID
             setCode(ContextUtils.nextId());
         }
         return isNew;
@@ -56,10 +55,25 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
      * @param skipKeys A {@link Collection} of {@link String} property keys to be skipped when building the criteria.
      *                 These properties will not be included in the generated criteria.
      * @return A {@link Criteria} object tailored according to the current entity,
-     *         excluding the properties specified in the {@code skipKeys} collection.
+     * excluding the properties specified in the {@code skipKeys} collection.
      */
     default Criteria criteria(Collection<String> skipKeys) {
-        // 调用CriteriaUtils的静态方法build来创建Criteria对象，并传入当前对象和要忽略的属性键集合。
         return QueryHelper.criteria(this, skipKeys);
+    }
+
+    /**
+     * Constructs a QueryFragment based on the current entity's properties and conditions,
+     * allowing for customization of the SQL query by specifying properties to exclude.
+     *
+     * @param skipKeys A collection of String property names indicating which properties
+     *                 should not be included in the generated SQL query. This can be useful
+     *                 for skipping sensitive or unnecessary fields.
+     * @return A QueryFragment object containing the SQL fragment and parameters necessary
+     * to form a part of an SQL query. The SQL fragment represents a conditional
+     * part of the query (e.g., WHERE clause), and the parameters are mapped to
+     * prevent SQL injection, ensuring secure query execution.
+     */
+    default QueryFragment querySql(Collection<String> skipKeys) {
+        return QueryHelper.query(this, skipKeys, null);
     }
 }

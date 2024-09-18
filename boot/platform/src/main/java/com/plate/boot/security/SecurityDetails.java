@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * SecurityDetails represents a user's security details, extending DefaultOAuth2User and implementing UserDetails.
- * It encapsulates user authentication and authorization data, including OAuth2 attributes,
- * tenant and group affiliations, and account status flags.
+ * Represents security details for a user, extending the DefaultOAuth2User and implementing UserDetails.
+ * This class encapsulates user identity and authentication information along with additional security-related properties.
+ * It is designed to work seamlessly with OAuth2-based authentication systems and Spring Security's user details interface.
  */
 @Setter
 @Getter
