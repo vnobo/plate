@@ -271,6 +271,13 @@ public final class BeanUtils implements InitializingBean {
         MAX_IN_MEMORY_SIZE = dataSize;
     }
 
+    /**
+     * Initializes the utils bean by performing necessary setup steps.
+     * This method is called after all properties of this bean have been set.
+     * It is part of the Spring Framework's InitializingBean interface contract.
+     * <p>
+     * Logs a message indicating the start of the initialization process for BeanUtils.
+     */
     @Override
     public void afterPropertiesSet() {
         log.info("Initializing utils [BeanUtils]...");
