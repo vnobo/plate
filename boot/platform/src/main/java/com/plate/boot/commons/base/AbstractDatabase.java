@@ -13,7 +13,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -73,6 +72,7 @@ public abstract class AbstractDatabase extends AbstractService {
      */
     protected <T> Flux<T> queryWithCache(Object key, Query query, Class<T> entityClass) {
         Flux<T> source = this.entityTemplate.select(query, entityClass);
+        source = source.flatMapSequential(ContextUtils::serializeUserAuditor);
         return queryWithCache(key, source).cache();
     }
 
@@ -113,12 +113,13 @@ public abstract class AbstractDatabase extends AbstractService {
      */
     protected <T> Flux<T> queryWithCache(Object key, Flux<T> sourceFlux) {
         String cacheKey = key + ":data";
-        Collection<T> cacheData = this.cache.get(cacheKey, ArrayList::new);
-        assert cacheData != null;
-        Flux<T> source = sourceFlux.doOnNext(cacheData::add)
-                .doAfterTerminate(() -> BeanUtils.cachePut(this.cache, cacheKey, cacheData));
-        return Flux.fromIterable(ObjectUtils.isEmpty(cacheData) ? Collections.emptyList() : cacheData)
-                .switchIfEmpty(Flux.defer(() -> source));
+        Collection<T> cacheData = this.cache.get(cacheKey, () -> null);
+        if (ObjectUtils.isEmpty(cacheData)) {
+            var sourceData = new ArrayList<T>();
+            return sourceFlux.doOnNext(sourceData::add)
+                    .doAfterTerminate(() -> BeanUtils.cachePut(this.cache, cacheKey, sourceData));
+        }
+        return Flux.fromIterable(cacheData);
     }
 
     /**
