@@ -25,14 +25,7 @@ export interface MessageOut {
 
 @Injectable({ providedIn: 'root' })
 export class RSocketCLientService {
-  private readonly transport = new RSocketWebSocketClient(
-    {
-      debug: true,
-      url: 'ws://localhost:4200/rsocket',
-      wsCreator: url => new WebSocket(url),
-    },
-    BufferEncoders
-  );
+  private readonly transportUrl = 'ws://localhost:4200/rsocket';
 
   private socketClient: ReactiveSocket<Buffer, Buffer> | null = null;
   private token: string | null = null;
@@ -54,7 +47,14 @@ export class RSocketCLientService {
           ]),
         },
       },
-      transport: this.transport,
+      transport: new RSocketWebSocketClient(
+        {
+          debug: true,
+          url: this.transportUrl,
+          wsCreator: url => new WebSocket(url),
+        },
+        BufferEncoders,
+      ),
     });
     this.token = token;
     client.connect().subscribe({

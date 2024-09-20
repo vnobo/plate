@@ -26,6 +26,10 @@ export class LoginService {
   autoLogin(): Authentication | null {
     const authentication = this._auth.authenticationToken();
     if (authentication) {
+      var lastAccessTime = dayjs.unix(authentication.lastAccessTime);
+      if (dayjs().diff(lastAccessTime, 'seconds') > authentication.expires) {
+        return null; // token expired
+      }
       authentication.lastAccessTime = dayjs().unix();
       this._auth.login(authentication);
       this._socket.connect(authentication.token);
