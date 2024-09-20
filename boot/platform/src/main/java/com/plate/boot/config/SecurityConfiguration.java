@@ -36,10 +36,6 @@ import org.springframework.security.web.server.header.ClearSiteDataServerHttpHea
 import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
-import org.springframework.session.ReactiveFindByIndexNameSessionRepository;
-import org.springframework.session.ReactiveSessionRepository;
-import org.springframework.session.Session;
-import org.springframework.session.security.SpringSessionBackedReactiveSessionRegistry;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -80,25 +76,6 @@ public class SecurityConfiguration {
     public ReactiveOAuth2AuthorizedClientService oAuth2ClientService(DatabaseClient databaseClient,
                                                                      ReactiveClientRegistrationRepository clientRepository) {
         return new R2dbcReactiveOAuth2AuthorizedClientService(databaseClient, clientRepository);
-    }
-
-    /**
-     * Creates and configures a SpringSessionBackedReactiveSessionRegistry bean.
-     * This registry is designed to manage sessions within a reactive environment, backed by the provided
-     * ReactiveSessionRepository and ReactiveFindByIndexNameSessionRepository instances.
-     *
-     * @param <S> The type of session extending the Session interface.
-     * @param sessionRepository A reactive session repository for storing and retrieving session data.
-     * @param indexedSessionRepository A reactive session repository capable of finding sessions by index name,
-     *                                enhancing session management capabilities.
-     * @return An instance of SpringSessionBackedReactiveSessionRegistry configured with the given repositories,
-     *         ready to manage and provide session-related services in a reactive context.
-     */
-    @Bean
-    public <S extends Session> SpringSessionBackedReactiveSessionRegistry<S> sessionRegistry(
-            ReactiveSessionRepository<S> sessionRepository,
-            ReactiveFindByIndexNameSessionRepository<S> indexedSessionRepository) {
-        return new SpringSessionBackedReactiveSessionRegistry<>(sessionRepository, indexedSessionRepository);
     }
 
     /**
