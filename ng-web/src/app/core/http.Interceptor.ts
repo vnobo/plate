@@ -3,11 +3,11 @@ import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { catchError, finalize, Observable, throwError, timeout } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
-import { LoadingService } from './loading.service';
+import { ProgressBar } from './progress-bar';
 import { AuthService } from './auth.service';
 
 export function defaultInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
-  const _loading = inject(LoadingService);
+  const _loading = inject(ProgressBar);
 
   _loading.show();
   if (req.url.indexOf('assets/') > -1) {

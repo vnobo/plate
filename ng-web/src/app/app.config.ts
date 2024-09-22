@@ -15,9 +15,9 @@ import {
 import dayjs from 'dayjs';
 import isLeapYear from 'dayjs/plugin/isLeapYear';
 import 'dayjs/locale/zh-cn';
-import { authTokenInterceptor, defaultInterceptor } from './service/http.Interceptor';
-import { PageTitleStrategy } from './service/page-title-strategy.service';
-import { icons } from './icons-provider';
+import { authTokenInterceptor, defaultInterceptor } from './core/http.Interceptor';
+import { PageTitleStrategy } from './core/page-title-strategy';
+import { icons } from './core/icons-provider';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzI18n, zh_CN } from 'ng-zorro-antd/i18n';
 import { registerLocaleData } from '@angular/common';
@@ -50,6 +50,7 @@ export const appConfig: ApplicationConfig = {
     provideNzI18n(zh_CN),
     importProvidersFrom(FormsModule),
     provideAnimationsAsync(),
-    provideHttpClient(), provideAnimationsAsync(),
+    provideHttpClient(),
+    provideAnimationsAsync(),
   ],
 };

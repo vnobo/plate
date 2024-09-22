@@ -21,5 +21,14 @@
   },
   "prettier.bracketSameLine": true,
   "Codegeex.CommitMessageStyle": "ConventionalCommits",
-  "Codegeex.RepoIndex": true
+  "Codegeex.RepoIndex": true,
+  "angular-schematics.schematicsDefaultOptions": {
+    "angular-*": {
+      "style": "scss",
+      "externalTemplate": true
+    },
+    "angular-component": {
+      "ngOnInit": true
+    }
+  }
 }
