@@ -24,7 +24,19 @@ public class WebConfig implements WebMvcConfigurer {
     private static final String DATE_FORMAT = "yyyy-MM-dd";
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-
+    /**
+     * A Jackson2ObjectMapperBuilderCustomizer that configures the Jackson2ObjectMapperBuilder to use custom date and time
+     * formats for serialization and deserialization.
+     *
+     * <p>This customizer sets up the following formats for:
+     * <ul>
+     *     <li>{@link java.time.LocalDate}: {@value #DATE_FORMAT}</li>
+     *     <li>{@link java.time.LocalDateTime}: {@value #DATE_TIME_FORMAT}</li>
+     * </ul>
+     *
+     * @return A non-null Jackson2ObjectMapperBuilderCustomizer instance that configures the mapper with the custom date
+     * and time formats.
+     */
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
         return builder -> {
