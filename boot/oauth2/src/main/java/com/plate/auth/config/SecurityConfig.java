@@ -22,6 +22,8 @@ import static org.springframework.security.web.header.writers.ClearSiteDataHeade
 
 /**
  * Provides the security configuration.
+ *
+ * @see <a href="https://docs.spring.io/spring-security/reference/servlet/configuration/java.html">Spring Security Reference</a>
  * @author Alex bob(<a href="https://github.com/vnobo">Alex Bob</a>)
  */
 @Configuration(proxyBeanMethods = false)
