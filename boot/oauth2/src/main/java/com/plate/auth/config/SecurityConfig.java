@@ -1,11 +1,8 @@
 package com.plate.auth.config;
 
-import com.plate.auth.security.core.UserAuditor;
-import com.plate.auth.security.core.UserAuditorAware;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -29,11 +26,6 @@ import static org.springframework.security.web.header.writers.ClearSiteDataHeade
 @Configuration(proxyBeanMethods = false)
 @EnableJpaAuditing
 public class SecurityConfig {
-
-    @Bean
-    public AuditorAware<UserAuditor> auditorProvider() {
-        return new UserAuditorAware();
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
