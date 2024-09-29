@@ -8,12 +8,13 @@ import org.springframework.data.domain.Sort;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
+ * Unit tests for QueryHelper.
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
 class QueryHelperTest {
 
     @Test
-    void applyPage() {
+    void applyPageTest() {
         // Prepare test data
         Pageable pageable = PageRequest.of(0, 10);
         String prefix = "tableAlias";
