@@ -40,6 +40,13 @@ public class UserAuthority implements GrantedAuthority, BaseEntity<Integer> {
     @LastModifiedDate
     private LocalDateTime updatedTime;
 
+    public UserAuthority() {
+    }
+
+    public UserAuthority(String authority) {
+        this.authority = authority;
+    }
+
     @Override
     public void setCode(String code) {
         this.code = code.startsWith("UA") ? code : "UA" + code;
