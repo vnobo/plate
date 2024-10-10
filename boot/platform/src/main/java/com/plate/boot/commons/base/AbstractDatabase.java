@@ -15,25 +15,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+
 /**
- * AbstractDatabase serves as a foundation for implementing database operations with caching capabilities.
- * It extends the AbstractService to inherit common service layer functionalities and integrates
- * R2DBC for reactive database access.
- * This class provides generic methods to execute queries and counts with caching support.
- * <p>
- * Key Features:
- * - Utilizes R2dbcEntityTemplate for entity-based operations.
- * - Leverages DatabaseClient for SQL execution.
- * - Implements caching mechanisms to enhance query performance.
- * - Supports reactive programming model using Flux and Mono.
- * <p>
- * Usage Note:
- * Subclasses should implement specific database interaction logic while leveraging
- * the provided caching wrappers around query and count operations.
- * <p>
- * Dependencies:
- * Requires an R2dbcEntityTemplate, DatabaseClient, and Cache instance to be functional,
- * typically wired through dependency injection.
+ * AbstractDatabase is an abstract class that serves as a foundation for database interactions
+ * in a reactive application context. It encapsulates the common functionality required for
+ * executing database queries, managing transactions, and handling entity mappings, providing
+ * a robust and flexible framework for database operations.
+ *
+ * <p>This class is designed to work with R2DBC (Reactive Relational Database Connectivity),
+ * a non-blocking, asynchronous API for database access in reactive applications. It leverages
+ * the R2dbcEntityTemplate for executing reactive database operations, the DatabaseClient for
+ * direct database interactions, and the R2dbcConverter for converting between R2DBC data types
+ * and domain-specific objects.
+ *
+ * <p>AbstractDatabase provides methods for executing queries with caching, counting entities
+ * with caching, and setting up the R2dbcEntityTemplate. It also overrides the afterPropertiesSet
+ * method to perform initialization tasks, such as setting up the databaseClient and r2dbcConverter.
+ *
+ * <p>Subclasses of AbstractDatabase can extend this functionality to provide specific database
+ * interactions tailored to their application's needs.
  */
 public abstract class AbstractDatabase extends AbstractService {
 
