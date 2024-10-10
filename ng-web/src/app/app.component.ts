@@ -7,7 +7,6 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzBackTopModule } from 'ng-zorro-antd/back-top';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ProgressBar } from './core/progress-bar';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +31,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.router.events.pipe(debounceTime(100), distinctUntilChanged()).subscribe(event => {
+    this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
         this.progressShow.apply(() => true);
       }
