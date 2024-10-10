@@ -149,6 +149,23 @@ public class SecurityController {
         return this.securityManager.updatePassword(userDetails, newPassword);
     }
 
+    /**
+     * Represents a request to change a user's password.
+     * This class encapsulates the necessary information to perform a password change,
+     * including the current password and the new password.
+     * <p>
+     * The class uses validation annotations to ensure that both the current and new passwords
+     * are not empty. This helps prevent invalid password change requests from being processed.
+     * </p>
+     * <p>
+     * Example usage:
+     * <pre>
+     * ChangePasswordRequest request = new ChangePasswordRequest();
+     * request.setPassword("oldPassword");
+     * request.setNewPassword("newPassword");
+     * </pre>
+     * </p>
+     */
     @Data
     public static class ChangePasswordRequest {
 
