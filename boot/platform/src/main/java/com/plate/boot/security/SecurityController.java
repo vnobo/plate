@@ -18,6 +18,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
+ *
  * The SecurityController class is a REST controller responsible for handling security-related endpoints.
  * It manages OAuth2 operations, password changes, and CSRF token retrieval.
  * The class utilizes a WebSession-based security context repository, a security manager, password encoding, and an OAuth2 client repository.
