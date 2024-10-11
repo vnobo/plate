@@ -1,0 +1,28 @@
+logging:
+  register-shutdown-hook: true
+  level:
+    web: debug
+    com.plate.boot.*: debug
+    org.springframework.r2dbc: debug
+    io.r2dbc.postgresql.PARAM: debug
+
+spring:
+  application.name: plate
+  r2dbc:
+    url: r2dbc:postgres://127.0.0.1:5432/plate?fetchSize=5000
+    username: farmer
+    password: 123456
+  sql.init:
+    mode: always
+    platform: postgres
+    encoding: utf-8
+  data.redis:
+    host: 127.0.0.1
+    timeout: 30s
+    connect-timeout: 10s
+    repositories.enabled: false
+  security.oauth2.client.registration:
+    github:
+      client-id: Iv1.14a97a700a228437
+      client-secret: 94d4fa39efc5677ea75f5dfae533191c00f76f99
+      scope: user
