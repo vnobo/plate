@@ -1,6 +1,8 @@
 package com.plate.boot;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -13,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
+@ExtendWith(OutputCaptureExtension.class)
 class BootApplicationTest {
 
     @Test
