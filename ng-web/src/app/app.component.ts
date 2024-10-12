@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { NavigationEnd, NavigationStart, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -24,10 +24,10 @@ import { ProgressBar } from './core/progress-bar';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  progressShow;
+  progressBar = inject(ProgressBar);
+  progressShow = toSignal(this.progressBar.progress$, { initialValue: false });
 
-  constructor(private loading: ProgressBar, private router: Router) {
-    this.progressShow = toSignal(this.loading.progress$, { initialValue: false });
+  constructor(private router: Router) {
   }
 
   ngOnInit(): void {
