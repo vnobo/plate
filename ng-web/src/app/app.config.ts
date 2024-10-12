@@ -33,9 +33,8 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideExperimentalZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
-    importProvidersFrom(BrowserAnimationsModule),
+    importProvidersFrom(FormsModule, BrowserAnimationsModule),
     provideAnimationsAsync(),
-    provideRouter(routes),
     provideHttpClient(
       withFetch(),
       withInterceptorsFromDi(),
@@ -48,9 +47,5 @@ export const appConfig: ApplicationConfig = {
     { provide: TitleStrategy, useClass: PageTitleStrategy },
     provideNzIcons(icons),
     provideNzI18n(zh_CN),
-    importProvidersFrom(FormsModule),
-    provideAnimationsAsync(),
-    provideHttpClient(),
-    provideAnimationsAsync(),
   ],
 };
