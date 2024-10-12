@@ -1,10 +1,10 @@
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Credentials, LoginService } from './login.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
-import { NzFormModule } from 'ng-zorro-antd/form';
 import { CommonModule } from '@angular/common';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
+import { Credentials, LoginService } from './login.service';
 
 @Component({
   selector: 'app-login',
@@ -14,7 +14,8 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  formBuilder: FormBuilder = Inject(FormBuilder);
+  formBuilder: FormBuilder = inject(FormBuilder);
+
   loginForm = this.formBuilder.group({
     username: new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(64)]),
     password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(64)]),
