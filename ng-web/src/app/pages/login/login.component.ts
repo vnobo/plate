@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
+  private _loginSer = inject(LoginService);
   loginForm = new FormGroup({
     username: new FormControl('', [
       Validators.required,
@@ -28,11 +29,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   });
   private componentDestroyed$: Subject<void> = new Subject<void>();
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private _loginSer: LoginService,
-  ) {
+  constructor(private router: Router, private route: ActivatedRoute) {
   }
 
   onSubmit(): void {

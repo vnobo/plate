@@ -6,9 +6,7 @@
         <form
           [formGroup]="loginForm"
           (ngSubmit)="onSubmit()"
-          [class.was-validated]="
-                        loginForm.invalid && (loginForm.dirty || loginForm.touched)
-                    "
+          [class.was-validated]="loginForm.invalid && (loginForm.dirty || loginForm.touched)"
           autocomplete="off"
           class="row g-3 needs-validation"
           novalidate>
@@ -19,10 +17,9 @@
               </div>
               <input
                 [class.is-invalid]="
-                                    loginForm.controls.username.valid &&
-                                    (loginForm.controls.username.dirty ||
-                                        loginForm.controls.username.touched)
-                                "
+                  loginForm.controls.username.valid &&
+                  (loginForm.controls.username.dirty || loginForm.controls.username.touched)
+                "
                 id="username"
                 [class.is-valid]="loginForm.controls.username.valid"
                 autocomplete="off"
@@ -44,10 +41,9 @@
               </div>
               <input
                 [class.is-invalid]="
-                                    loginForm.controls.password.invalid &&
-                                    (loginForm.controls.password.dirty ||
-                                        loginForm.controls.password.touched)
-                                "
+                  loginForm.controls.password.invalid &&
+                  (loginForm.controls.password.dirty || loginForm.controls.password.touched)
+                "
                 [class.is-valid]="loginForm.controls.password.valid"
                 autocomplete="off"
                 class="form-control"
@@ -62,8 +58,7 @@
                   loginForm.controls.password.errors?.['maxlength']
                 "
                 class="invalid-feedback">
-                密码长度为8 ~
-                20个字符，由字母和数字组成，不能包含空格、特殊字符或表情符号。
+                密码长度为8 ~ 20个字符，由字母和数字组成，不能包含空格、特殊字符或表情符号。
               </div>
               <div
                 *ngIf="loginForm.controls.password.errors?.['required']"
@@ -82,10 +77,7 @@
               <a class="mt-1 float-end" href="./">忘记密码？</a>
             </div>
             <div class="d-grid gap-2">
-              <button
-                [disabled]="!loginForm.valid"
-                class="btn btn-primary"
-                type="submit">
+              <button [disabled]="!loginForm.valid" class="btn btn-primary" type="submit">
                 登录
               </button>
             </div>
@@ -96,15 +88,11 @@
             <span class="me-auto">社交账号登录</span>
           </div>
           <div class="col col-sm-4 justify-content-around">
-            <a href="./" title="a"
-            ><i class="bi bi-github" style="color: #3492ed"></i
-            ></a>
+            <a href="./" title="a"><i class="bi bi-github" style="color: #3492ed"></i></a>
             <a class="mx-2" href="./" title="a"
             ><i class="bi bi-sina-weibo" style="color: #cf1900"></i
             ></a>
-            <a href="./" title="a"
-            ><i class="bi bi-wechat" style="color: #4daf29"></i
-            ></a>
+            <a href="./" title="a"><i class="bi bi-wechat" style="color: #4daf29"></i></a>
           </div>
           <div class="col col-sm-4 text-end">
             <a class="me-2" href="./">注册帐号</a>

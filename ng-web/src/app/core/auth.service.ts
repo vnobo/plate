@@ -40,10 +40,7 @@ export class AuthService {
       this.login(authentication);
       return authentication;
     }
-    throw new HttpErrorResponse({
-      error: 'Authenticate is incorrectness,please login again.',
-      status: 401,
-    });
+    return null;
   }
 
   isLogged(): boolean {

@@ -42,7 +42,7 @@ export class LoginService {
     return this._http.get<Authentication>('/oauth2/token', { headers: headers }).pipe(
       tap(authentication => {
         this._auth.login(authentication);
-      }),
+      })
     );
   }
 
@@ -66,7 +66,7 @@ export class LoginService {
         this._auth.logout();
         this._storage.remove(this.storageKey);
         this.credentials.set({} as Credentials);
-      }),
+      })
     );
   }
 }
