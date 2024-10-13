@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import dayjs from 'dayjs';
 import { Authentication, AuthService } from '../../core/auth.service';
@@ -19,11 +19,10 @@ export class LoginService {
   private _storage = inject(SessionStorageService);
 
   private readonly storageKey = 'credentials';
-  private credentials = signal({} as Credentials);
 
   autoLogin(): Authentication | null {
     const authentication = this._auth.authenticationToken();
-    if (authentication) {
+    if (authentication && Object.keys(authentication).length !== 0) {
       var lastAccessTime = dayjs.unix(authentication.lastAccessTime);
       if (dayjs().diff(lastAccessTime, 'seconds') > authentication.expires) {
         return null; // token expired
@@ -49,15 +48,14 @@ export class LoginService {
   setRememberMe(credentials: Credentials) {
     let creStr = JSON.stringify(credentials);
     this._storage.set(this.storageKey, creStr);
-    this.credentials.set(credentials);
   }
 
-  getRememberMe() {
+  getRememberMe(): Credentials | null {
     let creStr = this._storage.get(this.storageKey);
-    if (creStr) {
-      this.credentials.set(JSON.parse(creStr));
+    if (creStr && Object.keys(creStr).length !== 0) {
+      return JSON.parse(creStr);
     }
-    return this.credentials();
+    return null;
   }
 
   logout() {
@@ -65,7 +63,6 @@ export class LoginService {
       tap(res => {
         this._auth.logout();
         this._storage.remove(this.storageKey);
-        this.credentials.set({} as Credentials);
       })
     );
   }

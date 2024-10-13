@@ -51,10 +51,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       return;
     }
     const credentials = this._loginSer.getRememberMe();
-    if (credentials) {
-      if (credentials.username == undefined && credentials.password == undefined) {
-        return;
-      }
+    if (credentials && Object.keys(credentials).length !== 0) {
       this.login(credentials);
     }
   }
