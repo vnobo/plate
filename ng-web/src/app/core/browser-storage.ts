@@ -13,16 +13,11 @@ export class BrowserStorage {
   }
 
   get(key: string) {
-    const itemStr = this.storage.getItem(key);
-    if (itemStr) {
-      return atob(itemStr);
-    }
-    return null;
+    return this.storage.getItem(key);
   }
 
   set(key: string, value: string) {
-    const btoaStr = btoa(value);
-    this.storage.setItem(key, btoaStr);
+    this.storage.setItem(key, value);
   }
 
   remove(key: string) {

@@ -38,7 +38,7 @@ export class LoginService {
     const headers: HttpHeaders = new HttpHeaders({
       authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
     });
-    return this._http.get<Authentication>('/oauth2/token', { headers: headers }).pipe(
+    return this._http.get<Authentication>('/oauth2/login', { headers: headers }).pipe(
       tap(authentication => {
         this._auth.login(authentication);
       })

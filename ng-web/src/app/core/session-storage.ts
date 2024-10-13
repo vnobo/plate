@@ -13,12 +13,11 @@ export class SessionStorageService {
   }
 
   get(key: string) {
-    var value = this.storage.getItem(key);
-    return value && atob(value);
+    return this.storage.getItem(key);
   }
 
   set(key: string, value: string) {
-    this.storage.setItem(key, btoa(value));
+    this.storage.setItem(key, value);
   }
 
   remove(key: string) {
