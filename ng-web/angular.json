@@ -32,23 +32,24 @@
               },
               {
                 "glob": "**/*",
-                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                "input": "@ant-design/icons-angular/src/inline-svg/",
                 "output": "/assets/"
               },
               {
                 "glob": "**/*",
-                "input": "./node_modules/bootstrap-icons/icons/",
+                "input": "bootstrap-icons/icons/",
                 "output": "/assets/"
               }
             ],
             "styles": [
+              "bootstrap-icons/font/bootstrap-icons.min.css",
               "@angular/material/prebuilt-themes/azure-blue.css",
               "src/theme.less",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "bootstrap/dist/css/bootstrap.min.css",
               "src/styles.scss"
             ],
             "scripts": [
-              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+              "bootstrap/dist/js/bootstrap.bundle.min.js"
             ]
           },
           "configurations": {

@@ -1,29 +1,38 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NzFormModule } from 'ng-zorro-antd/form';
 import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
 import { Credentials, LoginService } from './login.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, NzFormModule, CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  formBuilder: FormBuilder = inject(FormBuilder);
-
-  loginForm = this.formBuilder.group({
-    username: new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(64)]),
-    password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(64)]),
+  loginForm = new FormGroup({
+    username: new FormControl('', [
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(64),
+    ]),
+    password: new FormControl('', [
+      Validators.required,
+      Validators.minLength(6),
+      Validators.maxLength(64),
+    ]),
     remember: new FormControl(false),
   });
   private componentDestroyed$: Subject<void> = new Subject<void>();
 
-  constructor(private router: Router, private route: ActivatedRoute, private _loginSer: LoginService) {
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private _loginSer: LoginService,
+  ) {
   }
 
   onSubmit(): void {
