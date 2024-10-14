@@ -44,7 +44,7 @@ import static org.springframework.security.web.server.csrf.CsrfWebFilter.DEFAULT
  * and utilizes a LoggersService to persist operation logs with enriched content.
  * The filter matches requests based on a predefined matcher (defaultLoggerMatcher) and can be bypassed
  * if the match is not successful.
- *
+ * <p>
  * Key Features:
  * - Caches request and response bodies to ensure they can be logged even after consumption.
  * - Matches requests to determine if logging should occur based on a ServerWebExchangeMatcher.
@@ -52,12 +52,12 @@ import static org.springframework.security.web.server.csrf.CsrfWebFilter.DEFAULT
  * - Handles DataBuffer retention and release to prevent memory leaks.
  * - Utilizes a separate service (LoggersService) to handle the logging operation asynchronously.
  * - Supports tracing-level logging for debugging filter operations.
- *
+ * <p>
  * Dependencies:
  * - ServerWebExchangeMatcher for matching requests.
  * - LoggersService for persisting log entries.
  * - SLF4J Logger (log) for internal logging.
- *
+ * <p>
  * Usage:
  * Implemented as a Spring component (@Component), it's automatically registered in the WebFilter chain.
  * Configuration may be required to customize the matching behavior or logging service interaction.
@@ -159,10 +159,10 @@ public class LoggerFilter implements WebFilter {
      * This method is useful for scenarios where the request body needs to be read or processed
      * multiple times without losing its original state.
      *
-     * @param exchange The ServerWebExchange containing the current request and response.
+     * @param exchange   The ServerWebExchange containing the current request and response.
      * @param dataBuffer The DataBuffer representing the body of the request.
      * @return A decorated ServerHttpRequest with the body cached for subsequent accesses.
-     *         Returns null if the data buffer capacity is zero.
+     * Returns null if the data buffer capacity is zero.
      */
     private static ServerHttpRequest requestDecorate(ServerWebExchange exchange, DataBuffer dataBuffer) {
         if (dataBuffer.capacity() > 0) {
@@ -197,7 +197,7 @@ public class LoggerFilter implements WebFilter {
      *
      * @param dataBuffer The source DataBuffer to be converted or wrapped.
      * @return A new DataBuffer instance, either wrapped or converted from the input,
-     *         maintaining the content of the original buffer.
+     * maintaining the content of the original buffer.
      * @throws IllegalArgumentException If the input DataBuffer is neither a NettyDataBuffer
      *                                  nor a DefaultDataBuffer, indicating an unsupported type.
      */
@@ -234,14 +234,14 @@ public class LoggerFilter implements WebFilter {
      * If no match is found, it simply continues the filter chain without caching or logging.
      *
      * @param exchange The current server web exchange to be filtered.
-     * @param chain The filter chain to be invoked for further processing.
+     * @param chain    The filter chain to be invoked for further processing.
      * @return A Mono that completes void when the filtering and optional caching/logging are finished.
      */
     @Override
     public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         var filterMono = defaultLoggerMatcher.matches(exchange);
         filterMono = filterMono.filter(ServerWebExchangeMatcher.MatchResult::isMatch);
-        filterMono = filterMono.switchIfEmpty(continueFilterChain(exchange, chain).then(Mono.empty()));
+        filterMono = filterMono.switchIfEmpty(Mono.defer(() -> continueFilterChain(exchange, chain).then(Mono.empty())));
         return filterMono.flatMap((m) -> cacheFilterChain(exchange, chain).then(Mono.defer(ContextUtils::securityDetails))
                 .doOnNext(userDetails -> logRequest(exchange, userDetails)).then());
     }
@@ -256,8 +256,8 @@ public class LoggerFilter implements WebFilter {
      *                 the client request and provides a way to manipulate the response.
      * @param chain    The WebFilterChain representing the remaining filters to be applied.
      * @return A Mono<Void> indicating the completion or error of the deferred filter operation.
-     *         The completion signifies that the request has been processed by the next filter
-     *         in line, or an error indicates that the processing failed at some point in the chain.
+     * The completion signifies that the request has been processed by the next filter
+     * in line, or an error indicates that the processing failed at some point in the chain.
      */
     private Mono<Void> continueFilterChain(ServerWebExchange exchange, WebFilterChain chain) {
         log.debug("{}Logger filter chain [continueFilterChain] next.", exchange.getLogPrefix());
@@ -281,7 +281,7 @@ public class LoggerFilter implements WebFilter {
     /**
      * Processes the request body from the given ServerWebExchange and ServerHttpRequest.
      *
-     * @param exchange The current server web exchange which holds information about the HTTP request and response.
+     * @param exchange          The current server web exchange which holds information about the HTTP request and response.
      * @param serverHttpRequest The actual HTTP request containing the body to be processed.
      * @return A Mono that emits the processed request body as a String.
      */
@@ -361,10 +361,10 @@ public class LoggerFilter implements WebFilter {
      * is asynchronous and the result is logged at the debug level with a prefixed log message indicating
      * the operation performed.
      *
-     * @param exchange     The current server web exchange which holds both the incoming request and the
-     *                     outgoing response.
-     * @param userDetails  Optional security details of the authenticated user, containing a username
-     *                     and a tenant code. If not provided, defaults are used.
+     * @param exchange    The current server web exchange which holds both the incoming request and the
+     *                    outgoing response.
+     * @param userDetails Optional security details of the authenticated user, containing a username
+     *                    and a tenant code. If not provided, defaults are used.
      */
     private void logRequest(ServerWebExchange exchange, SecurityDetails userDetails) {
         ServerHttpRequest request = exchange.getRequest();

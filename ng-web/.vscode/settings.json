@@ -1,0 +1,39 @@
+{
+  "[css]": {
+    "editor.foldingStrategy": "indentation"
+  },
+  "files.autoSave": "afterDelay",
+  "angular.forceStrictTemplates": true,
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
+  "editor.inlineSuggest.enabled": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "angular.view-engine": false,
+  "Codegeex.CompletionModel": "CodeGeeX Pro[Beta]",
+  "Codegeex.Privacy": true,
+  "merge-conflict.autoNavigateNextConflict.enabled": true,
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "prettier.bracketSameLine": true,
+  "Codegeex.CommitMessageStyle": "ConventionalCommits",
+  "Codegeex.RepoIndex": true,
+  "angular-schematics.schematicsDefaultOptions": {
+    "angular-*": {
+      "style": "scss",
+      "externalTemplate": true
+    },
+    "angular-component": {
+      "ngOnInit": true
+    }
+  },
+  "css.styleSheets": [
+    "**/${fileBasenameNoExtension}.{css,scss}",
+    "node_modules/bootstrap/dist/css/bootstrap.css",
+    "@angular/material/prebuilt-themes/azure-blue.css",
+    "node_modules/ng-zorro-antd/ng-zorro-antd.less",
+  ]
+}

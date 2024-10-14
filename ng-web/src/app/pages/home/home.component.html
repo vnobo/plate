@@ -1,0 +1,57 @@
+<nz-layout class="app-layout">
+  <nz-sider
+    class="menu-sidebar"
+    nzBreakpoint="md"
+    nzCollapsible
+    [nzCollapsed]="isCollapsed"
+    [nzTrigger]="null"
+    nzWidth="14.8rem">
+    <div class="sidebar-logo">
+      <a href="https://ng.ant.design/" rel="noopener noreferrer" target="_blank">
+        <img alt="logo" src="https://ng.ant.design/assets/img/logo.svg" />
+        <h1>Plate 管理后台</h1>
+      </a>
+    </div>
+    <ul nz-menu nzMode="inline" nzTheme="dark">
+      <li nz-submenu nzIcon="dashboard" nzOpen nzTitle="Dashboard">
+        <ul>
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="/welcome">Welcome</a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a>Monitor</a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a>Workplace</a>
+          </li>
+        </ul>
+      </li>
+      @for (menu of myMenus(); track menu) {
+        <li nz-submenu nzIcon="{{ menu.icons }}" nzOpen nzTitle="{{ menu.name }}">
+        <ul>
+          @for (children of menu.children; track children) {
+          <li nz-menu-item nzMatchRouter>
+            <a routerLink="{{ children.path }}">{{ children.name }}</a>
+          </li>
+          }
+        </ul>
+      </li>
+      }
+    </ul>
+  </nz-sider>
+  <nz-layout>
+    <nz-header>
+      <div class="app-header">
+        <span (click)="isCollapsed = !isCollapsed" class="header-trigger">
+          <span [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" class="trigger" nz-icon></span>
+        </span>
+      </div>
+    </nz-header>
+    <nz-breadcrumb nzAutoGenerate="true" nzRouteLabel="title"></nz-breadcrumb>
+    <nz-content>
+      <div class="inner-content">
+        <router-outlet></router-outlet>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

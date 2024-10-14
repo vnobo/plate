@@ -1,0 +1,11 @@
+<div class="fixed-top">
+  <mat-progress-bar *ngIf="progressShow()" mode="query"></mat-progress-bar>
+</div>
+<nz-layout class="layout">
+  <router-outlet></router-outlet>
+</nz-layout>
+<nz-back-top [nzTemplate]="tpl" [nzVisibilityHeight]="100">
+  <ng-template #tpl>
+    <div class="ant-back-top-inner ant-alert-rtl">UP</div>
+  </ng-template>
+</nz-back-top>

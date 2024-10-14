@@ -18,8 +18,10 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
- * Handles security-related endpoints for OAuth2 operations, password changes, and CSRF token retrieval.
- * Utilizes WebSession-based security context repository, security manager, password encoding, and OAuth2 client repository.
+ *
+ * The SecurityController class is a REST controller responsible for handling security-related endpoints.
+ * It manages OAuth2 operations, password changes, and CSRF token retrieval.
+ * The class utilizes a WebSession-based security context repository, a security manager, password encoding, and an OAuth2 client repository.
  */
 @RestController
 @RequestMapping("/oauth2")
@@ -149,6 +151,23 @@ public class SecurityController {
         return this.securityManager.updatePassword(userDetails, newPassword);
     }
 
+    /**
+     * Represents a request to change a user's password.
+     * This class encapsulates the necessary information to perform a password change,
+     * including the current password and the new password.
+     * <p>
+     * The class uses validation annotations to ensure that both the current and new passwords
+     * are not empty. This helps prevent invalid password change requests from being processed.
+     * </p>
+     * <p>
+     * Example usage:
+     * <pre>
+     * ChangePasswordRequest request = new ChangePasswordRequest();
+     * request.setPassword("oldPassword");
+     * request.setNewPassword("newPassword");
+     * </pre>
+     * </p>
+     */
     @Data
     public static class ChangePasswordRequest {
 

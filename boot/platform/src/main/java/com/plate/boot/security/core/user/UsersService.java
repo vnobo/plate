@@ -84,8 +84,8 @@ public class UsersService extends AbstractDatabase {
      */
     public Mono<User> modify(UserRequest request) {
         return this.usersRepository.findByUsername(request.getUsername())
-                .switchIfEmpty(Mono.defer(() -> Mono.error(RestServerException.withMsg(
-                        "User not found!", "User by username [" + request.getUsername() + "] not found!"))))
+                .switchIfEmpty(Mono.error(RestServerException.withMsg(
+                        "User not found!", "User by username [" + request.getUsername() + "] not found!")))
                 .flatMap(user -> {
                     request.setId(user.getId());
                     request.setCode(user.getCode());

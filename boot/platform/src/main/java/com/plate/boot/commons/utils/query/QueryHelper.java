@@ -207,7 +207,7 @@ public final class QueryHelper {
      */
     public static Criteria criteria(Object object, Collection<String> skipKeys) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, true);
-        objectMap = Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && skipKeys.contains(key));
+        objectMap = Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && !skipKeys.contains(key));
         return criteria(objectMap);
     }
 

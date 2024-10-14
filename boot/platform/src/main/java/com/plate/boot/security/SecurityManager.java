@@ -1,7 +1,6 @@
 package com.plate.boot.security;
 
 import com.plate.boot.commons.base.AbstractDatabase;
-import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.security.core.group.authority.GroupAuthority;
 import com.plate.boot.security.core.group.member.GroupMemberResponse;
 import com.plate.boot.security.core.tenant.member.TenantMemberResponse;
@@ -211,7 +210,7 @@ public class SecurityManager extends AbstractDatabase
     private Mono<List<GroupMemberResponse>> loadGroups(String userCode) {
         return this.queryWithCache("USER_GROUPS-" + userCode,
                         QUERY_GROUP_MEMBERS_SQL, Map.of("userCode", userCode), GroupMemberResponse.class)
-                .flatMap(ContextUtils::serializeUserAuditor).collectSortedList();
+                .collectSortedList();
     }
 
     /**
@@ -225,7 +224,7 @@ public class SecurityManager extends AbstractDatabase
     private Mono<List<TenantMemberResponse>> loadTenants(String userCode) {
         return this.queryWithCache("USER_TENANTS-" + userCode,
                         QUERY_TENANT_MEMBERS_SQL, Map.of("userCode", userCode), TenantMemberResponse.class)
-                .flatMap(ContextUtils::serializeUserAuditor).collectSortedList();
+                .collectSortedList();
     }
 
     /**
@@ -239,8 +238,7 @@ public class SecurityManager extends AbstractDatabase
      */
     private Mono<List<GrantedAuthority>> authorities(String userCode) {
         return this.getAuthorities(userCode)
-                .concatWith(this.getGroupAuthorities(userCode))
-                .flatMap(ContextUtils::serializeUserAuditor).distinct().collectList();
+                .concatWith(this.getGroupAuthorities(userCode)).distinct().collectList();
     }
 
     /**

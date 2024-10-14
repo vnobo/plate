@@ -45,22 +45,22 @@ public class UsersController {
      */
     @GetMapping("search")
     public Flux<UserResponse> search(UserRequest request, Pageable pageable) {
-        return ContextUtils.securityDetails().flatMapMany(securityDetails ->
-                this.usersService.search(request.securityCode(securityDetails.getTenantCode()), pageable));
+        return ContextUtils.securityDetails().flatMapMany(details ->
+                this.usersService.search(request.securityCode(details.getTenantCode()), pageable));
     }
 
     /**
      * Retrieves a paginated list of users based on the provided request and pagination details.
      * Ensures the operation is executed within the context of the authenticated tenant's security code.
      *
-     * @param request   A UserRequest object encapsulating the user search criteria and additional request-specific fields.
-     * @param pageable  Specifies the pagination details such as page number, size, sort orders, etc.
+     * @param request  A UserRequest object encapsulating the user search criteria and additional request-specific fields.
+     * @param pageable Specifies the pagination details such as page number, size, sort orders, etc.
      * @return A Mono wrapping a PagedModel of UserResponse objects representing the paged user data.
      */
     @GetMapping("page")
     public Mono<PagedModel<UserResponse>> page(UserRequest request, Pageable pageable) {
-        return ContextUtils.securityDetails().flatMap(securityDetails ->
-                        this.usersService.page(request.securityCode(securityDetails.getTenantCode()), pageable))
+        return ContextUtils.securityDetails().flatMap(details ->
+                        this.usersService.page(request.securityCode(details.getTenantCode()), pageable))
                 .map(PagedModel::new);
     }
 
@@ -70,7 +70,7 @@ public class UsersController {
      * @param request A valid UserRequest object containing the details for the user to be added.
      *                The ID within the request must be null, indicating a new user addition.
      * @return A Mono emitting the UserResponse representing the newly added user.
-     *         The UserResponse is a JSON-friendly version of the User entity with the password field excluded for security.
+     * The UserResponse is a JSON-friendly version of the User entity with the password field excluded for security.
      * @throws IllegalArgumentException If the ID within the request is not null, indicating an attempt to add an existing user.
      */
     @PostMapping("add")
@@ -103,8 +103,8 @@ public class UsersController {
      * @param request A UserRequest object containing the necessary details to identify the user for deletion.
      *                Must not be null and must contain a valid 'id'.
      * @return A Mono<Void> indicating the completion of the delete operation.
-     *         If the operation completes successfully, the Mono will be completed without any value.
-     *         If the 'id' in the request is null, a NullPointerException will be thrown before the operation begins.
+     * If the operation completes successfully, the Mono will be completed without any value.
+     * If the 'id' in the request is null, a NullPointerException will be thrown before the operation begins.
      */
     @DeleteMapping("delete")
     public Mono<Void> delete(@RequestBody UserRequest request) {
