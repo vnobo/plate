@@ -7,17 +7,23 @@ export const HOME_ROUTES: Routes = [
   {
     path: '',
     canActivate: [authGuard],
-    title: '管理后台',
     component: HomeComponent,
+    data: {
+      title: '管理后台',
+    },
     children: [
       {
         path: 'menus',
-        title: '菜单管理',
+        data: {
+          title: '菜单管理',
+        },
         component: MenusComponent,
       },
       {
         path: '',
-        title: '菜单管理',
+        data: {
+          title: '菜单管理',
+        },
         component: MenusComponent,
       },
     ],

@@ -22,19 +22,19 @@ import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzI18n, zh_CN } from 'ng-zorro-antd/i18n';
 import { registerLocaleData } from '@angular/common';
 import zh from '@angular/common/locales/zh';
-import { FormsModule } from '@angular/forms';
+import { NzConfig, provideNzConfig } from 'ng-zorro-antd/core/config';
 
 registerLocaleData(zh);
 
 dayjs.extend(isLeapYear);
 dayjs.locale('zh-cn');
 
+const ngZorroConfig: NzConfig = {
+  message: { nzDuration: 2000, nzMaxStack: 3 },
+};
+
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideExperimentalZonelessChangeDetection(),
-    provideRouter(routes, withComponentInputBinding()),
-    importProvidersFrom(FormsModule, BrowserAnimationsModule),
-    provideAnimationsAsync(),
     provideHttpClient(
       withFetch(),
       withInterceptorsFromDi(),
@@ -47,5 +47,10 @@ export const appConfig: ApplicationConfig = {
     { provide: TitleStrategy, useClass: PageTitleStrategy },
     provideNzIcons(icons),
     provideNzI18n(zh_CN),
+    provideNzConfig(ngZorroConfig),
+    provideExperimentalZonelessChangeDetection(),
+    provideRouter(routes, withComponentInputBinding()),
+    importProvidersFrom(BrowserAnimationsModule),
+    provideAnimationsAsync(),
   ],
 };

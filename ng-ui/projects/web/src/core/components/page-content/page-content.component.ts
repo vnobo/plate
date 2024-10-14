@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, signal, Type } from '@angular/core';
-import { ActivatedRoute, Params, PRIMARY_OUTLET, Resolve, ResolveFn, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Params, PRIMARY_OUTLET, Resolve, ResolveFn, RouterModule } from '@angular/router';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
@@ -106,7 +106,6 @@ export class PageContentComponent implements OnInit, OnDestroy {
   private _subject: Subject<void> = new Subject<void>();
 
   constructor(
-    private router: Router,
     private activatedRoute: ActivatedRoute,
     private iconService: NzIconService,
     private menusService: MenusService

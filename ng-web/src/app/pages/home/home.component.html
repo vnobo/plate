@@ -1,18 +1,18 @@
 <nz-layout class="app-layout">
   <nz-sider
-    [(nzCollapsed)]="isCollapsed"
-    [nzTrigger]="null"
     class="menu-sidebar"
     nzBreakpoint="md"
     nzCollapsible
-    nzWidth="256px">
+    [nzCollapsed]="isCollapsed"
+    [nzTrigger]="null"
+    nzWidth="14.8rem">
     <div class="sidebar-logo">
       <a href="https://ng.ant.design/" rel="noopener noreferrer" target="_blank">
         <img alt="logo" src="https://ng.ant.design/assets/img/logo.svg" />
-        <h1>Ant Design Of Angular</h1>
+        <h1>Plate 管理后台</h1>
       </a>
     </div>
-    <ul [nzInlineCollapsed]="isCollapsed" nz-menu nzMode="inline" nzTheme="dark">
+    <ul nz-menu nzMode="inline" nzTheme="dark">
       <li nz-submenu nzIcon="dashboard" nzOpen nzTitle="Dashboard">
         <ul>
           <li nz-menu-item nzMatchRouter>
@@ -26,19 +26,17 @@
           </li>
         </ul>
       </li>
-      <li nz-submenu nzIcon="home" nzOpen nzTitle="系统管理">
+      @for (menu of myMenus(); track menu) {
+        <li nz-submenu nzIcon="{{ menu.icons }}" nzOpen nzTitle="{{ menu.name }}">
         <ul>
+          @for (children of menu.children; track children) {
           <li nz-menu-item nzMatchRouter>
-            <a routerLink="/home/menus">菜单管理</a>
+            <a routerLink="{{ children.path }}">{{ children.name }}</a>
           </li>
-          <li nz-menu-item nzMatchRouter>
-            <a>Monitor</a>
-          </li>
-          <li nz-menu-item nzMatchRouter>
-            <a>Workplace</a>
-          </li>
+          }
         </ul>
       </li>
+      }
     </ul>
   </nz-sider>
   <nz-layout>
@@ -49,6 +47,7 @@
         </span>
       </div>
     </nz-header>
+    <nz-breadcrumb nzAutoGenerate="true" nzRouteLabel="title"></nz-breadcrumb>
     <nz-content>
       <div class="inner-content">
         <router-outlet></router-outlet>

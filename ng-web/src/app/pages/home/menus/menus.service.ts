@@ -18,7 +18,7 @@ export class MenusService {
           map(children => {
             item.children = children;
             return item;
-          }),
+          })
         );
       }),
       retry(3),
@@ -32,7 +32,7 @@ export class MenusService {
       .pipe(concatMap(this.childrenMap), toArray(), retry(3));
   }
 
-  getMeMenus(request: Menu): Observable<Menu[]> {
+  getMyMenus(request: Menu): Observable<Menu[]> {
     const params = new HttpParams({ fromObject: request as never });
     return this.http
       .get<Menu[]>('/menus/me', { params: params })

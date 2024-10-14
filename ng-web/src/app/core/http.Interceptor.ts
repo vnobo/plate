@@ -5,10 +5,14 @@ import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { ProgressBar } from './progress-bar';
 import { AuthService } from './auth.service';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
-export function defaultInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
+export function defaultInterceptor(
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn,
+): Observable<HttpEvent<unknown>> {
   const _loading = inject(ProgressBar);
-
+  const _message = inject(NzMessageService);
   _loading.show();
   if (req.url.indexOf('assets/') > -1) {
     return next(req);
@@ -32,30 +36,34 @@ export function defaultInterceptor(req: HttpRequest<unknown>, next: HttpHandlerF
       } else {
         alertMessage = errorResponse.message;
       }
+      _message.error(alertMessage);
       return throwError(() => errorResponse);
     }),
     finalize(() => _loading.hide()),
   );
 }
 
-export function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
+export function authTokenInterceptor(
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn,
+): Observable<HttpEvent<unknown>> {
   const _auth = inject(AuthService);
   const _route = inject(Router);
 
   if (!_auth.isLogged()) {
     return next(req);
   }
-  const authReq = req.clone({
+  const newReq = req.clone({
     headers: req.headers.set('Authorization', `Bearer ${_auth.authToken()}`),
   });
 
-  return next(authReq).pipe(
+  return next(newReq).pipe(
     catchError(errorResponse => {
       if (errorResponse.status === 401) {
         _auth.logout();
         _route.navigate([_auth.loginUrl]).then();
       }
       return throwError(() => errorResponse);
-    }),
+    })
   );
 }
