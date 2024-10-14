@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { CanActivateChildFn, CanActivateFn, CanMatchFn, Router } from '@angular/router';
 import dayjs from 'dayjs';
-import { SessionStorageService } from './session-storage';
+import { SessionStorageService } from './storage/session-storage';
 
 // 定义一个接口，用于存储用户的认证信息
 export interface Authentication {
@@ -24,7 +24,7 @@ export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = () => 
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  readonly loginUrl = '/auth/login';
+  readonly loginUrl = '/login';
   private _storage = inject(SessionStorageService);
   private readonly authenticationKey = 'authentication';
   private isLoggedIn = signal(false);
