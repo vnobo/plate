@@ -9,7 +9,7 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 
 @Component({
-  selector: 'system-menu-form',
+  selector: 'app-menu-form',
   standalone: true,
   imports: [
     ReactiveFormsModule,
