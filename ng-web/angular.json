@@ -42,14 +42,14 @@
               }
             ],
             "styles": [
-              "bootstrap-icons/font/bootstrap-icons.min.css",
-              "bootstrap/dist/css/bootstrap.min.css",
-              "@angular/material/prebuilt-themes/azure-blue.css",
+              "./node_modules/bootstrap-icons/font/bootstrap-icons.min.css",
+              "./node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "./node_modules/@angular/material/prebuilt-themes/azure-blue.css",
               "src/theme.less",
               "src/styles.scss"
             ],
             "scripts": [
-              "bootstrap/dist/js/bootstrap.bundle.min.js"
+              "./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ],
             "allowedCommonJsDependencies": [
               "dayjs"
