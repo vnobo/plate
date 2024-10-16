@@ -4,16 +4,18 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
 import { Credentials, LoginService } from './login.service';
 import { CommonModule } from '@angular/common';
+import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NzNotificationModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
   private _loginSer = inject(LoginService);
+  private _message = inject(NzNotificationService);
   loginForm = new FormGroup({
     username: new FormControl('', [
       Validators.required,
@@ -52,6 +54,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
     const credentials = this._loginSer.getRememberMe();
     if (credentials && Object.keys(credentials).length !== 0) {
+      this._message.success('自动登录成功', '记住我系统自动登录成功!');
       this.login(credentials);
     }
   }

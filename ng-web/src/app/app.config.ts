@@ -31,6 +31,11 @@ dayjs.locale('zh-cn');
 
 const ngZorroConfig: NzConfig = {
   message: { nzDuration: 2000, nzMaxStack: 3 },
+  notification: {
+    nzTop: '4.7rem',
+    nzDuration: 1000 * 10,
+    nzPlacement: 'topRight',
+  },
 };
 
 export const appConfig: ApplicationConfig = {

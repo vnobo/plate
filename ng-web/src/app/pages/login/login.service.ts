@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import dayjs from 'dayjs';
 import { Authentication, AuthService } from '../../core/auth.service';
-import { SessionStorageService } from '../../core/session-storage';
+import { BrowserStorage } from '../../core/storage/browser-storage';
 
 export interface Credentials {
   password: string | null | undefined;
@@ -16,7 +16,7 @@ export interface Credentials {
 export class LoginService {
   _auth = inject(AuthService);
   private _http = inject(HttpClient);
-  private _storage = inject(SessionStorageService);
+  private _storage = inject(BrowserStorage);
 
   private readonly storageKey = 'credentials';
 
