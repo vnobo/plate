@@ -35,11 +35,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    const credentials: Credentials = {
-      username: this.loginForm.value.username,
-      password: this.loginForm.value.password,
-    };
-
+    const credentials = this.loginForm.value as Credentials;
     if (this.loginForm.value.remember) {
       this._loginSer.setRememberMe(credentials);
     }

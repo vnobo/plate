@@ -72,6 +72,10 @@ export class MenusComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.refresh();
+  }
+
+  refresh() {
     const menuRequest: Menu = {
       pcode: '0',
       tenantCode: '0',

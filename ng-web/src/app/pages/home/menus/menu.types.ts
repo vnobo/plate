@@ -7,7 +7,7 @@ export interface Menu {
   authority?: string;
   name?: string;
   path?: string;
-  sort?: number;
+  sortNo?: number;
   extend?: never;
   creator?: UserAuditor;
   updater?: UserAuditor;

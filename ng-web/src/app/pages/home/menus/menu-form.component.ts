@@ -3,7 +3,7 @@ import { Component, EventEmitter, Output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzModalModule } from 'ng-zorro-antd/modal';
-import { MenuType } from './menu.types';
+import { Menu, MenuType } from './menu.types';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -125,9 +125,9 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
           </div>
           <div class="row g-3 my-1">
             <nz-form-item class="col-md">
-              <nz-form-label [nzSpan]="6" nzRequired for="sort">排序</nz-form-label>
+              <nz-form-label [nzSpan]="6" nzRequired for="sortNo">排序</nz-form-label>
               <nz-form-control [nzSpan]="18" nzHasFeedback nzValidatingTip="验证中...">
-                <input nz-input type="text" id="sort" formControlName="sort" />
+                <input nz-input type="text" id="sortNo" formControlName="sortNo" />
               </nz-form-control>
             </nz-form-item>
             <nz-form-item class="col-md">
@@ -164,7 +164,7 @@ export class MenuFormComponent {
     data: null;
   }>();
 
-  menuForm: FormGroup;
+  menuForm: FormGroup = new FormGroup({});
 
   constructor(private formBuilder: FormBuilder) {
     this.menuForm = this.formBuilder.group({
@@ -176,15 +176,16 @@ export class MenuFormComponent {
       authority: [null, Validators.required, Validators.minLength(6), Validators.maxLength(64)],
       name: [null, Validators.required],
       path: [null, Validators.required, Validators.pattern(/^(\/|(\/[a-zA-Z0-9_-]+)+)$/)],
-      sort: [null, Validators.required],
+      icons: [null, Validators.required],
+      sortNo: [null, Validators.required],
       extend: [null],
       permissions: [null],
-      icons: [null],
     });
   }
 
   submitForm() {
-    console.log(this.menuForm.value);
+    const menu = this.menuForm.value as Menu;
+    console.log(menu);
   }
 
   restForm(): void {
