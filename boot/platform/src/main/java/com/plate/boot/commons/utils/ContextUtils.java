@@ -83,7 +83,7 @@ public final class ContextUtils implements InitializingBean {
 
     static {
         try {
-            MD = MessageDigest.getInstance("MD5");
+            MD = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
             throw RestServerException.withMsg("MD5 algorithm not found", e);
         }
