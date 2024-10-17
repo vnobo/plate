@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { HomeComponent } from './home.component';
 import { MenusComponent } from './menus/menus.component';
 import { authGuard } from '../../core/auth.service';
+import { UsersComponent } from './users/users.component';
+import { GroupsComponent } from './groups/groups.component';
 
 export const HOME_ROUTES: Routes = [
   {
@@ -12,6 +14,20 @@ export const HOME_ROUTES: Routes = [
       title: '管理后台',
     },
     children: [
+      {
+        path: 'roles',
+        data: {
+          title: '角色管理',
+        },
+        component: GroupsComponent,
+      },
+      {
+        path: 'users',
+        data: {
+          title: '用户管理',
+        },
+        component: UsersComponent,
+      },
       {
         path: 'menus',
         data: {

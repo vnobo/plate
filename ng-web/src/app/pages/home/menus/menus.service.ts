@@ -39,6 +39,10 @@ export class MenusService {
       .pipe(concatMap(this.childrenMap), toArray(), retry(3));
   }
 
+  saveMenu(menu: Menu): Observable<Menu> {
+    return this.http.post<Menu>('/menus/save', menu);
+  }
+
   getChildren(request: Menu): Observable<Menu[]> {
     const params = new HttpParams({ fromObject: request as never });
     return this.http.get<Menu[]>('/menus/me', { params: params });

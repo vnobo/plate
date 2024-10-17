@@ -1,8 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { CanActivateChildFn, CanActivateFn, CanMatchFn, Router } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  CanActivateChildFn,
+  CanActivateFn,
+  CanMatchFn,
+  Router,
+  RouterStateSnapshot,
+} from '@angular/router';
 import dayjs from 'dayjs';
-import { SessionStorageService } from './session-storage';
+import { SessionStorageService } from './storage/session-storage';
 
 // 定义一个接口，用于存储用户的认证信息
 export interface Authentication {
@@ -13,12 +20,16 @@ export interface Authentication {
 }
 
 // 定义一个函数，用于判断用户是否已登录
-export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = () => {
+export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot,
+) => {
   const auth = inject(AuthService);
   const router = inject(Router);
   if (auth.isLogged()) {
     return true;
   }
+  auth.redirectUrl = state.url;
   return router.parseUrl(auth.loginUrl);
 };
 
@@ -29,6 +40,8 @@ export class AuthService {
   private readonly authenticationKey = 'authentication';
   private isLoggedIn = signal(false);
   private authentication = signal({} as Authentication);
+
+  public redirectUrl = '';
 
   authenticationToken() {
     if (this.isLoggedIn()) {

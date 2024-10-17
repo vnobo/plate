@@ -47,10 +47,12 @@
         </span>
       </div>
     </nz-header>
-    <nz-breadcrumb nzAutoGenerate="true" nzRouteLabel="title"></nz-breadcrumb>
-    <nz-content>
-      <div class="inner-content">
-        <router-outlet></router-outlet>
+    <nz-content class="my-1">
+      <div class="container-fluid">
+        <nz-breadcrumb class="m-1" nzAutoGenerate="true" nzRouteLabel="title"></nz-breadcrumb>
+        <div class="container">
+          <router-outlet></router-outlet>
+        </div>
       </div>
     </nz-content>
   </nz-layout>

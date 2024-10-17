@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 import { MenusService } from './menus.service';
 import { Subject, takeUntil } from 'rxjs';
 import { Menu } from './menu.types';
@@ -14,12 +14,18 @@ import { CommonModule } from '@angular/common';
   imports: [NzTableModule, MenuFormComponent, CommonModule],
 })
 export class MenusComponent implements OnInit, OnDestroy {
+  private _menusSer = inject(MenusService);
+
   listMenus: WritableSignal<Menu[]> = signal([]);
   mapOfExpandedData: Record<string, Menu[]> = {};
 
   private _subject: Subject<void> = new Subject<void>();
 
-  constructor(private menusService: MenusService) {
+  formEvent($event: any): void {
+    if ($event.btn === 'submit' && $event.status === 100) {
+      const menu = $event.data as Menu;
+      this._menusSer.saveMenu(menu).subscribe(result => this.refresh());
+    }
   }
 
   collapse(array: Menu[], data: Menu, $event: boolean): void {
@@ -32,8 +38,6 @@ export class MenusComponent implements OnInit, OnDestroy {
             this.collapse(array, target, false);
           }
         });
-      } else {
-        return;
       }
     }
   }
@@ -72,11 +76,15 @@ export class MenusComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.refresh();
+  }
+
+  refresh() {
     const menuRequest: Menu = {
       pcode: '0',
       tenantCode: '0',
     };
-    this.menusService
+    this._menusSer
       .getMenus(menuRequest)
       .pipe(takeUntil(this._subject))
       .subscribe(result => {

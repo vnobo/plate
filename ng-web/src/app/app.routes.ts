@@ -20,7 +20,13 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadChildren: () => import('./pages/home/home.routes').then(m => m.HOME_ROUTES),
   },
-  { path: 'login', component: LoginComponent, title: '登录系统' },
+  {
+    path: 'login',
+    component: LoginComponent,
+    data: {
+      title: '登录页面',
+    },
+  },
   { path: '', pathMatch: 'full', redirectTo: '/login' },
   { path: '**', component: PageNotFoundComponent },
 ];

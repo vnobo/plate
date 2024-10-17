@@ -5,25 +5,27 @@
     </button>
   </div>
   <div class="col-auto float-end">
-    <button class="btn btn-primary btn-sm" type="button">数据列</button>
+    <button (click)="refresh()" class="btn btn-success btn-sm mx-2" type="button">刷新</button>
   </div>
 </div>
 <nz-table
   #expandTable
   [nzData]="listMenus()"
   [nzPageIndex]="0"
-  nzFrontPagination="false"
-  nzTableLayout="fixed">
+  [nzScroll]="{ x: '100%' }"
+  nzNoResult="无数据"
+  nzTableLayout="auto"
+  nzFrontPagination="false">
   <thead>
   <tr>
-    <th>编码</th>
-    <th>排序</th>
-    <th>菜单名称</th>
-    <th>权限标识</th>
+    <th nzLeft>编码</th>
+    <th nzLeft>菜单名称</th>
+    <th nzLeft nzWidth="15rem">权限标识</th>
     <th>菜单类型</th>
-    <th>组件路径</th>
-    <th>创建时间</th>
-    <th>操作</th>
+    <th nzWidth="18rem">组件路径</th>
+    <th nzWidth="10rem">创建时间</th>
+    <th nzWidth="4rem">排序</th>
+    <th nzRight nzWidth="10rem">操作</th>
   </tr>
   </thead>
   <tbody>
@@ -39,18 +41,22 @@
             "
                   [(nzExpand)]="item.expand"
                   [nzIndentSize]="item.level! * 20"
-                  [nzShowExpand]="!!item.children">
+                  [nzShowExpand]="!!item.children"
+                  nzLeft>
                   {{ item.code }}
                 </td>
-                <td>{{ item.sort }}</td>
-                <td>{{ item.name }}</td>
-                <td>{{ item.authority }}</td>
+                <td nzLeft>{{ item.name }}</td>
+                <td nzLeft>{{ item.authority }}</td>
                 <td i18n="@@menuTypes">
                   {item.type, select, FOLDER {文件夹} MENU {菜单} LINK {链接} API {接口} OTHER {其他} }
                 </td>
                 <td>{{ item.path }}</td>
                 <td>{{ item.createdTime | date : 'short' }}</td>
-                <td><a href="javascript:void(0)">编辑</a> | <a href="javascript:void(0)">删除</a></td>
+                <td>{{ item.sortNo }}</td>
+                <td nzRight>
+                  <a href="javascript:void(0)" (click)="menuForm.editModal(item)">编辑</a> |
+                  <a href="javascript:void(0)">删除</a>
+                </td>
               </tr>
             }
           </ng-container>
@@ -59,4 +65,4 @@
     }
   </tbody>
 </nz-table>
-<system-menu-form #menuForm></system-menu-form>
+<app-menu-form #menuForm (formEvent)="formEvent($event)"></app-menu-form>
