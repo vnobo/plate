@@ -1,0 +1,42 @@
+<div class="row justify-content-between mb-2">
+  <div class="col-1">
+    <button class="btn btn-primary btn-sm" type="button">
+      <i class="bi bi-plus me-1"></i>新增
+    </button>
+  </div>
+  <div class="col-auto float-end">
+    <button (click)="refresh()" class="btn btn-success btn-sm mx-2" type="button">刷新</button>
+  </div>
+</div>
+<nz-table
+  #expandTable
+  [nzData]="groupsList()"
+  [nzPageIndex]="0"
+  [nzScroll]="{ x: '100%' }"
+  nzFrontPagination="false"
+  nzNoResult="无数据"
+  nzTableLayout="auto"
+  nzTitle="菜单管理">
+  <thead>
+  <tr>
+    <th nzLeft>编码</th>
+    <th nzLeft>名称</th>
+    <th nzRight>操作</th>
+  </tr>
+  </thead>
+  <tbody>
+    @for (data of expandTable.data; track $index) {
+      <ng-container>
+        <tr>
+          <td [(nzExpand)]="data.extend" nzLeft>
+            {{ data.code }}
+          </td>
+          <td nzLeft>{{ data.name }}</td>
+          <td nzRight>
+            <a href="javascript:void(0)">编辑</a> | <a href="javascript:void(0)">删除</a>
+          </td>
+        </tr>
+      </ng-container>
+    }
+  </tbody>
+</nz-table>

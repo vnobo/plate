@@ -1,3 +1,5 @@
+import { UserAuditor } from '../../../../types';
+
 export interface Menu {
   id?: number;
   code?: string;
@@ -19,12 +21,6 @@ export interface Menu {
   level?: number;
   expand?: boolean;
   parent?: Menu;
-}
-
-export interface UserAuditor {
-  code: string;
-  username: string;
-  name?: string;
 }
 
 export enum MenuType {

@@ -14,8 +14,10 @@ import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notif
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
+  private _subject$: Subject<void> = new Subject<void>();
   private _loginSer = inject(LoginService);
   private _message = inject(NzNotificationService);
+
   loginForm = new FormGroup({
     username: new FormControl('', [
       Validators.required,
@@ -29,7 +31,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     ]),
     remember: new FormControl(false),
   });
-  private componentDestroyed$: Subject<void> = new Subject<void>();
 
   constructor(private router: Router, private route: ActivatedRoute) {
   }
@@ -50,20 +51,20 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
     const credentials = this._loginSer.getRememberMe();
     if (credentials && Object.keys(credentials).length !== 0) {
-      this._message.success('自动登录成功', '记住我系统自动登录成功!');
       this.login(credentials);
+      this._message.success('自动登录成功', '记住我系统自动登录成功!');
     }
-  }
-
-  ngOnDestroy(): void {
-    this.componentDestroyed$.next();
-    this.componentDestroyed$.complete();
   }
 
   login(credentials: Credentials) {
     this._loginSer
       .login(credentials)
-      .pipe(takeUntil(this.componentDestroyed$), debounceTime(100), distinctUntilChanged())
+      .pipe(takeUntil(this._subject$), debounceTime(100), distinctUntilChanged())
       .subscribe(res => this.router.navigate(['/home'], { relativeTo: this.route }).then());
+  }
+
+  ngOnDestroy(): void {
+    this._subject$.next();
+    this._subject$.complete();
   }
 }

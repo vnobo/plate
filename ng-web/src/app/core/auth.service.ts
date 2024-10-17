@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { CanActivateChildFn, CanActivateFn, CanMatchFn, Router } from '@angular/router';
+import { ActivatedRoute, CanActivateChildFn, CanActivateFn, CanMatchFn, Router } from '@angular/router';
 import dayjs from 'dayjs';
 import { SessionStorageService } from './storage/session-storage';
 
@@ -16,6 +16,7 @@ export interface Authentication {
 export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
+  const state = inject(ActivatedRoute);
   if (auth.isLogged()) {
     return true;
   }
