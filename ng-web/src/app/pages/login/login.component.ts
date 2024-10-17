@@ -46,7 +46,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const auth = this._loginSer.autoLogin();
     if (auth) {
-      this.router.navigate(['/home'], { relativeTo: this.route }).then();
+      this.router.navigate([this._loginSer._auth.redirectUrl], { relativeTo: this.route }).then();
       return;
     }
     const credentials = this._loginSer.getRememberMe();
