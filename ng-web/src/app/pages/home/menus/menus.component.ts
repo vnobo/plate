@@ -21,8 +21,11 @@ export class MenusComponent implements OnInit, OnDestroy {
 
   private _subject: Subject<void> = new Subject<void>();
 
-  formEvent(event: any): void {
-    console.log(event);
+  formEvent($event: any): void {
+    if ($event.btn === 'submit' && $event.status === 100) {
+      const menu = $event.data as Menu;
+      this._menusSer.saveMenu(menu).subscribe(result => this.refresh());
+    }
   }
 
   collapse(array: Menu[], data: Menu, $event: boolean): void {
@@ -35,8 +38,6 @@ export class MenusComponent implements OnInit, OnDestroy {
             this.collapse(array, target, false);
           }
         });
-      } else {
-        return;
       }
     }
   }

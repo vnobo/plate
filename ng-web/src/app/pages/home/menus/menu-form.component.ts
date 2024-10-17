@@ -33,36 +33,14 @@ import { NzNotificationService } from 'ng-zorro-antd/notification';
             <div class="row my-2">
               <nz-form-item class="col-md mx-1mx-1">
                 <nz-form-label nzRequired nzFor="code">编码</nz-form-label>
-                <nz-form-control
-                  nzHasFeedback
-                  nzValidatingTip="验证中..."
-                  [nzErrorTip]="codeErrorTpl">
+                <nz-form-control nzHasFeedback>
                   <input nz-input type="text" id="code" formControlName="code" />
-                  <ng-template #codeErrorTpl let-control>
-                    <ng-container *ngIf="control.hasError('required')"
-                    >Please input your username!
-                    </ng-container>
-                    <ng-container *ngIf="control.hasError('duplicated')"
-                    >The username is redundant!
-                    </ng-container>
-                  </ng-template>
                 </nz-form-control>
               </nz-form-item>
               <nz-form-item class="col-md mx-1">
                 <nz-form-label nzRequired nzFor="pcode">父级</nz-form-label>
-                <nz-form-control
-                  nzHasFeedback
-                  nzValidatingTip="验证中..."
-                  [nzErrorTip]="pcodeErrorTpl">
+                <nz-form-control nzHasFeedback>
                   <input nz-input type="text" id="pcode" formControlName="pcode" />
-                  <ng-template #pcodeErrorTpl let-control>
-                    <ng-container *ngIf="control.hasError('required')"
-                    >Please input your username!
-                    </ng-container>
-                    <ng-container *ngIf="control.hasError('duplicated')"
-                    >The username is redundant!
-                    </ng-container>
-                  </ng-template>
                 </nz-form-control>
               </nz-form-item>
             </div>
@@ -157,22 +135,22 @@ import { NzNotificationService } from 'ng-zorro-antd/notification';
   `,
 })
 export class MenuFormComponent implements OnInit {
+  private _message = inject(NzNotificationService);
   @Output() formEvent = new EventEmitter<{
     btn: string;
     status: number;
     data: Menu | null;
   }>();
-  private _message = inject(NzNotificationService);
 
   isVisible = signal(false);
   private _formBuilder = inject(FormBuilder);
   menuForm: FormGroup = this._formBuilder.group({
     id: [null],
-    code: [{ value: null, disabled: true }, Validators.required],
-    pcode: [{ value: '0', disabled: true }, Validators.required],
+    code: [{ value: '0', disabled: true }, [Validators.required]],
+    pcode: [{ value: '0', disabled: true }, [Validators.required]],
     tenantCode: [{ value: '0', disabled: true }, Validators.required],
     type: [MenuType.MENU, Validators.required],
-    authority: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(64)]],
+    authority: [null, [Validators.required, Validators.minLength(6), Validators.maxLength(64)]],
     name: [null, Validators.required],
     path: ['', [Validators.required, Validators.pattern(/^(\/|(\/[a-zA-Z0-9_-]+)+)$/)]],
     icons: [null, Validators.required],
@@ -185,15 +163,14 @@ export class MenuFormComponent implements OnInit {
   }
 
   submitForm() {
+    const menu = this.menuForm.value as Menu;
+    menu.code = this.menuForm.controls['code'].value;
+    menu.pcode = this.menuForm.controls['pcode'].value;
+    menu.tenantCode = this.menuForm.controls['tenantCode'].value;
     if (this.menuForm.valid) {
-      const menu = this.menuForm.value as Menu;
-      this.formEvent.next({ btn: 'submit', status: 0, data: menu });
-      this.isVisible.set(false);
-    } else {
-      this._message.error('表单验证失败', '验证不通过,请检查输入内容. RES:' + this.menuForm.valid, {
-        nzDuration: 3000,
-      });
+      this.formEvent.next({ btn: 'submit', status: 100, data: menu });
     }
+    this.isVisible.set(false);
   }
 
   restForm(): void {

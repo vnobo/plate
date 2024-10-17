@@ -17,6 +17,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   private _subject$: Subject<void> = new Subject<void>();
   private _loginSer = inject(LoginService);
   private _message = inject(NzNotificationService);
+  private _router = inject(Router);
+  private _route = inject(ActivatedRoute);
 
   loginForm = new FormGroup({
     username: new FormControl('', [
@@ -31,9 +33,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     ]),
     remember: new FormControl(false),
   });
-
-  constructor(private router: Router, private route: ActivatedRoute) {
-  }
 
   onSubmit(): void {
     if (this.loginForm.valid) {
@@ -50,7 +49,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const auth = this._loginSer.autoLogin();
     if (auth) {
-      this.router.navigate([this._loginSer._auth.redirectUrl], { relativeTo: this.route }).then();
+      this._router.navigate([this._loginSer._auth.redirectUrl], { relativeTo: this._route }).then();
       return;
     }
     const credentials = this._loginSer.getRememberMe();
@@ -64,7 +63,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     this._loginSer
       .login(credentials)
       .pipe(takeUntil(this._subject$), debounceTime(100), distinctUntilChanged())
-      .subscribe(res => this.router.navigate(['/home'], { relativeTo: this.route }).then());
+      .subscribe(res => this._router.navigate(['/home'], { relativeTo: this._route }).then());
   }
 
   ngOnDestroy(): void {
