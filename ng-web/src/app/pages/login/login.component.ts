@@ -36,11 +36,15 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    const credentials = this.loginForm.value as Credentials;
-    if (this.loginForm.value.remember) {
-      this._loginSer.setRememberMe(credentials);
+    if (this.loginForm.valid) {
+      const credentials = this.loginForm.value as Credentials;
+      if (this.loginForm.value.remember) {
+        this._loginSer.setRememberMe(credentials);
+      }
+      this.login(credentials);
+    } else {
+      this._message.error('请输入正确的用户名和密码', '登录失败!');
     }
-    this.login(credentials);
   }
 
   ngOnInit(): void {

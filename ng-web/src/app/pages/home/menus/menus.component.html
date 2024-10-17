@@ -20,12 +20,12 @@
   <tr>
     <th nzLeft>编码</th>
     <th nzLeft>菜单名称</th>
-    <th nzLeft>权限标识</th>
+    <th nzLeft nzWidth="15rem">权限标识</th>
     <th>菜单类型</th>
-    <th>组件路径</th>
-    <th>创建时间</th>
-    <th>排序</th>
-    <th nzRight>操作</th>
+    <th nzWidth="18rem">组件路径</th>
+    <th nzWidth="10rem">创建时间</th>
+    <th nzWidth="4rem">排序</th>
+    <th nzRight nzWidth="10rem">操作</th>
   </tr>
   </thead>
   <tbody>
@@ -54,7 +54,8 @@
                 <td>{{ item.createdTime | date : 'short' }}</td>
                 <td>{{ item.sortNo }}</td>
                 <td nzRight>
-                  <a href="javascript:void(0)">编辑</a> | <a href="javascript:void(0)">删除</a>
+                  <a href="javascript:void(0)" (click)="menuForm.editModal(item)">编辑</a> |
+                  <a href="javascript:void(0)">删除</a>
                 </td>
               </tr>
             }
@@ -64,4 +65,4 @@
     }
   </tbody>
 </nz-table>
-<app-menu-form #menuForm></app-menu-form>
+<app-menu-form #menuForm (formEvent)="formEvent($event)"></app-menu-form>
