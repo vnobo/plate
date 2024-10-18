@@ -23,7 +23,7 @@ import java.util.Set;
 /**
  * Represents a menu entity within an application, encapsulating details about menu items including
  * their type, associated permissions, hierarchy, and metadata for display and management purposes.
- * This class integrates with JPA annotations for database persistence and utilizes Lombok's {@link Data}
+ * This class integrates with JPA annotations for database persistence and utilizes Logbook's {@link Data}
  * annotation for boilerplate code reduction related to getters, setters, equals, hash, and toString methods.
  * It also features custom methods to handle specific business logic such as authority formatting and
  * extraction of additional properties stored as JSON.
@@ -64,7 +64,7 @@ public class Menu implements BaseEntity<Integer> {
     private String tenantCode;
 
     /**
-     * Represents the type of a menu item.
+     * Represents the type of menu item.
      * <p>
      * This enumeration defines the different categories a menu item can fall into:
      * <ul>
@@ -241,7 +241,7 @@ public class Menu implements BaseEntity<Integer> {
          * Represents an API-related menu item within the system.
          * This type signifies that the menu item is associated with an API call or functionality.
          */
-        API;
+        API
     }
 
 }
