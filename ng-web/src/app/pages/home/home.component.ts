@@ -7,6 +7,7 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { MenusService } from './menus/menus.service';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 
 @Component({
   selector: 'app-home',
@@ -18,6 +19,7 @@ import { MenusService } from './menus/menus.service';
     NzIconModule,
     NzLayoutModule,
     NzMenuModule,
+    NzButtonModule,
     NzBreadCrumbModule,
   ],
   templateUrl: './home.component.html',
