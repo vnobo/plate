@@ -1,31 +1,76 @@
 import { Component, inject, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
-import { MenusService } from './menus.service';
-import { Subject, takeUntil } from 'rxjs';
-import { Menu } from './menu.types';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { MenuFormComponent } from './menu-form.component';
 import { CommonModule } from '@angular/common';
+
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzDividerModule } from 'ng-zorro-antd/divider';
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification';
+
+import { MenusService } from './menus.service';
+import { Subject, takeUntil, tap } from 'rxjs';
+import { Menu } from './menu.types';
+import { MenuFormComponent } from './menu-form.component';
 
 @Component({
   selector: 'app-menus',
   standalone: true,
   templateUrl: './menus.component.html',
   styleUrls: ['./menus.component.scss'],
-  imports: [NzTableModule, MenuFormComponent, CommonModule],
+  imports: [
+    CommonModule,
+    NzTableModule,
+    MenuFormComponent,
+    NzPopconfirmModule,
+    NzDividerModule,
+    NzNotificationModule,
+  ],
 })
 export class MenusComponent implements OnInit, OnDestroy {
   private _menusSer = inject(MenusService);
-
+  private _message = inject(NzNotificationService);
   listMenus: WritableSignal<Menu[]> = signal([]);
   mapOfExpandedData: Record<string, Menu[]> = {};
 
   private _subject: Subject<void> = new Subject<void>();
+
+  ngOnInit(): void {
+    this.loadData().subscribe();
+  }
 
   formEvent($event: any): void {
     if ($event.btn === 'submit' && $event.status === 100) {
       const menu = $event.data as Menu;
       this._menusSer.saveMenu(menu).subscribe(result => this.refresh());
     }
+  }
+
+  delete(menu: Menu) {
+    this._menusSer
+      .deleteMenu(menu)
+      .pipe(takeUntil(this._subject))
+      .subscribe(() => this.refresh());
+  }
+
+  refresh() {
+    this.loadData().subscribe(res =>
+      this._message.success('数据刷新成功!', ``, { nzDuration: 1000 }),
+    );
+  }
+
+  loadData() {
+    const menuRequest: Menu = {
+      pcode: '0',
+      tenantCode: '0',
+    };
+    return this._menusSer.getMenus(menuRequest).pipe(
+      takeUntil(this._subject),
+      tap(result => {
+        this.listMenus.set(result);
+        this.listMenus().forEach(item => {
+          this.mapOfExpandedData[item.code ? item.code : '0'] = this.convertTreeToList(item);
+        });
+      }),
+    );
   }
 
   collapse(array: Menu[], data: Menu, $event: boolean): void {
@@ -64,7 +109,6 @@ export class MenusComponent implements OnInit, OnDestroy {
         }
       }
     }
-
     return array;
   }
 
@@ -73,26 +117,6 @@ export class MenusComponent implements OnInit, OnDestroy {
       hashMap[node.code ? node.code : '0'] = true;
       array.push(node);
     }
-  }
-
-  ngOnInit(): void {
-    this.refresh();
-  }
-
-  refresh() {
-    const menuRequest: Menu = {
-      pcode: '0',
-      tenantCode: '0',
-    };
-    this._menusSer
-      .getMenus(menuRequest)
-      .pipe(takeUntil(this._subject))
-      .subscribe(result => {
-        this.listMenus.set(result);
-        this.listMenus().forEach(item => {
-          this.mapOfExpandedData[item.code ? item.code : '0'] = this.convertTreeToList(item);
-        });
-      });
   }
 
   ngOnDestroy(): void {
