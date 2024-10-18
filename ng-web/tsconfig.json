@@ -23,7 +23,8 @@
       "ES2022",
       "dom"
     ],
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
@@ -32,3 +33,5 @@
     "strictTemplates": true
   }
 }
+
+
