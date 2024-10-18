@@ -34,6 +34,7 @@
     "**/${fileBasenameNoExtension}.{css,scss}",
     "node_modules/bootstrap/dist/css/bootstrap.css",
     "@angular/material/prebuilt-themes/azure-blue.css",
-    "node_modules/ng-zorro-antd/ng-zorro-antd.less",
-  ]
+    "node_modules/ng-zorro-antd/ng-zorro-antd.less"
+  ],
+  "Codegeex.CommitMessage.LanguagePreference": "English"
 }
