@@ -55,7 +55,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     const credentials = this._loginSer.getRememberMe();
     if (credentials && Object.keys(credentials).length !== 0) {
       this.login(credentials);
-      this._message.success('自动登录成功', '记住我系统自动登录成功!');
     }
   }
 
@@ -63,7 +62,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     this._loginSer
       .login(credentials)
       .pipe(takeUntil(this._subject$), debounceTime(100), distinctUntilChanged())
-      .subscribe(res => this._router.navigate(['/home'], { relativeTo: this._route }).then());
+      .subscribe(res => {
+        this._message.success('登录系统成功!', `欢迎${res.details.name}登录系统!`);
+        this._router.navigate(['/home'], { relativeTo: this._route }).then();
+      });
   }
 
   ngOnDestroy(): void {
