@@ -34,6 +34,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     remember: new FormControl(false),
   });
 
+  getMinLength(): number {
+    return this.loginForm.get('username')?.errors?.['minlength']?.requiredLength;
+  }
+
   onSubmit(): void {
     if (this.loginForm.valid) {
       const credentials = this.loginForm.value as Credentials;
