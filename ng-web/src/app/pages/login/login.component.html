@@ -6,62 +6,61 @@
         <form
           [formGroup]="loginForm"
           (ngSubmit)="onSubmit()"
-          [class.was-validated]="loginForm.invalid && (loginForm.dirty || loginForm.touched)"
           autocomplete="off"
           class="row g-3 needs-validation"
           novalidate>
-          <div class="container container-sm">
-            <div class="input-group input-group-sm mb-3 has-validation">
+          <div class="container">
+            <div class="input-group input-group-sm mb-3">
               <div class="input-group-text">
-                <label for="username"><i class="bi bi-person-fill"></i></label>
+                <label class="text-red-400" for="username"
+                ><i class="bi bi-person-fill"></i>
+                </label>
               </div>
               <input
+                id="username"
+                placeholder="手机号或电子邮件"
+                autocomplete="off"
+                class="form-control"
                 [class.is-invalid]="
                   loginForm.controls.username.invalid &&
                   (loginForm.controls.username.dirty || loginForm.controls.username.touched)
                 "
                 [class.is-valid]="loginForm.controls.username.valid"
                 formControlName="username"
-                id="username"
-                placeholder="手机号或电子邮件"
-                autocomplete="off"
-                class="form-control"
                 type="text" />
-              <div
-                *ngIf="loginForm.controls.username.errors?.['required']"
-                class="invalid-feedback">
-                请输入电子邮件或手机号。
+              @if (loginForm.controls.username.errors?.['required']) {
+                <div class="invalid-feedback">请输入手机号或电子邮件,登录用户不能为空!</div>
+              } @else if (loginForm.controls.username.hasError('minlength') ||
+              loginForm.controls.username.hasError('maxlength')) {
+                <div class="invalid-feedback">
+                  登录用户长度为 6 ~ 32 个字符，由字母和数字组成，不能包含空格、特殊字符或表情符号。
               </div>
+              }
             </div>
-            <div class="input-group input-group-sm mb-3 has-validation">
+            <div class="input-group input-group-sm mb-3">
               <div class="input-group-text">
-                <label for="password"><i class="bi bi-key-fill"></i></label>
+                <label class="text-blue-400" for="password"><i class="bi bi-key-fill"></i></label>
               </div>
               <input
-                [class.is-valid]="loginForm.controls.password.valid"
-                formControlName="password"
                 id="password"
                 placeholder="密   码"
                 [class.is-invalid]="
                   loginForm.controls.password.invalid &&
                   (loginForm.controls.password.dirty || loginForm.controls.password.touched)
                 "
+                [class.is-valid]="loginForm.controls.password.valid"
                 autocomplete="off"
                 class="form-control"
+                formControlName="password"
                 type="password" />
-              <div
-                *ngIf="
-                  loginForm.controls.password.errors?.['minlength'] ||
-                  loginForm.controls.password.errors?.['maxlength']
-                "
-                class="invalid-feedback">
-                密码长度为8 ~ 20个字符，由字母和数字组成，不能包含空格、特殊字符或表情符号。
+              @if (loginForm.controls.password.hasError('minlength') ||
+              loginForm.controls.password.hasError('maxlength')) {
+                <div class="invalid-feedback">
+                  密码长度为6 ~ 32个字符，由字母和数字组成，不能包含空格、特殊字符或表情符号。
               </div>
-              <div
-                *ngIf="loginForm.controls.password.errors?.['required']"
-                class="invalid-feedback">
-                请输入密码。
-              </div>
+              } @else if (loginForm.controls.password.hasError('required')) {
+                <div class="invalid-feedback">请输入密码,密码不能为空!</div>
+              }
             </div>
             <div class="form-check input-group-sm mb-3">
               <input
@@ -74,7 +73,7 @@
               <a class="mt-1 float-end" href="./">忘记密码？</a>
             </div>
             <div class="d-grid gap-2">
-              <button [disabled]="!loginForm.valid" class="btn btn-primary" type="submit">
+              <button [disabled]="loginForm.invalid" class="btn btn-primary" type="submit">
                 登录
               </button>
             </div>

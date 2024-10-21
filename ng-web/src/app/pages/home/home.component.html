@@ -31,7 +31,7 @@
         <ul>
           @for (children of menu.children; track children) {
           <li nz-menu-item nzMatchRouter>
-            <a routerLink="{{ children.path }}">{{ children.name }}</a>
+            <a nz-button nzType="link" routerLink="{{ children.path }}">{{ children.name }}</a>
           </li>
           }
         </ul>
