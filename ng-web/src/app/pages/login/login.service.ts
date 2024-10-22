@@ -59,9 +59,8 @@ export class LoginService {
   }
 
   logout() {
-    this._http.get('/oauth2/logout').subscribe(res => {
-      this._auth.logout();
-      this._storage.remove(this.storageKey);
-    });
+    this._storage.remove(this.storageKey);
+    this._auth.logout();
+    this._http.get('/oauth2/logout').subscribe(res => console.log(res));
   }
 }

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, type OnInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
@@ -11,6 +11,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
+import { LoginService } from '../login/login.service';
 
 @Component({
   selector: 'app-home',
@@ -32,15 +33,20 @@ import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
   styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit {
-  _menusSer = inject(MenusService);
-  _activatedRoute = inject(ActivatedRoute);
+  private _menusSer = inject(MenusService);
+  private _router = inject(Router);
+  private _route = inject(ActivatedRoute);
+  private _loginSer = inject(LoginService);
 
   myMenus = toSignal(this._menusSer.getMyMenus({ pcode: '0', tenantCode: '0' }));
+
   isCollapsed = false;
 
   ngOnInit(): void {
   }
 
   loginOut() {
+    this._loginSer.logout();
+    this._router.navigate([this._loginSer._auth.loginUrl], { relativeTo: this._route }).then();
   }
 }

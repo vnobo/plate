@@ -1,23 +1,33 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, type OnInit, signal, WritableSignal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnDestroy,
+  type OnInit,
+  signal,
+  WritableSignal,
+} from '@angular/core';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { Subject, takeUntil } from 'rxjs';
-import { GroupsService } from '../groups/groups.service';
-import { Group } from '../groups/groups.types';
+import { Subject, takeUntil, tap } from 'rxjs';
+import { UsersService } from './users.service';
+import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification';
+import { User } from './user.types';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, NzTableModule],
+  imports: [CommonModule, NzTableModule, NzNotificationModule],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UsersComponent implements OnInit, OnDestroy {
-  groupsList: WritableSignal<Group[]> = signal([]);
   private _subject: Subject<void> = new Subject<void>();
+  usersList: WritableSignal<User[]> = signal([]);
+  private _message = inject(NzNotificationService);
 
-  constructor(private groupService: GroupsService) {
+  constructor(private _userSer: UsersService) {
   }
 
   ngOnInit(): void {
@@ -25,15 +35,26 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   refresh() {
-    const groupRequest: Group = {
-      tenantCode: '0',
-    };
-    this.groupService
-      .getGroups(groupRequest)
-      .pipe(takeUntil(this._subject))
-      .subscribe(result => this.groupsList.set(result));
+    this.loadData().subscribe(res =>
+      this._message.success('数据刷新成功!', ``, { nzDuration: 1000 }),
+    );
   }
 
+  loadData() {
+    const request = {
+      pcode: '0',
+      tenantCode: '0',
+    };
+    const page = {
+      pageNumber: 0,
+      pageSize: 10,
+      sorts: ['id,desc', 'name,desc'],
+    };
+    return this._userSer.pageUsers(request, page).pipe(
+      takeUntil(this._subject),
+      tap(result => this.usersList.set(result.content)),
+    );
+  }
   ngOnDestroy(): void {
     this._subject.next();
     this._subject.complete();

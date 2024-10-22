@@ -10,7 +10,7 @@
 </div>
 <nz-table
   #expandTable
-  [nzData]="groupsList()"
+  [nzData]="usersList()"
   [nzPageIndex]="0"
   [nzScroll]="{ x: '100%' }"
   nzFrontPagination="false"
@@ -19,7 +19,12 @@
   <thead>
   <tr>
     <th nzLeft>编码</th>
-    <th nzLeft>名称</th>
+    <th nzLeft>用户</th>
+    <th nzLeft>姓名</th>
+    <th>电话</th>
+    <th>邮箱</th>
+    <th>启用</th>
+    <th>锁定</th>
     <th nzRight>操作</th>
   </tr>
   </thead>
@@ -27,13 +32,14 @@
     @for (data of expandTable.data; track $index) {
       <ng-container>
         <tr>
-          <td [(nzExpand)]="data.extend" nzLeft>
-            {{ data.code }}
-          </td>
-          <td nzLeft>{{ data.name }}</td>
-          <td nzRight>
-            <a href="javascript:void(0)">编辑</a> | <a href="javascript:void(0)">删除</a>
-          </td>
+          <td>{{ data.code }}</td>
+          <td>{{ data.username }}</td>
+          <td>{{ data.name }}</td>
+          <td>{{ data.phone }}</td>
+          <td>{{ data.email }}</td>
+          <td>{{ data.disabled ? '否' : '是' }}</td>
+          <td>{{ data.accountLocked ? '是' : '否' }}</td>
+          <td><a href="javascript:void(0)">编辑</a> | <a href="javascript:void(0)">删除</a></td>
         </tr>
       </ng-container>
     }
