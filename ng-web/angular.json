@@ -43,13 +43,13 @@
               }
             ],
             "styles": [
-              "bootstrap-icons/font/bootstrap-icons.min.css",
+              "bootstrap-icons/font/bootstrap-icons.css",
               "@angular/material/prebuilt-themes/magenta-violet.css",
               "src/theme.less",
               "src/styles.scss"
             ],
             "scripts": [
-              "bootstrap/dist/js/bootstrap.bundle.min.js"
+              "bootstrap/dist/js/bootstrap.bundle.js"
             ],
             "allowedCommonJsDependencies": [
               "dayjs"
