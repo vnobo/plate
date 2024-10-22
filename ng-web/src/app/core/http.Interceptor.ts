@@ -12,7 +12,6 @@ export function defaultInterceptor(
   next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> {
   const _loading = inject(ProgressBar);
-  const _message = inject(NzMessageService);
   _loading.show();
   if (req.url.indexOf('assets/') > -1) {
     return next(req);
@@ -24,46 +23,52 @@ export function defaultInterceptor(
   });
   return next(xRequestedReq).pipe(
     timeout({ first: 5_000, each: 10_000 }),
-    catchError(errorResponse => {
-      let alertMessage = '';
-      const status = errorResponse.status;
-      if (status > 0) {
-        if (errorResponse.error) {
-          alertMessage = errorResponse.error.message;
-        } else {
-          alertMessage = '服务器无响应,请稍后重试!';
-        }
-      } else {
-        alertMessage = errorResponse.message;
-      }
-      _message.error(alertMessage);
-      return throwError(() => errorResponse);
-    }),
     finalize(() => _loading.hide()),
   );
 }
 
+export function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
+  const _message = inject(NzMessageService);
+  const _auth = inject(AuthService);
+  const _route = inject(Router);
+  return next(req).pipe(
+    catchError(error => {
+      if (error.status === 0) {
+        // A client-side or network error occurred. Handle it accordingly.
+        console.error('An error occurred:', error.error);
+        _message.error(`网络错误,请检查网络连接后重试!`);
+      } else {
+        if (error.status === 401) {
+          if (error.error.path === '/oauth2/login') {
+            return throwError(() => error.error);
+          }
+          _auth.logout();
+          _route.navigate([_auth.loginUrl]).then();
+          _message.error(`访问认证失败,错误码: ${error.status},详细信息: ${error.error.message}`);
+          return throwError(() => error.error);
+        } else {
+          _message.error(
+            `服务器访问错误,请稍后重试. 错误码: ${error.status},详细信息: ${error.error}`,
+          );
+        }
+      }
+      console.error(`Backend returned code ${error.status}, body was: `, error.error);
+      return throwError(() => error);
+    }),
+  );
+}
 export function authTokenInterceptor(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> {
   const _auth = inject(AuthService);
-  const _route = inject(Router);
-
   if (!_auth.isLogged()) {
     return next(req);
   }
   const newReq = req.clone({
     headers: req.headers.set('Authorization', `Bearer ${_auth.authToken()}`),
   });
-
-  return next(newReq).pipe(
-    catchError(errorResponse => {
-      if (errorResponse.status === 401) {
-        _auth.logout();
-        _route.navigate([_auth.loginUrl]).then();
-      }
-      return throwError(() => errorResponse);
-    })
-  );
+  return next(newReq);
 }
+
+export const indexInterceptor = [defaultInterceptor, handleErrorInterceptor, authTokenInterceptor];

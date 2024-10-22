@@ -17,7 +17,7 @@ import {
   withXsrfConfiguration,
 } from '@angular/common/http';
 
-import { authTokenInterceptor, defaultInterceptor } from './core/http.Interceptor';
+import { indexInterceptor } from './core/http.Interceptor';
 import { PageTitleStrategy } from './core/page-title-strategy';
 import { icons } from './core/icons-provider';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
@@ -38,7 +38,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withFetch(),
       withInterceptorsFromDi(),
-      withInterceptors([defaultInterceptor, authTokenInterceptor]),
+      withInterceptors(indexInterceptor),
       withXsrfConfiguration({
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN',

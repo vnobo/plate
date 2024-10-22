@@ -13,11 +13,12 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.data.relational.core.query.Update;
-import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsPasswordService;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
@@ -149,7 +150,9 @@ public class SecurityManager extends AbstractDatabase
     public Mono<User> loadByUsername(String username) {
         Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
         var userMono = this.entityTemplate.select(query, User.class);
-        return this.queryWithCache(username, userMono).singleOrEmpty();
+        return this.queryWithCache(username, userMono).switchIfEmpty(Mono.defer(() ->
+                        Mono.error(new UsernameNotFoundException("登录用户不存在,用户名: " + username))))
+                .last();
     }
 
     /**
@@ -169,8 +172,8 @@ public class SecurityManager extends AbstractDatabase
         Mono<SecurityDetails> userDetailsMono = userMono
                 .flatMap(tuple2 -> buildUserDetails(tuple2.getT1(), new HashSet<>(tuple2.getT2())));
         return userDetailsMono.cast(UserDetails.class)
-                .onErrorResume(throwable -> Mono.error(new AuthenticationServiceException(
-                        throwable.getLocalizedMessage(), throwable)))
+                .onErrorResume(throwable -> Mono.defer(() ->
+                        Mono.error(new BadCredentialsException(throwable.getMessage(), throwable))))
                 .publishOn(Schedulers.boundedElastic())
                 .doOnSuccess(securityDetails -> this.loginSuccess(securityDetails.getUsername())
                         .subscribe(res -> log.debug("登录成功! 登录信息修改: {}", res)));

@@ -7,6 +7,7 @@ import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.security.core.group.authority.GroupAuthoritiesRepository;
 import com.plate.boot.security.core.user.authority.UserAuthoritiesRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
@@ -23,6 +24,7 @@ import java.util.List;
 /**
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class MenusService extends AbstractDatabase {
@@ -38,15 +40,18 @@ public class MenusService extends AbstractDatabase {
     }
 
     public Mono<Menu> add(MenuRequest request) {
+        log.debug("Menu add request: {}", request);
         Criteria criteria = MenuRequest.of(request.getTenantCode(), request.getAuthority()).toCriteria();
-        return this.entityTemplate.exists(Query.query(criteria), Menu.class).filter(isExists -> !isExists)
-                .switchIfEmpty(Mono.error(RestServerException
-                        .withMsg("Add menu[" + request.getName() + "] is exists!",
-                                "The menu already exists, please try another name. is params: " + criteria)))
-                .flatMap((b) -> this.operate(request));
+        var existsMono = this.entityTemplate.exists(Query.query(criteria), Menu.class);
+        existsMono = existsMono.filter(isExists -> !isExists);
+        existsMono = existsMono.switchIfEmpty(Mono.error(RestServerException
+                .withMsg("Add menu[" + request.getName() + "] is exists!",
+                        "The menu already exists, please try another name. is params: " + criteria)));
+        return existsMono.flatMap((b) -> this.operate(request));
     }
 
     public Mono<Menu> modify(MenuRequest request) {
+        log.debug("Menu modify request: {}", request);
         var oldMunuMono = this.menusRepository.findByCode(request.getCode())
                 .switchIfEmpty(Mono.error(RestServerException.withMsg(
                         "Modify menu [" + request.getName() + "] is empty!",
@@ -60,7 +65,12 @@ public class MenusService extends AbstractDatabase {
     }
 
     public Mono<Menu> operate(MenuRequest request) {
-        return this.save(request.toMenu()).doAfterTerminate(() -> this.cache.clear());
+        log.debug("Menu operate request: {}", request);
+        if (ObjectUtils.isEmpty(request)) {
+            return Mono.empty();
+        }
+        var menu = request.toMenu();
+        return this.save(menu).doAfterTerminate(() -> this.cache.clear());
     }
 
     public Mono<Menu> save(Menu menu) {
@@ -78,6 +88,7 @@ public class MenusService extends AbstractDatabase {
 
     @Transactional(rollbackFor = Exception.class)
     public Mono<Void> delete(MenuRequest request) {
+        log.warn("Delete menu request: {}", request);
         if (ObjectUtils.nullSafeEquals(request.getTenantCode(), "0")) {
             List<String> rules = new ArrayList<>(Collections.singletonList(request.getAuthority()));
             var deleteAuthorityMono = Flux.concatDelayError(this.groupAuthoritiesRepository.deleteByAuthorityIn(rules),

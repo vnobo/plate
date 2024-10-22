@@ -162,7 +162,7 @@ public class SecurityConfiguration {
 
     /**
      * Configures the logout behavior for the server HTTP security.
-     *
+     * <p>
      * This method sets up the logout process by adding a security context logout handler,
      * a handler to clear site data through headers, and delegates these handlers
      * to manage the logout process. It also specifies the URL that triggers the logout
@@ -251,7 +251,6 @@ public class SecurityConfiguration {
         public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException e) {
             ServerHttpRequest request = exchange.getRequest();
             String requestedWith = request.getHeaders().getFirst(X_REQUESTED_WITH);
-
             log.error("认证失败! 信息: {}", e.getMessage());
             if (isXmlHttpRequest(requestedWith)) {
                 return handleXmlHttpRequestFailure(exchange, e);

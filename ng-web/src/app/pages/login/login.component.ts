@@ -34,10 +34,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     remember: new FormControl(false),
   });
 
-  getMinLength(): number {
-    return this.loginForm.get('username')?.errors?.['minlength']?.requiredLength;
-  }
-
   onSubmit(): void {
     if (this.loginForm.valid) {
       const credentials = this.loginForm.value as Credentials;
@@ -66,9 +62,15 @@ export class LoginComponent implements OnInit, OnDestroy {
     this._loginSer
       .login(credentials)
       .pipe(takeUntil(this._subject$), debounceTime(100), distinctUntilChanged())
-      .subscribe(res => {
-        this._message.success('登录系统成功!', `欢迎${res.details.name}登录系统!`);
-        this._router.navigate(['/home'], { relativeTo: this._route }).then();
+      .subscribe({
+        next: res => {
+          this._message.success('登录系统成功', `欢迎 ${res.details.name} 登录系统!`);
+          this._router.navigate(['/home'], { relativeTo: this._route }).then();
+        },
+        error: err => {
+          this._message.error(`登录系统失败,请重试`, `${err.errors}`);
+          this._loginSer.logout();
+        },
       });
   }
 
