@@ -13,6 +13,7 @@ import { Subject, takeUntil, tap } from 'rxjs';
 import { UsersService } from './users.service';
 import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification';
 import { User } from './user.types';
+import { Page } from '../../../../types';
 
 @Component({
   selector: 'app-users',
@@ -24,7 +25,7 @@ import { User } from './user.types';
 })
 export class UsersComponent implements OnInit, OnDestroy {
   private _subject: Subject<void> = new Subject<void>();
-  usersList: WritableSignal<User[]> = signal([]);
+  userPage: WritableSignal<Page<User>> = signal({} as Page<User>);
   private _message = inject(NzNotificationService);
 
   constructor(private _userSer: UsersService) {
@@ -36,7 +37,7 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   refresh() {
     this.loadData().subscribe(res =>
-      this._message.success('数据刷新成功!', ``, { nzDuration: 1000 }),
+      this._message.success('数据刷新成功!', ``, { nzDuration: 1000 })
     );
   }
 
@@ -52,7 +53,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     };
     return this._userSer.pageUsers(request, page).pipe(
       takeUntil(this._subject),
-      tap(result => this.usersList.set(result.content)),
+      tap(result => this.userPage.set(result)),
     );
   }
   ngOnDestroy(): void {
