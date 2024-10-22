@@ -40,16 +40,37 @@
     </ul>
   </nz-sider>
   <nz-layout>
-    <nz-header>
+    <nz-header class="hstack gap-2">
       <div class="app-header">
         <span (click)="isCollapsed = !isCollapsed" class="header-trigger">
           <span [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" class="trigger" nz-icon></span>
         </span>
       </div>
+      <div class="ms-auto">
+        <ul nz-menu nzMode="horizontal" nzTheme="dark">
+          <li nz-menu-item>
+            <span nz-icon nzType="home"></span>
+            <a class="p-1" href="/home" nz-button nzType="link">首页</a>
+          </li>
+          <li [nzPlacement]="'bottomRight'" nz-submenu nzIcon="user" nzTitle="我的">
+            <ul>
+              <li nz-menu-item>
+                <a (click)="loginOut()" nz-button nzDanger nzType="link">账号退出</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
     </nz-header>
+    <nz-page-header class="site-page-header">
+      <nz-breadcrumb
+        class="m-1"
+        nz-page-header-breadcrumb
+        nzAutoGenerate="true"
+        nzRouteLabel="title"></nz-breadcrumb>
+    </nz-page-header>
     <nz-content class="my-1">
       <div class="container-fluid">
-        <nz-breadcrumb class="m-1" nzAutoGenerate="true" nzRouteLabel="title"></nz-breadcrumb>
         <div class="container">
           <router-outlet></router-outlet>
         </div>

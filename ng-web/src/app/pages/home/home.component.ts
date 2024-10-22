@@ -8,6 +8,9 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { MenusService } from './menus/menus.service';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { NzAvatarModule } from 'ng-zorro-antd/avatar';
+import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
 
 @Component({
   selector: 'app-home',
@@ -21,6 +24,9 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
     NzMenuModule,
     NzButtonModule,
     NzBreadCrumbModule,
+    NzDropDownModule,
+    NzAvatarModule,
+    NzPageHeaderModule,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
@@ -33,5 +39,8 @@ export class HomeComponent implements OnInit {
   isCollapsed = false;
 
   ngOnInit(): void {
+  }
+
+  loginOut() {
   }
 }
