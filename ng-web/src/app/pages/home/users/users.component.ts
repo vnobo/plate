@@ -34,11 +34,10 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.refresh();
   }
 
   refresh() {
-    this.loadData(this.search, this.page).subscribe(res => this._message.success('数据刷新成功!', ``, { nzDuration: 1000 }));
+    this.loadData(this.search, this.page).subscribe(res => this._message.success('数据刷新成功!', ``, { nzDuration: 3000 }));
   }
 
   onQueryParamsChange($event: NzTableQueryParams) {
@@ -47,7 +46,7 @@ export class UsersComponent implements OnInit, OnDestroy {
       var sort = $event.sort[item].key + ',' + ($event.sort[item].value == 'descend' ? 'desc' : 'asc');
       this.page.sorts.push(sort);
     }
-    this.refresh();
+    this.loadData(this.search, this.page).subscribe(res => this._message.success('查询数据成功!', ``, { nzDuration: 3000 }));
   }
 
   loadData(search: User, page: Pageable) {
