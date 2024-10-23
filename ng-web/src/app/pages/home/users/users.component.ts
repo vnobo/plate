@@ -18,18 +18,16 @@ import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 })
 export class UsersComponent implements OnInit, OnDestroy {
   private _subject: Subject<void> = new Subject<void>();
-  listOfColumn = [
-    {
-      title: 'code',
-      compare: true,
-      priority: false,
-    },
-  ];
   userPage: WritableSignal<Page<User>> = signal({} as Page<User>);
   page = {
     pageNumber: 1,
     pageSize: 10,
     sorts: ['id,desc'],
+  };
+
+  search = {
+    pcode: '0',
+    tenantCode: '0',
   };
 
   constructor(private _userSer: UsersService, private _message: NzNotificationService) {
@@ -39,24 +37,17 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.refresh();
   }
 
+  refresh() {
+    this.loadData(this.search, this.page).subscribe(res => this._message.success('数据刷新成功!', ``, { nzDuration: 1000 }));
+  }
+
   onQueryParamsChange($event: NzTableQueryParams) {
     this.page.sorts = ['id,desc'];
     for (var item in $event.sort) {
-      var sort =
-        $event.sort[item].key + ',' + ($event.sort[item].value == 'descend' ? 'desc' : 'asc');
+      var sort = $event.sort[item].key + ',' + ($event.sort[item].value == 'descend' ? 'desc' : 'asc');
       this.page.sorts.push(sort);
     }
     this.refresh();
-  }
-
-  refresh() {
-    const search = {
-      pcode: '0',
-      tenantCode: '0',
-    };
-    this.loadData(search, this.page).subscribe(res =>
-      this._message.success('数据刷新成功!', ``, { nzDuration: 1000 }),
-    );
   }
 
   loadData(search: User, page: Pageable) {
