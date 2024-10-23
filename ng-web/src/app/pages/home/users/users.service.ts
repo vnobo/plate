@@ -13,7 +13,7 @@ export class UsersService {
 
   pageUsers(request: User, page: Pageable): Observable<Page<User>> {
     let params = new HttpParams({ fromObject: request as never });
-    params = params.appendAll({ page: page.pageNumber, size: page.pageSize });
+    params = params.appendAll({ page: page.pageNumber - 1, size: page.pageSize });
     for (const sort in page.sorts) {
       params = params.appendAll({ sort: page.sorts[sort] });
     }

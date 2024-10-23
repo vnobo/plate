@@ -1,45 +1,50 @@
 <div class="row justify-content-between mb-2">
   <div class="col-1">
-    <button class="btn btn-primary btn-sm" type="button">
-      <i class="bi bi-plus me-1"></i>新增
-    </button>
+    <button class="btn btn-primary btn-sm" type="button"><i class="bi bi-plus me-1"></i>新增</button>
   </div>
   <div class="col-auto float-end">
     <button (click)="refresh()" class="btn btn-success btn-sm mx-2" type="button">刷新</button>
   </div>
 </div>
 <nz-table
-  #expandTable
+  #userTable
+  (nzQueryParams)="onQueryParamsChange($event)"
+  [(nzPageIndex)]="page.pageNumber"
+  [(nzPageSize)]="page.pageSize"
   [nzData]="userPage().content"
-  [nzPageIndex]="0"
   [nzScroll]="{ x: '100%' }"
+  [nzTotal]="userPage().totalElements"
+  nzShowPagination
+  nzShowSizeChanger
   nzFrontPagination="false"
   nzNoResult="无数据"
   nzTableLayout="auto">
   <thead>
   <tr>
-    <th nzLeft>编码</th>
-    <th nzLeft>用户</th>
-    <th nzLeft>姓名</th>
-    <th>电话</th>
-    <th>邮箱</th>
+    <th [nzSortFn]="true" nzColumnKey="code" nzLeft nzShowSort>编码</th>
+    <th [nzSortFn]="true" nzColumnKey="username" nzLeft nzShowSort>用户</th>
+    <th [nzSortFn]="true" nzColumnKey="name" nzLeft nzShowSort>姓名</th>
+    <th [nzSortFn]="true" nzColumnKey="phone" nzShowSort>电话</th>
+    <th [nzSortFn]="true" nzColumnKey="email" nzShowSort>邮箱</th>
     <th>启用</th>
     <th>锁定</th>
-    <th nzRight>操作</th>
+    <th nzWidth="10rem">登录时间</th>
+    <th nzRight nzWidth="7rem">操作</th>
   </tr>
   </thead>
   <tbody>
-    @for (data of expandTable.data; track $index) {
+    @for (item of userTable.data; track item.id) {
       <ng-container>
         <tr>
-          <td>{{ data.code }}</td>
-          <td>{{ data.username }}</td>
-          <td>{{ data.name }}</td>
-          <td>{{ data.phone }}</td>
-          <td>{{ data.email }}</td>
-          <td>{{ data.disabled ? '否' : '是' }}</td>
-          <td>{{ data.accountLocked ? '是' : '否' }}</td>
-          <td><a href="javascript:void(0)">编辑</a> | <a href="javascript:void(0)">删除</a></td>
+          <td nzLeft>{{ item.code }}</td>
+          <td nzLeft>{{ item.username }}</td>
+          <td nzLeft>{{ item.name }}</td>
+          <td>{{ item.phone }}</td>
+          <td>{{ item.email }}</td>
+          <td>{{ item.disabled ? "否" : "是" }}</td>
+          <td>{{ item.accountLocked ? "是" : "否" }}</td>
+          <td>{{ item.loginTime | date : "short" }}</td>
+          <td nzRight><a href="javascript:void(0)">编辑</a> | <a href="javascript:void(0)">删除</a></td>
         </tr>
       </ng-container>
     }

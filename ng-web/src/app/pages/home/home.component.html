@@ -1,11 +1,6 @@
 <nz-layout class="app-layout">
-  <nz-sider
-    class="menu-sidebar"
-    nzBreakpoint="md"
-    nzCollapsible
-    [nzCollapsed]="isCollapsed"
-    [nzTrigger]="null"
-    nzWidth="14.8rem">
+  <nz-sider [nzCollapsed]="isCollapsed" [nzTrigger]="null" class="menu-sidebar" nzBreakpoint="md" nzCollapsible
+            nzWidth="14.8rem">
     <div class="sidebar-logo">
       <a href="https://ng.ant.design/" rel="noopener noreferrer" target="_blank">
         <img alt="logo" src="https://ng.ant.design/assets/img/logo.svg" />
@@ -63,11 +58,7 @@
       </div>
     </nz-header>
     <nz-page-header class="site-page-header">
-      <nz-breadcrumb
-        class="m-1"
-        nz-page-header-breadcrumb
-        nzAutoGenerate="true"
-        nzRouteLabel="title"></nz-breadcrumb>
+      <nz-breadcrumb class="m-1" nz-page-header-breadcrumb nzAutoGenerate="true" nzRouteLabel="title"></nz-breadcrumb>
     </nz-page-header>
     <nz-content class="my-1">
       <div class="container-fluid">
