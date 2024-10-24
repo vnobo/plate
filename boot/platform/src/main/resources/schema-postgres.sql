@@ -47,12 +47,12 @@ create table if not exists se_users
     created_time        timestamp             default current_timestamp,
     updated_time timestamp default current_timestamp,
     text_search  tsvector generated always as (
-        setweight(to_tsvector('english', tenant_code), 'C') || ' ' ||
-        setweight(to_tsvector('english', username), 'A') || ' ' ||
-        setweight(to_tsvector('english', coalesce(name, '')), 'B') || ' ' ||
-        setweight(to_tsvector('english', coalesce(phone, '')), 'B') || ' ' ||
-        setweight(to_tsvector('english', coalesce(email, '')), 'B') || ' ' ||
-        setweight(to_tsvector('english', coalesce(bio, '')), 'D')
+        setweight(to_tsvector('chinese', tenant_code), 'C') || ' ' ||
+        setweight(to_tsvector('chinese', username), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', coalesce(name, '')), 'C') || ' ' ||
+        setweight(to_tsvector('chinese', coalesce(phone, '')), 'B') || ' ' ||
+        setweight(to_tsvector('chinese', coalesce(email, '')), 'B') || ' ' ||
+        setweight(to_tsvector('chinese', coalesce(bio, '')), 'D')
         ) stored
 );
 create index text_full_search_gist_idx on se_users using GIST (text_search);
