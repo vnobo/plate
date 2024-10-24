@@ -45,8 +45,17 @@ create table if not exists se_users
     updater             varchar(64),
     login_time          timestamp             default current_timestamp,
     created_time        timestamp             default current_timestamp,
-    updated_time        timestamp             default current_timestamp
+    updated_time timestamp default current_timestamp,
+    text_search  tsvector generated always as (
+        setweight(to_tsvector('english', tenant_code), 'C') || ' ' ||
+        setweight(to_tsvector('english', username), 'A') || ' ' ||
+        setweight(to_tsvector('english', coalesce(name, '')), 'B') || ' ' ||
+        setweight(to_tsvector('english', coalesce(phone, '')), 'B') || ' ' ||
+        setweight(to_tsvector('english', coalesce(email, '')), 'B') || ' ' ||
+        setweight(to_tsvector('english', coalesce(bio, '')), 'D')
+        ) stored
 );
+create index text_full_search_gist_idx on se_users using GIST (text_search);
 create index se_users_tu_idx on se_users (tenant_code, username);
 create index se_users_extend_gin_idx on se_users using gin (extend);
 comment on table se_users is '用户表';

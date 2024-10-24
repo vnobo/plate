@@ -10,6 +10,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Represents the base entity contract for entities that require common functionality
@@ -28,6 +29,14 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
      * @param code The code to be set for the entity. It could be a plain string or follow a predefined format.
      */
     default void setCode(String code) {
+    }
+
+    default Map<String, Object> getQuery() {
+        return Map.of();
+    }
+
+    default void setQuery(Map<String, Object> query) {
+
     }
 
     /**
