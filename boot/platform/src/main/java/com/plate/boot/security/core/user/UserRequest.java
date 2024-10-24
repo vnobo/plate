@@ -19,10 +19,14 @@ import java.util.Map;
 public class UserRequest extends User {
 
     /**
-     * A map containing the query parameters associated with the user request.
-     * Each key-value pair represents a parameter name and its corresponding value.
+     * Search table "extend" json column.
      */
     private Map<String, Object> query;
+
+    /**
+     * Search table "text_search" tsvector column.
+     */
+    private String search;
 
     /**
      * The security code associated with the user request.
