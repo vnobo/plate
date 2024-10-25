@@ -40,14 +40,14 @@ public class TenantMembersService extends AbstractDatabase {
         QueryFragment QueryFragment = request.toParamSql();
         String query = QUERY_SQL + QueryFragment.whereSql() + QueryHelper.applyPage(pageable, "a");
         return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query,
-                QueryFragment.params(), TenantMemberResponse.class);
+                QueryFragment, TenantMemberResponse.class);
     }
 
     public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        QueryFragment QueryFragment = request.toParamSql();
-        String query = COUNT_SQL + QueryFragment.whereSql();
-        Mono<Long> countMono = this.countWithCache(BeanUtils.cacheKey(request), query, QueryFragment.params());
+        QueryFragment queryFragment = request.toParamSql();
+        String query = COUNT_SQL + queryFragment.whereSql();
+        Mono<Long> countMono = this.countWithCache(BeanUtils.cacheKey(request), query, queryFragment);
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }

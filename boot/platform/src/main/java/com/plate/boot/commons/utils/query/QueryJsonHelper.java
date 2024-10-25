@@ -111,7 +111,7 @@ public final class QueryJsonHelper {
      * @param prefix A string prefix to prepend to each JSON key to form the full column name in SQL queries.
      *               This helps address potential naming conflicts or scoping within the SQL context.
      * @return A QueryFragment containing:
-     * - The 'sql' field as a StringJoiner with all conditions joined by 'and',
+     * - The 'whereSqlJoiner' field as a StringJoiner with all conditions joined by 'and',
      *   ready to be appended to a WHERE clause in a SQL query.
      * - The 'params' map holding named parameters for binding values to the query,
      *   enhancing security and performance.
@@ -191,7 +191,7 @@ public final class QueryJsonHelper {
      * @param value The value to be compared against in the query condition. For 'In' and 'Between'
      *              operations, this should be a comma-separated string or an array respectively.
      * @return A QueryCondition object containing:
-     *         - The 'sql' field as a string of the SQL fragment representing the condition.
+     *         - The 'whereSqlJoiner' field as a string of the SQL fragment representing the condition.
      *         - The 'params' map holding named parameters and their values for the query.
      *         - The 'operation' entry describing the operation type and its SQL syntax.
      */

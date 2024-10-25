@@ -11,7 +11,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -46,23 +45,22 @@ public class TenantMemberRequest extends TenantMember {
         QueryFragment fragment = QueryHelper
                 .query(this, List.of("users", "securityCode", "username"), "a");
 
-        StringJoiner criteria = fragment.sql();
-        Map<String, Object> params = fragment.params();
+        StringJoiner criteria = fragment.whereSqlJoiner();
         if (!ObjectUtils.isEmpty(this.getUsers())) {
             criteria.add("a.user_code in :users");
-            params.put("users", this.getUsers());
+            fragment.put("users", this.getUsers());
         }
 
         if (StringUtils.hasLength(this.getSecurityCode())) {
             criteria.add("a.tenant_code like :securityCode");
-            params.put("securityCode", this.getSecurityCode());
+            fragment.put("securityCode", this.getSecurityCode());
         }
 
         if (StringUtils.hasLength(this.getUsername())) {
             criteria.add("c.username = :username");
-            params.put("username", this.getUsername());
+            fragment.put("username", this.getUsername());
         }
 
-        return QueryFragment.of(criteria, params);
+        return QueryFragment.of(criteria, fragment);
     }
 }
