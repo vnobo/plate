@@ -71,6 +71,7 @@ public class GlobalExceptionHandler {
                         exchange.getRequest().getPath().value(), ex.getReason(), errors));
     }
 
+
     /**
      * Handles specific types of failure exceptions by creating an appropriate error response.
      * This method is designed to catch and process {@link DataAccessException} and {@link R2dbcException},
@@ -128,6 +129,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.of(exchange.getRequest().getId(), ex.getStatusCode().value(),
                         exchange.getRequest().getPath().value(), ex.getLocalizedMessage(), ex.getErrors()));
+    }
+
+    /**
+     * Handles exceptions of type {@link IllegalArgumentException} by creating an appropriate error response.
+     * This method is designed to be used within a Spring MVC controller advice context to manage
+     * exceptions that occur during the execution of RESTful server operations.
+     *
+     * @param exchange The current server web exchange containing request and response information.
+     *                 This is used to extract details necessary for constructing the
+     *                 error response.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(ServerWebExchange exchange,
+                                                                        IllegalArgumentException ex) {
+        if (log.isDebugEnabled()) {
+            log.error(ex.getLocalizedMessage(), ex);
+        }
+        return ResponseEntity.status(INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
+                .body(ErrorResponse.of(exchange.getRequest().getId(), HttpStatus.BAD_REQUEST.value(),
+                        exchange.getRequest().getPath().value(), ex.getLocalizedMessage(), ex.getStackTrace()));
     }
 
 

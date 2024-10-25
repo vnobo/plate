@@ -2,14 +2,9 @@ package com.plate.boot.relational.logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.QueryFragment;
-import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Represents a logging request that extends the basic {@link Logger} functionality,
@@ -21,10 +16,6 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class LoggerRequest extends Logger {
-
-    private Map<String, Object> query;
-
-    private String securityCode;
 
     /**
      * Constructs a new {@link LoggerRequest} instance with specified details.
@@ -62,16 +53,4 @@ public class LoggerRequest extends Logger {
         return BeanUtils.copyProperties(this, Logger.class);
     }
 
-    /**
-     * Constructs a {@link QueryFragment} instance representing a part of a SQL query
-     * based on the current {@link LoggerRequest} object. The generated QueryFragment
-     * can be used to dynamically construct SQL queries with placeholders for parameters,
-     * enhancing performance and preventing SQL injection.
-     *
-     * @return A {@link QueryFragment} object encapsulating a SQL fragment and its
-     * associated parameters derived from the current LoggerRequest instance.
-     */
-    public QueryFragment buildQueryFragment() {
-        return QueryHelper.query(this, List.of(), null);
-    }
 }
