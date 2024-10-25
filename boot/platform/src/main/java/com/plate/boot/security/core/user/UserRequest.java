@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.util.Map;
-
 
 /**
  * Represents a user request, extending the base User class with additional attributes specific to requests.
@@ -17,18 +15,6 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class UserRequest extends User {
-
-    /**
-     * A map containing the query parameters associated with the user request.
-     * Each key-value pair represents a parameter name and its corresponding value.
-     */
-    private Map<String, Object> query;
-
-    /**
-     * The security code associated with the user request.
-     * This code is typically used for authentication or authorization purposes to ensure secure access.
-     */
-    private String securityCode;
 
     /**
      * Sets the security code for the user request and returns the updated UserRequest instance.

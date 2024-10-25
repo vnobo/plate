@@ -10,6 +10,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Represents the base entity contract for entities that require common functionality
@@ -28,6 +29,42 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
      * @param code The code to be set for the entity. It could be a plain string or follow a predefined format.
      */
     default void setCode(String code) {
+    }
+
+    /**
+     * postgresql types @code tsvector supports full text search
+     *
+     * @return Search string for the entity tsvector column
+     */
+    default String getSearch() {
+        return null;
+    }
+
+    /**
+     * postgresql types @code tsvector supports full text search
+     *
+     * @param search query tsvector item by string
+     */
+    default void setSearch(String search) {
+    }
+
+    /**
+     * Retrieves the default query conditions.
+     * Returns an immutable empty map, indicating that there are no specific query conditions.
+     *
+     * @return An immutable map containing the query conditions
+     */
+    default Map<String, Object> getQuery() {
+        return Map.of();
+    }
+
+    /**
+     * Sets the query parameters for the entity.
+     *
+     * @param query A map containing the query parameters where the key is a string
+     *              representing the parameter name and the value is the parameter value.
+     */
+    default void setQuery(Map<String, Object> query) {
     }
 
     /**

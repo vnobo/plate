@@ -14,11 +14,11 @@ export interface Credentials {
   providedIn: 'root',
 })
 export class LoginService {
-  _auth = inject(AuthService);
   private _http = inject(HttpClient);
   private _storage = inject(BrowserStorage);
-
   private readonly storageKey = 'credentials';
+
+  _auth = inject(AuthService);
 
   autoLogin(): Authentication | null {
     const authentication = this._auth.authenticationToken();
@@ -59,11 +59,8 @@ export class LoginService {
   }
 
   logout() {
-    return this._http.get('/oauth2/logout').pipe(
-      tap(res => {
-        this._auth.logout();
-        this._storage.remove(this.storageKey);
-      })
-    );
+    this._storage.remove(this.storageKey);
+    this._auth.logout();
+    this._http.get('/oauth2/logout').subscribe(res => console.log(res));
   }
 }

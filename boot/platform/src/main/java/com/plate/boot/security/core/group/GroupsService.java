@@ -22,16 +22,16 @@ public class GroupsService extends AbstractDatabase {
     private final GroupsRepository groupsRepository;
 
     public Flux<Group> search(GroupRequest request, Pageable pageable) {
-        QueryFragment QueryFragment = request.qSql();
-        String query = "select * from se_groups" + QueryFragment.whereSql() + QueryHelper.applyPage(pageable);
-        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query, QueryFragment.params(), Group.class);
+        QueryFragment queryFragment = request.qSql();
+        String query = "select * from se_groups" + queryFragment.whereSql() + QueryHelper.applyPage(pageable);
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query, queryFragment, Group.class);
     }
 
     public Mono<Page<Group>> page(GroupRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        QueryFragment QueryFragment = request.qSql();
-        String query = "select count(*) from se_groups" + QueryFragment.whereSql();
-        var countMono = this.countWithCache(BeanUtils.cacheKey(request), query, QueryFragment.params());
+        QueryFragment queryFragment = request.qSql();
+        String query = "select count(*) from se_groups" + queryFragment.whereSql();
+        var countMono = this.countWithCache(BeanUtils.cacheKey(request), query, queryFragment);
 
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));

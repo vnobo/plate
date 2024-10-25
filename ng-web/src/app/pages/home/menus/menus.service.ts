@@ -1,16 +1,12 @@
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { concatMap, delay, from, map, mergeMap, MonoTypeOperatorFunction, Observable, retry, toArray } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { concatMap, delay, from, map, mergeMap, Observable, retry, toArray } from 'rxjs';
 import { Menu } from './menu.types';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MenusService {
-  pipe(arg0: MonoTypeOperatorFunction<unknown>) {
-    throw new Error('Method not implemented.');
-  }
-
   constructor(private http: HttpClient) {
   }
 
@@ -27,14 +23,12 @@ export class MenusService {
                   item.children = children;
                 }
                 return item;
-              }),
+              })
             );
-          }),
-          retry(3),
+          })
         );
       }),
       toArray(),
-      retry(3),
     );
   }
 
@@ -56,17 +50,16 @@ export class MenusService {
   childrenMap = (items: Menu[]) => {
     return from(items).pipe(
       delay(100),
-      mergeMap(item => {
-        return this.getMyChildren({ pcode: item.code }).pipe(
+      mergeMap(item =>
+        this.getMyChildren({ pcode: item.code }).pipe(
           map(children => {
             if (children.length > 0) {
               item.children = children;
             }
             return item;
-          }),
-        );
-      }),
-      retry(3),
+          })
+        )
+      )
     );
   };
 

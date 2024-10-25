@@ -4,7 +4,6 @@ import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
-import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -28,17 +27,15 @@ public class UsersService extends AbstractDatabase {
     private final UsersRepository usersRepository;
 
     public Flux<UserResponse> search(UserRequest request, Pageable pageable) {
-        QueryFragment QueryFragment = request.querySql(List.of());
-        String query = "select * from se_users" + QueryFragment.whereSql() + QueryHelper.applyPage(pageable);
-        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query,
-                QueryFragment.params(), UserResponse.class);
+        QueryFragment queryFragment = QueryFragment.query(request, pageable);
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(),
+                queryFragment, UserResponse.class);
     }
 
     public Mono<Page<UserResponse>> page(UserRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        QueryFragment QueryFragment = request.querySql(List.of());
-        String query = "select count(*) from se_users" + QueryFragment.whereSql();
-        var countMono = super.countWithCache(BeanUtils.cacheKey(request), query, QueryFragment.params());
+        QueryFragment queryFragment = request.querySql(List.of());
+        var countMono = super.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
@@ -105,7 +102,6 @@ public class UsersService extends AbstractDatabase {
      *
      * @param request The UserRequest containing the data to operate on, including the code for user identification
      *                and the password that may require encoding upgrade.
-     *
      * @return A Mono emitting the updated or newly created User after the operation is completed.
      */
     public Mono<User> operate(UserRequest request) {
@@ -123,7 +119,7 @@ public class UsersService extends AbstractDatabase {
      *
      * @param request A UserRequest object encapsulating the details necessary to identify the user for deletion.
      * @return A Mono<Void> which upon subscription initiates the deletion process asynchronously.
-     *         The Mono will complete empty when the deletion is successful, or error if the operation fails.
+     * The Mono will complete empty when the deletion is successful, or error if the operation fails.
      */
     public Mono<Void> delete(UserRequest request) {
         return this.usersRepository.delete(request.toUser())
@@ -137,7 +133,7 @@ public class UsersService extends AbstractDatabase {
      *
      * @param user The user entity to be saved. Must not be null.
      * @return A Mono emitting the saved User entity after the operation completes successfully.
-     *         If the user is not found during update, a Mono error with RestServerException is returned.
+     * If the user is not found during update, a Mono error with RestServerException is returned.
      */
     public Mono<User> save(User user) {
         if (user.isNew()) {

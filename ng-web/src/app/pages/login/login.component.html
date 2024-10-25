@@ -28,14 +28,14 @@
                 [class.is-valid]="loginForm.controls.username.valid"
                 formControlName="username"
                 type="text" />
-              @if (loginForm.controls.username.errors?.['required']) {
-                <div class="invalid-feedback">请输入手机号或电子邮件,登录用户不能为空!</div>
+              <!---   @if (loginForm.controls.username.errors?.['required']) {
+              <div class="invalid-feedback">请输入手机号或电子邮件,登录用户不能为空!</div>
               } @else if (loginForm.controls.username.hasError('minlength') ||
               loginForm.controls.username.hasError('maxlength')) {
-                <div class="invalid-feedback">
-                  登录用户长度为 6 ~ 32 个字符，由字母和数字组成，不能包含空格、特殊字符或表情符号。
+              <div class="invalid-feedback">
+                登录用户长度为 6 ~ 32 个字符，由字母和数字组成，不能包含空格、特殊字符或表情符号。
               </div>
-              }
+            }-->
             </div>
             <div class="input-group input-group-sm mb-3">
               <div class="input-group-text">
@@ -53,6 +53,7 @@
                 class="form-control"
                 formControlName="password"
                 type="password" />
+              <!---
               @if (loginForm.controls.password.hasError('minlength') ||
               loginForm.controls.password.hasError('maxlength')) {
                 <div class="invalid-feedback">
@@ -60,7 +61,7 @@
               </div>
               } @else if (loginForm.controls.password.hasError('required')) {
                 <div class="invalid-feedback">请输入密码,密码不能为空!</div>
-              }
+              }-->
             </div>
             <div class="form-check input-group-sm mb-3">
               <input

@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.plate.boot.commons.utils.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 public final class QueryHelper {
 
     public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend",
-            "createdTime", "updatedTime", "securityCode", "query");
+            "createdTime", "updatedTime", "securityCode", "query", "search");
 
     /**
      * Applies pagination to a SQL query string based on the provided {@link Pageable} object.
@@ -95,21 +96,29 @@ public final class QueryHelper {
      */
     @SuppressWarnings("unchecked")
     public static QueryFragment query(Object object, Collection<String> skipKeys, String prefix) {
+        String querySql = querySqlBuilder(object);
+        Object[] queryFormatted = new Object[]{"", ""};
         StringJoiner whereSql = new StringJoiner(" and ");
         Map<String, Object> bindParams = Maps.newHashMap();
-
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         if (ObjectUtils.isEmpty(objectMap)) {
-            return QueryFragment.of(whereSql, bindParams);
+            return QueryFragment.of(querySql, whereSql, bindParams);
+        }
+
+        if (objectMap.containsKey("search")) {
+            var textSearch = (String) objectMap.get("search");
+            queryFormatted[0] = ",ts_rank_cd(text_search, query) as rank";
+            queryFormatted[1] = ",to_tsquery(:textSearch) query";
+            whereSql.add("text_search @@ to_tsquery(:textSearch)");
+            bindParams.put("textSearch", textSearch);
         }
 
         if (objectMap.containsKey("query")) {
             var jsonMap = (Map<String, Object>) objectMap.get("query");
             QueryFragment jsonQueryFragment = QueryJsonHelper.queryJson(jsonMap, prefix);
-            whereSql.merge(jsonQueryFragment.sql());
-            bindParams.putAll(jsonQueryFragment.params());
+            whereSql.merge(jsonQueryFragment.whereSqlJoiner());
+            bindParams.putAll(jsonQueryFragment);
         }
-
 
         String securityCodeKey = "securityCode";
         if (!skipKeys.contains(securityCodeKey) && objectMap.containsKey(securityCodeKey)) {
@@ -121,11 +130,24 @@ public final class QueryHelper {
         objectMap = Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && !skipKeys.contains(key));
         if (!ObjectUtils.isEmpty(objectMap)) {
             QueryFragment entityQueryFragment = query(objectMap, prefix);
-            whereSql.merge(entityQueryFragment.sql());
-            bindParams.putAll(entityQueryFragment.params());
+            whereSql.merge(entityQueryFragment.whereSqlJoiner());
+            bindParams.putAll(entityQueryFragment);
         }
+        if (StringUtils.hasLength(querySql)) {
+            querySql = querySql.formatted(queryFormatted);
+        }
+        return QueryFragment.of(querySql, whereSql, bindParams);
+    }
 
-        return QueryFragment.of(whereSql, bindParams);
+    private static String querySqlBuilder(Object object) {
+        String query = "SELECT * %1$s FROM #table_name %2$s";
+        Class<?> objectClass = object.getClass();
+        Table table = objectClass.getAnnotation(Table.class);
+        if (!ObjectUtils.isEmpty(table)) {
+            String tableName = StringUtils.hasLength(table.value()) ? table.value() : objectClass.getName();
+            return query.replace("#table_name", tableName);
+        }
+        return null;
     }
 
     private static QueryCondition securityCondition(Object value, String prefix) {
@@ -133,8 +155,7 @@ public final class QueryHelper {
         if (StringUtils.hasLength(prefix)) {
             key = prefix + "." + key;
         }
-        return new QueryCondition(key + " like :securityCode",
-                Map.of("securityCode", value), null);
+        return new QueryCondition(key + " LIKE :securityCode", Map.of("securityCode", value), null);
     }
 
     /**

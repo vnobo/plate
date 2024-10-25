@@ -1,14 +1,11 @@
 package com.plate.boot.relational.logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.plate.boot.commons.base.AbstractEntity;
 import com.plate.boot.commons.base.BaseEntity;
 import lombok.Data;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedDate;
+import lombok.EqualsAndHashCode;
 import org.springframework.data.relational.core.mapping.Table;
-
-import java.time.LocalDateTime;
 
 /**
  * Represents a database entity for logging activities within a system.
@@ -27,37 +24,15 @@ import java.time.LocalDateTime;
  *
  * @see BaseEntity for the base entity contract this class extends, providing common entity behaviors.
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Table("se_loggers")
-public class Logger implements BaseEntity<Long> {
+public class Logger extends AbstractEntity<Long> {
 
     /**
-     * Unique identifier for the logger entity.
-     * This field represents the primary key in the database table "se_loggers"
-     * and is automatically generated and managed by the persistence framework.
-     */
-    @Id
-    private Long id;
-
-    /**
-     * Stores a unique code associated with the logging event.
-     * This string represents a distinct identifier that can be used for
-     * tracing and referencing specific log entries across the system.
-     * It is integral to log management and analysis, supporting operations
-     * like filtering and correlation of log data.
-     */
-    private String code;
-
-    /**
-     * The tenant code associated with the logging activity.
-     * This string identifier denotes the specific tenant within a multi-tenant environment
-     * responsible for or related to the logged event. It facilitates segregation and filtering
-     * of logs based on different tenants in the system.
-     */
-    private String tenantCode;
-
-    /**
-     *
+     * Represents the operator who performed the logging event.
+     * This string field stores the name or identifier of the operator,
+     * providing insights into who triggered the logged activity.
      */
     private String operator;
 
@@ -101,19 +76,4 @@ public class Logger implements BaseEntity<Long> {
      */
     private JsonNode context;
 
-    /**
-     * The date and time when the log entry was created.
-     * This field is automatically populated by the system upon the creation of a new log record.
-     * It is annotated with {@link CreatedDate} to facilitate auditing and tracking of log events over time.
-     */
-    @CreatedDate
-    private LocalDateTime createdTime;
-
-    /**
-     * The date and time when this log entry was last updated.
-     * This field is automatically managed by the underlying persistence framework
-     * and reflects the last modification timestamp of the corresponding database record.
-     */
-    @LastModifiedDate
-    private LocalDateTime updatedTime;
 }

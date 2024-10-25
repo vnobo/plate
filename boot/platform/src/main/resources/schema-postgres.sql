@@ -45,8 +45,15 @@ create table if not exists se_users
     updater             varchar(64),
     login_time          timestamp             default current_timestamp,
     created_time        timestamp             default current_timestamp,
-    updated_time        timestamp             default current_timestamp
+    updated_time timestamp default current_timestamp,
+    text_search  tsvector generated always as (
+        setweight(to_tsvector('chinese', username), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', coalesce(name, '')), 'B') || ' ' ||
+        setweight(to_tsvector('chinese', coalesce(phone, '')), 'C') || ' ' ||
+        setweight(to_tsvector('chinese', coalesce(email, '')), 'D')
+        ) stored
 );
+create index se_users_text_full_search_gist_idx on se_users using GIST (text_search);
 create index se_users_tu_idx on se_users (tenant_code, username);
 create index se_users_extend_gin_idx on se_users using gin (extend);
 comment on table se_users is '用户表';
@@ -175,8 +182,14 @@ create table if not exists se_loggers
     url          text,
     context      jsonb,
     created_time timestamp            default current_timestamp,
-    updated_time timestamp            default current_timestamp
+    updated_time timestamp default current_timestamp,
+    text_search  tsvector generated always as (
+        setweight(to_tsvector('chinese', operator), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', coalesce(method, '')), 'B') || ' ' ||
+        setweight(to_tsvector('chinese', coalesce(url, '')), 'C') || ' ' ||
+        setweight(jsonb_to_tsvector('chinese', context, '["string"]'), 'D')
+        ) stored
 );
-create index se_loggers_tposm_idx on se_loggers (tenant_code, prefix, operator, status, method);
+create index se_loggers_text_full_search_gist_idx on se_loggers using GIST (text_search);
 create index se_loggers_extend_gin_idx on se_loggers using gin (context);
 comment on table se_loggers is '操作日志表';

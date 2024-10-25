@@ -27,14 +27,12 @@
       "externalTemplate": true
     },
     "angular-component": {
-      "ngOnInit": true
+      "ngOnInit": true,
+      "skipChangeDetectionOnPush": true
+    },
+    "angular-page": {
+      "skipChangeDetectionOnPush": true
     }
   },
-  "css.styleSheets": [
-    "**/${fileBasenameNoExtension}.{css,scss}",
-    "node_modules/bootstrap/dist/css/bootstrap.css",
-    "@angular/material/prebuilt-themes/azure-blue.css",
-    "node_modules/ng-zorro-antd/ng-zorro-antd.less"
-  ],
   "Codegeex.CommitMessage.LanguagePreference": "English"
 }
