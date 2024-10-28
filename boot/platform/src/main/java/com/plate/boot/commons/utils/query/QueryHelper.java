@@ -125,9 +125,9 @@ public final class QueryHelper {
 
         String securityCodeKey = "securityCode";
         if (!skipKeys.contains(securityCodeKey) && objectMap.containsKey(securityCodeKey)) {
-            var condition = securityCondition(objectMap.get(securityCodeKey), prefix);
-            whereAndJoiner.add(condition.getWhereSql());
-            bindParams.putAll(condition);
+            QueryFragment securityCondition = securityCondition(objectMap.get(securityCodeKey), prefix);
+            whereAndJoiner.add(securityCondition.getWhereSql());
+            bindParams.putAll(securityCondition);
         }
 
         objectMap = Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && !skipKeys.contains(key));
@@ -178,10 +178,10 @@ public final class QueryHelper {
      * and values are the user-provided filter values.
      */
     public static QueryFragment query(Map<String, Object> objectMap, String prefix) {
-        StringJoiner whereAndJoiner = new StringJoiner(" AND ", "(", ")");
+        StringJoiner whereAndJoiner = new StringJoiner(" AND ");
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-            QueryFragment condition = buildCondition(entry, prefix);
-            whereAndJoiner.add(condition.getWhereSql());
+            String conditionSql = buildConditionSql(entry, prefix);
+            whereAndJoiner.add(conditionSql);
         }
         return QueryFragment.of(whereAndJoiner.toString(), objectMap);
     }
@@ -199,7 +199,7 @@ public final class QueryHelper {
      * - The SQL fragment representing the condition with placeholders for parameters.
      * - A map of parameters mapping placeholders to the actual filter values.
      */
-    public static QueryFragment buildCondition(Map.Entry<String, Object> entry, String prefix) {
+    public static String buildConditionSql(Map.Entry<String, Object> entry, String prefix) {
         String sql = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey());
         if (StringUtils.hasLength(prefix)) {
             sql = prefix + "." + sql;
@@ -213,7 +213,7 @@ public final class QueryHelper {
         } else {
             sql = sql + " = " + paramName;
         }
-        return QueryFragment.of(sql, null, Map.of(paramName, value));
+        return sql;
     }
 
     /**
