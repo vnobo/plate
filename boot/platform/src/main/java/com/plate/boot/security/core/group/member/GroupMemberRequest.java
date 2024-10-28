@@ -37,7 +37,7 @@ public class GroupMemberRequest extends GroupMember {
     public QueryFragment toParamSql() {
         QueryFragment queryFragment = QueryHelper.query(this, List.of("users", "username"), "a");
 
-        StringJoiner criteria = queryFragment.whereSqlJoiner();
+        StringJoiner criteria = new StringJoiner(" AND ", "(", ")");
 
         if (!ObjectUtils.isEmpty(this.getUsers())) {
             criteria.add("a.user_code in :users");
@@ -49,7 +49,7 @@ public class GroupMemberRequest extends GroupMember {
             queryFragment.put("username", this.getUsername());
         }
 
-        return QueryFragment.of(criteria, queryFragment);
+        return QueryFragment.of(queryFragment.getWhereSql() + criteria, queryFragment);
     }
 
 }

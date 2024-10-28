@@ -2,6 +2,7 @@ package com.plate.boot.commons.utils.query;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
+import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -96,47 +97,47 @@ public final class QueryHelper {
      */
     @SuppressWarnings("unchecked")
     public static QueryFragment query(Object object, Collection<String> skipKeys, String prefix) {
+        StringJoiner whereAndJoiner = new StringJoiner(" AND ");
+        Map<String, Object> bindParams = Maps.newHashMap();
+
         String querySql = querySqlBuilder(object);
         Object[] queryFormatted = new Object[]{"", ""};
-        StringJoiner whereSql = new StringJoiner(" and ");
-        Map<String, Object> bindParams = Maps.newHashMap();
+
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         if (ObjectUtils.isEmpty(objectMap)) {
-            return QueryFragment.of(querySql, whereSql, bindParams);
+            return QueryFragment.of(querySql.formatted(queryFormatted), "", bindParams);
         }
 
         if (objectMap.containsKey("search")) {
-            var textSearch = (String) objectMap.get("search");
+            String textSearch = (String) objectMap.get("search");
             queryFormatted[0] = ",ts_rank_cd(text_search, query) as rank";
             queryFormatted[1] = ",to_tsquery(:textSearch) query";
-            whereSql.add("text_search @@ to_tsquery(:textSearch)");
+            whereAndJoiner.add("text_search @@ to_tsquery(:textSearch)");
             bindParams.put("textSearch", textSearch);
         }
 
         if (objectMap.containsKey("query")) {
             var jsonMap = (Map<String, Object>) objectMap.get("query");
             QueryFragment jsonQueryFragment = QueryJsonHelper.queryJson(jsonMap, prefix);
-            whereSql.merge(jsonQueryFragment.whereSqlJoiner());
+            whereAndJoiner.add(jsonQueryFragment.getWhereSql());
             bindParams.putAll(jsonQueryFragment);
         }
 
         String securityCodeKey = "securityCode";
         if (!skipKeys.contains(securityCodeKey) && objectMap.containsKey(securityCodeKey)) {
             var condition = securityCondition(objectMap.get(securityCodeKey), prefix);
-            whereSql.add(condition.sql());
-            bindParams.putAll(condition.params());
+            whereAndJoiner.add(condition.getWhereSql());
+            bindParams.putAll(condition);
         }
 
         objectMap = Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && !skipKeys.contains(key));
         if (!ObjectUtils.isEmpty(objectMap)) {
             QueryFragment entityQueryFragment = query(objectMap, prefix);
-            whereSql.merge(entityQueryFragment.whereSqlJoiner());
+            whereAndJoiner.add(entityQueryFragment.getWhereSql());
             bindParams.putAll(entityQueryFragment);
         }
-        if (StringUtils.hasLength(querySql)) {
-            querySql = querySql.formatted(queryFormatted);
-        }
-        return QueryFragment.of(querySql, whereSql, bindParams);
+
+        return QueryFragment.of(querySql.formatted(queryFormatted), whereAndJoiner.toString(), bindParams);
     }
 
     private static String querySqlBuilder(Object object) {
@@ -147,15 +148,16 @@ public final class QueryHelper {
             String tableName = StringUtils.hasLength(table.value()) ? table.value() : objectClass.getName();
             return query.replace("#table_name", tableName);
         }
-        return null;
+        throw RestServerException.withMsg("Table annotation not found",
+                "This object does not have a table annotation");
     }
 
-    private static QueryCondition securityCondition(Object value, String prefix) {
+    private static QueryFragment securityCondition(Object value, String prefix) {
         String key = "tenant_code";
         if (StringUtils.hasLength(prefix)) {
             key = prefix + "." + key;
         }
-        return new QueryCondition(key + " LIKE :securityCode", Map.of("securityCode", value), null);
+        return QueryFragment.of(key + " LIKE :securityCode", Map.of("securityCode", value));
     }
 
     /**
@@ -176,12 +178,12 @@ public final class QueryHelper {
      * and values are the user-provided filter values.
      */
     public static QueryFragment query(Map<String, Object> objectMap, String prefix) {
-        StringJoiner whereSql = new StringJoiner(" and ");
+        StringJoiner whereAndJoiner = new StringJoiner(" AND ", "(", ")");
         for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-            QueryCondition condition = buildCondition(entry, prefix);
-            whereSql.add(condition.sql());
+            QueryFragment condition = buildCondition(entry, prefix);
+            whereAndJoiner.add(condition.getWhereSql());
         }
-        return QueryFragment.of(whereSql, objectMap);
+        return QueryFragment.of(whereAndJoiner.toString(), objectMap);
     }
 
     /**
@@ -197,7 +199,7 @@ public final class QueryHelper {
      * - The SQL fragment representing the condition with placeholders for parameters.
      * - A map of parameters mapping placeholders to the actual filter values.
      */
-    public static QueryCondition buildCondition(Map.Entry<String, Object> entry, String prefix) {
+    public static QueryFragment buildCondition(Map.Entry<String, Object> entry, String prefix) {
         String sql = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey());
         if (StringUtils.hasLength(prefix)) {
             sql = prefix + "." + sql;
@@ -211,7 +213,7 @@ public final class QueryHelper {
         } else {
             sql = sql + " = " + paramName;
         }
-        return new QueryCondition(sql, Map.of(paramName, value), null);
+        return QueryFragment.of(sql, null, Map.of(paramName, value));
     }
 
     /**

@@ -67,8 +67,8 @@ public final class QueryJsonHelper {
      * @param sort The Sort object to be transformed. Its properties may require conversion to camelCase
      *             and adjustment for SQL-JSON compatibility.
      * @return A new Sort object with properties converted into camelCase format and formatted
-     *         for proper handling of nested JSON paths in SQL queries. Returns an unsorted Sort if
-     *         the input is null or empty.
+     * for proper handling of nested JSON paths in SQL queries. Returns an unsorted Sort if
+     * the input is null or empty.
      */
     public static Sort transformSortForJson(Sort sort) {
         if (sort == null || sort.isEmpty()) {
@@ -95,7 +95,7 @@ public final class QueryJsonHelper {
         int lastIndex = keys.length - 1;
         if (lastIndex > 0) {
             sortedProperty = sortedProperty + buildJsonQueryPath(Arrays.copyOfRange(keys, 1, lastIndex))
-                    .append("->>'").append(keys[lastIndex]).append("'");
+                    + "->>'" + keys[lastIndex] + "'";
         }
         return Sort.Order.by(sortedProperty).with(order.getDirection());
     }
@@ -111,29 +111,29 @@ public final class QueryJsonHelper {
      * @param prefix A string prefix to prepend to each JSON key to form the full column name in SQL queries.
      *               This helps address potential naming conflicts or scoping within the SQL context.
      * @return A QueryFragment containing:
-     * - The 'whereSqlJoiner' field as a StringJoiner with all conditions joined by 'and',
-     *   ready to be appended to a WHERE clause in a SQL query.
+     * - The 'getWhereSql' field as a StringJoiner with all conditions joined by 'and',
+     * ready to be appended to a WHERE clause in a SQL query.
      * - The 'params' map holding named parameters for binding values to the query,
-     *   enhancing security and performance.
+     * enhancing security and performance.
      * If 'params' is empty, a QueryFragment with an empty condition and no parameters is returned.
      * @throws IllegalArgumentException If any processing error occurs due to invalid input structure or content.
      */
     public static QueryFragment queryJson(Map<String, Object> params, String prefix) {
         Map<String, Object> bindParams = Maps.newHashMap();
-        StringJoiner whereSql = new StringJoiner(" and ");
+        StringJoiner whereSql = new StringJoiner(" AND ", "(", ")");
         if (ObjectUtils.isEmpty(params)) {
-            return QueryFragment.of(whereSql, bindParams);
+            return QueryFragment.of(whereSql.toString(), bindParams);
         }
         for (Map.Entry<String, Object> entry : params.entrySet()) {
-            QueryCondition exps = buildJsonCondition(entry, prefix);
-            whereSql.add(exps.sql());
-            bindParams.putAll(exps.params());
+            QueryFragment condition = buildJsonCondition(entry, prefix);
+            whereSql.add(condition.getWhereSql());
+            bindParams.putAll(condition);
         }
-        return QueryFragment.of(whereSql, bindParams);
+        return QueryFragment.of(whereSql.toString(), bindParams);
     }
 
     /**
-     * Constructs a {@link QueryCondition} based on the provided map entry and a prefix.
+     * Constructs a {@link QueryFragment} based on the provided map entry and a prefix.
      * The entry's key represents a JSON path, and the value is the condition's operand.
      * The method supports nested JSON paths and translates them into equivalent SQL expressions
      * compatible with JSON columns in SQL databases. It validates the path, processes the keys,
@@ -143,12 +143,12 @@ public final class QueryJsonHelper {
      *               (e.g., "extend.usernameLike"), and the value is the target value for the condition.
      * @param prefix A prefix to prepend to the first key of the JSON path to qualify column names
      *               in the SQL query, ensuring correct scoping or avoiding naming collisions.
-     * @return A {@link QueryCondition} object representing the constructed SQL condition
+     * @return A {@link QueryFragment} object representing the constructed SQL condition
      * for querying JSON data, including the SQL fragment, parameters, and the operation detail.
      * @throws RestServerException If the provided JSON path does not meet the minimum requirement of specifying
-     *                            at least one level of nesting after the prefix (if provided).
+     *                             at least one level of nesting after the prefix (if provided).
      */
-    private static QueryCondition buildJsonCondition(Map.Entry<String, Object> entry, String prefix) {
+    private static QueryFragment buildJsonCondition(Map.Entry<String, Object> entry, String prefix) {
         String[] keys = StringUtils.delimitedListToStringArray(entry.getKey(), ".");
         if (keys.length < 2) {
             throw RestServerException.withMsg("Json query column path [query[" + entry.getKey() + "]] error",
@@ -161,22 +161,23 @@ public final class QueryJsonHelper {
                     ));
         }
         // 处理第一个键
-        String sql = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, keys[0]);
+        String column = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, keys[0]);
         if (StringUtils.hasLength(prefix)) {
-            sql = prefix + "." + keys[0];
+            column = prefix + "." + keys[0];
         }
-        // 构建 JSON 路径
-        StringBuilder jsonPath = new StringBuilder("(" + sql);
+        StringBuilder conditionBuilder = new StringBuilder(column);
         int lastIndex = keys.length - 1;
         // 处理中间键
         if (lastIndex > 1) {
             String[] joinKeys = Arrays.copyOfRange(keys, 1, lastIndex);
-            jsonPath.append(buildJsonQueryPath(joinKeys));
+            for (String path : joinKeys) {
+                conditionBuilder.append("->'").append(path).append("'");
+            }
         }
         //处理最后键
-        QueryCondition lastCondition = buildLastCondition(keys, entry.getValue());
-        sql = jsonPath.append(lastCondition.sql()).toString();
-        return new QueryCondition(sql, lastCondition.params(), lastCondition.operation());
+        QueryFragment lastCondition = buildLastCondition(keys, entry.getValue());
+        conditionBuilder.append(lastCondition.getWhereSql());
+        return QueryFragment.of(conditionBuilder.toString(), lastCondition);
     }
 
     /**
@@ -186,16 +187,16 @@ public final class QueryJsonHelper {
      * It handles parameterization to prevent SQL injection and prepares the condition for dynamic
      * query execution.
      *
-     * @param keys An array of strings forming the path to the JSON attribute. The last element
-     *             may contain a keyword suffix for special operations.
+     * @param keys  An array of strings forming the path to the JSON attribute. The last element
+     *              may contain a keyword suffix for special operations.
      * @param value The value to be compared against in the query condition. For 'In' and 'Between'
      *              operations, this should be a comma-separated string or an array respectively.
      * @return A QueryCondition object containing:
-     *         - The 'whereSqlJoiner' field as a string of the SQL fragment representing the condition.
-     *         - The 'params' map holding named parameters and their values for the query.
-     *         - The 'operation' entry describing the operation type and its SQL syntax.
+     * - The 'getWhereSql' field as a string of the SQL fragment representing the condition.
+     * - The 'params' map holding named parameters and their values for the query.
+     * - The 'operation' entry describing the operation type and its SQL syntax.
      */
-    private static QueryCondition buildLastCondition(String[] keys, Object value) {
+    private static QueryFragment buildLastCondition(String[] keys, Object value) {
         StringBuilder conditionSql = new StringBuilder("->>'");
 
         String paramName = StringUtils.arrayToDelimitedString(keys, "_");
@@ -204,28 +205,27 @@ public final class QueryJsonHelper {
         Map.Entry<String, String> exps = queryKeywordMapper(lastKey);
         if (exps == null) {
             conditionSql.append(lastKey).append("' = :").append(paramName);
-            return new QueryCondition(conditionSql.append(")").toString(), Map.of(paramName, value),
-                    SQL_OPERATION_MAPPING.entrySet().iterator().next());
+            return QueryFragment.of(conditionSql.toString(), Map.of(paramName, value));
         }
 
         String key = lastKey.substring(0, lastKey.length() - exps.getKey().length());
         conditionSql.append(key).append("' ");
-
+        Map<String, Object> params;
         if ("Between".equals(exps.getKey()) || "NotBetween".equals(exps.getKey())) {
             String startKey = paramName + "_start";
             String endKey = paramName + "_end";
             conditionSql.append(exps.getValue()).append(" :").append(startKey).append(" and :").append(endKey);
             var values = StringUtils.commaDelimitedListToStringArray(String.valueOf(value));
-            return new QueryCondition(conditionSql.append(")").toString(),
-                    Map.of(startKey, values[0], endKey, values[1]), exps);
+            params = Map.of(startKey, values[0], endKey, values[1]);
         } else if ("NotIn".equals(exps.getKey()) || "In".equals(exps.getKey())) {
             conditionSql.append(exps.getValue()).append(" (:").append(paramName).append(")");
             var values = StringUtils.commaDelimitedListToSet(String.valueOf(value));
-            return new QueryCondition(conditionSql.append(")").toString(), Map.of(paramName, values), exps);
+            params = Map.of(paramName, values);
         } else {
             conditionSql.append(exps.getValue()).append(" :").append(paramName);
-            return new QueryCondition(conditionSql.append(")").toString(), Map.of(paramName, value), exps);
+            params = Map.of(paramName, value);
         }
+        return QueryFragment.of(conditionSql.toString(), params);
     }
 
     /**
@@ -236,12 +236,12 @@ public final class QueryJsonHelper {
      * @param joinKeys An array of strings representing keys in a JSON object which will be combined
      *                 to form a JSON path query expression.
      * @return StringBuilder A StringBuilder object containing the concatenated JSON path
-     *                       query expression, suitable for use in SQL queries with JSON columns.
+     * query expression, suitable for use in SQL queries with JSON columns.
      */
-    private static StringBuilder buildJsonQueryPath(String[] joinKeys) {
-        StringBuilder jsonPath = new StringBuilder();
+    private static StringJoiner buildJsonQueryPath(String[] joinKeys) {
+        StringJoiner jsonPath = new StringJoiner("->");
         for (String path : joinKeys) {
-            jsonPath.append("->'").append(path).append("'");
+            jsonPath.add("'" + path + "'");
         }
         return jsonPath;
     }
@@ -254,7 +254,7 @@ public final class QueryJsonHelper {
      *
      * @param queryKeyword The string for which the longest matching keyword mapping is to be retrieved.
      * @return An entry containing the matched keyword and its corresponding value from the SQL_OPERATION_MAPPING,
-     *         or null if no match is found.
+     * or null if no match is found.
      */
     private static Map.Entry<String, String> queryKeywordMapper(String queryKeyword) {
         return SQL_OPERATION_MAPPING.entrySet().stream()

@@ -7,11 +7,13 @@ import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notif
 import { User } from './user.types';
 import { Page, Pageable } from '../../../../types';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { NzHashCodeModule } from 'ng-zorro-antd/hash-code';
+import { TruncateMiddlePipe } from '../../../core/truncate-middle.pipe';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, NzTableModule, NzNotificationModule, NzPaginationModule],
+  imports: [CommonModule, NzTableModule, NzNotificationModule, NzPaginationModule, NzHashCodeModule, TruncateMiddlePipe],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

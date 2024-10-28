@@ -36,7 +36,7 @@
     @for (item of userTable.data; track item.id) {
       <ng-container>
         <tr>
-          <td nzLeft>{{ item.code }}</td>
+          <td nzLeft>{{ item.code ?? "" | appTruncateMiddle }}</td>
           <td nzLeft>{{ item.username }}</td>
           <td nzLeft>{{ item.name }}</td>
           <td>{{ item.phone }}</td>

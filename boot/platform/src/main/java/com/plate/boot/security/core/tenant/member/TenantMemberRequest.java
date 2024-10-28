@@ -45,7 +45,7 @@ public class TenantMemberRequest extends TenantMember {
         QueryFragment fragment = QueryHelper
                 .query(this, List.of("users", "securityCode", "username"), "a");
 
-        StringJoiner criteria = fragment.whereSqlJoiner();
+        StringJoiner criteria = new StringJoiner(" AND ", "(", ")");
         if (!ObjectUtils.isEmpty(this.getUsers())) {
             criteria.add("a.user_code in :users");
             fragment.put("users", this.getUsers());
@@ -61,6 +61,6 @@ public class TenantMemberRequest extends TenantMember {
             fragment.put("username", this.getUsername());
         }
 
-        return QueryFragment.of(criteria, fragment);
+        return QueryFragment.of(fragment.getWhereSql() + criteria, fragment);
     }
 }
