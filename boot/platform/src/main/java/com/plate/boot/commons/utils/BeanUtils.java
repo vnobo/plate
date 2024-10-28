@@ -131,7 +131,7 @@ public final class BeanUtils implements InitializingBean {
                     .collect(Collectors.toSet());
             setStr.forEach(keyJoiner::add);
         }
-        return ContextUtils.encodeToMD5(keyJoiner.toString());
+        return ContextUtils.encodeToSHA256(keyJoiner.toString());
     }
 
     /**

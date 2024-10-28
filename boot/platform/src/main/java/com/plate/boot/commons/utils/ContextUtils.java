@@ -85,7 +85,7 @@ public final class ContextUtils implements InitializingBean {
         try {
             MD = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
-            throw RestServerException.withMsg("MD5 algorithm not found", e);
+            throw RestServerException.withMsg("SHA-256 algorithm not found", e);
         }
     }
     /**
@@ -128,7 +128,7 @@ public final class ContextUtils implements InitializingBean {
      * @param input The string to be encoded into MD5 hash.
      * @return A base64 encoded string representing the MD5 hash of the input string.
      */
-    public static String encodeToMD5(String input) {
+    public static String encodeToSHA256(String input) {
         byte[] bytes = MD.digest(input.getBytes(StandardCharsets.UTF_8));
         return Base64.getEncoder().encodeToString(bytes);
     }
