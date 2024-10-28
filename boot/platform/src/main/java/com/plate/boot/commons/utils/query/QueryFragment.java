@@ -1,5 +1,6 @@
 package com.plate.boot.commons.utils.query;
 
+import lombok.Getter;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -13,17 +14,18 @@ import java.util.*;
  * This record facilitates the construction of dynamic SQL queries with placeholders
  * for improved performance and security against SQL injection.
  */
+@Getter
 public class QueryFragment extends HashMap<String, Object> {
 
     private final String querySql;
 
-    private final StringJoiner whereSql;
+    private final String whereSql;
 
     private final String orderSql;
 
-    public QueryFragment(String querySql, StringJoiner whereSql, String orderSql, Map<String, Object> params) {
+    public QueryFragment(String querySql, String whereSql, String orderSql, Map<String, Object> params) {
         super(16);
-        Assert.notNull(whereSql, "whereSqlJoiner must not be null!");
+        Assert.notNull(whereSql, "getWhereSql must not be null!");
         Assert.notNull(params, "params must not be null!");
         this.querySql = querySql;
         this.whereSql = whereSql;
@@ -42,15 +44,15 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return A new {@link QueryFragment} instance encapsulating the given SQL fragment
      * and parameters map, ready for use in preparing a parameterized SQL statement.
      */
-    public static QueryFragment of(StringJoiner whereSql, Map<String, Object> params) {
+    public static QueryFragment of(String whereSql, Map<String, Object> params) {
         return of(null, whereSql, "", params);
     }
 
-    public static QueryFragment of(String querySql, StringJoiner whereSql, Map<String, Object> params) {
+    public static QueryFragment of(String querySql, String whereSql, Map<String, Object> params) {
         return of(querySql, whereSql, "", params);
     }
 
-    public static QueryFragment of(String querySql, StringJoiner whereSql, String orderSql, Map<String, Object> params) {
+    public static QueryFragment of(String querySql, String whereSql, String orderSql, Map<String, Object> params) {
         return new QueryFragment(querySql, whereSql, orderSql, params);
     }
 
@@ -68,26 +70,9 @@ public class QueryFragment extends HashMap<String, Object> {
         if (!ObjectUtils.isEmpty(pageable)) {
             orderSql = QueryHelper.applyPage(pageable, prefix);
         }
-        return QueryFragment.of(queryFragment.querySqlJoiner(), queryFragment.whereSqlJoiner(), orderSql, queryFragment);
+        return QueryFragment.of(queryFragment.getQuerySql(), queryFragment.getWhereSql(), orderSql, queryFragment);
     }
 
-    /**
-     * Retrieves the {@link StringJoiner} instance containing the dynamically
-     * constructed SQL fragments of this {@link QueryFragment} object.
-     * <p>
-     * This method is useful for accessing the SQL fragment that represents
-     * a part of a query, such as a WHERE clause, which can be further
-     * incorporated into a complete SQL statement.
-     *
-     * @return The {@link StringJoiner} object holding the concatenated SQL segments.
-     */
-    public StringJoiner whereSqlJoiner() {
-        return this.whereSql;
-    }
-
-    public String querySqlJoiner() {
-        return this.querySql;
-    }
 
     /**
      * Generates the WHERE clause part of a SQL query based on the stored conditions.
@@ -97,7 +82,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return A String forming the WHERE clause of the SQL query, or an empty string if no conditions are present.
      */
     public String whereSql() {
-        if (this.whereSql.length() > 0) {
+        if (!this.whereSql.isEmpty()) {
             return " WHERE " + this.whereSql;
         }
         return "";
