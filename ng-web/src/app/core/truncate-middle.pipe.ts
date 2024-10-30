@@ -10,8 +10,8 @@ export class TruncateMiddlePipe implements PipeTransform {
       return value;
     }
 
-    const start = value.substring(0, 2);
-    const end = value.substring(value.length - 2);
+    const start = value.substring(0, 4);
+    const end = value.substring(value.length - 5);
     const middle = '..';
 
     return start + middle + end;

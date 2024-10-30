@@ -28,8 +28,8 @@ public class UsersService extends AbstractDatabase {
 
     public Flux<UserResponse> search(UserRequest request, Pageable pageable) {
         QueryFragment queryFragment = QueryFragment.query(request, pageable);
-        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(),
-                queryFragment, UserResponse.class);
+        String key = BeanUtils.cacheKey(request, pageable);
+        return super.queryWithCache(key, queryFragment.querySql(), queryFragment, UserResponse.class);
     }
 
     public Mono<Page<UserResponse>> page(UserRequest request, Pageable pageable) {

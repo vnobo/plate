@@ -5,21 +5,15 @@ import com.github.f4b6a3.ulid.Ulid;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.security.SecurityDetails;
-import com.plate.boot.security.core.UserAuditor;
 import com.plate.boot.security.core.user.UsersService;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -88,6 +82,7 @@ public final class ContextUtils implements InitializingBean {
             throw RestServerException.withMsg("SHA-256 algorithm not found", e);
         }
     }
+
     /**
      * A shared static instance of Jackson's {@link ObjectMapper}, which is utilized for
      * serializing and deserializing Java objects to and from JSON format. This singleton pattern
@@ -169,63 +164,6 @@ public final class ContextUtils implements InitializingBean {
         return ReactiveSecurityContextHolder.getContext()
                 .map(securityContext -> securityContext.getAuthentication().getPrincipal())
                 .cast(SecurityDetails.class);
-    }
-
-    /**
-     * Serializes the {@link UserAuditor} objects contained within the properties of the given input object.
-     * This method inspects the object's properties to identify those of type {@link UserAuditor} and applies
-     * a serialization process to them. It is designed to work with objects that may contain auditor fields
-     * which need to be processed before further operations, such as saving to a database or sending over a network.
-     *
-     * @param <T>    The generic type of the object whose properties are to be serialized.
-     * @param object The object whose properties are to be inspected and potentially serialized.
-     * @return A {@link Mono} wrapping the original object after all {@link UserAuditor} properties have been processed.
-     * The Mono completes when all processing is finished.
-     */
-    public static <T> Mono<T> serializeUserAuditor(T object) {
-        PropertyDescriptor[] propertyDescriptors = BeanUtils.getPropertyDescriptors(object.getClass());
-        var propertyFlux = Flux.fromArray(propertyDescriptors)
-                .filter(propertyDescriptor -> propertyDescriptor.getPropertyType() == UserAuditor.class)
-                .flatMap(propertyDescriptor -> serializeUserAuditorProperty(object, propertyDescriptor));
-        return propertyFlux.then(Mono.just(object));
-    }
-
-    /**
-     * Handles the property descriptor for an object, particularly focusing on serializing
-     * a {@link UserAuditor} within the given object by fetching additional user details
-     * and updating the object accordingly.
-     *
-     * @param <T>                The type of the object containing the property to be handled.
-     * @param object             The object whose property described by {@code propertyDescriptor} is to be processed.
-     * @param propertyDescriptor The descriptor of the property within {@code object} that refers to a {@link UserAuditor}.
-     * @return A {@link Mono} emitting a message indicating success or failure:
-     * - If the user auditor is empty, emits a warning message and completes.
-     * - If successful in serializing the user auditor, emits a success message and completes.
-     * - Emits an error signal if there are issues invoking methods on the property descriptor.
-     */
-    private static <T> Mono<String> serializeUserAuditorProperty(T object, PropertyDescriptor propertyDescriptor) {
-        try {
-            UserAuditor userAuditor = (UserAuditor) propertyDescriptor.getReadMethod().invoke(object);
-            if (ObjectUtils.isEmpty(userAuditor)) {
-                String msg = "User auditor is empty, No serializable." + propertyDescriptor.getName();
-                log.warn(msg);
-                return Mono.just(msg);
-            }
-            return USERS_SERVICE.loadByCode(userAuditor.code()).cache().flatMap(user -> {
-                try {
-                    propertyDescriptor.getWriteMethod().invoke(object, UserAuditor.withUser(user));
-                    String msg = "User auditor serializable success. " + propertyDescriptor.getName();
-                    log.debug(msg);
-                    return Mono.just(msg);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    return Mono.error(RestServerException.withMsg(
-                            "User auditor serialization getWriteMethod invoke error!", e));
-                }
-            });
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            return Mono.error(RestServerException.withMsg(
-                    "User auditor serialization getReadMethod invoke error!", e));
-        }
     }
 
     /**

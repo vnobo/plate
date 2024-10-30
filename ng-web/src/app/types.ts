@@ -4,6 +4,11 @@ export interface UserAuditor {
   name: string | null;
 }
 
+export interface Search {
+  search?: string | null;
+  query?: Map<string, any>;
+}
+
 export interface Page<T> {
   content: T[];
   pageable: Pageable;
@@ -18,8 +23,7 @@ export interface Page<T> {
 }
 
 export interface Pageable {
-  pageNumber: number;
-  pageSize: number;
+  page: number;
+  size: number;
   sorts: string[];
-  sort?: [];
 }

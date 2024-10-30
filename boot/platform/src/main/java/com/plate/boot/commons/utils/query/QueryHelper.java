@@ -108,11 +108,11 @@ public final class QueryHelper {
             return QueryFragment.of(querySql.formatted(queryFormatted), "", bindParams);
         }
 
-        if (objectMap.containsKey("search")) {
+        if (objectMap.containsKey("search") && !ObjectUtils.isEmpty(objectMap.get("search"))) {
             String textSearch = (String) objectMap.get("search");
             queryFormatted[0] = ",ts_rank_cd(text_search, query) as rank";
-            queryFormatted[1] = ",to_tsquery(:textSearch) query";
-            whereAndJoiner.add("text_search @@ to_tsquery(:textSearch)");
+            queryFormatted[1] = ",to_tsquery('chinese',:textSearch) query";
+            whereAndJoiner.add("text_search @@ to_tsquery('chinese',:textSearch)");
             bindParams.put("textSearch", textSearch);
         }
 

@@ -1,6 +1,6 @@
-import { UserAuditor } from '../../../../types';
+import { Search, UserAuditor } from '../../../types';
 
-export interface User {
+export interface User extends Search {
   id?: number;
   code?: string;
   tenantCode?: string;

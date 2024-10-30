@@ -1,16 +1,27 @@
-<div class="row justify-content-between mb-2">
-  <div class="col-1">
+<div class="row my-3">
+  <div class="col">
     <button class="btn btn-primary btn-sm" type="button"><i class="bi bi-plus me-1"></i>新增</button>
   </div>
-  <div class="col-auto float-end">
-    <button (click)="refresh()" class="btn btn-success btn-sm mx-2" type="button">刷新</button>
+  <div class="col-4 mx-1">
+    <nz-input-group [nzAddOnAfter]="suffixIconButton" [nzSuffix]="suffixTemplate" nzSearch>
+      <input [(ngModel)]="search.search" name="search" nz-input placeholder="搜索用户" type="text" />
+    </nz-input-group>
+    <ng-template #suffixTemplate>
+      @if (search.search) {
+        <span nz-icon nzType="close" (click)="search.search = ''"></span>
+      }
+    </ng-template>
+    <ng-template #suffixIconButton>
+      <button (click)="onSearch()" nz-button nzSearch nzType="primary"><span nz-icon nzType="search"></span></button>
+    </ng-template>
   </div>
 </div>
+
 <nz-table
   #userTable
   (nzQueryParams)="onQueryParamsChange($event)"
-  [(nzPageIndex)]="page.pageNumber"
-  [(nzPageSize)]="page.pageSize"
+  [(nzPageIndex)]="page.page"
+  [(nzPageSize)]="page.size"
   [nzData]="userPage().content"
   [nzScroll]="{ x: '100%' }"
   [nzTotal]="userPage().totalElements"
@@ -21,13 +32,13 @@
   nzTableLayout="auto">
   <thead>
   <tr>
-    <th [nzSortFn]="true" nzColumnKey="code" nzLeft nzShowSort nzWidth="5rem">编码</th>
+    <th [nzSortFn]="true" nzColumnKey="code" nzLeft nzShowSort nzWidth="8rem">编码</th>
     <th [nzSortFn]="true" nzColumnKey="username" nzLeft nzShowSort>用户</th>
     <th [nzSortFn]="true" nzColumnKey="name" nzLeft nzShowSort>姓名</th>
     <th [nzSortFn]="true" nzColumnKey="phone" nzShowSort>电话</th>
-    <th [nzSortFn]="true" nzColumnKey="email" nzShowSort>邮箱</th>
-    <th>启用</th>
-    <th>锁定</th>
+    <th [nzSortFn]="true" nzColumnKey="email" nzShowSort nzWidth="12rem">邮箱</th>
+    <th nzWidth="4rem">启用</th>
+    <th nzWidth="4rem">锁定</th>
     <th nzWidth="10rem">登录时间</th>
     <th nzRight nzWidth="7rem">操作</th>
   </tr>
@@ -36,17 +47,35 @@
     @for (item of userTable.data; track item.id) {
       <ng-container>
         <tr>
-          <td nzLeft>{{ item.code ?? "" | appTruncateMiddle }}</td>
-          <td nzLeft>{{ item.username }}</td>
-          <td nzLeft>{{ item.name }}</td>
-          <td>{{ item.phone }}</td>
-          <td>{{ item.email }}</td>
-          <td>{{ item.disabled ? "否" : "是" }}</td>
-          <td>{{ item.accountLocked ? "是" : "否" }}</td>
-          <td>{{ item.loginTime | date : "short" }}</td>
+          <td nzLeft [cdkCopyToClipboard]="item.code ?? ''">
+            <ng-container [ngTemplateOutlet]="tableColumn"
+                          [ngTemplateOutletContext]="{ $implicit: item.code ?? '' | appTruncateMiddle }"></ng-container>
+          </td>
+          <td nzLeft [cdkCopyToClipboard]="item.username ?? ''">
+            <ng-container [ngTemplateOutlet]="tableColumn"
+                          [ngTemplateOutletContext]="{ $implicit: item.username ?? '' }"></ng-container>
+          </td>
+          <td nzLeft [cdkCopyToClipboard]="item.name ?? ''">
+            <ng-container [ngTemplateOutlet]="tableColumn"
+                          [ngTemplateOutletContext]="{ $implicit: item.name ?? '' }"></ng-container>
+          </td>
+          <td [cdkCopyToClipboard]="item.phone ?? ''">
+            <ng-container [ngTemplateOutlet]="tableColumn"
+                          [ngTemplateOutletContext]="{ $implicit: item.phone ?? '' }"></ng-container>
+          </td>
+          <td [cdkCopyToClipboard]="item.email ?? ''">
+            <ng-container [ngTemplateOutlet]="tableColumn"
+                          [ngTemplateOutletContext]="{ $implicit: item.email ?? '' }"></ng-container>
+          </td>
+          <td>{{ item.disabled ? '否' : '是' }}</td>
+          <td>{{ item.accountLocked ? '是' : '否' }}</td>
+          <td>{{ item.loginTime | date : 'short' }}</td>
           <td nzRight><a href="javascript:void(0)">编辑</a> | <a href="javascript:void(0)">删除</a></td>
         </tr>
       </ng-container>
     }
   </tbody>
 </nz-table>
+<ng-template #tableColumn let-value>
+  <span nz-tooltip nzTooltipColor="cyan" nzTooltipPlacement="rightTop" nzTooltipTitle="双击复制">{{ value }}</span>
+</ng-template>

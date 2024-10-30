@@ -1,7 +1,6 @@
 package com.plate.boot.commons.base;
 
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.r2dbc.convert.R2dbcConverter;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
@@ -72,7 +71,7 @@ public abstract class AbstractDatabase extends AbstractService {
      */
     protected <T> Flux<T> queryWithCache(Object key, Query query, Class<T> entityClass) {
         Flux<T> source = this.entityTemplate.select(query, entityClass);
-        source = source.flatMapSequential(ContextUtils::serializeUserAuditor);
+        source = source.flatMapSequential(BeanUtils::serializeUserAuditor);
         return queryWithCache(key, source).cache();
     }
 
@@ -96,7 +95,7 @@ public abstract class AbstractDatabase extends AbstractService {
         Flux<T> source = executeSpec
                 .map((row, rowMetadata) -> this.r2dbcConverter.read(entityClass, row, rowMetadata))
                 .all();
-        source = source.flatMapSequential(ContextUtils::serializeUserAuditor);
+        source = source.flatMapSequential(BeanUtils::serializeUserAuditor);
         return queryWithCache(key, source).cache();
     }
 
