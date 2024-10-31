@@ -1,4 +1,4 @@
-import { UserAuditor } from '../../../types';
+import { UserAuditor } from '../../../core/types';
 
 export interface Group {
   id?: number;

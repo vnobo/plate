@@ -1,42 +1,32 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
-import { NavigationEnd, NavigationStart, Router, RouterLink, RouterOutlet } from '@angular/router';
-import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzBackTopModule } from 'ng-zorro-antd/back-top';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, ElementRef, inject, OnInit, Renderer2 } from '@angular/core';
+import { NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet } from '@angular/router';
 import { ProgressBar } from './core/progress-bar';
+import { VERSION as VERSION_ZORRO } from 'ng-zorro-antd/version';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterLink,
-    RouterOutlet,
-    NzLayoutModule,
-    NzSpinModule,
-    NzBackTopModule,
-    MatProgressBarModule,
-  ],
-  templateUrl: './app.component.html',
+  imports: [RouterOutlet],
+  template: '<router-outlet></router-outlet>',
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  progressBar = inject(ProgressBar);
-  progressShow = toSignal(this.progressBar.progress$, { initialValue: false });
+  private readonly progressBar = inject(ProgressBar);
+  private readonly router = inject(Router);
 
-  constructor(private router: Router) {
+  constructor(el: ElementRef, renderer: Renderer2) {
+    renderer.setAttribute(el.nativeElement, 'ng-zorro-version', VERSION_ZORRO.full);
   }
 
   ngOnInit(): void {
+    let configLoad = false;
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
-        this.progressShow.apply(() => true);
+        configLoad = true;
+      }
+      if (configLoad && event instanceof NavigationError) {
       }
       if (event instanceof NavigationEnd) {
-        this.progressShow.apply(() => false);
       }
     });
   }

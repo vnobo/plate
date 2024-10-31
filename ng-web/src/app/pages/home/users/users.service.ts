@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { User } from './user.types';
-import { Page, Pageable } from '../../../types';
+import { Page, Pageable } from '../../../core/types';
 
 @Injectable({
   providedIn: 'root',

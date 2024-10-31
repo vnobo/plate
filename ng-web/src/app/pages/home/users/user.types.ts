@@ -1,4 +1,4 @@
-import { Search, UserAuditor } from '../../../types';
+import { Search, UserAuditor } from '../../../core/types';
 
 export interface User extends Search {
   id?: number;

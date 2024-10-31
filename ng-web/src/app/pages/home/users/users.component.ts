@@ -7,13 +7,15 @@ import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { Subject, takeUntil, tap } from 'rxjs';
 import { UsersService } from './users.service';
 import { User } from './user.types';
-import { Page, Pageable } from '../../../types';
-import { TruncateMiddlePipe } from '../../../core/truncate-middle.pipe';
+import { Page, Pageable } from '../../../core/types';
+import { TruncateMiddlePipe } from '../../../shared/truncate-middle.pipe';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { FormsModule } from '@angular/forms';
+import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
+import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 
 @Component({
   selector: 'app-users',
@@ -30,6 +32,8 @@ import { FormsModule } from '@angular/forms';
     NzInputModule,
     NzIconModule,
     NzButtonModule,
+    NzPageHeaderModule,
+    NzAvatarModule,
   ],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss',
