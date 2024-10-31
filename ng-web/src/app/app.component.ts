@@ -2,12 +2,17 @@ import { Component, ElementRef, inject, OnInit, Renderer2, signal } from '@angul
 import { NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet } from '@angular/router';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { VERSION as VERSION_ZORRO } from 'ng-zorro-antd/version';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, MatProgressBarModule],
-  template: `<div class="fixed-top"><mat-progress-bar *ngIf="progressShow()" mode="query"></mat-progress-bar></div>
+  imports: [RouterOutlet, MatProgressBarModule, NgIf],
+  template: `<div class="fixed-top">
+      @if(progressShow()){
+      <mat-progress-bar mode="query"></mat-progress-bar>
+      }
+    </div>
     <router-outlet></router-outlet>`,
 })
 export class AppComponent implements OnInit {
