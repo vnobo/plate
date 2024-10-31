@@ -6,17 +6,6 @@ import dayjs from 'dayjs';
 import { Authentication } from '../types';
 import { SessionStorageService } from '..';
 
-// 定义一个函数，用于判断用户是否已登录
-export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-  const auth = inject(AuthService);
-  const router = inject(Router);
-  if (auth.isLogged()) {
-    return true;
-  }
-  auth.redirectUrl = state.url;
-  return router.parseUrl(auth.loginUrl);
-};
-
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   readonly loginUrl = '/login';
