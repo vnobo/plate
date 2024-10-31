@@ -12,15 +12,11 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "angular.view-engine": false,
-  "Codegeex.CompletionModel": "CodeGeeX Pro[Beta]",
-  "Codegeex.Privacy": true,
   "merge-conflict.autoNavigateNextConflict.enabled": true,
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "prettier.bracketSameLine": true,
-  "Codegeex.CommitMessageStyle": "ConventionalCommits",
-  "Codegeex.RepoIndex": true,
   "angular-schematics.schematicsDefaultOptions": {
     "angular-*": {
       "style": "scss",
@@ -33,6 +29,5 @@
     "angular-page": {
       "skipChangeDetectionOnPush": true
     }
-  },
-  "Codegeex.CommitMessage.LanguagePreference": "English"
+  }
 }
