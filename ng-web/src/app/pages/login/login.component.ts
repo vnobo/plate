@@ -14,23 +14,16 @@ import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notif
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  private _subject$: Subject<void> = new Subject<void>();
-  private _loginSer = inject(LoginService);
-  private _message = inject(NzNotificationService);
-  private _router = inject(Router);
-  private _route = inject(ActivatedRoute);
+  private readonly _loginSer = inject(LoginService);
+  private readonly _message = inject(NzNotificationService);
+  private readonly _router = inject(Router);
+  private readonly _route = inject(ActivatedRoute);
+
+  private readonly _subject$: Subject<void> = new Subject<void>();
 
   loginForm = new FormGroup({
-    username: new FormControl('', [
-      Validators.required,
-      Validators.minLength(5),
-      Validators.maxLength(32),
-    ]),
-    password: new FormControl('', [
-      Validators.required,
-      Validators.minLength(6),
-      Validators.maxLength(32),
-    ]),
+    username: new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(32)]),
+    password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(32)]),
     remember: new FormControl(false),
   });
 

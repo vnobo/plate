@@ -1,29 +1,13 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import {
-  ActivatedRouteSnapshot,
-  CanActivateChildFn,
-  CanActivateFn,
-  CanMatchFn,
-  Router,
-  RouterStateSnapshot,
-} from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivateChildFn, CanActivateFn, CanMatchFn, Router, RouterStateSnapshot } from '@angular/router';
 import dayjs from 'dayjs';
-import { SessionStorageService } from './storage/session-storage';
 
-// 定义一个接口，用于存储用户的认证信息
-export interface Authentication {
-  token: string;
-  expires: number;
-  lastAccessTime: number;
-  details: any;
-}
+import { Authentication } from '../types';
+import { SessionStorageService } from '..';
 
 // 定义一个函数，用于判断用户是否已登录
-export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = (
-  route: ActivatedRouteSnapshot,
-  state: RouterStateSnapshot,
-) => {
+export const authGuard: CanMatchFn | CanActivateFn | CanActivateChildFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
   const auth = inject(AuthService);
   const router = inject(Router);
   if (auth.isLogged()) {

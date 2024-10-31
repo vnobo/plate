@@ -1,18 +1,19 @@
-import { Component, ElementRef, inject, OnInit, Renderer2 } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, Renderer2, signal } from '@angular/core';
 import { NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet } from '@angular/router';
-import { ProgressBar } from './core/progress-bar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { VERSION as VERSION_ZORRO } from 'ng-zorro-antd/version';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
-  template: '<router-outlet></router-outlet>',
-  styleUrls: ['./app.component.scss'],
+  imports: [RouterOutlet, MatProgressBarModule],
+  template: `<div class="fixed-top"><mat-progress-bar *ngIf="progressShow()" mode="query"></mat-progress-bar></div>
+    <router-outlet></router-outlet>`,
 })
 export class AppComponent implements OnInit {
-  private readonly progressBar = inject(ProgressBar);
   private readonly router = inject(Router);
+
+  progressShow = signal(false);
 
   constructor(el: ElementRef, renderer: Renderer2) {
     renderer.setAttribute(el.nativeElement, 'ng-zorro-version', VERSION_ZORRO.full);
@@ -23,10 +24,12 @@ export class AppComponent implements OnInit {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) {
         configLoad = true;
+        this.progressShow.set(true);
       }
       if (configLoad && event instanceof NavigationError) {
       }
       if (event instanceof NavigationEnd) {
+        this.progressShow.set(false);
       }
     });
   }

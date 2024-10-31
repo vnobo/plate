@@ -27,3 +27,10 @@ export interface Pageable {
   size: number;
   sorts: string[];
 }
+
+export interface Authentication {
+  token: string;
+  expires: number;
+  lastAccessTime: number;
+  details: any;
+}

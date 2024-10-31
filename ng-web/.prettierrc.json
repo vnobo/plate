@@ -5,10 +5,11 @@
   "endOfLine": "auto",
   "bracketSpacing": true,
   "jsxSingleQuote": true,
-  "printWidth": 180,
+  "printWidth": 140,
   "proseWrap": "always",
   "semi": true,
   "singleQuote": true,
   "tabWidth": 2,
-  "trailingComma": "all"
+  "trailingComma": "all",
+  "htmlWhitespaceSensitivity": "strict"
 }

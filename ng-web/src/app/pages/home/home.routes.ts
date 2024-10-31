@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './home.component';
 import { MenusComponent } from './menus/menus.component';
-import { authGuard } from '../../core/auth.service';
 import { UsersComponent } from './users/users.component';
 import { GroupsComponent } from './groups/groups.component';
 
