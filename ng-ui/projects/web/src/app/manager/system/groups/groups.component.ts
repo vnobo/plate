@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
   selector: 'app-groups',
   templateUrl: './groups.component.html',
   styleUrl: './groups.component.css',
+  standalone: true,
 })
 export class GroupsComponent {
 }
