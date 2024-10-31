@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { User } from './user.types';
-import { Page, Pageable } from '../../../../types';
+import { Page, Pageable } from '../../../core/types';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +13,7 @@ export class UsersService {
 
   pageUsers(request: User, page: Pageable): Observable<Page<User>> {
     let params = new HttpParams({ fromObject: request as never });
-    params = params.appendAll({ page: page.pageNumber - 1, size: page.pageSize });
+    params = params.appendAll({ page: page.page - 1, size: page.size });
     for (const sort in page.sorts) {
       params = params.appendAll({ sort: page.sorts[sort] });
     }

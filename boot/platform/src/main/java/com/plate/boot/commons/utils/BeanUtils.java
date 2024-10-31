@@ -10,19 +10,21 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.google.common.collect.Maps;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.exception.JsonPointerException;
-import com.plate.boot.commons.exception.RestServerException;
+import com.plate.boot.security.core.UserAuditor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.unit.DataSize;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.beans.PropertyDescriptor;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -36,35 +38,11 @@ import java.util.stream.Collectors;
 public final class BeanUtils implements InitializingBean {
 
     /**
-     * A private constant field representing an instance of ByteArrayOutputStream.
-     * This is used for efficient byte array output operations, typically in scenarios
-     * where frequent writes to a byte stream are necessary before ultimately
-     * converting the data into a byte array. The ByteArrayOutputStream is mutable
-     * and can be reused after calling reset() method.
-     */
-    private final static ByteArrayOutputStream BYTE_ARRAY_OUTPUT_STREAM;
-    /**
-     * A private constant field representing an object output stream.
-     * This stream is used for serializing objects and writing them to a byte stream.
-     * It is declared as final, indicating that once initialized, it should not be reassigned.
-     */
-    private final static ObjectOutputStream OBJECT_OUTPUT_STREAM;
-
-    /**
      * Represents the maximum size of data that can be held in memory.
      * This threshold is utilized to determine when data should be processed differently,
      * such as being written to disk, to avoid exceeding memory constraints.
      */
     public static DataSize MAX_IN_MEMORY_SIZE;
-
-    static {
-        try {
-            BYTE_ARRAY_OUTPUT_STREAM = new ByteArrayOutputStream();
-            OBJECT_OUTPUT_STREAM = new ObjectOutputStream(BYTE_ARRAY_OUTPUT_STREAM);
-        } catch (IOException e) {
-            throw RestServerException.withMsg("Init static ObjectOutputStream error.", e);
-        }
-    }
 
     /**
      * Converts a JSON node at a specified JSON Path into an object of the provided class type.
@@ -126,6 +104,12 @@ public final class BeanUtils implements InitializingBean {
     public static String cacheKey(Object... objects) {
         StringJoiner keyJoiner = new StringJoiner("&");
         for (var obj : objects) {
+            if (obj instanceof Pageable pageable) {
+                keyJoiner.add(pageable.getPageNumber() + "_" + pageable.getPageSize());
+                for (var sort : pageable.getSort()) {
+                    keyJoiner.add(sort.getProperty() + "_" + sort.getDirection().name());
+                }
+            }
             var objMap = BeanUtils.beanToMap(obj, true);
             var setStr = objMap.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue())
                     .collect(Collectors.toSet());
@@ -167,11 +151,9 @@ public final class BeanUtils implements InitializingBean {
             return DataSize.ofBytes(0);
         }
         try {
-            BYTE_ARRAY_OUTPUT_STREAM.reset();
-            OBJECT_OUTPUT_STREAM.writeObject(obj);
-            OBJECT_OUTPUT_STREAM.flush();
-            return DataSize.ofBytes(BYTE_ARRAY_OUTPUT_STREAM.size());
-        } catch (IOException e) {
+            int size = objectToBytes(obj).length;
+            return DataSize.ofBytes(size);
+        } catch (Exception e) {
             log.error("Bean Size IO exception! msg: {}", e.getLocalizedMessage());
             return DataSize.ofBytes(0);
         }
@@ -274,6 +256,53 @@ public final class BeanUtils implements InitializingBean {
         var type = new TypeReference<Map<String, Object>>() {
         };
         return objectMapper.convertValue(bean, type);
+    }
+
+    /**
+     * Serializes the {@link UserAuditor} objects contained within the properties of the given input object.
+     * This method inspects the object's properties to identify those of type {@link UserAuditor} and applies
+     * a serialization process to them. It is designed to work with objects that may contain auditor fields
+     * which need to be processed before further operations, such as saving to a database or sending over a network.
+     *
+     * @param <T>    The generic type of the object whose properties are to be serialized.
+     * @param object The object whose properties are to be inspected and potentially serialized.
+     * @return A {@link Mono} wrapping the original object after all {@link UserAuditor} properties have been processed.
+     * The Mono completes when all processing is finished.
+     */
+    public static <T> Mono<T> serializeUserAuditor(T object) {
+        PropertyDescriptor[] propertyDescriptors = org.springframework.beans.BeanUtils.getPropertyDescriptors(object.getClass());
+        var propertyFlux = Flux.fromArray(propertyDescriptors)
+                .filter(propertyDescriptor -> propertyDescriptor.getPropertyType() == UserAuditor.class)
+                .flatMap(propertyDescriptor -> serializeUserAuditorProperty(object, propertyDescriptor));
+        return propertyFlux.then(Mono.just(object));
+    }
+
+    /**
+     * Handles the property descriptor for an object, particularly focusing on serializing
+     * a {@link UserAuditor} within the given object by fetching additional user details
+     * and updating the object accordingly.
+     *
+     * @param <T>                The type of the object containing the property to be handled.
+     * @param object             The object whose property described by {@code propertyDescriptor} is to be processed.
+     * @param propertyDescriptor The descriptor of the property within {@code object} that refers to a {@link UserAuditor}.
+     * @return A {@link Mono} emitting a message indicating success or failure:
+     * - If the user auditor is empty, emits a warning message and completes.
+     * - If successful in serializing the user auditor, emits a success message and completes.
+     * - Emits an error signal if there are issues invoking methods on the property descriptor.
+     */
+    private static <T> Mono<String> serializeUserAuditorProperty(T object, PropertyDescriptor propertyDescriptor) {
+        UserAuditor userAuditor = (UserAuditor) ReflectionUtils.invokeMethod(propertyDescriptor.getReadMethod(), object);
+        if (ObjectUtils.isEmpty(userAuditor)) {
+            String msg = "User auditor is empty, No serializable." + propertyDescriptor.getName();
+            log.warn(msg);
+            return Mono.just(msg);
+        }
+        return ContextUtils.USERS_SERVICE.loadByCode(userAuditor.code()).cache().flatMap(user -> {
+            ReflectionUtils.invokeMethod(propertyDescriptor.getWriteMethod(), object, UserAuditor.withUser(user));
+            log.debug("{} serialize user auditor property: {}",
+                    object.getClass().getSimpleName(), propertyDescriptor.getName());
+            return Mono.just("User auditor serializable success. " + propertyDescriptor.getName());
+        });
     }
 
     /**

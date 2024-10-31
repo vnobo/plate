@@ -51,9 +51,9 @@ public class WebConfiguration implements WebFluxConfigurer {
         URI url = URI.create("http://localhost:" + serverPort + "/rsocket");
         return requesterBuilder.setupData("CommandClient").setupRoute("connect.setup")
                 .setupMetadata(credentials, authenticationMimeType)
-                .rsocketStrategies(strategies->strategies.encoder(new SimpleAuthenticationEncoder()))
+                .rsocketStrategies(strategies -> strategies.encoder(new SimpleAuthenticationEncoder()))
                 .rsocketConnector(connector -> connector.acceptor(handler.responder())
-                        .keepAlive(Duration.ofSeconds(5),Duration.ofMinutes(100))
+                        .keepAlive(Duration.ofSeconds(5), Duration.ofMinutes(100))
                         .reconnect(Retry.backoff(100, Duration.ofMillis(500))))
                 .websocket(url);
     }
