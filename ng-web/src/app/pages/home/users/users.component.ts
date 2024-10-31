@@ -50,11 +50,9 @@ export class UsersComponent implements OnInit, OnDestroy {
     tenantCode: '0',
   };
 
-  constructor(private _userSer: UsersService, private _message: NzNotificationService) {
-  }
+  constructor(private _userSer: UsersService, private _message: NzNotificationService) {}
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   onSearch() {
     this.loadData(this.search, this.page).subscribe(res => this._message.success('数据加载成功!', ``, { nzDuration: 3000 }));
