@@ -6,6 +6,7 @@
     "cipchk.ng-zorro-vscode",
     "esbenp.prettier-vscode",
     "stylelint.vscode-stylelint",
-    "hossaini.bootstrap-intellisense"
+    "hossaini.bootstrap-intellisense",
+    "dbaeumer.vscode-eslint"
   ]
 }
