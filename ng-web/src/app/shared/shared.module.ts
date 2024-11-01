@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { SHARED_ZORRO_MODULES } from './shared-zorro.module';
 import { NgModule, Type } from '@angular/core';
 import { TruncateMiddlePipe } from './truncate-middle.pipe';
+import { MATERIAL_MODULES } from './material.module';
 
 // #region your componets & directives
 const COMPONENTS: Array<Type<any>> = [];
@@ -21,6 +22,7 @@ const DIRECTIVES: Array<Type<any>> = [TruncateMiddlePipe];
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
+    ...MATERIAL_MODULES,
     ...SHARED_ZORRO_MODULES,
     // your components
     ...COMPONENTS,

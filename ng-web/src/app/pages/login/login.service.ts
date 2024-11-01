@@ -3,12 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import dayjs from 'dayjs';
 import { AuthService, BrowserStorage } from '../../core';
-import { Authentication } from '../../core/types';
-
-export interface Credentials {
-  password: string | null | undefined;
-  username: string | null | undefined;
-}
+import { Authentication, Credentials } from '../../core/types';
 
 @Injectable({
   providedIn: 'root',

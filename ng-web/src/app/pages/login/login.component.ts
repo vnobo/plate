@@ -2,14 +2,15 @@ import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
-import { Credentials, LoginService } from './login.service';
-import { CommonModule } from '@angular/common';
-import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
+import { LoginService } from './login.service';
+import { SHARED_IMPORTS } from '../../shared/ shared-imports';
+import { Credentials } from '../../core/types';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NzNotificationModule],
+  imports: [SHARED_IMPORTS],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })

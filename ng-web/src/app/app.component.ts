@@ -8,12 +8,24 @@ import { NgIf } from '@angular/common';
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, MatProgressBarModule, NgIf],
-  template: `<div class="fixed-top">
-      @if(progressShow()){
-      <mat-progress-bar mode="query"></mat-progress-bar>
-      }
+  template: `
+    <div class="fixed-top">
+      <mat-progress-bar *ngIf="progressShow()" mode="query"></mat-progress-bar>
     </div>
-    <router-outlet></router-outlet>`,
+    <router-outlet></router-outlet>
+  `,
+  styles: `
+    :host {
+      min-height: 100%;
+      min-width: 100%;
+    }
+
+    .layout {
+      min-height: 100%;
+      min-width: 100%;
+      display: block;
+    }
+  `,
 })
 export class AppComponent implements OnInit {
   private readonly router = inject(Router);
@@ -32,8 +44,12 @@ export class AppComponent implements OnInit {
         this.progressShow.set(true);
       }
       if (configLoad && event instanceof NavigationError) {
+        configLoad = false;
+        this.progressShow.set(false);
+        console.error(event.error);
       }
       if (event instanceof NavigationEnd) {
+        configLoad = false;
         this.progressShow.set(false);
       }
     });

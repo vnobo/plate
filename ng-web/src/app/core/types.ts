@@ -34,3 +34,8 @@ export interface Authentication {
   lastAccessTime: number;
   details: any;
 }
+
+export interface Credentials {
+  password: string | null | undefined;
+  username: string | null | undefined;
+}

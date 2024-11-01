@@ -16,25 +16,12 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { FormsModule } from '@angular/forms';
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
+import { SharedModule } from '../../../shared/shared.module';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    NzTableModule,
-    NzNotificationModule,
-    NzPaginationModule,
-    TruncateMiddlePipe,
-    ClipboardModule,
-    NzToolTipModule,
-    NzInputModule,
-    NzIconModule,
-    NzButtonModule,
-    NzPageHeaderModule,
-    NzAvatarModule,
-  ],
+  imports: [SharedModule],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
