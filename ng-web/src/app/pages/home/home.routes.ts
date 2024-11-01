@@ -4,12 +4,13 @@ import { MenusComponent } from './menus/menus.component';
 import { UsersComponent } from './users/users.component';
 import { GroupsComponent } from './groups/groups.component';
 import { authGuard } from '../../core/pages.guard';
+import { BasicLayoutComponent } from '../../layout/basic/basic.component';
 
 export const HOME_ROUTES: Routes = [
   {
     path: '',
     canActivate: [authGuard],
-    component: HomeComponent,
+    component: BasicLayoutComponent,
     data: {
       title: '管理后台',
     },
