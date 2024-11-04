@@ -34,7 +34,7 @@ export const appConfig: ApplicationConfig = {
     ),
     { provide: LOCALE_ID, useValue: 'zh_CN' },
     provideRouter(routes, withComponentInputBinding()),
-    provideClientHydration(withEventReplay()),
-    provideExperimentalZonelessChangeDetection(), provideAnimationsAsync(),
+    provideExperimentalZonelessChangeDetection(),
+    provideAnimationsAsync(),
   ],
 };

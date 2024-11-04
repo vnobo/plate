@@ -14,17 +14,17 @@ import { Credentials } from '../../core/types';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginComponent implements OnInit {
+  private readonly _router = inject(Router);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _loginSer = inject(LoginService);
+  private readonly _message = inject(NzNotificationService);
+
   loginForm = new FormGroup({
     username: new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(32)]),
     password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(32)]),
     remember: new FormControl(false),
   });
-  private readonly _loginSer = inject(LoginService);
-  private readonly _message = inject(NzNotificationService);
-  private readonly _router = inject(Router);
-  private readonly _route = inject(ActivatedRoute);
-  private readonly _subject$: Subject<void> = new Subject<void>();
 
   onSubmit(): void {
     if (this.loginForm.valid) {
@@ -53,7 +53,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   login(credentials: Credentials) {
     this._loginSer
       .login(credentials)
-      .pipe(takeUntil(this._subject$), debounceTime(100), distinctUntilChanged())
+      .pipe(debounceTime(100), distinctUntilChanged())
       .subscribe({
         next: res => {
           this._message.success('登录系统成功', `欢迎 ${res.details.name} 登录系统!`);
@@ -64,10 +64,5 @@ export class LoginComponent implements OnInit, OnDestroy {
           this._loginSer.logout();
         },
       });
-  }
-
-  ngOnDestroy(): void {
-    this._subject$.next();
-    this._subject$.complete();
   }
 }
