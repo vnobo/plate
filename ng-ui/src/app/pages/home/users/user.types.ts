@@ -1,4 +1,4 @@
-import { Search, UserAuditor } from 'plate-types';
+import { Search, UserAuditor } from 'global-types';
 
 export interface User extends Search {
   id?: number;

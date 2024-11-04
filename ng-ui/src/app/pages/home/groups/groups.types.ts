@@ -1,4 +1,4 @@
-import { UserAuditor } from 'plate-types';
+import { UserAuditor } from 'global-types';
 
 export interface Group {
   id?: number;

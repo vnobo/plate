@@ -1,4 +1,4 @@
-import { UserAuditor } from 'plate-types';
+import { UserAuditor } from 'global-types';
 
 export interface Menu {
   id?: number;

@@ -13,7 +13,7 @@ export const routes: Routes = [
     data: { title: '管理平台' },
   },
   {
-    path: '',
+    path: 'passport',
     loadChildren: () => import('./pages/index').then(m => m.PASSPORT_ROUTES),
     data: { title: '管理平台' },
   },

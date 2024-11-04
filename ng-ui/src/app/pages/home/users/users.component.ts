@@ -5,7 +5,7 @@ import { Subject, takeUntil, tap } from 'rxjs';
 import { UsersService } from './users.service';
 import { User } from './user.types';
 import { SharedModule } from '../../../shared/shared.module';
-import { Page, Pageable } from 'plate-types';
+import { Page, Pageable } from 'global-types';
 
 @Component({
   selector: 'app-users',

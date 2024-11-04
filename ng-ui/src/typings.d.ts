@@ -1,4 +1,4 @@
-declare module 'plate-types' {
+declare module 'global-types' {
   export interface UserAuditor {
     code: string;
     username: string | null;

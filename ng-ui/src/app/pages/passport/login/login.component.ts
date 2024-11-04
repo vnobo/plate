@@ -5,7 +5,7 @@ import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { SHARED_IMPORTS } from '../../../shared/ shared-imports';
 import { LoginService } from './login.service';
-import { Credentials } from 'plate-types';
+import { Credentials } from 'global-types';
 
 @Component({
   selector: 'app-login',
