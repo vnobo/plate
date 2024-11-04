@@ -2,11 +2,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import dayjs from 'dayjs';
 
-import { Authentication } from '../types';
+import { Authentication } from '../../../typings';
 import { SessionStorageService } from '..';
 
 @Injectable({ providedIn: 'root' })
-export class AuthService {
+export class TokenService {
   readonly loginUrl = '/login';
   public redirectUrl = '';
   private _storage = inject(SessionStorageService);

@@ -1,11 +1,11 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { Credentials } from '../../../../typings';
+import { SHARED_IMPORTS } from '../../../shared/ shared-imports';
 import { LoginService } from './login.service';
-import { SHARED_IMPORTS } from '../../shared/ shared-imports';
-import { Credentials } from '../../core/types';
 
 @Component({
   selector: 'app-login',

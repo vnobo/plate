@@ -1,4 +1,4 @@
-import { UserAuditor } from '../../../core/types';
+import { UserAuditor } from '../../../../typings';
 
 export interface Menu {
   id?: number;

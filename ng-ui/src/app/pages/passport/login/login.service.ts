@@ -2,9 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import dayjs from 'dayjs';
-import { AuthService, BrowserStorage } from '../../core';
-import { Authentication, Credentials } from '../../core/types';
-
+import { AuthService, BrowserStorage } from '../../../core';
+import { Authentication, Credentials } from '../../../../typings';
 @Injectable({
   providedIn: 'root',
 })

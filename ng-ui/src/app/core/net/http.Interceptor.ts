@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { ProgressBar } from '../services/progress-bar';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { AuthService } from '../services/auth.service';
+import { TokenService } from '../services/token.service';
 
 /**
  * 默认的HTTP拦截器，用于处理所有HTTP请求。
@@ -47,7 +47,7 @@ function defaultInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn): Obs
  */
 function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
   const _message = inject(NzMessageService);
-  const _auth = inject(AuthService);
+  const _auth = inject(TokenService);
   const _route = inject(Router);
   return next(req).pipe(
     catchError(error => {
@@ -82,7 +82,7 @@ function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
  * @returns 返回一个 Observable，包含修改后的 HTTP 事件
  */
 function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
-  const _auth = inject(AuthService);
+  const _auth = inject(TokenService);
   if (!_auth.isLogged()) {
     return next(req);
   }

@@ -1,12 +1,23 @@
 import { Routes } from '@angular/router';
-import { LoginComponent, PageNotFoundComponent } from './pages';
+import { LoginComponent } from './pages';
 
 export const routes: Routes = [
   {
-    path: 'login',
-    component: LoginComponent,
-    data: { title: '登录页面' },
+    path: 'welcome',
+    loadChildren: () => import('./pages/index').then(m => m.WELCOME_ROUTES),
+    data: { title: '欢迎主页' },
   },
-  { path: '', pathMatch: 'full', redirectTo: '/login' },
-  { path: '**', component: PageNotFoundComponent },
+  {
+    path: 'home',
+    loadChildren: () => import('./pages/index').then(m => m.HOME_ROUTES),
+    data: { title: '管理平台' },
+  },
+  {
+    path: '',
+    loadChildren: () => import('./pages/index').then(m => m.PASSPORT_ROUTES),
+    data: { title: '管理平台' },
+  },
+  { path: '', pathMatch: 'full', redirectTo: '/passport' },
+  { path: 'exception', loadChildren: () => import('./pages/index').then(m => m.EXCEPTION_ROUTES) },
+  { path: '**', redirectTo: 'exception/404' },
 ];

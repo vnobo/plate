@@ -43,7 +43,7 @@
               "@angular/material/prebuilt-themes/magenta-violet.css",
               "bootstrap-icons/font/bootstrap-icons.css",
               "src/styles/theme.less",
-              "src/styles/styles.scss"
+              "src/styles.scss"
             ],
             "scripts": ["bootstrap/dist/js/bootstrap.bundle.js"],
             "allowedCommonJsDependencies": ["dayjs"]

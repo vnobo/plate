@@ -2,14 +2,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { User } from './user.types';
-import { Page, Pageable } from '../../../core/types';
+import { Page, Pageable } from '../../../../typings';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UsersService {
-  constructor(private http: HttpClient) {
-  }
+  constructor(private http: HttpClient) {}
 
   pageUsers(request: User, page: Pageable): Observable<Page<User>> {
     let params = new HttpParams({ fromObject: request as never });

@@ -4,7 +4,7 @@ import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { Subject, takeUntil, tap } from 'rxjs';
 import { UsersService } from './users.service';
 import { User } from './user.types';
-import { Page, Pageable } from '../../../core/types';
+import { Page, Pageable } from '../../../../typings';
 import { SharedModule } from '../../../shared/shared.module';
 
 @Component({
@@ -29,11 +29,9 @@ export class UsersComponent implements OnInit, OnDestroy {
   };
   private _subject: Subject<void> = new Subject<void>();
 
-  constructor(private _userSer: UsersService, private _message: NzNotificationService) {
-  }
+  constructor(private _userSer: UsersService, private _message: NzNotificationService) {}
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   onSearch() {
     this.loadData(this.search, this.page).subscribe(res => this._message.success('数据加载成功!', ``, { nzDuration: 3000 }));

@@ -1,4 +1,8 @@
 export { MenusService } from './home/menus/menus.service';
-export { LoginService } from './login/login.service';
-export { LoginComponent } from './login/login.component';
-export { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+export { LoginComponent } from './passport/login/login.component';
+export { LoginService } from './passport/login/login.service';
+
+export { HOME_ROUTES } from './home/home.routes';
+export { WELCOME_ROUTES } from './welcome/welcome.routes';
+export { PASSPORT_ROUTES } from './passport/passport.routes';
+export { EXCEPTION_ROUTES } from './exception/exception.routes';
