@@ -1,4 +1,4 @@
-import { Search, UserAuditor } from '../../../../typings';
+import { Search, UserAuditor } from 'plate-types';
 
 export interface User extends Search {
   id?: number;

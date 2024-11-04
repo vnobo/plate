@@ -2,8 +2,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import dayjs from 'dayjs';
 
-import { Authentication } from '../../../typings';
 import { SessionStorageService } from '..';
+import { Authentication } from 'plate-types';
 
 @Injectable({ providedIn: 'root' })
 export class TokenService {
