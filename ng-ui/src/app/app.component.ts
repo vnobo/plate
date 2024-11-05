@@ -39,8 +39,6 @@ export class AppComponent implements OnInit {
         this.progressShow.set(true);
       }
       if (configLoad && event instanceof NavigationError) {
-        configLoad = false;
-        this.progressShow.set(false);
         console.error(event.error);
       }
       if (event instanceof NavigationEnd) {

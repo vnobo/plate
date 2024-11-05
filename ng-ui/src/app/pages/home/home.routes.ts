@@ -37,10 +37,8 @@ export const HOME_ROUTES: Routes = [
       },
       {
         path: '',
-        data: {
-          title: '菜单管理',
-        },
-        component: MenusComponent,
+        pathMatch: 'full',
+        redirectTo: 'users',
       },
     ],
   },
