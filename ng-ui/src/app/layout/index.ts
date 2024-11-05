@@ -1,2 +1,2 @@
 export * from './basic/basic.component';
-export * from '../pages/exception/not-found.component';
+export * from './single/single-layout.component';

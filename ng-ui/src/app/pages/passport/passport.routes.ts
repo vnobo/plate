@@ -1,19 +1,25 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './login/login.component';
+import { SingleLayoutComponent } from '../../layout';
 
 export const PASSPORT_ROUTES: Routes = [
   // passport
   {
-    path: 'login',
-    component: LoginComponent,
-    data: { title: '登录' },
-  },
-  {
     path: '',
-    pathMatch: 'full',
-    redirectTo: 'login',
-  },
-  /**{
+    component: SingleLayoutComponent,
+    children: [
+      {
+        path: 'login',
+        component: LoginComponent,
+        data: { title: '登录' },
+      },
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'login',
+      },
+
+      /**{
         path: 'register',
         component: UserRegisterComponent,
         data: { title: '注册', titleI18n: 'app.register.register' },
@@ -28,6 +34,8 @@ export const PASSPORT_ROUTES: Routes = [
         component: UserLockComponent,
         data: { title: '锁屏', titleI18n: 'app.lock' },
       },*/
+    ],
+  },
   // 单页不包裹Layout
   //{ path: 'passport/callback/:type', component: CallbackComponent },
 ];

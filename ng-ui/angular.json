@@ -40,12 +40,12 @@
               }
             ],
             "styles": [
-              "@angular/material/prebuilt-themes/magenta-violet.css",
               "bootstrap-icons/font/bootstrap-icons.css",
+              "@tabler/core/dist/css/tabler.css",
               "src/styles/theme.less",
               "src/styles.scss"
             ],
-            "scripts": ["bootstrap/dist/js/bootstrap.bundle.js"],
+            "scripts": ["@tabler/core/dist/js/tabler.js"],
             "allowedCommonJsDependencies": ["dayjs"]
           },
           "configurations": {
