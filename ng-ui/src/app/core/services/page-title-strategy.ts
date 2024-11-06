@@ -9,9 +9,10 @@ export class PageTitleStrategy extends TitleStrategy {
   }
 
   override updateTitle(routerState: RouterStateSnapshot) {
-    const title = this.buildTitle(routerState);
-    if (title !== undefined) {
-      this.title.setTitle(`盘子管理平台 | ${title}`);
+    let title = this.buildTitle(routerState);
+    if (title == '' || title == null || title == undefined) {
+      title = routerState.root.data['title'];
     }
+    this.title.setTitle(`盘子管理平台 | ${title}`);
   }
 }

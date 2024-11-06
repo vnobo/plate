@@ -2,13 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import dayjs from 'dayjs';
-import { Authentication, AuthService } from '../../core/auth.service';
-import { BrowserStorage } from '../../core/storage/browser-storage';
-
-export interface Credentials {
-  password: string | null | undefined;
-  username: string | null | undefined;
-}
+import { AuthService, BrowserStorage } from '../../core';
+import { Authentication, Credentials } from '../../core/types';
 
 @Injectable({
   providedIn: 'root',
@@ -41,7 +36,7 @@ export class LoginService {
     return this._http.get<Authentication>('/oauth2/login', { headers: headers }).pipe(
       tap(authentication => {
         this._auth.login(authentication);
-      })
+      }),
     );
   }
 

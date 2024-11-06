@@ -2,35 +2,29 @@ import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
-import { Credentials, LoginService } from './login.service';
-import { CommonModule } from '@angular/common';
-import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
+import { LoginService } from './login.service';
+import { SHARED_IMPORTS } from '../../shared/ shared-imports';
+import { Credentials } from '../../core/types';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NzNotificationModule],
+  imports: [SHARED_IMPORTS],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  private _subject$: Subject<void> = new Subject<void>();
-  private _loginSer = inject(LoginService);
-  private _message = inject(NzNotificationService);
-  private _router = inject(Router);
-  private _route = inject(ActivatedRoute);
+  private readonly _loginSer = inject(LoginService);
+  private readonly _message = inject(NzNotificationService);
+  private readonly _router = inject(Router);
+  private readonly _route = inject(ActivatedRoute);
+
+  private readonly _subject$: Subject<void> = new Subject<void>();
 
   loginForm = new FormGroup({
-    username: new FormControl('', [
-      Validators.required,
-      Validators.minLength(5),
-      Validators.maxLength(32),
-    ]),
-    password: new FormControl('', [
-      Validators.required,
-      Validators.minLength(6),
-      Validators.maxLength(32),
-    ]),
+    username: new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(32)]),
+    password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(32)]),
     remember: new FormControl(false),
   });
 

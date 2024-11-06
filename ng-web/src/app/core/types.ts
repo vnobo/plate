@@ -27,3 +27,15 @@ export interface Pageable {
   size: number;
   sorts: string[];
 }
+
+export interface Authentication {
+  token: string;
+  expires: number;
+  lastAccessTime: number;
+  details: any;
+}
+
+export interface Credentials {
+  password: string | null | undefined;
+  username: string | null | undefined;
+}
