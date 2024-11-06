@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { MenusService } from '../../../pages';
+import { MenusService } from '@app/pages';
 
 @Component({
   selector: 'layout-basic-sidebar',

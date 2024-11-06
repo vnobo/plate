@@ -1,6 +1,6 @@
 import { Component, inject, output, signal } from '@angular/core';
-import { SharedModule } from '../../../shared/shared.module';
-import { LoginService } from '../../../pages';
+import { SharedModule } from '@app/shared/shared.module';
+import { LoginService } from '@app/pages';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({

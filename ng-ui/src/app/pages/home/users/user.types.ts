@@ -1,4 +1,4 @@
-import { Search, UserAuditor } from 'global-types';
+import { Search, UserAuditor } from '@app/core/types';
 
 export interface User extends Search {
   id?: number;

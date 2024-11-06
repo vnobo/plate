@@ -3,7 +3,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import dayjs from 'dayjs';
 
 import { SessionStorageService } from '..';
-import { Authentication } from 'global-types';
+import { Authentication } from '@app/core';
 
 @Injectable({ providedIn: 'root' })
 export class TokenService {

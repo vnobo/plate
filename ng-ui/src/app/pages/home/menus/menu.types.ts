@@ -1,4 +1,4 @@
-import { UserAuditor } from 'global-types';
+import { UserAuditor } from '@app/core/types';
 
 export interface Menu {
   id?: number;

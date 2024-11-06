@@ -2,8 +2,8 @@ import { Routes } from '@angular/router';
 import { MenusComponent } from './menus/menus.component';
 import { UsersComponent } from './users/users.component';
 import { GroupsComponent } from './groups/groups.component';
-import { authGuard } from '../../core/pages.guard';
-import { BasicLayoutComponent } from '../../layout/basic/basic.component';
+import { authGuard } from '@app/core/pages.guard';
+import { BasicLayoutComponent } from '@app/layout';
 
 export const HOME_ROUTES: Routes = [
   {

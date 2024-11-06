@@ -2,10 +2,11 @@ import { inject } from '@angular/core';
 import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { catchError, finalize, Observable, throwError, timeout } from 'rxjs';
 import { Router } from '@angular/router';
-import { environment } from '../../../environments/environment';
-import { ProgressBar } from '../services/progress-bar';
+import { environment } from '@environment/environment';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { TokenService } from '../services/token.service';
+
+import { ProgressBar } from '@app/core/services/progress-bar';
+import { TokenService } from '@app/core/services/token.service';
 
 /**
  * 默认的HTTP拦截器，用于处理所有HTTP请求。

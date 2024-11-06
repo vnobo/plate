@@ -1,8 +1,8 @@
-import { afterNextRender, Component, ElementRef, inject, OnInit, Renderer2, signal } from '@angular/core';
-import { NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet } from '@angular/router';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { VERSION as VERSION_ZORRO } from 'ng-zorro-antd/version';
 import { NgIf } from '@angular/common';
+import { Component, ElementRef, inject, OnInit, Renderer2, signal } from '@angular/core';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet } from '@angular/router';
+import { VERSION as VERSION_ZORRO } from 'ng-zorro-antd/version';
 
 @Component({
   selector: 'app-root',

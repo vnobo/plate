@@ -3,9 +3,9 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { SHARED_IMPORTS } from '../../../shared/ shared-imports';
-import { LoginService } from './login.service';
-import { Credentials } from 'global-types';
+import { Credentials } from '@app/core/types';
+import { SHARED_IMPORTS } from '@app/shared/shared-imports';
+import { LoginService } from '@app/pages';
 
 @Component({
   selector: 'app-login',

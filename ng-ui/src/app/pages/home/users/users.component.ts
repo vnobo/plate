@@ -4,8 +4,8 @@ import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { Subject, takeUntil, tap } from 'rxjs';
 import { UsersService } from './users.service';
 import { User } from './user.types';
-import { SharedModule } from '../../../shared/shared.module';
-import { Page, Pageable } from 'global-types';
+import { SharedModule } from '@app/shared/shared.module';
+import { Page, Pageable } from '@app/core/types';
 
 @Component({
   selector: 'app-users',

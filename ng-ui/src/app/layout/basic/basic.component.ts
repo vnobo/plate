@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { LayoutSidebarComponent } from './widgets/sidebar.component';
 import { LayoutHeaderComponent } from './widgets/header.component';
-import { SharedModule } from '../../shared/shared.module';
+import { SharedModule } from '@app/shared/shared.module';
 
 @Component({
   selector: 'layout-basic',
