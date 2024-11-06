@@ -7,6 +7,14 @@
     "esbenp.prettier-vscode",
     "stylelint.vscode-stylelint",
     "hossaini.bootstrap-intellisense",
-    "dbaeumer.vscode-eslint"
+    "dbaeumer.vscode-eslint",
+    "formulahendry.auto-rename-tag",
+    "formulahendry.auto-close-tag",
+    "johnpapa.angular2",
+    "tencent-cloud.coding-copilot",
+    "zignd.html-css-class-completion",
+    "davidanson.vscode-markdownlint",
+    "christian-kohler.npm-intellisense",
+    "christian-kohler.path-intellisense"
   ]
 }
