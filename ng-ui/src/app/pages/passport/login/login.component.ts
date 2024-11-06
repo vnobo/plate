@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, Renderer2 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
@@ -25,7 +25,9 @@ export class LoginComponent implements OnInit {
     password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(32)]),
     remember: new FormControl(false),
   });
-
+  constructor(el: ElementRef, renderer: Renderer2) {
+    renderer.setAttribute(el.nativeElement, 'a', 'a');
+  }
   onSubmit(): void {
     if (this.loginForm.valid) {
       const credentials = this.loginForm.value as Credentials;
