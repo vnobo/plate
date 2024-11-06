@@ -26,12 +26,30 @@ public class UsersService extends AbstractDatabase {
     private final PasswordEncoder passwordEncoder;
     private final UsersRepository usersRepository;
 
+    /**
+     * Searches for users based on the provided user request and pagination details.
+     *
+     * @param request  The user request object containing parameters needed for the search.
+     * @param pageable The pagination information specifying the page number and size of each page.
+     * @return A Flux object containing a stream of UserResponse data.
+     */
     public Flux<UserResponse> search(UserRequest request, Pageable pageable) {
         QueryFragment queryFragment = QueryFragment.query(request, pageable);
         String key = BeanUtils.cacheKey(request, pageable);
         return super.queryWithCache(key, queryFragment.querySql(), queryFragment, UserResponse.class);
     }
 
+    /**
+     * Retrieves a paged list of users based on the provided request and pagination settings.
+     * <p>
+     * This method performs a search query using the given {@link UserRequest} and {@link Pageable} parameters,
+     * and then retrieves the total count of matching records. The results are then combined into a single
+     * {@link Page} object, which includes both the list of users and the total count, allowing for pagination.
+     *
+     * @param request  The {@link UserRequest} object containing the search criteria.
+     * @param pageable The {@link Pageable} object defining the pagination settings.
+     * @return A {@link Mono} that emits a single {@link Page} object containing the paged list of users and the total count.
+     */
     public Mono<Page<UserResponse>> page(UserRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment queryFragment = request.querySql(List.of());
@@ -40,10 +58,22 @@ public class UsersService extends AbstractDatabase {
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
+    /**
+     * Loads a user by their unique code using a cached query.
+     * <p>
+     * This method retrieves a user from the repository based on the provided code.
+     * It utilizes a cached query to improve performance, reducing the need for repeated database hits
+     * for the same code. If a user with the given code is found, it is emitted as a single value in a {@link Mono}.
+     * If no user is found, an empty {@link Mono} is returned.
+     *
+     * @param code The unique code used to identify the user.
+     * @return A {@link Mono} that emits a single {@link User} object if found, or an empty {@link Mono} if no user matches the code.
+     */
     public Mono<User> loadByCode(String code) {
         var userMono = this.usersRepository.findByCode(code).flux();
         return super.queryWithCache(code, userMono).singleOrEmpty();
     }
+
 
     /**
      * Adds a new user based on the provided UserRequest.
