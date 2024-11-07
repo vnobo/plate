@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, OnInit, Renderer2 } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnInit, Renderer2 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
@@ -14,20 +14,31 @@ import { LoginService } from '@app/pages';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, AfterViewInit {
   private readonly _router = inject(Router);
   private readonly _route = inject(ActivatedRoute);
-  private readonly _loginSer = inject(LoginService);
+  private readonly _el = inject(ElementRef);
   private readonly _message = inject(NzNotificationService);
+  private readonly _loginSer = inject(LoginService);
 
   loginForm = new FormGroup({
     username: new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(32)]),
     password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(32)]),
     remember: new FormControl(false),
   });
-  constructor(el: ElementRef, renderer: Renderer2) {
-    renderer.setAttribute(el.nativeElement, 'a', 'a');
+
+  ngAfterViewInit(): void {
+    var tooltipTriggerList = [].slice.call(this._el.nativeElement.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl: any) {
+      let options = {
+        delay: { show: 50, hide: 50 },
+        html: tooltipTriggerEl.getAttribute('data-bs-html') === 'true',
+        placement: tooltipTriggerEl.getAttribute('data-bs-placement') ?? 'auto',
+      };
+      return new bootstrap.Tooltip(tooltipTriggerEl, options);
+    });
   }
+
   onSubmit(): void {
     if (this.loginForm.valid) {
       const credentials = this.loginForm.value as Credentials;
