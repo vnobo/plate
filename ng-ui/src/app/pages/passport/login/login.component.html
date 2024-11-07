@@ -52,7 +52,7 @@
               name="password"
               class="form-control is-valid-lite"
               placeholder="密   码"
-              type="password"
+              [type]="passwordFieldTextType ? 'text' : 'password'"
               autocomplete="off"
               formControlName="password"
               [class.is-invalid]="
@@ -70,6 +70,7 @@
               }-->
             <span class="input-group-text">
               <a
+                (click)="passwordFieldTextType = !passwordFieldTextType"
                 aria-label="显示密码"
                 class="link-secondary"
                 data-bs-original-title="显示密码"

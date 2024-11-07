@@ -21,6 +21,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
   private readonly _message = inject(NzNotificationService);
   private readonly _loginSer = inject(LoginService);
 
+  passwordFieldTextType = false;
+
   loginForm = new FormGroup({
     username: new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(32)]),
     password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(32)]),
