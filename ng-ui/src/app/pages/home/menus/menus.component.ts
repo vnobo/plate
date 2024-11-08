@@ -6,7 +6,7 @@ import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification';
 
-import { MenusService } from './menus.service';
+import { MenusService } from '@app/pages';
 import { Subject, takeUntil, tap } from 'rxjs';
 import { Menu } from './menu.types';
 import { MenuFormComponent } from './menu-form.component';

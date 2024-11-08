@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './login/login.component';
+import { LoginComponent } from '@app/pages';
 import { SingleLayoutComponent } from '@app/layout';
 
 export const PASSPORT_ROUTES: Routes = [
