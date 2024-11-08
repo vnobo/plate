@@ -32,7 +32,7 @@ public class BootApplication {
                         declare
                             v_code       text;
                             v_phone      text;
-                            batch_size   int := 1000; -- 每批提交的记录数
+                            batch_size   int := 100; -- 每批提交的记录数
                             commit_count int := 0; -- 记录已提交的批次数
                         begin
                             for i in 1..1000000
