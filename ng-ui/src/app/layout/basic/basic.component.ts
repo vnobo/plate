@@ -25,7 +25,7 @@ import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
           <layout-page-header (onIsCollapsed)="this.onHeaderIsCollapsed($event)"></layout-page-header>
         </nz-header>
         <nz-page-header nzBackIcon [nzGhost]="false">
-          <nz-breadcrumb [nzAutoGenerate]="true"></nz-breadcrumb>
+          <nz-breadcrumb nz-page-header-breadcrumb [nzAutoGenerate]="true" [nzRouteLabel]="'title'"></nz-breadcrumb>
           <nz-page-header-title>Title</nz-page-header-title>
           <nz-page-header-subtitle>This is a subtitle</nz-page-header-subtitle>
           <nz-page-header-extra>
