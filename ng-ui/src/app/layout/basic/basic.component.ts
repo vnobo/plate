@@ -2,11 +2,13 @@ import { Component, signal } from '@angular/core';
 import { LayoutSidebarComponent } from './widgets/sidebar.component';
 import { LayoutHeaderComponent } from './widgets/header.component';
 import { SharedModule } from '@app/shared/shared.module';
+import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
+import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 
 @Component({
   selector: 'layout-basic',
   standalone: true,
-  imports: [SharedModule, LayoutHeaderComponent, LayoutSidebarComponent],
+  imports: [SharedModule, LayoutHeaderComponent, LayoutSidebarComponent, NzPageHeaderModule, NzBreadCrumbModule],
   template: `
     <nz-layout class="nz-page">
       <nz-sider
@@ -22,6 +24,15 @@ import { SharedModule } from '@app/shared/shared.module';
         <nz-header>
           <layout-page-header (onIsCollapsed)="this.onHeaderIsCollapsed($event)"></layout-page-header>
         </nz-header>
+        <nz-page-header nzBackIcon [nzGhost]="false">
+          <nz-breadcrumb [nzAutoGenerate]="true"></nz-breadcrumb>
+          <nz-page-header-title>Title</nz-page-header-title>
+          <nz-page-header-subtitle>This is a subtitle</nz-page-header-subtitle>
+          <nz-page-header-extra>
+          </nz-page-header-extra>
+          <nz-page-header-content>
+          </nz-page-header-content>
+        </nz-page-header>
         <div class="container-fluid">
           <router-outlet></router-outlet>
         </div>
