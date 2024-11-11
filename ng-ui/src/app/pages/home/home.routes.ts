@@ -10,9 +10,6 @@ export const HOME_ROUTES: Routes = [
     path: '',
     canActivate: [authGuard],
     component: BasicLayoutComponent,
-    data: {
-      title: '管理后台',
-    },
     children: [
       {
         path: 'roles',

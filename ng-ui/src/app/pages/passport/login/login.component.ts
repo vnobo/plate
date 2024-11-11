@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, inject, OnInit, Renderer2 } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
@@ -30,8 +30,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
   });
 
   ngAfterViewInit(): void {
-    var tooltipTriggerList = [].slice.call(this._el.nativeElement.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl: any) {
+    const tooltipTriggerList = [].slice.call(this._el.nativeElement.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function(tooltipTriggerEl: any) {
       let options = {
         delay: { show: 50, hide: 50 },
         html: tooltipTriggerEl.getAttribute('data-bs-html') === 'true',

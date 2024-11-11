@@ -25,6 +25,8 @@
             placeholder="手机号或电子邮件"
             type="text"
             autocomplete="off"
+            autofocus
+            tabindex="1"
             formControlName="username"
             [class.is-invalid]="
               loginForm.controls.username.invalid && (loginForm.controls.username.dirty || loginForm.controls.username.touched)
@@ -54,6 +56,7 @@
               placeholder="密   码"
               [type]="passwordFieldTextType ? 'text' : 'password'"
               autocomplete="off"
+              tabindex="2"
               formControlName="password"
               [class.is-invalid]="
                 loginForm.controls.password.invalid && (loginForm.controls.password.dirty || loginForm.controls.password.touched)
@@ -101,12 +104,13 @@
         <div class="mb-2">
           <label class="form-check">
             <input class="form-check-input" formControlName="remember" id="flexCheckRemember" name="remember"
+                   tabindex="3"
                    type="checkbox" />
             <span class="form-check-label" for="flexCheckRemember">在这个设备上记住我</span>
           </label>
         </div>
         <div class="form-footer">
-          <button [disabled]="loginForm.invalid" class="btn btn-primary w-100" type="submit">登 录</button>
+          <button [disabled]="loginForm.invalid" class="btn btn-primary w-100" tabindex="4" type="submit">登 录</button>
         </div>
       </div>
     </form>

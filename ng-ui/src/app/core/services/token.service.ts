@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 
 @Injectable({ providedIn: 'root' })
 export class TokenService {
-  readonly loginUrl = '/login';
+  readonly loginUrl = '/passport/login';
   public redirectUrl = '';
   private _storage = inject(SessionStorageService);
   private readonly authenticationKey = 'authentication';
