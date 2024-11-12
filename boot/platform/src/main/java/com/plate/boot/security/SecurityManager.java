@@ -1,11 +1,13 @@
 package com.plate.boot.security;
 
 import com.plate.boot.commons.base.AbstractDatabase;
+import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.security.core.group.authority.GroupAuthority;
 import com.plate.boot.security.core.group.member.GroupMemberResponse;
 import com.plate.boot.security.core.tenant.member.TenantMemberResponse;
 import com.plate.boot.security.core.user.User;
 import com.plate.boot.security.core.user.UserRequest;
+import com.plate.boot.security.core.user.UserResponse;
 import com.plate.boot.security.core.user.UsersService;
 import com.plate.boot.security.core.user.authority.UserAuthority;
 import lombok.RequiredArgsConstructor;
@@ -188,10 +190,8 @@ public class SecurityManager extends AbstractDatabase
      * @return A Mono emitting the fully constructed SecurityDetails object, including group and tenant memberships.
      */
     private Mono<SecurityDetails> buildUserDetails(User user, Set<GrantedAuthority> authorities) {
-        SecurityDetails userDetails = SecurityDetails.of(user.getCode(), user.getUsername(), user.getName(),
-                user.getPassword(), user.getDisabled(), user.getAccountExpired(),
-                user.getAccountLocked(), user.getCredentialsExpired(), authorities,
-                Map.of("username", user.getUsername()), "username");
+        SecurityDetails userDetails = SecurityDetails.of(user.getCode(), authorities,
+                BeanUtils.beanToMap(UserResponse.withUser(user)), "username").buildUser(user);
         Mono<Tuple2<List<GroupMemberResponse>, List<TenantMemberResponse>>> groupsAndTenantsMono =
                 Mono.zipDelayError(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
         return groupsAndTenantsMono.doOnNext(tuple2 -> {

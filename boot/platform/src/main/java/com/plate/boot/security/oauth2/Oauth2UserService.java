@@ -103,9 +103,9 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
      * The method merges the OAuth2-specific data into the user's 'extend' field under the 'oauth2' key,
      * taking care to preserve existing data and update it with the new registrationId details.
      *
-     * @param user        The User entity to be modified, identified by its unique attributes.
+     * @param user           The User entity to be modified, identified by its unique attributes.
      * @param registrationId The identifier for the OAuth2 registration that is associated with the OAuth2User.
-     * @param oAuth2User The OAuth2User object containing additional details to integrate into the user entity.
+     * @param oAuth2User     The OAuth2User object containing additional details to integrate into the user entity.
      * @return A Mono<Void> that signals completion when the user has been successfully modified asynchronously.
      */
     public Mono<Void> modifyUser(User user, String registrationId, OAuth2User oAuth2User) {
@@ -131,7 +131,7 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
      * delegates the registration or modification process to the SecurityManager.
      *
      * @param registrationId The unique identifier for the OAuth2 registration.
-     * @param oAuth2User    The OAuth2User object containing user details obtained from the OAuth2 provider.
+     * @param oAuth2User     The OAuth2User object containing user details obtained from the OAuth2 provider.
      * @return A Mono that, when subscribed to, emits the User object representing the registered or modified user.
      */
     public Mono<User> registerUser(String registrationId, OAuth2User oAuth2User) {
@@ -145,7 +145,7 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
      * like a random password and populating fields from the OAuth2User's attributes.
      *
      * @param registrationId The identifier for the OAuth2 registration (e.g., 'github', 'gitee').
-     * @param oAuth2User    The OAuth2User object containing user data fetched from the OAuth provider.
+     * @param oAuth2User     The OAuth2User object containing user data fetched from the OAuth provider.
      * @return A UserRequest instance populated with data necessary for user registration or profile update,
      * including a generated password and extended attributes specific to the OAuth2 registration.
      */
@@ -178,17 +178,15 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
      * It augments the OAuth2User's attributes with additional details from the User object,
      * preparing the user information for security context population with enriched data.
      *
-     * @param details The User entity containing local user details like username, password, and account status.
+     * @param details    The User entity containing local user details like username, password, and account status.
      * @param oAuth2User The original OAuth2User object carrying OAuth provider-specific attributes and authorities.
      * @return A new OAuth2User instance, SecurityDetails, with combined attributes from both the User and OAuth2User,
-     *         including custom attributes such as 'username'.
+     * including custom attributes such as 'username'.
      */
     public OAuth2User convertToOauth2User(User details, OAuth2User oAuth2User) {
         Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
         attributes.put("username", details.getUsername());
-        return SecurityDetails.of(details.getCode(), details.getUsername(), details.getName(), details.getPassword(),
-                details.getDisabled(), details.getAccountExpired(),
-                details.getAccountLocked(), details.getCredentialsExpired(),
-                oAuth2User.getAuthorities(), attributes, "username");
+        return SecurityDetails.of(details.getCode(), oAuth2User.getAuthorities(), attributes, "username")
+                .buildUser(details);
     }
 }
