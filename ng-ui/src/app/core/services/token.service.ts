@@ -1,21 +1,21 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { SessionStorageService } from '@app/core';
 import { Authentication } from '@app/core/types';
 import dayjs from 'dayjs';
 
 @Injectable({ providedIn: 'root' })
 export class TokenService {
-  readonly loginUrl = '/passport/login';
-  public redirectUrl = '';
-  private _storage = inject(SessionStorageService);
+  public readonly loginUrl = '/passport/login';
   private readonly authenticationKey = 'authentication';
-  private isLoggedIn = signal(false);
-  private authentication = signal({} as Authentication);
+  public redirectUrl = '';
+  private readonly _storage = inject(SessionStorageService);
+  private isLoggedIn = false;
+  private authentication = {} as Authentication;
 
-  authenticationToken() {
-    if (this.isLoggedIn()) {
-      return this.authentication();
+  authenticationToken(): Authentication | null {
+    if (this.isLoggedIn) {
+      return this.authentication;
     }
     const authentication = this.authenticationLoadStorage();
     if (authentication) {
@@ -27,15 +27,12 @@ export class TokenService {
   }
 
   isLogged(): boolean {
-    if (this.isLoggedIn()) {
-      return true;
-    }
-    return false;
+    return this.isLoggedIn;
   }
 
   authToken(): string {
-    if (this.isLoggedIn()) {
-      return this.authentication().token;
+    if (this.isLoggedIn) {
+      return this.authentication.token;
     }
     const authentication = this.authenticationLoadStorage();
     if (authentication) {
@@ -50,14 +47,14 @@ export class TokenService {
   }
 
   login(authentication: Authentication): void {
-    this.isLoggedIn.set(true);
-    this.authentication.set(authentication);
+    this.isLoggedIn = true;
+    this.authentication = authentication;
     this._storage.set(this.authenticationKey, JSON.stringify(authentication));
   }
 
   logout(): void {
-    this.isLoggedIn.set(false);
-    this.authentication.set({} as Authentication);
+    this.isLoggedIn = false;
+    this.authentication = {} as Authentication;
     this._storage.remove(this.authenticationKey);
   }
 

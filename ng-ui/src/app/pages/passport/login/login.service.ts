@@ -9,15 +9,15 @@ import dayjs from 'dayjs';
   providedIn: 'root',
 })
 export class LoginService {
+  private readonly _http = inject(HttpClient);
+  private readonly _storage = inject(BrowserStorage);
   _auth = inject(AuthService);
-  private _http = inject(HttpClient);
-  private _storage = inject(BrowserStorage);
   private readonly storageKey = 'credentials';
 
   autoLogin(): Authentication | null {
     const authentication = this._auth.authenticationToken();
     if (authentication && Object.keys(authentication).length !== 0) {
-      var lastAccessTime = dayjs.unix(authentication.lastAccessTime);
+      const lastAccessTime = dayjs.unix(authentication.lastAccessTime);
       if (dayjs().diff(lastAccessTime, 'seconds') > authentication.expires) {
         return null; // token expired
       }
