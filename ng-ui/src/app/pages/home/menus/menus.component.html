@@ -1,6 +1,6 @@
 <div class="row justify-content-between mb-2">
   <div class="col-1">
-    <button (click)="menuForm.showModal()" class="btn btn-primary btn-sm" type="button">
+    <button class="btn btn-primary btn-sm" type="button">
       <i class="bi bi-plus me-1"></i>新增
     </button>
   </div>
@@ -54,7 +54,7 @@
                 <td>{{ item.createdTime | date : 'short' }}</td>
                 <td>{{ item.sortNo }}</td>
                 <td nzRight>
-                  <a (click)="menuForm.editModal(item)">编辑</a>
+                  <a nz-button nzType="link">编辑</a>
                   <nz-divider nzType="vertical"></nz-divider>
                   <a nz-popconfirm nzPopconfirmTitle="你确认要删除?" (nzOnConfirm)="delete(item)">删除</a>
                 </td>
@@ -66,4 +66,3 @@
     }
   </tbody>
 </nz-table>
-<app-menu-form #menuForm (formEvent)="formEvent($event)"></app-menu-form>

@@ -1,5 +1,5 @@
 <div class="container-fluid">
-  <nz-page-header [nzGhost]="false" nzBackIcon>
+  <nz-page-header [nzGhost]="false" class="sticky-top" nzBackIcon>
     <nz-breadcrumb [nzAutoGenerate]="true" [nzRouteLabel]="'title'" nz-page-header-breadcrumb></nz-breadcrumb>
     <nz-page-header-title>用户管理</nz-page-header-title>
     <nz-page-header-subtitle>管理平台所有用户</nz-page-header-subtitle>
@@ -8,14 +8,15 @@
     </nz-page-header-tags>
     <nz-page-header-extra>
       <nz-space>
-        <button *nzSpaceItem nz-button nzType="primary"><i class="bi bi-plus me-1"></i>新增</button>
+        <button (click)="openUserForm({})" *nzSpaceItem nz-button nzType="primary"><i class="bi bi-plus me-1"></i>新增
+        </button>
         <nz-input-group *nzSpaceItem [nzAddOnAfter]="suffixIconButton" [nzSuffix]="suffixTemplate" nzSearch
                         style="width: 20rem;">
-          <input [(ngModel)]="search.search" name="search" nz-input placeholder="搜索用户" type="text" />
+          <input [(ngModel)]="search().search" name="search" nz-input placeholder="搜索用户" type="text" />
         </nz-input-group>
         <ng-template #suffixTemplate>
-          @if (search.search) {
-            <span nz-icon nzType="close" (click)="search.search = ''"></span>
+          @if (search().search) {
+            <span nz-icon nzType="close" (click)="search().search = ''"></span>
           }
         </ng-template>
         <ng-template #suffixIconButton>
@@ -30,8 +31,8 @@
 
   <nz-table #userTable
             (nzQueryParams)="onQueryParamsChange($event)"
-            [(nzPageIndex)]="page.page"
-            [(nzPageSize)]="page.size"
+            [(nzPageIndex)]="page().page"
+            [(nzPageSize)]="page().size"
             [nzData]="userPage().content"
             [nzScroll]="{ x: '100%' }"
             [nzTotal]="userPage().totalElements"
@@ -81,7 +82,10 @@
             <td>{{ item.disabled ? '否' : '是' }}</td>
             <td>{{ item.accountLocked ? '是' : '否' }}</td>
             <td>{{ item.loginTime | date : 'short' }}</td>
-            <td nzRight><a href="javascript:void(0)">编辑</a> | <a href="javascript:void(0)">删除</a></td>
+            <td nzRight>
+              <a class="table-a" nz-button nzType="link" (click)="openUserForm(item)">编辑</a> |
+              <a class="table-a" nz-button nzType="link" href="javascript:void(0)">删除</a>
+            </td>
           </tr>
         </ng-container>
       }

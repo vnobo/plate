@@ -20,7 +20,7 @@ import { DatePipe } from '@angular/common';
         <div class="navbar-nav flex-row order-md-last">
           <div class="nav-item d-none d-md-flex me-3">
             <div class="btn-list">
-              <a href="https://github.com/tabler/tabler" class="btn" target="_blank" rel="noreferrer">
+              <a href="#" class="btn" target="_blank" rel="noreferrer">
                 <!-- Download SVG icon from http://tabler-icons.io/i/brand-github -->
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
@@ -30,7 +30,7 @@ import { DatePipe } from '@angular/common';
                 </svg>
                 Source code
               </a>
-              <a href="https://github.com/sponsors/codecalm" class="btn" target="_blank" rel="noreferrer">
+              <a href="#" class="btn" target="_blank" rel="noreferrer">
                 <!-- Download SVG icon from http://tabler-icons.io/i/heart -->
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -182,19 +182,19 @@ import { DatePipe } from '@angular/common';
           <div class="nav-item dropdown">
             <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown"
                aria-label="Open user menu" aria-expanded="false">
-              <span class="avatar avatar-sm" style="background-image: url(./static/avatars/000m.jpg)"></span>
+              <span class="avatar avatar-sm" style="background-image: url(/assets/img/avater.png)"></span>
               <div class="d-none d-xl-block ps-2">
-                <div>Paweł Kuna</div>
+                <span>{{ authenticationToken?.details?.nickname }}</span>
                 <div class="mt-1 small text-secondary">UI Designer</div>
               </div>
             </a>
             <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
               <a href="#" class="dropdown-item">Status</a>
-              <a href="./profile.html" class="dropdown-item">Profile</a>
+              <a href="#" class="dropdown-item">Profile</a>
               <a href="#" class="dropdown-item">Feedback</a>
               <div class="dropdown-divider"></div>
-              <a href="./settings.html" class="dropdown-item">Settings</a>
-              <a href="./sign-in.html" class="dropdown-item">Logout</a>
+              <a href="#" class="dropdown-item">Settings</a>
+              <a class="dropdown-item" (click)="loginOut()">注销用户</a>
             </div>
           </div>
         </div>

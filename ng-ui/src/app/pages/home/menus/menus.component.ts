@@ -10,6 +10,7 @@ import { MenusService } from '@app/pages';
 import { Subject, takeUntil, tap } from 'rxjs';
 import { Menu } from './menu.types';
 import { MenuFormComponent } from './menu-form.component';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 
 @Component({
   selector: 'app-menus',
@@ -19,6 +20,7 @@ import { MenuFormComponent } from './menu-form.component';
   imports: [
     CommonModule,
     NzTableModule,
+    NzButtonModule,
     MenuFormComponent,
     NzPopconfirmModule,
     NzDividerModule,

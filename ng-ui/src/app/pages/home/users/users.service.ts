@@ -18,4 +18,12 @@ export class UsersService {
     }
     return this.http.get<Page<User>>('/users/page', { params: params });
   }
+
+  add(request: User): Observable<User> {
+    return this.http.post<User>('/users/add', request);
+  }
+
+  modify(request: User): Observable<User> {
+    return this.http.put<User>('/users/modify', request);
+  }
 }

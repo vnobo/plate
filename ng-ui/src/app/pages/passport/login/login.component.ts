@@ -56,7 +56,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     const auth = this._loginSer.autoLogin();
     if (auth) {
-      this._router.navigate([this._loginSer._auth.redirectUrl], { relativeTo: this._route }).then();
+      const redirectUrl = this._loginSer._auth.redirectUrl ? this._loginSer._auth.redirectUrl : '/home';
+      this._router.navigate([redirectUrl], { relativeTo: this._route }).then();
       return;
     }
     const credentials = this._loginSer.getRememberMe();
