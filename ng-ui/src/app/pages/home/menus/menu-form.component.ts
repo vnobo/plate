@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, OnInit, Output, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzModalModule } from 'ng-zorro-antd/modal';
@@ -6,9 +6,9 @@ import { Menu, MenuType } from './menu.types';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { SHARED_IMPORTS } from '@app/shared/shared-imports';
 import { CommonModule } from '@angular/common';
+import { User } from '@app/pages/home/users/user.types';
 
 @Component({
   selector: 'app-menu-form',
@@ -117,21 +117,22 @@ import { CommonModule } from '@angular/common';
           </nz-form-control>
         </nz-form-item>
       </div>
-      <button nzType="default" nz-button (click)="restForm()">重置</button>
-      <button nzType="primary" nz-button (click)="submitForm()">确认</button>
+      <nz-form-item>
+        <nz-form-control [nzOffset]="6" [nzSpan]="5">
+          <button nz-button type="reset">重置</button>
+        </nz-form-control>
+        <nz-form-control [nzOffset]="3" [nzSpan]="5">
+          <button [disabled]="menuForm.invalid" nz-button nzType="primary" type="submit">保存</button>
+        </nz-form-control>
+      </nz-form-item>
     </form>
   `,
 })
 export class MenuFormComponent implements OnInit {
-  @Output() formEvent = new EventEmitter<{
-    btn: string;
-    status: number;
-    data: Menu | null;
-  }>();
-  isVisible = signal(false);
-  private _message = inject(NzNotificationService);
-  private _formBuilder = inject(FormBuilder);
-
+  menuData = signal<Menu>({} as Menu);
+  created = computed(() => this.menuData().id == undefined);
+  formSubmit = output<Menu>();
+  private readonly _formBuilder = inject(FormBuilder);
   menuForm: FormGroup = this._formBuilder.group({
     id: [null],
     code: [{ value: '0', disabled: true }, [Validators.required]],
@@ -147,38 +148,22 @@ export class MenuFormComponent implements OnInit {
     permissions: [null],
   });
 
+  constructor() {
+    effect(() => {
+      if (this.created()) {
+        this.menuForm.patchValue({} as User);
+      } else {
+        this.menuForm.patchValue(this.menuData());
+      }
+    });
+  }
+
   ngOnInit(): void {
   }
 
   submitForm() {
-    const menu = this.menuForm.value as Menu;
-    menu.code = this.menuForm.controls['code'].value;
-    menu.pcode = this.menuForm.controls['pcode'].value;
-    menu.tenantCode = this.menuForm.controls['tenantCode'].value;
     if (this.menuForm.valid) {
-      this.formEvent.next({ btn: 'submit', status: 100, data: menu });
+      this.formSubmit.emit(this.menuForm.getRawValue());
     }
-    this.isVisible.set(false);
-  }
-
-  restForm(): void {
-    this.menuForm.reset();
-  }
-
-  editModal(menu: Menu): void {
-    this.menuForm.patchValue(menu);
-    this.menuForm.controls['authority'].setValue(menu.authority?.slice(5));
-    this.formEvent.next({ btn: 'edit', status: 0, data: menu });
-    this.isVisible.set(true);
-  }
-
-  showModal(): void {
-    this.formEvent.next({ btn: 'show', status: 0, data: null });
-    this.isVisible.set(true);
-  }
-
-  handleCancel(): void {
-    this.formEvent.next({ btn: 'cancel', status: -1, data: null });
-    this.isVisible.set(false);
   }
 }

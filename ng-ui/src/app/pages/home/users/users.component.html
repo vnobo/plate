@@ -30,7 +30,7 @@
   </nz-page-header>
 
   <nz-table #userTable
-            (nzQueryParams)="onQueryParamsChange($event)"
+            (nzQueryParams)="onTableQueryChange($event)"
             [(nzPageIndex)]="page().page"
             [(nzPageSize)]="page().size"
             [nzData]="userPage().content"

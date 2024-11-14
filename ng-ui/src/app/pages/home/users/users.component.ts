@@ -11,7 +11,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 
 import { UsersService } from './users.service';
 import { User } from './user.types';
-import { UserFormComponent } from './user-form/user-form.component';
+import { UserFormComponent } from '@app/pages';
 
 @Component({
   selector: 'app-users',
@@ -22,6 +22,11 @@ import { UserFormComponent } from './user-form/user-form.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UsersComponent implements OnInit {
+
+  private readonly _message = inject(NzNotificationService);
+  private readonly _modal = inject(NzModalService);
+  private readonly _userSer = inject(UsersService);
+
   userPage = signal({} as Page<User>);
   page = signal({
     page: 1,
@@ -33,9 +38,6 @@ export class UsersComponent implements OnInit {
     pcode: '0',
     tenantCode: '0',
   } as User);
-  private readonly _message = inject(NzNotificationService);
-  private readonly _modal = inject(NzModalService);
-  private readonly _userSer = inject(UsersService);
 
   constructor() {
     effect(() => {
@@ -57,15 +59,15 @@ export class UsersComponent implements OnInit {
     });
     const ref = modal.getContentComponent();
     ref.userData.set(user);
-    ref.formSubmit.subscribe(user => {
-      if (user.id && user.id > 0) {
-        this._userSer.modify(user).subscribe(res => {
+    ref.formSubmit.subscribe(us => {
+      if (us.id && us.id > 0) {
+        this._userSer.modify(us).subscribe(res => {
           console.debug(`修改用户成功, ID: ${res.id},编码:${res.code}`);
           modal.close();
           this.onSearch();
         });
       } else {
-        this._userSer.add(user).subscribe(res => {
+        this._userSer.add(us).subscribe(res => {
           console.debug(`添加用户成功, ID: ${res.id},编码:${res.code}`);
           modal.close();
           this.onSearch();
@@ -79,7 +81,7 @@ export class UsersComponent implements OnInit {
       this._message.success('数据加载成功!', ``, { nzDuration: 3000 }));
   }
 
-  onQueryParamsChange($event: NzTableQueryParams) {
+  onTableQueryChange($event: NzTableQueryParams) {
     this.page().sorts = [];
     for (const item of $event.sort) {
       if (item.value) {
@@ -89,8 +91,8 @@ export class UsersComponent implements OnInit {
     }
   }
 
-  loadData(search: User, page: Pageable) {
-    return this._userSer.pageUsers(search, page).pipe(
+  private loadData(search: User, page: Pageable) {
+    return this._userSer.page(search, page).pipe(
       tap(result => this.userPage.set(result)),
     );
   }

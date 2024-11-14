@@ -10,7 +10,7 @@ import { Page, Pageable } from '@app/core/types';
 export class UsersService {
   constructor(private http: HttpClient) {}
 
-  pageUsers(request: User, page: Pageable): Observable<Page<User>> {
+  page(request: User, page: Pageable): Observable<Page<User>> {
     let params = new HttpParams({ fromObject: request as never });
     params = params.appendAll({ page: page.page - 1, size: page.size });
     for (const sort in page.sorts) {

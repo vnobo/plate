@@ -8,6 +8,9 @@ import com.plate.boot.security.core.group.authority.GroupAuthoritiesRepository;
 import com.plate.boot.security.core.user.authority.UserAuthoritiesRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
@@ -34,9 +37,17 @@ public class MenusService extends AbstractDatabase {
     private final GroupAuthoritiesRepository groupAuthoritiesRepository;
     private final UserAuthoritiesRepository userAuthoritiesRepository;
 
-    public Flux<Menu> search(MenuRequest request) {
-        Query query = Query.query(request.toCriteria()).sort(Sort.by("sortNo"));
+    public Flux<Menu> search(MenuRequest request, Pageable pageable) {
+        Query query = Query.query(request.toCriteria()).with(pageable).sort(Sort.by("sortNo"));
         return this.queryWithCache(BeanUtils.cacheKey(request), query, Menu.class);
+    }
+
+    public Mono<Page<Menu>> page(MenuRequest request, Pageable pageable) {
+        var searchMono = this.search(request, pageable).collectList();
+        Query query = Query.query(request.toCriteria());
+        var countMono = super.countWithCache(BeanUtils.cacheKey(request), query, Menu.class);
+        return searchMono.zipWith(countMono)
+                .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
     public Mono<Menu> add(MenuRequest request) {
