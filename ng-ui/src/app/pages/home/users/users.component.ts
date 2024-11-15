@@ -4,7 +4,6 @@ import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { tap } from 'rxjs';
 import { SharedModule } from '@app/shared/shared.module';
 import { Page, Pageable } from '@app/core/types';
-import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzModalService } from 'ng-zorro-antd/modal';
@@ -12,11 +11,12 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { UsersService } from './users.service';
 import { User } from './user.types';
 import { UserFormComponent } from '@app/pages';
+import { PageHeaderComponent } from '@app/layout';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [SharedModule, NzPageHeaderModule, NzTagModule, NzSpaceModule],
+  imports: [SharedModule, PageHeaderComponent, NzTagModule, NzSpaceModule],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

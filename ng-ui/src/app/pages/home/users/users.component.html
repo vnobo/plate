@@ -1,48 +1,44 @@
 <div class="container-fluid">
-  <div class="sticky-top">
-    <nz-page-header [nzGhost]="false" nzBackIcon>
-      <nz-breadcrumb [nzAutoGenerate]="true" [nzRouteLabel]="'title'" nz-page-header-breadcrumb></nz-breadcrumb>
-      <nz-page-header-title>用户管理</nz-page-header-title>
-      <nz-page-header-subtitle>管理平台所有用户</nz-page-header-subtitle>
-      <nz-page-header-tags>
-        <nz-tag [nzColor]="'blue'">Running</nz-tag>
-      </nz-page-header-tags>
-      <nz-page-header-extra>
-        <nz-space>
-          <button (click)="openUserForm({})" *nzSpaceItem nz-button nzType="primary"><i class="bi bi-plus me-1"></i>新增
+  <page-header>
+    <ng-container headerTitle>用户管理</ng-container>
+    <div pageHeaderSubtitle>管理平台所有用户</div>
+    <div pageHeaderTags>
+      <nz-tag [nzColor]="'blue'">Running</nz-tag>
+    </div>
+    <div pageHeaderExtra>
+      <nz-space>
+        <button (click)="openUserForm({})" *nzSpaceItem nz-button nzType="primary"><i class="bi bi-plus me-1"></i>新增
+        </button>
+        <nz-input-group *nzSpaceItem [nzAddOnAfter]="suffixIconButton" [nzSuffix]="suffixTemplate" nzSearch
+                        style="width: 20rem">
+          <input [(ngModel)]="search().search" name="search" nz-input placeholder="搜索用户" type="text" />
+        </nz-input-group>
+        <ng-template #suffixTemplate>
+          @if (search().search) {
+            <span nz-icon nzType="close" (click)="search().search = ''"></span>
+          }
+        </ng-template>
+        <ng-template #suffixIconButton>
+          <button (click)="onSearch()" nz-button nzSearch nzType="primary"><span nz-icon nzType="search"></span>
           </button>
-          <nz-input-group *nzSpaceItem [nzAddOnAfter]="suffixIconButton" [nzSuffix]="suffixTemplate" nzSearch
-                          style="width: 20rem;">
-            <input [(ngModel)]="search().search" name="search" nz-input placeholder="搜索用户" type="text" />
-          </nz-input-group>
-          <ng-template #suffixTemplate>
-            @if (search().search) {
-              <span nz-icon nzType="close" (click)="search().search = ''"></span>
-            }
-          </ng-template>
-          <ng-template #suffixIconButton>
-            <button (click)="onSearch()" nz-button nzSearch nzType="primary"><span nz-icon nzType="search"></span>
-            </button>
-          </ng-template>
-        </nz-space>
-      </nz-page-header-extra>
-      <nz-page-header-content>
-      </nz-page-header-content>
-    </nz-page-header>
-  </div>
-  <nz-table #userTable
-            (nzQueryParams)="onTableQueryChange($event)"
-            [(nzPageIndex)]="page().page"
-            [(nzPageSize)]="page().size"
-            [nzData]="userPage().content"
-            [nzScroll]="{ x: '100%' }"
-            [nzTotal]="userPage().totalElements"
-            class="mt-1"
-            nzFrontPagination="false"
-            nzNoResult="无数据"
-            nzShowPagination
-            nzShowSizeChanger
-            nzTableLayout="auto">
+        </ng-template>
+      </nz-space>
+    </div>
+  </page-header>
+  <nz-table
+    #userTable
+    (nzQueryParams)="onTableQueryChange($event)"
+    [(nzPageIndex)]="page().page"
+    [(nzPageSize)]="page().size"
+    [nzData]="userPage().content"
+    [nzScroll]="{ x: '100%' }"
+    [nzTotal]="userPage().totalElements"
+    class="mt-1"
+    nzFrontPagination="false"
+    nzNoResult="无数据"
+    nzShowPagination
+    nzShowSizeChanger
+    nzTableLayout="auto">
     <thead>
     <tr>
       <th [nzSortFn]="true" nzColumnKey="code" nzLeft nzShowSort nzWidth="8rem">编码</th>
@@ -61,8 +57,9 @@
         <ng-container>
           <tr>
             <td nzLeft [cdkCopyToClipboard]="item.code ?? ''">
-              <ng-container [ngTemplateOutlet]="tableColumn"
-                            [ngTemplateOutletContext]="{ $implicit: item.code ?? '' | appTruncateMiddle }"></ng-container>
+              <ng-container
+                [ngTemplateOutlet]="tableColumn"
+                [ngTemplateOutletContext]="{ $implicit: item.code ?? '' | appTruncateMiddle }"></ng-container>
             </td>
             <td nzLeft [cdkCopyToClipboard]="item.username ?? ''">
               <ng-container [ngTemplateOutlet]="tableColumn"

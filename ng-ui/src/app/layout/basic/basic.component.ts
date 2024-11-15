@@ -1,14 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { LayoutSidebarComponent } from './widgets/sidebar.component';
-import { LayoutHeaderComponent } from './widgets/header.component';
 import { SharedModule } from '@app/shared/shared.module';
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
+import { LayoutNavbarComponent } from './widgets/navbar.component';
 
 @Component({
   selector: 'layout-basic',
   standalone: true,
-  imports: [SharedModule, LayoutHeaderComponent, LayoutSidebarComponent, NzPageHeaderModule, NzBreadCrumbModule],
+  imports: [SharedModule, LayoutNavbarComponent, LayoutSidebarComponent, NzPageHeaderModule, NzBreadCrumbModule],
   template: `
     <nz-layout class="nz-page">
       <nz-sider [nzCollapsed]="isCollapsed()" [nzTrigger]="null" class="menu-sidebar" nzBreakpoint="md" nzCollapsible nzWidth="14.8rem">
@@ -16,7 +16,7 @@ import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
       </nz-sider>
       <nz-layout class="nz-page-wrapper">
         <nz-header>
-          <div layoutPageHeader (outputCollapsed)="onHeaderIsCollapsed($event)"></div>
+          <div layoutNavbar (outputCollapsed)="onHeaderIsCollapsed($event)"></div>
         </nz-header>
         <nz-content class="mt-2">
           <router-outlet></router-outlet>
@@ -50,7 +50,6 @@ import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
       nz-header {
         padding: 0;
         width: 100%;
-        z-index: 1030;
       }
     `,
   ],
