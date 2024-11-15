@@ -31,7 +31,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     const tooltipTriggerList = [].slice.call(this._el.nativeElement.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function(tooltipTriggerEl: any) {
+    tooltipTriggerList.map(function (tooltipTriggerEl: any) {
       let options = {
         delay: { show: 50, hide: 50 },
         html: tooltipTriggerEl.getAttribute('data-bs-html') === 'true',
@@ -72,7 +72,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
       .pipe(debounceTime(100), distinctUntilChanged())
       .subscribe({
         next: res => {
-          this._message.success('登录系统成功', `欢迎 ${res.details.nickname} 登录系统!`);
+          this._message.success('登录系统成功', `欢迎 ${res.details.name} 登录系统!`);
           this._router.navigate(['/home'], { relativeTo: this._route }).then();
         },
         error: err => {
