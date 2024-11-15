@@ -1,5 +1,6 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, inject, OnInit, output, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Authentication } from '@app/core/types';
 import { LoginService } from '@app/pages';
 import { SHARED_IMPORTS } from '@app/shared/shared-imports';
 
@@ -276,7 +277,7 @@ import { SHARED_IMPORTS } from '@app/shared/shared-imports';
               aria-expanded="false">
               <span class="avatar avatar-sm" style="background-image: url(/assets/img/avater.png)"></span>
               <div class="d-none d-xl-block ps-2">
-                <span>{{ authenticationToken?.details?.nickname }}</span>
+                <span>{{ authenticationToken()?.details?.nickname }}</span>
                 <div class="mt-1 small text-secondary">UI Designer</div>
               </div>
             </a>
@@ -318,14 +319,18 @@ import { SHARED_IMPORTS } from '@app/shared/shared-imports';
     `,
   ],
 })
-export class LayoutHeaderComponent {
+export class LayoutHeaderComponent implements OnInit {
   private readonly loginSer = inject(LoginService);
-  outputCollapsed = output<boolean>();
   private readonly router = inject(Router);
-
-  authenticationToken = this.loginSer._auth.authenticationToken();
-  isCollapsed = signal(false);
   private readonly route = inject(ActivatedRoute);
+
+  outputCollapsed = output<boolean>();
+  authenticationToken = signal<Authentication | null>({} as Authentication);
+  isCollapsed = signal(false);
+
+  ngOnInit(): void {
+    this.authenticationToken.set(this.loginSer._auth.authenticationToken());
+  }
 
   onCollapsed(isCollapsed: boolean) {
     this.isCollapsed.set(isCollapsed);

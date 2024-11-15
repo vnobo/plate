@@ -50,7 +50,7 @@ import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
       nz-header {
         padding: 0;
         width: 100%;
-        z-index: 2;
+        z-index: 1030;
       }
     `,
   ],

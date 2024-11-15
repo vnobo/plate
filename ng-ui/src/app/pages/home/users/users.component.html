@@ -1,34 +1,35 @@
 <div class="container-fluid">
-  <nz-page-header [nzGhost]="false" class="sticky-top" nzBackIcon>
-    <nz-breadcrumb [nzAutoGenerate]="true" [nzRouteLabel]="'title'" nz-page-header-breadcrumb></nz-breadcrumb>
-    <nz-page-header-title>用户管理</nz-page-header-title>
-    <nz-page-header-subtitle>管理平台所有用户</nz-page-header-subtitle>
-    <nz-page-header-tags>
-      <nz-tag [nzColor]="'blue'">Running</nz-tag>
-    </nz-page-header-tags>
-    <nz-page-header-extra>
-      <nz-space>
-        <button (click)="openUserForm({})" *nzSpaceItem nz-button nzType="primary"><i class="bi bi-plus me-1"></i>新增
-        </button>
-        <nz-input-group *nzSpaceItem [nzAddOnAfter]="suffixIconButton" [nzSuffix]="suffixTemplate" nzSearch
-                        style="width: 20rem;">
-          <input [(ngModel)]="search().search" name="search" nz-input placeholder="搜索用户" type="text" />
-        </nz-input-group>
-        <ng-template #suffixTemplate>
-          @if (search().search) {
-            <span nz-icon nzType="close" (click)="search().search = ''"></span>
-          }
-        </ng-template>
-        <ng-template #suffixIconButton>
-          <button (click)="onSearch()" nz-button nzSearch nzType="primary"><span nz-icon nzType="search"></span>
+  <div class="sticky-top">
+    <nz-page-header [nzGhost]="false" nzBackIcon>
+      <nz-breadcrumb [nzAutoGenerate]="true" [nzRouteLabel]="'title'" nz-page-header-breadcrumb></nz-breadcrumb>
+      <nz-page-header-title>用户管理</nz-page-header-title>
+      <nz-page-header-subtitle>管理平台所有用户</nz-page-header-subtitle>
+      <nz-page-header-tags>
+        <nz-tag [nzColor]="'blue'">Running</nz-tag>
+      </nz-page-header-tags>
+      <nz-page-header-extra>
+        <nz-space>
+          <button (click)="openUserForm({})" *nzSpaceItem nz-button nzType="primary"><i class="bi bi-plus me-1"></i>新增
           </button>
-        </ng-template>
-      </nz-space>
-    </nz-page-header-extra>
-    <nz-page-header-content>
-    </nz-page-header-content>
-  </nz-page-header>
-
+          <nz-input-group *nzSpaceItem [nzAddOnAfter]="suffixIconButton" [nzSuffix]="suffixTemplate" nzSearch
+                          style="width: 20rem;">
+            <input [(ngModel)]="search().search" name="search" nz-input placeholder="搜索用户" type="text" />
+          </nz-input-group>
+          <ng-template #suffixTemplate>
+            @if (search().search) {
+              <span nz-icon nzType="close" (click)="search().search = ''"></span>
+            }
+          </ng-template>
+          <ng-template #suffixIconButton>
+            <button (click)="onSearch()" nz-button nzSearch nzType="primary"><span nz-icon nzType="search"></span>
+            </button>
+          </ng-template>
+        </nz-space>
+      </nz-page-header-extra>
+      <nz-page-header-content>
+      </nz-page-header-content>
+    </nz-page-header>
+  </div>
   <nz-table #userTable
             (nzQueryParams)="onTableQueryChange($event)"
             [(nzPageIndex)]="page().page"
