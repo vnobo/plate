@@ -109,12 +109,6 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
     private String phone;
 
     /**
-     * The private field representing the name of the user.
-     * This string holds the personal name or full name of the user account.
-     */
-    private String name;
-
-    /**
      * Represents the profile picture or graphical representation associated with a user.
      * This string field holds the reference or URL to the user's avatar image.
      */

@@ -8,8 +8,8 @@ import dayjs from 'dayjs';
 export class TokenService {
   public readonly loginUrl = '/passport/login';
   private readonly authenticationKey = 'authentication';
-  public redirectUrl = '';
   private readonly _storage = inject(SessionStorageService);
+  public redirectUrl = '';
   private isLoggedIn = false;
   private authentication = {} as Authentication;
 
