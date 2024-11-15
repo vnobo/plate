@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, effect, inject, OnInit, signal, untracked } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { NzTableQueryParams } from 'ng-zorro-antd/table';
@@ -19,15 +19,12 @@ import { User } from '@app/pages/home/users/user.types';
   standalone: true,
   templateUrl: './menus.component.html',
   styleUrls: ['./menus.component.scss'],
-  imports: [
-    DatePipe,
-    NzNotificationModule,
-    ...SHARED_IMPORTS,
-    NzPageHeaderModule,
-    NzPageHeaderTitleDirective, NzSpaceModule,
-  ],
+  imports: [DatePipe, NzNotificationModule, ...SHARED_IMPORTS, NzPageHeaderModule, NzPageHeaderTitleDirective, NzSpaceModule],
 })
 export class MenusComponent implements OnInit {
+  private readonly _modal = inject(NzModalService);
+  private readonly _menusSer = inject(MenusService);
+  private readonly _message = inject(NzNotificationService);
   menuPage = signal({} as Page<Menu>);
   page = signal({
     page: 1,
@@ -39,13 +36,19 @@ export class MenusComponent implements OnInit {
     pcode: '0',
     tenantCode: '0',
   } as User);
-  private readonly _modal = inject(NzModalService);
-  private readonly _menusSer = inject(MenusService);
-  private readonly _message = inject(NzNotificationService);
 
   mapOfExpandedData: Record<string, Menu[]> = {};
 
+  constructor() {
+    effect(() => {
+      untracked(() => {
+        //todo: 信号优化数据流
+      });
+    });
+  }
+
   ngOnInit(): void {
+    this.onSearch();
   }
 
   openMenuForm(menu: Menu) {
@@ -81,8 +84,7 @@ export class MenusComponent implements OnInit {
   }
 
   onSearch() {
-    this.loadData(this.search(), this.page()).subscribe(() =>
-      this._message.success('数据加载成功!', ``, { nzDuration: 3000 }));
+    this.loadData(this.search(), this.page()).subscribe(() => this._message.success('数据加载成功!', ``, { nzDuration: 3000 }));
   }
 
   collapse(array: Menu[], data: Menu, $event: boolean): void {

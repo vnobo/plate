@@ -28,6 +28,12 @@ export interface Pageable {
   sorts: string[];
 }
 
+export const defaultPageable: Pageable = {
+  page: 0,
+  size: 20,
+  sorts: ['id,desc'],
+};
+
 export interface Authentication {
   token: string;
   expires: number;

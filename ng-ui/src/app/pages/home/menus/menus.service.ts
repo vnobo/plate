@@ -1,8 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { concatMap, delay, from, map, mergeMap, Observable, retry, toArray } from 'rxjs';
+import { concatMap, delay, from, map, mergeMap, Observable, retry, switchMap, toArray } from 'rxjs';
 import { Menu } from './menu.types';
-import { Page, Pageable } from '@app/core/types';
+import { defaultPageable, Page, Pageable } from '@app/core/types';
 
 @Injectable({
   providedIn: 'root',
@@ -26,26 +26,28 @@ export class MenusService {
     for (const sort in page.sorts) {
       params = params.appendAll({ sort: page.sorts[sort] });
     }
-    return this.http.get<Page<Menu>>('/menus/page', { params: params })
-      .pipe(
-        concatMap((page) => {
-          const items = page.content;
-          return from(items).pipe(
-            delay(100),
-            mergeMap(item => {
-              return this.search({ pcode: item.code }, { size: 1000 }).pipe(
-                map(children => {
-                  if (children.length > 0) {
-                    item.children = children;
-                  }
-                  return item;
-                }),
-              );
-            }),
-            toArray(),
-          );
-        }),
-      );
+    return this.http.get<Page<Menu>>('/menus/page', { params: params }).pipe(
+      switchMap(page =>
+        from(page.content).pipe(
+          delay(100),
+          mergeMap(item => {
+            return this.search({ pcode: item.code }, defaultPageable).pipe(
+              map(children => {
+                if (children.length > 0) {
+                  item.children = children;
+                }
+                return item;
+              }),
+            );
+          }),
+          toArray(),
+          map(items => {
+            page.content = items;
+            return page;
+          }),
+        ),
+      ),
+    );
   }
 
   getMenus(request: Menu): Observable<Menu[]> {
@@ -80,9 +82,7 @@ export class MenusService {
 
   getMyMenus(request: Menu): Observable<Menu[]> {
     const params = new HttpParams({ fromObject: request as never });
-    return this.http
-      .get<Menu[]>('/menus/me', { params: params })
-      .pipe(concatMap(this.childrenMap), toArray(), retry(3));
+    return this.http.get<Menu[]>('/menus/me', { params: params }).pipe(concatMap(this.childrenMap), toArray(), retry(3));
   }
 
   childrenMap = (items: Menu[]) => {

@@ -22,7 +22,6 @@ import { UserFormComponent } from '@app/pages';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UsersComponent implements OnInit {
-
   private readonly _message = inject(NzNotificationService);
   private readonly _modal = inject(NzModalService);
   private readonly _userSer = inject(UsersService);
@@ -42,12 +41,13 @@ export class UsersComponent implements OnInit {
   constructor() {
     effect(() => {
       untracked(() => {
-        this.onSearch();
+        //todo: 信号优化数据流
       });
     });
   }
 
   ngOnInit(): void {
+    this.onSearch();
   }
 
   openUserForm(user: User) {
@@ -77,8 +77,7 @@ export class UsersComponent implements OnInit {
   }
 
   onSearch() {
-    this.loadData(this.search(), this.page()).subscribe(() =>
-      this._message.success('数据加载成功!', ``, { nzDuration: 3000 }));
+    this.loadData(this.search(), this.page()).subscribe(() => this._message.success('数据加载成功!', ``, { nzDuration: 3000 }));
   }
 
   onTableQueryChange($event: NzTableQueryParams) {
@@ -92,9 +91,6 @@ export class UsersComponent implements OnInit {
   }
 
   private loadData(search: User, page: Pageable) {
-    return this._userSer.page(search, page).pipe(
-      tap(result => this.userPage.set(result)),
-    );
+    return this._userSer.page(search, page).pipe(tap(result => this.userPage.set(result)));
   }
-
 }

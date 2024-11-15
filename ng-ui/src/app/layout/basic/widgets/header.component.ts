@@ -1,29 +1,41 @@
 import { Component, inject, output, signal } from '@angular/core';
-import { LoginService } from '@app/pages';
 import { ActivatedRoute, Router } from '@angular/router';
+import { LoginService } from '@app/pages';
 import { SHARED_IMPORTS } from '@app/shared/shared-imports';
-import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'layout-page-header',
+  selector: 'layout-page-header,[layoutPageHeader]',
   standalone: true,
-  imports: [SHARED_IMPORTS, DatePipe],
+  imports: [...SHARED_IMPORTS],
   template: `
-    <div class="navbar navbar-expand-md d-print-none">
+    <div class="navbar d-print-none">
       <div class="container-fluid">
-        <button class="navbar-toggler" type="button" (click)="this.setNewName(!isCollapsed())"
-                aria-controls="navbar-menu" aria-expanded="true" aria-label="Toggle navigation">
+        <button
+          class="navbar-toggler"
+          type="button"
+          (click)="onCollapsed(!isCollapsed())"
+          aria-controls="navbar-menu"
+          aria-expanded="true"
+          aria-label="Toggle navigation">
           <span [nzType]="isCollapsed() ? 'menu-unfold' : 'menu-fold'" class="trigger" nz-icon></span>
         </button>
-        <div class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-        </div>
+        <div class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3"></div>
         <div class="navbar-nav flex-row order-md-last">
           <div class="nav-item d-none d-md-flex me-3">
             <div class="btn-list">
               <a href="#" class="btn" target="_blank" rel="noreferrer">
                 <!-- Download SVG icon from http://tabler-icons.io/i/brand-github -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="icon">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <path
                     d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"></path>
@@ -32,9 +44,17 @@ import { DatePipe } from '@angular/common';
               </a>
               <a href="#" class="btn" target="_blank" rel="noreferrer">
                 <!-- Download SVG icon from http://tabler-icons.io/i/heart -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                     class="icon text-pink">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="icon text-pink">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"></path>
                 </svg>
@@ -43,20 +63,48 @@ import { DatePipe } from '@angular/common';
             </div>
           </div>
           <div class="d-none d-md-flex">
-            <a href="?theme=dark" class="nav-link px-0 hide-theme-dark" data-bs-toggle="tooltip"
-               data-bs-placement="bottom" aria-label="Enable dark mode" data-bs-original-title="Enable dark mode">
+            <a
+              href="?theme=dark"
+              class="nav-link px-0 hide-theme-dark"
+              data-bs-toggle="tooltip"
+              data-bs-placement="bottom"
+              aria-label="Enable dark mode"
+              data-bs-original-title="Enable dark mode">
               <!-- Download SVG icon from http://tabler-icons.io/i/moon -->
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path>
               </svg>
             </a>
-            <a href="?theme=light" class="nav-link px-0 hide-theme-light" data-bs-toggle="tooltip"
-               data-bs-placement="bottom" aria-label="Enable light mode" data-bs-original-title="Enable light mode">
+            <a
+              href="?theme=light"
+              class="nav-link px-0 hide-theme-light"
+              data-bs-toggle="tooltip"
+              data-bs-placement="bottom"
+              aria-label="Enable light mode"
+              data-bs-original-title="Enable light mode">
               <!-- Download SVG icon from http://tabler-icons.io/i/sun -->
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
                 <path
@@ -66,8 +114,17 @@ import { DatePipe } from '@angular/common';
             <div class="nav-item dropdown d-none d-md-flex me-3">
               <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Show notifications">
                 <!-- Download SVG icon from http://tabler-icons.io/i/bell -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="icon">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <path
                     d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"></path>
@@ -93,9 +150,17 @@ import { DatePipe } from '@angular/common';
                         <div class="col-auto">
                           <a href="#" class="list-group-item-actions">
                             <!-- Download SVG icon from http://tabler-icons.io/i/star -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                 stroke-linejoin="round" class="icon text-muted">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="icon text-muted">
                               <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                               <path
                                 d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"></path>
@@ -116,9 +181,17 @@ import { DatePipe } from '@angular/common';
                         <div class="col-auto">
                           <a href="#" class="list-group-item-actions show">
                             <!-- Download SVG icon from http://tabler-icons.io/i/star -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                 stroke-linejoin="round" class="icon text-yellow">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="icon text-yellow">
                               <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                               <path
                                 d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"></path>
@@ -132,16 +205,23 @@ import { DatePipe } from '@angular/common';
                         <div class="col-auto"><span class="status-dot d-block"></span></div>
                         <div class="col text-truncate">
                           <a href="#" class="text-body d-block">Example 3</a>
-                          <div class="d-block text-secondary text-truncate mt-n1">
-                            Update change-version.js (#29736)
+                          <div class="d-block text-secondary text-truncate mt-n1"> Update change-version.js (#29736)
                           </div>
                         </div>
                         <div class="col-auto">
                           <a href="#" class="list-group-item-actions">
                             <!-- Download SVG icon from http://tabler-icons.io/i/star -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                 stroke-linejoin="round" class="icon text-muted">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="icon text-muted">
                               <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                               <path
                                 d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"></path>
@@ -156,16 +236,24 @@ import { DatePipe } from '@angular/common';
                         </div>
                         <div class="col text-truncate">
                           <a href="#" class="text-body d-block">Example 4</a>
-                          <div class="d-block text-secondary text-truncate mt-n1">
-                            Regenerate package-lock.json (#29730)
+                          <div class="d-block text-secondary text-truncate mt-n1"> Regenerate package-lock.json
+                            (#29730)
                           </div>
                         </div>
                         <div class="col-auto">
                           <a href="#" class="list-group-item-actions">
                             <!-- Download SVG icon from http://tabler-icons.io/i/star -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                 stroke-linejoin="round" class="icon text-muted">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="icon text-muted">
                               <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                               <path
                                 d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"></path>
@@ -180,8 +268,12 @@ import { DatePipe } from '@angular/common';
             </div>
           </div>
           <div class="nav-item dropdown">
-            <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown"
-               aria-label="Open user menu" aria-expanded="false">
+            <a
+              href="#"
+              class="nav-link d-flex lh-1 text-reset p-0"
+              data-bs-toggle="dropdown"
+              aria-label="Open user menu"
+              aria-expanded="false">
               <span class="avatar avatar-sm" style="background-image: url(/assets/img/avater.png)"></span>
               <div class="d-none d-xl-block ps-2">
                 <span>{{ authenticationToken?.details?.nickname }}</span>
@@ -201,37 +293,43 @@ import { DatePipe } from '@angular/common';
       </div>
     </div>`,
   styles: [
-    `:host {
-      min-height: 100%;
-      min-width: 100%;
-    }`,
-    `.nz-page-header {
-      position: relative;
-      padding: 0;
-      box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
-      height: 100%;
-    }`,
-    `.header-trigger {
-      height: 64px;
-      padding: 20px 24px;
-      font-size: 20px;
-      cursor: pointer;
-      transition: all .3s, padding 0s;
-    }`,
+    `
+      :host {
+        min-height: 100%;
+        min-width: 100%;
+      }
+    `,
+    `
+      .nz-page-header {
+        position: relative;
+        padding: 0;
+        box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+        height: 100%;
+      }
+    `,
+    `
+      .header-trigger {
+        height: 64px;
+        padding: 20px 24px;
+        font-size: 20px;
+        cursor: pointer;
+        transition: all 0.3s, padding 0s;
+      }
+    `,
   ],
 })
 export class LayoutHeaderComponent {
   private readonly loginSer = inject(LoginService);
-  authenticationToken = this.loginSer._auth.authenticationToken();
+  outputCollapsed = output<boolean>();
   private readonly router = inject(Router);
 
+  authenticationToken = this.loginSer._auth.authenticationToken();
   isCollapsed = signal(false);
-  onIsCollapsed = output<boolean>();
   private readonly route = inject(ActivatedRoute);
 
-  setNewName(isCollapsed: boolean) {
+  onCollapsed(isCollapsed: boolean) {
     this.isCollapsed.set(isCollapsed);
-    this.onIsCollapsed.emit(isCollapsed);
+    this.outputCollapsed.emit(isCollapsed);
   }
 
   loginOut() {
