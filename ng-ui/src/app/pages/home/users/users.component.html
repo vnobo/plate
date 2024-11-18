@@ -1,26 +1,23 @@
 <div class="container-fluid">
   <page-header>
-    <ng-container headerTitle>用户管理</ng-container>
+    <ng-container pageHeaderTitle>用户管理</ng-container>
     <div pageHeaderSubtitle>管理平台所有用户</div>
     <div pageHeaderTags>
       <nz-tag [nzColor]="'blue'">Running</nz-tag>
     </div>
     <div pageHeaderExtra>
       <nz-space>
-        <button (click)="openUserForm({})" *nzSpaceItem nz-button nzType="primary"><i class="bi bi-plus me-1"></i>新增
-        </button>
-        <nz-input-group *nzSpaceItem [nzAddOnAfter]="suffixIconButton" [nzSuffix]="suffixTemplate" nzSearch
-                        style="width: 20rem">
+        <button (click)="openUserForm({})" *nzSpaceItem nz-button nzType="primary"><i class="bi bi-plus me-1"></i>新增 </button>
+        <nz-input-group *nzSpaceItem [nzAddOnAfter]="suffixIconButton" [nzSuffix]="suffixTemplate" nzSearch style="width: 20rem">
           <input [(ngModel)]="search().search" name="search" nz-input placeholder="搜索用户" type="text" />
         </nz-input-group>
         <ng-template #suffixTemplate>
           @if (search().search) {
-            <span nz-icon nzType="close" (click)="search().search = ''"></span>
+          <span nz-icon nzType="close" (click)="search().search = ''"></span>
           }
         </ng-template>
         <ng-template #suffixIconButton>
-          <button (click)="onSearch()" nz-button nzSearch nzType="primary"><span nz-icon nzType="search"></span>
-          </button>
+          <button (click)="onSearch()" nz-button nzSearch nzType="primary"><span nz-icon nzType="search"></span> </button>
         </ng-template>
       </nz-space>
     </div>
@@ -40,52 +37,48 @@
     nzShowSizeChanger
     nzTableLayout="auto">
     <thead>
-    <tr>
-      <th [nzSortFn]="true" nzColumnKey="code" nzLeft nzShowSort nzWidth="8rem">编码</th>
-      <th [nzSortFn]="true" nzColumnKey="username" nzLeft nzShowSort>用户</th>
-      <th [nzSortFn]="true" nzColumnKey="name" nzLeft nzShowSort>姓名</th>
-      <th [nzSortFn]="true" nzColumnKey="phone" nzShowSort>电话</th>
-      <th [nzSortFn]="true" nzColumnKey="email" nzShowSort nzWidth="12rem">邮箱</th>
-      <th nzWidth="4rem">启用</th>
-      <th nzWidth="4rem">锁定</th>
-      <th nzWidth="10rem">登录时间</th>
-      <th nzRight nzWidth="7rem">操作</th>
-    </tr>
+      <tr>
+        <th [nzSortFn]="true" nzColumnKey="code" nzLeft nzShowSort nzWidth="8rem">编码</th>
+        <th [nzSortFn]="true" nzColumnKey="username" nzLeft nzShowSort>用户</th>
+        <th [nzSortFn]="true" nzColumnKey="name" nzLeft nzShowSort>姓名</th>
+        <th [nzSortFn]="true" nzColumnKey="phone" nzShowSort>电话</th>
+        <th [nzSortFn]="true" nzColumnKey="email" nzShowSort nzWidth="12rem">邮箱</th>
+        <th nzWidth="4rem">启用</th>
+        <th nzWidth="4rem">锁定</th>
+        <th nzWidth="10rem">登录时间</th>
+        <th nzRight nzWidth="7rem">操作</th>
+      </tr>
     </thead>
     <tbody>
       @for (item of userTable.data; track item.id) {
-        <ng-container>
-          <tr>
-            <td nzLeft [cdkCopyToClipboard]="item.code ?? ''">
-              <ng-container
-                [ngTemplateOutlet]="tableColumn"
-                [ngTemplateOutletContext]="{ $implicit: item.code ?? '' | appTruncateMiddle }"></ng-container>
-            </td>
-            <td nzLeft [cdkCopyToClipboard]="item.username ?? ''">
-              <ng-container [ngTemplateOutlet]="tableColumn"
-                            [ngTemplateOutletContext]="{ $implicit: item.username ?? '' }"></ng-container>
-            </td>
-            <td nzLeft [cdkCopyToClipboard]="item.name ?? ''">
-              <ng-container [ngTemplateOutlet]="tableColumn"
-                            [ngTemplateOutletContext]="{ $implicit: item.name ?? '' }"></ng-container>
-            </td>
-            <td [cdkCopyToClipboard]="item.phone ?? ''">
-              <ng-container [ngTemplateOutlet]="tableColumn"
-                            [ngTemplateOutletContext]="{ $implicit: item.phone ?? '' }"></ng-container>
-            </td>
-            <td [cdkCopyToClipboard]="item.email ?? ''">
-              <ng-container [ngTemplateOutlet]="tableColumn"
-                            [ngTemplateOutletContext]="{ $implicit: item.email ?? '' }"></ng-container>
-            </td>
-            <td>{{ item.disabled ? '否' : '是' }}</td>
-            <td>{{ item.accountLocked ? '是' : '否' }}</td>
-            <td>{{ item.loginTime | date : 'short' }}</td>
-            <td nzRight>
-              <a class="table-a" nz-button nzType="link" (click)="openUserForm(item)">编辑</a> |
-              <a class="table-a" nz-button nzType="link" href="javascript:void(0)">删除</a>
-            </td>
-          </tr>
-        </ng-container>
+      <ng-container>
+        <tr>
+          <td nzLeft [cdkCopyToClipboard]="item.code ?? ''">
+            <ng-container
+              [ngTemplateOutlet]="tableColumn"
+              [ngTemplateOutletContext]="{ $implicit: item.code ?? '' | appTruncateMiddle }"></ng-container>
+          </td>
+          <td nzLeft [cdkCopyToClipboard]="item.username ?? ''">
+            <ng-container [ngTemplateOutlet]="tableColumn" [ngTemplateOutletContext]="{ $implicit: item.username ?? '' }"></ng-container>
+          </td>
+          <td nzLeft [cdkCopyToClipboard]="item.name ?? ''">
+            <ng-container [ngTemplateOutlet]="tableColumn" [ngTemplateOutletContext]="{ $implicit: item.name ?? '' }"></ng-container>
+          </td>
+          <td [cdkCopyToClipboard]="item.phone ?? ''">
+            <ng-container [ngTemplateOutlet]="tableColumn" [ngTemplateOutletContext]="{ $implicit: item.phone ?? '' }"></ng-container>
+          </td>
+          <td [cdkCopyToClipboard]="item.email ?? ''">
+            <ng-container [ngTemplateOutlet]="tableColumn" [ngTemplateOutletContext]="{ $implicit: item.email ?? '' }"></ng-container>
+          </td>
+          <td>{{ item.disabled ? '否' : '是' }}</td>
+          <td>{{ item.accountLocked ? '是' : '否' }}</td>
+          <td>{{ item.loginTime | date : 'short' }}</td>
+          <td nzRight>
+            <a class="table-a" nz-button nzType="link" (click)="openUserForm(item)">编辑</a> |
+            <a class="table-a" nz-button nzType="link" href="javascript:void(0)">删除</a>
+          </td>
+        </tr>
+      </ng-container>
       }
     </tbody>
   </nz-table>
