@@ -23,7 +23,7 @@ import { SHARED_IMPORTS } from '@app/shared/shared-imports';
       <div class="navbar-nav flex-row order-md-last">
         <div class="nav-item d-none d-md-flex me-3">
           <div class="btn-list">
-            <a href="#" class="btn" target="_blank" rel="noreferrer">
+            <a href="https://github.com/vnobo/plate" class="btn" target="_blank" rel="noreferrer">
               <!-- Download SVG icon from http://tabler-icons.io/i/brand-github -->
               <svg
                 xmlns="http://www.w3.org/2000/svg"
