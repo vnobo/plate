@@ -1,25 +1,23 @@
-import { Component, effect, inject, OnInit, signal, untracked } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { Component, effect, inject, OnInit, signal, untracked } from '@angular/core';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { NzTableQueryParams } from 'ng-zorro-antd/table';
 import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification';
+import { NzTableQueryParams } from 'ng-zorro-antd/table';
 
 import { tap } from 'rxjs';
 
-import { Menu } from './menu.types';
-import { MenuFormComponent, MenusService } from '@app/pages';
-import { SHARED_IMPORTS } from '@app/shared/shared-imports';
-import { NzPageHeaderModule, NzPageHeaderTitleDirective } from 'ng-zorro-antd/page-header';
-import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { Page, Pageable } from '@app/core/types';
+import { MenuFormComponent, MenusService } from '@app/pages';
 import { User } from '@app/pages/home/users/user.types';
+import { SHARED_IMPORTS } from '@app/shared/shared-imports';
+import { Menu } from './menu.types';
 
 @Component({
   selector: 'app-menus',
   standalone: true,
   templateUrl: './menus.component.html',
   styleUrls: ['./menus.component.scss'],
-  imports: [DatePipe, NzNotificationModule, ...SHARED_IMPORTS, NzPageHeaderModule, NzPageHeaderTitleDirective, NzSpaceModule],
+  imports: [DatePipe, NzNotificationModule, ...SHARED_IMPORTS],
 })
 export class MenusComponent implements OnInit {
   private readonly _modal = inject(NzModalService);

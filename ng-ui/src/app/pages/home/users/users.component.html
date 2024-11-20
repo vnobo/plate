@@ -1,5 +1,5 @@
 <div class="container-fluid">
-  <page-header>
+  <page-content-header>
     <ng-container pageHeaderTitle>用户管理</ng-container>
     <div pageHeaderSubtitle>管理平台所有用户</div>
     <div pageHeaderTags>
@@ -21,7 +21,7 @@
         </ng-template>
       </nz-space>
     </div>
-  </page-header>
+  </page-content-header>
   <nz-table
     #userTable
     (nzQueryParams)="onTableQueryChange($event)"

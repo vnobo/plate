@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, type OnInit, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { NzTableQueryParams } from 'ng-zorro-antd/table';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { tap } from 'rxjs';
@@ -21,7 +21,7 @@ import { PageHeaderComponent } from '@app/layout';
   styleUrl: './users.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UsersComponent implements OnInit {
+export class UsersComponent {
   private readonly _message = inject(NzNotificationService);
   private readonly _modal = inject(NzModalService);
   private readonly _userSer = inject(UsersService);
@@ -38,15 +38,18 @@ export class UsersComponent implements OnInit {
     tenantCode: '0',
   } as User);
 
-  constructor() {
-    effect(() => {
-      untracked(() => {
-        //todo: 信号优化数据流
-      });
-    });
+  onSearch() {
+    this.loadData(this.search(), this.page()).subscribe(() => this._message.success('数据加载成功!', ``, { nzDuration: 3000 }));
   }
 
-  ngOnInit(): void {
+  onTableQueryChange($event: NzTableQueryParams) {
+    this.page().sorts = [];
+    for (const item of $event.sort) {
+      if (item.value) {
+        const sort = item.key + ',' + (item.value == 'descend' ? 'desc' : 'asc');
+        this.page().sorts.push(sort);
+      }
+    }
     this.onSearch();
   }
 
@@ -74,20 +77,6 @@ export class UsersComponent implements OnInit {
         });
       }
     });
-  }
-
-  onSearch() {
-    this.loadData(this.search(), this.page()).subscribe(() => this._message.success('数据加载成功!', ``, { nzDuration: 3000 }));
-  }
-
-  onTableQueryChange($event: NzTableQueryParams) {
-    this.page().sorts = [];
-    for (const item of $event.sort) {
-      if (item.value) {
-        const sort = item.key + ',' + (item.value == 'descend' ? 'desc' : 'asc');
-        this.page().sorts.push(sort);
-      }
-    }
   }
 
   private loadData(search: User, page: Pageable) {
