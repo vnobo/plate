@@ -2,6 +2,7 @@ package com.plate.boot.commons.utils.query;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
+import com.plate.boot.commons.exception.QueryException;
 import com.plate.boot.commons.exception.RestServerException;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.ObjectUtils;
@@ -151,7 +152,7 @@ public final class QueryJsonHelper {
     private static QueryFragment buildJsonCondition(Map.Entry<String, Object> entry, String prefix) {
         String[] keys = StringUtils.delimitedListToStringArray(entry.getKey(), ".");
         if (keys.length < 2) {
-            throw RestServerException.withMsg("Json query column path [query[" + entry.getKey() + "]] error",
+            throw QueryException.withMsg("Json query column path [query[" + entry.getKey() + "]] error",
                     List.of("Json path example: extend.username",
                             "Request query params:",
                             "query[extend.usernameLike]=aa",

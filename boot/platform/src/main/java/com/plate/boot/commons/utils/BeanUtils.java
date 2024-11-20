@@ -90,7 +90,7 @@ public final class BeanUtils implements InitializingBean {
         try {
             return ContextUtils.OBJECT_MAPPER.writeValueAsBytes(object);
         } catch (JsonProcessingException e) {
-            throw JsonException.withError(e);
+            throw JsonException.withError("Json processing exception", e);
         }
     }
 

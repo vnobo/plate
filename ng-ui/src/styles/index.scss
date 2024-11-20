@@ -6,3 +6,10 @@
 //@primary-color: #1890ff;
 
 @import '@tabler/core/src/scss/tabler';
+
+.ant-layout-header {
+  height: 100%;
+  padding: 0;
+  background: none;
+  color: transparent;
+}
