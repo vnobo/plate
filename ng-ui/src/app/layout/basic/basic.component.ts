@@ -18,7 +18,7 @@ import { LayoutNavbarComponent } from './widgets/navbar.component';
         <nz-header class="nz-header">
           <div layoutNavbar (outputCollapsed)="onHeaderIsCollapsed($event)"></div>
         </nz-header>
-        <nz-content class="mt-2">
+        <nz-content class="container-fluid mt-2">
           <router-outlet></router-outlet>
         </nz-content>
       </nz-layout>

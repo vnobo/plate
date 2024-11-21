@@ -11,19 +11,19 @@ import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
     <nz-page-header [nzGhost]="false" nzBackIcon>
       <nz-breadcrumb [nzAutoGenerate]="true" [nzRouteLabel]="'title'" nz-page-header-breadcrumb></nz-breadcrumb>
       <nz-page-header-title>
-        <ng-content select="page-content-header-title,[pageHeaderTitle]"></ng-content>
+        <ng-content select="[pageHeaderTitle]"></ng-content>
       </nz-page-header-title>
       <nz-page-header-subtitle>
-        <ng-content select="page-content-header-subtitle,[pageHeaderSubtitle]"></ng-content>
+        <ng-content select="[pageHeaderSubtitle]"></ng-content>
       </nz-page-header-subtitle>
       <nz-page-header-tags>
-        <ng-content select="[pageHeaderTags],page-content-header-tags"></ng-content>
+        <ng-content select="[pageHeaderTags]"></ng-content>
       </nz-page-header-tags>
       <nz-page-header-extra>
-        <ng-content select="[pageHeaderExtra],page-content-header-extra"></ng-content>
+        <ng-content select="[pageHeaderExtra]"></ng-content>
       </nz-page-header-extra>
       <nz-page-header-content>
-        <ng-content select="[pageHeaderContent],page-content-header-content"></ng-content>
+        <ng-content select="[pageHeaderContent]"></ng-content>
       </nz-page-header-content>
     </nz-page-header>
   </div>`,
@@ -32,12 +32,4 @@ export class PageHeaderComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {}
-}
-
-@Directive({
-  selector:
-    'page-content-header-title,page-content-header-subtitle,page-content-header-tags,page-content-header-extra,page-content-header-content',
-  standalone: true,
-})
-export class PageHeaderComponentDirective {
 }

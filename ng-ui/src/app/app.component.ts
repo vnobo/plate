@@ -29,6 +29,7 @@ export class AppComponent implements OnInit {
 
   constructor(el: ElementRef, renderer: Renderer2) {
     renderer.setAttribute(el.nativeElement, 'ng-zorro-version', VERSION_ZORRO.full);
+    renderer.setAttribute(el.nativeElement.parentElement, 'data-bs-theme', 'dark');
   }
 
   ngOnInit(): void {

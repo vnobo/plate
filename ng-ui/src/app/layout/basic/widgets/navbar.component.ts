@@ -313,13 +313,13 @@ import { SHARED_IMPORTS } from '@app/shared/shared-imports';
   ],
 })
 export class LayoutNavbarComponent implements OnInit {
-  outputCollapsed = output<boolean>();
-  authenticationToken = signal<Authentication | null>({} as Authentication);
-  isCollapsed = signal(false);
   private readonly loginSer = inject(LoginService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
+  outputCollapsed = output<boolean>();
+  authenticationToken = signal<Authentication | null>({} as Authentication);
+  isCollapsed = signal(false);
   ngOnInit(): void {
     this.authenticationToken.set(this.loginSer._auth.authenticationToken());
   }

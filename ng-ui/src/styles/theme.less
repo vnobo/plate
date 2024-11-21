@@ -1,11 +1,15 @@
 @import 'ng-zorro-antd/ng-zorro-antd.less';
 @import 'ng-zorro-antd/ng-zorro-antd.dark.less';
-@black: #151f2c;
-@white: #dce1e7;
-@body-background: var(--tblr-body-bg);
+
+@black: #0000;
+@white: #ffff;
+
+@body-bg: var(--tblr-body-bg);
+@body-background: @body-bg;
 @popover-background: var(--tblr-bg-surface);
 @popover-customize-border-color: var(--tblr-border-color);
-@component-background: color(#151f2c);
+@component-background: @body-bg;
+@layout-body-background: @body-bg;
 .cdk-overlay-container {
   z-index: 2000;
 }
