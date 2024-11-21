@@ -5,23 +5,22 @@ import { NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet }
 import { VERSION as VERSION_ZORRO } from 'ng-zorro-antd/version';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, MatProgressBarModule, NgIf],
-  template: `
+    selector: 'app-root',
+    imports: [RouterOutlet, MatProgressBarModule, NgIf],
+    template: `
     <div class="fixed-top">
       <mat-progress-bar *ngIf="progressShow()" mode="query"></mat-progress-bar>
     </div>
     <router-outlet></router-outlet>
   `,
-  styles: [
-    `
+    styles: [
+        `
       :host {
         min-height: 100%;
         min-width: 100%;
       }
     `,
-  ],
+    ]
 })
 export class AppComponent implements OnInit {
   progressShow = signal(false);

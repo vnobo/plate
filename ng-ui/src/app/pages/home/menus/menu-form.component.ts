@@ -11,18 +11,17 @@ import { CommonModule } from '@angular/common';
 import { User } from '@app/pages/home/users/user.types';
 
 @Component({
-  selector: 'app-menu-form',
-  standalone: true,
-  imports: [
-    CommonModule,
-    NzModalModule,
-    NzFormModule,
-    NzSelectModule,
-    NzButtonModule,
-    NzInputModule,
-    ...SHARED_IMPORTS,
-  ],
-  template: `
+    selector: 'app-menu-form',
+    imports: [
+        CommonModule,
+        NzModalModule,
+        NzFormModule,
+        NzSelectModule,
+        NzButtonModule,
+        NzInputModule,
+        ...SHARED_IMPORTS,
+    ],
+    template: `
     <form nz-form [formGroup]="menuForm" (ngSubmit)="submitForm()">
       <div class="row my-2">
         <nz-form-item class="col-md mx-1mx-1">
@@ -126,7 +125,7 @@ import { User } from '@app/pages/home/users/user.types';
         </nz-form-control>
       </nz-form-item>
     </form>
-  `,
+  `
 })
 export class MenuFormComponent implements OnInit {
   menuData = signal<Menu>({} as Menu);

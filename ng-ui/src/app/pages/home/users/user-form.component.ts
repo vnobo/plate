@@ -5,10 +5,9 @@ import { User } from '@app/pages/home/users/user.types';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 
 @Component({
-  selector: 'app-user-form',
-  standalone: true,
-  imports: [NzModalModule, ...SHARED_IMPORTS],
-  template: `
+    selector: 'app-user-form',
+    imports: [NzModalModule, ...SHARED_IMPORTS],
+    template: `
     <form (ngSubmit)="onSubmit()" [formGroup]="userForm" class="form-wrapper" nz-form>
       <nz-form-item>
         <nz-form-label [nzSpan]="6" nzFor="username" nzRequired>用&nbsp;&nbsp;户&nbsp;&nbsp;名</nz-form-label>
@@ -78,11 +77,11 @@ import { NzModalModule } from 'ng-zorro-antd/modal';
       </nz-form-item>
     </form>
   `,
-  styles: [`:host {
+    styles: [`:host {
     min-height: 100%;
     min-width: 100%;
   }
-  `],
+  `]
 })
 export class UserFormComponent implements OnInit {
   userData = signal<User>({} as User);

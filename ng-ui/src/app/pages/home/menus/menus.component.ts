@@ -13,11 +13,10 @@ import { SHARED_IMPORTS } from '@app/shared/shared-imports';
 import { Menu } from './menu.types';
 
 @Component({
-  selector: 'app-menus',
-  standalone: true,
-  templateUrl: './menus.component.html',
-  styleUrls: ['./menus.component.scss'],
-  imports: [DatePipe, NzNotificationModule, ...SHARED_IMPORTS],
+    selector: 'app-menus',
+    templateUrl: './menus.component.html',
+    styleUrls: ['./menus.component.scss'],
+    imports: [DatePipe, NzNotificationModule, ...SHARED_IMPORTS]
 })
 export class MenusComponent implements OnInit {
   private readonly _modal = inject(NzModalService);

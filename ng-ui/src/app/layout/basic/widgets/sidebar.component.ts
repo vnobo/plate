@@ -8,10 +8,9 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 
 @Component({
-  selector: 'layout-sidebar-menus, [layoutSidebarMenus]',
-  standalone: true,
-  imports: [NzLayoutModule, NzMenuModule, RouterModule, NzIconModule, SharedModule],
-  template: `
+    selector: 'layout-sidebar-menus, [layoutSidebarMenus]',
+    imports: [NzLayoutModule, NzMenuModule, RouterModule, NzIconModule, SharedModule],
+    template: `
     <div class="sidebar-logo">
       <a href="/" rel="noopener noreferrer" target="_blank">
         <img alt="logo" src="assets/img/logo.png" />
@@ -31,14 +30,14 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
         </li>
       }
     </ul>`,
-  styles: [
-    `
+    styles: [
+        `
       :host {
         min-width: 100%;
         min-height: 100%;
       }
     `,
-    `
+        `
       .sidebar-logo {
         position: relative;
         height: 64px;
@@ -48,7 +47,7 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
         transition: all 0.3s;
       }
     `,
-    `
+        `
       .sidebar-logo img {
         display: inline-block;
         height: 32px;
@@ -56,7 +55,7 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
         vertical-align: middle;
       }
     `,
-    `
+        `
       .sidebar-logo h1 {
         display: inline-block;
         margin: 0 0 0 20px;
@@ -67,7 +66,7 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
         vertical-align: middle;
       }
     `,
-    `
+        `
       .header-trigger {
         height: 64px;
         padding: 20px 24px;
@@ -76,12 +75,12 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
         transition: all 0.3s, padding 0s;
       }
     `,
-    `
+        `
       .trigger:hover {
         color: #1890ff;
       }
     `,
-  ],
+    ]
 })
 export class LayoutSidebarComponent {
   private readonly menusSer = inject(MenusService);

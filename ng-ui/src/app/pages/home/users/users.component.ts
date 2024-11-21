@@ -14,12 +14,11 @@ import { UserFormComponent } from '@app/pages';
 import { PageHeaderComponent } from '@app/layout';
 
 @Component({
-  selector: 'app-users',
-  standalone: true,
-  imports: [SharedModule, PageHeaderComponent, NzTagModule, NzSpaceModule],
-  templateUrl: './users.component.html',
-  styleUrl: './users.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-users',
+    imports: [SharedModule, PageHeaderComponent, NzTagModule, NzSpaceModule],
+    templateUrl: './users.component.html',
+    styleUrl: './users.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UsersComponent {
   private readonly _message = inject(NzNotificationService);
