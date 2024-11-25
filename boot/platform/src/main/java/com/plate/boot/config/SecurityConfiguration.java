@@ -17,8 +17,6 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
-import org.springframework.security.config.annotation.rsocket.EnableRSocketSecurity;
-import org.springframework.security.config.annotation.rsocket.RSocketSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -26,7 +24,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.R2dbcReactiveOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
-import org.springframework.security.rsocket.core.PayloadSocketAcceptorInterceptor;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.HttpBasicServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.authentication.logout.*;
@@ -56,7 +53,6 @@ import static com.plate.boot.config.SessionConfiguration.X_REQUESTED_WITH;
  */
 @Configuration(proxyBeanMethods = false)
 @EnableReactiveMethodSecurity
-@EnableRSocketSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
@@ -88,26 +84,6 @@ public class SecurityConfiguration {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
-
-    /**
-     * Configures and provides an RSocket interceptor for security purposes.
-     * This method sets up authorization policies for RSocket interactions,
-     * enforcing authentication requirements and permission rules.
-     *
-     * @param rsocket The RSocketSecurity configuration object used to define security rules.
-     * @return A configured PayloadSocketAcceptorInterceptor that enforces the defined security policies for RSocket communications.
-     */
-    @Bean
-    public PayloadSocketAcceptorInterceptor rsocketInterceptor(RSocketSecurity rsocket) {
-        rsocket.authorizePayload(authorize ->
-                        authorize
-                                .route("request.stream").authenticated()
-                                .anyRequest().authenticated()
-                                .anyExchange().permitAll()
-                )
-                .simpleAuthentication(Customizer.withDefaults());
-        return rsocket.build();
     }
 
     /**
