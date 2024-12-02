@@ -25,6 +25,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Service class for managing {@link Menu} entities.
+ * <p>
+ * This class provides methods to perform CRUD operations on menu items.
+ * It interacts with the data access layer to retrieve and persist menu data.
+ * </p>
+ *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
 @Log4j2
