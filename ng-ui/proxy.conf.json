@@ -1,18 +1,11 @@
 {
   "/api": {
-    "target": "http://localhost:9001",
+    "target": "https://localhost:8443",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
     "pathRewrite": {
       "^/api": ""
     }
-  },
-  "/rsocket": {
-    "target": "ws://localhost:9001/",
-    "secure": false,
-    "ws": true,
-    "changeOrigin": true,
-    "logLevel": "debug"
   }
 }

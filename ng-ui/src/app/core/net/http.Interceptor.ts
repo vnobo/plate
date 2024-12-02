@@ -69,7 +69,7 @@ function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
           _message.error(`服务器访问错误,请稍后重试. 错误码: ${error.status},详细信息: ${error.error}`);
         }
       }
-      console.error(`Backend returned code ${error.status}, body was: `, error.error);
+      console.error(`Backend returned code ${error.status}, body was: `, error.message);
       return throwError(() => error);
     }),
   );
