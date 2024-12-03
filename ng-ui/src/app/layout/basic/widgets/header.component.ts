@@ -4,9 +4,9 @@ import { SharedModule } from '@app/shared/shared.module';
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
 
 @Component({
-    selector: 'page-content-header,[pageContentHeader]',
-    imports: [NzPageHeaderModule, SharedModule],
-    template: ` <div class="sticky-top">
+  selector: 'page-content-header,[pageContentHeader]',
+  imports: [NzPageHeaderModule, SharedModule],
+  template: ` <div class="sticky-top">
     <nz-page-header [nzGhost]="false" nzBackIcon>
       <nz-breadcrumb [nzAutoGenerate]="true" [nzRouteLabel]="'title'" nz-page-header-breadcrumb></nz-breadcrumb>
       <nz-page-header-title>
@@ -25,7 +25,7 @@ import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
         <ng-content select="[pageHeaderContent]"></ng-content>
       </nz-page-header-content>
     </nz-page-header>
-  </div>`
+  </div>`,
 })
 export class PageHeaderComponent implements OnInit {
   constructor() {}
