@@ -5,9 +5,9 @@ import { LoginService } from '@app/pages';
 import { SHARED_IMPORTS } from '@app/shared/shared-imports';
 
 @Component({
-    selector: 'layout-navbar,[layoutNavbar]',
-    imports: [...SHARED_IMPORTS],
-    template: ` <div class="navbar d-print-none">
+  selector: 'layout-navbar,[layoutNavbar]',
+  imports: [...SHARED_IMPORTS],
+  template: ` <div class="navbar d-print-none">
     <div class="container-fluid">
       <button
         class="navbar-toggler"
@@ -285,14 +285,14 @@ import { SHARED_IMPORTS } from '@app/shared/shared-imports';
       </div>
     </div>
   </div>`,
-    styles: [
-        `
+  styles: [
+    `
       :host {
         min-height: 100%;
         min-width: 100%;
       }
     `,
-        `
+    `
       .nz-page-header {
         position: relative;
         padding: 0;
@@ -300,7 +300,7 @@ import { SHARED_IMPORTS } from '@app/shared/shared-imports';
         height: 100%;
       }
     `,
-        `
+    `
       .header-trigger {
         height: 64px;
         padding: 20px 24px;
@@ -309,7 +309,7 @@ import { SHARED_IMPORTS } from '@app/shared/shared-imports';
         transition: all 0.3s, padding 0s;
       }
     `,
-    ]
+  ],
 })
 export class LayoutNavbarComponent implements OnInit {
   private readonly loginSer = inject(LoginService);
