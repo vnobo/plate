@@ -2,7 +2,9 @@ server:
   shutdown: graceful
   http2.enabled: true
   compression.enabled: true
-  ssl.bundle: server-http3
+  #ssl:
+  #  enabled: true
+  #  bundle: server-http3
 
 spring:
   threads.virtual.enabled: true
@@ -28,9 +30,9 @@ spring:
     redis:
       flush-mode: on_save
       repository-type: indexed
-  ssl.bundle.jks:
-    server-http3:
-      key.alias: plate
-      keystore:
-        location: classpath:plate.jks
-        password: 123456
+  #ssl.bundle.jks:
+  #  server-http3:
+  #    key.alias: plate
+  #    keystore:
+  #      location: classpath:plate.jks
+  #      password: 123456
