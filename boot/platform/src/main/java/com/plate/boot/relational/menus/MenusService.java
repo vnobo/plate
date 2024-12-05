@@ -81,6 +81,12 @@ public class MenusService extends AbstractDatabase {
         return oldMunuMono;
     }
 
+    /**
+     * save menu entity
+     *
+     * @param request menu request
+     * @return Mono menu entity
+     */
     public Mono<Menu> operate(MenuRequest request) {
         log.debug("Menu operate request: {}", request);
         if (ObjectUtils.isEmpty(request)) {
