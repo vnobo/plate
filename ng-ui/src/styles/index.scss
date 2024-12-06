@@ -1,8 +1,8 @@
 /* Importing Bootstrap SCSS file. */
-@import '@tabler/core/src/scss/config';
+@use '@tabler/core/src/scss/config';
 
 // Override less variables to here
 // View all variables: https://github.com/NG-ZORRO/ng-zorro-antd/blob/master/components/style/themes/default.less
 //@primary-color: #1890ff;
 
-@import '@tabler/core/src/scss/tabler';
+@use '@tabler/core/src/scss/tabler';
