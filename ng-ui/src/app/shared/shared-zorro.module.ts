@@ -13,7 +13,7 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
+import { NzInputNumberLegacyModule } from 'ng-zorro-antd/input-number-legacy';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzListModule } from 'ng-zorro-antd/list';
 import { NzMessageModule } from 'ng-zorro-antd/message';
@@ -52,7 +52,7 @@ export const SHARED_ZORRO_MODULES = [
   NzDatePickerModule,
   NzTimePickerModule,
   NzTagModule,
-  NzInputNumberModule,
+  NzInputNumberLegacyModule,
   NzBreadCrumbModule,
   NzListModule,
   NzSwitchModule,
