@@ -19,16 +19,12 @@ public class Http3NettyCustomizer implements WebServerFactoryCustomizer<NettyRea
     public void customize(NettyReactiveWebServerFactory factory) {
         factory.addServerCustomizers(server -> {
             SslBundle sslBundle = factory.getSslBundles().getBundle("server-http3");
-            Http3SslContextSpec sslContextSpec =
+            Http3SslContextSpec ssl3ContextSpec =
                     Http3SslContextSpec.forServer(sslBundle.getManagers().getKeyManagerFactory(),
                             sslBundle.getKey().getPassword());
-
             return server
-                    // Configure HTTP/3 protocol
-                    .protocol(HttpProtocol.HTTP3)
-                    // Configure HTTP/3 SslContext
-                    .secure(spec -> spec.sslContext(sslContextSpec))
-                    // Configure HTTP/3 settings
+                    .protocol(HttpProtocol.H2,HttpProtocol.HTTP3)
+                    .secure(spec -> spec.sslContext(ssl3ContextSpec))
                     .http3Settings(spec -> spec.idleTimeout(Duration.ofSeconds(5))
                             .maxData(10_000_000)
                             .maxStreamDataBidirectionalRemote(1_000_000)
