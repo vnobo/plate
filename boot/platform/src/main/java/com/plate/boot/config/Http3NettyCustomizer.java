@@ -3,7 +3,6 @@ package com.plate.boot.config;
 import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
-import org.springframework.context.annotation.Configuration;
 import reactor.netty.http.Http3SslContextSpec;
 import reactor.netty.http.HttpProtocol;
 
@@ -12,7 +11,7 @@ import java.time.Duration;
 /**
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
-@Configuration(proxyBeanMethods = false)
+//@Configuration(proxyBeanMethods = false)
 public class Http3NettyCustomizer implements WebServerFactoryCustomizer<NettyReactiveWebServerFactory> {
 
     @Override
