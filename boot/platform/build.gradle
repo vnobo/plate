@@ -22,6 +22,7 @@ dependencies {
     implementation('io.netty:netty-tcnative-boringssl-static')
 
     testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'io.projectreactor:reactor-test'
 
 }
 

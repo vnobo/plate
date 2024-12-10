@@ -1,0 +1,9 @@
+logging:
+  register-shutdown-hook: true
+  #structured.format:
+  #  console: logstash
+  level:
+    web: debug
+    com.plate.boot.*: debug
+    org.springframework.r2dbc: debug
+    io.r2dbc.postgresql.PARAM: debug
