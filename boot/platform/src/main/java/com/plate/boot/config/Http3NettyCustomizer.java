@@ -13,7 +13,6 @@ import java.time.Duration;
  */
 //@Configuration(proxyBeanMethods = false)
 public class Http3NettyCustomizer implements WebServerFactoryCustomizer<NettyReactiveWebServerFactory> {
-
     @Override
     public void customize(NettyReactiveWebServerFactory factory) {
         factory.addServerCustomizers(server -> {
@@ -22,8 +21,11 @@ public class Http3NettyCustomizer implements WebServerFactoryCustomizer<NettyRea
                     Http3SslContextSpec.forServer(sslBundle.getManagers().getKeyManagerFactory(),
                             sslBundle.getKey().getPassword());
             return server
-                    .protocol(HttpProtocol.H2,HttpProtocol.HTTP3)
+                    // Configure HTTP/3 protocol
+                    .protocol(HttpProtocol.HTTP3)
+                    // Configure HTTP/3 SslContext
                     .secure(spec -> spec.sslContext(ssl3ContextSpec))
+                    // Configure HTTP/3 settings
                     .http3Settings(spec -> spec.idleTimeout(Duration.ofSeconds(5))
                             .maxData(10_000_000)
                             .maxStreamDataBidirectionalRemote(1_000_000)

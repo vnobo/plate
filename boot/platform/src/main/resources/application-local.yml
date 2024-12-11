@@ -10,16 +10,17 @@ logging:
 
 server:
   port: 8443
+  http2.enabled: true
   #ssl.bundle: server-http3
 
 spring:
   application.name: plate
-  #ssl.bundle.jks:
-  #  server-http3:
-  #    key.alias: plate
-  #    keystore:
-  #      location: classpath:plate.jks
-  #      password: 123456
+  ssl.bundle.jks:
+    server-http3:
+      key.alias: plate
+      keystore:
+        location: classpath:plate.jks
+        password: 123456
   r2dbc:
     url: r2dbc:postgres://127.0.0.1:5432/plate?fetchSize=5000
     username: farmer
