@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build the Docker image
-        run: docker buildx build --push -t  ${{ env.REGISTRY }}/postgres:17 ./boot/postgres
+        run: docker buildx build --push -t ${{ vars.DOCKER_PREFIX }}/postgres:17 ./boot/postgres
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build the Docker image
-        run: docker buildx build --push -t  ${{ env.REGISTRY }}/postgres:zhparser ./boot/postgres/zhparser
+        run: docker buildx build --push -t ${{ vars.DOCKER_PREFIX }}/postgres:zhparser ./boot/postgres/zhparser
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -61,10 +61,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build postgis Docker image
-        run: docker buildx build --push -t  ${{ env.REGISTRY }}/postgres:postgis ./boot/postgres/postgis
+        run: docker buildx build --push -t ${{ vars.DOCKER_PREFIX }}/postgres:postgis ./boot/postgres/postgis
       - uses: actions/checkout@v4
       - name: Build latest Docker image
-        run: docker buildx build --push -t  ${{ env.REGISTRY }}/postgres:latest ./boot/postgres/postgis
+        run: docker buildx build --push -t ${{ vars.DOCKER_PREFIX }}/postgres:latest ./boot/postgres/postgis
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
