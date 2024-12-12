@@ -66,9 +66,12 @@ jobs:
 
       - name: Build Local Docker image
         run: docker buildx build -t ${{ vars.DOCKER_PREFIX }}/postgres:17 ./boot/postgres
+
       - name: Build zhparser Docker image
         run: docker buildx build -t ${{ vars.DOCKER_PREFIX }}/postgres:zhparser ./boot/postgres/zhparser
+
       - name: Build postgis Docker image
         run: docker buildx build -t ${{ vars.DOCKER_PREFIX }}/postgres:postgis ./boot/postgres/postgis
+
       - name: Build latest Docker image
         run: docker buildx build -t ${{ vars.DOCKER_PREFIX }}/postgres:latest ./boot/postgres/postgis
