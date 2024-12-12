@@ -35,8 +35,17 @@ jobs:
           architecture: x64
           settings-path: ${{ github.workspace }}
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle
+      - name: Gradle Wrapper Validation
+        # You may pin to the exact commit or the version.
+        # uses: gradle/wrapper-validation-action@f9c9c575b8b21b6485636a91ffecd10e558c62f6
+        uses: gradle/wrapper-validation-action@v3.5.0
+        #with:
+        # Minimum number expected gradle-wrapper.jar files found in the repository. Non-negative number. Higher number is useful in monorepos where each project might have their own wrapper.
+        #min-wrapper-count: # optional, default is 1
+        # Allow Gradle snapshot versions during checksum verification. Boolean, true or false.
+        #allow-snapshots: # optional, default is false
+        # Accept arbitrary user-defined checksums as valid. Comma separated list of SHA256 checksums (lowercase hex).
+        #allow-checksums: # optional, default is
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
