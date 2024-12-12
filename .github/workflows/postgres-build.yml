@@ -64,9 +64,9 @@ jobs:
           # Inline BuildKit daemon config
         #config-inline: # optional
 
-      - name: Build the Docker image
+      - name: Build Local Docker image
         run: docker buildx build -t ${{ vars.DOCKER_PREFIX }}/postgres:17 ./boot/postgres
-      - name: Build the Docker image
+      - name: Build zhparser Docker image
         run: docker buildx build -t ${{ vars.DOCKER_PREFIX }}/postgres:zhparser ./boot/postgres/zhparser
       - name: Build postgis Docker image
         run: docker buildx build -t ${{ vars.DOCKER_PREFIX }}/postgres:postgis ./boot/postgres/postgis
