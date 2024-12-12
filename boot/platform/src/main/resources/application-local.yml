@@ -9,7 +9,7 @@ logging:
     io.r2dbc.postgresql.PARAM: debug
 
 server:
-  port: 8443
+  port: 8080
   http2.enabled: true
   #ssl.bundle: server-http3
 
