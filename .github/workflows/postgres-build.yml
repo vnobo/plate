@@ -12,6 +12,11 @@ on:
     branches: [ "main","dev" ]
   pull_request:
     branches: [ "main" ]
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   postgres-locale-image:
@@ -25,6 +30,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build the Docker image
         run: docker buildx build --push -t ${{ vars.DOCKER_PREFIX }}/postgres:17 ./boot/postgres
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
   postgres-zhparser-image:
     runs-on: ubuntu-latest
@@ -37,6 +46,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build the Docker image
         run: docker buildx build --push -t ${{ vars.DOCKER_PREFIX }}/postgres:zhparser ./boot/postgres/zhparser
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
   postgres-postgis-image:
     runs-on: ubuntu-latest
@@ -52,4 +65,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build latest Docker image
         run: docker buildx build --push -t ${{ vars.DOCKER_PREFIX }}/postgres:latest ./boot/postgres/postgis
-
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
