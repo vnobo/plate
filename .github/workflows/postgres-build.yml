@@ -19,7 +19,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  postgres-locale-image:
+  build-image:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,44 +28,47 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - name: Build the Docker image
-        run: docker buildx build --push -t ${{ vars.DOCKER_PREFIX }}/postgres:17 ./boot/postgres
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker Setup Buildx
+        # You may pin to the exact commit or the version.
+        # uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349
+        uses: docker/setup-buildx-action@v3.7.1
+          #with:
+          # Buildx version. (eg. v0.3.0)
+          #version: # optional
+          # Sets the builder driver to be used
+          #driver: # optional, default is docker-container
+          # List of additional driver-specific options. (eg. image=moby/buildkit:master)
+          #driver-opts: # optional
+          # BuildKit daemon flags
+          #buildkitd-flags: # optional
+          # BuildKit daemon config file
+          #buildkitd-config: # optional
+          # Inline BuildKit daemon config
+          #buildkitd-config-inline: # optional
+          # Sets up docker build command as an alias to docker buildx build
+          #install: # optional, default is false
+          # Switch to this builder instance
+          #use: # optional, default is true
+          # Optional address for docker socket or context from `docker context ls`
+          #endpoint: # optional
+          # Fixed platforms for current node. If not empty, values take priority over the detected ones
+          #platforms: # optional
+          # Append additional nodes to the builder
+          #append: # optional
+          # Cache buildx binary to GitHub Actions cache backend
+          #cache-binary: # optional, default is true
+          # Cleanup temp files and remove builder at the end of a job
+          #cleanup: # optional, default is true
+          # BuildKit daemon config file
+          #config: # optional
+          # Inline BuildKit daemon config
+        #config-inline: # optional
 
-  postgres-zhparser-image:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
       - name: Build the Docker image
-        run: docker buildx build --push -t ${{ vars.DOCKER_PREFIX }}/postgres:zhparser ./boot/postgres/zhparser
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-  postgres-postgis-image:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
+        run: docker buildx build -t ${{ vars.DOCKER_PREFIX }}/postgres:17 ./boot/postgres
+      - name: Build the Docker image
+        run: docker buildx build -t ${{ vars.DOCKER_PREFIX }}/postgres:zhparser ./boot/postgres/zhparser
       - name: Build postgis Docker image
-        run: docker buildx build --push -t ${{ vars.DOCKER_PREFIX }}/postgres:postgis ./boot/postgres/postgis
-      - uses: actions/checkout@v4
+        run: docker buildx build -t ${{ vars.DOCKER_PREFIX }}/postgres:postgis ./boot/postgres/postgis
       - name: Build latest Docker image
-        run: docker buildx build --push -t ${{ vars.DOCKER_PREFIX }}/postgres:latest ./boot/postgres/postgis
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+        run: docker buildx build -t ${{ vars.DOCKER_PREFIX }}/postgres:latest ./boot/postgres/postgis
