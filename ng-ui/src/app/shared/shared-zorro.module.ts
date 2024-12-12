@@ -13,7 +13,7 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
+import { NzInputNumberLegacyModule } from 'ng-zorro-antd/input-number-legacy';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzListModule } from 'ng-zorro-antd/list';
 import { NzMessageModule } from 'ng-zorro-antd/message';
@@ -23,6 +23,7 @@ import { NzPopoverModule } from 'ng-zorro-antd/popover';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzTableModule } from 'ng-zorro-antd/table';
@@ -51,7 +52,7 @@ export const SHARED_ZORRO_MODULES = [
   NzDatePickerModule,
   NzTimePickerModule,
   NzTagModule,
-  NzInputNumberModule,
+  NzInputNumberLegacyModule,
   NzBreadCrumbModule,
   NzListModule,
   NzSwitchModule,
@@ -64,4 +65,6 @@ export const SHARED_ZORRO_MODULES = [
   NzProgressModule,
   NzPopconfirmModule,
   NzLayoutModule,
+  NzSpinModule,
+  NzSpaceModule,
 ];

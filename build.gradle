@@ -1,7 +1,7 @@
 plugins {
-    id "org.springframework.boot" version "3.3.5" apply false
-    id 'io.spring.dependency-management' version '1.1.6' apply false
-    id 'org.graalvm.buildtools.native' version '0.10.2' apply false
+    id 'org.springframework.boot' version '3.4.0' apply false
+    id 'io.spring.dependency-management' version '1.1.6'
+    id 'org.graalvm.buildtools.native' version '0.10.3'
 }
 
 ext {
@@ -40,7 +40,7 @@ configure(subprojects - project(":boot")) { project ->
     tasks.named("bootBuildImage") {
         createdDate = "now"
         tags = ["${dockerPrefix}/${rootProject.name}-${project.name}:latest"]
-        imageName.set("${dockerPrefix}/${rootProject.name}-${project.name}:${project.version}")
+        imageName = "${dockerPrefix}/${rootProject.name}-${project.name}:${project.version}"
         environment = [
                 "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
                 "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 " +

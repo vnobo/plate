@@ -1,75 +1,87 @@
-import { Component, inject, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzDividerModule } from 'ng-zorro-antd/divider';
-import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { DatePipe } from '@angular/common';
+import { Component, effect, inject, OnInit, signal, untracked } from '@angular/core';
+import { NzModalService } from 'ng-zorro-antd/modal';
 import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification';
+import { NzTableQueryParams } from 'ng-zorro-antd/table';
 
-import { MenusService } from './menus.service';
-import { Subject, takeUntil, tap } from 'rxjs';
+import { tap } from 'rxjs';
+
+import { Page, Pageable } from '@app/core/types';
+import { MenuFormComponent, MenusService } from '@app/pages';
+import { User } from '@app/pages/home/users/user.types';
+import { SHARED_IMPORTS } from '@app/shared/shared-imports';
 import { Menu } from './menu.types';
-import { MenuFormComponent } from './menu-form.component';
 
 @Component({
-  selector: 'app-menus',
-  standalone: true,
-  templateUrl: './menus.component.html',
-  styleUrls: ['./menus.component.scss'],
-  imports: [
-    CommonModule,
-    NzTableModule,
-    MenuFormComponent,
-    NzPopconfirmModule,
-    NzDividerModule,
-    NzNotificationModule,
-  ],
+    selector: 'app-menus',
+    templateUrl: './menus.component.html',
+    styleUrls: ['./menus.component.scss'],
+    imports: [DatePipe, NzNotificationModule, ...SHARED_IMPORTS]
 })
-export class MenusComponent implements OnInit, OnDestroy {
-  listMenus: WritableSignal<Menu[]> = signal([]);
-  mapOfExpandedData: Record<string, Menu[]> = {};
-  private _menusSer = inject(MenusService);
-  private _message = inject(NzNotificationService);
-  private _subject: Subject<void> = new Subject<void>();
+export class MenusComponent implements OnInit {
+  private readonly _modal = inject(NzModalService);
+  private readonly _menusSer = inject(MenusService);
+  private readonly _message = inject(NzNotificationService);
+  menuPage = signal({} as Page<Menu>);
+  page = signal({
+    page: 1,
+    size: 10,
+    sorts: ['id,desc'],
+  } as Pageable);
+  search = signal({
+    search: '',
+    pcode: '0',
+    tenantCode: '0',
+  } as User);
 
-  ngOnInit(): void {
-    this.loadData().subscribe();
+  mapOfExpandedData: Record<string, Menu[]> = {};
+
+  constructor() {
+    effect(() => {
+      untracked(() => {
+        //todo: 信号优化数据流
+      });
+    });
   }
 
-  formEvent($event: any): void {
-    if ($event.btn === 'submit' && $event.status === 100) {
-      const menu = $event.data as Menu;
-      this._menusSer.saveMenu(menu).subscribe(result => this.refresh());
-    }
+  ngOnInit(): void {
+    this.onSearch();
+  }
+
+  openMenuForm(menu: Menu) {
+    const modal = this._modal.create<MenuFormComponent, Menu>({
+      nzTitle: '菜单表单',
+      nzContent: MenuFormComponent,
+      nzFooter: null,
+      nzZIndex: 2000,
+    });
+    const ref = modal.getContentComponent();
+    ref.menuData.set(menu);
+    ref.formSubmit.subscribe(ms => {
+      this._menusSer.save(ms).subscribe(res => {
+        console.debug(`保存菜单成功, ID: ${res.id},编码:${res.code}`);
+        modal.close();
+        this.onSearch();
+      });
+    });
   }
 
   delete(menu: Menu) {
-    this._menusSer
-      .deleteMenu(menu)
-      .pipe(takeUntil(this._subject))
-      .subscribe(() => this.refresh());
+    this._menusSer.delete(menu).subscribe(() => this.onSearch());
   }
 
-  refresh() {
-    this.loadData().subscribe(res =>
-      this._message.success('数据刷新成功!', ``, { nzDuration: 1000 }),
-    );
+  onTableQueryChange($event: NzTableQueryParams) {
+    this.page().sorts = [];
+    for (const item of $event.sort) {
+      if (item.value) {
+        const sort = item.key + ',' + (item.value == 'descend' ? 'desc' : 'asc');
+        this.page().sorts.push(sort);
+      }
+    }
   }
 
-  loadData() {
-    const menuRequest: Menu = {
-      pcode: '0',
-      tenantCode: '0',
-    };
-    return this._menusSer.getMenus(menuRequest).pipe(
-      takeUntil(this._subject),
-      tap(result => {
-        this.listMenus.set(result);
-        this.listMenus().forEach(item => {
-          this.mapOfExpandedData[item.code ? item.code : '0'] = this.convertTreeToList(item);
-        });
-      }),
-    );
+  onSearch() {
+    this.loadData(this.search(), this.page()).subscribe(() => this._message.success('数据加载成功!', ``, { nzDuration: 3000 }));
   }
 
   collapse(array: Menu[], data: Menu, $event: boolean): void {
@@ -118,8 +130,14 @@ export class MenusComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-    this._subject.next();
-    this._subject.complete();
+  private loadData(search: Menu, page: Pageable) {
+    return this._menusSer.page(search, page).pipe(
+      tap(result => {
+        this.menuPage.set(result);
+        this.menuPage().content.forEach(item => {
+          this.mapOfExpandedData[item.code ? item.code : '0'] = this.convertTreeToList(item);
+        });
+      }),
+    );
   }
 }

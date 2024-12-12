@@ -24,7 +24,7 @@ public class JsonPointerException extends JsonException {
      * @param message   A human-readable description of the error, explaining the context of the JSON pointer operation that failed.
      * @param exception The {@link IOException} that triggered this exception, providing additional context or details about the failure.
      */
-    public JsonPointerException(String message, IllegalArgumentException exception) {
+    public JsonPointerException(String message, Throwable exception) {
         super(message, exception);
     }
 
@@ -39,7 +39,7 @@ public class JsonPointerException extends JsonException {
      * @param exception The {@link IOException} that represents the underlying cause of the JSON pointer error. It provides deeper insight into why the operation failed.
      * @return A new {@code JsonPointerException} instance initialized with the given message and {@code IOException}.
      */
-    public static JsonPointerException withError(String message, IllegalArgumentException exception) {
+    public static JsonPointerException withError(String message, Throwable exception) {
         return new JsonPointerException(message, exception);
     }
 }

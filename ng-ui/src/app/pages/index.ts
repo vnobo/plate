@@ -1,6 +1,8 @@
 export { MenusService } from './home/menus/menus.service';
-export { LoginComponent } from './passport/login/login.component';
 export { LoginService } from './passport/login/login.service';
+
+export { MenuFormComponent } from './home/menus/menu-form.component';
+export { UserFormComponent } from './home/users/user-form.component';
 
 export { HOME_ROUTES } from './home/home.routes';
 export { WELCOME_ROUTES } from './welcome/welcome.routes';

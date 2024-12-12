@@ -3,11 +3,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-welcome',
-  standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './welcome.component.html',
-  styleUrls: ['./welcome.component.scss'],
+    selector: 'app-welcome',
+    imports: [CommonModule, FormsModule, ReactiveFormsModule],
+    templateUrl: './welcome.component.html',
+    styleUrls: ['./welcome.component.scss']
 })
 export class WelcomeComponent implements OnInit {
   perfileForm = new FormGroup({

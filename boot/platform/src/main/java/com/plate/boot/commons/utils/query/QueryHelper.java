@@ -2,7 +2,7 @@ package com.plate.boot.commons.utils.query;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
-import com.plate.boot.commons.exception.RestServerException;
+import com.plate.boot.commons.exception.QueryException;
 import com.plate.boot.commons.utils.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -148,7 +148,7 @@ public final class QueryHelper {
             String tableName = StringUtils.hasLength(table.value()) ? table.value() : objectClass.getName();
             return query.replace("#table_name", tableName);
         }
-        throw RestServerException.withMsg("Table annotation not found",
+        throw QueryException.withMsg("Table annotation not found",
                 "This object does not have a table annotation");
     }
 

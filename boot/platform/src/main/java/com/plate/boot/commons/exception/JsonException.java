@@ -43,4 +43,8 @@ public class JsonException extends RestServerException {
     public static JsonException withError(Throwable error) {
         return new JsonException(error);
     }
+
+    public static JsonPointerException withError(String message, Throwable throwable) {
+        return new JsonPointerException(message, throwable);
+    }
 }

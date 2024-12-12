@@ -2,6 +2,8 @@ package com.plate.boot.relational.menus;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -27,8 +29,13 @@ public class MenusController {
     private final MenusService menusService;
 
     @GetMapping("search")
-    public Flux<Menu> search(MenuRequest request) {
-        return this.menusService.search(request).distinct(Menu::getAuthority);
+    public Flux<Menu> search(MenuRequest request, Pageable pageable) {
+        return this.menusService.search(request, pageable).distinct(Menu::getAuthority);
+    }
+
+    @GetMapping("page")
+    public Mono<Page<Menu>> page(MenuRequest request, Pageable pageable) {
+        return this.menusService.page(request, pageable);
     }
 
     @GetMapping("me")
@@ -43,7 +50,7 @@ public class MenusController {
                     request.setRules(rules);
                 }
             }
-            return this.menusService.search(request).distinct(Menu::getAuthority);
+            return this.menusService.search(request, Pageable.ofSize(Integer.MAX_VALUE)).distinct(Menu::getAuthority);
         });
     }
 

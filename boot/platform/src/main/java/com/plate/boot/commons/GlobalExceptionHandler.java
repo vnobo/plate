@@ -81,7 +81,7 @@ public class GlobalExceptionHandler {
      * @param ex       The runtime exception that has been caught, which should be either a
      *                 {@link DataAccessException} or an {@link R2dbcException}.
      * @return A {@link ResponseEntity} containing an {@link ErrorResponse} with details about the failure,
-     * including a HTTP status of 507 (INSUFFICIENT_STORAGE), application/json content type,
+     * including an HTTP status of 507 (INSUFFICIENT_STORAGE), application/json content type,
      * and specifics of the error extracted from the exception and exchange.
      */
     @ExceptionHandler({DataAccessException.class, R2dbcException.class})

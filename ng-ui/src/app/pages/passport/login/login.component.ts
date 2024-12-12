@@ -1,30 +1,44 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { SHARED_IMPORTS } from '../../../shared/ shared-imports';
-import { LoginService } from './login.service';
-import { Credentials } from 'global-types';
+import { Credentials } from '@app/core/types';
+import { SHARED_IMPORTS } from '@app/shared/shared-imports';
+import { LoginService } from '@app/pages';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  imports: [SHARED_IMPORTS],
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
+    selector: 'app-login',
+    imports: [SHARED_IMPORTS],
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, AfterViewInit {
   private readonly _router = inject(Router);
   private readonly _route = inject(ActivatedRoute);
-  private readonly _loginSer = inject(LoginService);
+  private readonly _el = inject(ElementRef);
   private readonly _message = inject(NzNotificationService);
+  private readonly _loginSer = inject(LoginService);
+
+  passwordFieldTextType = false;
 
   loginForm = new FormGroup({
     username: new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(32)]),
     password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(32)]),
     remember: new FormControl(false),
   });
+
+  ngAfterViewInit(): void {
+    const tooltipTriggerList = [].slice.call(this._el.nativeElement.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl: any) {
+      let options = {
+        delay: { show: 50, hide: 50 },
+        html: tooltipTriggerEl.getAttribute('data-bs-html') === 'true',
+        placement: tooltipTriggerEl.getAttribute('data-bs-placement') ?? 'auto',
+      };
+      return new bootstrap.Tooltip(tooltipTriggerEl, options);
+    });
+  }
 
   onSubmit(): void {
     if (this.loginForm.valid) {
@@ -41,7 +55,8 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     const auth = this._loginSer.autoLogin();
     if (auth) {
-      this._router.navigate([this._loginSer._auth.redirectUrl], { relativeTo: this._route }).then();
+      const redirectUrl = this._loginSer._auth.redirectUrl ? this._loginSer._auth.redirectUrl : '/home';
+      this._router.navigate([redirectUrl], { relativeTo: this._route }).then();
       return;
     }
     const credentials = this._loginSer.getRememberMe();

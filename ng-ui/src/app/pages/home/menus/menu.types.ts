@@ -1,6 +1,6 @@
-import { UserAuditor } from 'global-types';
+import { Search, UserAuditor } from '@app/core/types';
 
-export interface Menu {
+export interface Menu extends Search {
   id?: number;
   code?: string;
   pcode?: string;

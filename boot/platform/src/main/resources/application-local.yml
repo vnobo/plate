@@ -1,15 +1,26 @@
 logging:
   register-shutdown-hook: true
+  #structured.format:
+  #  console: logstash
   level:
     web: debug
     com.plate.boot.*: debug
     org.springframework.r2dbc: debug
     io.r2dbc.postgresql.PARAM: debug
 
-server.port: 9001
+server:
+  port: 8080
+  http2.enabled: true
+  #ssl.bundle: server-http3
 
 spring:
   application.name: plate
+  ssl.bundle.jks:
+    server-http3:
+      key.alias: plate
+      keystore:
+        location: classpath:plate.jks
+        password: 123456
   r2dbc:
     url: r2dbc:postgres://127.0.0.1:5432/plate?fetchSize=5000
     username: farmer

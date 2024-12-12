@@ -1,43 +1,6 @@
-declare module 'global-types' {
-  export interface UserAuditor {
-    code: string;
-    username: string | null;
-    name: string | null;
-  }
+//bootstrap js any
+declare var bootstrap: any;
 
-  export interface Search {
-    search?: string | null;
-    query?: Map<string, any>;
-  }
-
-  export interface Page<T> {
-    content: T[];
-    pageable: Pageable;
-    totalPages: number;
-    totalElements: number;
-    size: number;
-    number: number;
-    first: boolean;
-    last: boolean;
-    numberOfElements: number;
-    empty: boolean;
-  }
-
-  export interface Pageable {
-    page: number;
-    size: number;
-    sorts: string[];
-  }
-
-  export interface Authentication {
-    token: string;
-    expires: number;
-    lastAccessTime: number;
-    details: any;
-  }
-
-  export interface Credentials {
-    password: string | null | undefined;
-    username: string | null | undefined;
-  }
-}
+declare type PageableWithDefaults = {
+  [K in keyof Pageable]?: Pageable[K] extends Array<infer U> ? U[] : Pageable[K] extends object ? object : Pageable[K];
+};

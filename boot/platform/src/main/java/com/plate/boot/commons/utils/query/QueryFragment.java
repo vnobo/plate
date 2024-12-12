@@ -1,5 +1,6 @@
 package com.plate.boot.commons.utils.query;
 
+import com.plate.boot.commons.exception.QueryException;
 import lombok.Getter;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
@@ -92,13 +93,15 @@ public class QueryFragment extends HashMap<String, Object> {
         if (StringUtils.hasLength(this.querySql)) {
             return this.querySql + whereSql() + this.orderSql;
         }
-        throw new NullPointerException("This querySql is null, please use whereSql() method!");
+        throw QueryException.withError("This querySql is null, please use whereSql() method!",
+                new IllegalArgumentException("This querySql is null, please use whereSql() method"));
     }
 
     public String countSql() {
         if (StringUtils.hasLength(this.querySql)) {
             return "SELECT COUNT(*) FROM (" + this.querySql + whereSql() + ") t";
         }
-        throw new NullPointerException("This querySql is null, please use whereSql() method!");
+        throw QueryException.withError("This countSql is null, please use whereSql() method!",
+                new IllegalArgumentException("This countSql is null, please use whereSql() method"));
     }
 }

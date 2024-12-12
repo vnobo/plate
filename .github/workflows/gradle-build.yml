@@ -5,7 +5,7 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 name: Gradle Build Image
-run-name: ${{ github.actor }} is bootBuildImage Actions
+run-name: ${{ github.actor }} is Build Boot Image Actions
 on:
   release:
     types: [ created ]
@@ -34,9 +34,6 @@ jobs:
           distribution: 'liberica'
           architecture: x64
           settings-path: ${{ github.workspace }}
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@dbbdc275be76ac10734476cc723d82dfe7ec6eda
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew

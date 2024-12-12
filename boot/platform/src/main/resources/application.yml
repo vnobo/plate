@@ -1,15 +1,12 @@
 server:
   shutdown: graceful
-  http2.enabled: true
   compression.enabled: true
 
 spring:
+  lifecycle.timeout-per-shutdown-phase: 20s
   threads.virtual.enabled: true
   main.keep-alive: true
   application.name: plate
-  rsocket.server:
-    mapping-path: /rsocket
-    transport: websocket
   webflux.format:
     time: "HH:mm:ss"
     date-time: "yyyy-MM-dd HH:mm:ss"

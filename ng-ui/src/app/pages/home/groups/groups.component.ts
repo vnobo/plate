@@ -6,12 +6,11 @@ import { Subject, takeUntil } from 'rxjs';
 import { NzTableModule } from 'ng-zorro-antd/table';
 
 @Component({
-  selector: 'app-groups',
-  standalone: true,
-  imports: [CommonModule, NzTableModule],
-  templateUrl: './groups.component.html',
-  styleUrl: './groups.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-groups',
+    imports: [CommonModule, NzTableModule],
+    templateUrl: './groups.component.html',
+    styleUrl: './groups.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GroupsComponent implements OnInit, OnDestroy {
   groupsList: WritableSignal<Group[]> = signal([]);

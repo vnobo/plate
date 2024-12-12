@@ -1,23 +1,23 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
+import { AuthService, BrowserStorage } from '@app/core';
+import { Authentication, Credentials } from '@app/core/types';
 import dayjs from 'dayjs';
-import { AuthService, BrowserStorage } from '../../../core';
-import { Authentication, Credentials } from 'global-types';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LoginService {
+  private readonly _http = inject(HttpClient);
+  private readonly _storage = inject(BrowserStorage);
   _auth = inject(AuthService);
-  private _http = inject(HttpClient);
-  private _storage = inject(BrowserStorage);
   private readonly storageKey = 'credentials';
 
   autoLogin(): Authentication | null {
     const authentication = this._auth.authenticationToken();
     if (authentication && Object.keys(authentication).length !== 0) {
-      var lastAccessTime = dayjs.unix(authentication.lastAccessTime);
+      const lastAccessTime = dayjs.unix(authentication.lastAccessTime);
       if (dayjs().diff(lastAccessTime, 'seconds') > authentication.expires) {
         return null; // token expired
       }

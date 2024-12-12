@@ -1,6 +1,7 @@
 package com.plate.boot.security.core.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.plate.boot.commons.utils.BeanUtils;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -16,6 +17,12 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class UserResponse extends User {
+
+    public static UserResponse withUser(User user) {
+        UserResponse response = new UserResponse();
+        BeanUtils.copyProperties(user, response);
+        return response;
+    }
 
     @JsonIgnore
     @Override

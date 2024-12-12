@@ -41,4 +41,14 @@ The API documentation is available using Swagger UI. Once the application is run
 Contributions are welcome! If you find any issues or want to add new features, feel free to open an issue or submit a
 pull request.
 
+## SSL Certificate Generation
+
+> https://github.com/FiloSottile/mkcert.git
+
+```bash
+    mkcert -cert-file localhost+2.pem -key-file localhost+2-key.pem -pkcs12 plate
+    
+    keytool -importkeystore -srckeystore plate.p12 -srcstoretype pkcs12 -srcalias 1 -destkeystore plate.jks -deststoretype jks -deststorepass 123456 -destalias plate
+```
+
 
