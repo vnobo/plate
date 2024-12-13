@@ -53,6 +53,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
       - name: Execute Gradle platform bootBuildImage
         run: |
+          chmod -x gradlew
           ./gradlew bootBuildImage
 
       - name: Set up Docker Buildx
