@@ -80,7 +80,7 @@ jobs:
           docker tag plate-platform "$tag"
           done <<< "${{ steps.meta.outputs.tags }}"
       - name: Push docker platform image to DockerHub
-        run: docker push -a ${{ steps.meta.outputs.tags }}
+        run: docker push ${{ steps.meta.outputs.tags }}
 
       - name: Extract oauth2 metadata (tags, labels) for Docker
         id: oauth2
@@ -103,5 +103,5 @@ jobs:
           docker tag plate-oauth2 $tag
           done <<< "${{ steps.oauth2.outputs.tags }}"
       - name: Push docker oauth2 image to DockerHub
-        run: docker push -a ${{ steps.oauth2.outputs.tags }}
+        run: docker push ${{ steps.oauth2.outputs.tags }}
         
