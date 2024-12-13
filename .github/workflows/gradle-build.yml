@@ -59,27 +59,31 @@ jobs:
           chmod +x ./gradlew
           ./gradlew bootBuildImage
 
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Extract platform metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.GITHUB_REGISTRY }}/plate-platform
+          flavor: |
+            latest=true
+          images: |
+            ${{ env.GITHUB_REGISTRY }}/plate-platform
+            ${{ env.DOCKER_REGISTRY }}/plate-platform
       - name: Tag platform docker image
         run: docker tag plate-platform ${{ steps.meta.outputs.tags }}
-      - name: Push docker image to DockerHub
+      - name: Push docker platform image to DockerHub
         run: docker push ${{ steps.meta.outputs.tags }}
 
-      - name: Push image to GHCR
-        run: |
-          docker tag plate-platform  ${{ env.GITHUB_REGISTRY }}/plate-platform:latest
-          docker push ${{ env.GITHUB_REGISTRY }}/plate-platform:latest
-          
-          docker tag plate-platform  ${{ env.GITHUB_REGISTRY }}/plate-platform:3.0.0
-          docker push ${{ env.GITHUB_REGISTRY }}/plate-platform:3.0.0
-          
-          docker tag plate-oauth2  ${{ env.GITHUB_REGISTRY }}/plate-oauth2:latest
-          docker push ${{ env.GITHUB_REGISTRY }}/plate-oauth2:latest
-          
-          docker tag plate-oauth2  ${{ env.GITHUB_REGISTRY }}/plate-oauth2:3.0.0
-          docker push ${{ env.GITHUB_REGISTRY }}/plate-oauth2:3.0.0
+      - name: Extract oauth2 metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          flavor: |
+            latest=true
+          images: |
+            ${{ env.GITHUB_REGISTRY }}/plate-oauth2
+            ${{ env.DOCKER_REGISTRY }}/plate-oauth2
+      - name: Tag oauth2 docker image
+        run: docker tag plate-oauth2 ${{ steps.meta.outputs.tags }}
+      - name: Push docker oauth2 image to DockerHub
+        run: docker push ${{ steps.meta.outputs.tags }}
         
