@@ -53,26 +53,32 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
       - name: Execute Gradle platform bootBuildImage
         run: |
-          chmod +x ./gradlew
           ./gradlew bootBuildImage
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.GITHUB_REGISTRY }}/plate-platform
+      - name: Tag platform docker image
+        run: docker tag plate-platform ${{ steps.meta.outputs.tags }}
+      - name: Push docker image to DockerHub
+        run: docker push ${{ steps.meta.outputs.tags }}
+
       - name: Push image to GHCR
         run: |
-          docker tag plate-platform:latest  ${{ env.GITHUB_REGISTRY }}/plate-platform:latest
+          docker tag plate-platform  ${{ env.GITHUB_REGISTRY }}/plate-platform:latest
           docker push ${{ env.GITHUB_REGISTRY }}/plate-platform:latest
           
-          docker tag plate-platform:latest  ${{ env.GITHUB_REGISTRY }}/plate-platform:3.0.0
+          docker tag plate-platform  ${{ env.GITHUB_REGISTRY }}/plate-platform:3.0.0
           docker push ${{ env.GITHUB_REGISTRY }}/plate-platform:3.0.0
           
-          docker tag plate-oauth2:latest  ${{ env.GITHUB_REGISTRY }}/plate-oauth2:latest
+          docker tag plate-oauth2  ${{ env.GITHUB_REGISTRY }}/plate-oauth2:latest
           docker push ${{ env.GITHUB_REGISTRY }}/plate-oauth2:latest
           
-          docker tag plate-oauth2:latest  ${{ env.GITHUB_REGISTRY }}/plate-oauth2:3.0.0
+          docker tag plate-oauth2  ${{ env.GITHUB_REGISTRY }}/plate-oauth2:3.0.0
           docker push ${{ env.GITHUB_REGISTRY }}/plate-oauth2:3.0.0
         
