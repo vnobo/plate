@@ -73,8 +73,6 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=ref,event=branch
-            type=ref,event=pr
-            type=sha
       - name: Tag platform docker image
         run: docker tag plate-platform ${{ steps.meta.outputs.tags }}
       - name: Push docker platform image to DockerHub
@@ -94,8 +92,6 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=ref,event=branch
-            type=ref,event=pr
-            type=sha
       - name: Tag oauth2 docker image
         run: docker tag plate-oauth2 ${{ steps.oauth2.outputs.tags }}
       - name: Push docker oauth2 image to DockerHub
