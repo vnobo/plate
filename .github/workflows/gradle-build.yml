@@ -74,7 +74,11 @@ jobs:
             type=semver,pattern={{major}}
             type=ref,event=branch
       - name: Tag platform docker image
-        run: docker tag plate-platform ${{ steps.meta.outputs.tags }}
+        run: |
+          while IFS= read -r tag; do
+          echo "Tagging image $tag"
+          docker tag plate-platform "$tag"
+          done <<< "${{ needs.metadata.outputs.tags }}"
       - name: Push docker platform image to DockerHub
         run: docker push ${{ steps.meta.outputs.tags }}
 
@@ -93,7 +97,11 @@ jobs:
             type=semver,pattern={{major}}
             type=ref,event=branch
       - name: Tag oauth2 docker image
-        run: docker tag plate-oauth2 ${{ steps.oauth2.outputs.tags }}
+        run: |
+          while IFS= read -r tag; do
+          echo "Tagging image $tag"
+          docker tag plate-oauth2 "$tag"
+          done <<< "${{ needs.oauth2.outputs.tags }}"
       - name: Push docker oauth2 image to DockerHub
         run: docker push ${{ steps.oauth2.outputs.tags }}
         
