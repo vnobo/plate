@@ -68,6 +68,14 @@ jobs:
           images: |
             ${{ env.GITHUB_REGISTRY }}/plate-platform
             ${{ env.DOCKER_REGISTRY }}/plate-platform
+          tags: |
+            type=schedule
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
       - name: Tag platform docker image
         run: docker tag plate-platform ${{ steps.meta.outputs.tags }}
       - name: Push docker platform image to DockerHub
@@ -82,6 +90,14 @@ jobs:
           images: |
             ${{ env.GITHUB_REGISTRY }}/plate-oauth2
             ${{ env.DOCKER_REGISTRY }}/plate-oauth2
+          tags: |
+            type=schedule
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
       - name: Tag oauth2 docker image
         run: docker tag plate-oauth2 ${{ steps.meta.outputs.tags }}
       - name: Push docker oauth2 image to DockerHub
