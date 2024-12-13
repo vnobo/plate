@@ -65,9 +65,9 @@ jobs:
           docker buildx imagetools create \
             --tag plate-platform:latest
            ${{ env.GITHUB_REGISTRY }}/plate-platform:latest
-          #  docker buildx imagetools create \
-          #    --tag plate-platform:latest
-          #   ${{ env.GITHUB_REGISTRY }}/plate-platform:3.0.0
+        #  docker buildx imagetools create \
+        #    --tag plate-platform:latest
+        #   ${{ env.GITHUB_REGISTRY }}/plate-platform:3.0.0
           
           docker buildx imagetools create \
             --tag plate-oauth2:latest
