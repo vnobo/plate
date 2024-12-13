@@ -4,17 +4,6 @@ plugins {
     id 'org.graalvm.buildtools.native' version '0.10.3'
 }
 
-ext {
-    def prefixStr = System.getenv("DOCKER_PREFIX")
-    def usernameStr = System.getenv("DOCKER_USERNAME")
-    def passwordStr = System.getenv("DOCKER_PASSWORD")
-    def emailStr = System.getenv("DOCKER_EMAIL")
-    dockerUsername = Objects.isNull(usernameStr) ? "Your default username" : usernameStr
-    dockerPassword = Objects.isNull(passwordStr) ? "Your default password" : passwordStr
-    dockerPrefix = Objects.isNull(prefixStr) ? "Your default prefix" : prefixStr
-    dockerEmail = Objects.isNull(emailStr) ? "Your default email" : emailStr
-}
-
 configure(allprojects) { project ->
 
     group "com.alex.plate"
@@ -39,47 +28,17 @@ configure(subprojects - project(":boot")) { project ->
 
     tasks.named("bootBuildImage") {
         createdDate = "now"
-        tags = ["${dockerPrefix}/${rootProject.name}-${project.name}:latest"]
-        imageName = "${dockerPrefix}/${rootProject.name}-${project.name}:${project.version}"
+        imageName = "${rootProject.name}-${project.name}"
         environment = [
                 "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
                 "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 " +
                         "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
         ]
-        publish = true
-        docker {
-            publishRegistry {
-                username = "${dockerUsername}"
-                password = "${dockerPassword}"
-                email = "${dockerEmail}"
-            }
-        }
-        buildWorkspace {
-            volume {
-                name = "cache-${rootProject.name}-${project.name}.work"
-            }
-        }
-        buildCache {
-            volume {
-                name = "cache-${rootProject.name}-${project.name}.build"
-            }
-        }
-        launchCache {
-            volume {
-                name = "cache-${rootProject.name}-${project.name}.launch"
-            }
-        }
     }
 
     configurations {
         compileOnly {
             extendsFrom annotationProcessor
-        }
-    }
-
-    java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
         }
     }
 
@@ -103,7 +62,6 @@ configure(subprojects - project(":boot")) { project ->
         annotationProcessor 'org.projectlombok:lombok'
 
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        testImplementation 'io.projectreactor:reactor-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }
 }
