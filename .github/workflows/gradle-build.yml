@@ -82,7 +82,7 @@ jobs:
         run: docker push ${{ steps.meta.outputs.tags }}
 
       - name: Extract oauth2 metadata (tags, labels) for Docker
-        id: meta
+        id: oauth2
         uses: docker/metadata-action@v5
         with:
           flavor: |
@@ -99,7 +99,7 @@ jobs:
             type=ref,event=pr
             type=sha
       - name: Tag oauth2 docker image
-        run: docker tag plate-oauth2 ${{ steps.meta.outputs.tags }}
+        run: docker tag plate-oauth2 ${{ steps.oauth2.outputs.tags }}
       - name: Push docker oauth2 image to DockerHub
-        run: docker push ${{ steps.meta.outputs.tags }}
+        run: docker push ${{ steps.oauth2.outputs.tags }}
         
