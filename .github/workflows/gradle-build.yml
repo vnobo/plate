@@ -62,12 +62,16 @@ jobs:
       - name: Push image to GHCR
         run: |
           docker buildx imagetools create \
-            --tag ${{ env.GITHUB_REGISTRY }}/plate-platform:latest \
-            --tag ${{ env.GITHUB_REGISTRY }}/plate-platform:3.0.0 \
-           plate-platform:latest
+            --tag plate-platform:latest
+           ${{ env.GITHUB_REGISTRY }}/plate-platform:latest
+          docker buildx imagetools create \
+            --tag plate-platform:latest
+           ${{ env.GITHUB_REGISTRY }}/plate-platform:3.0.0
           
           docker buildx imagetools create \
-            --tag ${{ env.GITHUB_REGISTRY }}/plate-oauth2:latest \
-            --tag ${{ env.GITHUB_REGISTRY }}/plate-oauth2:3.0.0 \
-           plate-oauth2:latest
+            --tag plate-oauth2:latest
+           ${{ env.GITHUB_REGISTRY }}/plate-oauth2:latest
+          docker buildx imagetools create \
+            --tag plate-oauth2:latest
+           ${{ env.GITHUB_REGISTRY }}/plate-oauth2:3.0.0
         
