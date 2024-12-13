@@ -69,7 +69,6 @@ jobs:
             ${{ env.GITHUB_REGISTRY }}/plate-platform
             ${{ env.DOCKER_REGISTRY }}/plate-platform
           tags: |
-            v3.0.0
             type=semver,pattern={{version}},value=v3.0.0
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
@@ -91,7 +90,6 @@ jobs:
             ${{ env.GITHUB_REGISTRY }}/plate-oauth2
             ${{ env.DOCKER_REGISTRY }}/plate-oauth2
           tags: |
-            v3.4.0
             type=semver,pattern={{version}},value=v3.4.0
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
