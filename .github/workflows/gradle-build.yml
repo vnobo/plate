@@ -31,9 +31,11 @@ jobs:
           distribution: 'liberica'
           architecture: x64
           settings-path: ${{ github.workspace }}
+          cache: 'gradle'
+          cache-dependency-path: |
+            sub-project/*.gradle*
+            sub-project/**/gradle-wrapper.properties
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
       - name: Execute Gradle platform bootBuildImage
         run: |
           chmod +x ./gradlew
