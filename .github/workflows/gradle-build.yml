@@ -112,7 +112,6 @@ jobs:
           registry: ${{env.DOCKER_REGISTRY}}
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
       - name: Push docker oauth2 image to DockerHub
         run: |
           docker push --all-tags  ${{ env.GITHUB_REGISTRY }}/plate-oauth2
