@@ -50,14 +50,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.PAGK_TOKEN }}
 
-      - name: Log into registry ${{ env.DOCKER_REGISTRY }}
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          registry: ${{env.DOCKER_REGISTRY}}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
       - name: Extract platform metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
@@ -79,6 +71,13 @@ jobs:
           docker tag plate-platform "$tag"
           done <<< "${{ steps.meta.outputs.tags }}"
 
+      - name: Log into registry ${{ env.DOCKER_REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{env.DOCKER_REGISTRY}}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Push docker platform image to DockerHub
         run: |
           docker push --all-tags ${{ env.GITHUB_REGISTRY }}/plate-platform
@@ -105,6 +104,14 @@ jobs:
           echo "Tagging image $tag"
           docker tag plate-oauth2 $tag
           done <<< "${{ steps.oauth2.outputs.tags }}"
+
+      - name: Log into registry ${{ env.DOCKER_REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{env.DOCKER_REGISTRY}}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push docker oauth2 image to DockerHub
         run: |
