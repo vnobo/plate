@@ -1,0 +1,1 @@
+FROM plate-oauth2:latest

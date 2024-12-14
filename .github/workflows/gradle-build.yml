@@ -43,6 +43,7 @@ jobs:
           ./gradlew bootBuildImage
 
       - name: Log into registry ${{ env.GITHUB_REGISTRY }}
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.GITHUB_REGISTRY }}
@@ -50,6 +51,7 @@ jobs:
           password: ${{ secrets.PAGK_TOKEN }}
 
       - name: Log into registry ${{ env.DOCKER_REGISTRY }}
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -69,6 +71,15 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=ref,event=branch
+
+      - name: Build and Push Platform
+        uses: docker/build-push-action@v6
+        with:
+          context: ./boot/platform
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
       - name: Tag platform docker image
         run: |
           while IFS= read -r tag; do

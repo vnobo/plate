@@ -1,0 +1,1 @@
+FROM plate-platform:latest
