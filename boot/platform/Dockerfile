@@ -1,4 +1,4 @@
-FROM local/plate-platform:latest
+FROM local.plate.org/plate-platform:latest
 
 LABEL org.opencontainers.image.source=https://github.com/vnobo/plate
 LABEL org.opencontainers.image.description="Plate platform container image"
