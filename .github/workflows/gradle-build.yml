@@ -98,7 +98,7 @@ jobs:
             type=semver,pattern={{major}}
             type=ref,event=branch
 
-      - name: Build and Push Platform
+      - name: Build and Push Oauth2
         uses: docker/build-push-action@v6
         with:
           context: ./boot/oauth2
