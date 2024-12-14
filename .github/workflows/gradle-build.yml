@@ -29,8 +29,6 @@ jobs:
           version: 'latest'
           java-version: '21'
           distribution: 'liberica'
-          architecture: x64
-          settings-path: ${{ github.workspace }}
           cache: 'gradle'
 
       - name: Execute Gradle platform bootBuildImage
