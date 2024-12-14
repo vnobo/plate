@@ -13,10 +13,9 @@ on:
     types: [ created ]
 env:
   GITHUB_REGISTRY: ghcr.io/${{ github.actor }}
-  DOCKER_REGISTRY: docker.io/alexbob
+  DOCKER_REGISTRY: alexbob
 jobs:
   boot-build-image:
-    environment: base
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -27,22 +26,6 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Log into registry ${{ env.GITHUB_REGISTRY }}
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.GITHUB_REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.PAGK_TOKEN }}
-
-      - name: Log into registry docker.io
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          registry: ${{env.DOCKER_REGISTRY}}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Set up JDK 21 for x64
         uses: actions/setup-java@v4
@@ -58,6 +41,19 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew bootBuildImage
+
+      - name: Log into registry ${{ env.GITHUB_REGISTRY }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GITHUB_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.PAGK_TOKEN }}
+
+      - name: Log into registry ${{ env.DOCKER_REGISTRY }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Extract platform metadata (tags, labels) for Docker
         id: meta
@@ -81,8 +77,8 @@ jobs:
           done <<< "${{ steps.meta.outputs.tags }}"
       - name: Push docker platform image to DockerHub
         run: |
-          docker push ${{ env.GITHUB_REGISTRY }}/plate-platform
-          docker push ${{ env.DOCKER_REGISTRY }}/plate-platform
+          docker push --all-tags ${{ env.GITHUB_REGISTRY }}/plate-platform
+          docker push --all-tags ${{ env.DOCKER_REGISTRY }}/plate-platform
 
       - name: Extract oauth2 metadata (tags, labels) for Docker
         id: oauth2
@@ -98,6 +94,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=ref,event=branch
+
       - name: Tag oauth2 docker image
         run: |
           while IFS= read -r tag; do
