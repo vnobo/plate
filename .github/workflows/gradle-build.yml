@@ -20,6 +20,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,8 +31,14 @@ jobs:
           version: 'latest'
           java-version: '21'
           distribution: 'liberica'
+          check-latest: true
           cache: 'gradle'
-
+          cache-dependency-path: | # optional
+            ./*.gradle*
+            ./**/gradle-wrapper.properties
+            /tmp/*.work*
+            /tmp/*.build
+            /tmp/*.launch
       - name: Execute Gradle platform bootBuildImage
         run: |
           chmod +x ./gradlew
