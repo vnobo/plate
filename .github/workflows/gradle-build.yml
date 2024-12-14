@@ -28,6 +28,7 @@ jobs:
       - name: Set up graalvm 21 for x64
         uses: graalvm/setup-graalvm@v1
         with:
+          version: 'latest'
           java-version: '21'
           distribution: 'liberica'
           native-image-job-reports: 'true'
