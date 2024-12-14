@@ -79,6 +79,7 @@ jobs:
           echo "Tagging image $tag"
           docker tag plate-platform "$tag"
           done <<< "${{ steps.meta.outputs.tags }}"
+
       - name: Push docker platform image to DockerHub
         run: |
           while IFS= read -r tag; do

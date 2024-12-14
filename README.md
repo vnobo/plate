@@ -18,16 +18,14 @@ basic system information such as users, roles, tenants, menus, etc., and provide
 
 ## ☀️ License
 
-[MIT](https://github.com/vnobo/plate/blob/main/LICENSE)
-
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FNG-ZORRO%2Fng-zorro-antd.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FNG-ZORRO%2Fng-zorro-antd?ref=badge_shield)
+[MIT](./LICENSE)
 
 ## 🖥 Environment Support
 
-* Spring boot `3.3.2`
+* Spring boot `3.4.0`
 *
 
-Angular `^17.2.1` [![npm package](https://img.shields.io/npm/v/ng-zorro-antd.svg?style=flat-square)](https://www.npmjs.org/package/ng-zorro-antd)
+Angular `^19.0.0`
 * ng-zorro-antd `17.2.0`
 * Server-side Rendering
 * Modern browsers including the following [specific versions](https://angular.io/guide/browser-support)
