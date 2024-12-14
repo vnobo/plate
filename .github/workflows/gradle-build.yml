@@ -76,17 +76,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Tag platform docker image
-        run: |
-          while IFS= read -r tag; do
-          echo "Tagging platform image $tag"
-          docker tag plate-platform "$tag"
-          done <<< "${{ steps.meta.outputs.tags }}"
-      - name: Push docker platform image to DockerHub
-        run: |
-          docker push --all-tags ${{ env.GITHUB_REGISTRY }}/plate-platform
-          docker push --all-tags ${{ env.DOCKER_REGISTRY }}/plate-platform
-
       - name: Extract oauth2 metadata (tags, labels) for Docker
         id: oauth2
         uses: docker/metadata-action@v5
@@ -101,14 +90,12 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=ref,event=branch
-      - name: Tag oauth2 docker image
-        run: |
-          while IFS= read -r tag; do
-          echo "Tagging oauth2 image $tag"
-          docker tag plate-oauth2 "$tag"
-          done <<< "${{ steps.oauth2.outputs.tags }}"
-      - name: Push docker oauth2 image to DockerHub
-        run: |
-          docker push --all-tags  ${{ env.GITHUB_REGISTRY }}/plate-oauth2
-          docker push --all-tags  ${{ env.DOCKER_REGISTRY }}/plate-oauth2
+
+      - name: Build and Push Oauth2
+        uses: docker/build-push-action@v6
+        with:
+          context: ./boot/oauth2
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.oauth2.outputs.tags }}
+          labels: ${{ steps.oauth2.outputs.labels }}
         
