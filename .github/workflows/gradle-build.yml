@@ -67,6 +67,15 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=ref,event=branch
+
+      - name: Build and Push Platform
+        uses: docker/build-push-action@v6
+        with:
+          context: ./boot/platform
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
       - name: Tag platform docker image
         run: |
           while IFS= read -r tag; do
