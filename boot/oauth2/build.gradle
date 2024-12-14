@@ -19,12 +19,6 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
 }
 
-hibernate {
-    enhancement {
-        enableAssociationManagement = true
-    }
-}
-
 tasks.named('test') {
     useJUnitPlatform()
 }
