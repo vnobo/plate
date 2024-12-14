@@ -1,1 +1,1 @@
-FROM plate-platform:latest
+FROM alexbob/plate-platform:latest

@@ -1,1 +1,1 @@
-FROM plate-oauth2:latest
+FROM alexbob/plate-oauth2:latest
