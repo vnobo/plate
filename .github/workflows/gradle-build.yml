@@ -16,7 +16,6 @@ env:
   DOCKER_REGISTRY: docker.io/alexbob
 jobs:
   boot-build-image:
-    environment: base
     runs-on: ubuntu-latest
     permissions:
       contents: read
