@@ -23,7 +23,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Set up JDK 21 for x64
         uses: actions/setup-java@v4
         with:
@@ -32,15 +31,14 @@ jobs:
           distribution: 'liberica'
           architecture: x64
           settings-path: ${{ github.workspace }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
       - name: Execute Gradle platform bootBuildImage
         run: |
           chmod +x ./gradlew
           ./gradlew bootBuildImage
-
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
       - name: Log into registry ${{ env.GITHUB_REGISTRY }}
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
@@ -48,14 +46,12 @@ jobs:
           registry: ${{ env.GITHUB_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.PAGK_TOKEN }}
-
       - name: Log into registry ${{ env.DOCKER_REGISTRY }}
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
       - name: Extract platform metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
@@ -70,7 +66,6 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=ref,event=branch
-
       - name: Build and Push Platform
         uses: docker/build-push-action@v6
         with:
@@ -78,7 +73,6 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
       - name: Extract oauth2 metadata (tags, labels) for Docker
         id: oauth2
         uses: docker/metadata-action@v5
@@ -93,7 +87,6 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=ref,event=branch
-
       - name: Build and Push Oauth2
         uses: docker/build-push-action@v6
         with:
