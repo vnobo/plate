@@ -81,8 +81,10 @@ jobs:
           done <<< "${{ steps.meta.outputs.tags }}"
       - name: Push docker platform image to DockerHub
         run: |
-          docker push ${{ env.GITHUB_REGISTRY }}/plate-platform
-          docker push ${{ env.DOCKER_REGISTRY }}/plate-platform
+          while IFS= read -r tag; do
+          echo "Push platform image $tag"
+          docker push "$tag"
+          done <<< "${{ steps.meta.outputs.tags }}"
 
       - name: Extract oauth2 metadata (tags, labels) for Docker
         id: oauth2
@@ -106,6 +108,8 @@ jobs:
           done <<< "${{ steps.oauth2.outputs.tags }}"
       - name: Push docker oauth2 image to DockerHub
         run: |
-          docker push --all-tags  ${{ env.GITHUB_REGISTRY }}/plate-oauth2
-          docker push --all-tags  ${{ env.DOCKER_REGISTRY }}/plate-oauth2
+          while IFS= read -r tag; do
+          echo "Push oauth2 image $tag"
+          docker push "$tag"
+          done <<< "${{ steps.oauth2.outputs.tags }}"
         
