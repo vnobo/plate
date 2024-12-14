@@ -32,9 +32,6 @@ jobs:
           architecture: x64
           settings-path: ${{ github.workspace }}
           cache: 'gradle'
-          cache-dependency-path: |
-            sub-project/*.gradle*
-            sub-project/**/gradle-wrapper.properties
 
       - name: Execute Gradle platform bootBuildImage
         run: |
