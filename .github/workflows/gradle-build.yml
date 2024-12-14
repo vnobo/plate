@@ -21,12 +21,6 @@ jobs:
       contents: read
       packages: write
     steps:
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -38,6 +32,9 @@ jobs:
           distribution: 'liberica'
           architecture: x64
           settings-path: ${{ github.workspace }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Execute Gradle platform bootBuildImage
         run: |
