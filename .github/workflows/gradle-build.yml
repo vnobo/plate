@@ -38,8 +38,7 @@ jobs:
           distribution: 'liberica'
           architecture: x64
           settings-path: ${{ github.workspace }}
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+
       - name: Execute Gradle platform bootBuildImage
         run: |
           chmod +x ./gradlew
