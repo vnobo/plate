@@ -70,7 +70,7 @@ jobs:
       - name: Tag platform docker image
         run: |
           while IFS= read -r tag; do
-          echo "Tagging image $tag"
+          echo "Tagging platform image $tag"
           docker tag plate-platform "$tag"
           done <<< "${{ steps.meta.outputs.tags }}"
       - name: Push docker platform image to DockerHub
@@ -95,8 +95,8 @@ jobs:
       - name: Tag oauth2 docker image
         run: |
           while IFS= read -r tag; do
-          echo "Tagging image $tag"
-          docker tag plate-oauth2 $tag
+          echo "Tagging oauth2 image $tag"
+          docker tag plate-oauth2 "$tag"
           done <<< "${{ steps.oauth2.outputs.tags }}"
       - name: Push docker oauth2 image to DockerHub
         run: |
