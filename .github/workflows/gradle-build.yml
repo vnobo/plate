@@ -21,11 +21,14 @@ jobs:
       contents: read
       packages: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up JDK 21 for x64
         uses: actions/setup-java@v4
@@ -67,7 +70,7 @@ jobs:
             ${{ env.GITHUB_REGISTRY }}/plate-platform
             ${{ env.DOCKER_REGISTRY }}/plate-platform
           tags: |
-            type=semver,pattern={{version}},value=v3.0.0
+            type=semver,pattern={{version}},value=v3.4.0
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=ref,event=branch
@@ -79,17 +82,6 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Tag platform docker image
-        run: |
-          while IFS= read -r tag; do
-          echo "Tagging image $tag"
-          docker tag alexbob/plate-platform "$tag"
-          done <<< "${{ steps.meta.outputs.tags }}"
-      - name: Push docker platform image to DockerHub
-        run: |
-          docker push --all-tags ${{ env.GITHUB_REGISTRY }}/plate-platform
-          docker push --all-tags ${{ env.DOCKER_REGISTRY }}/plate-platform
 
       - name: Extract oauth2 metadata (tags, labels) for Docker
         id: oauth2
@@ -106,14 +98,11 @@ jobs:
             type=semver,pattern={{major}}
             type=ref,event=branch
 
-      - name: Tag oauth2 docker image
-        run: |
-          while IFS= read -r tag; do
-          echo "Tagging image $tag"
-          docker tag alexbob/plate-oauth2 $tag
-          done <<< "${{ steps.oauth2.outputs.tags }}"
-      - name: Push docker oauth2 image to DockerHub
-        run: |
-          docker push --all-tags  ${{ env.GITHUB_REGISTRY }}/plate-oauth2
-          docker push --all-tags  ${{ env.DOCKER_REGISTRY }}/plate-oauth2
+      - name: Build and Push Platform
+        uses: docker/build-push-action@v6
+        with:
+          context: ./boot/oauth2
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.oauth2.outputs.tags }}
+          labels: ${{ steps.oauth2.outputs.labels }}
         
