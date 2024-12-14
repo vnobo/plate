@@ -1,4 +1,4 @@
-FROM local.plate.org/plate-oauth2:latest
+FROM localhost:5000/plate-oauth2:latest
 
 LABEL org.opencontainers.image.source=https://github.com/vnobo/plate
 LABEL org.opencontainers.image.description="Plate oauth2 container image"
