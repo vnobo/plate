@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import com.plate.boot.commons.exception.QueryException;
 import com.plate.boot.commons.exception.RestServerException;
 import org.springframework.data.domain.Sort;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
@@ -120,17 +119,11 @@ public final class QueryJsonHelper {
      * @throws IllegalArgumentException If any processing error occurs due to invalid input structure or content.
      */
     public static QueryFragment queryJson(Map<String, Object> params, String prefix) {
-        Map<String, Object> bindParams = Maps.newHashMap();
-        StringJoiner whereSql = new StringJoiner(" AND ", "(", ")");
-        if (ObjectUtils.isEmpty(params)) {
-            return QueryFragment.of(whereSql.toString(), bindParams);
-        }
+        QueryFragment queryFragment =  QueryFragment.of(null, params);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
-            QueryFragment condition = buildJsonCondition(entry, prefix);
-            whereSql.add(condition.getWhereSql());
-            bindParams.putAll(condition);
+            queryFragment.merge(buildJsonCondition(entry, prefix));
         }
-        return QueryFragment.of(whereSql.toString(), bindParams);
+        return queryFragment;
     }
 
     /**

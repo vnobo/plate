@@ -12,7 +12,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Set;
-import java.util.StringJoiner;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -42,25 +41,23 @@ public class TenantMemberRequest extends TenantMember {
     }
 
     public QueryFragment toParamSql() {
-        QueryFragment fragment = QueryHelper
-                .query(this, List.of("users", "securityCode", "username"), "a");
+        QueryFragment fragment = QueryHelper.query(this, List.of("users", "securityCode", "username"), "a");
 
-        StringJoiner criteria = new StringJoiner(" AND ", "(", ")");
         if (!ObjectUtils.isEmpty(this.getUsers())) {
-            criteria.add("a.user_code in :users");
+            fragment.addWhere("a.user_code in :users");
             fragment.put("users", this.getUsers());
         }
 
         if (StringUtils.hasLength(this.getSecurityCode())) {
-            criteria.add("a.tenant_code like :securityCode");
+            fragment.addWhere("a.tenant_code like :securityCode");
             fragment.put("securityCode", this.getSecurityCode());
         }
 
         if (StringUtils.hasLength(this.getUsername())) {
-            criteria.add("c.username = :username");
+            fragment.addWhere("c.username = :username");
             fragment.put("username", this.getUsername());
         }
 
-        return QueryFragment.of(fragment.getWhereSql() + criteria, fragment);
+        return fragment;
     }
 }

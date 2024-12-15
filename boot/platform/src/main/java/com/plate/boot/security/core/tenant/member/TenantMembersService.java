@@ -37,10 +37,10 @@ public class TenantMembersService extends AbstractDatabase {
     private final TenantMembersRepository tenantMembersRepository;
 
     public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
-        QueryFragment QueryFragment = request.toParamSql();
-        String query = QUERY_SQL + QueryFragment.whereSql() + QueryHelper.applyPage(pageable, "a");
-        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query,
-                QueryFragment, TenantMemberResponse.class);
+        QueryFragment queryFragment = QueryHelper.query(request, pageable, QUERY_SQL, "a");
+        queryFragment = queryFragment.merge(request.toParamSql());
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(),
+                queryFragment, TenantMemberResponse.class);
     }
 
     public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
