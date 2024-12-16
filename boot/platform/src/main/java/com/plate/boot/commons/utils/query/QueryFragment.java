@@ -94,6 +94,12 @@ public class QueryFragment extends HashMap<String, Object> {
         return this;
     }
 
+    /**
+     * Merges the given where clause with the existing one.
+     *
+     * @param where the where
+     * @return this
+     */
     public QueryFragment mergeWhere(StringJoiner where) {
         whereSql.merge(where);
         return this;
