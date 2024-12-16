@@ -2,7 +2,6 @@ package com.plate.boot.commons.utils.query;
 
 import com.plate.boot.commons.exception.QueryException;
 import lombok.Getter;
-import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,33 +16,36 @@ import java.util.StringJoiner;
 @Getter
 public class QueryFragment extends HashMap<String, Object> {
 
+    private final StringJoiner columns = new StringJoiner(",");
+
     private final StringJoiner querySql = new StringJoiner(",");
 
     private final StringJoiner whereSql = new StringJoiner(" AND ");
 
     private final StringJoiner orderSql = new StringJoiner(",");
 
-    private final String pageSql;
+    private final int size;
 
-    public QueryFragment(String pageSql, Map<String, Object> params) {
+    private final long offset;
+
+    public QueryFragment(int size, long offset, Map<String, Object> params) {
         super(16);
-        this.pageSql = pageSql;
+        this.size = size;
+        this.offset = offset;
         this.putAll(params);
     }
 
-    /**
-     * Creates a new instance of {@link QueryFragment} with the provided conditional SQL
-     * fragment and parameters map.
-     *
-     * @param pageSql A {@link StringJoiner} object containing the dynamically
-     *                constructed WHERE clause segments of a SQL query, concatenated by 'and'.
-     * @param params  A {@link Map} of parameter names to values, which will be
-     *                substituted for placeholders within the SQL query to prevent SQL injection.
-     * @return A new {@link QueryFragment} instance encapsulating the given SQL fragment
-     * and parameters map, ready for use in preparing a parameterized SQL statement.
-     */
-    public static QueryFragment of(String pageSql, Map<String, Object> params) {
-        return new QueryFragment(pageSql, params);
+    public static QueryFragment of(Map<String, Object> params) {
+        return of(25, 0, params);
+    }
+
+    public static QueryFragment of(int size, long offset, Map<String, Object> params) {
+        return new QueryFragment(size, offset, params);
+    }
+
+    public QueryFragment addColumn(CharSequence column) {
+        columns.add(column);
+        return this;
     }
 
     public QueryFragment addQuery(CharSequence query) {
@@ -73,10 +75,11 @@ public class QueryFragment extends HashMap<String, Object> {
 
     public QueryFragment merge(QueryFragment fragment) {
         this.putAll(fragment);
+        this.columns.merge(fragment.getColumns());
         this.querySql.merge(fragment.getQuerySql());
         this.whereSql.merge(fragment.getWhereSql());
         this.orderSql.merge(fragment.getOrderSql());
-        return of(fragment.getPageSql(), this);
+        return of(fragment.getSize(), fragment.getOffset(), this);
     }
 
     /**
@@ -102,7 +105,8 @@ public class QueryFragment extends HashMap<String, Object> {
 
     public String querySql() {
         if (this.querySql.length() > 0) {
-            return this.querySql + whereSql() + orderSql() + (StringUtils.hasLength(this.pageSql) ? this.pageSql : "");
+            return String.format("SELECT %s FROM %s %s %s LIMIT %d OFFSET %d",
+                    this.columns, this.querySql, whereSql(), orderSql(), this.size, this.offset);
         }
         throw QueryException.withError("This querySql is null, please use whereSql() method!",
                 new IllegalArgumentException("This querySql is null, please use whereSql() method"));
@@ -110,7 +114,8 @@ public class QueryFragment extends HashMap<String, Object> {
 
     public String countSql() {
         if (this.querySql.length() > 0) {
-            return "SELECT COUNT(*) FROM (" + this.querySql + whereSql() + ") t";
+            return "SELECT COUNT(*) FROM (" + String.format("SELECT %s FROM %s", this.columns, this.querySql)
+                    + whereSql() + ") t";
         }
         throw QueryException.withError("This countSql is null, please use whereSql() method!",
                 new IllegalArgumentException("This countSql is null, please use whereSql() method"));

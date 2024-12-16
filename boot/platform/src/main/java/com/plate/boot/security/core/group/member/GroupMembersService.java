@@ -3,7 +3,6 @@ package com.plate.boot.security.core.group.member;
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
-import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -35,8 +34,7 @@ public class GroupMembersService extends AbstractDatabase {
 
     public Flux<GroupMemberResponse> search(GroupMemberRequest request, Pageable pageable) {
         QueryFragment queryFragment = request.toParamSql();
-        String query = QUERY_SQL + queryFragment.whereSql() + QueryHelper.applyPage(pageable);
-        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query,
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(),
                 queryFragment, GroupMemberResponse.class);
     }
 

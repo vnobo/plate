@@ -11,7 +11,10 @@ import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -24,153 +27,97 @@ public final class QueryHelper {
     public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend",
             "createdTime", "updatedTime", "securityCode", "query", "search");
 
-    /**
-     * Applies pagination to a SQL query string based on the provided {@link Pageable} object.
-     * This is a convenience overload that delegates to applyPage(Pageable)
-     * with a null prefix, used primarily when no prefix is needed for generating the SQL LIMIT and OFFSET clauses.
-     *
-     * @param pageable The pagination information, including page size and offset.
-     * @return A string representing the pagination part of the SQL query, i.e., "LIMIT {pageSize} OFFSET {offset}".
-     */
-    public static String applyPage(Pageable pageable) {
-        return String.format(" LIMIT %d OFFSET %d", pageable.getPageSize(), pageable.getOffset());
-
+    public static QueryFragment query(Object object, Pageable pageable) {
+        return query(object, pageable, List.of(), null);
     }
 
-
-    /**
-     * Applies sorting to a SQL query string based on the provided {@link Sort} object, with an optional prefix for property names.
-     * Transforms the sort orders into SQL-compatible sort clauses, considering case insensitivity and JSON field access notation.
-     * If the sort is unsorted or null, defaults to sorting by 'id' in descending order.
-     *
-     * @param sort   The sorting criteria specifying the properties and directions for sorting.
-     * @param prefix An optional prefix to prepend to each sorted property name, useful when dealing with table aliases or nested properties.
-     * @return A string representing the sorting part of the SQL query, starting with "ORDER BY",
-     * followed by comma-separated sort clauses, each in the format "property_name ASC/DESC".
-     */
-    public static StringJoiner applySort(Sort sort, String prefix) {
-        sort = QueryJsonHelper.transformSortForJson(sort);
-        StringJoiner sortSql = new StringJoiner(", ");
-        for (Sort.Order order : sort) {
-            String sortedPropertyName = order.getProperty();
-            String sortedProperty = order.isIgnoreCase() ? "lower(" + sortedPropertyName + ")" : sortedPropertyName;
-            if (StringUtils.hasLength(prefix)) {
-                sortedProperty = prefix + "." + sortedProperty;
-            }
-            sortSql.add(sortedProperty + (order.isAscending() ? " asc" : " desc"));
-        }
-        return sortSql;
-    }
-    public static QueryFragment query(Object object, Pageable pageable, String querySql) {
-        return query(object, pageable, querySql, List.of(), null);
+    public static QueryFragment query(Object object, Collection<String> skipKeys) {
+        return query(object, Pageable.ofSize(25), skipKeys, null);
     }
 
-    public static QueryFragment query(Object object, Pageable pageable, String querySql, String prefix) {
-        return query(object, pageable, querySql, List.of(), prefix);
+    public static QueryFragment query(Object object, Collection<String> skipKeys, String prefix) {
+        return query(object, Pageable.ofSize(25), skipKeys, prefix);
     }
 
-    public static QueryFragment query(Object object, Pageable pageable, String querySql, Collection<String> skipKeys, String prefix) {
-        QueryFragment queryFragment = query(object, querySql, QueryHelper.applyPage(pageable), skipKeys, prefix);
-        return queryFragment.mergeOrder(QueryHelper.applySort(pageable.getSort(), prefix));
+    public static QueryFragment query(Object object, Pageable pageable, String prefix) {
+        return query(object, pageable, List.of(), prefix);
     }
 
-    /**
-     * Constructs a QueryFragment for dynamic SQL WHERE clause generation based on an object's properties.
-     * Excludes specified keys and allows for an optional prefix to be applied to column names.
-     * This method also processes a special "query" property within the object, which contains
-     * a nested map of conditions, and applies additional security-related conditions if present.
-     *
-     * @param object   The source object whose properties will be used to construct the query conditions.
-     *                 Properties should map to filter values. A special property "query" can be used
-     *                 to pass a nested map of conditions.
-     * @param skipKeys A collection of strings representing property names to exclude from the query conditions.
-     *                 These properties will not be included in the generated WHERE clause.
-     * @param prefix   An optional prefix to prepend to each property name in the SQL query,
-     *                 useful for specifying table aliases or namespaces.
-     * @return A QueryFragment containing the concatenated SQL WHERE conditions and a map of parameters.
-     * The SQL conditions are joined by 'and', and the parameters map binds placeholders to actual values.
-     */
     @SuppressWarnings("unchecked")
-    public static QueryFragment query(Object object, String sql, String pageSql, Collection<String> skipKeys, String prefix) {
+    public static QueryFragment query(Object object, Pageable pageable, Collection<String> skipKeys, String prefix) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
-        QueryFragment queryFragment = QueryFragment.of(pageSql, objectMap);
-        String querySql = StringUtils.hasLength(sql) ? sql : querySqlBuilder(object);
-        queryFragment.addQuery(querySql);
+        Map<String, Object> filterMap = ObjectUtils.isEmpty(objectMap) ? Map.of() :
+                Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && !skipKeys.contains(key));
+
+        QueryFragment queryFragment = QueryFragment.of(pageable.getPageSize(), pageable.getOffset(), filterMap);
+        QueryHelper.applySort(queryFragment, pageable.getSort(), prefix);
+        QueryHelper.applyWhere(queryFragment, prefix);
+        QueryHelper.applyQuerySql(queryFragment, object);
+
         if (ObjectUtils.isEmpty(objectMap)) {
             return queryFragment;
         }
-        if (objectMap.containsKey("search") && !ObjectUtils.isEmpty(objectMap.get("search"))) {
-            String textSearch = (String) objectMap.get("search");
-            queryFragment.addQuery("ts_rank_cd(text_search, query) as rank");
-            queryFragment.addQuery("to_tsquery('chinese',:textSearch) query");
-            queryFragment.addWhere("text_search @@ to_tsquery('chinese',:textSearch)");
-            queryFragment.put("textSearch", textSearch);
-        }
 
-        if (objectMap.containsKey("query")) {
-            var jsonMap = (Map<String, Object>) objectMap.get("query");
+        String queryKey = "query";
+        if (objectMap.containsKey(queryKey)) {
+            Map<String, Object> jsonMap = (Map<String, Object>) objectMap.get(queryKey);
             QueryFragment jsonQueryFragment = QueryJsonHelper.queryJson(jsonMap, prefix);
             queryFragment.merge(jsonQueryFragment);
         }
 
         String securityCodeKey = "securityCode";
         if (!skipKeys.contains(securityCodeKey) && objectMap.containsKey(securityCodeKey)) {
-            QueryFragment securityCondition = securityCondition(objectMap.get(securityCodeKey), prefix);
-            queryFragment.merge(securityCondition);
+            String key = "tenant_code";
+            if (StringUtils.hasLength(prefix)) {
+                key = prefix + "." + key;
+            }
+            queryFragment.addWhere(key + " LIKE :securityCode");
+            queryFragment.put("securityCode", objectMap.get(securityCodeKey));
         }
 
-        objectMap = Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && !skipKeys.contains(key));
-        if (!ObjectUtils.isEmpty(objectMap)) {
-            QueryFragment entityQueryFragment = query(objectMap, prefix);
-            queryFragment.merge(entityQueryFragment);
+        String searchKey = "search";
+        if (objectMap.containsKey(searchKey) && !ObjectUtils.isEmpty(objectMap.get(searchKey))) {
+            String textSearch = (String) objectMap.get(searchKey);
+            queryFragment.addColumn("TS_RANK_CD(text_search, queryTextSearch) AS rank");
+            queryFragment.addQuery("TO_TSQUERY('chinese',:textSearch) queryTextSearch");
+            queryFragment.addWhere("text_search @@ TO_TSQUERY('chinese',:textSearch)");
+            queryFragment.put("textSearch", textSearch);
         }
         return queryFragment;
     }
 
-    private static String querySqlBuilder(Object object) {
-        String query = "SELECT * %1$s FROM #table_name %2$s";
+
+    public static void applySort(QueryFragment queryFragment, Sort sort, String prefix) {
+        sort = QueryJsonHelper.transformSortForJson(sort);
+        for (Sort.Order order : sort) {
+            String sortedPropertyName = order.getProperty();
+            String sortedProperty = order.isIgnoreCase() ? "LOWER(" + sortedPropertyName + ")" : sortedPropertyName;
+            if (StringUtils.hasLength(prefix)) {
+                sortedProperty = prefix + "." + sortedProperty;
+            }
+            queryFragment.addOrder(sortedProperty + (order.isAscending() ? " ASC" : " DESC"));
+        }
+    }
+
+    public static void applyWhere(QueryFragment queryFragment, String prefix) {
+        for (Map.Entry<String, Object> entry : queryFragment.entrySet()) {
+            String conditionSql = buildConditionSql(entry, prefix);
+            queryFragment.addWhere(conditionSql);
+        }
+    }
+
+    public static void applyQuerySql(QueryFragment queryFragment, Object object) {
         Class<?> objectClass = object.getClass();
         Table table = objectClass.getAnnotation(Table.class);
-        if (!ObjectUtils.isEmpty(table)) {
-            String tableName = StringUtils.hasLength(table.value()) ? table.value() : objectClass.getName();
-            return query.replace("#table_name", tableName);
-        }
-        throw QueryException.withMsg("Table annotation not found",
-                "This object does not have a table annotation");
-    }
 
-    private static QueryFragment securityCondition(Object value, String prefix) {
-        String key = "tenant_code";
-        if (StringUtils.hasLength(prefix)) {
-            key = prefix + "." + key;
+        if (ObjectUtils.isEmpty(table)) {
+            throw QueryException.withMsg("Table annotation not found",
+                    "This object does not have a table annotation");
         }
-        return QueryFragment.of(key + " LIKE :securityCode", Map.of("securityCode", value));
-    }
 
-    /**
-     * Constructs a ParamSql instance for dynamic SQL WHERE clause generation
-     * based on a provided map of column-value pairs. Supports optional prefixing
-     * for column names to handle table aliases or nested properties. Determines
-     * the SQL condition type (equality, 'like', or 'in') dynamically based on
-     * the value's type, enabling flexible query construction.
-     *
-     * @param objectMap A map where keys represent column names (in camelCase)
-     *                  and values are the criteria for filtering. Values can be
-     *                  Strings, Collections, or other types supporting equality checks.
-     * @param prefix    An optional string prefix to prepend to each column name,
-     *                  typically used to reference specific tables or entities in a query.
-     * @return A ParamSql object encapsulating the constructed WHERE clause
-     * conditions joined by 'and', and a map of parameters for prepared
-     * statement binding, where keys correspond to named parameters
-     * and values are the user-provided filter values.
-     */
-    public static QueryFragment query(Map<String, Object> objectMap, String prefix) {
-        StringJoiner whereAndJoiner = new StringJoiner(" AND ");
-        for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
-            String conditionSql = buildConditionSql(entry, prefix);
-            whereAndJoiner.add(conditionSql);
-        }
-        return QueryFragment.of(whereAndJoiner.toString(), objectMap);
+        String tableName = StringUtils.hasLength(table.value()) ? table.value() : objectClass.getName();
+        queryFragment.addColumn("*");
+        queryFragment.addQuery(tableName);
     }
 
     /**
@@ -187,20 +134,20 @@ public final class QueryHelper {
      * - A map of parameters mapping placeholders to the actual filter values.
      */
     public static String buildConditionSql(Map.Entry<String, Object> entry, String prefix) {
-        String sql = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey());
+        String columnName = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey());
         if (StringUtils.hasLength(prefix)) {
-            sql = prefix + "." + sql;
+            columnName = prefix + "." + columnName;
         }
         Object value = entry.getValue();
         String paramName = ":" + entry.getKey();
         if (value instanceof String) {
-            sql = sql + " like " + paramName;
+            columnName = columnName + " LIKE " + paramName;
         } else if (value instanceof Collection<?>) {
-            sql = sql + " in (" + paramName + ")";
+            columnName = columnName + " IN (" + paramName + ")";
         } else {
-            sql = sql + " = " + paramName;
+            columnName = columnName + " = " + paramName;
         }
-        return sql;
+        return columnName;
     }
 
     /**

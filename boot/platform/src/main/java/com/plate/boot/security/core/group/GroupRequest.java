@@ -1,13 +1,10 @@
 package com.plate.boot.security.core.group;
 
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.QueryFragment;
-import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,9 +26,5 @@ public class GroupRequest extends Group {
 
     public Group toGroup() {
         return BeanUtils.copyProperties(this, Group.class);
-    }
-
-    public QueryFragment qSql() {
-        return QueryHelper.query(this, List.of(), null);
     }
 }
