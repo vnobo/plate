@@ -17,11 +17,11 @@ env:
 jobs:
   boot-build-image:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        platform:
-          - linux/amd64
-          - linux/arm64
+#    strategy:
+#      matrix:
+#        platform:
+#          - linux/amd64
+#          - linux/arm64
     permissions:
       contents: read
       packages: write
@@ -41,8 +41,8 @@ jobs:
       - name: Execute Gradle platform bootBuildImage
         run: |
           chmod +x ./gradlew
-          ./gradlew bootBuildImage --imagePlatform=${{ matrix.platform }}
-
+          ./gradlew bootBuildImage
+#--imagePlatform=${{ matrix.platform }}
       - name: Log into registry ${{ env.GITHUB_REGISTRY }}
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
@@ -75,7 +75,7 @@ jobs:
       - name: Build and Push Platform
         uses: docker/build-push-action@v6
         with:
-          platforms: ${{ matrix.platform }}
+#          platforms: ${{ matrix.platform }}
           context: ./boot/platform
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
@@ -99,7 +99,7 @@ jobs:
       - name: Build and Push Oauth2
         uses: docker/build-push-action@v6
         with:
-          platforms: ${{ matrix.platform }}
+#          platforms: ${{ matrix.platform }}
           context: ./boot/oauth2
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.oauth2.outputs.tags }}
