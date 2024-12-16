@@ -13,7 +13,7 @@ on:
     types: [ created ]
 env:
   GITHUB_REGISTRY: ghcr.io/${{ github.actor }}
-  DOCKER_REGISTRY: alexbob
+  DOCKER_REGISTRY: docker.io/alexbob
 jobs:
   boot-build-image:
     runs-on: ubuntu-latest
@@ -42,7 +42,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Execute Gradle amd64 bootBuildImage
+      - name: Execute Gradle Plate bootBuildImage
         run: |
           chmod +x ./gradlew
           ./gradlew bootBuildImage --imagePlatform=linux/amd64
