@@ -44,11 +44,11 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     public static QueryFragment withNew() {
-        return withMap(25, 0, Map.of());
+        return withMap(Map.of());
     }
 
     public static QueryFragment withMap(Map<String, Object> params) {
-        return new QueryFragment(25, 0, params);
+        return new QueryFragment(Integer.MAX_VALUE, 0, params);
     }
 
     public static QueryFragment withMap(int size, long offset, Map<String, Object> params) {
@@ -56,7 +56,7 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     public static QueryFragment of(QueryFragment params) {
-        return of(25, 0, params);
+        return of(Integer.MAX_VALUE, 0, params);
     }
 
     public static QueryFragment of(int size, long offset, QueryFragment params) {
@@ -83,16 +83,34 @@ public class QueryFragment extends HashMap<String, Object> {
         return this;
     }
 
+    /**
+     * Adds an ORDER BY clause to the query.
+     *
+     * @param order the order
+     * @return this
+     */
     public QueryFragment addOrder(CharSequence order) {
         orderSql.add(order);
         return this;
     }
 
+    /**
+     * Merges the given where clause with the existing one.
+     *
+     * @param where the where
+     * @return this
+     */
     public QueryFragment mergeWhere(StringJoiner where) {
         whereSql.merge(where);
         return this;
     }
 
+    /**
+     * Merges the given order clause with the existing one.
+     *
+     * @param order the order
+     * @return this
+     */
     public QueryFragment mergeOrder(StringJoiner order) {
         orderSql.merge(order);
         return this;

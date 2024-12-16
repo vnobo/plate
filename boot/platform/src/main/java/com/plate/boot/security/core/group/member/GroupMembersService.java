@@ -32,13 +32,13 @@ public class GroupMembersService extends AbstractDatabase {
 
     private final GroupMembersRepository memberRepository;
 
-    public Flux<GroupMemberResponse> search(GroupMemberRequest request, Pageable pageable) {
+    public Flux<GroupMemberResp> search(GroupMemberReq request, Pageable pageable) {
         QueryFragment queryFragment = request.toParamSql();
         return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(),
-                queryFragment, GroupMemberResponse.class);
+                queryFragment, GroupMemberResp.class);
     }
 
-    public Mono<Page<GroupMemberResponse>> page(GroupMemberRequest request, Pageable pageable) {
+    public Mono<Page<GroupMemberResp>> page(GroupMemberReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment QueryFragment = request.toParamSql();
         String query = COUNT_SQL + QueryFragment.whereSql();
@@ -47,7 +47,7 @@ public class GroupMembersService extends AbstractDatabase {
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
-    public Mono<GroupMember> operate(GroupMemberRequest request) {
+    public Mono<GroupMember> operate(GroupMemberReq request) {
         var dataMono = this.entityTemplate.selectOne(Query.query(request.toCriteria()), GroupMember.class)
                 .defaultIfEmpty(request.toGroupMember());
         return dataMono.flatMap(this::save).doAfterTerminate(() -> this.cache.clear());
@@ -63,7 +63,7 @@ public class GroupMembersService extends AbstractDatabase {
         }
     }
 
-    public Mono<Void> delete(GroupMemberRequest request) {
+    public Mono<Void> delete(GroupMemberReq request) {
         return this.memberRepository.delete(request.toGroupMember()).doAfterTerminate(() -> this.cache.clear());
     }
 }

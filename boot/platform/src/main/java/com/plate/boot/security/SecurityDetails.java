@@ -3,7 +3,7 @@ package com.plate.boot.security;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plate.boot.security.core.UserAuditor;
-import com.plate.boot.security.core.group.member.GroupMemberResponse;
+import com.plate.boot.security.core.group.member.GroupMemberResp;
 import com.plate.boot.security.core.tenant.member.TenantMemberResponse;
 import com.plate.boot.security.core.user.User;
 import lombok.Getter;
@@ -53,11 +53,11 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
     private Set<TenantMemberResponse> tenants;
 
     /**
-     * Represents a collection of {@link GroupMemberResponse} instances associated with a security details object.
+     * Represents a collection of {@link GroupMemberResp} instances associated with a security details object.
      * This set encapsulates the group membership responses for a user, providing information about the groups
      * the user is a part of, including each group's name and additional metadata in the form of a JSON node.
      */
-    private Set<GroupMemberResponse> groups;
+    private Set<GroupMemberResp> groups;
 
     /**
      * The password field securely stores the authentication credential for a user.

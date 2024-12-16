@@ -21,22 +21,22 @@ public class GroupMembersController {
     private final GroupMembersService groupMembersService;
 
     @GetMapping("search")
-    public Flux<GroupMemberResponse> search(GroupMemberRequest request, Pageable pageable) {
+    public Flux<GroupMemberResp> search(GroupMemberReq request, Pageable pageable) {
         return this.groupMembersService.search(request, pageable);
     }
 
     @GetMapping("page")
-    public Mono<Page<GroupMemberResponse>> page(GroupMemberRequest request, Pageable pageable) {
+    public Mono<Page<GroupMemberResp>> page(GroupMemberReq request, Pageable pageable) {
         return this.groupMembersService.page(request, pageable);
     }
 
     @PostMapping("save")
-    public Mono<GroupMember> save(@Valid @RequestBody GroupMemberRequest request) {
+    public Mono<GroupMember> save(@Valid @RequestBody GroupMemberReq request) {
         return this.groupMembersService.operate(request);
     }
 
     @DeleteMapping("delete")
-    public Mono<Void> delete(@Valid @RequestBody GroupMemberRequest request) {
+    public Mono<Void> delete(@Valid @RequestBody GroupMemberReq request) {
         Assert.notNull(request.getId(), "When deleting a Tenant, the ID must not be null");
         return this.groupMembersService.delete(request);
     }

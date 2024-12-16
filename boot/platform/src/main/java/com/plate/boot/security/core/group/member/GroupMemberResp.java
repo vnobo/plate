@@ -11,7 +11,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class GroupMemberResponse extends GroupMember {
+public class GroupMemberResp extends GroupMember {
 
     private String name;
 
