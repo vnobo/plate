@@ -2,12 +2,10 @@ package com.plate.boot.commons.utils.query;
 
 import com.plate.boot.commons.exception.QueryException;
 import lombok.Getter;
-import org.springframework.data.domain.Pageable;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringJoiner;
 
 /**
  * Represents a SQL parameter structure consisting of a conditional SQL fragment
@@ -18,62 +16,87 @@ import java.util.*;
 @Getter
 public class QueryFragment extends HashMap<String, Object> {
 
-    private final String querySql;
+    private final StringJoiner columns = new StringJoiner(",");
 
-    private final String whereSql;
+    private final StringJoiner querySql = new StringJoiner(" ");
 
-    private final String orderSql;
+    private final StringJoiner whereSql = new StringJoiner(" AND ");
 
-    public QueryFragment(String querySql, String whereSql, String orderSql, Map<String, Object> params) {
+    private final StringJoiner orderSql = new StringJoiner(",");
+
+    private final int size;
+
+    private final long offset;
+
+    public QueryFragment(int size, long offset, QueryFragment params) {
         super(16);
-        Assert.notNull(whereSql, "getWhereSql must not be null!");
-        Assert.notNull(params, "params must not be null!");
-        this.querySql = querySql;
-        this.whereSql = whereSql;
-        this.orderSql = orderSql;
+        this.size = size;
+        this.offset = offset;
+        this.mergeWhere(params.getWhereSql());
         this.putAll(params);
     }
 
-    /**
-     * Creates a new instance of {@link QueryFragment} with the provided conditional SQL
-     * fragment and parameters map.
-     *
-     * @param whereSql A {@link StringJoiner} object containing the dynamically
-     *                 constructed WHERE clause segments of a SQL query, concatenated by 'and'.
-     * @param params   A {@link Map} of parameter names to values, which will be
-     *                 substituted for placeholders within the SQL query to prevent SQL injection.
-     * @return A new {@link QueryFragment} instance encapsulating the given SQL fragment
-     * and parameters map, ready for use in preparing a parameterized SQL statement.
-     */
-    public static QueryFragment of(String whereSql, Map<String, Object> params) {
-        return of(null, whereSql, "", params);
+    public QueryFragment(int size, long offset, Map<String, Object> params) {
+        super(16);
+        this.size = size;
+        this.offset = offset;
+        this.putAll(params);
     }
 
-    public static QueryFragment of(String querySql, String whereSql, Map<String, Object> params) {
-        return of(querySql, whereSql, "", params);
+    public static QueryFragment withNew() {
+        return withMap(25, 0, Map.of());
     }
 
-    public static QueryFragment of(String querySql, String whereSql, String orderSql, Map<String, Object> params) {
-        return new QueryFragment(querySql, whereSql, orderSql, params);
+    public static QueryFragment withMap(Map<String, Object> params) {
+        return new QueryFragment(25, 0, params);
     }
 
-    public static QueryFragment query(Object object, Pageable pageable) {
-        return query(object, pageable, List.of(), null);
+    public static QueryFragment withMap(int size, long offset, Map<String, Object> params) {
+        return new QueryFragment(size, offset, params);
     }
 
-    public static QueryFragment query(Object object, Pageable pageable, String prefix) {
-        return query(object, pageable, List.of(), prefix);
+    public static QueryFragment of(QueryFragment params) {
+        return of(25, 0, params);
     }
 
-    public static QueryFragment query(Object object, Pageable pageable, Collection<String> skipKeys, String prefix) {
-        QueryFragment queryFragment = QueryHelper.query(object, skipKeys, prefix);
-        String orderSql = "";
-        if (!ObjectUtils.isEmpty(pageable)) {
-            orderSql = QueryHelper.applyPage(pageable, prefix);
+    public static QueryFragment of(int size, long offset, QueryFragment params) {
+        return new QueryFragment(size, offset, params);
+    }
+
+    public QueryFragment addColumn(CharSequence... columns) {
+        for (CharSequence column : columns) {
+            this.columns.add(column);
         }
-        return QueryFragment.of(queryFragment.getQuerySql(), queryFragment.getWhereSql(), orderSql, queryFragment);
+        return this;
     }
 
+    public QueryFragment addQuery(CharSequence... queries) {
+        this.querySql.setEmptyValue("");
+        for (CharSequence query : queries) {
+            this.querySql.add(query);
+        }
+        return this;
+    }
+
+    public QueryFragment addWhere(CharSequence where) {
+        whereSql.add(where);
+        return this;
+    }
+
+    public QueryFragment addOrder(CharSequence order) {
+        orderSql.add(order);
+        return this;
+    }
+
+    public QueryFragment mergeWhere(StringJoiner where) {
+        whereSql.merge(where);
+        return this;
+    }
+
+    public QueryFragment mergeOrder(StringJoiner order) {
+        orderSql.merge(order);
+        return this;
+    }
 
     /**
      * Generates the WHERE clause part of a SQL query based on the stored conditions.
@@ -83,23 +106,32 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return A String forming the WHERE clause of the SQL query, or an empty string if no conditions are present.
      */
     public String whereSql() {
-        if (!this.whereSql.isEmpty()) {
+        if (this.whereSql.length() > 0) {
             return " WHERE " + this.whereSql;
         }
         return "";
     }
 
+    public String orderSql() {
+        if (this.orderSql.length() > 0) {
+            return " ORDER BY " + this.orderSql;
+        }
+        return "";
+    }
+
     public String querySql() {
-        if (StringUtils.hasLength(this.querySql)) {
-            return this.querySql + whereSql() + this.orderSql;
+        if (this.querySql.length() > 0) {
+            return String.format("SELECT %s FROM %s %s %s LIMIT %d OFFSET %d",
+                    this.columns, this.querySql, whereSql(), orderSql(), this.size, this.offset);
         }
         throw QueryException.withError("This querySql is null, please use whereSql() method!",
                 new IllegalArgumentException("This querySql is null, please use whereSql() method"));
     }
 
     public String countSql() {
-        if (StringUtils.hasLength(this.querySql)) {
-            return "SELECT COUNT(*) FROM (" + this.querySql + whereSql() + ") t";
+        if (this.querySql.length() > 0) {
+            return "SELECT COUNT(*) FROM (" + String.format("SELECT %s FROM %s", this.columns, this.querySql)
+                    + whereSql() + ") t";
         }
         throw QueryException.withError("This countSql is null, please use whereSql() method!",
                 new IllegalArgumentException("This countSql is null, please use whereSql() method"));

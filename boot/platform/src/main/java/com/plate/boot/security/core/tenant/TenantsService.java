@@ -25,16 +25,14 @@ public class TenantsService extends AbstractDatabase {
     private final TenantMembersRepository membersRepository;
 
     public Flux<Tenant> search(TenantRequest request, Pageable pageable) {
-        QueryFragment queryFragment = request.qSql();
-        String query = "select * from se_tenants" + queryFragment.whereSql() + QueryHelper.applyPage(pageable);
-        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query, queryFragment, Tenant.class);
+        QueryFragment queryFragment = QueryHelper.query(request, pageable);
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(), queryFragment, Tenant.class);
     }
 
     public Mono<Page<Tenant>> page(TenantRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        QueryFragment queryFragment = request.qSql();
-        String query = "select count(*) from se_tenants" + queryFragment.whereSql() + QueryHelper.applyPage(pageable);
-        var countMono = this.countWithCache(BeanUtils.cacheKey(request), query, queryFragment);
+        QueryFragment queryFragment = QueryHelper.query(request, pageable);
+        var countMono = this.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
 
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));

@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import com.plate.boot.commons.exception.QueryException;
 import com.plate.boot.commons.exception.RestServerException;
 import org.springframework.data.domain.Sort;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
@@ -120,17 +119,13 @@ public final class QueryJsonHelper {
      * @throws IllegalArgumentException If any processing error occurs due to invalid input structure or content.
      */
     public static QueryFragment queryJson(Map<String, Object> params, String prefix) {
-        Map<String, Object> bindParams = Maps.newHashMap();
-        StringJoiner whereSql = new StringJoiner(" AND ", "(", ")");
-        if (ObjectUtils.isEmpty(params)) {
-            return QueryFragment.of(whereSql.toString(), bindParams);
-        }
+        QueryFragment queryFragment = QueryFragment.withNew();
         for (Map.Entry<String, Object> entry : params.entrySet()) {
-            QueryFragment condition = buildJsonCondition(entry, prefix);
-            whereSql.add(condition.getWhereSql());
-            bindParams.putAll(condition);
+            var condition = buildJsonCondition(entry, prefix);
+            queryFragment.mergeWhere(condition.getWhereSql());
+            queryFragment.putAll(condition);
         }
-        return QueryFragment.of(whereSql.toString(), bindParams);
+        return queryFragment;
     }
 
     /**
@@ -178,7 +173,7 @@ public final class QueryJsonHelper {
         //处理最后键
         QueryFragment lastCondition = buildLastCondition(keys, entry.getValue());
         conditionBuilder.append(lastCondition.getWhereSql());
-        return QueryFragment.of(conditionBuilder.toString(), lastCondition);
+        return QueryFragment.withMap(lastCondition).addWhere(conditionBuilder.toString());
     }
 
     /**
@@ -206,7 +201,7 @@ public final class QueryJsonHelper {
         Map.Entry<String, String> exps = queryKeywordMapper(lastKey);
         if (exps == null) {
             conditionSql.append(lastKey).append("' = :").append(paramName);
-            return QueryFragment.of(conditionSql.toString(), Map.of(paramName, value));
+            return QueryFragment.withMap(Map.of(paramName, value)).addWhere(conditionSql.toString());
         }
 
         String key = lastKey.substring(0, lastKey.length() - exps.getKey().length());
@@ -226,7 +221,7 @@ public final class QueryJsonHelper {
             conditionSql.append(exps.getValue()).append(" :").append(paramName);
             params = Map.of(paramName, value);
         }
-        return QueryFragment.of(conditionSql.toString(), params);
+        return QueryFragment.withMap(params).addWhere(conditionSql.toString());
     }
 
     /**

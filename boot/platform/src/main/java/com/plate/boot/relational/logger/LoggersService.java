@@ -3,6 +3,7 @@ package com.plate.boot.relational.logger;
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
+import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -34,7 +35,7 @@ public class LoggersService extends AbstractDatabase {
      * @return A Flux of Logger objects matching the search criteria, respecting the specified pagination.
      */
     public Flux<Logger> search(LoggerRequest request, Pageable pageable) {
-        QueryFragment queryFragment = QueryFragment.query(request, pageable);
+        QueryFragment queryFragment = QueryHelper.query(request, pageable);
         var cacheKey = BeanUtils.cacheKey(request, pageable);
         return this.queryWithCache(cacheKey, queryFragment.querySql(), queryFragment, Logger.class);
     }
@@ -50,7 +51,7 @@ public class LoggersService extends AbstractDatabase {
      */
     public Mono<Page<Logger>> page(LoggerRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        QueryFragment queryFragment = QueryFragment.query(request, pageable);
+        QueryFragment queryFragment = QueryHelper.query(request, pageable);
         var countMono = this.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));

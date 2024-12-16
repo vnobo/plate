@@ -4,6 +4,7 @@ import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
+import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -34,7 +35,7 @@ public class UsersService extends AbstractDatabase {
      * @return A Flux object containing a stream of UserResponse data.
      */
     public Flux<UserResponse> search(UserRequest request, Pageable pageable) {
-        QueryFragment queryFragment = QueryFragment.query(request, pageable);
+        QueryFragment queryFragment = QueryHelper.query(request, pageable);
         String key = BeanUtils.cacheKey(request, pageable);
         return super.queryWithCache(key, queryFragment.querySql(), queryFragment, UserResponse.class);
     }

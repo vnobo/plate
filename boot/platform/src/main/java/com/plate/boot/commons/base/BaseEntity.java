@@ -111,6 +111,6 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
      * prevent SQL injection, ensuring secure query execution.
      */
     default QueryFragment querySql(Collection<String> skipKeys) {
-        return QueryHelper.query(this, skipKeys, null);
+        return QueryHelper.query(this, skipKeys);
     }
 }

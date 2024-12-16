@@ -12,7 +12,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Set;
-import java.util.StringJoiner;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -36,20 +35,17 @@ public class GroupMemberRequest extends GroupMember {
 
     public QueryFragment toParamSql() {
         QueryFragment queryFragment = QueryHelper.query(this, List.of("users", "username"), "a");
-
-        StringJoiner criteria = new StringJoiner(" AND ", "(", ")");
-
         if (!ObjectUtils.isEmpty(this.getUsers())) {
-            criteria.add("a.user_code in :users");
+            queryFragment.addWhere("a.user_code in :users");
             queryFragment.put("users", this.getUsers());
         }
 
         if (StringUtils.hasLength(this.getUsername())) {
-            criteria.add("c.username = :username");
+            queryFragment.addWhere("c.username = :username");
             queryFragment.put("username", this.getUsername());
         }
 
-        return QueryFragment.of(queryFragment.getWhereSql() + criteria, queryFragment);
+        return queryFragment;
     }
 
 }
