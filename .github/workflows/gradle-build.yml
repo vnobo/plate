@@ -36,7 +36,7 @@ jobs:
       - name: Execute Gradle platform bootBuildImage
         run: |
           chmod +x ./gradlew
-          ./gradlew bootBuildImage --imagePlatform=linux/arm64
+          ./gradlew bootBuildImage
 
       - name: Log into registry ${{ env.GITHUB_REGISTRY }}
         if: github.event_name != 'pull_request'
