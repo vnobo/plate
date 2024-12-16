@@ -121,7 +121,9 @@ public final class QueryJsonHelper {
     public static QueryFragment queryJson(Map<String, Object> params, String prefix) {
         QueryFragment queryFragment = QueryFragment.of(25, 0, Map.of());
         for (Map.Entry<String, Object> entry : params.entrySet()) {
-            queryFragment.merge(buildJsonCondition(entry, prefix));
+            var condition = buildJsonCondition(entry, prefix);
+            queryFragment.mergeWhere(condition.getWhereSql());
+            queryFragment.putAll(condition);
         }
         return queryFragment;
     }

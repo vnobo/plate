@@ -62,7 +62,8 @@ public final class QueryHelper {
         if (objectMap.containsKey(queryKey)) {
             Map<String, Object> jsonMap = (Map<String, Object>) objectMap.get(queryKey);
             QueryFragment jsonQueryFragment = QueryJsonHelper.queryJson(jsonMap, prefix);
-            queryFragment.merge(jsonQueryFragment);
+            queryFragment.mergeWhere(jsonQueryFragment.getWhereSql());
+            queryFragment.putAll(jsonQueryFragment);
         }
 
         String securityCodeKey = "securityCode";

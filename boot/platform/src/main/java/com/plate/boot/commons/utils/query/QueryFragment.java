@@ -18,7 +18,7 @@ public class QueryFragment extends HashMap<String, Object> {
 
     private final StringJoiner columns = new StringJoiner(",");
 
-    private final StringJoiner querySql = new StringJoiner(",");
+    private final StringJoiner querySql = new StringJoiner(" ");
 
     private final StringJoiner whereSql = new StringJoiner(" AND ");
 
@@ -43,13 +43,17 @@ public class QueryFragment extends HashMap<String, Object> {
         return new QueryFragment(size, offset, params);
     }
 
-    public QueryFragment addColumn(CharSequence column) {
-        columns.add(column);
+    public QueryFragment addColumn(CharSequence... columns) {
+        for (CharSequence column : columns) {
+            this.columns.add(column);
+        }
         return this;
     }
 
-    public QueryFragment addQuery(CharSequence query) {
-        querySql.add(query);
+    public QueryFragment addQuery(CharSequence... queries) {
+        for (CharSequence query : queries) {
+            this.querySql.add(query);
+        }
         return this;
     }
 
@@ -71,15 +75,6 @@ public class QueryFragment extends HashMap<String, Object> {
     public QueryFragment mergeOrder(StringJoiner order) {
         orderSql.merge(order);
         return this;
-    }
-
-    public QueryFragment merge(QueryFragment fragment) {
-        this.putAll(fragment);
-        this.columns.merge(fragment.getColumns());
-        this.querySql.merge(fragment.getQuerySql());
-        this.whereSql.merge(fragment.getWhereSql());
-        this.orderSql.merge(fragment.getOrderSql());
-        return of(fragment.getSize(), fragment.getOffset(), this);
     }
 
     /**

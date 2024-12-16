@@ -44,8 +44,8 @@ public class TenantMemberRequest extends TenantMember {
         QueryFragment fragment = QueryHelper.query(this, List.of("users", "securityCode", "username"), "a");
 
         if (!ObjectUtils.isEmpty(this.getUsers())) {
-            fragment.addWhere("a.user_code in :users");
-            fragment.put("users", this.getUsers());
+            fragment.addWhere("a.user_code in (:users)");
+            fragment.put("users", StringUtils.collectionToCommaDelimitedString(this.getUsers()));
         }
 
         if (StringUtils.hasLength(this.getSecurityCode())) {

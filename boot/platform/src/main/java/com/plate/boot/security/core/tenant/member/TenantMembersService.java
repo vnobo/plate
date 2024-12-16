@@ -37,8 +37,12 @@ public class TenantMembersService extends AbstractDatabase {
     private final TenantMembersRepository tenantMembersRepository;
 
     public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
-        QueryFragment queryFragment = QueryHelper.query(request, pageable, "a");
-        queryFragment = queryFragment.merge(request.toParamSql());
+        QueryFragment queryFragment = request.toParamSql().addColumn("a.*", "b.name as tenant_name",
+                        "b.extend as tenant_extend", "c.name as login_name", "c.username")
+                .addQuery("a",
+                        "inner join se_tenants b on a.tenant_code = b.code",
+                        "inner join se_users c on c.code = a.user_code");
+        QueryHelper.applySort(queryFragment, pageable.getSort(), "a");
         return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(),
                 queryFragment, TenantMemberResponse.class);
     }
@@ -46,8 +50,7 @@ public class TenantMembersService extends AbstractDatabase {
     public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment queryFragment = request.toParamSql();
-        String query = COUNT_SQL + queryFragment.whereSql();
-        Mono<Long> countMono = this.countWithCache(BeanUtils.cacheKey(request), query, queryFragment);
+        Mono<Long> countMono = this.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
