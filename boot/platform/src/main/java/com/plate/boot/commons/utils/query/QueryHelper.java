@@ -49,7 +49,7 @@ public final class QueryHelper {
         Map<String, Object> filterMap = ObjectUtils.isEmpty(objectMap) ? Map.of() :
                 Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && !skipKeys.contains(key));
 
-        QueryFragment queryFragment = QueryFragment.of(pageable.getPageSize(), pageable.getOffset(), filterMap);
+        QueryFragment queryFragment = QueryFragment.withMap(pageable.getPageSize(), pageable.getOffset(), filterMap);
         QueryHelper.applySort(queryFragment, pageable.getSort(), prefix);
         QueryHelper.applyWhere(queryFragment, prefix);
         QueryHelper.applyQuerySql(queryFragment, object);
@@ -80,7 +80,7 @@ public final class QueryHelper {
         if (objectMap.containsKey(searchKey) && !ObjectUtils.isEmpty(objectMap.get(searchKey))) {
             String textSearch = (String) objectMap.get(searchKey);
             queryFragment.addColumn("TS_RANK_CD(text_search, queryTextSearch) AS rank");
-            queryFragment.addQuery("TO_TSQUERY('chinese',:textSearch) queryTextSearch");
+            queryFragment.addQuery(",TO_TSQUERY('chinese',:textSearch) queryTextSearch");
             queryFragment.addWhere("text_search @@ TO_TSQUERY('chinese',:textSearch)");
             queryFragment.put("textSearch", textSearch);
         }

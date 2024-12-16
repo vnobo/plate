@@ -22,24 +22,15 @@ import reactor.core.publisher.Mono;
 @Service
 @RequiredArgsConstructor
 public class TenantMembersService extends AbstractDatabase {
-    private final static String QUERY_SQL = """
-            select a.*, b.name as tenant_name, b.extend as tenant_extend,c.name as login_name,c.username
-            from se_tenant_members a
-            inner join se_tenants b on a.tenant_code = b.code
-            inner join se_users c on c.code = a.user_code
-            """;
-    private final static String COUNT_SQL = """
-            select count(*) from se_tenant_members a
-            inner join se_tenants b on a.tenant_code = b.code
-            inner join se_users c on c.code = a.user_code
-            """;
 
     private final TenantMembersRepository tenantMembersRepository;
 
     public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
-        QueryFragment queryFragment = request.toParamSql().addColumn("a.*", "b.name as tenant_name",
+        QueryFragment fragment = request.toParamSql();
+        QueryFragment queryFragment = QueryFragment.of(pageable.getPageSize(), pageable.getOffset(), fragment)
+                .addColumn("a.*", "b.name as tenant_name",
                         "b.extend as tenant_extend", "c.name as login_name", "c.username")
-                .addQuery("a",
+                .addQuery("se_tenant_members a",
                         "inner join se_tenants b on a.tenant_code = b.code",
                         "inner join se_users c on c.code = a.user_code");
         QueryHelper.applySort(queryFragment, pageable.getSort(), "a");

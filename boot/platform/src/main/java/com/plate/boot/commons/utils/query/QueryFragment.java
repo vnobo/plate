@@ -28,6 +28,14 @@ public class QueryFragment extends HashMap<String, Object> {
 
     private final long offset;
 
+    public QueryFragment(int size, long offset, QueryFragment params) {
+        super(16);
+        this.size = size;
+        this.offset = offset;
+        this.mergeWhere(params.getWhereSql());
+        this.putAll(params);
+    }
+
     public QueryFragment(int size, long offset, Map<String, Object> params) {
         super(16);
         this.size = size;
@@ -35,11 +43,23 @@ public class QueryFragment extends HashMap<String, Object> {
         this.putAll(params);
     }
 
-    public static QueryFragment of(Map<String, Object> params) {
+    public static QueryFragment withNew() {
+        return withMap(25, 0, Map.of());
+    }
+
+    public static QueryFragment withMap(Map<String, Object> params) {
+        return new QueryFragment(25, 0, params);
+    }
+
+    public static QueryFragment withMap(int size, long offset, Map<String, Object> params) {
+        return new QueryFragment(size, offset, params);
+    }
+
+    public static QueryFragment of(QueryFragment params) {
         return of(25, 0, params);
     }
 
-    public static QueryFragment of(int size, long offset, Map<String, Object> params) {
+    public static QueryFragment of(int size, long offset, QueryFragment params) {
         return new QueryFragment(size, offset, params);
     }
 
@@ -51,6 +71,7 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     public QueryFragment addQuery(CharSequence... queries) {
+        this.querySql.setEmptyValue("");
         for (CharSequence query : queries) {
             this.querySql.add(query);
         }

@@ -119,7 +119,7 @@ public final class QueryJsonHelper {
      * @throws IllegalArgumentException If any processing error occurs due to invalid input structure or content.
      */
     public static QueryFragment queryJson(Map<String, Object> params, String prefix) {
-        QueryFragment queryFragment = QueryFragment.of(25, 0, Map.of());
+        QueryFragment queryFragment = QueryFragment.withNew();
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             var condition = buildJsonCondition(entry, prefix);
             queryFragment.mergeWhere(condition.getWhereSql());
@@ -173,7 +173,7 @@ public final class QueryJsonHelper {
         //处理最后键
         QueryFragment lastCondition = buildLastCondition(keys, entry.getValue());
         conditionBuilder.append(lastCondition.getWhereSql());
-        return QueryFragment.of(lastCondition).addWhere(conditionBuilder.toString());
+        return QueryFragment.withMap(lastCondition).addWhere(conditionBuilder.toString());
     }
 
     /**
@@ -201,7 +201,7 @@ public final class QueryJsonHelper {
         Map.Entry<String, String> exps = queryKeywordMapper(lastKey);
         if (exps == null) {
             conditionSql.append(lastKey).append("' = :").append(paramName);
-            return QueryFragment.of(Map.of(paramName, value)).addWhere(conditionSql.toString());
+            return QueryFragment.withMap(Map.of(paramName, value)).addWhere(conditionSql.toString());
         }
 
         String key = lastKey.substring(0, lastKey.length() - exps.getKey().length());
@@ -221,7 +221,7 @@ public final class QueryJsonHelper {
             conditionSql.append(exps.getValue()).append(" :").append(paramName);
             params = Map.of(paramName, value);
         }
-        return QueryFragment.of(params).addWhere(conditionSql.toString());
+        return QueryFragment.withMap(params).addWhere(conditionSql.toString());
     }
 
     /**
