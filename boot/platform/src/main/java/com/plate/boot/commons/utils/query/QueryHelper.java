@@ -107,6 +107,14 @@ public final class QueryHelper {
         }
     }
 
+    /**
+     * Applies the query SQL based on the provided object's table annotation.
+     * If the object does not have a table annotation, it throws a QueryException.
+     *
+     * @param queryFragment The QueryFragment to which the query SQL will be applied.
+     * @param object The object containing the table annotation and data for the query.
+     * @throws QueryException If the object does not have a table annotation.
+     */
     public static void applyQuerySql(QueryFragment queryFragment, Object object) {
         Class<?> objectClass = object.getClass();
         Table table = objectClass.getAnnotation(Table.class);
