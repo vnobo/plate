@@ -2,8 +2,9 @@ package com.plate.boot.security;
 
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.security.core.group.authority.GroupAuthority;
-import com.plate.boot.security.core.group.member.GroupMemberResponse;
+import com.plate.boot.security.core.group.member.GroupMemberResp;
 import com.plate.boot.security.core.tenant.member.TenantMemberResponse;
 import com.plate.boot.security.core.user.User;
 import com.plate.boot.security.core.user.UserRequest;
@@ -31,7 +32,6 @@ import reactor.util.function.Tuple2;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -63,26 +63,25 @@ import java.util.Set;
 public class SecurityManager extends AbstractDatabase
         implements ReactiveUserDetailsService, ReactiveUserDetailsPasswordService {
 
-    private final static String QUERY_GROUP_MEMBERS_SQL = """
-            select a.*,b.name,b.extend
-            from se_group_members a join se_groups b on a.group_code=b.code
-            where a.user_code like :userCode
-            """;
-    private final static String QUERY_TENANT_MEMBERS_SQL = """
-            select a.*,b.name ,b.extend
-            from se_tenant_members a join se_tenants b on a.tenant_code=b.code
-            where a.user_code like :userCode
-            """;
-    private final static String QUERY_USER_AUTHORITY_SQL = """
-            select * from se_authorities where user_code = :userCode
-            """;
-    private final static String QUERY_GROUP_AUTHORITY_SQL = """
-            select ga.* from se_group_authorities ga
-            join se_group_members gm on ga.group_code = gm.group_code
-            join se_users su on gm.user_code = su.code
-            join se_groups sg on gm.group_code = sg.code and sg.tenant_code = su.tenant_code
-            where gm.user_code = :userCode
-            """;
+    private final static QueryFragment QUERY_GROUP_MEMBERS_FRAGMENT = QueryFragment.withNew()
+            .addColumn("a.*", "b.name", "b.extend")
+            .addQuery("se_group_members a", "join se_groups b on a.group_code=b.code")
+            .addWhere("a.user_code like :userCode");
+    private final static QueryFragment QUERY_TENANT_MEMBERS_FRAGMENT = QueryFragment.withNew()
+            .addColumn("a.*", "b.name", "b.extend")
+            .addQuery("se_tenant_members a", "join se_tenants b on a.tenant_code=b.code")
+            .addWhere("a.user_code like :userCode");
+    private final static QueryFragment QUERY_USER_AUTHORITY_FRAGMENT = QueryFragment.withNew()
+            .addColumn("*")
+            .addQuery("se_authorities")
+            .addWhere("user_code = :userCode");
+    private final static QueryFragment QUERY_GROUP_AUTHORITY_FRAGMENT = QueryFragment.withNew()
+            .addColumn("ga.*")
+            .addQuery("se_group_authorities ga",
+                    "join se_group_members gm on ga.group_code = gm.group_code",
+                    "join se_users su on gm.user_code = su.code",
+                    "join se_groups sg on gm.group_code = sg.code and sg.tenant_code = su.tenant_code")
+            .addWhere("gm.user_code = :userCode");
 
     /**
      * Represents the service layer for handling user-related operations.
@@ -134,9 +133,11 @@ public class SecurityManager extends AbstractDatabase
      * @return A Mono emitting the User if found, or an empty Mono if no user matches the given OAuth2 binding data.
      */
     public Mono<User> loadByOauth2(String bindType, String openid) {
-        String query = "select * from se_users where extend->'oauth2'->:bindType->>'openid'::varchar = :openid";
-        var userMono = this.databaseClient.sql(query)
-                .bind("bindType", bindType).bind("openid", openid)
+        QueryFragment queryFragment = QueryFragment.withNew().addColumn("*").addQuery("se_users")
+                .addWhere("extend->'oauth2'->:bindType->>'openid'::varchar = :openid");
+        queryFragment.put("bindType", bindType);
+        queryFragment.put("openid", openid);
+        var userMono = this.databaseClient.sql(queryFragment::querySql).bindValues(queryFragment)
                 .map((row, metadata) -> this.r2dbcConverter.read(User.class, row, metadata))
                 .all();
         return this.queryWithCache(bindType + openid, userMono).singleOrEmpty();
@@ -192,7 +193,7 @@ public class SecurityManager extends AbstractDatabase
     private Mono<SecurityDetails> buildUserDetails(User user, Set<GrantedAuthority> authorities) {
         SecurityDetails userDetails = SecurityDetails.of(user.getCode(), authorities,
                 BeanUtils.beanToMap(UserResponse.withUser(user)), "username").buildUser(user);
-        Mono<Tuple2<List<GroupMemberResponse>, List<TenantMemberResponse>>> groupsAndTenantsMono =
+        Mono<Tuple2<List<GroupMemberResp>, List<TenantMemberResponse>>> groupsAndTenantsMono =
                 Mono.zipDelayError(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
         return groupsAndTenantsMono.doOnNext(tuple2 -> {
             userDetails.setGroups(new HashSet<>(tuple2.getT1()));
@@ -207,13 +208,13 @@ public class SecurityManager extends AbstractDatabase
      * with user auditor context before being collected and sorted into a list.
      *
      * @param userCode The unique code identifying the user whose groups are to be loaded.
-     * @return A Mono emitting a sorted list of {@link GroupMemberResponse} representing the user's group memberships,
+     * @return A Mono emitting a sorted list of {@link GroupMemberResp} representing the user's group memberships,
      * once the asynchronous operation completes successfully.
      */
-    private Mono<List<GroupMemberResponse>> loadGroups(String userCode) {
-        return this.queryWithCache("USER_GROUPS-" + userCode,
-                        QUERY_GROUP_MEMBERS_SQL, Map.of("userCode", userCode), GroupMemberResponse.class)
-                .collectSortedList();
+    private Mono<List<GroupMemberResp>> loadGroups(String userCode) {
+        QUERY_GROUP_MEMBERS_FRAGMENT.put("userCode", userCode);
+        return this.queryWithCache("USER_GROUPS-" + userCode, QUERY_GROUP_MEMBERS_FRAGMENT.querySql(),
+                QUERY_GROUP_MEMBERS_FRAGMENT, GroupMemberResp.class).collectSortedList();
     }
 
     /**
@@ -225,9 +226,9 @@ public class SecurityManager extends AbstractDatabase
      * @return A Mono that, when subscribed to, emits a sorted list of {@link TenantMemberResponse} objects representing the tenant members.
      */
     private Mono<List<TenantMemberResponse>> loadTenants(String userCode) {
-        return this.queryWithCache("USER_TENANTS-" + userCode,
-                        QUERY_TENANT_MEMBERS_SQL, Map.of("userCode", userCode), TenantMemberResponse.class)
-                .collectSortedList();
+        QUERY_TENANT_MEMBERS_FRAGMENT.put("userCode", userCode);
+        return this.queryWithCache("USER_TENANTS-" + userCode, QUERY_TENANT_MEMBERS_FRAGMENT.querySql(),
+                QUERY_TENANT_MEMBERS_FRAGMENT, TenantMemberResponse.class).collectSortedList();
     }
 
     /**
@@ -251,9 +252,9 @@ public class SecurityManager extends AbstractDatabase
      * @return A Flux emitting GrantedAuthority instances representing the authorities assigned to the user.
      */
     private Flux<GrantedAuthority> getAuthorities(String userCode) {
-        return this.queryWithCache("USER_AUTHORITIES-" + userCode,
-                        QUERY_USER_AUTHORITY_SQL, Map.of("userCode", userCode), UserAuthority.class)
-                .cast(GrantedAuthority.class);
+        QUERY_USER_AUTHORITY_FRAGMENT.put("userCode", userCode);
+        return this.queryWithCache("USER_AUTHORITIES-" + userCode, QUERY_USER_AUTHORITY_FRAGMENT.querySql(),
+                QUERY_USER_AUTHORITY_FRAGMENT, UserAuthority.class).cast(GrantedAuthority.class);
     }
 
     /**
@@ -263,9 +264,9 @@ public class SecurityManager extends AbstractDatabase
      * @return A {@link Flux} emitting {@link GrantedAuthority} instances representing the authorities granted to the group.
      */
     private Flux<GrantedAuthority> getGroupAuthorities(String userCode) {
-        return this.queryWithCache("GROUP_AUTHORITIES-" + userCode,
-                        QUERY_GROUP_AUTHORITY_SQL, Map.of("userCode", userCode), GroupAuthority.class)
-                .cast(GrantedAuthority.class);
+        QUERY_GROUP_AUTHORITY_FRAGMENT.put("userCode", userCode);
+        return this.queryWithCache("GROUP_AUTHORITIES-" + userCode, QUERY_GROUP_AUTHORITY_FRAGMENT.querySql(),
+                QUERY_GROUP_AUTHORITY_FRAGMENT, GroupAuthority.class).cast(GrantedAuthority.class);
     }
 
     /**

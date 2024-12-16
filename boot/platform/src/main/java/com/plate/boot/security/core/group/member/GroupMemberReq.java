@@ -19,7 +19,7 @@ import java.util.Set;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class GroupMemberRequest extends GroupMember {
+public class GroupMemberReq extends GroupMember {
 
     private Set<String> users;
 

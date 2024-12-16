@@ -44,11 +44,11 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     public static QueryFragment withNew() {
-        return withMap(25, 0, Map.of());
+        return withMap(Map.of());
     }
 
     public static QueryFragment withMap(Map<String, Object> params) {
-        return new QueryFragment(25, 0, params);
+        return new QueryFragment(Integer.MAX_VALUE, 0, params);
     }
 
     public static QueryFragment withMap(int size, long offset, Map<String, Object> params) {
@@ -56,7 +56,7 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     public static QueryFragment of(QueryFragment params) {
-        return of(25, 0, params);
+        return of(Integer.MAX_VALUE, 0, params);
     }
 
     public static QueryFragment of(int size, long offset, QueryFragment params) {
