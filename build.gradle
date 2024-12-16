@@ -36,17 +36,17 @@ configure(subprojects - project(":boot")) { project ->
         ]
         buildWorkspace {
             bind {
-                source = "/home/runner/work/plate/plate/.gradle/build/cache-${rootProject.name}-${project.name}.work"
+                source = "/tmp/cache-${rootProject.name}-${project.name}.work"
             }
         }
         buildCache {
             bind {
-                source = "/home/runner/work/plate/plate/.gradle/build/cache-${rootProject.name}-${project.name}.build"
+                source = "/tmp/cache-${rootProject.name}-${project.name}.build"
             }
         }
         launchCache {
             bind {
-                source = "/home/runner/work/plate/plate/.gradle/build/cache-${rootProject.name}-${project.name}.launch"
+                source = "/tmp/cache-${rootProject.name}-${project.name}.launch"
             }
         }
     }
