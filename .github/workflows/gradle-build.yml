@@ -16,11 +16,14 @@ env:
   DOCKER_REGISTRY: alexbob
 jobs:
   boot-build-image:
-    name: Boot build image on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        platform:
+          - linux/amd64
+          - linux/arm/v6
+          - linux/arm/v7
+          - linux/arm64
     permissions:
       contents: read
       packages: write
@@ -74,6 +77,7 @@ jobs:
       - name: Build and Push Platform
         uses: docker/build-push-action@v6
         with:
+          platforms: ${{ matrix.platform }}
           context: ./boot/platform
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
