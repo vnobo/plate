@@ -105,6 +105,12 @@ public class QueryFragment extends HashMap<String, Object> {
         return this;
     }
 
+    /**
+     * Merges the given order clause with the existing one.
+     *
+     * @param order the order
+     * @return this
+     */
     public QueryFragment mergeOrder(StringJoiner order) {
         orderSql.merge(order);
         return this;
