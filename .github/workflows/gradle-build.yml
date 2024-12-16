@@ -16,7 +16,11 @@ env:
   DOCKER_REGISTRY: alexbob
 jobs:
   boot-build-image:
-    runs-on: ubuntu-latest
+    name: Boot build image on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
     permissions:
       contents: read
       packages: write
