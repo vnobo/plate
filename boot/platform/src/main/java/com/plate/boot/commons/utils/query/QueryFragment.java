@@ -83,6 +83,12 @@ public class QueryFragment extends HashMap<String, Object> {
         return this;
     }
 
+    /**
+     * Adds an ORDER BY clause to the query.
+     *
+     * @param order the order
+     * @return this
+     */
     public QueryFragment addOrder(CharSequence order) {
         orderSql.add(order);
         return this;
