@@ -8,6 +8,9 @@ name: Gradle Build Image
 run-name: ${{ github.actor }} is Build Boot Image Actions
 on:
   push:
+    branches:
+      - 'main'
+      - 'dev'
     tags:
       - 'v*'
   release:
@@ -16,9 +19,9 @@ env:
   GITHUB_REGISTRY: ghcr.io/${{ github.actor }}
   DOCKER_REGISTRY: docker.io/alexbob
   tags: |
-    type=semver,pattern={{version}}
+    type=semver,pattern={{version}},value=v0.0.2
     type=semver,pattern={{major}}.{{minor}}
-    type=semver,pattern={{major}}
+    type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
     type=ref,event=tag
 jobs:
   boot-build-image:
@@ -43,12 +46,6 @@ jobs:
           java-version: '21'
           distribution: 'liberica'
           cache: 'gradle'
-          cache-dependency-path: | # optional
-            *.gradle*
-            **/gradle-wrapper.properties
-            /tmp/*.work
-            /tmp/*.build
-            /tmp/*.launch
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
