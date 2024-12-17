@@ -17,6 +17,11 @@ env:
 jobs:
   boot-build-image:
     runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     permissions:
       contents: read
       packages: write
@@ -34,18 +39,24 @@ jobs:
           distribution: 'liberica'
           native-image-job-reports: 'true'
           cache: 'gradle'
-#     - name: Set up QEMU
-#        uses: docker/setup-qemu-action@v3
-#        with:
-#          platforms: linux/amd64,linux/arm64
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: network=host
 
       - name: Execute Gradle Plate bootBuildImage
         run: |
           chmod +x ./gradlew
-          ./gradlew bootBuildImage --imagePlatform=linux/amd64
-          ./gradlew bootBuildImage --imagePlatform=linux/arm64
+          ./gradlew bootBuildImage --imagePlatform=linux/amd64 --network=host --publishImage=true
+          ./gradlew bootBuildImage --imagePlatform=linux/arm64 --network=host --publishImage=true
+      - name: Inspect
+        run: |
+          docker buildx imagetools inspect localhost:5000/plate-oauth2:latest
+          docker buildx imagetools inspect localhost:5000/plate-platform:latest
 
       - name: Log into registry ${{ env.GITHUB_REGISTRY }}
         if: github.event_name != 'pull_request'
