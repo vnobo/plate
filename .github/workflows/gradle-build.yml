@@ -8,7 +8,6 @@ name: Gradle Build Image
 run-name: ${{ github.actor }} is Build Boot Image Actions
 on:
   push:
-    branches: [ "main","dev" ]
     tags:
       - 'v*'
   release:
