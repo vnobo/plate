@@ -9,11 +9,18 @@ run-name: ${{ github.actor }} is Build Boot Image Actions
 on:
   push:
     branches: [ "main","dev" ]
+    tags:
+      - 'v*'
   release:
     types: [ created ]
 env:
   GITHUB_REGISTRY: ghcr.io/${{ github.actor }}
   DOCKER_REGISTRY: docker.io/alexbob
+  tags: |
+    type=semver,pattern={{version}}
+    type=semver,pattern={{major}}.{{minor}}
+    type=semver,pattern={{major}}
+    type=ref,event=tag
 jobs:
   boot-build-image:
     runs-on: ubuntu-latest
@@ -87,11 +94,7 @@ jobs:
           images: |
             ${{ env.GITHUB_REGISTRY }}/plate-platform
             ${{ env.DOCKER_REGISTRY }}/plate-platform
-          tags: |
-            type=semver,pattern={{version}},value=v3.4.0
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=ref,event=branch
+          tags: ${{ env.tags }}
 
       - name: Build and Push Platform
         uses: docker/build-push-action@v6
@@ -111,11 +114,7 @@ jobs:
           images: |
             ${{ env.GITHUB_REGISTRY }}/plate-oauth2
             ${{ env.DOCKER_REGISTRY }}/plate-oauth2
-          tags: |
-            type=semver,pattern={{version}},value=v3.4.0
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=ref,event=branch
+          tags: ${{ env.tags }}
 
       - name: Build and Push Oauth2
         uses: docker/build-push-action@v6
