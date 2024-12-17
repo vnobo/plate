@@ -46,7 +46,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+          platforms: linux/amd64,linux/arm64
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -59,8 +59,6 @@ jobs:
           chmod +x ./gradlew
           ./gradlew bootBuildImage --imagePlatform=linux/amd64 --network=host --publishImage
           ./gradlew bootBuildImage --imagePlatform=linux/arm64 --network=host --publishImage
-          ./gradlew bootBuildImage --imagePlatform=linux/arm/v6 --network=host --publishImage
-          ./gradlew bootBuildImage --imagePlatform=linux/arm/v7 --network=host --publishImage
       - name: Inspect
         run: |
           docker buildx imagetools inspect localhost:5000/plate-oauth2:latest
@@ -98,7 +96,7 @@ jobs:
       - name: Build and Push Platform
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+          platforms: linux/amd64,linux/arm64
           context: ./boot/platform
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
@@ -122,7 +120,7 @@ jobs:
       - name: Build and Push Oauth2
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
+          platforms: linux/amd64,linux/arm64
           context: ./boot/oauth2
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.oauth2.outputs.tags }}
