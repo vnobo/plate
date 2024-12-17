@@ -43,7 +43,6 @@ public final class QueryHelper {
         return query(object, pageable, List.of(), prefix);
     }
 
-    @SuppressWarnings("unchecked")
     public static QueryFragment query(Object object, Pageable pageable, Collection<String> skipKeys, String prefix) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         Map<String, Object> filterMap = ObjectUtils.isEmpty(objectMap) ? Map.of() :
@@ -58,35 +57,41 @@ public final class QueryHelper {
             return queryFragment;
         }
 
-        String queryKey = "query";
-        if (objectMap.containsKey(queryKey)) {
-            Map<String, Object> jsonMap = (Map<String, Object>) objectMap.get(queryKey);
-            QueryFragment jsonQueryFragment = QueryJsonHelper.queryJson(jsonMap, prefix);
-            queryFragment.mergeWhere(jsonQueryFragment.getWhereSql());
-            queryFragment.putAll(jsonQueryFragment);
-        }
+        processQueryKey(queryFragment, objectMap, prefix);
+        processSecurityCodeKey(queryFragment, objectMap, skipKeys, prefix);
+        processSearchKey(queryFragment, objectMap, prefix);
 
-        String securityCodeKey = "securityCode";
-        if (!skipKeys.contains(securityCodeKey) && objectMap.containsKey(securityCodeKey)) {
-            String key = "tenant_code";
-            if (StringUtils.hasLength(prefix)) {
-                key = prefix + "." + key;
-            }
-            queryFragment.addWhere(key + " LIKE :securityCode");
-            queryFragment.put("securityCode", objectMap.get(securityCodeKey));
-        }
-
-        String searchKey = "search";
-        if (objectMap.containsKey(searchKey) && !ObjectUtils.isEmpty(objectMap.get(searchKey))) {
-            String textSearch = (String) objectMap.get(searchKey);
-            queryFragment.addColumn("TS_RANK_CD(text_search, queryTextSearch) AS rank");
-            queryFragment.addQuery(",TO_TSQUERY('chinese',:textSearch) queryTextSearch");
-            queryFragment.addWhere("text_search @@ TO_TSQUERY('chinese',:textSearch)");
-            queryFragment.put("textSearch", textSearch);
-        }
         return queryFragment;
     }
 
+    @SuppressWarnings("unchecked")
+    private static void processQueryKey(QueryFragment queryFragment, Map<String, Object> objectMap, String prefix) {
+        if (objectMap.containsKey("query")) {
+            var jsonMap = (Map<String, Object>) objectMap.get("query");
+            var jsonQueryFragment = QueryJsonHelper.queryJson(jsonMap, prefix);
+            queryFragment.mergeWhere(jsonQueryFragment.getWhereSql());
+            queryFragment.putAll(jsonQueryFragment);
+        }
+    }
+
+    private static void processSecurityCodeKey(QueryFragment queryFragment, Map<String, Object> objectMap, Collection<String> skipKeys, String prefix) {
+        if (!skipKeys.contains("securityCode") && objectMap.containsKey("securityCode")) {
+            var key = StringUtils.hasLength(prefix) ? prefix + ".tenant_code" : "tenant_code";
+            queryFragment.addWhere(key + " LIKE :securityCode");
+            queryFragment.put("securityTypeCode", objectMap.get("securityCode"));
+        }
+    }
+
+    private static void processSearchKey(QueryFragment queryFragment, Map<String, Object> objectMap, String prefix) {
+        if (objectMap.containsKey("search") && !ObjectUtils.isEmpty(objectMap.get("search"))) {
+            var textSearch = (String) objectMap.get("search");
+            var column = StringUtils.hasLength(prefix) ? prefix + ".text_search" : "text_search";
+            queryFragment.addColumn("TS_RANK_CD(" + column + ", queryTextSearch) AS rank");
+            queryFragment.addQuery(",TO_TSQUERY('chinese',:textSearch) queryTextSearch");
+            queryFragment.addWhere(column + " @@ TO_TSQUERY('chinese',:textSearch)");
+            queryFragment.put("textSearch", textSearch);
+        }
+    }
 
     public static void applySort(QueryFragment queryFragment, Sort sort, String prefix) {
         sort = QueryJsonHelper.transformSortForJson(sort);
@@ -112,7 +117,7 @@ public final class QueryHelper {
      * If the object does not have a table annotation, it throws a QueryException.
      *
      * @param queryFragment The QueryFragment to which the query SQL will be applied.
-     * @param object The object containing the table annotation and data for the query.
+     * @param object        The object containing the table annotation and data for the query.
      * @throws QueryException If the object does not have a table annotation.
      */
     public static void applyQuerySql(QueryFragment queryFragment, Object object) {
