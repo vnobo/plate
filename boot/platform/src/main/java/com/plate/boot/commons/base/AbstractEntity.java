@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.security.core.UserAuditor;
 import lombok.Data;
 import org.springframework.data.annotation.*;
+import org.springframework.data.relational.core.mapping.InsertOnlyProperty;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -56,6 +57,7 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
      * use User.class code property
      */
     @CreatedBy
+    @InsertOnlyProperty
     protected UserAuditor creator;
 
     /**
@@ -75,6 +77,7 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
      * Data entity create time, timestamp column
      */
     @CreatedDate
+    @InsertOnlyProperty
     protected LocalDateTime createdTime;
 
     /**
