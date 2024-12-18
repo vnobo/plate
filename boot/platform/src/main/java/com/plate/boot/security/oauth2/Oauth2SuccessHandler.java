@@ -17,8 +17,6 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 import static com.plate.boot.config.SessionConfiguration.XML_HTTP_REQUEST;
 import static com.plate.boot.config.SessionConfiguration.X_REQUESTED_WITH;
 
@@ -66,8 +64,9 @@ public class Oauth2SuccessHandler extends RedirectServerAuthenticationSuccessHan
     @Override
     public Mono<Void> onAuthenticationSuccess(WebFilterExchange webFilterExchange, Authentication authentication) {
         if (!(authentication instanceof OAuth2AuthenticationToken)) {
-            throw RestServerException.withMsg("Authentication token must be an instance of OAuth2AuthenticationToken",
-                    List.of());
+            throw RestServerException.withMsg(
+                    "Authentication token must be an instance of OAuth2AuthenticationToken",
+                    new TypeNotPresentException("OAuth2AuthenticationToken", null));
         }
 
         ServerWebExchange exchange = webFilterExchange.getExchange();
