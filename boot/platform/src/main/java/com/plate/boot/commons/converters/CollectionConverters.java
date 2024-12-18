@@ -96,8 +96,7 @@ public class CollectionConverters implements InitializingBean {
                 return ContextUtils.OBJECT_MAPPER.readValue(source.asString(), new TypeReference<>() {
                 });
             } catch (JsonProcessingException e) {
-                throw JsonException.withMsg("Json converter to collection error",
-                        "Object Json converter to Collection error, message: " + e.getMessage());
+                throw JsonException.withMsg("Object Json converter to Collection error", e);
             }
         }
     }
@@ -120,7 +119,7 @@ public class CollectionConverters implements InitializingBean {
 
         /**
          * Converts a given collection into its JSON representation.
-         *
+         * <p>
          * This method takes a collection of any type and attempts to serialize it into a JSON object
          * using the Jackson {@link ObjectMapper}. If the serialization process encounters a
          * {@link JsonProcessingException}, it is caught and rethrown as a {@link JsonException} with a
@@ -135,8 +134,7 @@ public class CollectionConverters implements InitializingBean {
             try {
                 return Json.of(ContextUtils.OBJECT_MAPPER.writeValueAsBytes(source));
             } catch (JsonProcessingException e) {
-                throw JsonException.withMsg("Collection converter to Json error",
-                        "Collection converter to Json error, message: " + e.getMessage());
+                throw JsonException.withMsg("Collection converter to Json error", e);
             }
         }
     }
