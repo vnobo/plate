@@ -62,8 +62,9 @@ public class MenusService extends AbstractDatabase {
         var existsMono = this.entityTemplate.exists(Query.query(criteria), Menu.class);
         existsMono = existsMono.filter(isExists -> !isExists);
         existsMono = existsMono.switchIfEmpty(Mono.error(RestServerException
-                .withMsg("Add menu[" + request.getName() + "] is exists!",
-                        "The menu already exists, please try another name. is params: " + criteria)));
+                .withMsg("Add menu[" + request.getName() + "] is exists",
+                        new IllegalArgumentException("The menu already exists, please try another name. is params: "
+                                + criteria))));
         return existsMono.flatMap((b) -> this.operate(request));
     }
 
@@ -71,8 +72,9 @@ public class MenusService extends AbstractDatabase {
         log.debug("Menu modify request: {}", request);
         var oldMunuMono = this.menusRepository.findByCode(request.getCode())
                 .switchIfEmpty(Mono.error(RestServerException.withMsg(
-                        "Modify menu [" + request.getName() + "] is empty!",
-                        "The menu does not exist, please choose another name. is code: " + request.getCode())));
+                        "Modify menu [" + request.getName() + "] is empty",
+                        new IllegalArgumentException("The menu does not exist, please choose another name. is code: "
+                                + request.getCode()))));
         oldMunuMono = oldMunuMono.flatMap(old -> {
             request.setId(old.getId());
             request.setAuthority(old.getAuthority());
