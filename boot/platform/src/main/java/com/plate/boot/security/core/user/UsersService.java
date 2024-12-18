@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -92,7 +93,7 @@ public class UsersService extends AbstractDatabase {
         return this.usersRepository.existsByUsernameIgnoreCase(request.getUsername()).flatMap(exists -> {
             if (exists) {
                 return Mono.error(RestServerException.withMsg("User already exists",
-                        "Username [" + request.getUsername() + "] already exists!"));
+                        new UsernameNotFoundException("User by username [" + request.getUsername() + "] already exists")));
             }
             return this.operate(request);
         });
@@ -111,9 +112,10 @@ public class UsersService extends AbstractDatabase {
      * @return A Mono that, when subscribed to, emits the updated User entity after modification or throws an exception if the user was not found.
      */
     public Mono<User> modify(UserRequest request) {
-        return this.usersRepository.findByUsername(request.getUsername())
-                .switchIfEmpty(Mono.error(RestServerException.withMsg(
-                        "User not found!", "User by username [" + request.getUsername() + "] not found!")))
+        Mono<User> userFoundMono = Mono.defer(() -> Mono.error(RestServerException
+                .withMsg("User [" + request.getUsername() + "] not found",
+                        new UsernameNotFoundException("User by username [" + request.getUsername() + "] not found!"))));
+        return this.usersRepository.findByUsername(request.getUsername()).switchIfEmpty(userFoundMono)
                 .flatMap(user -> {
                     request.setId(user.getId());
                     request.setCode(user.getCode());
@@ -172,8 +174,6 @@ public class UsersService extends AbstractDatabase {
         } else {
             assert user.getId() != null;
             return this.usersRepository.findById(user.getId())
-                    .switchIfEmpty(Mono.error(RestServerException.withMsg("User not found",
-                            "User by id [" + user.getId() + "] not found!")))
                     .flatMap(old -> {
                         user.setCreatedTime(old.getCreatedTime());
                         user.setPassword(old.getPassword());

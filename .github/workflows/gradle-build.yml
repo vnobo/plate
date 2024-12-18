@@ -19,8 +19,8 @@ env:
   GITHUB_REGISTRY: ghcr.io/${{ github.actor }}
   DOCKER_REGISTRY: docker.io/alexbob
   tags: |
-    type=semver,pattern={{version}},value=v0.0.2
-    type=semver,pattern={{major}}.{{minor}}
+    type=semver,pattern={{version}},value=v0.0.3
+    type=semver,pattern={{major}}.{{minor}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
     type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
     type=ref,event=tag
 jobs:

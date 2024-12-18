@@ -147,12 +147,12 @@ public final class QueryJsonHelper {
     private static QueryFragment buildJsonCondition(Map.Entry<String, Object> entry, String prefix) {
         String[] keys = StringUtils.delimitedListToStringArray(entry.getKey(), ".");
         if (keys.length < 2) {
-            throw QueryException.withMsg("Json query column path [query[" + entry.getKey() + "]] error",
-                    List.of("Json path example: extend.username",
-                            "Request query params:",
-                            "query[extend.usernameLike]=aa",
-                            "query[extend.age]=23",
-                            "query[extend.nameIn]=aa,bb,cc",
+            throw QueryException.withError("Json query column path [query[" + entry.getKey() + "]] error",
+                    new Throwable("Json path example: extend.username," +
+                            "Request query params:" +
+                            "query[extend.usernameLike]=aa," +
+                            "query[extend.age]=23," +
+                            "query[extend.nameIn]=aa,bb,cc," +
                             "query[extend.codeEq]=123456"
                     ));
         }

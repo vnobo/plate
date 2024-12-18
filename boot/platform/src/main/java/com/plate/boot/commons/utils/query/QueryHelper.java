@@ -76,9 +76,9 @@ public final class QueryHelper {
 
     private static void processSecurityCodeKey(QueryFragment queryFragment, Map<String, Object> objectMap, Collection<String> skipKeys, String prefix) {
         if (!skipKeys.contains("securityCode") && objectMap.containsKey("securityCode")) {
-            var key = StringUtils.hasLength(prefix) ? prefix + ".tenant_code" : "tenant_code";
-            queryFragment.addWhere(key + " LIKE :securityCode");
-            queryFragment.put("securityTypeCode", objectMap.get("securityCode"));
+            var column = StringUtils.hasLength(prefix) ? prefix + ".tenant_code" : "tenant_code";
+            queryFragment.addWhere(column + " LIKE :securityCode");
+            queryFragment.put("securityCode", objectMap.get("securityCode"));
         }
     }
 
@@ -88,7 +88,7 @@ public final class QueryHelper {
             var column = StringUtils.hasLength(prefix) ? prefix + ".text_search" : "text_search";
             queryFragment.addColumn("TS_RANK_CD(" + column + ", queryTextSearch) AS rank");
             queryFragment.addQuery(",TO_TSQUERY('chinese',:textSearch) queryTextSearch");
-            queryFragment.addWhere(column + " @@ TO_TSQUERY('chinese',:textSearch)");
+            queryFragment.addWhere(column + "@@TO_TSQUERY('chinese',:textSearch)");
             queryFragment.put("textSearch", textSearch);
         }
     }
@@ -126,7 +126,7 @@ public final class QueryHelper {
 
         if (ObjectUtils.isEmpty(table)) {
             throw QueryException.withMsg("Table annotation not found",
-                    "This object does not have a table annotation");
+                    new IllegalArgumentException("This object does not have a table annotation"));
         }
 
         String tableName = StringUtils.hasLength(table.value()) ? table.value() : objectClass.getName();

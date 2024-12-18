@@ -1,5 +1,6 @@
 package com.plate.boot.config;
 
+import com.nimbusds.oauth2.sdk.dpop.verifiers.AccessTokenValidationException;
 import com.plate.boot.commons.exception.RestServerException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +36,7 @@ import java.util.regex.Pattern;
  */
 @Configuration(proxyBeanMethods = false)
 @EnableRedisIndexedWebSession
-public class SessionConfiguration{
+public class SessionConfiguration {
 
     public static final String HEADER_SESSION_ID_NAME = "X-Auth-Token";
     public static final String X_REQUESTED_WITH = "X-Requested-With";
@@ -112,7 +113,7 @@ public class SessionConfiguration{
         }
 
         private static RestServerException invalidTokenError(String message) {
-            return RestServerException.withMsg("Bearer token is malformed!", message);
+            return RestServerException.withMsg(message, new AccessTokenValidationException("Bearer token is malformed"));
         }
 
         @Override
@@ -210,7 +211,8 @@ public class SessionConfiguration{
             }
             Matcher matcher = AUTHORIZATION_PATTERN.matcher(authorization);
             if (!matcher.matches()) {
-                throw invalidTokenError("bearer is malformed.");
+                throw invalidTokenError("Extracts the bearer token from the" +
+                        " 'Authorization' header within the provided HTTP headers.");
             }
             return matcher.group("token");
         }

@@ -1,11 +1,13 @@
 package com.plate.boot.commons.exception;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
+import lombok.Getter;
+import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.web.server.ServerErrorException;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 
 /**
  * Represents a custom exception class for handling REST server errors, which includes an error message, a status code,
@@ -22,29 +24,37 @@ import java.io.Serializable;
  *     <li>Convenience static factory methods for instantiation.</li>
  * </ul>
  */
-@Data
+@Getter
 @EqualsAndHashCode(callSuper = true)
-public class RestServerException extends RuntimeException implements Serializable {
+public class RestServerException extends ServerErrorException {
 
-    protected final HttpStatusCode statusCode;
-    protected final Object errors;
 
-    public RestServerException(HttpStatusCode code, String message, Object msg) {
-        super(message);
-        this.statusCode = code;
-        this.errors = msg;
+    public RestServerException(String reason, Throwable cause) {
+        super(reason, cause);
     }
 
-    public RestServerException(String message, Throwable throwable) {
-        this(HttpStatus.INTERNAL_SERVER_ERROR, message, throwable.fillInStackTrace());
+    public RestServerException(String reason, Method handlerMethod, Throwable cause) {
+        super(reason, handlerMethod, cause);
     }
 
-    public static RestServerException withMsg(String message, Object errors) {
-        return withMsg(HttpStatusCode.valueOf(500), message, errors);
+    public RestServerException(String reason, MethodParameter parameter, Throwable cause) {
+        super(reason, parameter, cause);
     }
 
-    public static RestServerException withMsg(HttpStatusCode code, String message, Object errors) {
-        return new RestServerException(code, message, errors);
+    public static RestServerException withMsg(String reason, Throwable cause) {
+        var ex = new RestServerException(reason, cause);
+        ex.setTitle(reason);
+        ex.setDetail(cause.getMessage());
+        ex.setStackTrace(cause.getStackTrace());
+        return ex;
+    }
+
+    public static RestServerException withMsg(String reason, Method handlerMethod, @Nullable Throwable cause) {
+        return new RestServerException(reason, handlerMethod, cause);
+    }
+
+    public static RestServerException withMsg(String reason, MethodParameter parameter, Throwable cause) {
+        return new RestServerException(reason, parameter, cause);
     }
 
 }

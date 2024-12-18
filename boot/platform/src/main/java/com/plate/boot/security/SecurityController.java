@@ -18,7 +18,6 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
- *
  * The SecurityController class is a REST controller responsible for handling security-related endpoints.
  * It manages OAuth2 operations, password changes, and CSRF token retrieval.
  * The class utilizes a WebSession-based security context repository, a security manager, password encoding, and an OAuth2 client repository.
@@ -139,12 +138,14 @@ public class SecurityController {
     public Mono<UserDetails> changePassword(@Valid @RequestBody ChangePasswordRequest request,
                                             Authentication authentication) {
         if (!request.getPassword().equals(request.getNewPassword())) {
-            throw RestServerException.withMsg("Password and newPassword not match", request);
+            throw RestServerException.withMsg("Password and newPassword not match",
+                    new IllegalArgumentException("Password and newPassword not match"));
         }
         String presentedPassword = (String) authentication.getCredentials();
         if (!this.passwordEncoder.matches(presentedPassword, request.getPassword())) {
             throw RestServerException.withMsg(
-                    "Password verification failed, presented password not match", presentedPassword);
+                    "Password verification failed, presented password not match",
+                    new IllegalArgumentException("Password verification failed, presented password not match"));
         }
         String newPassword = this.passwordEncoder.encode(request.getNewPassword());
         UserDetails userDetails = (UserDetails) authentication.getDetails();
