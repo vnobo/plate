@@ -60,18 +60,19 @@ public final class BeanUtils implements InitializingBean {
      *                       or if there is an issue converting the JsonNode to the target class.
      */
     public static <T> T jsonPathToBean(JsonNode json, String path, Class<T> clazz) {
+
+        String[] paths = StringUtils.commaDelimitedListToStringArray(path);
+        StringJoiner pathJoiner = new StringJoiner("/");
+        for (String p : paths) {
+            pathJoiner.add(p);
+        }
+        JsonPointer jsonPointer = JsonPointer.valueOf(pathJoiner.toString());
+        JsonNode valueNode = json.at(jsonPointer);
+        if (valueNode.isMissingNode()) {
+            throw JsonPointerException.withError("Json pointer path error, path: {}" + pathJoiner,
+                    new IllegalArgumentException(pathJoiner + " is not found in the json [" + json + "]"));
+        }
         try {
-            String[] paths = StringUtils.commaDelimitedListToStringArray(path);
-            StringJoiner pathJoiner = new StringJoiner("/");
-            for (String p : paths) {
-                pathJoiner.add(p);
-            }
-            JsonPointer jsonPointer = JsonPointer.valueOf(pathJoiner.toString());
-            JsonNode valueNode = json.at(jsonPointer);
-            if (valueNode.isMissingNode()) {
-                throw JsonPointerException.withMsg("Json pointer path error",
-                        "JsonPointer path is not exist!");
-            }
             return ContextUtils.OBJECT_MAPPER.convertValue(valueNode, clazz);
         } catch (IllegalArgumentException e) {
             throw JsonPointerException.withError("Json pointer covert error", e);
