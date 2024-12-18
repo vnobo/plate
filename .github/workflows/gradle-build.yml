@@ -101,7 +101,9 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Upload Platform Image to Registry
-        run: echo "Upload image ${{ steps.meta.outputs.tag }}:${{ steps.meta.outputs.image_tag }} to registry."
+        run: |
+          echo "Upload images ${{ steps.meta.outputs.tags }} to registry."
+          echo "Upload labels ${{ steps.meta.outputs.labels }} to registry"
 
       - name: Extract oauth2 metadata (tags, labels) for Docker
         id: oauth2
@@ -123,4 +125,6 @@ jobs:
           tags: ${{ steps.oauth2.outputs.tags }}
           labels: ${{ steps.oauth2.outputs.labels }}
       - name: Upload Oauth2 Image to Registry
-        run: echo "Upload image ${{ steps.oauth2.outputs.tag }}:${{ steps.oauth2.outputs.image_tag }} to registry."
+        run: |
+          echo "Upload images ${{ steps.oauth2.outputs.tags }} to registry."
+          echo "Upload labels ${{ steps.oauth2.outputs.labels }} to registry"
