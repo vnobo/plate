@@ -100,6 +100,8 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+      - name: Upload Platform Image to Registry
+        run: echo "Upload image ${{ steps.meta.outputs.tag }}:${{ steps.meta.outputs.image_tag }} to registry."
 
       - name: Extract oauth2 metadata (tags, labels) for Docker
         id: oauth2
@@ -120,4 +122,5 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.oauth2.outputs.tags }}
           labels: ${{ steps.oauth2.outputs.labels }}
-        
+      - name: Upload Oauth2 Image to Registry
+        run: echo "Upload image ${{ steps.oauth2.outputs.tag }}:${{ steps.oauth2.outputs.image_tag }} to registry."
