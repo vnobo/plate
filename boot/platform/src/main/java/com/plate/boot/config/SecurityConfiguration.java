@@ -1,6 +1,5 @@
 package com.plate.boot.config;
 
-import com.plate.boot.commons.ErrorResponse;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.security.oauth2.Oauth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +13,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
@@ -33,6 +33,7 @@ import org.springframework.security.web.server.header.ClearSiteDataServerHttpHea
 import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -179,9 +180,9 @@ public class SecurityConfiguration {
          *
          * @param exchange The server web exchange to evaluate for CSRF protection exclusion.
          * @return A Mono that emits a MatchResult indicating whether the exchange should be ignored for CSRF protection.
-         *         - If the request method is allowed or matches custom criteria, emits MatchResult.notMatch(),
-         *           suggesting the request should be ignored by CSRF protection.
-         *         - Otherwise, emits MatchResult.match() indicating standard CSRF protection should apply.
+         * - If the request method is allowed or matches custom criteria, emits MatchResult.notMatch(),
+         * suggesting the request should be ignored by CSRF protection.
+         * - Otherwise, emits MatchResult.match() indicating standard CSRF protection should apply.
          */
         @Override
         public Mono<MatchResult> matches(ServerWebExchange exchange) {
@@ -208,7 +209,6 @@ public class SecurityConfiguration {
      * <ul>
      *   <li>{@link #commence(ServerWebExchange, AuthenticationException)}: Handles the commencement of the authentication failure handling.</li>
      *   <li>{@link #isXmlHttpRequest(String)}: Determines if the request is an XMLHttpRequest.</li>
-     *   <li>{@link #handleXmlHttpRequestFailure(ServerWebExchange, AuthenticationException)}: Manages the response for failed AJAX requests.</li>
      *   <li>{@link #createErrorResponse(ServerWebExchange, AuthenticationException)}: Constructs an error response object for AJAX request failures.</li>
      * </ul>
      */
@@ -220,16 +220,27 @@ public class SecurityConfiguration {
          * Determines the nature of the request and delegates to the appropriate failure handling method.
          *
          * @param exchange The current server web exchange containing the request and response objects.
-         * @param e The authentication exception that triggered this failure handling.
+         * @param e        The authentication exception that triggered this failure handling.
          * @return A Mono that, when subscribed to, signals the completion of the failure handling, typically without a value (Void).
          */
         @Override
         public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException e) {
             ServerHttpRequest request = exchange.getRequest();
             String requestedWith = request.getHeaders().getFirst(X_REQUESTED_WITH);
-            log.error("认证失败! 信息: {}", e.getMessage());
+            log.error("Authentication Failure! Information: {}", e.getMessage());
             if (isXmlHttpRequest(requestedWith)) {
-                return handleXmlHttpRequestFailure(exchange, e);
+                return Mono.defer(() -> {
+                    ServerHttpResponse response = exchange.getResponse();
+                    var errorResponse = createErrorResponse(exchange, e);
+                    response.setStatusCode(errorResponse.getStatusCode());
+                    response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+                    var body = BeanUtils.objectToBytes(errorResponse.getBody());
+                    var dataBufferFactory = response.bufferFactory();
+                    var bodyBuffer = dataBufferFactory.wrap(body);
+
+                    return response.writeAndFlushWith(Flux.just(bodyBuffer).windowUntilChanged())
+                            .doOnError((err) -> DataBufferUtils.release(bodyBuffer));
+                });
             }
             return super.commence(exchange, e);
         }
@@ -246,40 +257,19 @@ public class SecurityConfiguration {
         }
 
         /**
-         * Handles the failure case of an XML HTTP request by setting the response status to UNAUTHORIZED,
-         * preparing an error response in JSON format, and sending it back to the client.
-         *
-         * @param exchange The current server web exchange containing the request and response objects.
-         * @param e The authentication exception that caused the request handling failure.
-         * @return A Mono that, when subscribed to, completes after writing the error response to the client
-         *         and handling any potential errors during the write operation by releasing allocated resources.
-         */
-        private Mono<Void> handleXmlHttpRequestFailure(ServerWebExchange exchange, AuthenticationException e) {
-            var response = exchange.getResponse();
-            response.setStatusCode(HttpStatus.UNAUTHORIZED);
-            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-
-            ErrorResponse errorResponse = createErrorResponse(exchange, e);
-            var body = BeanUtils.objectToBytes(errorResponse);
-            var dataBufferFactory = response.bufferFactory();
-            var bodyBuffer = dataBufferFactory.wrap(body);
-
-            return response.writeAndFlushWith(Flux.just(bodyBuffer).windowUntilChanged())
-                    .doOnError((error) -> DataBufferUtils.release(bodyBuffer));
-        }
-
-        /**
          * Constructs an error response object for authentication failures.
          *
          * @param exchange The ServerWebExchange associated with the request that triggered the error.
-         * @param e        The AuthenticationException that caused the error response to be generated.
+         * @param ex       The AuthenticationException that caused the error response to be generated.
          * @return An ErrorResponse instance representing the authentication failure, including details
-         *         from the original request and the exception message.
+         * from the original request and the exception message.
          */
-        private ErrorResponse createErrorResponse(ServerWebExchange exchange, AuthenticationException e) {
-            return ErrorResponse.of(exchange.getRequest().getId(), HttpStatus.UNAUTHORIZED.value(),
-                    exchange.getRequest().getPath().value(),
-                    "认证失败,检查你的用户名,密码是否正确或安全密钥是否过期!", List.of(e.getMessage()));
+        private ErrorResponse createErrorResponse(ServerWebExchange exchange, AuthenticationException ex) {
+            ErrorResponse.Builder builder = ErrorResponse.builder(ex, HttpStatus.UNAUTHORIZED, "Authentication Failure");
+            return builder.headers(httpHeaders -> httpHeaders
+                            .addAll(exchange.getRequest().getHeaders()))
+                    .title("Authentication Failure").type(exchange.getRequest().getURI())
+                    .detail(ex.getMessage()).build();
         }
     }
 }
