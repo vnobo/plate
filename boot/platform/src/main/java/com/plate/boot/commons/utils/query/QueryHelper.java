@@ -213,7 +213,8 @@ public final class QueryHelper {
      */
     public static QueryFragment query(Object object, Pageable pageable, Collection<String> skipKeys, String prefix) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
-        Map<String, Object> filterMap = Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && !skipKeys.contains(key));
+        Map<String, Object> filterMap = ObjectUtils.isEmpty(objectMap) ? Map.of() :
+                Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && !skipKeys.contains(key));
 
         QueryFragment queryFragment = QueryFragment.withMap(pageable.getPageSize(), pageable.getOffset(), filterMap);
         applySort(queryFragment, pageable.getSort(), prefix);
@@ -225,7 +226,6 @@ public final class QueryHelper {
             processSecurityCodeKey(queryFragment, objectMap, skipKeys, prefix);
             processSearchKey(queryFragment, objectMap, prefix);
         }
-
         return queryFragment;
     }
 
