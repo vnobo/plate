@@ -1,23 +1,23 @@
 ## Project Structure
 
-The project is structured in a typical Spring Boot fashion, with the main application entry point in the
-`com.plate.boot` package. It includes various sub-packages for different concerns such as security, relational data
-handling, and common utilities.
+The project is organized in a typical Spring Boot manner, with the main application entry point located in the
+`com.plate.boot` package. It contains various sub-packages dealing with different aspects such as security, relational
+data handling, and common utilities.
 
 ## Features
 
-The application includes the following key features:
+The application encompasses the following key features:
 
-- **User Management**: Handles user-related operations and authentication.
-- **Security**: Implements security configurations and OAuth2 support.
-- **Logging**: Manages application logs efficiently with pagination and cleanup.
+- **User Management**: Deals with user-related operations and authentication.
+- **Security**: Implements security configurations and provides OAuth2 support.
+- **Logging**: Effectively manages application logs with pagination and cleanup functions.
 - **Menus**: Manages menu items and their associated permissions.
-- **Tenant Support**: Provides multi-tenancy capabilities.
-- **Caching**: Utilizes caching mechanisms to improve performance.
+- **Tenant Support**: Offers multi-tenancy capabilities.
+- **Caching**: Utilizes caching mechanisms to enhance performance.
 
 ## Dependencies
 
-The project relies on several dependencies, including:
+The project depends on several dependencies, including:
 
 - Spring Boot 3.x.x
 - Spring Data R2DBC
@@ -30,16 +30,16 @@ The project relies on several dependencies, including:
 To run the application, you need to have Java 17 and Maven installed. Then, you can start the application by running the
 following command from the root directory of the project:
 
-This will start the Spring Boot application, and it should be accessible at `http://localhost:8080`.
+This will launch the Spring Boot application, and it should be accessible at `http://localhost:8080`.
 
 ## API Documentation
 
-The API documentation is available using Swagger UI. Once the application is running, you can access the Swagger UI at:
+The API documentation can be accessed via Swagger UI. Once the application is running, you can visit the Swagger UI at:
 
 ## Contributing
 
-Contributions are welcome! If you find any issues or want to add new features, feel free to open an issue or submit a
-pull request.
+Contributions are welcome! If you come across any issues or wish to add new features, feel free to open an issue or
+submit a pull request.
 
 ## SSL Certificate Generation
 
@@ -51,18 +51,21 @@ pull request.
     keytool -importkeystore -srckeystore plate.p12 -srcstoretype pkcs12 -srcalias 1 -destkeystore plate.jks -deststoretype jks -deststorepass 123456 -destalias plate
 ```
 
-### 开发者文档：使用 QueryHelper、QueryJsonHelper 和 QueryFragment
+### Developer Documentation: Using QueryHelper, QueryJsonHelper and QueryFragment
 
-#### 1. 概述
+#### 1. Overview
 
-`QueryHelper`、`QueryJsonHelper` 和 `QueryFragment` 是三个工具类，它们共同协作以帮助开发者构建和执行动态 SQL 查询，特别是涉及
-JSON 字段的查询。这些工具类提供了一种安全、灵活的方式来处理数据库查询，减少了 SQL 注入的风险，并简化了查询构建过程。
+`QueryHelper`, `QueryJsonHelper` and `QueryFragment` are three utility classes that work together to assist developers
+in constructing and executing dynamic SQL queries, especially those involving JSON fields. These utility classes offer a
+secure and flexible way to handle database queries, reducing the risk of SQL injection and simplifying the query
+construction process.
 
 #### 2. QueryFragment
 
-`QueryFragment` 是一个核心类，用于构建 SQL 查询的各个部分，包括选择的列、查询条件、排序和分页。
+`QueryFragment` is a core class used for building different parts of an SQL query, including selected columns, query
+conditions, sorting and pagination.
 
-**使用案例：**
+**Usage Example**:
 
 ```java
 QueryFragment queryFragment = QueryFragment.withNew()
@@ -73,16 +76,17 @@ QueryFragment queryFragment = QueryFragment.withNew()
 
 queryFragment.
 
-put("age",18); // 绑定参数
+put("age",18); // Bind parameters
 
-String sqlQuery = queryFragment.querySql(); // 生成 SQL 查询字符串
+String sqlQuery = queryFragment.querySql(); // Generate the SQL query string
 ```
 
 #### 3. QueryHelper
 
-`QueryHelper` 提供了从对象构建 `QueryFragment` 的静态方法，特别是当对象包含分页信息时。
+`QueryHelper` provides static methods to build a `QueryFragment` from an object, especially when the object contains
+pagination information.
 
-**使用案例：**
+**Usage Example**:
 
 ```java
 UserRequest userRequest = new UserRequest();
@@ -98,9 +102,10 @@ String sqlQuery = queryFragment.querySql();
 
 #### 4. QueryJsonHelper
 
-`QueryJsonHelper` 专注于处理 JSON 字段的查询，允许开发者构建针对 JSON 数据的 SQL 查询条件。
+`QueryJsonHelper` focuses on handling queries for JSON fields, allowing developers to construct SQL query conditions for
+JSON data.
 
-**使用案例：**
+**Usage Example**:
 
 ```java
 Map<String, Object> jsonParams = new HashMap<>();
@@ -115,11 +120,11 @@ QueryFragment queryFragment = QueryJsonHelper.queryJson(jsonParams, "a");
 String sqlQuery = queryFragment.querySql();
 ```
 
-#### 5. 全文搜索用例
+#### 5. Full-text Search Use Case
 
-对于全文搜索，可以使用 `QueryFragment` 的 `addQuery` 方法来添加全文搜索的条件。
+For full-text search, you can use the `addQuery` method of `QueryFragment` to add conditions for full-text search.
 
-**使用案例：**
+**Usage Example**:
 
 ```java
 QueryFragment queryFragment = QueryFragment.withNew()
@@ -130,18 +135,19 @@ QueryFragment queryFragment = QueryFragment.withNew()
 
 queryFragment.
 
-put("search","test user"); // 绑定全文搜索参数
+put("search","test user"); // Bind the full-text search parameter
 
-String sqlQuery = queryFragment.querySql(); // 生成包含全文搜索的 SQL 查询字符串
+String sqlQuery = queryFragment.querySql(); // Generate the SQL query string containing the full-text search
 ```
 
-在这个例子中，`to_tsvector` 和 `to_tsquery` 是 PostgreSQL 的全文搜索函数，用于将文本转换为向量和查询字符串。
+In this example, `to_tsvector` and `to_tsquery` are PostgreSQL's full-text search functions used to convert text into
+vectors and query strings respectively.
 
-#### 6. 集成 UserRequest
+#### 6. Integration with UserRequest
 
-`UserRequest` 类扩展了 `User` 类，并添加了额外的属性和方法，用于处理用户请求。
+The `UserRequest` class extends the `User` class and adds additional attributes and methods for handling user requests.
 
-**使用案例：**
+**Usage Example**:
 
 ```java
 UserRequest userRequest = new UserRequest();
@@ -152,17 +158,20 @@ userRequest.
 
 setSecurityCode("secure-code");
 
-// 将 UserRequest 转换为 QueryFragment
+// Convert UserRequest to QueryFragment
 QueryFragment queryFragment = userRequest.toParamSql();
 String sqlQuery = queryFragment.querySql();
 ```
 
-在这个例子中，`toParamSql` 方法将 `UserRequest` 对象转换为 `QueryFragment` 实例，以便构建 SQL 查询。
+In this example, the `toParamSql` method converts the `UserRequest` object into a `QueryFragment` instance for
+constructing an SQL query.
 
-#### 7. 注意事项
+#### 7. Precautions
 
-- 确保在使用这些工具类时，数据库连接和配置已经正确设置。
-- 对于全文搜索，确保数据库支持全文搜索功能，并且已经创建了相应的索引。
-- 在绑定参数时，确保参数名称和值与查询中的占位符匹配。
+- Ensure that the database connection and configuration are correctly set when using these utility classes.
+- For full-text search, make sure that the database supports the full-text search function and that the corresponding
+  indexes have been created.
+- When binding parameters, ensure that the parameter names and values match the placeholders in the query.
 
-通过这些工具类，开发者可以更方便地构建和执行 SQL 查询，同时保持代码的安全性和可维护性。
+Through these utility classes, developers can build and execute SQL queries more conveniently while maintaining the
+security and maintainability of the code. 
