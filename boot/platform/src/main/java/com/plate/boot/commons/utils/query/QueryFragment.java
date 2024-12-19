@@ -8,24 +8,93 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 /**
- * Represents a SQL parameter structure consisting of a conditional SQL fragment
- * and a map of parameters to be bound to a PreparedStatement.
- * This record facilitates the construction of dynamic SQL queries with placeholders
- * for improved performance and security against SQL injection.
+ * Represents a SQL parameter structure consisting of a conditional SQL fragment and a map of parameters
+ * to be bound to a PreparedStatement. This class facilitates the construction of dynamic SQL queries
+ * with placeholders for improved performance and security against SQL injection.
+ *
+ * <p>The QueryFragment class is designed to be flexible and modular, allowing users to build complex
+ * SQL queries by chaining method calls. It manages the SQL query structure, including the SELECT
+ * columns, FROM clause, WHERE conditions, ORDER BY clause, and LIMIT/OFFSET for pagination.
+ *
+ * <p>Example usage:
+ * <pre>
+ * {@code
+ * QueryFragment queryFragment = QueryFragment.withNew()
+ *     .addColumn("id", "name", "email")
+ *     .addQuery("users")
+ *     .addWhere("age > :age", 18)
+ *     .addOrder("name ASC")
+ *     .addOrder("email DESC");
+ *
+ * // Bind parameters
+ * queryFragment.put("age", 18);
+ *
+ * // Generate SQL query
+ * String sql = queryFragment.querySql();
+ * System.out.println(sql);
+ * }
+ * </pre>
+ * In this example, a QueryFragment instance is created and configured with columns, a table name,
+ * a WHERE condition, and ORDER BY clauses. Parameters are added to the query fragment, and finally,
+ * the SQL query string is generated using the querySql() method.
+ *
+ * @see QueryHelper for utility methods to construct QueryFragment instances from objects.
  */
 @Getter
 public class QueryFragment extends HashMap<String, Object> {
 
+    /**
+     * A StringJoiner to accumulate column names for the SELECT clause.
+     * Example usage:
+     * <pre>
+     * {@code
+     * queryFragment.addColumn("id", "name", "email");
+     * }
+     * </pre>
+     */
     private final StringJoiner columns = new StringJoiner(",");
 
+    /**
+     * A StringJoiner to accumulate the main SQL query parts (e.g., table names).
+     * Example usage:
+     * <pre>
+     * {@code
+     * queryFragment.addQuery("users");
+     * }
+     * </pre>
+     */
     private final StringJoiner querySql = new StringJoiner(" ");
 
+    /**
+     * A StringJoiner to accumulate WHERE conditions.
+     * Example usage:
+     * <pre>
+     * {@code
+     * queryFragment.addWhere("age > :age");
+     * }
+     * </pre>
+     */
     private final StringJoiner whereSql = new StringJoiner(" AND ");
 
+    /**
+     * A StringJoiner to accumulate ORDER BY clauses.
+     * Example usage:
+     * <pre>
+     * {@code
+     * queryFragment.addOrder("name ASC");
+     * }
+     * </pre>
+     */
     private final StringJoiner orderSql = new StringJoiner(",");
 
+    /**
+     * The maximum number of rows to return (LIMIT clause).
+     */
     private final int size;
 
+    /**
+     * The number of rows to skip before starting to return rows (OFFSET clause).
+     */
     private final long offset;
 
     public QueryFragment(int size, long offset, QueryFragment params) {
@@ -137,6 +206,17 @@ public class QueryFragment extends HashMap<String, Object> {
         return "";
     }
 
+    /**
+     * Generates the complete SQL query string based on the configured columns, table, conditions, and pagination.
+     *
+     * <p>The generated SQL query follows this structure:
+     * <code>SELECT columns FROM table WHERE conditions ORDER BY order LIMIT size OFFSET offset</code>
+     *
+     * <p>If no table or columns are specified, an exception is thrown to prevent generating an invalid query.
+     *
+     * @return A String representing the complete SQL query.
+     * @throws QueryException if the querySql is null, indicating that the query structure is incomplete.
+     */
     public String querySql() {
         if (this.querySql.length() > 0) {
             return String.format("SELECT %s FROM %s %s %s LIMIT %d OFFSET %d",
@@ -146,6 +226,17 @@ public class QueryFragment extends HashMap<String, Object> {
                 new IllegalArgumentException("This querySql is null, please use whereSql() method"));
     }
 
+    /**
+     * Generates the COUNT SQL query string based on the configured conditions.
+     *
+     * <p>The generated COUNT SQL query follows this structure:
+     * <code>SELECT COUNT(*) FROM (SELECT columns FROM table WHERE conditions) t</code>
+     *
+     * <p>If no table or columns are specified, an exception is thrown to prevent generating an invalid query.
+     *
+     * @return A String representing the COUNT SQL query.
+     * @throws QueryException if the countSql is null, indicating that the query structure is incomplete.
+     */
     public String countSql() {
         if (this.querySql.length() > 0) {
             return "SELECT COUNT(*) FROM (" + String.format("SELECT %s FROM %s", this.columns, this.querySql)
