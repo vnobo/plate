@@ -58,6 +58,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, null, headers, status, exchange);
     }
 
+    /**
+     * Handles exceptions of type {@link DataAccessException} by creating an appropriate error response.
+     * This method is designed to be used within a Spring MVC controller advice context to manage
+     * exceptions that occur during the execution of RESTful server operations.
+     *
+     * @param ex       The {@link DataAccessException} instance that was thrown, encapsulating
+     *                 error details such as error code, message, and any additional info.
+     * @param exchange The current server web exchange containing request and response information.
+     *                 This is used to extract details necessary for constructing the error response.
+     * @return A {@link Mono} containing a {@link ResponseEntity} with status {@link HttpStatus#INSUFFICIENT_STORAGE},
+     * content type set to {@link MediaType#APPLICATION_JSON}, and body containing
+     * a {@link ProblemDetail} object representing the details of the exception.
+     * The error response includes the request URI, the error message, and a custom title.
+     */
     @ExceptionHandler(DataAccessException.class)
     public Mono<ResponseEntity<Object>> handleDataAccessException(DataAccessException ex, ServerWebExchange exchange) {
         if (logger.isDebugEnabled()) {

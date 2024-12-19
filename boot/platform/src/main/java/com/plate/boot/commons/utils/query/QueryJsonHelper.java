@@ -18,6 +18,54 @@ import java.util.stream.Collectors;
  * SQL-compatible formats, particularly focusing on handling JSON-based queries. It provides methods to
  * convert sort orders into camelCase for JSON serialization, construct conditional SQL clauses for querying
  * nested JSON properties, and manage special operations like 'Between', 'In', and others within a SQL context.
+ *
+ * <p>This class is essential for applications that need to query JSON data stored in SQL databases, as it
+ * helps in constructing SQL queries that can understand and manipulate JSON structures.
+ *
+ * <p>Example usage:
+ * <pre>
+ * {@code
+ * Map<String, Object> jsonParams = new HashMap<>();
+ * jsonParams.put("extend.usernameLike", "Test User");
+ * jsonParams.put("extend.emailEq", "testuser@example.com");
+ * QueryFragment queryFragment = QueryJsonHelper.queryJson(jsonParams, "a");
+ * String sqlQuery = queryFragment.querySql();
+ * System.out.println(sqlQuery);
+ * }
+ * </pre>
+ * In this example, a JSON-based query is constructed using the QueryJsonHelper class. The query searches
+ * for a user with a username like "Test User" and an email equal to "testuser@example.com". The query is
+ * then converted into an SQL query string that can be executed against a database.
+ *
+ * <p>For a JSON object with nested fields, such as:
+ * <pre>
+ * {@code
+ * {
+ *   "extend": {
+ *     "requestBody": {
+ *       "bio": "This is a brief introduction of the user.",
+ *       "name": "Test User",
+ *       "email": "testuser@example.com",
+ *       "phone": "123-456-7890",
+ *       "avatar": "http://example.com/avatar.jpg"
+ *     },
+ *     "additionalField1": "value1",
+ *     "additionalField2": "value2"
+ *   },
+ *   "disabled": false,
+ *   "username": "17089118266"
+ * }
+ * }
+ * </pre>
+ * The QueryJsonHelper class can be used to construct SQL queries that target these nested fields, such as:
+ * <pre>
+ * {@code
+ * QueryFragment queryFragment = QueryJsonHelper.queryJson(jsonParams, "a");
+ * }
+ * </pre>
+ * This will generate an SQL query that can search for users based on the provided JSON parameters.
+ *
+ * @see QueryFragment for the class representing the SQL query structure.
  */
 public final class QueryJsonHelper {
 
@@ -102,20 +150,15 @@ public final class QueryJsonHelper {
 
     /**
      * Constructs a QueryFragment representing a set of JSON-based query conditions.
-     * It iterates over provided parameters, converting each into a properly formatted
-     * SQL condition using the provided prefix to namespace JSON keys, suitable for querying
-     * JSON data stored in SQL databases.
+     *
+     * <p>This method takes a map of JSON parameters and a prefix, and constructs a QueryFragment that can be
+     * used to build an SQL query targeting JSON data. The method iterates over the provided parameters,
+     * converting each into a properly formatted SQL condition using the provided prefix to namespace JSON keys.
      *
      * @param params A map where each key represents a JSON path (possibly prefixed) and the value is the
      *               condition's value or further criteria for complex operations like 'Between', 'In', etc.
      * @param prefix A string prefix to prepend to each JSON key to form the full column name in SQL queries.
-     *               This helps address potential naming conflicts or scoping within the SQL context.
-     * @return A QueryFragment containing:
-     * - The 'getWhereSql' field as a StringJoiner with all conditions joined by 'and',
-     * ready to be appended to a WHERE clause in a SQL query.
-     * - The 'params' map holding named parameters for binding values to the query,
-     * enhancing security and performance.
-     * If 'params' is empty, a QueryFragment with an empty condition and no parameters is returned.
+     * @return A QueryFragment containing the constructed SQL conditions for querying JSON data.
      * @throws IllegalArgumentException If any processing error occurs due to invalid input structure or content.
      */
     public static QueryFragment queryJson(Map<String, Object> params, String prefix) {
@@ -134,6 +177,22 @@ public final class QueryJsonHelper {
      * The method supports nested JSON paths and translates them into equivalent SQL expressions
      * compatible with JSON columns in SQL databases. It validates the path, processes the keys,
      * and delegates the construction of the final condition part to {@link #buildLastCondition(String[], Object)}.
+     * <pre>
+     * {@code
+     * // Create a map of JSON-based query parameters
+     * Map<String, Object> jsonParams = new HashMap<>();
+     * jsonParams.put("extend.requestBody.nameEq", "Test User"); // EQ stands for Equal
+     * jsonParams.put("extend.additionalField1Eq", "value1"); // EQ stands for Equal
+     *
+     * // Use the QueryJsonHelper to construct the SQL query for the given JSON parameters
+     * QueryFragment queryFragment = QueryJsonHelper.queryJson(jsonParams, "a");
+     *
+     * // Get the SQL query string
+     * String sqlQuery = queryFragment.querySql();
+     *
+     * // Now you can execute the sqlQuery against your database using a JDBC template or similar
+     * }
+     * </pre>
      *
      * @param entry  A map entry where the key is a dot-delimited string indicating a JSON path
      *               (e.g., "extend.usernameLike"), and the value is the target value for the condition.
