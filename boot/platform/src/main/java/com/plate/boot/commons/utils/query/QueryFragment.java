@@ -63,7 +63,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * }
      * </pre>
      */
-    private final StringJoiner querySql = new StringJoiner(" ");
+    private final StringJoiner select = new StringJoiner(" ");
 
     /**
      * A StringJoiner to accumulate WHERE conditions.
@@ -74,7 +74,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * }
      * </pre>
      */
-    private final StringJoiner whereSql = new StringJoiner(" AND ");
+    private final StringJoiner where = new StringJoiner(" AND ");
 
     /**
      * A StringJoiner to accumulate ORDER BY clauses.
@@ -85,7 +85,9 @@ public class QueryFragment extends HashMap<String, Object> {
      * }
      * </pre>
      */
-    private final StringJoiner orderSql = new StringJoiner(",");
+    private final StringJoiner orderBy = new StringJoiner(",");
+
+    private final StringJoiner groupBy = new StringJoiner(",");
 
     /**
      * The maximum number of rows to return (LIMIT clause).
@@ -101,7 +103,7 @@ public class QueryFragment extends HashMap<String, Object> {
         super(16);
         this.size = size;
         this.offset = offset;
-        this.mergeWhere(params.getWhereSql());
+        this.mergeWhere(params.getWhere());
         this.putAll(params);
     }
 
@@ -140,15 +142,15 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     public QueryFragment addQuery(CharSequence... queries) {
-        this.querySql.setEmptyValue("");
+        this.select.setEmptyValue("");
         for (CharSequence query : queries) {
-            this.querySql.add(query);
+            this.select.add(query);
         }
         return this;
     }
 
     public QueryFragment addWhere(CharSequence where) {
-        whereSql.add(where);
+        this.where.add(where);
         return this;
     }
 
@@ -159,7 +161,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return this
      */
     public QueryFragment addOrder(CharSequence order) {
-        orderSql.add(order);
+        this.orderBy.add(order);
         return this;
     }
 
@@ -170,7 +172,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return this
      */
     public QueryFragment mergeWhere(StringJoiner where) {
-        whereSql.merge(where);
+        this.where.merge(where);
         return this;
     }
 
@@ -181,7 +183,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return this
      */
     public QueryFragment mergeOrder(StringJoiner order) {
-        orderSql.merge(order);
+        this.orderBy.merge(order);
         return this;
     }
 
@@ -193,15 +195,15 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return A String forming the WHERE clause of the SQL query, or an empty string if no conditions are present.
      */
     public String whereSql() {
-        if (this.whereSql.length() > 0) {
-            return " WHERE " + this.whereSql;
+        if (this.where.length() > 0) {
+            return " WHERE " + this.where;
         }
         return "";
     }
 
     public String orderSql() {
-        if (this.orderSql.length() > 0) {
-            return " ORDER BY " + this.orderSql;
+        if (this.orderBy.length() > 0) {
+            return " ORDER BY " + this.orderBy;
         }
         return "";
     }
@@ -218,9 +220,9 @@ public class QueryFragment extends HashMap<String, Object> {
      * @throws QueryException if the querySql is null, indicating that the query structure is incomplete.
      */
     public String querySql() {
-        if (this.querySql.length() > 0) {
+        if (this.select.length() > 0) {
             return String.format("SELECT %s FROM %s %s %s LIMIT %d OFFSET %d",
-                    this.columns, this.querySql, whereSql(), orderSql(), this.size, this.offset);
+                    this.columns, this.select, whereSql(), orderSql(), this.size, this.offset);
         }
         throw QueryException.withError("This querySql is null, please use whereSql() method!",
                 new IllegalArgumentException("This querySql is null, please use whereSql() method"));
@@ -238,8 +240,8 @@ public class QueryFragment extends HashMap<String, Object> {
      * @throws QueryException if the countSql is null, indicating that the query structure is incomplete.
      */
     public String countSql() {
-        if (this.querySql.length() > 0) {
-            return "SELECT COUNT(*) FROM (" + String.format("SELECT %s FROM %s", this.columns, this.querySql)
+        if (this.select.length() > 0) {
+            return "SELECT COUNT(*) FROM (" + String.format("SELECT %s FROM %s", this.columns, this.select)
                     + whereSql() + ") t";
         }
         throw QueryException.withError("This countSql is null, please use whereSql() method!",

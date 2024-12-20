@@ -6,6 +6,9 @@ import com.plate.boot.security.core.UserAuditorAware;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -13,6 +16,7 @@ import org.springframework.data.domain.ReactiveAuditorAware;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
 import org.springframework.data.r2dbc.config.EnableR2dbcAuditing;
 import org.springframework.lang.NonNull;
+import org.springframework.r2dbc.connection.TransactionAwareConnectionFactoryProxy;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.List;
@@ -71,4 +75,11 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
         return new UserAuditorAware();
     }
 
+    @Bean
+    public DSLContext dslContext(ConnectionFactory connectionFactory) {
+        return DSL.using(
+                new TransactionAwareConnectionFactoryProxy(connectionFactory),
+                SQLDialect.POSTGRES
+        );
+    }
 }

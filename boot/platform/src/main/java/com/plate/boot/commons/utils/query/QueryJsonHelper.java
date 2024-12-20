@@ -165,7 +165,7 @@ public final class QueryJsonHelper {
         QueryFragment queryFragment = QueryFragment.withNew();
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             var condition = buildJsonCondition(entry, prefix);
-            queryFragment.mergeWhere(condition.getWhereSql());
+            queryFragment.mergeWhere(condition.getWhere());
             queryFragment.putAll(condition);
         }
         return queryFragment;
@@ -231,7 +231,7 @@ public final class QueryJsonHelper {
         }
         //处理最后键
         QueryFragment lastCondition = buildLastCondition(keys, entry.getValue());
-        conditionBuilder.append(lastCondition.getWhereSql());
+        conditionBuilder.append(lastCondition.getWhere());
         return QueryFragment.withMap(lastCondition).addWhere(conditionBuilder.toString());
     }
 
