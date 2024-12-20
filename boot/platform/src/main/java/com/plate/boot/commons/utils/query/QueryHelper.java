@@ -241,7 +241,7 @@ public final class QueryHelper {
         if (objectMap.containsKey("query")) {
             var jsonMap = (Map<String, Object>) objectMap.get("query");
             var jsonQueryFragment = QueryJsonHelper.queryJson(jsonMap, prefix);
-            queryFragment.mergeWhere(jsonQueryFragment.getWhereSql());
+            queryFragment.mergeWhere(jsonQueryFragment.getWhere());
             queryFragment.putAll(jsonQueryFragment);
         }
     }
