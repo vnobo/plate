@@ -169,6 +169,13 @@ public class QueryFragment extends HashMap<String, Object> {
         return this;
     }
 
+    /**
+     * Adds a GROUP BY clause to the query.
+     *
+     * @param size   page size
+     * @param offset page offset
+     * @return the QueryFragment instance
+     */
     public QueryFragment limit(int size, long offset) {
         this.size = size;
         this.offset = offset;
