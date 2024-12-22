@@ -10,5 +10,4 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class, SecurityConfiguration.class})
 @EnableTransactionManagement
 public class InfrastructureConfiguration {
-
 }

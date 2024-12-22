@@ -7,7 +7,6 @@ import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.security.SecurityDetails;
 import com.plate.boot.security.core.user.UsersService;
 import lombok.extern.log4j.Log4j2;
-import org.jooq.DSLContext;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -107,18 +106,15 @@ public final class ContextUtils implements InitializingBean {
      */
     public static UsersService USERS_SERVICE;
 
-    public static DSLContext JOOQDSL;
-
     /**
      * Initializes the ContextUtils class with necessary dependencies.
      *
      * @param objectMapper The ObjectMapper instance used for JSON serialization and deserialization.
      * @param usersService The UsersService instance to provide access to user-related operations.
      */
-    ContextUtils(ObjectMapper objectMapper, UsersService usersService, DSLContext create) {
+    ContextUtils(ObjectMapper objectMapper, UsersService usersService) {
         ContextUtils.OBJECT_MAPPER = objectMapper;
         ContextUtils.USERS_SERVICE = usersService;
-        ContextUtils.JOOQDSL = create;
     }
 
     /**
