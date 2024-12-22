@@ -161,8 +161,8 @@ public class QueryFragment extends HashMap<String, Object> {
     /**
      * Adds an ORDER BY clause to the query.
      *
-     * @param order the order
-     * @return this
+     * @param order the order to add
+     * @return the QueryFragment instance
      */
     public QueryFragment orderBy(CharSequence order) {
         this.orderBy.add(order);
