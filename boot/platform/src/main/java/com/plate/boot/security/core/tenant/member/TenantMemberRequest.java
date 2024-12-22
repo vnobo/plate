@@ -44,17 +44,17 @@ public class TenantMemberRequest extends TenantMember {
         QueryFragment fragment = QueryHelper.query(this, List.of("users", "securityCode", "username"), "a");
 
         if (!ObjectUtils.isEmpty(this.getUsers())) {
-            fragment.addWhere("a.user_code in (:users)");
+            fragment.where("a.user_code in (:users)");
             fragment.put("users", StringUtils.collectionToCommaDelimitedString(this.getUsers()));
         }
 
         if (StringUtils.hasLength(this.getSecurityCode())) {
-            fragment.addWhere("a.tenant_code like :securityCode");
+            fragment.where("a.tenant_code like :securityCode");
             fragment.put("securityCode", this.getSecurityCode());
         }
 
         if (StringUtils.hasLength(this.getUsername())) {
-            fragment.addWhere("c.username = :username");
+            fragment.where("c.username = :username");
             fragment.put("username", this.getUsername());
         }
 

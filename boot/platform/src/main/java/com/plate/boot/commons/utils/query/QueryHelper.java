@@ -241,7 +241,7 @@ public final class QueryHelper {
         if (objectMap.containsKey("query")) {
             var jsonMap = (Map<String, Object>) objectMap.get("query");
             var jsonQueryFragment = QueryJsonHelper.queryJson(jsonMap, prefix);
-            queryFragment.mergeWhere(jsonQueryFragment.getWhere());
+            queryFragment.getWhere().merge(jsonQueryFragment.getWhere());
             queryFragment.putAll(jsonQueryFragment);
         }
     }
@@ -257,7 +257,7 @@ public final class QueryHelper {
     private static void processSecurityCodeKey(QueryFragment queryFragment, Map<String, Object> objectMap, Collection<String> skipKeys, String prefix) {
         if (!skipKeys.contains("securityCode") && objectMap.containsKey("securityCode")) {
             var column = StringUtils.hasLength(prefix) ? prefix + ".tenant_code" : "tenant_code";
-            queryFragment.addWhere(column + " LIKE :securityCode");
+            queryFragment.where(column + " LIKE :securityCode");
             queryFragment.put("securityCode", objectMap.get("securityCode"));
         }
     }
@@ -273,9 +273,9 @@ public final class QueryHelper {
         if (objectMap.containsKey("search") && !ObjectUtils.isEmpty(objectMap.get("search"))) {
             var textSearch = (String) objectMap.get("search");
             var column = StringUtils.hasLength(prefix) ? prefix + ".text_search" : "text_search";
-            queryFragment.addColumn("TS_RANK_CD(" + column + ", queryTextSearch) AS rank");
-            queryFragment.addQuery(",TO_TSQUERY('chinese',:textSearch) queryTextSearch");
-            queryFragment.addWhere(column + "@@TO_TSQUERY('chinese',:textSearch)");
+            queryFragment.columns("TS_RANK_CD(" + column + ", queryTextSearch) AS rank");
+            queryFragment.query(",TO_TSQUERY('chinese',:textSearch) queryTextSearch");
+            queryFragment.where(column + "@@TO_TSQUERY('chinese',:textSearch)");
             queryFragment.put("textSearch", textSearch);
         }
     }
@@ -317,7 +317,7 @@ public final class QueryHelper {
             if (StringUtils.hasLength(prefix)) {
                 sortedProperty = prefix + "." + sortedProperty;
             }
-            queryFragment.addOrder(sortedProperty + (order.isAscending() ? " ASC" : " DESC"));
+            queryFragment.orderBy(sortedProperty + (order.isAscending() ? " ASC" : " DESC"));
         }
     }
 
@@ -330,7 +330,7 @@ public final class QueryHelper {
     public static void applyWhere(QueryFragment queryFragment, String prefix) {
         for (Map.Entry<String, Object> entry : queryFragment.entrySet()) {
             String conditionSql = buildConditionSql(entry, prefix);
-            queryFragment.addWhere(conditionSql);
+            queryFragment.where(conditionSql);
         }
     }
 
@@ -352,8 +352,8 @@ public final class QueryHelper {
         }
 
         String tableName = StringUtils.hasLength(table.value()) ? table.value() : objectClass.getName();
-        queryFragment.addColumn("*");
-        queryFragment.addQuery(tableName);
+        queryFragment.columns("*");
+        queryFragment.query(tableName);
     }
 
     /**

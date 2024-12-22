@@ -28,9 +28,9 @@ public class TenantMembersService extends AbstractDatabase {
     public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
         QueryFragment fragment = request.toParamSql();
         QueryFragment queryFragment = QueryFragment.of(pageable.getPageSize(), pageable.getOffset(), fragment)
-                .addColumn("a.*", "b.name as tenant_name",
+                .columns("a.*", "b.name as tenant_name",
                         "b.extend as tenant_extend", "c.name as login_name", "c.username")
-                .addQuery("se_tenant_members a",
+                .query("se_tenant_members a",
                         "inner join se_tenants b on a.tenant_code = b.code",
                         "inner join se_users c on c.code = a.user_code");
         QueryHelper.applySort(queryFragment, pageable.getSort(), "a");
