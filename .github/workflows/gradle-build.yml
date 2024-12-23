@@ -59,9 +59,8 @@ jobs:
       - name: Execute Gradle Plate bootBuildImage
         run: |
           chmod +x ./gradlew
-          ./gradlew build --scan
-          ./gradlew bootBuildImage --imagePlatform=linux/amd64 --network=host --publishImage
-          ./gradlew bootBuildImage --imagePlatform=linux/arm64 --network=host --publishImage
+          ./gradlew bootBuildImage --imagePlatform=linux/amd64 --network=host --publishImage --scan
+          ./gradlew bootBuildImage --imagePlatform=linux/arm64 --network=host --publishImage --scan
       - name: Inspect
         run: |
           docker buildx imagetools inspect localhost:5000/plate-oauth2:latest
