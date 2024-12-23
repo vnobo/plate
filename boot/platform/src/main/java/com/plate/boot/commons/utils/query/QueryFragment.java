@@ -1,5 +1,6 @@
 package com.plate.boot.commons.utils.query;
 
+import com.google.common.base.CaseFormat;
 import com.plate.boot.commons.exception.QueryException;
 import lombok.Getter;
 
@@ -179,6 +180,16 @@ public class QueryFragment extends HashMap<String, Object> {
     public QueryFragment limit(int size, long offset) {
         this.size = size;
         this.offset = offset;
+        return this;
+    }
+
+    public QueryFragment ts(String column, Object value) {
+        String lowerCamelCol = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column);
+        String queryTable = "ts_" + lowerCamelCol;
+        columns("TS_RANK_CD(" + lowerCamelCol + ", " + queryTable + ") AS rank");
+        query(",TO_TSQUERY('chinese',:" + column + ") AS " + queryTable);
+        where(queryTable + " @@ " + lowerCamelCol);
+        put(column, value);
         return this;
     }
 
