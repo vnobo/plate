@@ -29,6 +29,8 @@ jobs:
           distribution: 'liberica'
           check-latest: true
           cache: 'gradle'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
       - name: Build with Gradle Wrapper
         run: |
           chmod +x ./gradlew

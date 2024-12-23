@@ -57,7 +57,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
       - name: Execute Gradle Plate bootBuildImage
-        #linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
         run: |
           chmod +x ./gradlew
           ./gradlew build --scan
