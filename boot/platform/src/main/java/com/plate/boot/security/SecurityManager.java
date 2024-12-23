@@ -64,24 +64,24 @@ public class SecurityManager extends AbstractDatabase
         implements ReactiveUserDetailsService, ReactiveUserDetailsPasswordService {
 
     private final static QueryFragment QUERY_GROUP_MEMBERS_FRAGMENT = QueryFragment.withNew()
-            .addColumn("a.*", "b.name", "b.extend")
-            .addQuery("se_group_members a", "join se_groups b on a.group_code=b.code")
-            .addWhere("a.user_code like :userCode");
+            .columns("a.*", "b.name", "b.extend")
+            .query("se_group_members a", "join se_groups b on a.group_code=b.code")
+            .where("a.user_code like :userCode");
     private final static QueryFragment QUERY_TENANT_MEMBERS_FRAGMENT = QueryFragment.withNew()
-            .addColumn("a.*", "b.name", "b.extend")
-            .addQuery("se_tenant_members a", "join se_tenants b on a.tenant_code=b.code")
-            .addWhere("a.user_code like :userCode");
+            .columns("a.*", "b.name", "b.extend")
+            .query("se_tenant_members a", "join se_tenants b on a.tenant_code=b.code")
+            .where("a.user_code like :userCode");
     private final static QueryFragment QUERY_USER_AUTHORITY_FRAGMENT = QueryFragment.withNew()
-            .addColumn("*")
-            .addQuery("se_authorities")
-            .addWhere("user_code = :userCode");
+            .columns("*")
+            .query("se_authorities")
+            .where("user_code = :userCode");
     private final static QueryFragment QUERY_GROUP_AUTHORITY_FRAGMENT = QueryFragment.withNew()
-            .addColumn("ga.*")
-            .addQuery("se_group_authorities ga",
+            .columns("ga.*")
+            .query("se_group_authorities ga",
                     "join se_group_members gm on ga.group_code = gm.group_code",
                     "join se_users su on gm.user_code = su.code",
                     "join se_groups sg on gm.group_code = sg.code and sg.tenant_code = su.tenant_code")
-            .addWhere("gm.user_code = :userCode");
+            .where("gm.user_code = :userCode");
 
     /**
      * Represents the service layer for handling user-related operations.
@@ -133,8 +133,8 @@ public class SecurityManager extends AbstractDatabase
      * @return A Mono emitting the User if found, or an empty Mono if no user matches the given OAuth2 binding data.
      */
     public Mono<User> loadByOauth2(String bindType, String openid) {
-        QueryFragment queryFragment = QueryFragment.withNew().addColumn("*").addQuery("se_users")
-                .addWhere("extend->'oauth2'->:bindType->>'openid'::varchar = :openid");
+        QueryFragment queryFragment = QueryFragment.withNew().columns("*").query("se_users")
+                .where("extend->'oauth2'->:bindType->>'openid'::varchar = :openid");
         queryFragment.put("bindType", bindType);
         queryFragment.put("openid", openid);
         var userMono = this.databaseClient.sql(queryFragment::querySql).bindValues(queryFragment)

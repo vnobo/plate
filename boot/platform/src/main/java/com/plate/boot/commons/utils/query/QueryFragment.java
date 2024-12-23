@@ -20,11 +20,11 @@ import java.util.StringJoiner;
  * <pre>
  * {@code
  * QueryFragment queryFragment = QueryFragment.withNew()
- *     .addColumn("id", "name", "email")
- *     .addQuery("users")
- *     .addWhere("age > :age", 18)
- *     .addOrder("name ASC")
- *     .addOrder("email DESC");
+ *     .columns("id", "name", "email")
+ *     .query("users")
+ *     .where("age > :age", 18)
+ *     .orderBy("name ASC")
+ *     .orderBy("email DESC");
  *
  * // Bind parameters
  * queryFragment.put("age", 18);
@@ -48,7 +48,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * Example usage:
      * <pre>
      * {@code
-     * queryFragment.addColumn("id", "name", "email");
+     * queryFragment.columns("id", "name", "email");
      * }
      * </pre>
      */
@@ -59,18 +59,18 @@ public class QueryFragment extends HashMap<String, Object> {
      * Example usage:
      * <pre>
      * {@code
-     * queryFragment.addQuery("users");
+     * queryFragment.query("users");
      * }
      * </pre>
      */
-    private final StringJoiner select = new StringJoiner(" ");
+    private final StringJoiner from = new StringJoiner(" ");
 
     /**
      * A StringJoiner to accumulate WHERE conditions.
      * Example usage:
      * <pre>
      * {@code
-     * queryFragment.addWhere("age > :age");
+     * queryFragment.where("age > :age");
      * }
      * </pre>
      */
@@ -81,7 +81,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * Example usage:
      * <pre>
      * {@code
-     * queryFragment.addOrder("name ASC");
+     * queryFragment.orderBy("name ASC");
      * }
      * </pre>
      */
@@ -92,26 +92,30 @@ public class QueryFragment extends HashMap<String, Object> {
     /**
      * The maximum number of rows to return (LIMIT clause).
      */
-    private final int size;
+    private int size = 25;
 
     /**
      * The number of rows to skip before starting to return rows (OFFSET clause).
      */
-    private final long offset;
+    private long offset = 0;
 
-    public QueryFragment(int size, long offset, QueryFragment params) {
-        super(16);
-        this.size = size;
-        this.offset = offset;
-        this.mergeWhere(params.getWhere());
-        this.putAll(params);
+    public QueryFragment(QueryFragment fragment) {
+        super(fragment);
+        this.size = fragment.size;
+        this.offset = fragment.offset;
+        this.columns.merge(fragment.getColumns());
+        this.from.merge(fragment.getFrom());
+        this.orderBy.merge(fragment.getOrderBy());
+        this.where.merge(fragment.getWhere());
     }
 
-    public QueryFragment(int size, long offset, Map<String, Object> params) {
-        super(16);
-        this.size = size;
-        this.offset = offset;
-        this.putAll(params);
+    /**
+     * Creates a new QueryFragment instance with the specified parameters.
+     *
+     * @param params the parameters to initialize the QueryFragment with
+     */
+    public QueryFragment(Map<String, Object> params) {
+        super(params);
     }
 
     public static QueryFragment withNew() {
@@ -119,11 +123,11 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     public static QueryFragment withMap(Map<String, Object> params) {
-        return new QueryFragment(Integer.MAX_VALUE, 0, params);
+        return new QueryFragment(params);
     }
 
     public static QueryFragment withMap(int size, long offset, Map<String, Object> params) {
-        return new QueryFragment(size, offset, params);
+        return withMap(params).limit(size, offset);
     }
 
     public static QueryFragment of(QueryFragment params) {
@@ -131,25 +135,25 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     public static QueryFragment of(int size, long offset, QueryFragment params) {
-        return new QueryFragment(size, offset, params);
+        return of(params).limit(size, offset);
     }
 
-    public QueryFragment addColumn(CharSequence... columns) {
+    public QueryFragment columns(CharSequence... columns) {
         for (CharSequence column : columns) {
             this.columns.add(column);
         }
         return this;
     }
 
-    public QueryFragment addQuery(CharSequence... queries) {
-        this.select.setEmptyValue("");
+    public QueryFragment query(CharSequence... queries) {
+        this.from.setEmptyValue("");
         for (CharSequence query : queries) {
-            this.select.add(query);
+            this.from.add(query);
         }
         return this;
     }
 
-    public QueryFragment addWhere(CharSequence where) {
+    public QueryFragment where(CharSequence where) {
         this.where.add(where);
         return this;
     }
@@ -157,43 +161,27 @@ public class QueryFragment extends HashMap<String, Object> {
     /**
      * Adds an ORDER BY clause to the query.
      *
-     * @param order the order
-     * @return this
+     * @param order the order to add
+     * @return the QueryFragment instance
      */
-    public QueryFragment addOrder(CharSequence order) {
+    public QueryFragment orderBy(CharSequence order) {
         this.orderBy.add(order);
         return this;
     }
 
     /**
-     * Merges the given where clause with the existing one.
+     * Adds a GROUP BY clause to the query.
      *
-     * @param where the where
-     * @return this
+     * @param size   page size
+     * @param offset page offset
+     * @return the QueryFragment instance
      */
-    public QueryFragment mergeWhere(StringJoiner where) {
-        this.where.merge(where);
+    public QueryFragment limit(int size, long offset) {
+        this.size = size;
+        this.offset = offset;
         return this;
     }
 
-    /**
-     * Merges the given order clause with the existing one.
-     *
-     * @param order the order
-     * @return this
-     */
-    public QueryFragment mergeOrder(StringJoiner order) {
-        this.orderBy.merge(order);
-        return this;
-    }
-
-    /**
-     * Generates the WHERE clause part of a SQL query based on the stored conditions.
-     * If conditions have been accumulated, it prefixes the conditions with the 'WHERE' keyword;
-     * otherwise, it returns an empty string to indicate no conditions.
-     *
-     * @return A String forming the WHERE clause of the SQL query, or an empty string if no conditions are present.
-     */
     public String whereSql() {
         if (this.where.length() > 0) {
             return " WHERE " + this.where;
@@ -220,9 +208,9 @@ public class QueryFragment extends HashMap<String, Object> {
      * @throws QueryException if the querySql is null, indicating that the query structure is incomplete.
      */
     public String querySql() {
-        if (this.select.length() > 0) {
+        if (this.from.length() > 0) {
             return String.format("SELECT %s FROM %s %s %s LIMIT %d OFFSET %d",
-                    this.columns, this.select, whereSql(), orderSql(), this.size, this.offset);
+                    this.columns, this.from, whereSql(), orderSql(), this.size, this.offset);
         }
         throw QueryException.withError("This querySql is null, please use whereSql() method!",
                 new IllegalArgumentException("This querySql is null, please use whereSql() method"));
@@ -240,8 +228,8 @@ public class QueryFragment extends HashMap<String, Object> {
      * @throws QueryException if the countSql is null, indicating that the query structure is incomplete.
      */
     public String countSql() {
-        if (this.select.length() > 0) {
-            return "SELECT COUNT(*) FROM (" + String.format("SELECT %s FROM %s", this.columns, this.select)
+        if (this.from.length() > 0) {
+            return "SELECT COUNT(*) FROM (" + String.format("SELECT %s FROM %s", this.columns, this.from)
                     + whereSql() + ") t";
         }
         throw QueryException.withError("This countSql is null, please use whereSql() method!",
