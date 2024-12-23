@@ -271,12 +271,8 @@ public final class QueryHelper {
      */
     private static void processSearchKey(QueryFragment queryFragment, Map<String, Object> objectMap, String prefix) {
         if (objectMap.containsKey("search") && !ObjectUtils.isEmpty(objectMap.get("search"))) {
-            var textSearch = (String) objectMap.get("search");
             var column = StringUtils.hasLength(prefix) ? prefix + ".text_search" : "text_search";
-            queryFragment.columns("TS_RANK_CD(" + column + ", queryTextSearch) AS rank");
-            queryFragment.query(",TO_TSQUERY('chinese',:textSearch) queryTextSearch");
-            queryFragment.where(column + "@@TO_TSQUERY('chinese',:textSearch)");
-            queryFragment.put("textSearch", textSearch);
+            queryFragment.ts(column, objectMap.get("search"));
         }
     }
 

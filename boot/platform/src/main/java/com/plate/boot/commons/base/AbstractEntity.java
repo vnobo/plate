@@ -81,6 +81,11 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
     protected LocalDateTime createdTime;
 
     /**
+     * Data full text search entity sort
+     */
+    protected Double rank;
+
+    /**
      * Support query for json column
      */
     @Transient

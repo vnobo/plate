@@ -39,7 +39,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+      - uses: gradle/actions/wrapper-validation@v4
       - name: Set up java 21 for x64
         uses: actions/setup-java@v4
         with:
@@ -57,11 +57,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
       - name: Execute Gradle Plate bootBuildImage
-        #linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64
         run: |
           chmod +x ./gradlew
-          ./gradlew bootBuildImage --imagePlatform=linux/amd64 --network=host --publishImage
-          ./gradlew bootBuildImage --imagePlatform=linux/arm64 --network=host --publishImage
+          ./gradlew bootBuildImage --imagePlatform=linux/amd64 --network=host --publishImage --scan
+          ./gradlew bootBuildImage --imagePlatform=linux/arm64 --network=host --publishImage --scan
       - name: Inspect
         run: |
           docker buildx imagetools inspect localhost:5000/plate-oauth2:latest
