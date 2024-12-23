@@ -35,22 +35,10 @@ jobs:
       - name: Build with Gradle Wrapper
         run: |
           chmod +x ./gradlew
-          ./gradlew build --scan
-          ./gradlew test --scan
-  dependency-submission:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Set up JDK 21 for x64
-        uses: actions/setup-java@v4
-        with:
-          version: 'latest'
-          java-version: '21'
-          distribution: 'liberica'
-          check-latest: true
-          cache: 'gradle'
+          ./gradlew test
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@v4
+        with:
+          build-scan-publish: true
+          build-scan-terms-of-use-url: "https://gradle.com/help/legal-terms-of-use"
+          build-scan-terms-of-use-agree: "yes"
