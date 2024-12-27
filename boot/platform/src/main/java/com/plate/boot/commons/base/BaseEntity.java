@@ -43,25 +43,25 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
     /**
      * postgresql types @code tsvector supports full text search
      *
-     * @param search query tsvector item by string
+     * @param search from tsvector item by string
      */
     default void setSearch(String search) {
     }
 
     /**
-     * Retrieves the default query conditions.
-     * Returns an immutable empty map, indicating that there are no specific query conditions.
+     * Retrieves the default from conditions.
+     * Returns an immutable empty map, indicating that there are no specific from conditions.
      *
-     * @return An immutable map containing the query conditions
+     * @return An immutable map containing the from conditions
      */
     default Map<String, Object> getQuery() {
         return Map.of();
     }
 
     /**
-     * Sets the query parameters for the entity.
+     * Sets the from parameters for the entity.
      *
-     * @param query A map containing the query parameters where the key is a string
+     * @param query A map containing the from parameters where the key is a string
      *              representing the parameter name and the value is the parameter value.
      */
     default void setQuery(Map<String, Object> query) {
@@ -100,15 +100,15 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
 
     /**
      * Constructs a QueryFragment based on the current entity's properties and conditions,
-     * allowing for customization of the SQL query by specifying properties to exclude.
+     * allowing for customization of the SQL from by specifying properties to exclude.
      *
      * @param skipKeys A collection of String property names indicating which properties
-     *                 should not be included in the generated SQL query. This can be useful
+     *                 should not be included in the generated SQL from. This can be useful
      *                 for skipping sensitive or unnecessary fields.
      * @return A QueryFragment object containing the SQL fragment and parameters necessary
-     * to form a part of an SQL query. The SQL fragment represents a conditional
-     * part of the query (e.g., WHERE clause), and the parameters are mapped to
-     * prevent SQL injection, ensuring secure query execution.
+     * to form a part of an SQL from. The SQL fragment represents a conditional
+     * part of the from (e.g., WHERE clause), and the parameters are mapped to
+     * prevent SQL injection, ensuring secure from execution.
      */
     default QueryFragment querySql(Collection<String> skipKeys) {
         return QueryHelper.query(this, skipKeys);

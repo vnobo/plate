@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * This class, AbstractEntity, is a base class for all data entities in the system.
  * It provides common fields and methods for all data entities, such as id, code, tenantCode,
- * extend, creator, updater, updatedTime, createdTime, query, search, and securityCode.
+ * extend, creator, updater, updatedTime, createdTime, from, search, and securityCode.
  * <p>
  * The id field is the unique identifier of the data entity. The code field is the data entity code,
  * and the tenantCode field is the data tenant code.
@@ -20,7 +20,7 @@ import java.util.Map;
  * The creator field is the data entity create operator, and the updater field is the data entity update operator.
  * The updatedTime field is the data entity update time,timestamp column,
  * and the createdTime field is the data entity create time, timestamp column.
- * The query field is a Map object that supports query for json column,
+ * The from field is a Map object that supports from for json column,
  * and the search field is a String object that supports full text search for tsvector column.
  * The securityCode field is a String object that supports security code for sensitive data.
  * <p>
@@ -81,12 +81,7 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
     protected LocalDateTime createdTime;
 
     /**
-     * Data full text search entity sort
-     */
-    protected Double rank;
-
-    /**
-     * Support query for json column
+     * Support from for json column
      */
     @Transient
     protected Map<String, Object> query;
