@@ -7,8 +7,8 @@ import com.plate.boot.security.core.group.authority.GroupAuthority;
 import com.plate.boot.security.core.group.member.GroupMemberResp;
 import com.plate.boot.security.core.tenant.member.TenantMemberResponse;
 import com.plate.boot.security.core.user.User;
-import com.plate.boot.security.core.user.UserRequest;
-import com.plate.boot.security.core.user.UserResponse;
+import com.plate.boot.security.core.user.UserReq;
+import com.plate.boot.security.core.user.UserRes;
 import com.plate.boot.security.core.user.UsersService;
 import com.plate.boot.security.core.user.authority.UserAuthority;
 import lombok.RequiredArgsConstructor;
@@ -46,14 +46,14 @@ import java.util.Set;
  * - Manage user registration and modification through integration with UsersService.
  * - Retrieve user information based on OAuth2 bindings for authentication purposes.
  * - Load user details by username, including associated roles and permissions.
- * - Cache query results to minimize direct database hits for frequently accessed data.
+ * - Cache from results to minimize direct database hits for frequently accessed data.
  * - Handle password updates in a secure manner, clearing related caches post-update.
  * - Populate SecurityDetails objects with comprehensive user and authorization data.
  * <p>
  * Dependencies:
  * - UsersService: For CRUD operations on user entities.
  * - R2DBC (reactive database access): To execute SQL queries asynchronously.
- * - Cache: Utilized for storing query results to improve response times on subsequent requests.
+ * - Cache: Utilized for storing from results to improve response times on subsequent requests.
  * <p>
  * Note: The class uses reactive types (Mono, Flux) to facilitate non-blocking, asynchronous processing.
  */
@@ -65,19 +65,19 @@ public class SecurityManager extends AbstractDatabase
 
     private final static QueryFragment QUERY_GROUP_MEMBERS_FRAGMENT = QueryFragment.withNew()
             .columns("a.*", "b.name", "b.extend")
-            .query("se_group_members a", "join se_groups b on a.group_code=b.code")
+            .from("se_group_members a", "join se_groups b on a.group_code=b.code")
             .where("a.user_code like :userCode");
     private final static QueryFragment QUERY_TENANT_MEMBERS_FRAGMENT = QueryFragment.withNew()
             .columns("a.*", "b.name", "b.extend")
-            .query("se_tenant_members a", "join se_tenants b on a.tenant_code=b.code")
+            .from("se_tenant_members a", "join se_tenants b on a.tenant_code=b.code")
             .where("a.user_code like :userCode");
     private final static QueryFragment QUERY_USER_AUTHORITY_FRAGMENT = QueryFragment.withNew()
             .columns("*")
-            .query("se_authorities")
+            .from("se_authorities")
             .where("user_code = :userCode");
     private final static QueryFragment QUERY_GROUP_AUTHORITY_FRAGMENT = QueryFragment.withNew()
             .columns("ga.*")
-            .query("se_group_authorities ga",
+            .from("se_group_authorities ga",
                     "join se_group_members gm on ga.group_code = gm.group_code",
                     "join se_users su on gm.user_code = su.code",
                     "join se_groups sg on gm.group_code = sg.code and sg.tenant_code = su.tenant_code")
@@ -111,11 +111,11 @@ public class SecurityManager extends AbstractDatabase
     /**
      * Registers a new user or modifies an existing one based on the provided user request.
      *
-     * @param request A UserRequest object containing the details necessary to register or modify a user.
+     * @param request A UserReq object containing the details necessary to register or modify a user.
      *                If the request contains a non-empty 'code', it will be treated as a modification request.
      * @return A Mono emitting the updated or newly registered User instance upon successful operation.
      */
-    public Mono<User> registerOrModifyUser(UserRequest request) {
+    public Mono<User> registerOrModifyUser(UserReq request) {
         if (StringUtils.hasLength(request.getCode())) {
             return this.usersService.operate(request);
         }
@@ -133,7 +133,7 @@ public class SecurityManager extends AbstractDatabase
      * @return A Mono emitting the User if found, or an empty Mono if no user matches the given OAuth2 binding data.
      */
     public Mono<User> loadByOauth2(String bindType, String openid) {
-        QueryFragment queryFragment = QueryFragment.withNew().columns("*").query("se_users")
+        QueryFragment queryFragment = QueryFragment.withNew().columns("*").from("se_users")
                 .where("extend->'oauth2'->:bindType->>'openid'::varchar = :openid");
         queryFragment.put("bindType", bindType);
         queryFragment.put("openid", openid);
@@ -192,7 +192,7 @@ public class SecurityManager extends AbstractDatabase
      */
     private Mono<SecurityDetails> buildUserDetails(User user, Set<GrantedAuthority> authorities) {
         SecurityDetails userDetails = SecurityDetails.of(user.getCode(), authorities,
-                BeanUtils.beanToMap(UserResponse.withUser(user)), "username").buildUser(user);
+                BeanUtils.beanToMap(UserRes.withUser(user)), "username").buildUser(user);
         Mono<Tuple2<List<GroupMemberResp>, List<TenantMemberResponse>>> groupsAndTenantsMono =
                 Mono.zipDelayError(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
         return groupsAndTenantsMono.doOnNext(tuple2 -> {
@@ -204,7 +204,7 @@ public class SecurityManager extends AbstractDatabase
     /**
      * Loads a list of group members associated with a given user code asynchronously.
      * Utilizes caching to enhance performance on subsequent calls with the same user code.
-     * The data is fetched from the database using a predefined SQL query and then serialized
+     * The data is fetched from the database using a predefined SQL from and then serialized
      * with user auditor context before being collected and sorted into a list.
      *
      * @param userCode The unique code identifying the user whose groups are to be loaded.
@@ -219,7 +219,7 @@ public class SecurityManager extends AbstractDatabase
 
     /**
      * Loads a list of tenant members associated with a given user code.
-     * The data is fetched using a cached query with specific SQL and parameters,
+     * The data is fetched using a cached from with specific SQL and parameters,
      * then serialized with user auditor context, and finally collected into a sorted list.
      *
      * @param userCode The unique code identifying the user whose tenant members are to be loaded.
