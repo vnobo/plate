@@ -24,14 +24,14 @@ import java.util.stream.Collectors;
  */
 public final class QueryHelper {
 
-    public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend",
-            "createdTime", "updatedTime", "securityCode", "query", "search");
+    public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend", "query", "search",
+            "createdTime", "updatedTime", "securityCode");
 
     /**
      * Constructs a QueryFragment instance by converting the provided object into a map,
      * excluding specified keys, and then further processing this map to create the QueryFragment.
      * This method is used to dynamically build SQL queries based on the given object's properties,
-     * allowing for flexible and secure query construction.
+     * allowing for flexible and secure from construction.
      *
      * <p>The method's workflow is as follows:
      * <ul>
@@ -40,25 +40,25 @@ public final class QueryHelper {
      *     <li>Filters out the excluded keys from the map.</li>
      *     <li>Creates a QueryFragment instance with pagination information from the Pageable object.</li>
      *     <li>Applies sorting and WHERE conditions based on the object's properties.</li>
-     *     <li>Generates the SQL query string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
+     *     <li>Generates the SQL from string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
      * </ul>
      *
      * <p>Example usage:
      * <pre>
      * {@code
-     * UserRequest userRequest = new UserRequest();
+     * UserReq userRequest = new UserReq();
      * userRequest.setUsername("john");
      * Pageable pageable = PageRequest.of(0, 10);
-     * QueryFragment queryFragment = QueryHelper.query(userRequest, pageable);
+     * QueryFragment queryFragment = QueryHelper.from(userRequest, pageable);
      * String sqlQuery = queryFragment.querySql();
      * }
      * </pre>
-     * In this example, a UserRequest object is created with a username filter, and a Pageable object is defined for pagination.
-     * The query method is then called to generate a QueryFragment, which can be used to execute a SQL query with pagination and filtering.
+     * In this example, a UserReq object is created with a username filter, and a Pageable object is defined for pagination.
+     * The from method is then called to generate a QueryFragment, which can be used to execute a SQL from with pagination and filtering.
      *
-     * @param object   The object to be converted into a map for query construction.
+     * @param object   The object to be converted into a map for from construction.
      * @param pageable The Pageable object containing pagination information.
-     * @return A QueryFragment instance representing the constructed query.
+     * @return A QueryFragment instance representing the constructed from.
      */
     public static QueryFragment query(Object object, Pageable pageable) {
         return query(object, pageable, List.of(), null);
@@ -68,7 +68,7 @@ public final class QueryHelper {
      * Constructs a QueryFragment instance by converting the provided object into a map,
      * excluding specified keys, and then further processing this map to create the QueryFragment.
      * This method is used to dynamically build SQL queries based on the given object's properties,
-     * allowing for flexible and secure query construction.
+     * allowing for flexible and secure from construction.
      *
      * <p>The method's workflow is as follows:
      * <ul>
@@ -77,24 +77,24 @@ public final class QueryHelper {
      *     <li>Filters out the excluded keys from the map.</li>
      *     <li>Creates a QueryFragment instance with pagination information from a default Pageable object.</li>
      *     <li>Applies sorting and WHERE conditions based on the object's properties.</li>
-     *     <li>Generates the SQL query string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
+     *     <li>Generates the SQL from string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
      * </ul>
      *
      * <p>Example usage:
      * <pre>
      * {@code
-     * UserRequest userRequest = new UserRequest();
+     * UserReq userRequest = new UserReq();
      * userRequest.setUsername("john");
-     * QueryFragment queryFragment = QueryHelper.query(userRequest, List.of("username"));
+     * QueryFragment queryFragment = QueryHelper.from(userRequest, List.of("username"));
      * String sqlQuery = queryFragment.querySql();
      * }
      * </pre>
-     * In this example, a UserRequest object is created with a username filter, and a collection of keys to be excluded is defined.
-     * The query method is then called to generate a QueryFragment, which can be used to execute a SQL query with filtering.
+     * In this example, a UserReq object is created with a username filter, and a collection of keys to be excluded is defined.
+     * The from method is then called to generate a QueryFragment, which can be used to execute a SQL from with filtering.
      *
-     * @param object   The object to be converted into a map for query construction.
+     * @param object   The object to be converted into a map for from construction.
      * @param skipKeys A collection of keys to be excluded from the object map.
-     * @return A QueryFragment instance representing the constructed query.
+     * @return A QueryFragment instance representing the constructed from.
      */
     public static QueryFragment query(Object object, Collection<String> skipKeys) {
         return query(object, Pageable.ofSize(25), skipKeys, null);
@@ -104,7 +104,7 @@ public final class QueryHelper {
      * Constructs a QueryFragment instance by converting the provided object into a map,
      * excluding specified keys, and then further processing this map to create the QueryFragment.
      * This method is used to dynamically build SQL queries based on the given object's properties,
-     * allowing for flexible and secure query construction.
+     * allowing for flexible and secure from construction.
      *
      * <p>The method's workflow is as follows:
      * <ul>
@@ -113,25 +113,25 @@ public final class QueryHelper {
      *     <li>Filters out the excluded keys from the map.</li>
      *     <li>Creates a QueryFragment instance with pagination information from a default Pageable object.</li>
      *     <li>Applies sorting and WHERE conditions based on the object's properties.</li>
-     *     <li>Generates the SQL query string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
+     *     <li>Generates the SQL from string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
      * </ul>
      *
      * <p>Example usage:
      * <pre>
      * {@code
-     * UserRequest userRequest = new UserRequest();
+     * UserReq userRequest = new UserReq();
      * userRequest.setUsername("john");
-     * QueryFragment queryFragment = QueryHelper.query(userRequest, List.of("username"), "a");
+     * QueryFragment queryFragment = QueryHelper.from(userRequest, List.of("username"), "a");
      * String sqlQuery = queryFragment.querySql();
      * }
      * </pre>
-     * In this example, a UserRequest object is created with a username filter, and a collection of keys to be excluded is defined.
-     * The query method is then called to generate a QueryFragment, which can be used to execute a SQL query with filtering.
+     * In this example, a UserReq object is created with a username filter, and a collection of keys to be excluded is defined.
+     * The from method is then called to generate a QueryFragment, which can be used to execute a SQL from with filtering.
      *
-     * @param object   The object to be converted into a map for query construction.
+     * @param object   The object to be converted into a map for from construction.
      * @param skipKeys A collection of keys to be excluded from the object map.
      * @param prefix   An optional prefix to be applied to column names.
-     * @return A QueryFragment instance representing the constructed query.
+     * @return A QueryFragment instance representing the constructed from.
      */
     public static QueryFragment query(Object object, Collection<String> skipKeys, String prefix) {
         return query(object, Pageable.ofSize(25), skipKeys, prefix);
@@ -141,7 +141,7 @@ public final class QueryHelper {
      * Constructs a QueryFragment instance by converting the provided object into a map,
      * excluding specified keys, and then further processing this map to create the QueryFragment.
      * This method is used to dynamically build SQL queries based on the given object's properties,
-     * allowing for flexible and secure query construction.
+     * allowing for flexible and secure from construction.
      *
      * <p>The method's workflow is as follows:
      * <ul>
@@ -150,26 +150,26 @@ public final class QueryHelper {
      *     <li>Filters out the excluded keys from the map.</li>
      *     <li>Creates a QueryFragment instance with pagination information from the Pageable object.</li>
      *     <li>Applies sorting and WHERE conditions based on the object's properties.</li>
-     *     <li>Generates the SQL query string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
+     *     <li>Generates the SQL from string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
      * </ul>
      *
      * <p>Example usage:
      * <pre>
      * {@code
-     * UserRequest userRequest = new UserRequest();
+     * UserReq userRequest = new UserReq();
      * userRequest.setUsername("john");
      * Pageable pageable = PageRequest.of(0, 10);
-     * QueryFragment queryFragment = QueryHelper.query(userRequest, pageable, "a");
+     * QueryFragment queryFragment = QueryHelper.from(userRequest, pageable, "a");
      * String sqlQuery = queryFragment.querySql();
      * }
      * </pre>
-     * In this example, a UserRequest object is created with a username filter, and a Pageable object is defined for pagination.
-     * The query method is then called to generate a QueryFragment, which can be used to execute a SQL query with pagination and filtering.
+     * In this example, a UserReq object is created with a username filter, and a Pageable object is defined for pagination.
+     * The from method is then called to generate a QueryFragment, which can be used to execute a SQL from with pagination and filtering.
      *
-     * @param object   The object to be converted into a map for query construction.
+     * @param object   The object to be converted into a map for from construction.
      * @param pageable The Pageable object containing pagination information.
      * @param prefix   An optional prefix to be applied to column names.
-     * @return A QueryFragment instance representing the constructed query.
+     * @return A QueryFragment instance representing the constructed from.
      */
     public static QueryFragment query(Object object, Pageable pageable, String prefix) {
         return query(object, pageable, List.of(), prefix);
@@ -179,7 +179,7 @@ public final class QueryHelper {
      * Constructs a QueryFragment instance by converting the provided object into a map,
      * excluding specified keys, and then further processing this map to create the QueryFragment.
      * This method is used to dynamically build SQL queries based on the given object's properties,
-     * allowing for flexible and secure query construction.
+     * allowing for flexible and secure from construction.
      *
      * <p>The method's workflow is as follows:
      * <ul>
@@ -188,28 +188,28 @@ public final class QueryHelper {
      *     <li>Filters out the excluded keys from the map.</li>
      *     <li>Creates a QueryFragment instance with pagination information from the Pageable object.</li>
      *     <li>Applies sorting and WHERE conditions based on the object's properties.</li>
-     *     <li>Generates the SQL query string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
+     *     <li>Generates the SQL from string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
      * </ul>
      *
      * <p>Example usage:
      * <pre>
      * {@code
-     * UserRequest userRequest = new UserRequest();
+     * UserReq userRequest = new UserReq();
      * userRequest.setUsername("john");
      * Pageable pageable = PageRequest.of(0, 10);
-     * QueryFragment queryFragment = QueryHelper.query(userRequest, pageable, List.of("username"), "a");
+     * QueryFragment queryFragment = QueryHelper.from(userRequest, pageable, List.of("username"), "a");
      * String sqlQuery = queryFragment.querySql();
      * }
      * </pre>
-     * In this example, a UserRequest object is created with a username filter, a Pageable object is defined for pagination,
-     * and a collection of keys to be excluded is provided. The query method is then called to generate a QueryFragment,
-     * which can be used to execute a SQL query with pagination and filtering.
+     * In this example, a UserReq object is created with a username filter, a Pageable object is defined for pagination,
+     * and a collection of keys to be excluded is provided. The from method is then called to generate a QueryFragment,
+     * which can be used to execute a SQL from with pagination and filtering.
      *
-     * @param object   The object to be converted into a map for query construction.
+     * @param object   The object to be converted into a map for from construction.
      * @param pageable The Pageable object containing pagination information.
      * @param skipKeys A collection of keys to be excluded from the object map.
      * @param prefix   An optional prefix to be applied to column names.
-     * @return A QueryFragment instance representing the constructed query.
+     * @return A QueryFragment instance representing the constructed from.
      */
     public static QueryFragment query(Object object, Pageable pageable, Collection<String> skipKeys, String prefix) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
@@ -230,16 +230,16 @@ public final class QueryHelper {
     }
 
     /**
-     * Processes the 'query' key in the object map and merges the resulting query fragment.
+     * Processes the 'from' key in the object map and merges the resulting from fragment.
      *
-     * @param queryFragment The QueryFragment to which the query conditions will be added.
-     * @param objectMap     The map representation of the object containing the 'query' key.
+     * @param queryFragment The QueryFragment to which the from conditions will be added.
+     * @param objectMap     The map representation of the object containing the 'from' key.
      * @param prefix        An optional prefix to be applied to column names.
      */
     @SuppressWarnings("unchecked")
     private static void processQueryKey(QueryFragment queryFragment, Map<String, Object> objectMap, String prefix) {
-        if (objectMap.containsKey("query")) {
-            var jsonMap = (Map<String, Object>) objectMap.get("query");
+        if (objectMap.containsKey("from")) {
+            var jsonMap = (Map<String, Object>) objectMap.get("from");
             var jsonQueryFragment = QueryJsonHelper.queryJson(jsonMap, prefix);
             queryFragment.getWhere().merge(jsonQueryFragment.getWhere());
             queryFragment.putAll(jsonQueryFragment);
@@ -247,7 +247,7 @@ public final class QueryHelper {
     }
 
     /**
-     * Processes the 'securityCode' key in the object map and adds the corresponding condition to the query fragment.
+     * Processes the 'securityCode' key in the object map and adds the corresponding condition to the from fragment.
      *
      * @param queryFragment The QueryFragment to which the security code condition will be added.
      * @param objectMap     The map representation of the object containing the 'securityCode' key.
@@ -263,7 +263,7 @@ public final class QueryHelper {
     }
 
     /**
-     * Processes the 'search' key in the object map and adds the corresponding condition to the query fragment.
+     * Processes the 'search' key in the object map and adds the corresponding condition to the from fragment.
      *
      * @param queryFragment The QueryFragment to which the search condition will be added.
      * @param objectMap     The map representation of the object containing the 'search' key.
@@ -331,11 +331,11 @@ public final class QueryHelper {
     }
 
     /**
-     * Applies the query SQL based on the provided object's table annotation.
+     * Applies the from SQL based on the provided object's table annotation.
      * If the object does not have a table annotation, it throws a QueryException.
      *
-     * @param queryFragment The QueryFragment to which the query SQL will be applied.
-     * @param object        The object containing the table annotation and data for the query.
+     * @param queryFragment The QueryFragment to which the from SQL will be applied.
+     * @param object        The object containing the table annotation and data for the from.
      * @throws QueryException If the object does not have a table annotation.
      */
     public static void applyQuerySql(QueryFragment queryFragment, Object object) {
@@ -349,7 +349,7 @@ public final class QueryHelper {
 
         String tableName = StringUtils.hasLength(table.value()) ? table.value() : objectClass.getName();
         queryFragment.columns("*");
-        queryFragment.query(tableName);
+        queryFragment.from(tableName);
     }
 
     /**

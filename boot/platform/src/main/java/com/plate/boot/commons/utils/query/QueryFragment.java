@@ -14,7 +14,7 @@ import java.util.StringJoiner;
  * with placeholders for improved performance and security against SQL injection.
  *
  * <p>The QueryFragment class is designed to be flexible and modular, allowing users to build complex
- * SQL queries by chaining method calls. It manages the SQL query structure, including the SELECT
+ * SQL queries by chaining method calls. It manages the SQL from structure, including the SELECT
  * columns, FROM clause, WHERE conditions, ORDER BY clause, and LIMIT/OFFSET for pagination.
  *
  * <p>Example usage:
@@ -22,7 +22,7 @@ import java.util.StringJoiner;
  * {@code
  * QueryFragment queryFragment = QueryFragment.withNew()
  *     .columns("id", "name", "email")
- *     .query("users")
+ *     .from("users")
  *     .where("age > :age", 18)
  *     .orderBy("name ASC")
  *     .orderBy("email DESC");
@@ -30,14 +30,14 @@ import java.util.StringJoiner;
  * // Bind parameters
  * queryFragment.put("age", 18);
  *
- * // Generate SQL query
+ * // Generate SQL from
  * String sql = queryFragment.querySql();
  * System.out.println(sql);
  * }
  * </pre>
  * In this example, a QueryFragment instance is created and configured with columns, a table name,
- * a WHERE condition, and ORDER BY clauses. Parameters are added to the query fragment, and finally,
- * the SQL query string is generated using the querySql() method.
+ * a WHERE condition, and ORDER BY clauses. Parameters are added to the from fragment, and finally,
+ * the SQL from string is generated using the querySql() method.
  *
  * @see QueryHelper for utility methods to construct QueryFragment instances from objects.
  */
@@ -56,11 +56,11 @@ public class QueryFragment extends HashMap<String, Object> {
     private final StringJoiner columns = new StringJoiner(",");
 
     /**
-     * A StringJoiner to accumulate the main SQL query parts (e.g., table names).
+     * A StringJoiner to accumulate the main SQL from parts (e.g., table names).
      * Example usage:
      * <pre>
      * {@code
-     * queryFragment.query("users");
+     * queryFragment.from("users");
      * }
      * </pre>
      */
@@ -119,6 +119,10 @@ public class QueryFragment extends HashMap<String, Object> {
         super(params);
     }
 
+    public static QueryFragment withColumns(CharSequence... columns) {
+        return withMap(Map.of()).columns(columns);
+    }
+
     public static QueryFragment withNew() {
         return withMap(Map.of());
     }
@@ -146,7 +150,7 @@ public class QueryFragment extends HashMap<String, Object> {
         return this;
     }
 
-    public QueryFragment query(CharSequence... queries) {
+    public QueryFragment from(CharSequence... queries) {
         this.from.setEmptyValue("");
         for (CharSequence query : queries) {
             this.from.add(query);
@@ -160,7 +164,7 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     /**
-     * Adds an ORDER BY clause to the query.
+     * Adds an ORDER BY clause to the from.
      *
      * @param order the order to add
      * @return the QueryFragment instance
@@ -171,7 +175,7 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     /**
-     * Adds a GROUP BY clause to the query.
+     * Adds a GROUP BY clause to the from.
      *
      * @param size   page size
      * @param offset page offset
@@ -187,7 +191,7 @@ public class QueryFragment extends HashMap<String, Object> {
         String lowerCamelCol = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column);
         String queryTable = "ts_" + lowerCamelCol;
         columns("TS_RANK_CD(" + lowerCamelCol + ", " + queryTable + ") AS rank");
-        query(",TO_TSQUERY('chinese',:" + column + ") AS " + queryTable);
+        from(",TO_TSQUERY('chinese',:" + column + ") AS " + queryTable);
         where(queryTable + " @@ " + lowerCamelCol);
         put(column, value);
         return this;
@@ -208,15 +212,15 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     /**
-     * Generates the complete SQL query string based on the configured columns, table, conditions, and pagination.
+     * Generates the complete SQL from string based on the configured columns, table, conditions, and pagination.
      *
-     * <p>The generated SQL query follows this structure:
+     * <p>The generated SQL from follows this structure:
      * <code>SELECT columns FROM table WHERE conditions ORDER BY order LIMIT size OFFSET offset</code>
      *
-     * <p>If no table or columns are specified, an exception is thrown to prevent generating an invalid query.
+     * <p>If no table or columns are specified, an exception is thrown to prevent generating an invalid from.
      *
-     * @return A String representing the complete SQL query.
-     * @throws QueryException if the querySql is null, indicating that the query structure is incomplete.
+     * @return A String representing the complete SQL from.
+     * @throws QueryException if the querySql is null, indicating that the from structure is incomplete.
      */
     public String querySql() {
         if (this.from.length() > 0) {
@@ -228,15 +232,15 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     /**
-     * Generates the COUNT SQL query string based on the configured conditions.
+     * Generates the COUNT SQL from string based on the configured conditions.
      *
-     * <p>The generated COUNT SQL query follows this structure:
+     * <p>The generated COUNT SQL from follows this structure:
      * <code>SELECT COUNT(*) FROM (SELECT columns FROM table WHERE conditions) t</code>
      *
-     * <p>If no table or columns are specified, an exception is thrown to prevent generating an invalid query.
+     * <p>If no table or columns are specified, an exception is thrown to prevent generating an invalid from.
      *
-     * @return A String representing the COUNT SQL query.
-     * @throws QueryException if the countSql is null, indicating that the query structure is incomplete.
+     * @return A String representing the COUNT SQL from.
+     * @throws QueryException if the countSql is null, indicating that the from structure is incomplete.
      */
     public String countSql() {
         if (this.from.length() > 0) {
