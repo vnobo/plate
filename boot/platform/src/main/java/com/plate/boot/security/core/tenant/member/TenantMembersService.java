@@ -30,7 +30,7 @@ public class TenantMembersService extends AbstractDatabase {
         QueryFragment queryFragment = QueryFragment.of(pageable.getPageSize(), pageable.getOffset(), fragment)
                 .columns("a.*", "b.name as tenant_name",
                         "b.extend as tenant_extend", "c.name as login_name", "c.username")
-                .query("se_tenant_members a",
+                .from("se_tenant_members a",
                         "inner join se_tenants b on a.tenant_code = b.code",
                         "inner join se_users c on c.code = a.user_code");
         QueryHelper.applySort(queryFragment, pageable.getSort(), "a");
