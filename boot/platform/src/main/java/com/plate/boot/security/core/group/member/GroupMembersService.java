@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -31,7 +30,6 @@ public class GroupMembersService extends AbstractDatabase {
                         "inner join se_users c on c.code = a.user_code")
                 .where(fragment.getWhere().toString());
         queryFragment.putAll(fragment);
-        Query.query(Criteria.where("name").in("a"));
         return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(),
                 queryFragment, GroupMemberResp.class);
     }
