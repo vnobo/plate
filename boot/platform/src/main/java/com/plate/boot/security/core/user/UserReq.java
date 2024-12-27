@@ -8,31 +8,31 @@ import lombok.ToString;
 
 /**
  * Represents a user request, extending the base User class with additional attributes specific to requests.
- * It includes a query map for parameters and a security code, offering fluent method for setting the security code.
- * This class also provides utility methods to convert to a plain User instance and to bind request parameters into a SQL query fragment.
+ * It includes a from map for parameters and a security code, offering fluent method for setting the security code.
+ * This class also provides utility methods to convert to a plain User instance and to bind request parameters into a SQL from fragment.
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class UserRequest extends User {
+public class UserReq extends User {
 
     /**
-     * Sets the security code for the user request and returns the updated UserRequest instance.
+     * Sets the security code for the user request and returns the updated UserReq instance.
      * This method allows for method chaining in a fluent API style.
      *
      * @param securityCode The security code to be set for the user request.
-     * @return The UserRequest instance with the updated security code.
+     * @return The UserReq instance with the updated security code.
      */
-    public UserRequest securityCode(String securityCode) {
+    public UserReq securityCode(String securityCode) {
         this.setSecurityCode(securityCode);
         return this;
     }
 
     /**
-     * Converts the UserRequest instance into a User instance by copying all properties.
+     * Converts the UserReq instance into a User instance by copying all properties.
      * This is useful when you need to separate concerns between a request object and a domain object.
      *
-     * @return A new User instance with properties copied from this UserRequest.
+     * @return A new User instance with properties copied from this UserReq.
      */
     public User toUser() {
         return BeanUtils.copyProperties(this, User.class);
