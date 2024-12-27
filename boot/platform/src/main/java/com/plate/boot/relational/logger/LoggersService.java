@@ -30,11 +30,11 @@ public class LoggersService extends AbstractDatabase {
     /**
      * Searches for loggers based on the provided request and pagination information.
      *
-     * @param request  A LoggerRequest object containing criteria for filtering loggers.
+     * @param request  A LoggerReq object containing criteria for filtering loggers.
      * @param pageable Pagination details defining how the results should be sliced.
      * @return A Flux of Logger objects matching the search criteria, respecting the specified pagination.
      */
-    public Flux<Logger> search(LoggerRequest request, Pageable pageable) {
+    public Flux<Logger> search(LoggerReq request, Pageable pageable) {
         QueryFragment queryFragment = QueryHelper.query(request, pageable);
         var cacheKey = BeanUtils.cacheKey(request, pageable);
         return this.queryWithCache(cacheKey, queryFragment.querySql(), queryFragment, Logger.class);
@@ -43,13 +43,13 @@ public class LoggersService extends AbstractDatabase {
     /**
      * Retrieves a paginated list of loggers based on the provided request and pagination details.
      *
-     * @param request  A {@link LoggerRequest} object containing criteria to filter loggers.
+     * @param request  A {@link LoggerReq} object containing criteria to filter loggers.
      * @param pageable A {@link Pageable} instance specifying pagination information like page number, size, sorting, etc.
      * @return A {@link Mono} emitting a {@link Page} of {@link Logger} objects that match the given criteria,
      * respecting the specified pagination and sorted accordingly. The {@link Page} includes both content and
      * metadata such as total elements, page number, and page size.
      */
-    public Mono<Page<Logger>> page(LoggerRequest request, Pageable pageable) {
+    public Mono<Page<Logger>> page(LoggerReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment queryFragment = QueryHelper.query(request, pageable);
         var countMono = this.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
@@ -58,14 +58,14 @@ public class LoggersService extends AbstractDatabase {
     }
 
     /**
-     * Operates on a given {@link LoggerRequest} by converting it into a {@link Logger}
+     * Operates on a given {@link LoggerReq} by converting it into a {@link Logger}
      * entity and saving it using the {@link #save(Logger)} method. After the termination
      * of the save operation, the cache is cleared to ensure fresh data is fetched on subsequent queries.
      *
-     * @param request The {@link LoggerRequest} containing details necessary to create or update a {@link Logger} entity.
+     * @param request The {@link LoggerReq} containing details necessary to create or update a {@link Logger} entity.
      * @return A {@link Mono} emitting the saved {@link Logger} entity upon successful completion of the save operation.
      */
-    public Mono<Logger> operate(LoggerRequest request) {
+    public Mono<Logger> operate(LoggerReq request) {
         return this.save(request.toLogger()).doAfterTerminate(() -> this.cache.clear());
     }
 
