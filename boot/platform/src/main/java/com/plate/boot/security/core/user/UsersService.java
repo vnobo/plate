@@ -33,26 +33,26 @@ public class UsersService extends AbstractDatabase {
      *
      * @param request  The user request object containing parameters needed for the search.
      * @param pageable The pagination information specifying the page number and size of each page.
-     * @return A Flux object containing a stream of UserResponse data.
+     * @return A Flux object containing a stream of UserRes data.
      */
-    public Flux<UserResponse> search(UserRequest request, Pageable pageable) {
+    public Flux<UserRes> search(UserReq request, Pageable pageable) {
         QueryFragment queryFragment = QueryHelper.query(request, pageable);
         String key = BeanUtils.cacheKey(request, pageable);
-        return super.queryWithCache(key, queryFragment.querySql(), queryFragment, UserResponse.class);
+        return super.queryWithCache(key, queryFragment.querySql(), queryFragment, UserRes.class);
     }
 
     /**
      * Retrieves a paged list of users based on the provided request and pagination settings.
      * <p>
-     * This method performs a search query using the given {@link UserRequest} and {@link Pageable} parameters,
+     * This method performs a search from using the given {@link UserReq} and {@link Pageable} parameters,
      * and then retrieves the total count of matching records. The results are then combined into a single
      * {@link Page} object, which includes both the list of users and the total count, allowing for pagination.
      *
-     * @param request  The {@link UserRequest} object containing the search criteria.
+     * @param request  The {@link UserReq} object containing the search criteria.
      * @param pageable The {@link Pageable} object defining the pagination settings.
      * @return A {@link Mono} that emits a single {@link Page} object containing the paged list of users and the total count.
      */
-    public Mono<Page<UserResponse>> page(UserRequest request, Pageable pageable) {
+    public Mono<Page<UserRes>> page(UserReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment queryFragment = request.querySql(List.of());
         var countMono = super.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
@@ -61,10 +61,10 @@ public class UsersService extends AbstractDatabase {
     }
 
     /**
-     * Loads a user by their unique code using a cached query.
+     * Loads a user by their unique code using a cached from.
      * <p>
      * This method retrieves a user from the repository based on the provided code.
-     * It utilizes a cached query to improve performance, reducing the need for repeated database hits
+     * It utilizes a cached from to improve performance, reducing the need for repeated database hits
      * for the same code. If a user with the given code is found, it is emitted as a single value in a {@link Mono}.
      * If no user is found, an empty {@link Mono} is returned.
      *
@@ -78,18 +78,18 @@ public class UsersService extends AbstractDatabase {
 
 
     /**
-     * Adds a new user based on the provided UserRequest.
+     * Adds a new user based on the provided UserReq.
      *
      * <p>This method first checks if a user with the same username already exists in the database.
      * If an existing user is found, a {@link RestServerException} is thrown indicating that the
      * user already exists. If no existing user is found, the request is processed through the
-     * {@link #operate(UserRequest)} method to create and save the new user entity.</p>
+     * {@link #operate(UserReq)} method to create and save the new user entity.</p>
      *
-     * @param request A UserRequest object containing the details for the new user, including the username which must be unique.
+     * @param request A UserReq object containing the details for the new user, including the username which must be unique.
      * @return A Mono that, when subscribed to, emits the newly created User entity upon successful addition,
      * or errors with a RestServerException if the user already exists.
      */
-    public Mono<User> add(UserRequest request) {
+    public Mono<User> add(UserReq request) {
         return this.usersRepository.existsByUsernameIgnoreCase(request.getUsername()).flatMap(exists -> {
             if (exists) {
                 return Mono.error(RestServerException.withMsg("User already exists",
@@ -100,18 +100,18 @@ public class UsersService extends AbstractDatabase {
     }
 
     /**
-     * Modifies an existing user based on the provided UserRequest.
+     * Modifies an existing user based on the provided UserReq.
      * <p>
      * This method first attempts to find a user by their username in the repository. If the user is not found,
      * a {@link RestServerException} is thrown indicating the absence of the user. Upon finding the user, the
      * request's ID, code, and username are set to match the found user's details (though these typically would
      * be redundant operations given the nature of the method). The modified user is then processed through the
-     * {@link #operate(UserRequest)} method to apply any necessary updates defined in the request.
+     * {@link #operate(UserReq)} method to apply any necessary updates defined in the request.
      *
-     * @param request A UserRequest object containing the updated information for the user, primarily identified by their username.
+     * @param request A UserReq object containing the updated information for the user, primarily identified by their username.
      * @return A Mono that, when subscribed to, emits the updated User entity after modification or throws an exception if the user was not found.
      */
-    public Mono<User> modify(UserRequest request) {
+    public Mono<User> modify(UserReq request) {
         Mono<User> userFoundMono = Mono.defer(() -> Mono.error(RestServerException
                 .withMsg("User [" + request.getUsername() + "] not found",
                         new UsernameNotFoundException("User by username [" + request.getUsername() + "] not found!"))));
@@ -125,19 +125,19 @@ public class UsersService extends AbstractDatabase {
     }
 
     /**
-     * Operates on a UserRequest to process and persist user data.
+     * Operates on a UserReq to process and persist user data.
      *
-     * <p>This method enhances the incoming UserRequest by upgrading the password encoding if necessary.
+     * <p>This method enhances the incoming UserReq by upgrading the password encoding if necessary.
      * It then attempts to find an existing user by code from the repository. If the user does not exist,
      * the request is converted into a new User entity. Subsequently, the request's data is copied onto
      * the found or created user, and the user is saved. Finally, the operation triggers a cache clearance
      * to ensure data consistency.</p>
      *
-     * @param request The UserRequest containing the data to operate on, including the code for user identification
+     * @param request The UserReq containing the data to operate on, including the code for user identification
      *                and the password that may require encoding upgrade.
      * @return A Mono emitting the updated or newly created User after the operation is completed.
      */
-    public Mono<User> operate(UserRequest request) {
+    public Mono<User> operate(UserReq request) {
         request.setPassword(this.upgradeEncodingIfPassword(request.getPassword()));
         var userMono = this.usersRepository.findByCode(request.getCode()).defaultIfEmpty(request.toUser());
         userMono = userMono.flatMap(user -> {
@@ -148,13 +148,13 @@ public class UsersService extends AbstractDatabase {
     }
 
     /**
-     * Deletes a user based on the provided UserRequest.
+     * Deletes a user based on the provided UserReq.
      *
-     * @param request A UserRequest object encapsulating the details necessary to identify the user for deletion.
+     * @param request A UserReq object encapsulating the details necessary to identify the user for deletion.
      * @return A Mono<Void> which upon subscription initiates the deletion process asynchronously.
      * The Mono will complete empty when the deletion is successful, or error if the operation fails.
      */
-    public Mono<Void> delete(UserRequest request) {
+    public Mono<Void> delete(UserReq request) {
         return this.usersRepository.delete(request.toUser())
                 .doAfterTerminate(() -> this.cache.clear());
     }

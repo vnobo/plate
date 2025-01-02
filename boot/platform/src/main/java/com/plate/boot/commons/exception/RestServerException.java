@@ -28,19 +28,45 @@ import java.lang.reflect.Method;
 @EqualsAndHashCode(callSuper = true)
 public class RestServerException extends ServerErrorException {
 
-
+    /**
+     * Constructs a new RestServerException with the specified detail message and cause.
+     *
+     * @param reason the detail message (which is saved for later retrieval by the {@link Throwable#getMessage()} method).
+     * @param cause  the cause (which is saved for later retrieval by the {@link Throwable#getCause()} method).
+     */
     public RestServerException(String reason, Throwable cause) {
         super(reason, cause);
     }
 
+    /**
+     * Constructs a new RestServerException with the specified detail message, handler method, and cause.
+     *
+     * @param reason        the detail message (which is saved for later retrieval by the {@link Throwable#getMessage()} method).
+     * @param handlerMethod the method that caused the exception.
+     * @param cause         the cause (which is saved for later retrieval by the {@link Throwable#getCause()} method).
+     */
     public RestServerException(String reason, Method handlerMethod, Throwable cause) {
         super(reason, handlerMethod, cause);
     }
 
+    /**
+     * Constructs a new RestServerException with the specified detail message, method parameter, and cause.
+     *
+     * @param reason    the detail message (which is saved for later retrieval by the {@link Throwable#getMessage()} method).
+     * @param parameter the method parameter that caused the exception.
+     * @param cause     the cause (which is saved for later retrieval by the {@link Throwable#getCause()} method).
+     */
     public RestServerException(String reason, MethodParameter parameter, Throwable cause) {
         super(reason, parameter, cause);
     }
 
+    /**
+     * Creates a new RestServerException with the specified detail message and cause.
+     *
+     * @param reason the detail message.
+     * @param cause  the cause.
+     * @return a new instance of RestServerException.
+     */
     public static RestServerException withMsg(String reason, Throwable cause) {
         var ex = new RestServerException(reason, cause);
         ex.setTitle(reason);
@@ -49,10 +75,26 @@ public class RestServerException extends ServerErrorException {
         return ex;
     }
 
+    /**
+     * Creates a new RestServerException with the specified detail message, handler method, and cause.
+     *
+     * @param reason        the detail message.
+     * @param handlerMethod the method that caused the exception.
+     * @param cause         the cause (which is saved for later retrieval by the {@link Throwable#getCause()} method).
+     * @return a new instance of RestServerException.
+     */
     public static RestServerException withMsg(String reason, Method handlerMethod, @Nullable Throwable cause) {
         return new RestServerException(reason, handlerMethod, cause);
     }
 
+    /**
+     * Creates a new RestServerException with the specified detail message, method parameter, and cause.
+     *
+     * @param reason    the detail message.
+     * @param parameter the method parameter that caused the exception.
+     * @param cause     the cause (which is saved for later retrieval by the {@link Throwable#getCause()} method).
+     * @return a new instance of RestServerException.
+     */
     public static RestServerException withMsg(String reason, MethodParameter parameter, Throwable cause) {
         return new RestServerException(reason, parameter, cause);
     }

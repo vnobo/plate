@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.utils.ContextUtils;
-import com.plate.boot.relational.logger.LoggerRequest;
+import com.plate.boot.relational.logger.LoggerReq;
 import com.plate.boot.relational.logger.LoggersService;
 import com.plate.boot.security.SecurityDetails;
 import io.netty.buffer.Unpooled;
@@ -48,7 +48,7 @@ import static org.springframework.security.web.server.csrf.CsrfWebFilter.DEFAULT
  * Key Features:
  * - Caches request and response bodies to ensure they can be logged even after consumption.
  * - Matches requests to determine if logging should occur based on a ServerWebExchangeMatcher.
- * - Processes and logs the HTTP method, status, path, headers, cookies, query parameters, and bodies.
+ * - Processes and logs the HTTP method, status, path, headers, cookies, from parameters, and bodies.
  * - Handles DataBuffer retention and release to prevent memory leaks.
  * - Utilizes a separate service (LoggersService) to handle the logging operation asynchronously.
  * - Supports tracing-level logging for debugging filter operations.
@@ -355,8 +355,8 @@ public class LoggerFilter implements WebFilter {
     /**
      * Logs the details of an HTTP request along with optional user details for security audit purposes.
      * It extracts information from the provided ServerWebExchange including request and response headers,
-     * cookies, query parameters, body content, and response status code. The logged data is structured
-     * into an ObjectNode which is then used to create a LoggerRequest object. This method also associates
+     * cookies, from parameters, body content, and response status code. The logged data is structured
+     * into an ObjectNode which is then used to create a LoggerReq object. This method also associates
      * the log entry with a tenant code extracted from the user details, if available. The logging process
      * is asynchronous and the result is logged at the debug level with a prefixed log message indicating
      * the operation performed.
@@ -387,7 +387,7 @@ public class LoggerFilter implements WebFilter {
         String tenantCode = Optional.ofNullable(userDetails.getTenantCode()).orElse("0");
         String path = request.getPath().value();
 
-        LoggerRequest logger = LoggerRequest.of(tenantCode, userDetails.getUsername(), prefix,
+        LoggerReq logger = LoggerReq.of(tenantCode, userDetails.getUsername(), prefix,
                 method, status, path, contentNode);
         this.loggerService.operate(logger).share().subscribe(res ->
                 log.debug("{}**操作日志** Method: {},MessageBody: {}",

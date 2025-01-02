@@ -5,7 +5,7 @@ import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.security.SecurityDetails;
 import com.plate.boot.security.SecurityManager;
 import com.plate.boot.security.core.user.User;
-import com.plate.boot.security.core.user.UserRequest;
+import com.plate.boot.security.core.user.UserReq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -127,7 +127,7 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
 
     /**
      * Registers a new user or modifies an existing user based on the provided OAuth2 user information.
-     * This method first converts the OAuth2User object into a UserRequest and then
+     * This method first converts the OAuth2User object into a UserReq and then
      * delegates the registration or modification process to the SecurityManager.
      *
      * @param registrationId The unique identifier for the OAuth2 registration.
@@ -140,17 +140,17 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
     }
 
     /**
-     * Converts an OAuth2User object into a UserRequest, preparing it for user registration or update.
+     * Converts an OAuth2User object into a UserReq, preparing it for user registration or update.
      * This method handles specifics based on the registrationId, setting default attributes
      * like a random password and populating fields from the OAuth2User's attributes.
      *
      * @param registrationId The identifier for the OAuth2 registration (e.g., 'github', 'gitee').
      * @param oAuth2User     The OAuth2User object containing user data fetched from the OAuth provider.
-     * @return A UserRequest instance populated with data necessary for user registration or profile update,
+     * @return A UserReq instance populated with data necessary for user registration or profile update,
      * including a generated password and extended attributes specific to the OAuth2 registration.
      */
-    public UserRequest convertToUserRequest(String registrationId, OAuth2User oAuth2User) {
-        UserRequest request = new UserRequest();
+    public UserReq convertToUserRequest(String registrationId, OAuth2User oAuth2User) {
+        UserReq request = new UserReq();
         request.setPassword(generateRandoPassword());
         ObjectNode extend = ContextUtils.OBJECT_MAPPER.createObjectNode();
         if (registrationId.equalsIgnoreCase(GITHUB.name()) || "gitee".equalsIgnoreCase(registrationId)) {

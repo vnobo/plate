@@ -5,7 +5,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.r2dbc.core.DatabaseClient;
-import org.springframework.stereotype.Component;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
@@ -16,7 +15,7 @@ public class BootApplication {
         SpringApplication.run(BootApplication.class, args);
     }
 
-    @Component
+    //@Component
     static class AppRunner implements ApplicationRunner {
 
         private final DatabaseClient databaseClient;

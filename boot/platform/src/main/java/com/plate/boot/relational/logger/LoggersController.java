@@ -30,7 +30,7 @@ public class LoggersController {
      * which processes the request further to fetch the relevant log entries. The returned data is wrapped
      * in a {@link PagedModel} to facilitate standardized pagination responses.
      *
-     * @param request  A {@link LoggerRequest} object encapsulating the criteria for the log search,
+     * @param request  A {@link LoggerReq} object encapsulating the criteria for the log search,
      *                 such as filters, prefixes, or additional metadata.
      * @param pageable A Spring {@link Pageable} instance defining the pagination parameters like page number,
      *                 size, sorting instructions, etc.
@@ -39,7 +39,7 @@ public class LoggersController {
      * the current page and provides access to the actual log records.
      */
     @GetMapping("page")
-    public Mono<Page<Logger>> page(LoggerRequest request, Pageable pageable) {
+    public Mono<Page<Logger>> page(LoggerReq request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMap(userDetails -> {
             request.setSecurityCode(userDetails.getTenantCode());
             return this.loggersService.page(request, pageable);

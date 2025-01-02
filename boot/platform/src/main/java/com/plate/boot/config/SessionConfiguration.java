@@ -27,12 +27,12 @@ import java.util.regex.Pattern;
 /**
  * Configures session management for web applications with support for custom session ID resolution,
  * particularly tailored for handling both AJAX requests and cases where a Bearer token might be
- * present either in the request header or query parameters.
+ * present either in the request header or from parameters.
  * <p>
  * This configuration class enhances the session handling by introducing a custom strategy to read
  * session IDs from a custom header ({@code X-Auth-Token}) for AJAX requests or falling back to
  * cookies for non-AJAX requests. It also supports extracting Bearer tokens from the Authorization
- * header or access_token query parameter, ensuring secure and flexible session management.
+ * header or access_token from parameter, ensuring secure and flexible session management.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableRedisIndexedWebSession
@@ -67,7 +67,7 @@ public class SessionConfiguration {
      * Configures and provides a custom strategy for resolving the session ID from web requests.
      * This resolver extends {@link HeaderWebSessionIdResolver} and conditionally switches
      * between header-based and cookie-based session ID resolution based on the presence of
-     * specific request headers or query parameters.
+     * specific request headers or from parameters.
      *
      * @return A configured instance of {@link WebSessionIdResolver} that is capable of
      * handling session ID resolution with custom logic to support both header and

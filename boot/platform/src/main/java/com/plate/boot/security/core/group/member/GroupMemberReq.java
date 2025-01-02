@@ -36,7 +36,7 @@ public class GroupMemberReq extends GroupMember {
     public QueryFragment toParamSql() {
         QueryFragment queryFragment = QueryHelper.query(this, List.of("users", "username"), "a");
         if (!ObjectUtils.isEmpty(this.getUsers())) {
-            queryFragment.where("a.user_code in :users");
+            queryFragment.where("a.user_code in (:users)");
             queryFragment.put("users", this.getUsers());
         }
 

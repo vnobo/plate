@@ -14,12 +14,12 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
- * QueryJsonHelper is a utility class designed to facilitate the transformation of query parameters into
+ * QueryJsonHelper is a utility class designed to facilitate the transformation of from parameters into
  * SQL-compatible formats, particularly focusing on handling JSON-based queries. It provides methods to
  * convert sort orders into camelCase for JSON serialization, construct conditional SQL clauses for querying
  * nested JSON properties, and manage special operations like 'Between', 'In', and others within a SQL context.
  *
- * <p>This class is essential for applications that need to query JSON data stored in SQL databases, as it
+ * <p>This class is essential for applications that need to from JSON data stored in SQL databases, as it
  * helps in constructing SQL queries that can understand and manipulate JSON structures.
  *
  * <p>Example usage:
@@ -33,9 +33,9 @@ import java.util.stream.Collectors;
  * System.out.println(sqlQuery);
  * }
  * </pre>
- * In this example, a JSON-based query is constructed using the QueryJsonHelper class. The query searches
- * for a user with a username like "Test User" and an email equal to "testuser@example.com". The query is
- * then converted into an SQL query string that can be executed against a database.
+ * In this example, a JSON-based from is constructed using the QueryJsonHelper class. The from searches
+ * for a user with a username like "Test User" and an email equal to "testuser@example.com". The from is
+ * then converted into an SQL from string that can be executed against a database.
  *
  * <p>For a JSON object with nested fields, such as:
  * <pre>
@@ -63,9 +63,9 @@ import java.util.stream.Collectors;
  * QueryFragment queryFragment = QueryJsonHelper.queryJson(jsonParams, "a");
  * }
  * </pre>
- * This will generate an SQL query that can search for users based on the provided JSON parameters.
+ * This will generate an SQL from that can search for users based on the provided JSON parameters.
  *
- * @see QueryFragment for the class representing the SQL query structure.
+ * @see QueryFragment for the class representing the SQL from structure.
  */
 public final class QueryJsonHelper {
 
@@ -149,10 +149,10 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Constructs a QueryFragment representing a set of JSON-based query conditions.
+     * Constructs a QueryFragment representing a set of JSON-based from conditions.
      *
      * <p>This method takes a map of JSON parameters and a prefix, and constructs a QueryFragment that can be
-     * used to build an SQL query targeting JSON data. The method iterates over the provided parameters,
+     * used to build an SQL from targeting JSON data. The method iterates over the provided parameters,
      * converting each into a properly formatted SQL condition using the provided prefix to namespace JSON keys.
      *
      * @param params A map where each key represents a JSON path (possibly prefixed) and the value is the
@@ -179,15 +179,15 @@ public final class QueryJsonHelper {
      * and delegates the construction of the final condition part to {@link #buildLastCondition(String[], Object)}.
      * <pre>
      * {@code
-     * // Create a map of JSON-based query parameters
+     * // Create a map of JSON-based from parameters
      * Map<String, Object> jsonParams = new HashMap<>();
      * jsonParams.put("extend.requestBody.nameEq", "Test User"); // EQ stands for Equal
      * jsonParams.put("extend.additionalField1Eq", "value1"); // EQ stands for Equal
      *
-     * // Use the QueryJsonHelper to construct the SQL query for the given JSON parameters
+     * // Use the QueryJsonHelper to construct the SQL from for the given JSON parameters
      * QueryFragment queryFragment = QueryJsonHelper.queryJson(jsonParams, "a");
      *
-     * // Get the SQL query string
+     * // Get the SQL from string
      * String sqlQuery = queryFragment.querySql();
      *
      * // Now you can execute the sqlQuery against your database using a JDBC template or similar
@@ -197,7 +197,7 @@ public final class QueryJsonHelper {
      * @param entry  A map entry where the key is a dot-delimited string indicating a JSON path
      *               (e.g., "extend.usernameLike"), and the value is the target value for the condition.
      * @param prefix A prefix to prepend to the first key of the JSON path to qualify column names
-     *               in the SQL query, ensuring correct scoping or avoiding naming collisions.
+     *               in the SQL from, ensuring correct scoping or avoiding naming collisions.
      * @return A {@link QueryFragment} object representing the constructed SQL condition
      * for querying JSON data, including the SQL fragment, parameters, and the operation detail.
      * @throws RestServerException If the provided JSON path does not meet the minimum requirement of specifying
@@ -206,13 +206,13 @@ public final class QueryJsonHelper {
     private static QueryFragment buildJsonCondition(Map.Entry<String, Object> entry, String prefix) {
         String[] keys = StringUtils.delimitedListToStringArray(entry.getKey(), ".");
         if (keys.length < 2) {
-            throw QueryException.withError("Json query column path [query[" + entry.getKey() + "]] error",
+            throw QueryException.withError("Json from column path [from[" + entry.getKey() + "]] error",
                     new Throwable("Json path example: extend.username," +
-                            "Request query params:" +
-                            "query[extend.usernameLike]=aa," +
-                            "query[extend.age]=23," +
-                            "query[extend.nameIn]=aa,bb,cc," +
-                            "query[extend.codeEq]=123456"
+                            "Request from params:" +
+                            "from[extend.usernameLike]=aa," +
+                            "from[extend.age]=23," +
+                            "from[extend.nameIn]=aa,bb,cc," +
+                            "from[extend.codeEq]=123456"
                     ));
         }
         // 处理第一个键
@@ -236,19 +236,19 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Constructs the final part of a query condition based on an array of keys and a value.
+     * Constructs the final part of a from condition based on an array of keys and a value.
      * This method generates SQL fragments for different types of conditions such as equality,
      * between, in, not in, etc., depending on the detected keyword in the last key of the keys array.
      * It handles parameterization to prevent SQL injection and prepares the condition for dynamic
-     * query execution.
+     * from execution.
      *
      * @param keys  An array of strings forming the path to the JSON attribute. The last element
      *              may contain a keyword suffix for special operations.
-     * @param value The value to be compared against in the query condition. For 'In' and 'Between'
+     * @param value The value to be compared against in the from condition. For 'In' and 'Between'
      *              operations, this should be a comma-separated string or an array respectively.
      * @return A QueryCondition object containing:
      * - The 'getWhereSql' field as a string of the SQL fragment representing the condition.
-     * - The 'params' map holding named parameters and their values for the query.
+     * - The 'params' map holding named parameters and their values for the from.
      * - The 'operation' entry describing the operation type and its SQL syntax.
      */
     private static QueryFragment buildLastCondition(String[] keys, Object value) {
@@ -284,14 +284,14 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Constructs a JSON path query string from an array of keys meant to be used in SQL queries
+     * Constructs a JSON path from string from an array of keys meant to be used in SQL queries
      * targeting JSON data. Each key in the array is appended to the path with the appropriate
      * SQL-JSON operator, allowing for traversal of nested JSON objects.
      *
      * @param joinKeys An array of strings representing keys in a JSON object which will be combined
-     *                 to form a JSON path query expression.
+     *                 to form a JSON path from expression.
      * @return StringBuilder A StringBuilder object containing the concatenated JSON path
-     * query expression, suitable for use in SQL queries with JSON columns.
+     * from expression, suitable for use in SQL queries with JSON columns.
      */
     private static StringJoiner buildJsonQueryPath(String[] joinKeys) {
         StringJoiner jsonPath = new StringJoiner("->");

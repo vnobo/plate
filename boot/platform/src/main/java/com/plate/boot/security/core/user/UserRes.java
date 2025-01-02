@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plate.boot.commons.utils.BeanUtils;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.springframework.data.annotation.ReadOnlyProperty;
 
 import java.util.Map;
 
@@ -16,10 +17,16 @@ import java.util.Map;
  */
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class UserResponse extends User {
+public class UserRes extends User {
 
-    public static UserResponse withUser(User user) {
-        UserResponse response = new UserResponse();
+    /**
+     * Data full text search entity sort
+     */
+    @ReadOnlyProperty
+    protected Double rank;
+
+    public static UserRes withUser(User user) {
+        UserRes response = new UserRes();
         BeanUtils.copyProperties(user, response);
         return response;
     }
