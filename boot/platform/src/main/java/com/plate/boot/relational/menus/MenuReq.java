@@ -21,20 +21,20 @@ import java.util.Set;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class MenuRequest extends Menu {
+public class MenuReq extends Menu {
 
     private Set<String> rules;
 
     private String icons;
 
     @Valid
-    private Set<MenuRequest> menus;
+    private Set<MenuReq> menus;
 
-    public static MenuRequest of(String tenantCode, String authority) {
-        MenuRequest menuRequest = new MenuRequest();
-        menuRequest.setTenantCode(tenantCode);
-        menuRequest.setAuthority(authority);
-        return menuRequest;
+    public static MenuReq of(String tenantCode, String authority) {
+        MenuReq menuReq = new MenuReq();
+        menuReq.setTenantCode(tenantCode);
+        menuReq.setAuthority(authority);
+        return menuReq;
     }
 
     public Menu toMenu() {

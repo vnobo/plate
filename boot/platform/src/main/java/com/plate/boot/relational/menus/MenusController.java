@@ -29,17 +29,17 @@ public class MenusController {
     private final MenusService menusService;
 
     @GetMapping("search")
-    public Flux<Menu> search(MenuRequest request, Pageable pageable) {
+    public Flux<Menu> search(MenuReq request, Pageable pageable) {
         return this.menusService.search(request, pageable).distinct(Menu::getAuthority);
     }
 
     @GetMapping("page")
-    public Mono<Page<Menu>> page(MenuRequest request, Pageable pageable) {
+    public Mono<Page<Menu>> page(MenuReq request, Pageable pageable) {
         return this.menusService.page(request, pageable);
     }
 
     @GetMapping("me")
-    public Flux<Menu> load(MenuRequest request) {
+    public Flux<Menu> load(MenuReq request) {
         return ReactiveSecurityContextHolder.getContext().flatMapMany(securityContext -> {
             Authentication authentication = securityContext.getAuthentication();
             var rules = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
@@ -55,7 +55,7 @@ public class MenusController {
     }
 
     @PostMapping("save")
-    public Mono<Menu> save(@Valid @RequestBody MenuRequest request) {
+    public Mono<Menu> save(@Valid @RequestBody MenuReq request) {
         if (StringUtils.hasLength(request.getCode())) {
             return this.menusService.modify(request);
         }
@@ -63,7 +63,7 @@ public class MenusController {
     }
 
     @DeleteMapping("delete")
-    public Mono<Void> delete(@Valid @RequestBody MenuRequest request) {
+    public Mono<Void> delete(@Valid @RequestBody MenuReq request) {
         Assert.isTrue(!request.isNew(), "Delete [ID] cannot be empty!");
         Assert.notNull(request.getCode(), "Delete [CODE] cannot be empty!");
         return this.menusService.delete(request);
