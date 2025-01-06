@@ -230,16 +230,16 @@ public final class QueryHelper {
     }
 
     /**
-     * Processes the 'from' key in the object map and merges the resulting from fragment.
+     * Processes the 'query' key in the object map and merges the resulting from fragment.
      *
-     * @param queryFragment The QueryFragment to which the from conditions will be added.
+     * @param queryFragment The QueryFragment to which the query conditions will be added.
      * @param objectMap     The map representation of the object containing the 'from' key.
      * @param prefix        An optional prefix to be applied to column names.
      */
     @SuppressWarnings("unchecked")
     private static void processQueryKey(QueryFragment queryFragment, Map<String, Object> objectMap, String prefix) {
-        if (objectMap.containsKey("from")) {
-            var jsonMap = (Map<String, Object>) objectMap.get("from");
+        if (objectMap.containsKey("query")) {
+            var jsonMap = (Map<String, Object>) objectMap.get("query");
             var jsonQueryFragment = QueryJsonHelper.queryJson(jsonMap, prefix);
             queryFragment.getWhere().merge(jsonQueryFragment.getWhere());
             queryFragment.putAll(jsonQueryFragment);
