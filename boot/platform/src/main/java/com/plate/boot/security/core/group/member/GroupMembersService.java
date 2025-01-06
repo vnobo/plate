@@ -37,8 +37,7 @@ public class GroupMembersService extends AbstractDatabase {
     public Mono<Page<GroupMemberResp>> page(GroupMemberReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment fragment = request.toParamSql();
-        QueryFragment queryFragment = QueryFragment.withColumns("*")
-                .from("se_group_members a",
+        QueryFragment queryFragment = QueryFragment.withColumns("*").from("se_group_members a",
                         "inner join se_groups b on a.group_code = b.code",
                         "inner join se_users c on c.code = a.user_code")
                 .where(fragment.getWhere().toString());
