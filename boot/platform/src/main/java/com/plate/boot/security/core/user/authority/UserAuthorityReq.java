@@ -14,7 +14,7 @@ import java.util.Set;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class UserAuthorityRequest extends UserAuthority {
+public class UserAuthorityReq extends UserAuthority {
 
     public UserAuthority toAuthority() {
         return BeanUtils.copyProperties(this, UserAuthority.class);
