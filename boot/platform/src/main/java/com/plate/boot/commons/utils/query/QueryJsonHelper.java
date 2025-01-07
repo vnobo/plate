@@ -244,11 +244,11 @@ public final class QueryJsonHelper {
      *
      * @param keys  An array of strings forming the path to the JSON attribute. The last element
      *              may contain a keyword suffix for special operations.
-     * @param value The value to be compared against in the from condition. For 'In' and 'Between'
+     * @param value The value to be compared against in the form condition. For 'In' and 'Between'
      *              operations, this should be a comma-separated string or an array respectively.
      * @return A QueryCondition object containing:
      * - The 'getWhereSql' field as a string of the SQL fragment representing the condition.
-     * - The 'params' map holding named parameters and their values for the from.
+     * - The 'params' map holding named parameters and their values for the form.
      * - The 'operation' entry describing the operation type and its SQL syntax.
      */
     private static QueryFragment buildLastCondition(String[] keys, Object value) {

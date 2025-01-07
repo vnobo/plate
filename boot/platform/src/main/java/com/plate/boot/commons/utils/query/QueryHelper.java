@@ -254,7 +254,8 @@ public final class QueryHelper {
      * @param skipKeys      A collection of keys to be excluded from the object map.
      * @param prefix        An optional prefix to be applied to column names.
      */
-    private static void processSecurityCodeKey(QueryFragment queryFragment, Map<String, Object> objectMap, Collection<String> skipKeys, String prefix) {
+    private static void processSecurityCodeKey(QueryFragment queryFragment, Map<String, Object> objectMap,
+                                               Collection<String> skipKeys, String prefix) {
         if (!skipKeys.contains("securityCode") && objectMap.containsKey("securityCode")) {
             var column = StringUtils.hasLength(prefix) ? prefix + ".tenant_code" : "tenant_code";
             queryFragment.where(column + " LIKE :securityCode");
