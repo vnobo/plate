@@ -215,21 +215,18 @@ public final class QueryJsonHelper {
                             "from[extend.codeEq]=123456"
                     ));
         }
-        // 处理第一个键
         String column = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, keys[0]);
         if (StringUtils.hasLength(prefix)) {
             column = prefix + "." + keys[0];
         }
         StringBuilder conditionBuilder = new StringBuilder(column);
         int lastIndex = keys.length - 1;
-        // 处理中间键
         if (lastIndex > 1) {
             String[] joinKeys = Arrays.copyOfRange(keys, 1, lastIndex);
             for (String path : joinKeys) {
                 conditionBuilder.append("->'").append(path).append("'");
             }
         }
-        //处理最后键
         QueryFragment lastCondition = buildLastCondition(keys, entry.getValue());
         conditionBuilder.append(lastCondition.getWhere());
         return QueryFragment.withMap(lastCondition).where(conditionBuilder.toString());

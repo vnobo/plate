@@ -274,6 +274,7 @@ public final class QueryHelper {
         if (objectMap.containsKey("search") && !ObjectUtils.isEmpty(objectMap.get("search"))) {
             var column = StringUtils.hasLength(prefix) ? prefix + ".text_search" : "text_search";
             queryFragment.ts(column, objectMap.get("search"));
+            queryFragment.orderBy("rank desc");
         }
     }
 
