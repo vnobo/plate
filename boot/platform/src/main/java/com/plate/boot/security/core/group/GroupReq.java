@@ -13,13 +13,13 @@ import java.util.Map;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class GroupRequest extends Group {
+public class GroupReq extends Group {
 
     private Map<String, Object> query;
 
     private String securityCode;
 
-    public GroupRequest securityCode(String securityCode) {
+    public GroupReq securityCode(String securityCode) {
         this.setSecurityCode(securityCode);
         return this;
     }

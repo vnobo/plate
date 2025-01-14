@@ -21,12 +21,12 @@ public class GroupsService extends AbstractDatabase {
 
     private final GroupsRepository groupsRepository;
 
-    public Flux<Group> search(GroupRequest request, Pageable pageable) {
+    public Flux<Group> search(GroupReq request, Pageable pageable) {
         QueryFragment queryFragment = QueryHelper.query(request, pageable);
         return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(), queryFragment, Group.class);
     }
 
-    public Mono<Page<Group>> page(GroupRequest request, Pageable pageable) {
+    public Mono<Page<Group>> page(GroupReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment queryFragment = QueryHelper.query(request, pageable);
         var countMono = this.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
@@ -35,7 +35,7 @@ public class GroupsService extends AbstractDatabase {
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
-    public Mono<Group> operate(GroupRequest request) {
+    public Mono<Group> operate(GroupReq request) {
         var dataMono = this.groupsRepository.findByCode(request.getCode())
                 .defaultIfEmpty(request.toGroup());
         dataMono = dataMono.flatMap(data -> {
@@ -45,7 +45,7 @@ public class GroupsService extends AbstractDatabase {
         return dataMono.doAfterTerminate(() -> this.cache.clear());
     }
 
-    public Mono<Void> delete(GroupRequest request) {
+    public Mono<Void> delete(GroupReq request) {
         return this.groupsRepository.delete(request.toGroup());
     }
 

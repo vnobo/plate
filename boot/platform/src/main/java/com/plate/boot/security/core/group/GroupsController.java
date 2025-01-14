@@ -22,13 +22,13 @@ public class GroupsController {
     private final GroupsService groupsService;
 
     @GetMapping("search")
-    public Flux<Group> search(GroupRequest request, Pageable pageable) {
+    public Flux<Group> search(GroupReq request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMapMany(securityDetails ->
                 this.groupsService.search(request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 
     @GetMapping("page")
-    public Mono<PagedModel<Group>> page(GroupRequest request, Pageable pageable) {
+    public Mono<PagedModel<Group>> page(GroupReq request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMap(securityDetails ->
                 this.groupsService.page(request.securityCode(securityDetails.getTenantCode()), pageable))
                 .map(PagedModel::new);
@@ -36,13 +36,13 @@ public class GroupsController {
 
     @PostMapping("save")
     @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
-    public Mono<Group> add(@Valid @RequestBody GroupRequest request) {
+    public Mono<Group> add(@Valid @RequestBody GroupReq request) {
         return this.groupsService.operate(request);
     }
 
     @DeleteMapping("delete")
     @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
-    public Mono<Void> delete(@Valid @RequestBody GroupRequest request) {
+    public Mono<Void> delete(@Valid @RequestBody GroupReq request) {
         Assert.notNull(request.getId(), "When deleting a Group, the ID must not be null");
         return this.groupsService.delete(request);
     }
