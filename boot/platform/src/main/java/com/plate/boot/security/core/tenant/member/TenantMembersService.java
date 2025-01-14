@@ -25,7 +25,7 @@ public class TenantMembersService extends AbstractDatabase {
 
     private final TenantMembersRepository tenantMembersRepository;
 
-    public Flux<TenantMemberResponse> search(TenantMemberRequest request, Pageable pageable) {
+    public Flux<TenantMemberRes> search(TenantMemberReq request, Pageable pageable) {
         QueryFragment fragment = request.toParamSql();
         QueryFragment queryFragment = QueryFragment.of(pageable.getPageSize(), pageable.getOffset(), fragment)
                 .columns("a.*", "b.name as tenant_name",
@@ -35,10 +35,10 @@ public class TenantMembersService extends AbstractDatabase {
                         "inner join se_users c on c.code = a.user_code");
         QueryHelper.applySort(queryFragment, pageable.getSort(), "a");
         return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(),
-                queryFragment, TenantMemberResponse.class);
+                queryFragment, TenantMemberRes.class);
     }
 
-    public Mono<Page<TenantMemberResponse>> page(TenantMemberRequest request, Pageable pageable) {
+    public Mono<Page<TenantMemberRes>> page(TenantMemberReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment queryFragment = request.toParamSql();
         Mono<Long> countMono = this.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
@@ -47,7 +47,7 @@ public class TenantMembersService extends AbstractDatabase {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Mono<TenantMember> operate(TenantMemberRequest request) {
+    public Mono<TenantMember> operate(TenantMemberReq request) {
         var tenantMemberMono = this.entityTemplate.selectOne(Query.query(request.toCriteria()), TenantMember.class)
                 .defaultIfEmpty(request.toMemberTenant());
         tenantMemberMono = tenantMemberMono.flatMap(old -> {
@@ -64,7 +64,7 @@ public class TenantMembersService extends AbstractDatabase {
         return entityTemplate.update(TenantMember.class).matching(query).apply(update).then();
     }
 
-    public Mono<Void> delete(TenantMemberRequest request) {
+    public Mono<Void> delete(TenantMemberReq request) {
         return this.tenantMembersRepository.delete(request.toMemberTenant());
     }
 }

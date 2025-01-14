@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class TenantMemberResponse extends TenantMember {
+public class TenantMemberRes extends TenantMember {
 
     private String name;
 
