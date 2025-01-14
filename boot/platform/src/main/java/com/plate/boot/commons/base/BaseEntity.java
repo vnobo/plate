@@ -14,7 +14,7 @@ import java.util.Map;
 
 /**
  * Represents the base entity contract for entities that require common functionality
- * such as having a unique code, being serializable, and persistable with a generic type identifier.
+ * such as having a unique code, being serializable, and perishable with a generic type identifier.
  * Implementing classes should provide concrete behavior for these base operations.
  */
 public interface BaseEntity<T> extends Serializable, Persistable<T> {

@@ -54,7 +54,7 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
 
     /**
      * Data entity create operator
-     * use User.class code property
+     * use User. Class code property
      */
     @CreatedBy
     @InsertOnlyProperty
