@@ -21,22 +21,22 @@ public class TenantsController {
     private final TenantsService tenantsService;
 
     @GetMapping("search")
-    public Flux<Tenant> search(TenantRequest request, Pageable pageable) {
+    public Flux<Tenant> search(TenantReq request, Pageable pageable) {
         return this.tenantsService.search(request, pageable);
     }
 
     @GetMapping("page")
-    public Mono<PagedModel<Tenant>> page(TenantRequest request, Pageable pageable) {
+    public Mono<PagedModel<Tenant>> page(TenantReq request, Pageable pageable) {
         return this.tenantsService.page(request, pageable).map(PagedModel::new);
     }
 
     @PostMapping("save")
-    public Mono<Tenant> operate(@Valid @RequestBody TenantRequest request) {
+    public Mono<Tenant> operate(@Valid @RequestBody TenantReq request) {
         return this.tenantsService.operate(request);
     }
 
     @DeleteMapping("delete")
-    public Mono<Void> delete(@Valid @RequestBody TenantRequest request) {
+    public Mono<Void> delete(@Valid @RequestBody TenantReq request) {
         Assert.notNull(request.getId(), "When deleting a Tenant, the ID must not be null");
         return this.tenantsService.delete(request);
     }

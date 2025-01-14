@@ -24,12 +24,12 @@ public class TenantsService extends AbstractDatabase {
 
     private final TenantMembersRepository membersRepository;
 
-    public Flux<Tenant> search(TenantRequest request, Pageable pageable) {
+    public Flux<Tenant> search(TenantReq request, Pageable pageable) {
         QueryFragment queryFragment = QueryHelper.query(request, pageable);
         return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(), queryFragment, Tenant.class);
     }
 
-    public Mono<Page<Tenant>> page(TenantRequest request, Pageable pageable) {
+    public Mono<Page<Tenant>> page(TenantReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment queryFragment = QueryHelper.query(request, pageable);
         var countMono = this.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
@@ -38,7 +38,7 @@ public class TenantsService extends AbstractDatabase {
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
-    public Mono<Tenant> operate(TenantRequest request) {
+    public Mono<Tenant> operate(TenantReq request) {
         var tenantMono = this.tenantsRepository.findByCode(request.getCode())
                 .defaultIfEmpty(request.toTenant());
         tenantMono = tenantMono.flatMap(data -> {
@@ -48,7 +48,7 @@ public class TenantsService extends AbstractDatabase {
         return tenantMono.doAfterTerminate(() -> this.cache.clear());
     }
 
-    public Mono<Void> delete(TenantRequest request) {
+    public Mono<Void> delete(TenantReq request) {
         return Flux.concatDelayError(
                 this.tenantsRepository.delete(request.toTenant()),
                 this.membersRepository.deleteByTenantCode(request.getCode())).then();

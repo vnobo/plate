@@ -13,7 +13,7 @@ import java.util.Map;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class TenantRequest extends Tenant {
+public class TenantReq extends Tenant {
 
     private Map<String, Object> query;
 
