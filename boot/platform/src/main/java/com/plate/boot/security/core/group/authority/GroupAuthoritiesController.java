@@ -21,24 +21,24 @@ public class GroupAuthoritiesController {
     private final GroupAuthoritiesService authoritiesService;
 
     @GetMapping("search")
-    public Flux<GroupAuthority> search(GroupAuthorityRequest request, Pageable pageable) {
+    public Flux<GroupAuthority> search(GroupAuthorityReq request, Pageable pageable) {
         return this.authoritiesService.search(request, pageable);
     }
 
     @PostMapping("save")
-    public Mono<GroupAuthority> save(@Valid @RequestBody GroupAuthorityRequest request) {
+    public Mono<GroupAuthority> save(@Valid @RequestBody GroupAuthorityReq request) {
         return this.authoritiesService.operate(request);
     }
 
     @PostMapping("batch")
-    public Mono<Object> batch(@RequestBody GroupAuthorityRequest request) {
+    public Mono<Object> batch(@RequestBody GroupAuthorityReq request) {
         Assert.notNull(request.getAuthorities(), "Authorities param [authorities] cannot be null!");
         return this.authoritiesService.batch(request).thenReturn(Map.of("success", 200,
                 "message", "The operation succeeds and takes effect in a few minutes!"));
     }
 
     @DeleteMapping("delete")
-    public Mono<Void> delete(@Valid @RequestBody GroupAuthorityRequest request) {
+    public Mono<Void> delete(@Valid @RequestBody GroupAuthorityReq request) {
         Assert.notNull(request.getId(), "When deleting a Group, the ID must not be null");
         return this.authoritiesService.delete(request);
     }

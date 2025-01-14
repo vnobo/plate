@@ -15,7 +15,7 @@ import java.util.Set;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class GroupAuthorityRequest extends GroupAuthority implements Serializable {
+public class GroupAuthorityReq extends GroupAuthority implements Serializable {
 
     private Set<String> authorities;
 
