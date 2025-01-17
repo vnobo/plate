@@ -6,16 +6,16 @@ plugins {
 }
 
 dependencies {
+    implementation 'org.springframework.modulith:spring-modulith-starter-core'
 
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.session:spring-session-data-redis")
 
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
 
-    //implementation("org.springframework.boot:spring-boot-starter-jooq")
-    //implementation("org.jooq:jooq")
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.postgresql:r2dbc-postgresql")
 
@@ -24,6 +24,7 @@ dependencies {
 
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.springframework.modulith:spring-modulith-starter-test'
 
 }
 
