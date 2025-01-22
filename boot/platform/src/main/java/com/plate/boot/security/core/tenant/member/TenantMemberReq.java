@@ -19,7 +19,7 @@ import java.util.Set;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class TenantMemberRequest extends TenantMember {
+public class TenantMemberReq extends TenantMember {
 
     private Set<String> users;
 
@@ -27,7 +27,7 @@ public class TenantMemberRequest extends TenantMember {
 
     private String securityCode;
 
-    public TenantMemberRequest securityCode(String securityCode) {
+    public TenantMemberReq securityCode(String securityCode) {
         this.setSecurityCode(securityCode);
         return this;
     }

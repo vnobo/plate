@@ -215,21 +215,18 @@ public final class QueryJsonHelper {
                             "from[extend.codeEq]=123456"
                     ));
         }
-        // 处理第一个键
         String column = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, keys[0]);
         if (StringUtils.hasLength(prefix)) {
             column = prefix + "." + keys[0];
         }
         StringBuilder conditionBuilder = new StringBuilder(column);
         int lastIndex = keys.length - 1;
-        // 处理中间键
         if (lastIndex > 1) {
             String[] joinKeys = Arrays.copyOfRange(keys, 1, lastIndex);
             for (String path : joinKeys) {
                 conditionBuilder.append("->'").append(path).append("'");
             }
         }
-        //处理最后键
         QueryFragment lastCondition = buildLastCondition(keys, entry.getValue());
         conditionBuilder.append(lastCondition.getWhere());
         return QueryFragment.withMap(lastCondition).where(conditionBuilder.toString());
@@ -244,11 +241,11 @@ public final class QueryJsonHelper {
      *
      * @param keys  An array of strings forming the path to the JSON attribute. The last element
      *              may contain a keyword suffix for special operations.
-     * @param value The value to be compared against in the from condition. For 'In' and 'Between'
+     * @param value The value to be compared against in the form condition. For 'In' and 'Between'
      *              operations, this should be a comma-separated string or an array respectively.
      * @return A QueryCondition object containing:
      * - The 'getWhereSql' field as a string of the SQL fragment representing the condition.
-     * - The 'params' map holding named parameters and their values for the from.
+     * - The 'params' map holding named parameters and their values for the form.
      * - The 'operation' entry describing the operation type and its SQL syntax.
      */
     private static QueryFragment buildLastCondition(String[] keys, Object value) {

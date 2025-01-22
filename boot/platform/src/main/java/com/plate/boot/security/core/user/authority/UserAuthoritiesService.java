@@ -18,18 +18,18 @@ public class UserAuthoritiesService extends AbstractDatabase {
 
     private final UserAuthoritiesRepository userAuthoritiesRepository;
 
-    public Flux<UserAuthority> search(UserAuthorityRequest request) {
+    public Flux<UserAuthority> search(UserAuthorityReq request) {
         Query query = Query.query(request.toCriteria()).sort(Sort.by("id").descending());
         return super.queryWithCache(BeanUtils.cacheKey(request), query, UserAuthority.class);
     }
 
-    public Mono<UserAuthority> operate(UserAuthorityRequest request) {
+    public Mono<UserAuthority> operate(UserAuthorityReq request) {
         var dataMono = this.entityTemplate.selectOne(Query.query(request.toCriteria()), UserAuthority.class);
         dataMono = dataMono.switchIfEmpty(Mono.defer(() -> this.save(request.toAuthority())));
         return dataMono.doAfterTerminate(() -> this.cache.clear());
     }
 
-    public Mono<Void> delete(UserAuthorityRequest request) {
+    public Mono<Void> delete(UserAuthorityReq request) {
         return this.userAuthoritiesRepository.delete(request.toAuthority())
                 .doAfterTerminate(() -> this.cache.clear());
     }

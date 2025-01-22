@@ -43,12 +43,12 @@ public class MenusService extends AbstractDatabase {
     private final GroupAuthoritiesRepository groupAuthoritiesRepository;
     private final UserAuthoritiesRepository userAuthoritiesRepository;
 
-    public Flux<Menu> search(MenuRequest request, Pageable pageable) {
+    public Flux<Menu> search(MenuReq request, Pageable pageable) {
         Query query = Query.query(request.toCriteria()).with(pageable).sort(Sort.by("sortNo"));
         return this.queryWithCache(BeanUtils.cacheKey(request), query, Menu.class);
     }
 
-    public Mono<Page<Menu>> page(MenuRequest request, Pageable pageable) {
+    public Mono<Page<Menu>> page(MenuReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         Query query = Query.query(request.toCriteria());
         var countMono = super.countWithCache(BeanUtils.cacheKey(request), query, Menu.class);
@@ -56,9 +56,9 @@ public class MenusService extends AbstractDatabase {
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
-    public Mono<Menu> add(MenuRequest request) {
+    public Mono<Menu> add(MenuReq request) {
         log.debug("Menu add request: {}", request);
-        Criteria criteria = MenuRequest.of(request.getTenantCode(), request.getAuthority()).toCriteria();
+        Criteria criteria = MenuReq.of(request.getTenantCode(), request.getAuthority()).toCriteria();
         var existsMono = this.entityTemplate.exists(Query.query(criteria), Menu.class);
         existsMono = existsMono.filter(isExists -> !isExists);
         existsMono = existsMono.switchIfEmpty(Mono.error(RestServerException
@@ -68,7 +68,7 @@ public class MenusService extends AbstractDatabase {
         return existsMono.flatMap((b) -> this.operate(request));
     }
 
-    public Mono<Menu> modify(MenuRequest request) {
+    public Mono<Menu> modify(MenuReq request) {
         log.debug("Menu modify request: {}", request);
         var oldMunuMono = this.menusRepository.findByCode(request.getCode())
                 .switchIfEmpty(Mono.error(RestServerException.withMsg(
@@ -89,7 +89,7 @@ public class MenusService extends AbstractDatabase {
      * @param request menu request
      * @return Mono menu entity
      */
-    public Mono<Menu> operate(MenuRequest request) {
+    public Mono<Menu> operate(MenuReq request) {
         log.debug("Menu operate request: {}", request);
         if (ObjectUtils.isEmpty(request)) {
             return Mono.empty();
@@ -112,7 +112,7 @@ public class MenusService extends AbstractDatabase {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Mono<Void> delete(MenuRequest request) {
+    public Mono<Void> delete(MenuReq request) {
         log.warn("Delete menu request: {}", request);
         if (ObjectUtils.nullSafeEquals(request.getTenantCode(), "0")) {
             List<String> rules = new ArrayList<>(Collections.singletonList(request.getAuthority()));

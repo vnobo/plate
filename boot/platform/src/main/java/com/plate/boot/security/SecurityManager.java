@@ -5,7 +5,7 @@ import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.security.core.group.authority.GroupAuthority;
 import com.plate.boot.security.core.group.member.GroupMemberResp;
-import com.plate.boot.security.core.tenant.member.TenantMemberResponse;
+import com.plate.boot.security.core.tenant.member.TenantMemberRes;
 import com.plate.boot.security.core.user.User;
 import com.plate.boot.security.core.user.UserReq;
 import com.plate.boot.security.core.user.UserRes;
@@ -193,7 +193,7 @@ public class SecurityManager extends AbstractDatabase
     private Mono<SecurityDetails> buildUserDetails(User user, Set<GrantedAuthority> authorities) {
         SecurityDetails userDetails = SecurityDetails.of(user.getCode(), authorities,
                 BeanUtils.beanToMap(UserRes.withUser(user)), "username").buildUser(user);
-        Mono<Tuple2<List<GroupMemberResp>, List<TenantMemberResponse>>> groupsAndTenantsMono =
+        Mono<Tuple2<List<GroupMemberResp>, List<TenantMemberRes>>> groupsAndTenantsMono =
                 Mono.zipDelayError(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
         return groupsAndTenantsMono.doOnNext(tuple2 -> {
             userDetails.setGroups(new HashSet<>(tuple2.getT1()));
@@ -223,12 +223,12 @@ public class SecurityManager extends AbstractDatabase
      * then serialized with user auditor context, and finally collected into a sorted list.
      *
      * @param userCode The unique code identifying the user whose tenant members are to be loaded.
-     * @return A Mono that, when subscribed to, emits a sorted list of {@link TenantMemberResponse} objects representing the tenant members.
+     * @return A Mono that, when subscribed to, emits a sorted list of {@link TenantMemberRes} objects representing the tenant members.
      */
-    private Mono<List<TenantMemberResponse>> loadTenants(String userCode) {
+    private Mono<List<TenantMemberRes>> loadTenants(String userCode) {
         QUERY_TENANT_MEMBERS_FRAGMENT.put("userCode", userCode);
         return this.queryWithCache("USER_TENANTS-" + userCode, QUERY_TENANT_MEMBERS_FRAGMENT.querySql(),
-                QUERY_TENANT_MEMBERS_FRAGMENT, TenantMemberResponse.class).collectSortedList();
+                QUERY_TENANT_MEMBERS_FRAGMENT, TenantMemberRes.class).collectSortedList();
     }
 
     /**

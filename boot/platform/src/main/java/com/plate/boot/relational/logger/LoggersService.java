@@ -95,6 +95,6 @@ public class LoggersService extends AbstractDatabase {
     @Scheduled(cron = "0 0 1 * * ?")
     public void clearLoggers() {
         this.loggersRepository.deleteByCreatedTimeBefore(LocalDateTime.now().minusYears(3))
-                .subscribe(res -> log.info("清理过期日志: {}", res));
+                .subscribe(res -> log.info("CLEAN UP EXPIRED LOGS: {}", res));
     }
 }

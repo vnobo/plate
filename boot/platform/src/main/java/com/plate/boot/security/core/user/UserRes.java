@@ -25,6 +25,24 @@ public class UserRes extends User {
     @ReadOnlyProperty
     protected Double rank;
 
+    /**
+     * Creates a UserRes instance from a given User object.
+     *
+     * <p>This method initializes a new UserRes instance and copies the properties
+     * from the provided User object to the new UserRes instance.
+     *
+     * <p>Example usage:
+     * <pre>
+     * {@code
+     * User user = new User();
+     * // set user properties
+     * UserRes userRes = UserRes.withUser(user);
+     * }
+     * </pre>
+     *
+     * @param user the User object from which to copy properties
+     * @return a new UserRes instance with properties copied from the provided User object
+     */
     public static UserRes withUser(User user) {
         UserRes response = new UserRes();
         BeanUtils.copyProperties(user, response);

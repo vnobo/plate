@@ -27,13 +27,13 @@ public class GroupAuthoritiesService extends AbstractDatabase {
 
     private final GroupAuthoritiesRepository authoritiesRepository;
 
-    public Flux<GroupAuthority> search(GroupAuthorityRequest request, Pageable pageable) {
+    public Flux<GroupAuthority> search(GroupAuthorityReq request, Pageable pageable) {
         Query query = Query.query(request.toCriteria()).with(pageable);
         return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query, GroupAuthority.class);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Mono<Integer> batch(GroupAuthorityRequest request) {
+    public Mono<Integer> batch(GroupAuthorityReq request) {
 
         Assert.notNull(request.getGroupCode(), "Authoring Group rules [groupCode] cannot be null");
         var dataMono = this.authoritiesRepository.findByGroupCode(request.getGroupCode()).collectList();
@@ -60,7 +60,7 @@ public class GroupAuthoritiesService extends AbstractDatabase {
                 .publishOn(Schedulers.boundedElastic());
     }
 
-    public Mono<GroupAuthority> operate(GroupAuthorityRequest request) {
+    public Mono<GroupAuthority> operate(GroupAuthorityReq request) {
         var dataMono = this.entityTemplate.selectOne(Query.query(request.toCriteria()), GroupAuthority.class)
                 .defaultIfEmpty(request.toGroupAuthority());
         return dataMono.flatMap(this::save).doAfterTerminate(() -> this.cache.clear());
@@ -76,7 +76,7 @@ public class GroupAuthoritiesService extends AbstractDatabase {
         }
     }
 
-    public Mono<Void> delete(GroupAuthorityRequest request) {
+    public Mono<Void> delete(GroupAuthorityReq request) {
         return this.authoritiesRepository.delete(request.toGroupAuthority())
                 .doAfterTerminate(() -> this.cache.clear());
     }

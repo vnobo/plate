@@ -230,16 +230,16 @@ public final class QueryHelper {
     }
 
     /**
-     * Processes the 'from' key in the object map and merges the resulting from fragment.
+     * Processes the 'query' key in the object map and merges the resulting from fragment.
      *
-     * @param queryFragment The QueryFragment to which the from conditions will be added.
+     * @param queryFragment The QueryFragment to which the query conditions will be added.
      * @param objectMap     The map representation of the object containing the 'from' key.
      * @param prefix        An optional prefix to be applied to column names.
      */
     @SuppressWarnings("unchecked")
     private static void processQueryKey(QueryFragment queryFragment, Map<String, Object> objectMap, String prefix) {
-        if (objectMap.containsKey("from")) {
-            var jsonMap = (Map<String, Object>) objectMap.get("from");
+        if (objectMap.containsKey("query")) {
+            var jsonMap = (Map<String, Object>) objectMap.get("query");
             var jsonQueryFragment = QueryJsonHelper.queryJson(jsonMap, prefix);
             queryFragment.getWhere().merge(jsonQueryFragment.getWhere());
             queryFragment.putAll(jsonQueryFragment);
@@ -254,7 +254,8 @@ public final class QueryHelper {
      * @param skipKeys      A collection of keys to be excluded from the object map.
      * @param prefix        An optional prefix to be applied to column names.
      */
-    private static void processSecurityCodeKey(QueryFragment queryFragment, Map<String, Object> objectMap, Collection<String> skipKeys, String prefix) {
+    private static void processSecurityCodeKey(QueryFragment queryFragment, Map<String, Object> objectMap,
+                                               Collection<String> skipKeys, String prefix) {
         if (!skipKeys.contains("securityCode") && objectMap.containsKey("securityCode")) {
             var column = StringUtils.hasLength(prefix) ? prefix + ".tenant_code" : "tenant_code";
             queryFragment.where(column + " LIKE :securityCode");
@@ -273,6 +274,7 @@ public final class QueryHelper {
         if (objectMap.containsKey("search") && !ObjectUtils.isEmpty(objectMap.get("search"))) {
             var column = StringUtils.hasLength(prefix) ? prefix + ".text_search" : "text_search";
             queryFragment.ts(column, objectMap.get("search"));
+            queryFragment.orderBy("rank desc");
         }
     }
 

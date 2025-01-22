@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plate.boot.security.core.UserAuditor;
 import com.plate.boot.security.core.group.member.GroupMemberResp;
-import com.plate.boot.security.core.tenant.member.TenantMemberResponse;
+import com.plate.boot.security.core.tenant.member.TenantMemberRes;
 import com.plate.boot.security.core.user.User;
 import lombok.Getter;
 import lombok.Setter;
@@ -45,12 +45,12 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
     private String nickname;
 
     /**
-     * A collection of {@link TenantMemberResponse} objects representing the tenants associated with the security details.
+     * A collection of {@link TenantMemberRes} objects representing the tenants associated with the security details.
      * Each {@code TenantMemberResponse} encapsulates information about a tenant member, including a unique identifier,
      * tenant code, user code, enabled status, and audit details provided by {@link UserAuditor}.
      * This set facilitates management and access to tenant-specific data for the authenticated user within a security context.
      */
-    private Set<TenantMemberResponse> tenants;
+    private Set<TenantMemberRes> tenants;
 
     /**
      * Represents a collection of {@link GroupMemberResp} instances associated with a security details object.
@@ -160,8 +160,8 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
         if (ObjectUtils.isEmpty(this.getTenants())) {
             return defaultTenantCode;
         }
-        return this.getTenants().stream().filter(TenantMemberResponse::getEnabled).findAny()
-                .map(TenantMemberResponse::getTenantCode).orElse(defaultTenantCode);
+        return this.getTenants().stream().filter(TenantMemberRes::getEnabled).findAny()
+                .map(TenantMemberRes::getTenantCode).orElse(defaultTenantCode);
     }
 
     @JsonGetter
@@ -170,8 +170,8 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
         if (ObjectUtils.isEmpty(this.getTenants())) {
             return defaultTenantName;
         }
-        return this.getTenants().stream().filter(TenantMemberResponse::getEnabled).findAny()
-                .map(TenantMemberResponse::getName).orElse(defaultTenantName);
+        return this.getTenants().stream().filter(TenantMemberRes::getEnabled).findAny()
+                .map(TenantMemberRes::getName).orElse(defaultTenantName);
     }
 
     @Override
