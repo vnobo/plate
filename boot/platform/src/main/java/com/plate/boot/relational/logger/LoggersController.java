@@ -1,4 +1,4 @@
-package com.plate.boot.inventory.relational.logger;
+package com.plate.boot.relational.logger;
 
 import com.plate.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;

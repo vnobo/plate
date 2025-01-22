@@ -1,4 +1,4 @@
-package com.plate.boot.inventory.relational.logger;
+package com.plate.boot.relational.logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.commons.base.AbstractEntity;

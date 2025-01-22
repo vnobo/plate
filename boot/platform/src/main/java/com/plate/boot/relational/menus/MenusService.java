@@ -1,4 +1,4 @@
-package com.plate.boot.inventory.relational.menus;
+package com.plate.boot.relational.menus;
 
 
 import com.plate.boot.commons.base.AbstractDatabase;

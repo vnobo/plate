@@ -1,4 +1,4 @@
-package com.plate.boot.inventory.relational.menus;
+package com.plate.boot.relational.menus;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
