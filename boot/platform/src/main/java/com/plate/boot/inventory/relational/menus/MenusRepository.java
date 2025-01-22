@@ -1,4 +1,4 @@
-package com.plate.boot.relational.menus;
+package com.plate.boot.inventory.relational.menus;
 
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Mono;

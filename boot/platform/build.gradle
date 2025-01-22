@@ -6,7 +6,6 @@ plugins {
 }
 
 dependencies {
-    implementation 'org.springframework.modulith:spring-modulith-starter-core'
 
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
@@ -19,12 +18,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.postgresql:r2dbc-postgresql")
 
-    runtimeOnly ('io.netty.incubator:netty-incubator-codec-http3:0.0.28.Final')
-    implementation('io.netty:netty-tcnative-boringssl-static')
+    //http3
+    //runtimeOnly ('io.netty.incubator:netty-incubator-codec-http3:0.0.28.Final')
+    //implementation('io.netty:netty-tcnative-boringssl-static')
 
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'io.projectreactor:reactor-test'
-    testImplementation 'org.springframework.modulith:spring-modulith-starter-test'
 
 }
 

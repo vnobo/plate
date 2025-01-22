@@ -1,4 +1,4 @@
-package com.plate.boot.relational.menus;
+package com.plate.boot.inventory.relational.menus;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.plate.boot.commons.utils.BeanUtils;

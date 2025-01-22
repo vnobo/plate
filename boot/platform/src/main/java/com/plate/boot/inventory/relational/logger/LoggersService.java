@@ -1,4 +1,4 @@
-package com.plate.boot.relational.logger;
+package com.plate.boot.inventory.relational.logger;
 
 import com.plate.boot.commons.base.AbstractDatabase;
 import com.plate.boot.commons.utils.BeanUtils;

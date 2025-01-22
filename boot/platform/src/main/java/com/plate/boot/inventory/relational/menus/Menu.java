@@ -1,4 +1,4 @@
-package com.plate.boot.relational.menus;
+package com.plate.boot.inventory.relational.menus;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.core.type.TypeReference;

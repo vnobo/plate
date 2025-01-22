@@ -1,4 +1,4 @@
-package com.plate.boot.relational.logger;
+package com.plate.boot.inventory.relational.logger;
 
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Mono;

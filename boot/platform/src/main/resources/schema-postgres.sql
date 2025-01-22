@@ -9,6 +9,19 @@ drop table if exists se_tenant_members;
 drop table if exists se_menus;
 drop table if exists se_loggers;
 
+create table if not exists event_publication
+(
+    id               UUID                     not null,
+    listener_id      TEXT                     not null,
+    event_type       TEXT                     not null,
+    serialized_event TEXT                     not null,
+    publication_date TIMESTAMP WITH TIME ZONE not null,
+    completion_date  TIMESTAMP WITH TIME ZONE,
+    primary key (id)
+);
+create index if not exists event_publication_serialized_event_hash_idx on event_publication using hash (serialized_event);
+create index if not exists event_publication_by_completion_date_idx on event_publication (completion_date);
+
 create table oauth2_authorized_client
 (
     client_registration_id  varchar(100)                            not null,

@@ -1,11 +1,11 @@
-package com.plate.boot.relational;
+package com.plate.boot.inventory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.utils.ContextUtils;
-import com.plate.boot.relational.logger.LoggerReq;
-import com.plate.boot.relational.logger.LoggersService;
+import com.plate.boot.inventory.relational.logger.LoggerReq;
+import com.plate.boot.inventory.relational.logger.LoggersService;
 import com.plate.boot.security.SecurityDetails;
 import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
