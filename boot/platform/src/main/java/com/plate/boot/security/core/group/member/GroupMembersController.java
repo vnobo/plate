@@ -11,7 +11,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * REST controller for handling operations related to group members, including searching, pagination,
+ * saving, and deletion.
+ * This controller interacts with the {@link GroupMembersService} to process requests and returns
+ * reactive types for asynchronous processing.
  */
 @RestController
 @RequestMapping("/groups/members")
@@ -21,12 +24,12 @@ public class GroupMembersController {
     private final GroupMembersService groupMembersService;
 
     @GetMapping("search")
-    public Flux<GroupMemberResp> search(GroupMemberReq request, Pageable pageable) {
+    public Flux<GroupMemberRes> search(GroupMemberReq request, Pageable pageable) {
         return this.groupMembersService.search(request, pageable);
     }
 
     @GetMapping("page")
-    public Mono<Page<GroupMemberResp>> page(GroupMemberReq request, Pageable pageable) {
+    public Mono<Page<GroupMemberRes>> page(GroupMemberReq request, Pageable pageable) {
         return this.groupMembersService.page(request, pageable);
     }
 

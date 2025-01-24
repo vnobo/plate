@@ -43,9 +43,4 @@ public class Tenant implements BaseEntity<Integer> {
 
     @LastModifiedDate
     private LocalDateTime updatedTime;
-
-    @Override
-    public void setCode(String code) {
-        this.code = code.startsWith("T") ? code : "T" + code;
-    }
 }

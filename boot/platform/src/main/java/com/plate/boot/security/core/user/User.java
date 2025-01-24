@@ -145,15 +145,4 @@ public class User extends AbstractEntity<Long> {
      */
     private LocalDateTime loginTime;
 
-    /**
-     * Sets the code for the user with a conditional prefix.
-     * If the provided code does not start with 'U', the method prepends 'U' to it.
-     * This ensures uniformity where codes are expected to adhere to a specific format.
-     *
-     * @param code The code to be set for the user. If it lacks the 'U' prefix, it will be added automatically.
-     */
-    @Override
-    public void setCode(String code) {
-        this.code = code.startsWith("U") ? code : "U" + code;
-    }
 }

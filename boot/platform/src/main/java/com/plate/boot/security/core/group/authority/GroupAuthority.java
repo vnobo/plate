@@ -1,54 +1,34 @@
 package com.plate.boot.security.core.group.authority;
 
-import com.plate.boot.commons.base.BaseEntity;
-import com.plate.boot.security.core.UserAuditor;
+import com.plate.boot.commons.base.AbstractEntity;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.*;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @Table("se_group_authorities")
-public class GroupAuthority implements GrantedAuthority, BaseEntity<Integer> {
+public class GroupAuthority extends AbstractEntity<Integer> implements GrantedAuthority {
 
-    @Id
-    private Integer id;
 
-    private String code;
 
     @NotBlank(message = "Role [groupCode] can not be empty!")
-    private String groupCode;
+    private UUID groupCode;
 
     @NotBlank(message = "Role [authority]can not be empty!")
     private String authority;
 
-    @CreatedBy
-    private UserAuditor creator;
-
-    @LastModifiedBy
-    private UserAuditor updater;
-
-    @CreatedDate
-    private LocalDateTime createdTime;
-
-    @LastModifiedDate
-    private LocalDateTime updatedTime;
-
-    public GroupAuthority(String groupCode, String authority) {
+    public GroupAuthority(UUID groupCode, String authority) {
         this.groupCode = groupCode;
         this.authority = authority;
-    }
-
-    @Override
-    public void setCode(String code) {
-        this.code = code.startsWith("GA") ? code : "GA" + code;
     }
 }

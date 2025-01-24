@@ -1,48 +1,24 @@
 package com.plate.boot.security.core.tenant.member;
 
-import com.plate.boot.commons.base.BaseEntity;
-import com.plate.boot.security.core.UserAuditor;
+import com.plate.boot.commons.base.AbstractEntity;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.springframework.data.annotation.*;
+import lombok.EqualsAndHashCode;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Table("se_tenant_members")
-public class TenantMember implements BaseEntity<Long> {
-
-    @Id
-    private Long id;
-
-    private String code;
-
-    @NotBlank(message = "租户编码[tenantCode]不能为空!")
-    private String tenantCode;
+public class TenantMember extends AbstractEntity<Long> {
 
     @NotBlank(message = "用户编码[userCode]不能为空!")
-    private String userCode;
+    private UUID userCode;
 
     private Boolean enabled;
 
-    @CreatedBy
-    private UserAuditor creator;
-
-    @LastModifiedBy
-    private UserAuditor updater;
-
-    @CreatedDate
-    private LocalDateTime createdTime;
-
-    @LastModifiedDate
-    private LocalDateTime updatedTime;
-
-    @Override
-    public void setCode(String code) {
-        this.code = code.startsWith("TM") ? code : "TM" + code;
-    }
 }

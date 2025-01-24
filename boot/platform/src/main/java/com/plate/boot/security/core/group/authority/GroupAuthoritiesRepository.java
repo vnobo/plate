@@ -5,6 +5,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
+import java.util.UUID;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -32,5 +33,5 @@ public interface GroupAuthoritiesRepository extends R2dbcRepository<GroupAuthori
      * @return 返回一个Flux对象，该对象包含满足条件的GroupAuthority实体。Flux是一个响应式流，
      * 允许以非阻塞方式处理异步数据序列。
      */
-    Flux<GroupAuthority> findByGroupCode(String groupCode);
+    Flux<GroupAuthority> findByGroupCode(UUID groupCode);
 }

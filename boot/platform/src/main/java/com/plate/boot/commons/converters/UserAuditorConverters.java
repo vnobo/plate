@@ -10,6 +10,8 @@ import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 /**
  * Configures converters for handling the transformation between {@link UserAuditor} instances and their string representations.
  * This configuration is particularly useful in data persistence layers where type conversion is necessary, such as when storing
@@ -46,7 +48,7 @@ public class UserAuditorConverters implements InitializingBean {
      */
     @Component
     @WritingConverter
-    public static class UserAuditorWriteConverter implements Converter<UserAuditor, String> {
+    public static class UserAuditorWriteConverter implements Converter<UserAuditor, UUID> {
         /**
          * Converts a {@link UserAuditor} object to its code represented as a String.
          *
@@ -55,7 +57,7 @@ public class UserAuditorConverters implements InitializingBean {
          * @throws NullPointerException if the source {@link UserAuditor} is null.
          */
         @Override
-        public String convert(@NonNull UserAuditor source) {
+        public UUID convert(@NonNull UserAuditor source) {
             return source.code();
         }
     }
@@ -74,18 +76,18 @@ public class UserAuditorConverters implements InitializingBean {
      *
      * @see UserAuditorConverters
      * @see UserAuditorWriteConverter
-     * @see UserAuditor#withCode(String)
+     * @see UserAuditor#withCode(UUID)
      */
     @Component
     @ReadingConverter
-    public static class UserAuditorReadConverter implements Converter<String, UserAuditor> {
+    public static class UserAuditorReadConverter implements Converter<UUID, UserAuditor> {
         /**
          * Converts a given non-null String source representing a user auditor code
          * into a {@link UserAuditor} instance.
          * <p>
          * This method is part of the read conversion process, used to transform auditor codes
          * stored as strings (for example, in a database) back into rich {@link UserAuditor} objects.
-         * It delegates the conversion to the {@link UserAuditor#withCode(String)} factory method,
+         * It delegates the conversion to the {@link UserAuditor#withCode(UUID)} factory method,
          * which reconstructs the auditor with the provided code while setting default null values for
          * the username and name fields.
          *
@@ -94,7 +96,7 @@ public class UserAuditorConverters implements InitializingBean {
          * @throws NullPointerException if the source is null.
          */
         @Override
-        public UserAuditor convert(@NonNull String source) {
+        public UserAuditor convert(@NonNull UUID source) {
             return UserAuditor.withCode(source);
         }
     }

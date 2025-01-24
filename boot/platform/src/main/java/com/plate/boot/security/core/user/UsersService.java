@@ -17,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -71,7 +72,7 @@ public class UsersService extends AbstractDatabase {
      * @param code The unique code used to identify the user.
      * @return A {@link Mono} that emits a single {@link User} object if found, or an empty {@link Mono} if no user matches the code.
      */
-    public Mono<User> loadByCode(String code) {
+    public Mono<User> loadByCode(UUID code) {
         var userMono = this.usersRepository.findByCode(code).flux();
         return super.queryWithCache(code, userMono).singleOrEmpty();
     }

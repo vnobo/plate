@@ -18,10 +18,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.postgresql:r2dbc-postgresql")
 
-    //http3
-    //runtimeOnly ('io.netty.incubator:netty-incubator-codec-http3:0.0.28.Final')
-    //implementation('io.netty:netty-tcnative-boringssl-static')
-
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'io.projectreactor:reactor-test'
 

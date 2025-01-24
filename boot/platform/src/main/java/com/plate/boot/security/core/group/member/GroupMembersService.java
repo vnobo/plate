@@ -13,7 +13,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Service class for managing group members operations, including search, pagination, CRUD operations,
+ * and cache management.
  */
 @Service
 @RequiredArgsConstructor
@@ -21,20 +22,20 @@ public class GroupMembersService extends AbstractDatabase {
 
     private final GroupMembersRepository memberRepository;
 
-    public Flux<GroupMemberResp> search(GroupMemberReq request, Pageable pageable) {
+    public Flux<GroupMemberRes> search(GroupMemberReq request, Pageable pageable) {
         QueryFragment fragment = request.toParamSql();
-        QueryFragment queryFragment = QueryFragment.withColumns("a.*", "b.name as group_name", "b.extend as group_extend",
-                        "c.name as login_name", "c.username")
+        QueryFragment queryFragment = QueryFragment.withColumns("a.*", "b.name as group_name",
+                        "b.extend as group_extend", "c.name as login_name", "c.username")
                 .from("se_group_members a",
                         "inner join se_groups b on a.group_code = b.code",
                         "inner join se_users c on c.code = a.user_code")
                 .where(fragment.getWhere().toString());
         queryFragment.putAll(fragment);
         return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(),
-                queryFragment, GroupMemberResp.class);
+                queryFragment, GroupMemberRes.class);
     }
 
-    public Mono<Page<GroupMemberResp>> page(GroupMemberReq request, Pageable pageable) {
+    public Mono<Page<GroupMemberRes>> page(GroupMemberReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment fragment = request.toParamSql();
         QueryFragment queryFragment = QueryFragment.withColumns("*").from("se_group_members a",

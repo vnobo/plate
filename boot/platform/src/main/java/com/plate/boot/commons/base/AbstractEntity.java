@@ -8,6 +8,7 @@ import org.springframework.data.relational.core.mapping.InsertOnlyProperty;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * This class, AbstractEntity, is a base class for all data entities in the system.
@@ -40,7 +41,7 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
     /**
      * Data entity code
      */
-    protected String code;
+    protected UUID code;
 
     /**
      * Data tenant code

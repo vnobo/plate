@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
@@ -58,7 +60,7 @@ public class TenantMembersService extends AbstractDatabase {
                 .then(tenantMemberMono).doAfterTerminate(() -> this.cache.clear());
     }
 
-    private Mono<Void> userDefaultTenant(String userCode) {
+    private Mono<Void> userDefaultTenant(UUID userCode) {
         Query query = Query.query(Criteria.where("userCode").is(userCode));
         Update update = Update.update("enabled", false);
         return entityTemplate.update(TenantMember.class).matching(query).apply(update).then();
