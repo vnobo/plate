@@ -21,6 +21,14 @@ import java.util.UUID;
 public interface BaseEntity<T> extends Serializable, Persistable<T> {
 
     /**
+     * Retrieves the unique code assigned to the entity.
+     * This code serves as a distinct identifier for the entity within the system.
+     *
+     * @return The unique identifier (UUID) of the entity.
+     */
+    <E> E getCode();
+
+    /**
      * Sets the unique code for an entity.
      * This method is intended to assign or update the code attribute of an entity,
      * which serves as a unique identifier in accordance with the BaseEntity interface.
@@ -72,14 +80,14 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
      * Determines whether the entity is new, typically indicating it has not been persisted yet.
      * This is assessed by checking if the entity's identifier ({@code getId}) is empty.
      * If the entity is determined to be new, a unique code is generated using {@link ContextUtils#nextId()}
-     * and assigned to the entity via {@link #setCode(String)}.
+     * and assigned to the entity via {@link #setCode(UUID)}.
      *
      * @return {@code true} if the entity is considered new (i.e., lacks an identifier), otherwise {@code false}.
      */
     @Override
     @JsonIgnore
     default boolean isNew() {
-        boolean isNew = ObjectUtils.isEmpty(getId());
+        boolean isNew = ObjectUtils.isEmpty(getCode());
         if (isNew) {
             setCode(ContextUtils.nextId());
         }

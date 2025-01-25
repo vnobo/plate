@@ -1,7 +1,6 @@
 package com.plate.boot.security.core.group.member;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.plate.boot.commons.base.BaseResEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -30,7 +29,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class GroupMemberRes extends GroupMember implements BaseResEntity<Long> {
+public class GroupMemberRes extends GroupMember {
 
     private String name;
 

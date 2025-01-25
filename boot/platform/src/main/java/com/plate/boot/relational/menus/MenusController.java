@@ -9,7 +9,6 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -73,10 +72,10 @@ public class MenusController {
 
     @PostMapping("save")
     public Mono<Menu> save(@Valid @RequestBody MenuReq request) {
-        if (StringUtils.hasLength(request.getCode())) {
-            return this.menusService.modify(request);
+        if (request.isNew()) {
+            return this.menusService.add(request);
         }
-        return this.menusService.add(request);
+        return this.menusService.modify(request);
     }
 
     @DeleteMapping("delete")
