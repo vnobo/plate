@@ -9,7 +9,13 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.util.UUID;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Represents a member associated with a tenant within the system. This class extends the {@link AbstractEntity}
+ * to inherit common entity properties and adds specific fields relevant to a tenant member.
+ * <p>
+ * The {@code userCode} field uniquely identifies the user associated with the tenant and must not be blank.
+ * The {@code enabled} field indicates whether the tenant member is currently enabled or not.
+ *
+ * @see AbstractEntity
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
