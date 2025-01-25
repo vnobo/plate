@@ -13,8 +13,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Service class for managing group members operations, including search, pagination, CRUD operations,
- * and cache management.
+ * Service class for managing group members, providing operations to search, page, operate (update or create),
+ * save, and delete group members with reactive support.
+ * This service utilizes caching mechanisms to improve performance on frequently accessed data and
+ * leverages SQL query fragments for dynamic querying capabilities.
+ *
+ * @see GroupMembersRepository
  */
 @Service
 @RequiredArgsConstructor
