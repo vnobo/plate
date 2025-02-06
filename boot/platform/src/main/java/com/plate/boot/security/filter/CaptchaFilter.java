@@ -39,6 +39,16 @@ public class CaptchaFilter implements WebFilter, Ordered {
 
     private final CaptchaRepository captchaTokenRepository;
 
+    /**
+     * Filters the incoming request to check if it requires captcha protection.
+     * If the request matches the captcha protection criteria, it validates the captcha token.
+     * If the captcha token is valid, it continues the filter chain.
+     * If the captcha token is invalid or an error occurs, it handles the access denied exception.
+     *
+     * @param exchange the current server web exchange
+     * @param chain    the web filter chain
+     * @return a Mono that indicates when request processing is complete
+     */
     @Override
     public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         return REQUIRE_CAPTCHA_PROTECTION_MATCHER.matches(exchange)
