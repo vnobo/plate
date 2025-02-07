@@ -11,36 +11,75 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.time.LocalDateTime;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
- * //
+ * Represents a tenant entity in the system.
+ * This class is annotated with Lombok's \@Data to generate boilerplate code such as getters, setters, toString, equals, and hashCode methods.
+ * It is also mapped to the "se_tenants" table in the database.
+ * <p>
+ * The class includes validation constraints and auditing fields.
+ * <p>
+ * \@author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Data
 @Table("se_tenants")
 public class Tenant implements BaseEntity<Integer> {
 
+    /**
+     * The unique identifier for the tenant.
+     */
     @Id
     private Integer id;
 
-    @NotBlank(message = "编码[code]不能为空!")
+    /**
+     * The code of the tenant.
+     * This field is mandatory and cannot be blank.
+     */
+    @NotBlank(message = "Tenant [code] cannot be empty!")
     private String code;
 
-    @NotBlank(message = "父级[pcode]不能为空!")
+    /**
+     * The parent code of the tenant.
+     * This field is mandatory and cannot be blank.
+     */
+    @NotBlank(message = "Tenant parent code [pcode] cannot be empty!")
     private String pcode;
 
-    @NotBlank(message = "租户名[name]不能为空!")
+    /**
+     * The name of the tenant.
+     * This field is mandatory and cannot be blank.
+     */
+    @NotBlank(message = "Tenant name [name] cannot be empty!")
     private String name;
 
+    /**
+     * Additional information about the tenant in JSON format.
+     */
     private JsonNode extend;
 
+    /**
+     * The user who created the tenant.
+     * This field is automatically populated by the auditing framework.
+     */
     @CreatedBy
     private UserAuditor creator;
 
+    /**
+     * The user who last modified the tenant.
+     * This field is automatically populated by the auditing framework.
+     */
     @LastModifiedBy
     private UserAuditor updater;
 
+    /**
+     * The timestamp when the tenant was created.
+     * This field is automatically populated by the auditing framework.
+     */
     @CreatedDate
     private LocalDateTime createdTime;
 
+    /**
+     * The timestamp when the tenant was last modified.
+     * This field is automatically populated by the auditing framework.
+     */
     @LastModifiedDate
     private LocalDateTime updatedTime;
 }

@@ -11,17 +11,44 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.UUID;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Entity class representing a user authority.
+ * This class implements GrantedAuthority and BaseEntity interfaces.
+ * It is annotated with \@Table to map it to the "se_authorities" table in the database.
+ * It uses Lombok annotations for boilerplate code reduction.
+ * <p>
+ * The class extends AbstractEntity to inherit common entity properties.
+ * It includes validation constraints for its fields.
+ * <p>
+ * \@author
+ * <a href="https://github.com/vnobo">Alex bob</a>
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Table("se_authorities")
 public class UserAuthority extends AbstractEntity<Integer> implements GrantedAuthority, BaseEntity<Integer> {
 
-    @NotBlank(message = "用户[userCode]不能为空!")
+    /**
+     * The unique code of the user.
+     * It is annotated with \@NotBlank to ensure it is not null or empty.
+     */
+    @NotBlank(message = "User entity [userCode] cannot be empty!")
     private UUID userCode;
 
-    @NotBlank(message = "权限[authority]不能为空!")
+    /**
+     * The authority granted to the user.
+     * It is annotated with \@NotBlank to ensure it is not null or empty.
+     */
+    @NotBlank(message = "User entity [authority] cannot be empty!")
     private String authority;
 
+    /**
+     * Returns the authority granted to the user.
+     * This method is required by the GrantedAuthority interface.
+     *
+     * @return the authority granted to the user
+     */
+    @Override
+    public String getAuthority() {
+        return this.authority;
+    }
 }

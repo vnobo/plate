@@ -6,15 +6,20 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Repository interface for managing UserAuthority entities.
+ * This interface extends R2dbcRepository to provide reactive CRUD operations for UserAuthority entities.
+ * <p>
+ * The class is annotated with \@author to indicate the author of the code.
+ * \@author
+ * <a href="https://github.com/vnobo">Alex bob</a>
  */
 public interface UserAuthoritiesRepository extends R2dbcRepository<UserAuthority, Integer> {
 
     /**
-     * This method deletes records from the database based on the provided authority value.
+     * Deletes records from the database based on the provided authority values.
      *
-     * @param authorities the authority value to delete by
-     * @return a Mono<Integer> indicating the number of records deleted
+     * @param authorities the list of authority values to delete by
+     * @return a Mono emitting the number of records deleted
      */
     Mono<Integer> deleteByAuthorityIn(List<String> authorities);
 
