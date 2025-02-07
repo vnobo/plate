@@ -1,24 +1,23 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { NzTableQueryParams } from 'ng-zorro-antd/table';
-import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { tap } from 'rxjs';
-import { SharedModule } from '@app/shared/shared.module';
 import { Page, Pageable } from '@app/core/types';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzModalService } from 'ng-zorro-antd/modal';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
+import { NzTableQueryParams } from 'ng-zorro-antd/table';
+import { tap } from 'rxjs';
 
-import { UsersService } from './users.service';
-import { User } from './user.types';
+import { DatePipe } from '@angular/common';
 import { UserFormComponent } from '@app/pages';
-import { PageHeaderComponent } from '@app/layout';
+import { SHARED_IMPORTS } from '@app/shared/shared-imports';
+import { TruncateMiddlePipe } from '@app/shared/truncate-middle.pipe';
+import { User } from './user.types';
+import { UsersService } from './users.service';
 
 @Component({
-    selector: 'app-users',
-    imports: [SharedModule, PageHeaderComponent, NzTagModule, NzSpaceModule],
-    templateUrl: './users.component.html',
-    styleUrl: './users.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-users',
+  imports: [DatePipe, TruncateMiddlePipe, ...SHARED_IMPORTS],
+  templateUrl: './users.component.html',
+  styleUrl: './users.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UsersComponent {
   private readonly _message = inject(NzNotificationService);

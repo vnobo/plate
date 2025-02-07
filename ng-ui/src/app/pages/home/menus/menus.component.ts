@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, effect, inject, OnInit, signal, untracked } from '@angular/core';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { NzTableQueryParams } from 'ng-zorro-antd/table';
 
 import { tap } from 'rxjs';
@@ -13,10 +13,10 @@ import { SHARED_IMPORTS } from '@app/shared/shared-imports';
 import { Menu } from './menu.types';
 
 @Component({
-    selector: 'app-menus',
-    templateUrl: './menus.component.html',
-    styleUrls: ['./menus.component.scss'],
-    imports: [DatePipe, NzNotificationModule, ...SHARED_IMPORTS]
+  selector: 'app-menus',
+  templateUrl: './menus.component.html',
+  styleUrls: ['./menus.component.scss'],
+  imports: [DatePipe, ...SHARED_IMPORTS],
 })
 export class MenusComponent implements OnInit {
   private readonly _modal = inject(NzModalService);

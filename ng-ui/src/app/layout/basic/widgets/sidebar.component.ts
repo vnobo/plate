@@ -2,16 +2,14 @@ import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { MenusService } from '@app/pages';
-import { SharedModule } from '@app/shared/shared.module';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 
 @Component({
   selector: 'layout-sidebar-menus, [layoutSidebarMenus]',
-  imports: [NzLayoutModule, NzMenuModule, RouterModule, NzIconModule, SharedModule],
-  template: `
-    <div class="sidebar-logo">
+  imports: [NzLayoutModule, NzMenuModule, RouterModule, NzIconModule],
+  template: ` <div class="sidebar-logo">
       <a href="/" rel="noopener noreferrer" target="_blank">
         <img alt="logo" src="assets/img/logo.png" />
         <h1>Plate 管理后台</h1>
@@ -19,15 +17,15 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
     </div>
     <ul nz-menu nzMode="inline">
       @for (menu of myMenus(); track menu) {
-        <li nz-submenu nzIcon="{{ menu.icons }}" nzOpen nzTitle="{{ menu.name }}">
-          <ul>
-            @for (children of menu.children; track children) {
-              <li nz-menu-item nzMatchRouter>
-                <a nz-button nzType="link" routerLink="{{ children.path }}">{{ children.name }}</a>
-              </li>
-            }
-          </ul>
-        </li>
+      <li nz-submenu nzIcon="{{ menu.icons }}" nzOpen nzTitle="{{ menu.name }}">
+        <ul>
+          @for (children of menu.children; track children) {
+          <li nz-menu-item nzMatchRouter>
+            <a nz-button nzType="link" routerLink="{{ children.path }}">{{ children.name }}</a>
+          </li>
+          }
+        </ul>
+      </li>
       }
     </ul>`,
   styles: [

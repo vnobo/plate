@@ -1,8 +1,7 @@
-import { Pipe, type PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-    name: 'appTruncateMiddle',
-    standalone: false
+  name: 'truncateMiddle',
 })
 export class TruncateMiddlePipe implements PipeTransform {
   transform(value: string, length: number = 8): string {

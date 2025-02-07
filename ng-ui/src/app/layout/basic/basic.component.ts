@@ -1,14 +1,12 @@
 import { Component, signal } from '@angular/core';
-import { LayoutSidebarComponent } from './widgets/sidebar.component';
 import { SharedModule } from '@app/shared/shared.module';
-import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { LayoutNavbarComponent } from './widgets/navbar.component';
+import { LayoutSidebarComponent } from './widgets/sidebar.component';
 
 @Component({
-    selector: 'layout-basic',
-    imports: [SharedModule, LayoutNavbarComponent, LayoutSidebarComponent, NzPageHeaderModule, NzBreadCrumbModule],
-    template: `
+  selector: 'layout-basic',
+  imports: [SharedModule, LayoutNavbarComponent, LayoutSidebarComponent],
+  template: `
     <nz-layout class="page">
       <nz-sider [nzCollapsed]="isCollapsed()" [nzTrigger]="null" class="menu-sidebar" nzBreakpoint="md" nzCollapsible nzWidth="14.8rem">
         <div layoutSidebarMenus></div>
@@ -23,8 +21,8 @@ import { LayoutNavbarComponent } from './widgets/navbar.component';
       </nz-layout>
     </nz-layout>
   `,
-    styles: [
-        `
+  styles: [
+    `
       :host {
         display: flex;
         text-rendering: optimizeLegibility;
@@ -32,7 +30,7 @@ import { LayoutNavbarComponent } from './widgets/navbar.component';
         -moz-osx-font-smoothing: grayscale;
       }
     `,
-        `
+    `
       .menu-sidebar {
         position: relative;
         z-index: 10;
@@ -40,14 +38,14 @@ import { LayoutNavbarComponent } from './widgets/navbar.component';
         box-shadow: 2px 0 6px rgba(0, 21, 41, 0.35);
       }
     `,
-        `
+    `
       .nz-header {
         padding: 0;
         height: auto;
         line-height: normal;
       }
     `,
-    ]
+  ],
 })
 export class BasicLayoutComponent {
   isCollapsed = signal(false);
