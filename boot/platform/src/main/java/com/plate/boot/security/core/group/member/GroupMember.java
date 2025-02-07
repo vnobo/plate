@@ -25,9 +25,9 @@ import java.util.UUID;
 @Table("se_group_members")
 public class GroupMember extends AbstractEntity<Long> {
 
-    @NotBlank(message = "Rule [groupCode] not be empty!")
+    @NotBlank(message = "Group member [groupCode] cannot be empty!")
     private UUID groupCode;
 
-    @NotBlank(message = "User [username]not be empty!")
+    @NotBlank(message = "Group member [username] cannot be empty!")
     private UUID userCode;
 }

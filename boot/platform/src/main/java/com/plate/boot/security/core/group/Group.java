@@ -14,7 +14,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("se_groups")
 public class Group extends AbstractEntity<Integer> {
 
-    @NotBlank(message = " Rules [name] not be empty!")
+    @NotBlank(message = "Group [name] cannot be empty!")
     private String name;
 
 }

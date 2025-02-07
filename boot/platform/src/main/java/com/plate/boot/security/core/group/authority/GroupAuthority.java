@@ -20,11 +20,10 @@ import java.util.UUID;
 public class GroupAuthority extends AbstractEntity<Integer> implements GrantedAuthority {
 
 
-
-    @NotBlank(message = "Role [groupCode] can not be empty!")
+    @NotBlank(message = "Group authority [groupCode] cannot be empty!")
     private UUID groupCode;
 
-    @NotBlank(message = "Role [authority]can not be empty!")
+    @NotBlank(message = "Group authority [authority] cannot be empty!")
     private String authority;
 
     public GroupAuthority(UUID groupCode, String authority) {

@@ -22,7 +22,7 @@ import java.util.UUID;
 @Table("se_tenant_members")
 public class TenantMember extends AbstractEntity<Long> {
 
-    @NotBlank(message = "用户编码[userCode]不能为空!")
+    @NotBlank(message = "The user code [userCode] cannot be empty!")
     private UUID userCode;
 
     private Boolean enabled;
