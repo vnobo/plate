@@ -13,7 +13,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -28,7 +27,7 @@ import static com.plate.boot.security.captcha.CaptchaRepository.DEFAULT_CAPTCHA_
  * It integrates with session management and captcha token validation to prevent unauthorized access.
  */
 @Log4j2
-@Component
+//@Component
 @RequiredArgsConstructor
 public class CaptchaFilter implements WebFilter, Ordered {
 
