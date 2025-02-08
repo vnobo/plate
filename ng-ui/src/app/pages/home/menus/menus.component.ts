@@ -1,16 +1,16 @@
-import { DatePipe } from '@angular/common';
-import { Component, effect, inject, OnInit, signal, untracked } from '@angular/core';
-import { NzModalService } from 'ng-zorro-antd/modal';
-import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { NzTableQueryParams } from 'ng-zorro-antd/table';
+import {DatePipe} from '@angular/common';
+import {Component, effect, inject, OnInit, signal, untracked} from '@angular/core';
+import {NzModalService} from 'ng-zorro-antd/modal';
+import {NzNotificationService} from 'ng-zorro-antd/notification';
+import {NzTableQueryParams} from 'ng-zorro-antd/table';
 
-import { tap } from 'rxjs';
+import {tap} from 'rxjs';
 
-import { Page, Pageable } from '@app/core/types';
-import { MenuFormComponent, MenusService } from '@app/pages';
-import { User } from '@app/pages/home/users/user.types';
-import { SHARED_IMPORTS } from '@app/shared/shared-imports';
-import { Menu } from './menu.types';
+import {Page, Pageable} from '@app/core/types';
+import {MenuFormComponent, MenusService} from '@app/pages';
+import {User} from '@app/pages/home/users/user.types';
+import {SHARED_IMPORTS} from '@app/shared/shared-imports';
+import {Menu} from './menu.types';
 
 @Component({
   selector: 'app-menus',
@@ -59,7 +59,7 @@ export class MenusComponent implements OnInit {
     ref.menuData.set(menu);
     ref.formSubmit.subscribe(ms => {
       this._menusSer.save(ms).subscribe(res => {
-        console.debug(`保存菜单成功, ID: ${res.id},编码:${res.code}`);
+        console.debug(`保存菜单成功,编码:${res.code}`);
         modal.close();
         this.onSearch();
       });

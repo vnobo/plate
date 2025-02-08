@@ -48,9 +48,9 @@
     </tr>
   </thead>
   <tbody>
-    @for (data of menuTable.data; track $index) {
+    @for (data of menuTable.data; track data.code) {
     <ng-container>
-      @for (item of mapOfExpandedData[data.code ? data.code : '0']; track $index) {
+      @for (item of mapOfExpandedData[data.code ? data.code : '0']; track item.code) {
       <ng-container>
         @if ((item.parent && item.parent.expand) || !item.parent) {
         <tr>

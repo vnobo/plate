@@ -11,10 +11,7 @@ import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -403,15 +400,13 @@ public final class QueryHelper {
         if (ObjectUtils.isEmpty(objectMap)) {
             return Criteria.empty();
         }
-        List<Criteria> criteriaList = objectMap.entrySet().parallelStream().map(entry -> {
-            if (entry.getValue() instanceof String value) {
-                return Criteria.where(entry.getKey()).like(String.format("%s", value)).ignoreCase(true);
-            } else if (entry.getValue() instanceof Collection<?> values) {
-                return Criteria.where(entry.getKey()).in(values);
-            } else {
-                return Criteria.where(entry.getKey()).is(entry.getValue());
-            }
-        }).collect(Collectors.toList());
+        List<Criteria> criteriaList = objectMap.entrySet().parallelStream().map(entry ->
+                switch (entry.getValue()) {
+                    case UUID value -> Criteria.where(entry.getKey()).is(value);
+                    case String value -> Criteria.where(entry.getKey()).like(value).ignoreCase(true);
+                    case Collection<?> values -> Criteria.where(entry.getKey()).in(values);
+                    case null, default -> Criteria.where(entry.getKey()).is(entry.getValue());
+                }).collect(Collectors.toList());
         return Criteria.from(criteriaList);
     }
 }

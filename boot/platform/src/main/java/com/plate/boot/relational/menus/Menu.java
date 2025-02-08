@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 import java.security.Permission;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Represents a menu entity within an application, encapsulating details about menu items including
@@ -30,6 +31,11 @@ import java.util.Set;
 @Data
 @Table("se_menus")
 public class Menu extends AbstractEntity<Integer> {
+
+    /**
+     * parent code
+     */
+    protected UUID pcode;
 
     /**
      * Represents the type of menu item.

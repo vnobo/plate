@@ -1,10 +1,10 @@
-import { Component, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterModule } from '@angular/router';
-import { MenusService } from '@app/pages';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
+import {Component, inject} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {RouterModule} from '@angular/router';
+import {MenusService} from '@app/pages';
+import {NzIconModule} from 'ng-zorro-antd/icon';
+import {NzLayoutModule} from 'ng-zorro-antd/layout';
+import {NzMenuModule} from 'ng-zorro-antd/menu';
 
 @Component({
   selector: 'layout-sidebar-menus, [layoutSidebarMenus]',
@@ -82,5 +82,5 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
 export class LayoutSidebarComponent {
   private readonly menusSer = inject(MenusService);
 
-  myMenus = toSignal(this.menusSer.getMyMenus({ pcode: '0', tenantCode: '0' }));
+  myMenus = toSignal(this.menusSer.getMyMenus({pcode: '00000000-0000-0000-0000-000000000000', tenantCode: '0'}));
 }

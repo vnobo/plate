@@ -1,12 +1,9 @@
 package com.plate.boot.commons.utils;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.exception.JsonPointerException;
@@ -25,6 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -247,16 +245,32 @@ public final class BeanUtils implements InitializingBean {
         if (ObjectUtils.isEmpty(bean)) {
             return null;
         }
-        ObjectMapper objectMapper = ContextUtils.OBJECT_MAPPER.copy();
-        if (isToUnderlineCase) {
-            objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+        PropertyDescriptor[] propertyDescriptors = org.springframework.beans.BeanUtils
+                .getPropertyDescriptors(bean.getClass());
+        Map<String, Object> resultMap = Maps.newHashMap();
+        for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+            if (propertyDescriptor.getReadMethod() == null) {
+                continue;
+            }
+            try {
+                ReflectionUtils.makeAccessible(propertyDescriptor.getReadMethod());
+                var method = propertyDescriptor.getReadMethod();
+                if (method == null) {
+                    continue;
+                }
+                var readValue = method.invoke(bean);
+                if (ignoreNullValue && ObjectUtils.isEmpty(readValue)) {
+                    continue;
+                }
+                var key = isToUnderlineCase ? CaseFormat.LOWER_CAMEL
+                        .to(CaseFormat.LOWER_UNDERSCORE, propertyDescriptor.getName()) : propertyDescriptor.getName();
+                resultMap.put(key, readValue);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                log.error("BeanUtils beanToMap getReadMethod for property [{}]  error", propertyDescriptor.getName(), e);
+                continue;
+            }
         }
-        if (ignoreNullValue) {
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        }
-        var type = new TypeReference<Map<String, Object>>() {
-        };
-        return objectMapper.convertValue(bean, type);
+        return resultMap;
     }
 
     /**
