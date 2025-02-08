@@ -1,4 +1,4 @@
-package com.plate.boot.security.core.captcha;
+package com.plate.boot.security.captcha;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerWebExchange;

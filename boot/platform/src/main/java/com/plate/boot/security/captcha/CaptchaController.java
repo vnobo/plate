@@ -1,8 +1,8 @@
-package com.plate.boot.security.core.captcha;
+package com.plate.boot.security.captcha;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +12,8 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -46,12 +48,19 @@ public class CaptchaController {
      * @return a Mono emitting the response entity containing the captcha image
      */
     @GetMapping("code")
-    public Mono<ResponseEntity<Resource>> getCaptcha(ServerWebExchange exchange) {
+    public Mono<ResponseEntity<DataBuffer>> getCaptcha(ServerWebExchange exchange) {
+        DataBuffer dataBuffer = exchange.getResponse().bufferFactory().allocateBuffer(2048);
         return this.captchaTokenRepository.generateToken(exchange)
                 .publishOn(Schedulers.boundedElastic()).flatMap(captchaToken -> {
-                    Resource resource = new ByteArrayResource(captchaToken.captcha().getBytes(StandardCharsets.UTF_8));
-                    return Mono.just(ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(resource))
-                            .delayUntil((a) -> this.captchaTokenRepository.saveToken(exchange, captchaToken));
+                    try (OutputStream outputStream = dataBuffer.asOutputStream()) {
+                        outputStream.write(captchaToken.captcha().getBytes());
+                        return Mono.just(ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(dataBuffer))
+                                .delayUntil((a) -> this.captchaTokenRepository.saveToken(exchange, captchaToken));
+                    } catch (IOException e) {
+                        return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .contentType(MediaType.TEXT_PLAIN)
+                                .body(dataBuffer.read(e.getMessage().getBytes(StandardCharsets.UTF_8))));
+                    }
                 });
     }
 

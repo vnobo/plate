@@ -1,7 +1,5 @@
-package com.plate.boot.security.filter;
+package com.plate.boot.security.captcha;
 
-import com.plate.boot.security.core.captcha.CaptchaRepository;
-import com.plate.boot.security.core.captcha.CaptchaToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.Ordered;
@@ -15,6 +13,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.server.authorization.ServerAccessDeniedHandler;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -22,13 +21,14 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static com.plate.boot.security.core.captcha.CaptchaRepository.DEFAULT_CAPTCHA_TOKEN_ATTR_NAME;
+import static com.plate.boot.security.captcha.CaptchaRepository.DEFAULT_CAPTCHA_TOKEN_ATTR_NAME;
 
 /**
  * A filter that provides captcha protection for specific endpoints, primarily used to secure OAuth2 token requests.
  * It integrates with session management and captcha token validation to prevent unauthorized access.
  */
 @Log4j2
+@Component
 @RequiredArgsConstructor
 public class CaptchaFilter implements WebFilter, Ordered {
 

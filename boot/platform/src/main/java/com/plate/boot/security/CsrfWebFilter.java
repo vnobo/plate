@@ -1,4 +1,4 @@
-package com.plate.boot.security.filter;
+package com.plate.boot.security;
 
 import com.plate.boot.commons.utils.ContextUtils;
 import lombok.extern.log4j.Log4j2;
