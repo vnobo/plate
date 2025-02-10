@@ -85,4 +85,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 HttpStatus.INSUFFICIENT_STORAGE, exchange);
     }
 
+    @Override
+    protected @NonNull Mono<ResponseEntity<Object>> handleExceptionInternal(@NonNull Exception ex, Object body,
+                                                                            HttpHeaders headers, @NonNull HttpStatusCode status,
+                                                                            @NonNull ServerWebExchange exchange) {
+        if (logger.isDebugEnabled()) {
+            logger.error(ex.getLocalizedMessage(), ex);
+        }
+        return super.handleExceptionInternal(ex, body, headers, status, exchange);
+    }
 }
