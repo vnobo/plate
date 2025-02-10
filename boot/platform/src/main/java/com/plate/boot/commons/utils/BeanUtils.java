@@ -22,8 +22,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
@@ -245,32 +245,29 @@ public final class BeanUtils implements InitializingBean {
         if (ObjectUtils.isEmpty(bean)) {
             return null;
         }
-        PropertyDescriptor[] propertyDescriptors = org.springframework.beans.BeanUtils
-                .getPropertyDescriptors(bean.getClass());
-        Map<String, Object> resultMap = Maps.newHashMap();
-        for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-            if (propertyDescriptor.getReadMethod() == null) {
+        Class<?> actualEditable = bean.getClass();
+        PropertyDescriptor[] propertyDescriptors = org.springframework.beans.BeanUtils.getPropertyDescriptors(actualEditable);
+        Map<String, Object> beanMap = Maps.newHashMap();
+        for (PropertyDescriptor targetPd : propertyDescriptors) {
+            String key = targetPd.getName();
+            if (key.equals("class") || key.equals("new")) {
                 continue;
             }
-            try {
-                ReflectionUtils.makeAccessible(propertyDescriptor.getReadMethod());
-                var method = propertyDescriptor.getReadMethod();
-                if (method == null) {
-                    continue;
-                }
-                var readValue = method.invoke(bean);
-                if (ignoreNullValue && ObjectUtils.isEmpty(readValue)) {
-                    continue;
-                }
-                var key = isToUnderlineCase ? CaseFormat.LOWER_CAMEL
-                        .to(CaseFormat.LOWER_UNDERSCORE, propertyDescriptor.getName()) : propertyDescriptor.getName();
-                resultMap.put(key, readValue);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                log.error("BeanUtils beanToMap getReadMethod for property [{}]  error", propertyDescriptor.getName(), e);
+            if (isToUnderlineCase) {
+                key = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key);
+            }
+            var readMethod = targetPd.getReadMethod();
+            if (Optional.ofNullable(readMethod).isEmpty()) {
                 continue;
             }
+            ReflectionUtils.makeAccessible(readMethod);
+            Object value = ReflectionUtils.invokeMethod(readMethod, bean);
+            if (ignoreNullValue && ObjectUtils.isEmpty(value)) {
+                continue;
+            }
+            beanMap.put(key, value);
         }
-        return resultMap;
+        return beanMap;
     }
 
     /**
