@@ -1,5 +1,6 @@
 package com.plate.boot.security.core.user.authority;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plate.boot.commons.base.AbstractEntity;
 import com.plate.boot.commons.base.BaseEntity;
 import jakarta.validation.constraints.NotBlank;
@@ -50,5 +51,11 @@ public class UserAuthority extends AbstractEntity<Integer> implements GrantedAut
     @Override
     public String getAuthority() {
         return this.authority;
+    }
+
+    @JsonIgnore
+    @Override
+    public String getTenantCode() {
+        return this.tenantCode;
     }
 }
