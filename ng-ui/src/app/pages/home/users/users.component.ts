@@ -1,16 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Page, Pageable } from '@app/core/types';
-import { NzModalService } from 'ng-zorro-antd/modal';
-import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { NzTableQueryParams } from 'ng-zorro-antd/table';
-import { tap } from 'rxjs';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {Page, Pageable} from '@app/core/types';
+import {NzModalService} from 'ng-zorro-antd/modal';
+import {NzNotificationService} from 'ng-zorro-antd/notification';
+import {NzTableQueryParams} from 'ng-zorro-antd/table';
+import {tap} from 'rxjs';
 
-import { DatePipe } from '@angular/common';
-import { UserFormComponent } from '@app/pages';
-import { SHARED_IMPORTS } from '@app/shared/shared-imports';
-import { TruncateMiddlePipe } from '@app/shared/truncate-middle.pipe';
-import { User } from './user.types';
-import { UsersService } from './users.service';
+import {DatePipe} from '@angular/common';
+import {UserFormComponent} from '@app/pages';
+import {SHARED_IMPORTS} from '@app/shared/shared-imports';
+import {TruncateMiddlePipe} from '@app/shared/truncate-middle.pipe';
+import {User} from './user.types';
+import {UsersService} from './users.service';
 
 @Component({
   selector: 'app-users',
@@ -61,15 +61,15 @@ export class UsersComponent {
     const ref = modal.getContentComponent();
     ref.userData.set(user);
     ref.formSubmit.subscribe(us => {
-      if (us.id && us.id > 0) {
+      if (us.code) {
         this._userSer.modify(us).subscribe(res => {
-          console.debug(`修改用户成功, ID: ${res.id},编码:${res.code}`);
+          console.debug(`修改用户成功, 编码:${res.code}`);
           modal.close();
           this.onSearch();
         });
       } else {
         this._userSer.add(us).subscribe(res => {
-          console.debug(`添加用户成功, ID: ${res.id},编码:${res.code}`);
+          console.debug(`添加用户成功, 编码:${res.code}`);
           modal.close();
           this.onSearch();
         });

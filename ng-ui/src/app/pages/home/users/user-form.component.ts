@@ -1,7 +1,7 @@
-import { Component, computed, effect, inject, OnInit, output, signal } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { User } from '@app/pages/home/users/user.types';
-import { SHARED_IMPORTS } from '@app/shared/shared-imports';
+import {Component, computed, effect, inject, OnInit, output, signal} from '@angular/core';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {User} from '@app/pages/home/users/user.types';
+import {SHARED_IMPORTS} from '@app/shared/shared-imports';
 
 @Component({
   selector: 'app-user-form',
@@ -83,7 +83,7 @@ import { SHARED_IMPORTS } from '@app/shared/shared-imports';
 })
 export class UserFormComponent implements OnInit {
   userData = signal<User>({} as User);
-  created = computed(() => this.userData().id == undefined);
+  created = computed(() => this.userData().code == undefined);
   formSubmit = output<User>();
   private readonly fb = inject(FormBuilder);
   userForm: FormGroup = this.fb.group({

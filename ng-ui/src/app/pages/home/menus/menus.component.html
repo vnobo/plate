@@ -37,6 +37,7 @@
   nzTableLayout="auto">
   <thead>
     <tr>
+      <th nzLeft>序号</th>
       <th nzLeft>编码</th>
       <th nzLeft>菜单名称</th>
       <th nzLeft nzWidth="18rem">权限标识</th>
@@ -48,19 +49,26 @@
     </tr>
   </thead>
   <tbody>
-    @for (data of menuTable.data; track data.code) {
+    @for (data of menuTable.data; track data; let index = $index) {
     <ng-container>
-      @for (item of mapOfExpandedData[data.code ? data.code : '0']; track item.code) {
+      @for (item of mapOfExpandedData[data.code ? data.code : '0']; track item; let index = $index) {
       <ng-container>
         @if ((item.parent && item.parent.expand) || !item.parent) {
         <tr>
           <td
             (nzExpandChange)="collapse(mapOfExpandedData[data.code ? data.code : '0'], item, $event)"
             [(nzExpand)]="item.expand"
-            [nzIndentSize]="item.level! * 20"
+            [nzIndentSize]="item.level! * 10"
             [nzShowExpand]="!!item.children"
-            nzLeft>
-            {{ item.code }}
+          >{{ index + 1 }}
+          </td
+          >
+          <td [cdkCopyToClipboard]="item.code ?? ''">
+            <ng-container
+              [ngTemplateOutlet]="tableColumn"
+              [ngTemplateOutletContext]="{
+                $implicit: item.code ?? '' | truncateMiddle
+              }"></ng-container>
           </td>
           <td nzLeft>{{ item.name }}</td>
           <td nzLeft>{{ item.authority }}</td>
@@ -81,3 +89,6 @@
     }
   </tbody>
 </nz-table>
+<ng-template #tableColumn let-value>
+  <span nz-tooltip nzTooltipColor="cyan" nzTooltipPlacement="rightTop" nzTooltipTitle="双击复制">{{ value }}</span>
+</ng-template>

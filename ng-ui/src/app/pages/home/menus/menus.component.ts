@@ -11,12 +11,13 @@ import {MenuFormComponent, MenusService} from '@app/pages';
 import {User} from '@app/pages/home/users/user.types';
 import {SHARED_IMPORTS} from '@app/shared/shared-imports';
 import {Menu} from './menu.types';
+import {TruncateMiddlePipe} from '@app/shared/truncate-middle.pipe';
 
 @Component({
   selector: 'app-menus',
   templateUrl: './menus.component.html',
   styleUrls: ['./menus.component.scss'],
-  imports: [DatePipe, ...SHARED_IMPORTS],
+  imports: [DatePipe, TruncateMiddlePipe, ...SHARED_IMPORTS],
 })
 export class MenusComponent implements OnInit {
   private readonly _modal = inject(NzModalService);
@@ -29,8 +30,7 @@ export class MenusComponent implements OnInit {
     sorts: ['id,desc'],
   } as Pageable);
   search = signal({
-    search: '',
-    pcode: '0',
+    pcode: '00000000-0000-0000-0000-000000000000',
     tenantCode: '0',
   } as User);
 
@@ -124,8 +124,8 @@ export class MenusComponent implements OnInit {
   }
 
   visitNode(node: Menu, hashMap: Record<string, boolean>, array: Menu[]): void {
-    if (!hashMap[node.code ? node.code : '0']) {
-      hashMap[node.code ? node.code : '0'] = true;
+    if (!hashMap[node.code ? node.code : '00000000-0000-0000-0000-000000000000']) {
+      hashMap[node.code ? node.code : '00000000-0000-0000-0000-000000000000'] = true;
       array.push(node);
     }
   }
