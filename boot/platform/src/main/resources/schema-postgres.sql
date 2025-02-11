@@ -27,7 +27,7 @@ create table oauth2_authorized_client
 create table if not exists se_users
 (
     id                  serial8 primary key,
-    code         uuid not null unique,
+    code uuid not null unique,
     tenant_code         varchar(64)  not null default '0',
     username            varchar(256) not null unique,
     password            text         not null,
