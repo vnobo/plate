@@ -193,7 +193,6 @@ create table if not exists se_loggers
           "string",
           "numeric",
           "boolean",
-          "null",
           "array",
           "object"
         ]'), 'D')
