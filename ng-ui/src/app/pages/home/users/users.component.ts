@@ -5,16 +5,14 @@ import {NzNotificationService} from 'ng-zorro-antd/notification';
 import {NzTableQueryParams} from 'ng-zorro-antd/table';
 import {tap} from 'rxjs';
 
-import {DatePipe} from '@angular/common';
 import {UserFormComponent} from '@app/pages';
 import {SHARED_IMPORTS} from '@app/shared/shared-imports';
-import {TruncateMiddlePipe} from '@app/shared/truncate-middle.pipe';
 import {User} from './user.types';
 import {UsersService} from './users.service';
 
 @Component({
   selector: 'app-users',
-  imports: [DatePipe, TruncateMiddlePipe, ...SHARED_IMPORTS],
+  imports: [...SHARED_IMPORTS],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

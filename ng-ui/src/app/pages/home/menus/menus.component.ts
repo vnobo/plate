@@ -1,4 +1,3 @@
-import {DatePipe} from '@angular/common';
 import {Component, effect, inject, OnInit, signal, untracked} from '@angular/core';
 import {NzModalService} from 'ng-zorro-antd/modal';
 import {NzNotificationService} from 'ng-zorro-antd/notification';
@@ -11,13 +10,12 @@ import {MenuFormComponent, MenusService} from '@app/pages';
 import {User} from '@app/pages/home/users/user.types';
 import {SHARED_IMPORTS} from '@app/shared/shared-imports';
 import {Menu} from './menu.types';
-import {TruncateMiddlePipe} from '@app/shared/truncate-middle.pipe';
 
 @Component({
   selector: 'app-menus',
   templateUrl: './menus.component.html',
   styleUrls: ['./menus.component.scss'],
-  imports: [DatePipe, TruncateMiddlePipe, ...SHARED_IMPORTS],
+  imports: [...SHARED_IMPORTS],
 })
 export class MenusComponent implements OnInit {
   private readonly _modal = inject(NzModalService);

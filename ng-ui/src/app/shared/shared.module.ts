@@ -1,10 +1,9 @@
-import { CommonModule } from '@angular/common';
-import { NgModule, Type } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { MATERIAL_MODULES } from './material.module';
-import { SHARED_ZORRO_MODULES } from './shared-zorro.module';
-import { TruncateMiddlePipe } from './truncate-middle.pipe';
+import {CommonModule} from '@angular/common';
+import {NgModule, Type} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {RouterModule} from '@angular/router';
+import {MATERIAL_MODULES} from './material.module';
+import {SHARED_ZORRO_MODULES} from './shared-zorro.module';
 
 // #region your componets & directives
 const COMPONENTS: Array<Type<any>> = [];

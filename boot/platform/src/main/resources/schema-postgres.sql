@@ -47,6 +47,7 @@ create table if not exists se_users
     created_time        timestamp             default current_timestamp,
     updated_time timestamp default current_timestamp,
     text_search  tsvector generated always as (
+        setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
         setweight(to_tsvector('chinese', username), 'A') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(name, '')), 'B') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(phone, '')), 'B') || ' ' ||
@@ -185,10 +186,16 @@ create table if not exists se_loggers
     created_time timestamp            default current_timestamp,
     updated_time timestamp default current_timestamp,
     text_search  tsvector generated always as (
+        setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(method, '')), 'B') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(url, '')), 'C') || ' ' ||
-        setweight(jsonb_to_tsvector('chinese', context, '[
-          "string"
+        setweight(jsonb_to_tsvector('chinese', context::jsonb, '[
+          "string",
+          "numeric",
+          "boolean",
+          "null",
+          "array",
+          "object"
         ]'), 'D')
         ) stored
 );
