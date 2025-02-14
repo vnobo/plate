@@ -1,4 +1,5 @@
 server:
+  port: "${port:8080}"
   shutdown: graceful
   compression.enabled: true
 

@@ -6,6 +6,7 @@ import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -77,7 +78,7 @@ public class LoggersService extends AbstractDatabase {
      *
      * @param logger The {@link Logger} entity to save. Must not be {@code null}.
      * @return A {@link Mono} emitting the saved {@link Logger} entity after the operation completes.
-     *         Emits the entity whether it was inserted or updated.
+     * Emits the entity whether it was inserted or updated.
      * @throws IllegalArgumentException if the {@code logger} is {@code null}.
      */
     public Mono<Logger> save(Logger logger) {
@@ -96,5 +97,11 @@ public class LoggersService extends AbstractDatabase {
     public void clearLoggers() {
         this.loggersRepository.deleteByCreatedTimeBefore(LocalDateTime.now().minusYears(3))
                 .subscribe(res -> log.info("CLEAN UP EXPIRED LOGS: {}", res));
+    }
+
+    @EventListener
+    public void processBlockedListEvent(LoggerReq logger) {
+        this.operate(logger).subscribe(res ->
+                log.debug("Client request log save result. log: {}", logger.getContext()));
     }
 }

@@ -3,7 +3,7 @@ package com.plate.boot.security;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plate.boot.security.core.UserAuditor;
-import com.plate.boot.security.core.group.member.GroupMemberResp;
+import com.plate.boot.security.core.group.member.GroupMemberRes;
 import com.plate.boot.security.core.tenant.member.TenantMemberRes;
 import com.plate.boot.security.core.user.User;
 import lombok.Getter;
@@ -16,6 +16,7 @@ import org.springframework.util.ObjectUtils;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Represents security details for a user, extending the DefaultOAuth2User and implementing UserDetails.
@@ -30,7 +31,7 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
      * Represents the unique identifier code for a security detail within the {@link SecurityDetails} class.
      * This string value is used to distinguish different security details instances.
      */
-    private String code;
+    private UUID code;
 
     /**
      * Represents the username of the security principal.
@@ -53,11 +54,11 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
     private Set<TenantMemberRes> tenants;
 
     /**
-     * Represents a collection of {@link GroupMemberResp} instances associated with a security details object.
+     * Represents a collection of {@link GroupMemberRes} instances associated with a security details object.
      * This set encapsulates the group membership responses for a user, providing information about the groups
      * the user is a part of, including each group's name and additional metadata in the form of a JSON node.
      */
-    private Set<GroupMemberResp> groups;
+    private Set<GroupMemberRes> groups;
 
     /**
      * The password field securely stores the authentication credential for a user.
@@ -126,7 +127,7 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
         super(authorities, attributes, nameAttributeKey);
     }
 
-    public static SecurityDetails of(String code, Collection<? extends GrantedAuthority> authorities,
+    public static SecurityDetails of(UUID code, Collection<? extends GrantedAuthority> authorities,
                                      Map<String, Object> attributes, String nameAttributeKey) {
         SecurityDetails securityDetails = new SecurityDetails(authorities, attributes, nameAttributeKey);
         securityDetails.setCode(code);

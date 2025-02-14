@@ -1,19 +1,29 @@
-import { NgClass, NgStyle, NgTemplateOutlet } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import {CommonModule, DatePipe} from '@angular/common';
+import {NgModule, Type} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {PageHeaderComponent} from '@app/layout';
+import {MATERIAL_MODULES} from './material.module';
+import {SHARED_ZORRO_MODULES} from './shared-zorro.module';
+import {TruncateMiddlePipe} from './truncate-middle.pipe';
 
-import { PageHeaderComponent } from '@app/layout';
-import { SHARED_ZORRO_MODULES } from './shared-zorro.module';
+// #region your standalone componets & directives
+export const COMPONENTS: Array<Type<any>> = [PageHeaderComponent];
+export const DIRECTIVES: Array<Type<any>> = [];
 
-export const LAYOUT_COMPONENTS = [PageHeaderComponent];
+@NgModule({
+  imports: [TruncateMiddlePipe, DatePipe],
+  exports: [TruncateMiddlePipe, DatePipe],
+})
+export class ImportsModule {
+}
 
-export const SHARED_IMPORTS = [
+export const SHARED_IMPORTS: Array<Type<any>> = [
+  CommonModule,
   FormsModule,
   ReactiveFormsModule,
-  RouterLink,
-  NgTemplateOutlet,
-  NgClass,
-  NgStyle,
+  ImportsModule,
+  ...MATERIAL_MODULES,
   ...SHARED_ZORRO_MODULES,
-  ...LAYOUT_COMPONENTS,
+  ...COMPONENTS,
+  ...DIRECTIVES,
 ];

@@ -1,5 +1,6 @@
 package com.plate.boot.commons.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.security.core.UserAuditor;
 import lombok.Data;
@@ -8,6 +9,7 @@ import org.springframework.data.relational.core.mapping.InsertOnlyProperty;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * This class, AbstractEntity, is a base class for all data entities in the system.
@@ -40,7 +42,7 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
     /**
      * Data entity code
      */
-    protected String code;
+    protected UUID code;
 
     /**
      * Data tenant code
@@ -98,4 +100,8 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
     @Transient
     protected String securityCode;
 
+    @JsonIgnore
+    public T getId() {
+        return id;
+    }
 }

@@ -1,13 +1,12 @@
-import { Component, computed, effect, inject, OnInit, output, signal } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SHARED_IMPORTS } from '@app/shared/shared-imports';
-import { User } from '@app/pages/home/users/user.types';
-import { NzModalModule } from 'ng-zorro-antd/modal';
+import {Component, computed, effect, inject, OnInit, output, signal} from '@angular/core';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {User} from '@app/pages/home/users/user.types';
+import {SHARED_IMPORTS} from '@app/shared/shared-imports';
 
 @Component({
-    selector: 'app-user-form',
-    imports: [NzModalModule, ...SHARED_IMPORTS],
-    template: `
+  selector: 'app-user-form',
+  imports: [...SHARED_IMPORTS],
+  template: `
     <form (ngSubmit)="onSubmit()" [formGroup]="userForm" class="form-wrapper" nz-form>
       <nz-form-item>
         <nz-form-label [nzSpan]="6" nzFor="username" nzRequired>用&nbsp;&nbsp;户&nbsp;&nbsp;名</nz-form-label>
@@ -16,32 +15,28 @@ import { NzModalModule } from 'ng-zorro-antd/modal';
         </nz-form-control>
       </nz-form-item>
       @if (created()) {
-        <nz-form-item>
-          <nz-form-label [nzSpan]="6" nzFor="password" nzRequired>密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码
-          </nz-form-label>
-          <nz-form-control [nzSpan]="14" nzErrorTip="Password must be at least 6 characters!">
-            <input nz-input type="password" formControlName="password" id="password" />
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-label [nzSpan]="6" nzFor="confirmPassword" nzRequired>确认密码</nz-form-label>
-          <nz-form-control [nzSpan]="14" nzErrorTip="Password must be at least 6 characters!">
-            <input nz-input type="password" formControlName="confirmPassword" id="confirmPassword" />
-          </nz-form-control>
-        </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzFor="password" nzRequired>密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码 </nz-form-label>
+        <nz-form-control [nzSpan]="14" nzErrorTip="Password must be at least 6 characters!">
+          <input nz-input type="password" formControlName="password" id="password" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzFor="confirmPassword" nzRequired>确认密码</nz-form-label>
+        <nz-form-control [nzSpan]="14" nzErrorTip="Password must be at least 6 characters!">
+          <input nz-input type="password" formControlName="confirmPassword" id="confirmPassword" />
+        </nz-form-control>
+      </nz-form-item>
       }
 
       <nz-form-item>
-        <nz-form-label [nzSpan]="6" nzFor="name" nzRequired>昵&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;称
-        </nz-form-label>
+        <nz-form-label [nzSpan]="6" nzFor="name" nzRequired>昵&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;称 </nz-form-label>
         <nz-form-control [nzSpan]="14" nzErrorTip="Please input your name!">
           <input formControlName="name" id="name" nz-input />
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-label [nzSpan]="6" nzFor="avatar">
-          头&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;像
-        </nz-form-label>
+        <nz-form-label [nzSpan]="6" nzFor="avatar"> 头&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;像 </nz-form-label>
         <nz-form-control [nzSpan]="14">
           <input formControlName="avatar" id="avatar" nz-input />
         </nz-form-control>
@@ -77,15 +72,18 @@ import { NzModalModule } from 'ng-zorro-antd/modal';
       </nz-form-item>
     </form>
   `,
-    styles: [`:host {
-    min-height: 100%;
-    min-width: 100%;
-  }
-  `]
+  styles: [
+    `
+      :host {
+        min-height: 100%;
+        min-width: 100%;
+      }
+    `,
+  ],
 })
 export class UserFormComponent implements OnInit {
   userData = signal<User>({} as User);
-  created = computed(() => this.userData().id == undefined);
+  created = computed(() => this.userData().code == undefined);
   formSubmit = output<User>();
   private readonly fb = inject(FormBuilder);
   userForm: FormGroup = this.fb.group({
@@ -121,8 +119,7 @@ export class UserFormComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   onSubmit(): void {
     if (this.userForm.valid) {

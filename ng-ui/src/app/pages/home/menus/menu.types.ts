@@ -1,7 +1,6 @@
-import { Search, UserAuditor } from '@app/core/types';
+import {Search, UserAuditor} from '@app/core/types';
 
 export interface Menu extends Search {
-  id?: number;
   code?: string;
   pcode?: string;
   tenantCode?: string;

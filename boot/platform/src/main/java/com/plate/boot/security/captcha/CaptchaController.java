@@ -1,4 +1,4 @@
-package com.plate.boot.security.core.captcha;
+package com.plate.boot.security.captcha;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -20,6 +20,15 @@ import java.nio.charset.StandardCharsets;
  * REST controller responsible for handling captcha generation and validation operations.
  * <p>
  * This controller exposes endpoints to generate captcha images and manage captcha tokens within the application's sessions.
+ * <p>
+ * The class is annotated with \@RestController to indicate that it's a REST controller in the Spring context.
+ * It is also annotated with \@RequestMapping to map HTTP requests to handler methods.
+ * \@RequiredArgsConstructor is used to generate a constructor with required arguments.
+ * <p>
+ * The controller uses reactive programming with Project Reactor.
+ * <p>
+ * \@author
+ * <a href="https://github.com/vnobo">Alex bob</a>
  */
 @RestController
 @RequestMapping("/captcha")
@@ -28,6 +37,16 @@ public class CaptchaController {
 
     private final CaptchaRepository captchaTokenRepository;
 
+    /**
+     * Generates a captcha image and returns it as a response entity.
+     * <p>
+     * This endpoint handles GET requests to "/captcha/code".
+     * It generates a captcha token, converts it to a ByteArrayResource, and returns it as a PNG image.
+     * The token is also saved in the repository.
+     *
+     * @param exchange the server web exchange
+     * @return a Mono emitting the response entity containing the captcha image
+     */
     @GetMapping("code")
     public Mono<ResponseEntity<DataBuffer>> getCaptcha(ServerWebExchange exchange) {
         DataBuffer dataBuffer = exchange.getResponse().bufferFactory().allocateBuffer(2048);

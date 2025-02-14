@@ -3,6 +3,8 @@ package com.plate.boot.relational.menus;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 /**
  * Interface representing a repository for menu operations with reactive support.
  * Extends R2dbcRepository to inherit basic CRUD operations and additional functionality.
@@ -16,8 +18,7 @@ public interface MenusRepository extends R2dbcRepository<Menu, Integer> {
      * @param code The unique code that identifies the menu.
      * @return A Mono emitting the found {@link Menu} object, or empty if no menu exists with the given code.
      */
-    Mono<Menu> findByCode(String code);
-
+    Mono<Menu> findByCode(UUID code);
 
     /**
      * Deletes menu records by the specified authority.

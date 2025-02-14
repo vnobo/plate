@@ -1,22 +1,21 @@
-import { DatePipe } from '@angular/common';
-import { Component, effect, inject, OnInit, signal, untracked } from '@angular/core';
-import { NzModalService } from 'ng-zorro-antd/modal';
-import { NzNotificationModule, NzNotificationService } from 'ng-zorro-antd/notification';
-import { NzTableQueryParams } from 'ng-zorro-antd/table';
+import {Component, effect, inject, OnInit, signal, untracked} from '@angular/core';
+import {NzModalService} from 'ng-zorro-antd/modal';
+import {NzNotificationService} from 'ng-zorro-antd/notification';
+import {NzTableQueryParams} from 'ng-zorro-antd/table';
 
-import { tap } from 'rxjs';
+import {tap} from 'rxjs';
 
-import { Page, Pageable } from '@app/core/types';
-import { MenuFormComponent, MenusService } from '@app/pages';
-import { User } from '@app/pages/home/users/user.types';
-import { SHARED_IMPORTS } from '@app/shared/shared-imports';
-import { Menu } from './menu.types';
+import {Page, Pageable} from '@app/core/types';
+import {MenuFormComponent, MenusService} from '@app/pages';
+import {User} from '@app/pages/home/users/user.types';
+import {SHARED_IMPORTS} from '@app/shared/shared-imports';
+import {Menu} from './menu.types';
 
 @Component({
-    selector: 'app-menus',
-    templateUrl: './menus.component.html',
-    styleUrls: ['./menus.component.scss'],
-    imports: [DatePipe, NzNotificationModule, ...SHARED_IMPORTS]
+  selector: 'app-menus',
+  templateUrl: './menus.component.html',
+  styleUrls: ['./menus.component.scss'],
+  imports: [...SHARED_IMPORTS],
 })
 export class MenusComponent implements OnInit {
   private readonly _modal = inject(NzModalService);
@@ -29,8 +28,7 @@ export class MenusComponent implements OnInit {
     sorts: ['id,desc'],
   } as Pageable);
   search = signal({
-    search: '',
-    pcode: '0',
+    pcode: '00000000-0000-0000-0000-000000000000',
     tenantCode: '0',
   } as User);
 
@@ -59,7 +57,7 @@ export class MenusComponent implements OnInit {
     ref.menuData.set(menu);
     ref.formSubmit.subscribe(ms => {
       this._menusSer.save(ms).subscribe(res => {
-        console.debug(`保存菜单成功, ID: ${res.id},编码:${res.code}`);
+        console.debug(`保存菜单成功,编码:${res.code}`);
         modal.close();
         this.onSearch();
       });
@@ -124,8 +122,8 @@ export class MenusComponent implements OnInit {
   }
 
   visitNode(node: Menu, hashMap: Record<string, boolean>, array: Menu[]): void {
-    if (!hashMap[node.code ? node.code : '0']) {
-      hashMap[node.code ? node.code : '0'] = true;
+    if (!hashMap[node.code ? node.code : '00000000-0000-0000-0000-000000000000']) {
+      hashMap[node.code ? node.code : '00000000-0000-0000-0000-000000000000'] = true;
       array.push(node);
     }
   }

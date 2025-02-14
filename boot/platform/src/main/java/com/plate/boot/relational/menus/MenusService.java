@@ -44,8 +44,9 @@ public class MenusService extends AbstractDatabase {
     private final UserAuthoritiesRepository userAuthoritiesRepository;
 
     public Flux<Menu> search(MenuReq request, Pageable pageable) {
+        var cacheKey = BeanUtils.cacheKey(request, pageable);
         Query query = Query.query(request.toCriteria()).with(pageable).sort(Sort.by("sortNo"));
-        return this.queryWithCache(BeanUtils.cacheKey(request), query, Menu.class);
+        return this.queryWithCache(cacheKey, query, Menu.class);
     }
 
     public Mono<Page<Menu>> page(MenuReq request, Pageable pageable) {

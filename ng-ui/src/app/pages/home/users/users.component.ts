@@ -1,24 +1,21 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { NzTableQueryParams } from 'ng-zorro-antd/table';
-import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { tap } from 'rxjs';
-import { SharedModule } from '@app/shared/shared.module';
-import { Page, Pageable } from '@app/core/types';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzSpaceModule } from 'ng-zorro-antd/space';
-import { NzModalService } from 'ng-zorro-antd/modal';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {Page, Pageable} from '@app/core/types';
+import {NzModalService} from 'ng-zorro-antd/modal';
+import {NzNotificationService} from 'ng-zorro-antd/notification';
+import {NzTableQueryParams} from 'ng-zorro-antd/table';
+import {tap} from 'rxjs';
 
-import { UsersService } from './users.service';
-import { User } from './user.types';
-import { UserFormComponent } from '@app/pages';
-import { PageHeaderComponent } from '@app/layout';
+import {UserFormComponent} from '@app/pages';
+import {SHARED_IMPORTS} from '@app/shared/shared-imports';
+import {User} from './user.types';
+import {UsersService} from './users.service';
 
 @Component({
-    selector: 'app-users',
-    imports: [SharedModule, PageHeaderComponent, NzTagModule, NzSpaceModule],
-    templateUrl: './users.component.html',
-    styleUrl: './users.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-users',
+  imports: [...SHARED_IMPORTS],
+  templateUrl: './users.component.html',
+  styleUrl: './users.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UsersComponent {
   private readonly _message = inject(NzNotificationService);
@@ -62,15 +59,15 @@ export class UsersComponent {
     const ref = modal.getContentComponent();
     ref.userData.set(user);
     ref.formSubmit.subscribe(us => {
-      if (us.id && us.id > 0) {
+      if (us.code) {
         this._userSer.modify(us).subscribe(res => {
-          console.debug(`修改用户成功, ID: ${res.id},编码:${res.code}`);
+          console.debug(`修改用户成功, 编码:${res.code}`);
           modal.close();
           this.onSearch();
         });
       } else {
         this._userSer.add(us).subscribe(res => {
-          console.debug(`添加用户成功, ID: ${res.id},编码:${res.code}`);
+          console.debug(`添加用户成功, 编码:${res.code}`);
           modal.close();
           this.onSearch();
         });

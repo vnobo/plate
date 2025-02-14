@@ -1,4 +1,4 @@
-import { Component, Directive, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { SharedModule } from '@app/shared/shared.module';
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';

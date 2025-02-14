@@ -1,54 +1,61 @@
 package com.plate.boot.security.core.user.authority;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.plate.boot.commons.base.AbstractEntity;
 import com.plate.boot.commons.base.BaseEntity;
-import com.plate.boot.security.core.UserAuditor;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.springframework.data.annotation.*;
+import lombok.EqualsAndHashCode;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Entity class representing a user authority.
+ * This class implements GrantedAuthority and BaseEntity interfaces.
+ * It is annotated with \@Table to map it to the "se_authorities" table in the database.
+ * It uses Lombok annotations for boilerplate code reduction.
+ * <p>
+ * The class extends AbstractEntity to inherit common entity properties.
+ * It includes validation constraints for its fields.
+ * <p>
+ * \@author
+ * <a href="https://github.com/vnobo">Alex bob</a>
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Table("se_authorities")
-public class UserAuthority implements GrantedAuthority, BaseEntity<Integer> {
+public class UserAuthority extends AbstractEntity<Integer> implements GrantedAuthority, BaseEntity<Integer> {
 
-    @Id
-    private Integer id;
+    /**
+     * The unique code of the user.
+     * It is annotated with \@NotBlank to ensure it is not null or empty.
+     */
+    @NotBlank(message = "User entity [userCode] cannot be empty!")
+    private UUID userCode;
 
-    private String code;
-
-    @NotBlank(message = "用户[userCode]不能为空!")
-    private String userCode;
-
-    @NotBlank(message = "权限[authority]不能为空!")
+    /**
+     * The authority granted to the user.
+     * It is annotated with \@NotBlank to ensure it is not null or empty.
+     */
+    @NotBlank(message = "User entity [authority] cannot be empty!")
     private String authority;
 
-    @CreatedBy
-    private UserAuditor creator;
-
-    @LastModifiedBy
-    private UserAuditor updater;
-
-    @CreatedDate
-    private LocalDateTime createdTime;
-
-    @LastModifiedDate
-    private LocalDateTime updatedTime;
-
-    public UserAuthority() {
-    }
-
-    public UserAuthority(String authority) {
-        this.authority = authority;
-    }
-
+    /**
+     * Returns the authority granted to the user.
+     * This method is required by the GrantedAuthority interface.
+     *
+     * @return the authority granted to the user
+     */
     @Override
-    public void setCode(String code) {
-        this.code = code.startsWith("UA") ? code : "UA" + code;
+    public String getAuthority() {
+        return this.authority;
+    }
+
+    @JsonIgnore
+    @Override
+    public String getTenantCode() {
+        return this.tenantCode;
     }
 }

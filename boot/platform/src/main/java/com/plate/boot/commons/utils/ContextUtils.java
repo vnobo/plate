@@ -1,8 +1,6 @@
 package com.plate.boot.commons.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.f4b6a3.ulid.Ulid;
-import com.github.f4b6a3.ulid.UlidCreator;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.security.SecurityDetails;
 import com.plate.boot.security.core.user.UsersService;
@@ -20,6 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Utility class providing context-related operations and services for the application.
@@ -168,19 +167,12 @@ public final class ContextUtils implements InitializingBean {
     }
 
     /**
-     * Generates the next unique identifier using ULID (Universally Unique Lexicographically Sortable Identifier).
-     * <p>
-     * This method utilizes the {@link UlidCreator#getMonotonicUlid()} to produce ULIDs which are:
-     * - Globally unique across space and time.
-     * - Lexicographically sortable.
-     * - Monotonic in time.
-     * </p>
+     * Generates a new random UUID (Universally Unique Identifier) as the next identifier.
      *
-     * @return A string representation of the generated ULID, which can be used as a unique identifier.
+     * @return A newly created {@link UUID} instance, providing a unique identifier.
      */
-    public static String nextId() {
-        Ulid ulid = UlidCreator.getMonotonicUlid();
-        return ulid.toString();
+    public static UUID nextId() {
+        return UUID.randomUUID();
     }
 
     /**

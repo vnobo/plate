@@ -34,7 +34,6 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 
 export const SHARED_ZORRO_MODULES = [
   NzButtonModule,
-  NzMessageModule,
   NzDropDownModule,
   NzGridModule,
   NzCheckboxModule,
@@ -52,7 +51,6 @@ export const SHARED_ZORRO_MODULES = [
   NzDatePickerModule,
   NzTimePickerModule,
   NzTagModule,
-  NzInputNumberLegacyModule,
   NzBreadCrumbModule,
   NzListModule,
   NzSwitchModule,

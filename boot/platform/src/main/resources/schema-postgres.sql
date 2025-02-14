@@ -27,7 +27,7 @@ create table oauth2_authorized_client
 create table if not exists se_users
 (
     id                  serial8 primary key,
-    code                varchar(64)  not null unique,
+    code uuid not null unique,
     tenant_code         varchar(64)  not null default '0',
     username            varchar(256) not null unique,
     password            text         not null,
@@ -41,13 +41,13 @@ create table if not exists se_users
     avatar              text,
     bio                 text,
     extend              jsonb,
-    creator             varchar(64),
-    updater             varchar(64),
+    creator      uuid,
+    updater      uuid,
     login_time          timestamp             default current_timestamp,
     created_time        timestamp             default current_timestamp,
     updated_time timestamp default current_timestamp,
     text_search  tsvector generated always as (
-        setweight(to_tsvector('chinese', code), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
         setweight(to_tsvector('chinese', username), 'A') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(name, '')), 'B') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(phone, '')), 'B') || ' ' ||
@@ -62,11 +62,11 @@ comment on table se_users is '用户表';
 create table if not exists se_authorities
 (
     id           serial8 primary key,
-    code         varchar(64)  not null unique,
-    user_code    varchar(64)  not null,
+    code      uuid not null unique,
+    user_code uuid not null,
     authority    varchar(512) not null,
-    creator      varchar(64),
-    updater      varchar(64),
+    creator   uuid,
+    updater   uuid,
     created_time timestamp default current_timestamp,
     updated_time timestamp default current_timestamp,
     unique (user_code, authority)
@@ -77,12 +77,13 @@ comment on table se_authorities is '用户权限表';
 create table if not exists se_groups
 (
     id           serial8 primary key,
-    code         varchar(64)  not null unique,
+    code    uuid not null unique,
+    pcode   uuid not null default '00000000-0000-0000-0000-000000000000',
     tenant_code  varchar(64)  not null default '0',
     name         varchar(512) not null,
     extend       jsonb,
-    creator      varchar(64),
-    updater      varchar(64),
+    creator uuid,
+    updater uuid,
     created_time timestamp             default current_timestamp,
     updated_time timestamp             default current_timestamp
 );
@@ -94,11 +95,11 @@ comment on table se_groups is '角色表';
 create table if not exists se_group_authorities
 (
     id           serial8 primary key,
-    code         varchar(64)  not null unique,
-    group_code   varchar(64)  not null,
+    code       uuid not null unique,
+    group_code uuid not null,
     authority    varchar(512) not null,
-    creator      varchar(64),
-    updater      varchar(64),
+    creator    uuid,
+    updater    uuid,
     created_time timestamp default current_timestamp,
     updated_time timestamp default current_timestamp,
     unique (group_code, authority)
@@ -109,11 +110,11 @@ comment on table se_group_authorities is '角色权限表';
 create table if not exists se_group_members
 (
     id           serial8 primary key,
-    code         varchar(64) not null unique,
-    group_code   varchar(64) not null,
-    user_code    varchar(64) not null,
-    creator      varchar(64),
-    updater      varchar(64),
+    code       uuid not null unique,
+    group_code uuid not null,
+    user_code  uuid not null,
+    creator    uuid,
+    updater    uuid,
     created_time timestamp default current_timestamp,
     updated_time timestamp default current_timestamp,
     unique (group_code, user_code)
@@ -127,8 +128,8 @@ create table if not exists se_tenants
     name         varchar(512) not null,
     description  text,
     extend       jsonb,
-    creator      varchar(64),
-    updater      varchar(64),
+    creator uuid,
+    updater uuid,
     created_time timestamp default current_timestamp,
     updated_time timestamp default current_timestamp
 );
@@ -138,12 +139,12 @@ comment on table se_tenants is '租户表';
 create table if not exists se_tenant_members
 (
     id           serial8 primary key,
-    code         varchar(64) not null unique,
+    code      uuid not null unique,
     tenant_code  varchar(64) not null,
-    user_code    varchar(64) not null,
+    user_code uuid not null,
     enabled      boolean     not null default true,
-    creator      varchar(64),
-    updater      varchar(64),
+    creator   uuid,
+    updater   uuid,
     created_time timestamp            default current_timestamp,
     updated_time timestamp            default current_timestamp,
     unique (tenant_code, user_code)
@@ -153,8 +154,8 @@ comment on table se_tenant_members is '租户用户关系表';
 create table if not exists se_menus
 (
     id           serial8 primary key,
-    code         varchar(64)  not null unique,
-    pcode        varchar(64)  not null default '0',
+    code    uuid not null unique,
+    pcode   uuid not null default '00000000-0000-0000-0000-000000000000',
     tenant_code  varchar(64)  not null default '0',
     type         varchar(20)  not null default 'MENU',
     authority    varchar(256) not null unique,
@@ -162,8 +163,8 @@ create table if not exists se_menus
     path         text,
     sort_no      int                   default 0,
     extend       jsonb,
-    creator      varchar(64),
-    updater      varchar(64),
+    creator uuid,
+    updater uuid,
     created_time timestamp             default current_timestamp,
     updated_time timestamp             default current_timestamp
 );
@@ -174,10 +175,10 @@ comment on table se_menus is '菜单权限表';
 create table if not exists se_loggers
 (
     id           serial8 primary key,
-    code         varchar(64) not null unique,
+    code         uuid not null unique,
     tenant_code  varchar(64) not null default '0',
     prefix       varchar(64),
-    operator     varchar(64),
+    operator     uuid,
     status       varchar(64),
     method       varchar(64),
     url          text,
@@ -185,10 +186,16 @@ create table if not exists se_loggers
     created_time timestamp            default current_timestamp,
     updated_time timestamp default current_timestamp,
     text_search  tsvector generated always as (
-        setweight(to_tsvector('chinese', operator), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(method, '')), 'B') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(url, '')), 'C') || ' ' ||
-        setweight(jsonb_to_tsvector('chinese', context, '["string"]'), 'D')
+        setweight(jsonb_to_tsvector('chinese', context::jsonb, '[
+          "string",
+          "numeric",
+          "boolean",
+          "array",
+          "object"
+        ]'), 'D')
         ) stored
 );
 create index se_loggers_text_full_search_gist_idx on se_loggers using GIST (text_search);

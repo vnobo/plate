@@ -227,6 +227,7 @@ public class SecurityConfiguration {
         public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException e) {
             ServerHttpRequest request = exchange.getRequest();
             String requestedWith = request.getHeaders().getFirst(X_REQUESTED_WITH);
+            e.printStackTrace();
             log.error("Authentication Failure! Information: {}", e.getMessage());
             if (isXmlHttpRequest(requestedWith)) {
                 return Mono.defer(() -> {

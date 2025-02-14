@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.relational.logger.LoggerReq;
-import com.plate.boot.relational.logger.LoggersService;
 import com.plate.boot.security.SecurityDetails;
 import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
@@ -14,6 +13,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.reactivestreams.Publisher;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.core.io.buffer.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
@@ -65,8 +66,7 @@ import static org.springframework.security.web.server.csrf.CsrfWebFilter.DEFAULT
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class LoggerFilter implements WebFilter {
-
+public class LoggerFilter implements WebFilter, ApplicationEventPublisherAware {
     /**
      * Constants for the attribute key used to cache request body information.
      * This string represents the attribute name under which the cached request body can be stored or retrieved in a context where attributes are managed.
@@ -101,7 +101,7 @@ public class LoggerFilter implements WebFilter {
      * This service is responsible for handling logging operations within the application,
      * providing functionality to log messages at various levels of severity.
      */
-    private final LoggersService loggerService;
+    private ApplicationEventPublisher publisher;
 
     /**
      * Caches the request body of a ServerWebExchange and decorates the ServerHttpRequest
@@ -389,9 +389,7 @@ public class LoggerFilter implements WebFilter {
 
         LoggerReq logger = LoggerReq.of(tenantCode, userDetails.getUsername(), prefix,
                 method, status, path, contentNode);
-        this.loggerService.operate(logger).share().subscribe(res ->
-                log.debug("{}**操作日志** Method: {},MessageBody: {}",
-                        exchange.getLogPrefix(), exchange.getRequest().getMethod().name(), res));
+        this.publisher.publishEvent(logger);
     }
 
     /**
@@ -418,4 +416,8 @@ public class LoggerFilter implements WebFilter {
         }
     }
 
+    @Override
+    public void setApplicationEventPublisher(@NonNull ApplicationEventPublisher publisher) {
+        this.publisher = publisher;
+    }
 }

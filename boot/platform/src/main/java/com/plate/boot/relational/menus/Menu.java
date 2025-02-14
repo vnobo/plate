@@ -4,21 +4,20 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.CaseFormat;
-import com.plate.boot.commons.base.BaseEntity;
+import com.plate.boot.commons.base.AbstractEntity;
 import com.plate.boot.commons.utils.ContextUtils;
-import com.plate.boot.security.core.UserAuditor;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-import org.springframework.data.annotation.*;
+import lombok.EqualsAndHashCode;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.StringUtils;
 
 import java.security.Permission;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Represents a menu entity within an application, encapsulating details about menu items including
@@ -28,40 +27,15 @@ import java.util.Set;
  * It also features custom methods to handle specific business logic such as authority formatting and
  * extraction of additional properties stored as JSON.
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Table("se_menus")
-public class Menu implements BaseEntity<Integer> {
+public class Menu extends AbstractEntity<Integer> {
 
     /**
-     * Unique identifier for the menu entity.
-     * This field represents the primary key of the menu within the database
-     * and is annotated with {@link Id} to denote its role as the identity field.
-     * The type {@code Integer} suggests that the identifier is a numeric value.
+     * parent code
      */
-    @Id
-    private Integer id;
-
-    /**
-     * Represents the unique code associated with a menu item within the system.
-     * This string identifier helps distinguish one menu from another and is likely used
-     * in various operations such as retrieval, modification, and deletion of menu items.
-     */
-    private String code;
-
-    /**
-     * Represents the private code attribute associated with a menu item.
-     * This code serves as an internal reference or identifier within the system.
-     * It is not exposed publicly and can be utilized for backend processing,
-     * data linking, or any other purpose that requires a distinct code within the menu context.
-     */
-    private String pcode;
-
-    /**
-     * The unique code representing the tenant associated with this menu item.
-     * This field is crucial for multi-tenancy support, enabling the distinction between
-     * menu items belonging to different tenants within the system.
-     */
-    private String tenantCode;
+    protected UUID pcode;
 
     /**
      * Represents the type of menu item.
@@ -110,50 +84,6 @@ public class Menu implements BaseEntity<Integer> {
      * Typically used for organizing the display order of menu items.
      */
     private Short sortNo;
-
-    /**
-     * This field holds additional, extendable information about the menu item in a structured JSON format.
-     * It allows for storing custom metadata that does not fit into the predefined fields of the `Menu` class.
-     * The content can vary and may include data used for UI customization, access control details, or any other
-     * application-specific information.
-     */
-    private JsonNode extend;
-
-    /**
-     * The creator of the menu item.
-     * This field holds a reference to the {@link UserAuditor} who initially created the menu.
-     * It captures metadata about the creator, including their code, username, and name.
-     */
-    @CreatedBy
-    private UserAuditor creator;
-
-    /**
-     * The {@code updater} field represents the user auditor who last modified the {@link Menu} entity.
-     * It captures metadata about the user responsible for the most recent update to the menu item,
-     * including their code, username, and name. This information is particularly useful for auditing
-     * purposes, enabling tracking of changes and maintaining a log of who made modifications.
-     * <p>
-     * Type: {@link UserAuditor}
-     * <p>
-     * Access: Private
-     */
-    @LastModifiedBy
-    private UserAuditor updater;
-
-    /**
-     * Represents the timestamp indicating when the menu was initially created.
-     * This field is automatically populated with the date and time at creation.
-     */
-    @CreatedDate
-    private LocalDateTime createdTime;
-
-    /**
-     * Represents the last modified date and time of the menu.
-     * This field captures when the menu was last updated and is automatically managed
-     * by the system to reflect the most recent modification timestamp.
-     */
-    @LastModifiedDate
-    private LocalDateTime updatedTime;
 
     /**
      * Sets the authority for the menu item.

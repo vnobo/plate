@@ -2,8 +2,10 @@ import {
   ArrowLeftOutline,
   DashboardOutline,
   FormOutline,
+  GroupOutline,
   HomeOutline,
   MenuFoldOutline,
+  MenuOutline,
   MenuUnfoldOutline,
   SettingOutline,
   UserOutline,
@@ -19,4 +21,6 @@ export const icons = [
   UserOutline,
   HomeOutline,
   SettingOutline,
+  MenuOutline,
+  GroupOutline,
 ];

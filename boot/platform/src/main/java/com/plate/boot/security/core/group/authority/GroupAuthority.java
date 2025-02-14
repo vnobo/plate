@@ -1,54 +1,68 @@
 package com.plate.boot.security.core.group.authority;
 
-import com.plate.boot.commons.base.BaseEntity;
-import com.plate.boot.security.core.UserAuditor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.plate.boot.commons.base.AbstractEntity;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.*;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Entity class representing a group authority.
+ * This class implements GrantedAuthority interface.
+ * It is annotated with \@Table to map it to the "se_group_authorities" table in the database.
+ * It uses Lombok annotations for boilerplate code reduction.
+ * <p>
+ * The class extends AbstractEntity to inherit common entity properties.
+ * It includes validation constraints for its fields.
+ * <p>
+ * \@author
+ * <a href="https://github.com/vnobo">Alex bob</a>
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @Table("se_group_authorities")
-public class GroupAuthority implements GrantedAuthority, BaseEntity<Integer> {
+public class GroupAuthority extends AbstractEntity<Integer> implements GrantedAuthority {
 
-    @Id
-    private Integer id;
+    /**
+     * The unique code of the group.
+     * It is annotated with \@NotBlank to ensure it is not null or empty.
+     */
+    @NotBlank(message = "Group authority [groupCode] cannot be empty!")
+    private UUID groupCode;
 
-    private String code;
-
-    @NotBlank(message = "Role [groupCode] can not be empty!")
-    private String groupCode;
-
-    @NotBlank(message = "Role [authority]can not be empty!")
+    /**
+     * The authority granted to the group.
+     * It is annotated with \@NotBlank to ensure it is not null or empty.
+     */
+    @NotBlank(message = "Group authority [authority] cannot be empty!")
     private String authority;
 
-    @CreatedBy
-    private UserAuditor creator;
-
-    @LastModifiedBy
-    private UserAuditor updater;
-
-    @CreatedDate
-    private LocalDateTime createdTime;
-
-    @LastModifiedDate
-    private LocalDateTime updatedTime;
-
-    public GroupAuthority(String groupCode, String authority) {
+    /**
+     * Constructs a new GroupAuthority with the specified group code and authority.
+     *
+     * @param groupCode the unique code of the group
+     * @param authority the authority granted to the group
+     */
+    public GroupAuthority(UUID groupCode, String authority) {
         this.groupCode = groupCode;
         this.authority = authority;
     }
 
+    /**
+     * Returns the tenant code associated with the group authority.
+     * This method is annotated with \@JsonIgnore to exclude it from JSON serialization.
+     *
+     * @return the tenant code
+     */
+    @JsonIgnore
     @Override
-    public void setCode(String code) {
-        this.code = code.startsWith("GA") ? code : "GA" + code;
+    public String getTenantCode() {
+        return this.tenantCode;
     }
 }

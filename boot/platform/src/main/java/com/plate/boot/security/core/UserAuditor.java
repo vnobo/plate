@@ -4,6 +4,7 @@ import com.plate.boot.security.SecurityDetails;
 import com.plate.boot.security.core.user.User;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 /**
  * Represents an immutable data structure for auditing user information within an application.
@@ -16,7 +17,7 @@ import java.io.Serializable;
  *
  * @see Serializable The record implements Serializable for potential persistence or distributed computing needs.
  */
-public record UserAuditor(String code, String username, String name) implements Serializable {
+public record UserAuditor(UUID code, String username, String name) implements Serializable {
 
     /**
      * Creates an instance of {@link UserAuditor} with the specified user details.
@@ -28,7 +29,7 @@ public record UserAuditor(String code, String username, String name) implements 
      * @param name     The full name of the user for personal identification in audits.
      * @return A new instance of {@link UserAuditor} populated with the provided user details.
      */
-    public static UserAuditor of(String code, String username, String name) {
+    public static UserAuditor of(UUID code, String username, String name) {
         return new UserAuditor(code, username, name);
     }
 
@@ -43,7 +44,7 @@ public record UserAuditor(String code, String username, String name) implements 
      * @return A new {@link UserAuditor} instance initialized with the given code and null username and name.
      * @throws NullPointerException if the provided code is null.
      */
-    public static UserAuditor withCode(String code) {
+    public static UserAuditor withCode(UUID code) {
         return of(code, null, null);
     }
 

@@ -9,17 +9,35 @@ import org.springframework.data.relational.core.query.Criteria;
 import java.util.Set;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Request class for UserAuthority operations.
+ * This class extends UserAuthority and provides methods to convert to UserAuthority and Criteria objects.
+ * It uses Lombok annotations for boilerplate code reduction.
+ * <p>
+ * The class is annotated with \@Data, \@EqualsAndHashCode, and \@ToString to generate getter, setter, equals, hashCode, and toString methods.
+ * It includes methods to convert the request to a UserAuthority entity and to create Criteria for database queries.
+ * <p>
+ * \@author
+ * <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class UserAuthorityReq extends UserAuthority {
 
+    /**
+     * Converts this request to a UserAuthority entity.
+     *
+     * @return a UserAuthority entity with properties copied from this request
+     */
     public UserAuthority toAuthority() {
         return BeanUtils.copyProperties(this, UserAuthority.class);
     }
 
+    /**
+     * Creates a Criteria object based on this request.
+     *
+     * @return a Criteria object for querying the database
+     */
     public Criteria toCriteria() {
         return criteria(Set.of());
     }

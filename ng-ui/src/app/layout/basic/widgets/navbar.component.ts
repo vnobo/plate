@@ -2,11 +2,11 @@ import { Component, inject, OnInit, output, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Authentication } from '@app/core/types';
 import { LoginService } from '@app/pages';
-import { SHARED_IMPORTS } from '@app/shared/shared-imports';
+import { SharedModule } from '@app/shared/shared.module';
 
 @Component({
   selector: 'layout-navbar,[layoutNavbar]',
-  imports: [...SHARED_IMPORTS],
+  imports: [SharedModule],
   template: ` <div class="navbar d-print-none">
     <div class="container-fluid">
       <button

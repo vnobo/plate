@@ -8,10 +8,10 @@ import { SHARED_IMPORTS } from '@app/shared/shared-imports';
 import { LoginService } from '@app/pages';
 
 @Component({
-    selector: 'app-login',
-    imports: [SHARED_IMPORTS],
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss']
+  selector: 'app-login',
+  imports: [...SHARED_IMPORTS],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, AfterViewInit {
   private readonly _router = inject(Router);

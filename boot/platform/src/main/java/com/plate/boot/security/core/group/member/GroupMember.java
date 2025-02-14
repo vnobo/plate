@@ -1,46 +1,33 @@
 package com.plate.boot.security.core.group.member;
 
-import com.plate.boot.commons.base.BaseEntity;
-import com.plate.boot.security.core.UserAuditor;
+import com.plate.boot.commons.base.AbstractEntity;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.springframework.data.annotation.*;
+import lombok.EqualsAndHashCode;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Represents a member within a group, associating a user with a specific group identified by codes.
+ * This class extends {@link AbstractEntity} to inherit common entity attributes and behaviors.
+ * It adds validation constraints on the `groupCode` and `userCode` fields to ensure they are not blank,
+ * enhancing data integrity.
+ *
+ * <p>
+ * The `groupCode` field corresponds to the unique identifier of the group to which the member belongs.
+ * The `userCode` field represents the unique identifier of the user who is a member of the group.
+ *
+ * @see AbstractEntity
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Table("se_group_members")
-public class GroupMember implements BaseEntity<Long> {
+public class GroupMember extends AbstractEntity<Long> {
 
-    @Id
-    private Long id;
+    @NotBlank(message = "Group member [groupCode] cannot be empty!")
+    private UUID groupCode;
 
-    private String code;
-
-    @NotBlank(message = "Rule [groupCode] not be empty!")
-    private String groupCode;
-
-    @NotBlank(message = "User [username]not be empty!")
-    private String userCode;
-
-    @CreatedBy
-    private UserAuditor creator;
-
-    @LastModifiedBy
-    private UserAuditor updater;
-
-    @CreatedDate
-    private LocalDateTime createdTime;
-
-    @LastModifiedDate
-    private LocalDateTime updatedTime;
-
-    @Override
-    public void setCode(String code) {
-        this.code = code.startsWith("GM") ? code : "GM" + code;
-    }
+    @NotBlank(message = "Group member [username] cannot be empty!")
+    private UUID userCode;
 }

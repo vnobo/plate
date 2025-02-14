@@ -1,8 +1,8 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { concatMap, delay, from, map, mergeMap, Observable, retry, switchMap, toArray } from 'rxjs';
-import { Menu } from './menu.types';
-import { defaultPageable, Page, Pageable } from '@app/core/types';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {concatMap, delay, from, map, mergeMap, Observable, retry, switchMap, toArray} from 'rxjs';
+import {Menu} from './menu.types';
+import {defaultPageable, Page, Pageable} from '@app/core/types';
 
 @Injectable({
   providedIn: 'root',

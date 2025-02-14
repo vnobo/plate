@@ -1,22 +1,17 @@
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { SHARED_ZORRO_MODULES } from './shared-zorro.module';
-import { NgModule, Type } from '@angular/core';
-import { TruncateMiddlePipe } from './truncate-middle.pipe';
-import { MATERIAL_MODULES } from './material.module';
+import {CommonModule} from '@angular/common';
+import {NgModule, Type} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {RouterModule} from '@angular/router';
+import {MATERIAL_MODULES} from './material.module';
+import {SHARED_ZORRO_MODULES} from './shared-zorro.module';
 
 // #region your componets & directives
 const COMPONENTS: Array<Type<any>> = [];
-const DIRECTIVES: Array<Type<any>> = [TruncateMiddlePipe];
+const DIRECTIVES: Array<Type<any>> = [];
 
 @NgModule({
-  imports: [CommonModule, FormsModule, RouterModule, ReactiveFormsModule, ...SHARED_ZORRO_MODULES],
-  declarations: [
-    // your components
-    ...COMPONENTS,
-    ...DIRECTIVES,
-  ],
+  imports: [CommonModule, FormsModule, RouterModule, ReactiveFormsModule],
+  declarations: [...COMPONENTS, ...DIRECTIVES],
   exports: [
     CommonModule,
     FormsModule,
@@ -24,10 +19,8 @@ const DIRECTIVES: Array<Type<any>> = [TruncateMiddlePipe];
     RouterModule,
     ...MATERIAL_MODULES,
     ...SHARED_ZORRO_MODULES,
-    // your components
     ...COMPONENTS,
     ...DIRECTIVES,
   ],
 })
-export class SharedModule {
-}
+export class SharedModule {}

@@ -1,12 +1,9 @@
 package com.plate.boot.commons.utils;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.exception.JsonPointerException;
@@ -26,6 +23,7 @@ import reactor.core.publisher.Mono;
 
 import java.beans.PropertyDescriptor;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
@@ -247,16 +245,29 @@ public final class BeanUtils implements InitializingBean {
         if (ObjectUtils.isEmpty(bean)) {
             return null;
         }
-        ObjectMapper objectMapper = ContextUtils.OBJECT_MAPPER.copy();
-        if (isToUnderlineCase) {
-            objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+        Class<?> actualEditable = bean.getClass();
+        PropertyDescriptor[] propertyDescriptors = org.springframework.beans.BeanUtils.getPropertyDescriptors(actualEditable);
+        Map<String, Object> beanMap = Maps.newHashMap();
+        for (PropertyDescriptor targetPd : propertyDescriptors) {
+            String key = targetPd.getName();
+            if (key.equals("class") || key.equals("new")) {
+                continue;
+            }
+            if (isToUnderlineCase) {
+                key = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key);
+            }
+            var readMethod = targetPd.getReadMethod();
+            if (Optional.ofNullable(readMethod).isEmpty()) {
+                continue;
+            }
+            ReflectionUtils.makeAccessible(readMethod);
+            Object value = ReflectionUtils.invokeMethod(readMethod, bean);
+            if (ignoreNullValue && ObjectUtils.isEmpty(value)) {
+                continue;
+            }
+            beanMap.put(key, value);
         }
-        if (ignoreNullValue) {
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        }
-        var type = new TypeReference<Map<String, Object>>() {
-        };
-        return objectMapper.convertValue(bean, type);
+        return beanMap;
     }
 
     /**
