@@ -27,7 +27,7 @@ create table oauth2_authorized_client
 create table if not exists se_users
 (
     id                  serial8 primary key,
-    code uuid not null unique,
+    code         uuid not null unique,
     tenant_code         varchar(64)  not null default '0',
     username            varchar(256) not null unique,
     password            text         not null,
@@ -178,23 +178,23 @@ create table if not exists se_loggers
     code         uuid not null unique,
     tenant_code  varchar(64) not null default '0',
     prefix       varchar(64),
-    operator     uuid,
+    operator     varchar(64),
     status       varchar(64),
     method       varchar(64),
     url          text,
     context      jsonb,
+    extend       jsonb,
+    creator      uuid,
+    updater      uuid,
     created_time timestamp            default current_timestamp,
     updated_time timestamp default current_timestamp,
     text_search  tsvector generated always as (
         setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', operator), 'A') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(method, '')), 'B') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(url, '')), 'C') || ' ' ||
         setweight(jsonb_to_tsvector('chinese', context::jsonb, '[
-          "string",
-          "numeric",
-          "boolean",
-          "array",
-          "object"
+          "string"
         ]'), 'D')
         ) stored
 );

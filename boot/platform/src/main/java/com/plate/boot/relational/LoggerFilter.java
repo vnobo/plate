@@ -6,6 +6,7 @@ import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.relational.logger.LoggerReq;
 import com.plate.boot.security.SecurityDetails;
+import com.plate.boot.security.core.UserAuditor;
 import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
 import io.netty.util.internal.EmptyArrays;
@@ -389,6 +390,9 @@ public class LoggerFilter implements WebFilter, ApplicationEventPublisherAware {
 
         LoggerReq logger = LoggerReq.of(tenantCode, userDetails.getUsername(), prefix,
                 method, status, path, contentNode);
+        var userAuditor = UserAuditor.of(userDetails.getCode(), userDetails.getUsername(), userDetails.getName());
+        logger.setCreator(userAuditor);
+        logger.setUpdater(userAuditor);
         this.publisher.publishEvent(logger);
     }
 

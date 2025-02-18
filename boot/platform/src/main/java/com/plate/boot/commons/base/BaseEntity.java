@@ -6,11 +6,11 @@ import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.commons.utils.query.QueryHelper;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.query.Criteria;
-import org.springframework.util.ObjectUtils;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -26,7 +26,9 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
      *
      * @return The unique identifier (UUID) of the entity.
      */
-    <E> E getCode();
+    default <E> E getCode() {
+        return null;
+    }
 
     /**
      * Sets the unique code for an entity.
@@ -87,11 +89,10 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
     @Override
     @JsonIgnore
     default boolean isNew() {
-        boolean isNew = ObjectUtils.isEmpty(getCode());
-        if (isNew) {
+        if (Optional.ofNullable(getCode()).isEmpty()) {
             setCode(ContextUtils.nextId());
         }
-        return isNew;
+        return Optional.ofNullable(getId()).isEmpty();
     }
 
     /**
