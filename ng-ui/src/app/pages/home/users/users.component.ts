@@ -78,8 +78,8 @@ export class UsersComponent {
     this._userSer
       .delete(user)
       .pipe(
-        delay(1500),
         tap(() => this._message.success('删除成功!', ``, { nzDuration: 3000 })),
+        delay(1500),
       )
       .subscribe(() => this.fetchUserData());
   }
