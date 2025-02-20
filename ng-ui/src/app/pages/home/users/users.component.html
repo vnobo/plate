@@ -6,7 +6,7 @@
   </div>
   <div pageHeaderExtra>
     <nz-space>
-      <button (click)="openUserForm({})" *nzSpaceItem nz-button nzType="primary"><i class="bi bi-plus me-1"></i>新增 </button>
+      <button (click)="openUserForm({})" *nzSpaceItem nz-button nzType="primary"><i class="bi bi-plus me-1"></i>新增</button>
       <nz-input-group *nzSpaceItem [nzAddOnAfter]="suffixIconButton" [nzSuffix]="suffixTemplate" nzSearch style="width: 20rem">
         <input [(ngModel)]="search().search" name="search" nz-input placeholder="搜索用户" type="text" />
       </nz-input-group>
@@ -16,8 +16,11 @@
         }
       </ng-template>
       <ng-template #suffixIconButton>
-        <button (click)="onSearch()" nz-button nzSearch nzType="primary"><span nz-icon nzType="search"></span> </button>
+        <button (click)="fetchUserData()" nz-button nzSearch nzType="primary"><span nz-icon nzType="search"></span> </button>
       </ng-template>
+    </nz-space>
+    <nz-space>
+      <button (click)="fetchUserData()" nz-button nzType="primary"><i class="bi bi-arrow-clockwise"></i></button>
     </nz-space>
   </div>
 </page-content-header>

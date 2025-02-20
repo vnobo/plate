@@ -34,7 +34,7 @@ export class UsersComponent {
     tenantCode: '0',
   } as User);
 
-  onSearch() {
+  fetchUserData() {
     this.loadData(this.search(), this.page()).subscribe(() => this._message.success('数据加载成功!', ``, { nzDuration: 3000 }));
   }
 
@@ -46,7 +46,7 @@ export class UsersComponent {
         this.page().sorts.push(sort);
       }
     }
-    this.onSearch();
+    this.fetchUserData();
   }
 
   openUserForm(user: User) {
@@ -63,15 +63,21 @@ export class UsersComponent {
         this._userSer.modify(us).subscribe(res => {
           console.debug(`修改用户成功, 编码:${res.code}`);
           modal.close();
-          this.onSearch();
+          this.fetchUserData();
         });
       } else {
         this._userSer.add(us).subscribe(res => {
           console.debug(`添加用户成功, 编码:${res.code}`);
           modal.close();
-          this.onSearch();
+          this.fetchUserData();
         });
       }
+    });
+  }
+  onDelete(user: User) {
+    this._userSer.delete(user).subscribe(res => {
+      console.debug(`删除用户成功, 编码:${user.code}`);
+      this.fetchUserData();
     });
   }
 
