@@ -156,7 +156,11 @@ public class UsersService extends AbstractDatabase {
      * The Mono will complete empty when the deletion is successful, or error if the operation fails.
      */
     public Mono<Void> delete(UserReq request) {
-        return this.usersRepository.delete(request.toUser())
+        return this.usersRepository.findByCode(request.getCode())
+                .switchIfEmpty(Mono.error(RestServerException
+                        .withMsg("User [" + request.getCode() + "] not found",
+                                new UsernameNotFoundException("User by code [" + request.getCode() + "] not found"))))
+                .flatMap(this.usersRepository::delete)
                 .doAfterTerminate(() -> this.cache.clear());
     }
 
