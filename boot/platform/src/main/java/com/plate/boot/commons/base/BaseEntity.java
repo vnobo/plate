@@ -9,7 +9,6 @@ import org.springframework.data.relational.core.query.Criteria;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,42 +39,6 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
      * @param code The code to be set for the entity. It could be a plain string or follow a predefined format.
      */
     default void setCode(UUID code) {
-    }
-
-    /**
-     * postgresql types @code tsvector supports full text search
-     *
-     * @return Search string for the entity tsvector column
-     */
-    default String getSearch() {
-        return null;
-    }
-
-    /**
-     * postgresql types @code tsvector supports full text search
-     *
-     * @param search from tsvector item by string
-     */
-    default void setSearch(String search) {
-    }
-
-    /**
-     * Retrieves the default from conditions.
-     * Returns an immutable empty map, indicating that there are no specific from conditions.
-     *
-     * @return An immutable map containing the from conditions
-     */
-    default Map<String, Object> getQuery() {
-        return Map.of();
-    }
-
-    /**
-     * Sets the from parameters for the entity.
-     *
-     * @param query A map containing the from parameters where the key is a string
-     *              representing the parameter name and the value is the parameter value.
-     */
-    default void setQuery(Map<String, Object> query) {
     }
 
     /**

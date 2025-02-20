@@ -390,7 +390,7 @@ public class LoggerFilter implements WebFilter, ApplicationEventPublisherAware {
 
         LoggerReq logger = LoggerReq.of(tenantCode, userDetails.getUsername(), prefix,
                 method, status, path, contentNode);
-        var userAuditor = UserAuditor.of(userDetails.getCode(), userDetails.getUsername(), userDetails.getName());
+        var userAuditor = UserAuditor.withDetails(userDetails);
         logger.setCreator(userAuditor);
         logger.setUpdater(userAuditor);
         this.publisher.publishEvent(logger);
