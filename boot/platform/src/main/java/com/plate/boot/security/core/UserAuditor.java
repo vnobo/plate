@@ -17,20 +17,19 @@ import java.util.UUID;
  *
  * @see Serializable The record implements Serializable for potential persistence or distributed computing needs.
  */
-public record UserAuditor(UUID code, String username, String name) implements Serializable {
+public record UserAuditor(UUID code, String name) implements Serializable {
 
     /**
      * Creates an instance of {@link UserAuditor} with the specified user details.
      * This method serves as a convenient alternative constructor, promoting the use of named arguments
      * for better code readability and ensuring the creation of fully initialized auditor objects.
      *
-     * @param code     The unique code identifying the user within the auditing context.
-     * @param username The username associated with the user's account.
-     * @param name     The full name of the user for personal identification in audits.
+     * @param code The unique code identifying the user within the auditing context.
+     * @param name The full name of the user for personal identification in audits.
      * @return A new instance of {@link UserAuditor} populated with the provided user details.
      */
-    public static UserAuditor of(UUID code, String username, String name) {
-        return new UserAuditor(code, username, name);
+    public static UserAuditor of(UUID code, String name) {
+        return new UserAuditor(code, name);
     }
 
     /**
@@ -45,7 +44,7 @@ public record UserAuditor(UUID code, String username, String name) implements Se
      * @throws NullPointerException if the provided code is null.
      */
     public static UserAuditor withCode(UUID code) {
-        return of(code, null, null);
+        return of(code, null);
     }
 
     /**
@@ -56,7 +55,7 @@ public record UserAuditor(UUID code, String username, String name) implements Se
      * @return A new {@code UserAuditor} instance with its fields set according to the provided {@code SecurityDetails}.
      */
     public static UserAuditor withDetails(SecurityDetails securityDetails) {
-        return of(securityDetails.getCode(), securityDetails.getUsername(), securityDetails.getName());
+        return of(securityDetails.getCode(), securityDetails.getName());
     }
 
     /**
@@ -67,7 +66,7 @@ public record UserAuditor(UUID code, String username, String name) implements Se
      * @return A new {@link UserAuditor} instance populated with the user's code, username, and name.
      */
     public static UserAuditor withUser(User user) {
-        return of(user.getCode(), user.getUsername(), user.getName());
+        return of(user.getCode(), user.getName());
     }
 
 }
