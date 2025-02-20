@@ -67,7 +67,9 @@ import {SHARED_IMPORTS} from '@app/shared/shared-imports';
           <button nz-button type="reset">重置</button>
         </nz-form-control>
         <nz-form-control [nzOffset]="3" [nzSpan]="5">
-          <button [disabled]="userForm.invalid" nz-button nzType="primary" type="submit">保存</button>
+          <button [disabled]="userForm.invalid || (!userForm.touched && !userForm.dirty)" nz-button nzType="primary" type="submit"
+            >保存</button
+          >
         </nz-form-control>
       </nz-form-item>
     </form>
