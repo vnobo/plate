@@ -1,11 +1,11 @@
-import { AfterViewInit, Component, ElementRef, inject, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { Credentials } from '@app/core/types';
-import { SHARED_IMPORTS } from '@app/shared/shared-imports';
-import { LoginService } from '@app/pages';
+import {AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit} from '@angular/core';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {NzNotificationService} from 'ng-zorro-antd/notification';
+import {debounceTime, distinctUntilChanged, finalize, retry, Subject, takeUntil} from 'rxjs';
+import {Credentials} from '@app/core/types';
+import {SHARED_IMPORTS} from '@app/shared/shared-imports';
+import {LoginService} from '@app/pages';
 
 @Component({
   selector: 'app-login',
@@ -13,14 +13,17 @@ import { LoginService } from '@app/pages';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent implements OnInit, AfterViewInit {
+export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly _router = inject(Router);
   private readonly _route = inject(ActivatedRoute);
   private readonly _el = inject(ElementRef);
   private readonly _message = inject(NzNotificationService);
   private readonly _loginSer = inject(LoginService);
 
+  isSubmitting = false;
+
   passwordFieldTextType = false;
+  private destroy$ = new Subject<void>();
 
   loginForm = new FormGroup({
     username: new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(32)]),
@@ -41,15 +44,13 @@ export class LoginComponent implements OnInit, AfterViewInit {
   }
 
   onSubmit(): void {
-    if (this.loginForm.valid) {
-      const credentials = this.loginForm.value as Credentials;
-      if (this.loginForm.value.remember) {
-        this._loginSer.setRememberMe(credentials);
-      }
-      this.login(credentials);
-    } else {
-      this._message.error('请输入正确的用户名和密码', '登录失败!');
+    if (this.loginForm.invalid || this.isSubmitting) return;
+    this.isSubmitting = true;
+    const credentials = this.loginForm.value as Credentials;
+    if (this.loginForm.value.remember) {
+      this._loginSer.setRememberMe(credentials);
     }
+    this.login(credentials);
   }
 
   ngOnInit(): void {
@@ -68,7 +69,13 @@ export class LoginComponent implements OnInit, AfterViewInit {
   login(credentials: Credentials) {
     this._loginSer
       .login(credentials)
-      .pipe(debounceTime(100), distinctUntilChanged())
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        finalize(() => (this.isSubmitting = false)),
+        retry(3),
+        takeUntil(this.destroy$),
+      )
       .subscribe({
         next: res => {
           this._message.success('登录系统成功', `欢迎 ${res.details.name} 登录系统!`);
@@ -79,5 +86,10 @@ export class LoginComponent implements OnInit, AfterViewInit {
           this._loginSer.logout();
         },
       });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
