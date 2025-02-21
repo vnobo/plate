@@ -1,8 +1,12 @@
 plugins {
-    id 'org.springframework.boot' version '3.4.2' apply false
-    id 'io.spring.dependency-management' version '1.1.7'
-    id 'org.graalvm.buildtools.native' version '0.10.4'
-    id "com.gorylenko.gradle-git-properties" version "2.4.1"
+    id 'org.springframework.boot' version '3.4.3' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
+    id 'org.graalvm.buildtools.native' version '0.10.4' apply false
+}
+ext {
+    javaVersion = 21
+    springBootVersion = '3.4.3'
+    guavaVersion = '33.+'
 }
 
 configure(allprojects) { project ->
@@ -15,7 +19,10 @@ configure(allprojects) { project ->
     }
 
     configurations.configureEach {
-        resolutionStrategy.cacheChangingModulesFor 0, "minutes"
+        resolutionStrategy {
+            cacheChangingModulesFor 0, "minutes"
+            cacheDynamicVersionsFor 10, 'minutes'
+        }
     }
 }
 
@@ -24,7 +31,25 @@ configure(subprojects - project(":boot")) { project ->
     apply plugin: "java"
     apply plugin: "org.springframework.boot"
     apply plugin: "io.spring.dependency-management"
+    apply plugin: "org.graalvm.buildtools.native"
 
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(javaVersion)
+        }
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:$springBootVersion"
+        }
+    }
     tasks.named("bootBuildImage") {
         createdDate = "now"
         imageName = "localhost:5000/${rootProject.name}-${project.name}:latest"
@@ -35,24 +60,15 @@ configure(subprojects - project(":boot")) { project ->
         ]
     }
 
-    java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
-        }
-    }
-
-    configurations {
-        compileOnly {
-            extendsFrom annotationProcessor
-        }
-    }
-
     dependencies {
 
-        implementation("com.google.guava:guava:33.+")
+        implementation("com.google.guava:guava:$guavaVersion")
         implementation("org.springframework.boot:spring-boot-starter-actuator")
 
-        implementation("org.springframework.boot:spring-boot-starter-log4j2")
+        implementation("org.springframework.boot:spring-boot-starter-log4j2") {
+            exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j2-impl'
+        }
+
         modules {
             module("org.springframework.boot:spring-boot-starter-logging") {
                 replacedBy("org.springframework.boot:spring-boot-starter-log4j2", "Use Log4j2 instead of Logback")
