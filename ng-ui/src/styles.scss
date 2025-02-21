@@ -1,3 +1,5 @@
+@import 'https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkai/dist/LXGWWenKai-Regular/result.css';
+
 :root {
   --tblr-font-sans-serif: 'Inter';
 }
@@ -9,5 +11,5 @@ body {
 
 body {
   margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  font-family: 'LXGW WenKai', Roboto, 'Helvetica Neue', sans-serif;
 }
