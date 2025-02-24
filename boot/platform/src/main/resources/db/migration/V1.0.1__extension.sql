@@ -1,13 +1,15 @@
 -- create the extension
-create extension zhparser;
+create extension if not exists zhparser;
 
 -- make test configuration using parser
+drop text search configuration if exists chinese cascade;
 create text search configuration chinese (parser = zhparser);
 
 -- add token mapping
 alter text search configuration chinese add mapping for n,v,a,i,e,l,x with simple;
 set default_text_search_config = 'chinese';
 show default_text_search_config;
+truncate table zhparser.zhprs_custom_word;
 --add custom word
 insert into zhparser.zhprs_custom_word
 values ('支付宝');
