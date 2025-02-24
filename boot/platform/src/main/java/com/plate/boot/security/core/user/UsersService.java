@@ -3,6 +3,7 @@ package com.plate.boot.security.core.user;
 import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.RequiredArgsConstructor;
@@ -157,7 +158,8 @@ public class UsersService extends AbstractCache {
      */
     public Mono<User> save(User user) {
         if (user.isNew()) {
-            return this.usersRepository.save(user);
+            return this.usersRepository.save(user)
+                    .doOnSuccess(ContextUtils::eventPublisher);
         } else {
             assert user.getId() != null;
             return this.usersRepository.findById(user.getId())
@@ -168,7 +170,7 @@ public class UsersService extends AbstractCache {
                         user.setAccountLocked(old.getAccountLocked());
                         user.setCredentialsExpired(old.getCredentialsExpired());
                         return this.usersRepository.save(user);
-                    });
+                    }).doOnSuccess(ContextUtils::eventPublisher);
         }
     }
 
