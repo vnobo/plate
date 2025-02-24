@@ -1,6 +1,6 @@
 package com.plate.boot.security.core.group;
 
-import com.plate.boot.commons.base.AbstractDatabase;
+import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.commons.utils.query.QueryHelper;
@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class GroupsService extends AbstractDatabase {
+public class GroupsService extends AbstractCache {
 
     private final GroupsRepository groupsRepository;
 

@@ -1,8 +1,9 @@
 package com.plate.boot.security.core.group.authority;
 
 
-import com.plate.boot.commons.base.AbstractDatabase;
+import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.DatabaseUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.relational.core.query.Query;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class GroupAuthoritiesService extends AbstractDatabase {
+public class GroupAuthoritiesService extends AbstractCache {
 
     private final GroupAuthoritiesRepository authoritiesRepository;
 
@@ -61,7 +62,7 @@ public class GroupAuthoritiesService extends AbstractDatabase {
     }
 
     public Mono<GroupAuthority> operate(GroupAuthorityReq request) {
-        var dataMono = this.entityTemplate.selectOne(Query.query(request.toCriteria()), GroupAuthority.class)
+        var dataMono = DatabaseUtils.ENTITY_TEMPLATE.selectOne(Query.query(request.toCriteria()), GroupAuthority.class)
                 .defaultIfEmpty(request.toGroupAuthority());
         return dataMono.flatMap(this::save).doAfterTerminate(() -> this.cache.clear());
     }

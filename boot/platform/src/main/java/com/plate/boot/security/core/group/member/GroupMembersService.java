@@ -1,7 +1,8 @@
 package com.plate.boot.security.core.group.member;
 
-import com.plate.boot.commons.base.AbstractDatabase;
+import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.DatabaseUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,7 +23,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class GroupMembersService extends AbstractDatabase {
+public class GroupMembersService extends AbstractCache {
 
     private final GroupMembersRepository memberRepository;
 
@@ -52,7 +53,7 @@ public class GroupMembersService extends AbstractDatabase {
     }
 
     public Mono<GroupMember> operate(GroupMemberReq request) {
-        var dataMono = this.entityTemplate.selectOne(Query.query(request.toCriteria()), GroupMember.class)
+        var dataMono = DatabaseUtils.ENTITY_TEMPLATE.selectOne(Query.query(request.toCriteria()), GroupMember.class)
                 .defaultIfEmpty(request.toGroupMember());
         return dataMono.flatMap(this::save).doAfterTerminate(() -> this.cache.clear());
     }

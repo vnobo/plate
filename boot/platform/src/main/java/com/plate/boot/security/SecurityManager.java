@@ -1,7 +1,8 @@
 package com.plate.boot.security;
 
-import com.plate.boot.commons.base.AbstractDatabase;
+import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.DatabaseUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.security.core.group.authority.GroupAuthority;
 import com.plate.boot.security.core.group.member.GroupMemberRes;
@@ -61,7 +62,7 @@ import java.util.UUID;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class SecurityManager extends AbstractDatabase
+public class SecurityManager extends AbstractCache
         implements ReactiveUserDetailsService, ReactiveUserDetailsPasswordService {
 
     private final static QueryFragment QUERY_GROUP_MEMBERS_FRAGMENT = QueryFragment.withNew()
@@ -104,7 +105,7 @@ public class SecurityManager extends AbstractDatabase
         securityDetails.password(newPassword);
         Query query = Query.query(Criteria.where("username").is(userDetails.getUsername()).ignoreCase(true));
         Update update = Update.update("password", newPassword);
-        return this.entityTemplate.update(User.class).matching(query).apply(update)
+        return DatabaseUtils.ENTITY_TEMPLATE.update(User.class).matching(query).apply(update)
                 .flatMap(result -> Mono.just((UserDetails) securityDetails))
                 .doAfterTerminate(() -> this.cache.clear());
     }
@@ -138,10 +139,8 @@ public class SecurityManager extends AbstractDatabase
                 .where("extend->'oauth2'->:bindType->>'openid'::varchar = :openid");
         queryFragment.put("bindType", bindType);
         queryFragment.put("openid", openid);
-        var userMono = this.databaseClient.sql(queryFragment::querySql).bindValues(queryFragment)
-                .map((row, metadata) -> this.r2dbcConverter.read(User.class, row, metadata))
-                .all();
-        return this.queryWithCache(bindType + openid, userMono).singleOrEmpty();
+        var userFlux = DatabaseUtils.query(queryFragment.querySql(), queryFragment, User.class);
+        return this.queryWithCache(bindType + openid, userFlux).singleOrEmpty();
     }
 
     /**
@@ -153,8 +152,8 @@ public class SecurityManager extends AbstractDatabase
      */
     public Mono<User> loadByUsername(String username) {
         Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
-        var userMono = this.entityTemplate.select(query, User.class);
-        return this.queryWithCache(username, userMono).switchIfEmpty(Mono.defer(() ->
+        var userFlux = DatabaseUtils.query(query, User.class);
+        return this.queryWithCache(username, userFlux).switchIfEmpty(Mono.defer(() ->
                         Mono.error(new UsernameNotFoundException("登录用户不存在,用户名: " + username))))
                 .last();
     }
@@ -280,7 +279,7 @@ public class SecurityManager extends AbstractDatabase
     private Mono<Long> loginSuccess(String username) {
         Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
         Update update = Update.update("loginTime", LocalDateTime.now());
-        return this.entityTemplate.update(User.class).matching(query).apply(update);
+        return DatabaseUtils.ENTITY_TEMPLATE.update(User.class).matching(query).apply(update);
     }
 
 }

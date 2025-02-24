@@ -1,9 +1,10 @@
 package com.plate.boot.relational.menus;
 
 
-import com.plate.boot.commons.base.AbstractDatabase;
+import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.DatabaseUtils;
 import com.plate.boot.security.core.group.authority.GroupAuthoritiesRepository;
 import com.plate.boot.security.core.user.authority.UserAuthoritiesRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ import java.util.List;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class MenusService extends AbstractDatabase {
+public class MenusService extends AbstractCache {
     public final static String AUTHORITY_PREFIX = "ROLE_";
 
     private final MenusRepository menusRepository;
@@ -60,7 +61,7 @@ public class MenusService extends AbstractDatabase {
     public Mono<Menu> add(MenuReq request) {
         log.debug("Menu add request: {}", request);
         Criteria criteria = MenuReq.of(request.getTenantCode(), request.getAuthority()).toCriteria();
-        var existsMono = this.entityTemplate.exists(Query.query(criteria), Menu.class);
+        var existsMono = DatabaseUtils.ENTITY_TEMPLATE.exists(Query.query(criteria), Menu.class);
         existsMono = existsMono.filter(isExists -> !isExists);
         existsMono = existsMono.switchIfEmpty(Mono.error(RestServerException
                 .withMsg("Add menu[" + request.getName() + "] is exists",

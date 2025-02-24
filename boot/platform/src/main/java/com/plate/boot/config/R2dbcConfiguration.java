@@ -1,15 +1,11 @@
 package com.plate.boot.config;
 
 import com.google.common.collect.Lists;
-import com.plate.boot.security.core.UserAuditor;
-import com.plate.boot.security.core.UserAuditorAware;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.data.domain.ReactiveAuditorAware;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
 import org.springframework.data.r2dbc.config.EnableR2dbcAuditing;
 import org.springframework.lang.NonNull;
@@ -57,18 +53,6 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
     @Override
     public @NonNull List<Object> getCustomConverters() {
         return Lists.newArrayList(customConverters);
-    }
-
-    /**
-     * Provides a bean instance of {@link ReactiveAuditorAware} configured to use {@link UserAuditorAware}.
-     * This method sets up auditing awareness for reactive contexts, allowing the system to automatically
-     * populate audit fields like creator, updater, etc., with details from the current security context.
-     *
-     * @return A bean instance of {@link ReactiveAuditorAware<UserAuditor>} that supplies the current auditor details.
-     */
-    @Bean
-    public ReactiveAuditorAware<UserAuditor> userAuditorProvider() {
-        return new UserAuditorAware();
     }
 
 }
