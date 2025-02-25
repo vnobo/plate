@@ -1,6 +1,7 @@
 package com.plate.boot.commons.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.plate.boot.commons.base.BaseEvent;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.security.SecurityDetails;
 import lombok.extern.log4j.Log4j2;
@@ -127,8 +128,8 @@ public final class ContextUtils implements InitializingBean {
         ContextUtils.APPLICATION_EVENT_PUBLISHER = applicationEventPublisher;
     }
 
-    public static void eventPublisher(Object object) {
-        ContextUtils.APPLICATION_EVENT_PUBLISHER.publishEvent(object);
+    public static void eventPublisher(BaseEvent<?> object) {
+       ContextUtils.APPLICATION_EVENT_PUBLISHER.publishEvent(object);
     }
 
     /**

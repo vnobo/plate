@@ -1,5 +1,6 @@
 package com.plate.boot.commons.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.security.core.UserAuditor;
 import lombok.Data;
@@ -62,6 +63,13 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
     protected UserAuditor creator;
 
     /**
+     * Data entity create time, timestamp column
+     */
+    @CreatedDate
+    @InsertOnlyProperty
+    protected LocalDateTime createdTime;
+
+    /**
      * Data entity update operator
      * use User.class code property
      */
@@ -74,12 +82,6 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
     @LastModifiedDate
     protected LocalDateTime updatedTime;
 
-    /**
-     * Data entity create time, timestamp column
-     */
-    @CreatedDate
-    @InsertOnlyProperty
-    protected LocalDateTime createdTime;
 
     /**
      * Support from for json column
@@ -96,6 +98,17 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
     /**
      * Support security code for sensitive data
      */
+    @JsonIgnore
     @Transient
     protected String securityCode;
+
+    @JsonIgnore
+    public String getSearch() {
+        return search;
+    }
+
+    @JsonIgnore
+    public Map<String, Object> getQuery() {
+        return query;
+    }
 }
