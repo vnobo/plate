@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.HandlerMapping;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -28,6 +29,7 @@ public class UsersService extends AbstractCache {
 
     private final PasswordEncoder passwordEncoder;
     private final UsersRepository usersRepository;
+    private final HandlerMapping resourceHandlerMapping;
 
     /**
      * Searches for users based on the provided user request and pagination details.
@@ -140,11 +142,9 @@ public class UsersService extends AbstractCache {
      */
     public Mono<Void> delete(UserReq request) {
         return this.usersRepository.findByCode(request.getCode())
-                .switchIfEmpty(Mono.error(RestServerException
-                        .withMsg("User [" + request.getCode() + "] not found",
-                                new UsernameNotFoundException("User by code [" + request.getCode() + "] not found"))))
-                .flatMap(this.usersRepository::delete)
-                .doAfterTerminate(() -> this.cache.clear());
+                .delayUntil(this.usersRepository::delete)
+                .doOnSuccess(res -> ContextUtils.eventPublisher(UserEvent.delete(res)))
+                .then().doAfterTerminate(() -> this.cache.clear());
     }
 
     /**
@@ -159,18 +159,16 @@ public class UsersService extends AbstractCache {
     public Mono<User> save(User user) {
         if (user.isNew()) {
             return this.usersRepository.save(user)
-                    .doOnSuccess(ContextUtils::eventPublisher);
+                    .doOnSuccess(res -> ContextUtils.eventPublisher(UserEvent.insert(res)));
         } else {
             assert user.getId() != null;
-            return this.usersRepository.findById(user.getId())
-                    .flatMap(old -> {
-                        user.setCreatedTime(old.getCreatedTime());
-                        user.setPassword(old.getPassword());
-                        user.setAccountExpired(old.getAccountExpired());
-                        user.setAccountLocked(old.getAccountLocked());
-                        user.setCredentialsExpired(old.getCredentialsExpired());
-                        return this.usersRepository.save(user);
-                    }).doOnSuccess(ContextUtils::eventPublisher);
+            return this.usersRepository.findById(user.getId()).flatMap(old -> {
+                user.setPassword(old.getPassword());
+                user.setAccountExpired(old.getAccountExpired());
+                user.setAccountLocked(old.getAccountLocked());
+                user.setCredentialsExpired(old.getCredentialsExpired());
+                return this.usersRepository.save(user);
+            }).doOnSuccess(res -> ContextUtils.eventPublisher(UserEvent.save(res)));
         }
     }
 

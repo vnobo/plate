@@ -2,11 +2,10 @@ package com.plate.boot.security.core.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plate.boot.commons.utils.BeanUtils;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.data.annotation.ReadOnlyProperty;
-
-import java.util.Map;
 
 /**
  * Represents a response object for user data, extending the base User class.
@@ -15,6 +14,7 @@ import java.util.Map;
  *
  * <p><strong>NOTE:</strong> The getPassword method is overridden to be ignored during JSON serialization.
  */
+@Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class UserRes extends User {
@@ -23,7 +23,7 @@ public class UserRes extends User {
      * Data full text search entity sort
      */
     @ReadOnlyProperty
-    protected Double rank;
+    private Double rank;
 
     /**
      * Creates a UserRes instance from a given User object.
@@ -55,21 +55,4 @@ public class UserRes extends User {
         return super.getPassword();
     }
 
-    @JsonIgnore
-    @Override
-    public String getSearch() {
-        return search;
-    }
-
-    @JsonIgnore
-    @Override
-    public String getSecurityCode() {
-        return securityCode;
-    }
-
-    @JsonIgnore
-    @Override
-    public Map<String, Object> getQuery() {
-        return query;
-    }
 }

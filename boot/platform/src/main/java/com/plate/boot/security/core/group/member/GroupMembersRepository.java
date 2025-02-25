@@ -1,6 +1,9 @@
 package com.plate.boot.security.core.group.member;
 
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 /**
  * {@code GroupMembersRepository} is an interface that extends Spring Data R2DBC's {@link R2dbcRepository},
@@ -13,4 +16,12 @@ import org.springframework.data.r2dbc.repository.R2dbcRepository;
  * @see GroupMember
  */
 public interface GroupMembersRepository extends R2dbcRepository<GroupMember, Long> {
+
+    /**
+     * Deletes records from the database based on the provided userCode.
+     *
+     * @param userCode the userCode to delete by
+     * @return a Mono emitting the number of records deleted
+     */
+    Mono<Integer> deleteByUserCode(UUID userCode);
 }

@@ -5,7 +5,9 @@ import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.DatabaseUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.commons.utils.query.QueryHelper;
+import com.plate.boot.security.core.user.UserEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -69,5 +71,12 @@ public class TenantMembersService extends AbstractCache {
 
     public Mono<Void> delete(TenantMemberReq request) {
         return this.tenantMembersRepository.delete(request.toMemberTenant());
+    }
+
+    @EventListener(value = UserEvent.class, condition = "#event.kind == 'DELETE'")
+    public void onUserEvent(UserEvent event) {
+        this.tenantMembersRepository.deleteByUserCode(event.entity().getCode())
+                .doAfterTerminate(() -> this.cache.clear())
+                .subscribe();
     }
 }

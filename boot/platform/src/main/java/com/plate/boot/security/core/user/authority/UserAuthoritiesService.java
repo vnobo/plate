@@ -3,7 +3,9 @@ package com.plate.boot.security.core.user.authority;
 import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.DatabaseUtils;
+import com.plate.boot.security.core.user.UserEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -79,4 +81,10 @@ public class UserAuthoritiesService extends AbstractCache {
         }
     }
 
+    @EventListener(value = UserEvent.class, condition = "#event.kind == 'DELETE'")
+    public void onUserEvent(UserEvent event) {
+        this.userAuthoritiesRepository.deleteByUserCode(event.entity().getCode())
+                .doAfterTerminate(() -> this.cache.clear())
+                .subscribe();
+    }
 }
