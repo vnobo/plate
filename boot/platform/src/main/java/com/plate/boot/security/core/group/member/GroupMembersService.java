@@ -1,9 +1,12 @@
 package com.plate.boot.security.core.group.member;
 
-import com.plate.boot.commons.base.AbstractDatabase;
+import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.DatabaseUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
+import com.plate.boot.security.core.user.UserEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +25,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class GroupMembersService extends AbstractDatabase {
+public class GroupMembersService extends AbstractCache {
 
     private final GroupMembersRepository memberRepository;
 
@@ -52,7 +55,7 @@ public class GroupMembersService extends AbstractDatabase {
     }
 
     public Mono<GroupMember> operate(GroupMemberReq request) {
-        var dataMono = this.entityTemplate.selectOne(Query.query(request.toCriteria()), GroupMember.class)
+        var dataMono = DatabaseUtils.ENTITY_TEMPLATE.selectOne(Query.query(request.toCriteria()), GroupMember.class)
                 .defaultIfEmpty(request.toGroupMember());
         return dataMono.flatMap(this::save).doAfterTerminate(() -> this.cache.clear());
     }
@@ -69,5 +72,12 @@ public class GroupMembersService extends AbstractDatabase {
 
     public Mono<Void> delete(GroupMemberReq request) {
         return this.memberRepository.delete(request.toGroupMember()).doAfterTerminate(() -> this.cache.clear());
+    }
+
+    @EventListener(value = UserEvent.class, condition = "#event.kind.name() == 'DELETE'")
+    public void onUserDeletedEvent(UserEvent event) {
+        this.memberRepository.deleteByUserCode(event.entity().getCode())
+                .doAfterTerminate(() -> this.cache.clear())
+                .subscribe();
     }
 }

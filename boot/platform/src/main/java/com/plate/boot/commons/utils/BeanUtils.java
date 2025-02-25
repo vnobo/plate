@@ -8,16 +8,14 @@ import com.google.common.collect.Maps;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.exception.JsonPointerException;
 import com.plate.boot.security.core.UserAuditor;
+import com.plate.boot.security.core.UserAuditorAware;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.Cache;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.unit.DataSize;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -36,11 +34,15 @@ import java.util.stream.Collectors;
 public final class BeanUtils implements InitializingBean {
 
     /**
-     * Represents the maximum size of data that can be held in memory.
-     * This threshold is utilized to determine when data should be processed differently,
-     * such as being written to disk, to avoid exceeding memory constraints.
+     * Static reference to the UsersService instance.
+     * This service provides functionalities related to user management such as
+     * user retrieval, creation, update, and deletion.
      */
-    public static DataSize MAX_IN_MEMORY_SIZE;
+    public static UserAuditorAware USER_AUDITOR_AWARE;
+
+    public BeanUtils(UserAuditorAware usersService) {
+        BeanUtils.USER_AUDITOR_AWARE = usersService;
+    }
 
     /**
      * Converts a JSON node at a specified JSON Path into an object of the provided class type.
@@ -115,47 +117,6 @@ public final class BeanUtils implements InitializingBean {
             setStr.forEach(keyJoiner::add);
         }
         return ContextUtils.encodeToSHA256(keyJoiner.toString());
-    }
-
-    /**
-     * Inserts an object into the specified cache if its size does not exceed the maximum allowed in-memory size.
-     *
-     * @param cache    The cache instance where the object will be stored.
-     * @param cacheKey The key under which the object will be stored in the cache.
-     * @param obj      The object to be cached. Its size will be evaluated against the maximum allowed size.
-     *                 If the object exceeds the limit, it will not be cached and a warning will be logged.
-     */
-    public static void cachePut(Cache cache, String cacheKey, Object obj) {
-        DataSize objectSize = getBeanSize(obj);
-        if (objectSize.toBytes() > MAX_IN_MEMORY_SIZE.toBytes()) {
-            log.warn("Object size is too large, Max memory size is {}, Object size is {}.",
-                    MAX_IN_MEMORY_SIZE, objectSize);
-            return;
-        }
-        cache.put(cacheKey, obj);
-    }
-
-    /**
-     * Calculates the size of the given Java bean by serializing it into a byte array and measuring its length.
-     * This method provides an estimate of the space the object occupies when serialized.
-     *
-     * @param obj The Java bean object whose size is to be calculated. Must not be null.
-     * @return The size of the bean as a {@link DataSize} object, representing the size in a human-readable format.
-     * If the object is empty or serialization fails, returns a DataSize of 0 bytes.
-     * @throws IllegalArgumentException If the provided object is null, since null cannot be sized.
-     */
-    public static DataSize getBeanSize(Object obj) {
-        if (ObjectUtils.isEmpty(obj)) {
-            log.warn("Object is empty,This object not null.");
-            return DataSize.ofBytes(0);
-        }
-        try {
-            int size = objectToBytes(obj).length;
-            return DataSize.ofBytes(size);
-        } catch (Exception e) {
-            log.error("Bean Size IO exception! msg: {}", e.getLocalizedMessage());
-            return DataSize.ofBytes(0);
-        }
     }
 
     /**
@@ -282,6 +243,7 @@ public final class BeanUtils implements InitializingBean {
      * The Mono completes when all processing is finished.
      */
     public static <T> Mono<T> serializeUserAuditor(T object) {
+        log.debug("Serialize user auditor property: {}", object.getClass().getSimpleName());
         PropertyDescriptor[] propertyDescriptors = org.springframework.beans.BeanUtils.getPropertyDescriptors(object.getClass());
         var propertyFlux = Flux.fromArray(propertyDescriptors)
                 .filter(propertyDescriptor -> propertyDescriptor.getPropertyType() == UserAuditor.class)
@@ -309,24 +271,10 @@ public final class BeanUtils implements InitializingBean {
             log.warn(msg);
             return Mono.just(msg);
         }
-        return ContextUtils.USERS_SERVICE.loadByCode(userAuditor.code()).cache().flatMap(user -> {
-            ReflectionUtils.invokeMethod(propertyDescriptor.getWriteMethod(), object, UserAuditor.withUser(user));
-            log.debug("{} serialize user auditor property: {}",
-                    object.getClass().getSimpleName(), propertyDescriptor.getName());
+        return USER_AUDITOR_AWARE.loadByCode(userAuditor.code()).cache().flatMap(user -> {
+            ReflectionUtils.invokeMethod(propertyDescriptor.getWriteMethod(), object, user);
             return Mono.just("User auditor serializable success. " + propertyDescriptor.getName());
         });
-    }
-
-    /**
-     * Sets the maximum size of data that can be stored in memory before being written to disk.
-     * This method allows configuration of the maximum in-memory size limit, which is particularly
-     * useful for managing memory usage when handling large amounts of data, such as file uploads.
-     *
-     * @param dataSize The maximum in-memory size limit defined as a {@link DataSize}. Defaults to 256 kilobytes if not explicitly set.
-     */
-    @Value("${spring.codec.max-in-memory-size:256kb}")
-    public void setMaxInMemorySize(DataSize dataSize) {
-        MAX_IN_MEMORY_SIZE = dataSize;
     }
 
     /**

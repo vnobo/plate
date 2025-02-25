@@ -2,34 +2,34 @@ import {
   ApplicationConfig,
   importProvidersFrom,
   LOCALE_ID,
-  provideExperimentalZonelessChangeDetection,
+  provideExperimentalZonelessChangeDetection
 } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import {provideRouter, withComponentInputBinding} from '@angular/router';
 
 import {
   provideHttpClient,
   withFetch,
   withInterceptors,
   withInterceptorsFromDi,
-  withXsrfConfiguration,
+  withXsrfConfiguration
 } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import {FormsModule} from '@angular/forms';
+import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 
-import { NzConfig, provideNzConfig } from 'ng-zorro-antd/core/config';
-import { provideNzI18n, zh_CN } from 'ng-zorro-antd/i18n';
-import { provideNzIcons } from 'ng-zorro-antd/icon';
+import {NzConfig, provideNzConfig} from 'ng-zorro-antd/core/config';
+import {provideNzI18n, zh_CN} from 'ng-zorro-antd/i18n';
+import {provideNzIcons} from 'ng-zorro-antd/icon';
 
-import { routes } from './app.routes';
-import { indexInterceptor } from './core';
-import { icons } from '../style-icons';
+import {routes} from './app.routes';
+import {indexInterceptor} from './core';
+import {icons} from '../style-icons';
 
 const ngZorroConfig: NzConfig = {
   message: { nzDuration: 2000, nzMaxStack: 3 },
   notification: {
     nzTop: '4.7rem',
     nzDuration: 1000 * 10,
-    nzPlacement: 'topRight',
+    nzPlacement: 'bottomRight',
   },
 };
 
@@ -52,6 +52,5 @@ export const appConfig: ApplicationConfig = {
     { provide: LOCALE_ID, useValue: 'zh_CN' },
     provideRouter(routes, withComponentInputBinding()),
     provideExperimentalZonelessChangeDetection(),
-    provideAnimationsAsync(), provideAnimationsAsync(),
   ],
 };

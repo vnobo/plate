@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
@@ -88,6 +89,7 @@ public class User extends AbstractEntity<Long> {
      * This flag is often used in security contexts to determine if an account is no longer valid due to passage of time.
      * A true value signifies that the account is expired and access should be denied until the account is renewed.
      */
+    @ReadOnlyProperty
     private Boolean accountExpired;
 
     /**
@@ -96,6 +98,7 @@ public class User extends AbstractEntity<Long> {
      * typically due to security reasons such as multiple failed login attempts.
      * A locked account prevents the user from logging in until it is unlocked by an administrator.
      */
+    @ReadOnlyProperty
     private Boolean accountLocked;
 
     /**
@@ -103,6 +106,7 @@ public class User extends AbstractEntity<Long> {
      * This flag is typically used in authentication systems to determine if a user needs to renew their credentials
      * (e.g., password) before they can proceed with accessing secure resources.
      */
+    @ReadOnlyProperty
     private Boolean credentialsExpired;
 
     /**
@@ -143,6 +147,7 @@ public class User extends AbstractEntity<Long> {
      * It is typically set during the login process to track user activity and can be utilized
      * for analytics, session management, or security auditing purposes.
      */
+    @ReadOnlyProperty
     private LocalDateTime loginTime;
 
 }

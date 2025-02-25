@@ -1,10 +1,13 @@
 package com.plate.boot.security.core.tenant.member;
 
-import com.plate.boot.commons.base.AbstractDatabase;
+import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.DatabaseUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.commons.utils.query.QueryHelper;
+import com.plate.boot.security.core.user.UserEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +26,7 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
-public class TenantMembersService extends AbstractDatabase {
+public class TenantMembersService extends AbstractCache {
 
     private final TenantMembersRepository tenantMembersRepository;
 
@@ -50,7 +53,7 @@ public class TenantMembersService extends AbstractDatabase {
 
     @Transactional(rollbackFor = Exception.class)
     public Mono<TenantMember> operate(TenantMemberReq request) {
-        var tenantMemberMono = this.entityTemplate.selectOne(Query.query(request.toCriteria()), TenantMember.class)
+        var tenantMemberMono = DatabaseUtils.ENTITY_TEMPLATE.selectOne(Query.query(request.toCriteria()), TenantMember.class)
                 .defaultIfEmpty(request.toMemberTenant());
         tenantMemberMono = tenantMemberMono.flatMap(old -> {
             old.setEnabled(true);
@@ -63,10 +66,17 @@ public class TenantMembersService extends AbstractDatabase {
     private Mono<Void> userDefaultTenant(UUID userCode) {
         Query query = Query.query(Criteria.where("userCode").is(userCode));
         Update update = Update.update("enabled", false);
-        return entityTemplate.update(TenantMember.class).matching(query).apply(update).then();
+        return DatabaseUtils.ENTITY_TEMPLATE.update(TenantMember.class).matching(query).apply(update).then();
     }
 
     public Mono<Void> delete(TenantMemberReq request) {
         return this.tenantMembersRepository.delete(request.toMemberTenant());
+    }
+
+    @EventListener(value = UserEvent.class, condition = "#event.kind.name() == 'DELETE'")
+    public void onUserDeletedEvent(UserEvent event) {
+        this.tenantMembersRepository.deleteByUserCode(event.entity().getCode())
+                .doAfterTerminate(() -> this.cache.clear())
+                .subscribe();
     }
 }

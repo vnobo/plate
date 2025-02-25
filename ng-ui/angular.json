@@ -42,8 +42,9 @@
             "styles": [
               { "input": "@angular/material/prebuilt-themes/cyan-orange.css", "bundleName": "material-style" },
               { "input": "bootstrap-icons/font/bootstrap-icons.css", "bundleName": "bootstrap-icons-style" },
-              { "input": "src/styles/theme.less", "bundleName": "ng-zorro-antd-style" },
-              "src/styles.scss"
+              { "input": "src/styles/ng-zorro-antd.less", "bundleName": "ng-zorro-antd-style" },
+              { "input": "src/styles/tabler.scss", "bundleName": "tabler-style" },
+              { "input": "src/styles.scss", "bundleName": "main-style" }
             ],
             "scripts": [{ "input": "@tabler/core/dist/js/tabler.js", "bundleName": "tabler-script" }],
             "allowedCommonJsDependencies": ["dayjs"]

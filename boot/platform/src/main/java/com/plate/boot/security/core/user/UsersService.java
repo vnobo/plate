@@ -1,8 +1,9 @@
 package com.plate.boot.security.core.user;
 
-import com.plate.boot.commons.base.AbstractDatabase;
+import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.RequiredArgsConstructor;
@@ -12,22 +13,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.HandlerMapping;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Service
 @RequiredArgsConstructor
-public class UsersService extends AbstractDatabase {
+public class UsersService extends AbstractCache {
 
     private final PasswordEncoder passwordEncoder;
     private final UsersRepository usersRepository;
+    private final HandlerMapping resourceHandlerMapping;
 
     /**
      * Searches for users based on the provided user request and pagination details.
@@ -60,23 +63,6 @@ public class UsersService extends AbstractDatabase {
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
-
-    /**
-     * Loads a user by their unique code using a cached from.
-     * <p>
-     * This method retrieves a user from the repository based on the provided code.
-     * It utilizes a cached from to improve performance, reducing the need for repeated database hits
-     * for the same code. If a user with the given code is found, it is emitted as a single value in a {@link Mono}.
-     * If no user is found, an empty {@link Mono} is returned.
-     *
-     * @param code The unique code used to identify the user.
-     * @return A {@link Mono} that emits a single {@link User} object if found, or an empty {@link Mono} if no user matches the code.
-     */
-    public Mono<User> loadByCode(UUID code) {
-        var userMono = this.usersRepository.findByCode(code).flux();
-        return super.queryWithCache(code, userMono).singleOrEmpty();
-    }
-
 
     /**
      * Adds a new user based on the provided UserReq.
@@ -155,9 +141,11 @@ public class UsersService extends AbstractDatabase {
      * @return A Mono<Void> which upon subscription initiates the deletion process asynchronously.
      * The Mono will complete empty when the deletion is successful, or error if the operation fails.
      */
+    @Transactional(rollbackFor = Exception.class)
     public Mono<Void> delete(UserReq request) {
-        return this.usersRepository.delete(request.toUser())
-                .doAfterTerminate(() -> this.cache.clear());
+        return this.usersRepository.findByCode(request.getCode())
+                .doOnNext(res -> ContextUtils.eventPublisher(UserEvent.delete(res)))
+                .flatMap(this.usersRepository::delete).doAfterTerminate(() -> this.cache.clear());
     }
 
     /**
@@ -171,18 +159,17 @@ public class UsersService extends AbstractDatabase {
      */
     public Mono<User> save(User user) {
         if (user.isNew()) {
-            return this.usersRepository.save(user);
+            return this.usersRepository.save(user)
+                    .doOnNext(res -> ContextUtils.eventPublisher(UserEvent.insert(res)));
         } else {
             assert user.getId() != null;
-            return this.usersRepository.findById(user.getId())
-                    .flatMap(old -> {
-                        user.setCreatedTime(old.getCreatedTime());
-                        user.setPassword(old.getPassword());
-                        user.setAccountExpired(old.getAccountExpired());
-                        user.setAccountLocked(old.getAccountLocked());
-                        user.setCredentialsExpired(old.getCredentialsExpired());
-                        return this.usersRepository.save(user);
-                    });
+            return this.usersRepository.findById(user.getId()).flatMap(old -> {
+                user.setPassword(old.getPassword());
+                user.setAccountExpired(old.getAccountExpired());
+                user.setAccountLocked(old.getAccountLocked());
+                user.setCredentialsExpired(old.getCredentialsExpired());
+                return this.usersRepository.save(user);
+            }).doOnNext(res -> ContextUtils.eventPublisher(UserEvent.save(res)));
         }
     }
 

@@ -74,7 +74,7 @@ public class UsersController {
      */
     @PostMapping("add")
     public Mono<UserRes> add(@Valid @RequestBody UserReq request) {
-        Assert.isNull(request.getId(), () -> "When adding a new user, the ID must be null");
+        Assert.isNull(request.getCode(), () -> "When adding a new user, the ID must be null");
         return this.usersService.add(request).map(user -> BeanUtils.copyProperties(user, UserRes.class));
     }
 
@@ -91,7 +91,7 @@ public class UsersController {
      */
     @PutMapping("modify")
     public Mono<UserRes> modify(@Validated(Update.class) @RequestBody UserReq request) {
-        Assert.notNull(request.getId(), () -> "When modifying an existing user, the ID must not be null");
+        Assert.notNull(request.getCode(), () -> "When modifying an existing user, the ID must not be null");
         return this.usersService.modify(request).map(user -> BeanUtils.copyProperties(user, UserRes.class));
     }
 
@@ -107,7 +107,7 @@ public class UsersController {
      */
     @DeleteMapping("delete")
     public Mono<Void> delete(@RequestBody UserReq request) {
-        Assert.notNull(request.getId(), "When deleting a user, the ID must not be null");
+        Assert.notNull(request.getCode(), "When deleting a user, the ID must not be null");
         return this.usersService.delete(request);
     }
 }

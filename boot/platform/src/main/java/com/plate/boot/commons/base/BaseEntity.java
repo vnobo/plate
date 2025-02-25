@@ -6,11 +6,10 @@ import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.commons.utils.query.QueryHelper;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.query.Criteria;
-import org.springframework.util.ObjectUtils;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -26,7 +25,9 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
      *
      * @return The unique identifier (UUID) of the entity.
      */
-    <E> E getCode();
+    default <E> E getCode() {
+        return null;
+    }
 
     /**
      * Sets the unique code for an entity.
@@ -41,42 +42,6 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
     }
 
     /**
-     * postgresql types @code tsvector supports full text search
-     *
-     * @return Search string for the entity tsvector column
-     */
-    default String getSearch() {
-        return null;
-    }
-
-    /**
-     * postgresql types @code tsvector supports full text search
-     *
-     * @param search from tsvector item by string
-     */
-    default void setSearch(String search) {
-    }
-
-    /**
-     * Retrieves the default from conditions.
-     * Returns an immutable empty map, indicating that there are no specific from conditions.
-     *
-     * @return An immutable map containing the from conditions
-     */
-    default Map<String, Object> getQuery() {
-        return Map.of();
-    }
-
-    /**
-     * Sets the from parameters for the entity.
-     *
-     * @param query A map containing the from parameters where the key is a string
-     *              representing the parameter name and the value is the parameter value.
-     */
-    default void setQuery(Map<String, Object> query) {
-    }
-
-    /**
      * Determines whether the entity is new, typically indicating it has not been persisted yet.
      * This is assessed by checking if the entity's identifier ({@code getId}) is empty.
      * If the entity is determined to be new, a unique code is generated using {@link ContextUtils#nextId()}
@@ -87,11 +52,10 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
     @Override
     @JsonIgnore
     default boolean isNew() {
-        boolean isNew = ObjectUtils.isEmpty(getCode());
-        if (isNew) {
+        if (Optional.ofNullable(getCode()).isEmpty()) {
             setCode(ContextUtils.nextId());
         }
-        return isNew;
+        return Optional.ofNullable(getId()).isEmpty();
     }
 
     /**

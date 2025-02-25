@@ -21,10 +21,10 @@ spring:
     pool:
       max-idle-time: 10m
       validation-query: select 1
-  sql.init:
-    mode: always
-    platform: postgres
-    encoding: utf-8
+  flyway:
+    url: jdbc:postgresql://127.0.0.1:5432/plate
+    user: ${spring.r2dbc.username}
+    password: ${spring.r2dbc.password}
   data.redis:
     host: 127.0.0.1
     timeout: 30s

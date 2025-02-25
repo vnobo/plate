@@ -12,26 +12,24 @@ import java.util.UUID;
  */
 public interface GroupAuthoritiesRepository extends R2dbcRepository<GroupAuthority, Integer> {
 
-    /**
-     * 根据权限集合删除用户。
+/**
+     * Deletes users based on a set of permissions.
      * <p>
-     * 本函数通过Mono封装了异步删除操作，它接收一个权限集合作为参数，旨在删除所有拥有这些权限的用户。
-     * 使用Reactive编程模型可以提高并发处理的效率，并且能够优雅地处理异步数据流。
+     * This function encapsulates an asynchronous deletion operation using Mono. It takes a set of permissions as a parameter and aims to delete all users who possess these permissions.
+     * The use of the Reactive programming model enhances the efficiency of concurrent processing and elegantly handles asynchronous data streams.
      *
-     * @param authorities 要删除的用户的权限集合。通过权限集合来定位需要删除的用户，这是因为权限通常是一种有效的用户标识方式。
-     * @return Mono<Integer> 表示异步操作的结果，返回被删除的用户数量。Mono是一种Reactive Streams类型，用于表示0或1个元素的序列。
+     * @param authorities The set of permissions of the users to be deleted. Users are located via their permission sets, as permissions are often an effective way to identify users.
+     * @return Mono<Integer> Represents the result of the asynchronous operation, returning the number of users deleted. Mono is a Reactive Streams type used to represent a sequence of 0 or 1 elements.
      */
     Mono<Integer> deleteByAuthorityIn(Collection<String> authorities);
 
-    /**
-     * 根据组代码查询权限信息。
+/**
+     * Query permission information based on the group code.
      * <p>
-     * 本方法通过指定的组代码查询与之相关的权限组。这允许系统根据用户的组成员身份，
-     * 动态确定用户具有哪些权限。这对于实现基于角色的访问控制（RBAC）是非常重要的。
+     * This method retrieves the permission groups associated with the specified group code. It allows the system to dynamically determine the permissions a user has based on their group membership. This is crucial for implementing Role-Based Access Control (RBAC).
      *
-     * @param groupCode 组的唯一标识码。这个参数是用来筛选权限组的关键依据。
-     * @return 返回一个Flux对象，该对象包含满足条件的GroupAuthority实体。Flux是一个响应式流，
-     * 允许以非阻塞方式处理异步数据序列。
+     * @param groupCode The unique identifier code of the group. This parameter is the key criterion for filtering permission groups.
+     * @return Returns a Flux object containing the GroupAuthority entities that meet the criteria. Flux is a reactive stream that allows for non-blocking processing of asynchronous data sequences.
      */
     Flux<GroupAuthority> findByGroupCode(UUID groupCode);
 }

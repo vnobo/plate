@@ -1,8 +1,8 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { User } from './user.types';
-import { Page, Pageable } from '@app/core/types';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {User} from './user.types';
+import {Page, Pageable} from '@app/core/types';
 
 @Injectable({
   providedIn: 'root',
@@ -25,5 +25,9 @@ export class UsersService {
 
   modify(request: User): Observable<User> {
     return this.http.put<User>('/users/modify', request);
+  }
+
+  delete(request: User): Observable<User> {
+    return this.http.delete<User>('/users/delete', { body: request });
   }
 }

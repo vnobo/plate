@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.relational.logger.LoggerEvent;
 import com.plate.boot.relational.logger.LoggerReq;
 import com.plate.boot.security.SecurityDetails;
+import com.plate.boot.security.core.UserAuditor;
 import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
 import io.netty.util.internal.EmptyArrays;
@@ -389,7 +391,10 @@ public class LoggerFilter implements WebFilter, ApplicationEventPublisherAware {
 
         LoggerReq logger = LoggerReq.of(tenantCode, userDetails.getUsername(), prefix,
                 method, status, path, contentNode);
-        this.publisher.publishEvent(logger);
+        var userAuditor = UserAuditor.withDetails(userDetails);
+        logger.setCreator(userAuditor);
+        logger.setUpdater(userAuditor);
+        ContextUtils.eventPublisher(LoggerEvent.insert(logger));
     }
 
     /**

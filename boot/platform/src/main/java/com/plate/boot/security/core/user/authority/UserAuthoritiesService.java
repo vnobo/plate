@@ -1,8 +1,11 @@
 package com.plate.boot.security.core.user.authority;
 
-import com.plate.boot.commons.base.AbstractDatabase;
+import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.DatabaseUtils;
+import com.plate.boot.security.core.user.UserEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -22,7 +25,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class UserAuthoritiesService extends AbstractDatabase {
+public class UserAuthoritiesService extends AbstractCache {
 
     private final UserAuthoritiesRepository userAuthoritiesRepository;
 
@@ -45,7 +48,7 @@ public class UserAuthoritiesService extends AbstractDatabase {
      * @return a Mono emitting the operated user authority
      */
     public Mono<UserAuthority> operate(UserAuthorityReq request) {
-        var dataMono = this.entityTemplate.selectOne(Query.query(request.toCriteria()), UserAuthority.class);
+        var dataMono = DatabaseUtils.ENTITY_TEMPLATE.selectOne(Query.query(request.toCriteria()), UserAuthority.class);
         dataMono = dataMono.switchIfEmpty(Mono.defer(() -> this.save(request.toAuthority())));
         return dataMono.doAfterTerminate(() -> this.cache.clear());
     }
@@ -78,4 +81,11 @@ public class UserAuthoritiesService extends AbstractDatabase {
         }
     }
 
+    @EventListener(value = UserEvent.class, condition = "#event.kind.name() == 'DELETE'")
+    public void onUserDeletedEvent(UserEvent event) {
+        this.userAuthoritiesRepository.deleteByUserCode(event.entity().getCode())
+                .doAfterTerminate(() -> this.cache.clear())
+                .subscribe();
+
+    }
 }

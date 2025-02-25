@@ -1,11 +1,15 @@
 package com.plate.boot.commons.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.plate.boot.commons.base.BaseEvent;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.security.SecurityDetails;
-import com.plate.boot.security.core.user.UsersService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -31,8 +35,8 @@ import java.util.UUID;
  */
 @Log4j2
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public final class ContextUtils implements InitializingBean {
-
 
     /**
      * Constant defining the role identifier for administrators within the system.
@@ -99,21 +103,33 @@ public final class ContextUtils implements InitializingBean {
      */
     public static ObjectMapper OBJECT_MAPPER;
     /**
-     * Static reference to the UsersService instance.
-     * This service provides functionalities related to user management such as
-     * user retrieval, creation, update, and deletion.
+     * Global cache manager instance
+     * <p>
+     * This static member variable provides an application-level cache management access point, making it convenient to operate the cache across different layers.
+     * Ensure that the injection or initialization of this instance is completed during the system initialization phase (typically through a dependency injection framework like Spring configuration).
+     * <p>
+     * Notes:
+     * 1. Since it uses a public static variable, ensure that the CacheManager implementation itself is thread-safe when used in a multi-threaded environment.
+     * 2. Avoid directly modifying this variable in unit tests or uncontrolled environments.
+     * 3. It is recommended to obtain the cache manager instance through dependency injection, and use this static variable only in special scenarios.
      */
-    public static UsersService USERS_SERVICE;
+    public static CacheManager CACHE_MANAGER;
+
+    public static ApplicationEventPublisher APPLICATION_EVENT_PUBLISHER;
 
     /**
      * Initializes the ContextUtils class with necessary dependencies.
      *
      * @param objectMapper The ObjectMapper instance used for JSON serialization and deserialization.
-     * @param usersService The UsersService instance to provide access to user-related operations.
      */
-    ContextUtils(ObjectMapper objectMapper, UsersService usersService) {
+    ContextUtils(ObjectMapper objectMapper, CacheManager cacheManager, ApplicationEventPublisher applicationEventPublisher) {
         ContextUtils.OBJECT_MAPPER = objectMapper;
-        ContextUtils.USERS_SERVICE = usersService;
+        ContextUtils.CACHE_MANAGER = cacheManager;
+        ContextUtils.APPLICATION_EVENT_PUBLISHER = applicationEventPublisher;
+    }
+
+    public static void eventPublisher(BaseEvent<?> object) {
+       ContextUtils.APPLICATION_EVENT_PUBLISHER.publishEvent(object);
     }
 
     /**

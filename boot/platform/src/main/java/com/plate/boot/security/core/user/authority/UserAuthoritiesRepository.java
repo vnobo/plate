@@ -4,6 +4,7 @@ import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Repository interface for managing UserAuthority entities.
@@ -22,5 +23,13 @@ public interface UserAuthoritiesRepository extends R2dbcRepository<UserAuthority
      * @return a Mono emitting the number of records deleted
      */
     Mono<Integer> deleteByAuthorityIn(List<String> authorities);
+
+    /**
+     * Deletes records from the database based on the provided userCode.
+     *
+     * @param userCode the userCode to delete by
+     * @return a Mono emitting the number of records deleted
+     */
+    Mono<Integer> deleteByUserCode(UUID userCode);
 
 }

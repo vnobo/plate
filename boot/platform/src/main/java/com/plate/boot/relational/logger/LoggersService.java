@@ -1,6 +1,6 @@
 package com.plate.boot.relational.logger;
 
-import com.plate.boot.commons.base.AbstractDatabase;
+import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.commons.utils.query.QueryHelper;
@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class LoggersService extends AbstractDatabase {
+public class LoggersService extends AbstractCache {
 
     private final LoggersRepository loggersRepository;
 
@@ -100,8 +100,13 @@ public class LoggersService extends AbstractDatabase {
     }
 
     @EventListener
-    public void processBlockedListEvent(LoggerReq logger) {
-        this.operate(logger).subscribe(res ->
-                log.debug("Client request log save result. log: {}", logger.getContext()));
+    public void processLoggerEvent(LoggerEvent event) {
+        if (event.kind() == LoggerEvent.Kind.INSERT) {
+            var logger = event.entity();
+            this.operate(logger).subscribe(res ->
+                    log.debug("Client request log save result. log: {}", logger.getContext()));
+        }
+
     }
+
 }

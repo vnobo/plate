@@ -1,6 +1,6 @@
 package com.plate.boot.security.core.tenant;
 
-import com.plate.boot.commons.base.AbstractDatabase;
+import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.commons.utils.query.QueryHelper;
@@ -26,7 +26,7 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @RequiredArgsConstructor
-public class TenantsService extends AbstractDatabase {
+public class TenantsService extends AbstractCache {
 
     private final TenantsRepository tenantsRepository;
     private final TenantMembersRepository membersRepository;

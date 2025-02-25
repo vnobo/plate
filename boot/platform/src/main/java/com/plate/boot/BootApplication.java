@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * This class serves as the primary class to launch the Spring Boot application.
  * It is annotated with `@SpringBootApplication`, which is a convenience annotation
  * that includes `@Configuration`, `@EnableAutoConfiguration`, and `@ComponentScan`.
- * These annotations together configure the application context, enable auto-configuration
+ * These annotations together configure the application context, enable autoconfiguration
  * of Spring features, and scan for Spring components in the package where this class is located
  * and its sub-packages.
  * <p>

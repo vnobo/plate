@@ -5,8 +5,8 @@
     <nz-tag [nzColor]="'blue'">Running</nz-tag>
   </div>
   <div pageHeaderExtra>
-    <nz-space>
-      <button (click)="openUserForm({})" *nzSpaceItem nz-button nzType="primary"><i class="bi bi-plus me-1"></i>新增 </button>
+    <nz-space [nzSize]="'small'">
+      <button (click)="openUserForm({})" *nzSpaceItem nz-button nzType="primary"><i class="bi bi-plus me-1"></i>新增</button>
       <nz-input-group *nzSpaceItem [nzAddOnAfter]="suffixIconButton" [nzSuffix]="suffixTemplate" nzSearch style="width: 20rem">
         <input [(ngModel)]="search().search" name="search" nz-input placeholder="搜索用户" type="text" />
       </nz-input-group>
@@ -16,8 +16,9 @@
         }
       </ng-template>
       <ng-template #suffixIconButton>
-        <button (click)="onSearch()" nz-button nzSearch nzType="primary"><span nz-icon nzType="search"></span> </button>
+        <button (click)="fetchUserData()" nz-button nzSearch nzType="primary"><span nz-icon nzType="search"></span> </button>
       </ng-template>
+      <button (click)="fetchUserData()" *nzSpaceItem nz-button nzType="primary"><i class="bi bi-arrow-clockwise"></i></button>
     </nz-space>
   </div>
 </page-content-header>
@@ -26,9 +27,9 @@
   (nzQueryParams)="onTableQueryChange($event)"
   [(nzPageIndex)]="page().page"
   [(nzPageSize)]="page().size"
-  [nzData]="userPage().content"
+  [nzData]="userData().content"
   [nzScroll]="{ x: '100%' }"
-  [nzTotal]="userPage().totalElements"
+  [nzTotal]="userData().totalElements"
   class="mt-1"
   nzFrontPagination="false"
   nzNoResult="无数据"
@@ -50,10 +51,10 @@
     </tr>
   </thead>
   <tbody>
-    @for (item of userTable.data; track item; let index = $index) {
+    @for (item of userTable.data; track item;) {
     <ng-container>
       <tr>
-        <td nzLeft="left">{{ index }}</td>
+        <td nzLeft="left">{{ item.id }}</td>
         <td nzLeft [cdkCopyToClipboard]="item.code ?? ''">
           <ng-container
             [ngTemplateOutlet]="tableColumn"
@@ -76,7 +77,16 @@
         <td>{{ item.loginTime | date : 'short' }}</td>
         <td nzRight>
           <a class="table-a" nz-button nzType="link" (click)="openUserForm(item)">编辑</a> |
-          <a class="table-a" nz-button nzType="link" href="javascript:void(0)">删除</a>
+          <a
+            class="table-a"
+            nz-button
+            nzType="link"
+            nz-popconfirm
+            nzPopconfirmTitle="Are you sure delete this task?"
+            nzPopconfirmPlacement="bottom"
+            (nzOnConfirm)="onDelete(item)"
+            >删除</a
+          >
         </td>
       </tr>
     </ng-container>

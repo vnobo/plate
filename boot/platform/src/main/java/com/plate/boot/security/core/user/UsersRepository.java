@@ -1,7 +1,5 @@
 package com.plate.boot.security.core.user;
 
-import org.springframework.data.r2dbc.repository.Modifying;
-import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Mono;
 
@@ -36,16 +34,5 @@ public interface UsersRepository extends R2dbcRepository<User, Long> {
      * @return A Mono emitting {@code true} if a user with the specified username exists, {@code false} otherwise.
      */
     Mono<Boolean> existsByUsernameIgnoreCase(String username);
-
-    /**
-     * Changes the password for a user with a case-insensitive matching username.
-     *
-     * @param username The username of the user whose password is to be changed, matched case-insensitively.
-     * @param newPassword The new password to set for the user.
-     * @return A Mono emitting the number of rows affected by the update operation, which is typically 1 if the user is found and the password is updated successfully.
-     */
-    @Modifying
-    @Query("update se_users set password=:newPassword where username ilike :username")
-    Mono<Long> changePassword(String username, String newPassword);
 
 }
