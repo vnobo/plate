@@ -51,10 +51,10 @@
     </tr>
   </thead>
   <tbody>
-    @for (item of userTable.data; track item.code; let index = $index) {
+    @for (item of userTable.data; track item;) {
     <ng-container>
       <tr>
-        <td nzLeft="left">{{ index + 1 }}</td>
+        <td nzLeft="left">{{ item.id }}</td>
         <td nzLeft [cdkCopyToClipboard]="item.code ?? ''">
           <ng-container
             [ngTemplateOutlet]="tableColumn"

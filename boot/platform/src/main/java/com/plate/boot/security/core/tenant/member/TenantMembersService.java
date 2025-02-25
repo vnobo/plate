@@ -73,8 +73,8 @@ public class TenantMembersService extends AbstractCache {
         return this.tenantMembersRepository.delete(request.toMemberTenant());
     }
 
-    @EventListener(value = UserEvent.class, condition = "#event.kind == 'DELETE'")
-    public void onUserEvent(UserEvent event) {
+    @EventListener(value = UserEvent.class, condition = "#event.kind.name() == 'DELETE'")
+    public void onUserDeletedEvent(UserEvent event) {
         this.tenantMembersRepository.deleteByUserCode(event.entity().getCode())
                 .doAfterTerminate(() -> this.cache.clear())
                 .subscribe();

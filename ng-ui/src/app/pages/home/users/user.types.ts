@@ -1,6 +1,7 @@
 import {Search, UserAuditor} from '@app/core/types';
 
 export interface User extends Search {
+  id?: number;
   code?: string;
   tenantCode?: string;
   username?: string;

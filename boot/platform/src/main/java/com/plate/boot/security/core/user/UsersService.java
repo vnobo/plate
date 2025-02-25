@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.HandlerMapping;
 import reactor.core.publisher.Flux;
@@ -140,11 +141,11 @@ public class UsersService extends AbstractCache {
      * @return A Mono<Void> which upon subscription initiates the deletion process asynchronously.
      * The Mono will complete empty when the deletion is successful, or error if the operation fails.
      */
+    @Transactional(rollbackFor = Exception.class)
     public Mono<Void> delete(UserReq request) {
         return this.usersRepository.findByCode(request.getCode())
-                .delayUntil(this.usersRepository::delete)
-                .doOnSuccess(res -> ContextUtils.eventPublisher(UserEvent.delete(res)))
-                .then().doAfterTerminate(() -> this.cache.clear());
+                .doOnNext(res -> ContextUtils.eventPublisher(UserEvent.delete(res)))
+                .flatMap(this.usersRepository::delete).doAfterTerminate(() -> this.cache.clear());
     }
 
     /**
@@ -159,7 +160,7 @@ public class UsersService extends AbstractCache {
     public Mono<User> save(User user) {
         if (user.isNew()) {
             return this.usersRepository.save(user)
-                    .doOnSuccess(res -> ContextUtils.eventPublisher(UserEvent.insert(res)));
+                    .doOnNext(res -> ContextUtils.eventPublisher(UserEvent.insert(res)));
         } else {
             assert user.getId() != null;
             return this.usersRepository.findById(user.getId()).flatMap(old -> {
@@ -168,7 +169,7 @@ public class UsersService extends AbstractCache {
                 user.setAccountLocked(old.getAccountLocked());
                 user.setCredentialsExpired(old.getCredentialsExpired());
                 return this.usersRepository.save(user);
-            }).doOnSuccess(res -> ContextUtils.eventPublisher(UserEvent.save(res)));
+            }).doOnNext(res -> ContextUtils.eventPublisher(UserEvent.save(res)));
         }
     }
 

@@ -3,6 +3,7 @@ package com.plate.boot.commons.base;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
+import org.springframework.core.ResolvableType;
 import org.springframework.data.relational.core.mapping.event.AbstractRelationalEvent;
 
 /**
@@ -11,23 +12,30 @@ import org.springframework.data.relational.core.mapping.event.AbstractRelational
 @EqualsAndHashCode(callSuper = true)
 public abstract class BaseEvent<E> extends AbstractRelationalEvent<E> {
 
-    private final E entity;
+    public final E entity;
 
-    /**
-     * the kind of event. Guaranteed to be not {@literal null}.
-     */
     @Getter
-    private final Kind kind;
+    public final Kind kind;
 
-    protected BaseEvent(E entity, Kind kind) {
+    protected BaseEvent(@NonNull E entity, @NonNull Kind kind) {
         super(entity);
         this.entity = entity;
         this.kind = kind;
     }
 
-    /**
-     * @return the entity to which this event refers. Guaranteed to be not {@literal null}.
-     */
+    @Override
+    public @NonNull ResolvableType getResolvableType() {
+        return ResolvableType.forType(getType());
+    }
+
+    public Kind kind() {
+        return getKind();
+    }
+
+    public E entity() {
+        return getEntity();
+    }
+
     @Override
     public E getEntity() {
         return this.entity;
@@ -36,7 +44,7 @@ public abstract class BaseEvent<E> extends AbstractRelationalEvent<E> {
     @SuppressWarnings("unchecked")
     @Override
     public @NonNull Class<E> getType() {
-        return (Class<E>) entity.getClass();
+        return (Class<E>) this.getClass();
     }
 
     public enum Kind {
