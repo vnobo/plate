@@ -100,8 +100,13 @@ public class LoggersService extends AbstractCache {
     }
 
     @EventListener
-    public void processBlockedListEvent(LoggerReq logger) {
-        this.operate(logger).subscribe(res ->
-                log.debug("Client request log save result. log: {}", logger.getContext()));
+    public void processLoggerEvent(LoggerEvent event) {
+        if (event.kind() == LoggerEvent.Kind.INSERT) {
+            var logger = event.entity();
+            this.operate(logger).subscribe(res ->
+                    log.debug("Client request log save result. log: {}", logger.getContext()));
+        }
+
     }
+
 }

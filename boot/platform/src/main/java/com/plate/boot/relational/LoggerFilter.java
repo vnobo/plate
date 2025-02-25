@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.relational.logger.LoggerEvent;
 import com.plate.boot.relational.logger.LoggerReq;
 import com.plate.boot.security.SecurityDetails;
 import com.plate.boot.security.core.UserAuditor;
@@ -393,7 +394,7 @@ public class LoggerFilter implements WebFilter, ApplicationEventPublisherAware {
         var userAuditor = UserAuditor.withDetails(userDetails);
         logger.setCreator(userAuditor);
         logger.setUpdater(userAuditor);
-        this.publisher.publishEvent(logger);
+        ContextUtils.eventPublisher(LoggerEvent.insert(logger));
     }
 
     /**
