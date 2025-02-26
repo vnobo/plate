@@ -3,15 +3,20 @@ values ('f47ac10b-58cc-4372-a567-0e02b2c3d479', 'admin',
         '{pbkdf2}7d8a68bc5d507bd19bc153ff10bcdef66f5a5f3d0c1ab2438630e50b5c65894bccc2c7e4404c5afa',
         '系统超级管理员', '17089118266', null, null, 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
         'f47ac10b-58cc-4372-a567-0e02b2c3d479'),
-       ('6ba7b810-9dad-11d1-80b4-00c04fd430c8', 'farmer',
-        '{pbkdf2}7d8a68bc5d507bd19bc153ff10bcdef66f5a5f3d0c1ab2438630e50b5c65894bccc2c7e4404c5afa',
-        '测试用户', null, '5199840@qq.com', null, 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-        'f47ac10b-58cc-4372-a567-0e02b2c3d479'),
        ('550e8400-e29b-41d4-a716-446655440000', 'user',
         '{pbkdf2}7d8a68bc5d507bd19bc153ff10bcdef66f5a5f3d0c1ab2438630e50b5c65894bccc2c7e4404c5afa',
-        '普通用户', null, null, 'PostgreSQL Elephant Logo Home About 我们可以创建一个GIN索引（第12.9节）来加快文本搜索：
-另一种方法是创建一个单独的tsvector列来保存to_tsvector的输出。要使此列自动更新其源数据，请使用存储的生成列。此示例是title和body的串联，使用coalesce来确保当另一个字段为NULL时仍将索引一个字段：
-', 'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'f47ac10b-58cc-4372-a567-0e02b2c3d479');
+        '普通用户', null, null, 'Hello Bob,
+
+Thanks for your interest in our Open Source Program.
+
+If our collaboration looks promising, we’ll reach out to you with an email containing all the relevant information for partners.
+
+Have a nice day!
+
+Kind regards,
+JetBrains Community Support Team
+www.jetbrains.com
+The Drive to Develop', 'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'f47ac10b-58cc-4372-a567-0e02b2c3d479');
 
 insert into se_authorities(code, user_code, authority, creator, updater)
 values ('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed', 'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'ROLE_SYSTEM_ADMINISTRATORS',
