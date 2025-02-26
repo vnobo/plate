@@ -29,3 +29,7 @@ spring:
     redis:
       flush-mode: on_save
       repository-type: indexed
+  flyway:
+    baseline-on-migrate: false
+    baseline-version: 1.0.0
+    baseline-description: "Baseline version V1.0.0,See https://github.com/plate/plate"
