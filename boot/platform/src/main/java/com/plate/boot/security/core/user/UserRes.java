@@ -29,8 +29,7 @@ public class UserRes extends User {
     public String getPhone() {
         String phone = super.getPhone();
         return phone != null && phone.length() >= 7 ?
-                phone.replaceAll("(\\d{3})\\d{4}(\\d*)", "$1****$2") :
-                phone;
+                phone.replaceAll("(\\d{3})\\d{4}(\\d*)", "$1****$2") : phone;
     }
 
     @Override
