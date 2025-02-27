@@ -32,14 +32,6 @@
               loginForm.controls.username.invalid && (loginForm.controls.username.dirty || loginForm.controls.username.touched)
             "
             [class.is-valid]="loginForm.controls.username.valid" />
-          <!---   @if (loginForm.controls.username.errors?.['required']) {
-              <div class="invalid-feedback">请输入手机号或电子邮件,登录用户不能为空!</div>
-              } @else if (loginForm.controls.username.hasError('minlength') ||
-              loginForm.controls.username.hasError('maxlength')) {
-              <div class="invalid-feedback">
-                登录用户长度为 6 ~ 32 个字符，由字母和数字组成，不能包含空格、特殊字符或表情符号。
-              </div>7028e676-e944-4e11-8842-599d29a378a7
-            }-->
         </div>
         <div class="mb-2">
           <div class="form-label form-label-description">
@@ -62,15 +54,6 @@
                 loginForm.controls.password.invalid && (loginForm.controls.password.dirty || loginForm.controls.password.touched)
               "
               [class.is-valid]="loginForm.controls.password.valid" />
-            <!---
-              @if (loginForm.controls.password.hasError('minlength') ||
-              loginForm.controls.password.hasError('maxlength')) {
-                <div class="invalid-feedback">
-                  密码长度为6 ~ 32个字符，由字母和数字组成，不能包含空格、特殊字符或表情符号。
-              </div>
-              } @else if (loginForm.controls.password.hasError('required')) {
-                <div class="invalid-feedback">请输入密码,密码不能为空!</div>
-              }-->
             <span class="input-group-text">
               <a
                 (click)="passwordFieldTextType = !passwordFieldTextType"
