@@ -15,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.web.reactive.HandlerMapping;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -30,7 +29,7 @@ public class UsersService extends AbstractCache {
 
     private final PasswordEncoder passwordEncoder;
     private final UsersRepository usersRepository;
-    private final HandlerMapping resourceHandlerMapping;
+
 
     /**
      * Searches for users based on the provided user request and pagination details.

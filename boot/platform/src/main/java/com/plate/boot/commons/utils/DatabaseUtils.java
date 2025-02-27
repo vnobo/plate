@@ -5,6 +5,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.r2dbc.convert.R2dbcConverter;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ import java.util.Map;
 @Log4j2
 @Component
 public class DatabaseUtils implements InitializingBean {
-
+    public static ReactiveRedisTemplate<String, Object> REACTIVE_REDIS_TEMPLATE;
     /**
      * Represents the maximum size of data that can be held in memory.
      * This threshold is utilized to determine when data should be processed differently,
@@ -51,10 +52,11 @@ public class DatabaseUtils implements InitializingBean {
      */
     public static R2dbcConverter R2DBC_CONVERTER;
 
-    DatabaseUtils(R2dbcEntityTemplate entityTemplate) {
+    DatabaseUtils(R2dbcEntityTemplate entityTemplate, ReactiveRedisTemplate<String, Object> redisTemplate) {
         DatabaseUtils.ENTITY_TEMPLATE = entityTemplate;
         DatabaseUtils.DATABASE_CLIENT = entityTemplate.getDatabaseClient();
         DatabaseUtils.R2DBC_CONVERTER = entityTemplate.getConverter();
+        DatabaseUtils.REACTIVE_REDIS_TEMPLATE = redisTemplate;
     }
 
     /**
