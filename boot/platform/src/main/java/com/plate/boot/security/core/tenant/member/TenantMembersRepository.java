@@ -6,7 +6,11 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 /**
- * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * Repository interface for tenant member operations.
+ * Extends the R2dbcRepository interface to provide reactive CRUD operations for TenantMember entities.
+ * Includes custom methods for deleting tenant members by tenantCode and userCode.
+ * <p>
+ * Author: <a href="https://github.com/vnobo">Alex bob</a>
  */
 public interface TenantMembersRepository extends R2dbcRepository<TenantMember, Long> {
 
