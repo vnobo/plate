@@ -3,6 +3,7 @@ package com.plate.boot.security;
 import com.plate.boot.commons.utils.ContextUtils;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
 import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.stereotype.Component;
@@ -18,8 +19,9 @@ import reactor.core.publisher.Mono;
  * This filter is designed to be executed early in the filter chain with a low precedence order.
  */
 @Log4j2
+@Order(Ordered.LOWEST_PRECEDENCE - 1)
 @Component
-public class CsrfWebFilter implements WebFilter, Ordered {
+public class CsrfWebFilter implements WebFilter {
 
     /**
      * Filters the incoming server web exchange to ensure CSRF protection.
@@ -42,15 +44,5 @@ public class CsrfWebFilter implements WebFilter, Ordered {
         }
         return chain.filter(exchange);
     }
-
-    /**
-     * Retrieves the order in which this filter should be executed within the filter chain.
-     * This filter is configured with a low precedence order to ensure it is executed early in the chain.
-     *
-     * @return The order value, which is set to {@link Ordered#LOWEST_PRECEDENCE} minus 1, making it a lower priority than most other filters.
-     */
-    @Override
-    public int getOrder() {
-        return Ordered.LOWEST_PRECEDENCE - 1;
-    }
+    
 }

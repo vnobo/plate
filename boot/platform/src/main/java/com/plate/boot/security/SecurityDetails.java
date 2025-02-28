@@ -96,6 +96,7 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
      */
     @JsonIgnore
     private Boolean credentialsExpired;
+
     /**
      * The email address associated with the user.
      * This field holds the user's email which is used for communication and can be a primary contact point.
@@ -122,11 +123,27 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
      */
     private String bio;
 
+    /**
+     * Constructs a new SecurityDetails instance with the specified authorities, attributes, and name attribute key.
+     *
+     * @param authorities      the collection of granted authorities
+     * @param attributes       the attributes associated with the user
+     * @param nameAttributeKey the key used to access the user's name attribute
+     */
     public SecurityDetails(Collection<? extends GrantedAuthority> authorities,
                            Map<String, Object> attributes, String nameAttributeKey) {
         super(authorities, attributes, nameAttributeKey);
     }
 
+    /**
+     * Creates a new SecurityDetails instance with the specified code, authorities, attributes, and name attribute key.
+     *
+     * @param code             the unique identifier code for the security details
+     * @param authorities      the collection of granted authorities
+     * @param attributes       the attributes associated with the user
+     * @param nameAttributeKey the key used to access the user's name attribute
+     * @return a new SecurityDetails instance
+     */
     public static SecurityDetails of(UUID code, Collection<? extends GrantedAuthority> authorities,
                                      Map<String, Object> attributes, String nameAttributeKey) {
         SecurityDetails securityDetails = new SecurityDetails(authorities, attributes, nameAttributeKey);
@@ -134,6 +151,12 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
         return securityDetails;
     }
 
+    /**
+     * Builds and populates the SecurityDetails instance with the provided user information.
+     *
+     * @param user the user information to populate the security details
+     * @return the populated SecurityDetails instance
+     */
     public SecurityDetails buildUser(User user) {
         this.setCode(user.getCode());
         this.setUsername(user.getUsername());
@@ -150,12 +173,23 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
         return this;
     }
 
-
+    /**
+     * Sets the password for the security details.
+     *
+     * @param password the password to set
+     * @return the updated SecurityDetails instance
+     */
     public SecurityDetails password(String password) {
         this.setPassword(password);
         return this;
     }
 
+    /**
+     * Retrieves the tenant code associated with the security details.
+     * If no tenants are associated, returns the default tenant code "0".
+     *
+     * @return the tenant code
+     */
     public String getTenantCode() {
         var defaultTenantCode = "0";
         if (ObjectUtils.isEmpty(this.getTenants())) {
@@ -165,9 +199,15 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
                 .map(TenantMemberRes::getTenantCode).orElse(defaultTenantCode);
     }
 
+    /**
+     * Retrieves the tenant name associated with the security details.
+     * If no tenants are associated, returns the default tenant name "Default Tenant".
+     *
+     * @return the tenant name
+     */
     @JsonGetter
     public String getTenantName() {
-        var defaultTenantName = "默认租户";
+        var defaultTenantName = "Default Tenant";
         if (ObjectUtils.isEmpty(this.getTenants())) {
             return defaultTenantName;
         }
@@ -175,21 +215,41 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
                 .map(TenantMemberRes::getName).orElse(defaultTenantName);
     }
 
+    /**
+     * Checks if the account is non-expired.
+     *
+     * @return true if the account is non-expired, false otherwise
+     */
     @Override
     public boolean isAccountNonExpired() {
         return !this.accountExpired;
     }
 
+    /**
+     * Checks if the account is non-locked.
+     *
+     * @return true if the account is non-locked, false otherwise
+     */
     @Override
     public boolean isAccountNonLocked() {
         return !this.accountLocked;
     }
 
+    /**
+     * Checks if the credentials are non-expired.
+     *
+     * @return true if the credentials are non-expired, false otherwise
+     */
     @Override
     public boolean isCredentialsNonExpired() {
         return !this.credentialsExpired;
     }
 
+    /**
+     * Checks if the account is enabled.
+     *
+     * @return true if the account is enabled, false otherwise
+     */
     @Override
     public boolean isEnabled() {
         return !this.disabled;
