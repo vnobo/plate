@@ -384,8 +384,8 @@ public class LoggerFilter implements WebFilter {
         LoggerReq logger = LoggerReq.of(tenantCode, userDetails.getUsername(), prefix,
                 method, status, path, contentNode);
         var userAuditor = UserAuditor.withDetails(userDetails);
-        logger.setCreator(userAuditor);
-        logger.setUpdater(userAuditor);
+        logger.setCreatedBy(userAuditor);
+        logger.setUpdatedBy(userAuditor);
         ContextUtils.eventPublisher(LoggerEvent.insert(logger));
     }
 

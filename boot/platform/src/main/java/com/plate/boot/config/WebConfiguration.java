@@ -1,11 +1,14 @@
 package com.plate.boot.config;
 
+import lombok.NonNull;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.reactive.config.WebFluxConfigurer;
+import org.springframework.web.method.HandlerTypePredicate;
+import org.springframework.web.reactive.config.DelegatingWebFluxConfiguration;
+import org.springframework.web.reactive.config.PathMatchConfigurer;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 
 /**
@@ -18,7 +21,7 @@ import org.springframework.web.reactive.result.method.annotation.ArgumentResolve
 @Configuration(proxyBeanMethods = false)
 @EnableScheduling
 @EnableAsync
-public class WebConfiguration implements WebFluxConfigurer {
+public class WebConfiguration extends DelegatingWebFluxConfiguration {
 
     /**
      * Configures custom argument resolvers for handler methods in a reactive environment.
@@ -29,7 +32,8 @@ public class WebConfiguration implements WebFluxConfigurer {
      * @param configurer The {@link ArgumentResolverConfigurer} used to register custom argument resolvers.
      */
     @Override
-    public void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
+    public void configureArgumentResolvers(@NonNull ArgumentResolverConfigurer configurer) {
+        super.configureArgumentResolvers(configurer);
         ReactivePageableHandlerMethodArgumentResolver pageableResolver =
                 new ReactivePageableHandlerMethodArgumentResolver();
         pageableResolver.setMaxPageSize(100);
@@ -37,4 +41,20 @@ public class WebConfiguration implements WebFluxConfigurer {
         configurer.addCustomResolver(pageableResolver);
     }
 
+    /**
+     * Configures path matching options for the application.
+     * This method uses the {@link PathMatchConfigurer} to add path prefixes for specific base packages.
+     * For example, it adds the "/oauth/v1" prefix for handler methods in the "com.plate.boot.security" package
+     * and the "/rela/v1" prefix for handler methods in the "com.plate.boot.relational" package.
+     *
+     * @param configurer The {@link PathMatchConfigurer} used to configure path matching options.
+     */
+    @Override
+    public void configurePathMatching(@NonNull PathMatchConfigurer configurer) {
+        super.configurePathMatching(configurer);
+        configurer.addPathPrefix("/oauth/v1",
+                HandlerTypePredicate.forBasePackage("com.plate.boot.security"));
+        configurer.addPathPrefix("/rela/v1",
+                HandlerTypePredicate.forBasePackage("com.plate.boot.relational"));
+    }
 }

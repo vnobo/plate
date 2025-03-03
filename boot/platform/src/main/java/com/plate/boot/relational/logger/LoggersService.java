@@ -87,7 +87,7 @@ public class LoggersService extends AbstractCache {
         } else {
             assert logger.getId() != null;
             return this.loggersRepository.findById(logger.getId()).flatMap(old -> {
-                logger.setCreatedTime(old.getCreatedTime());
+                logger.setCreatedAt(old.getCreatedAt());
                 return this.loggersRepository.save(logger);
             });
         }
@@ -95,7 +95,7 @@ public class LoggersService extends AbstractCache {
 
     @Scheduled(cron = "0 0 1 * * ?")
     public void clearLoggers() {
-        this.loggersRepository.deleteByCreatedTimeBefore(LocalDateTime.now().minusYears(3))
+        this.loggersRepository.deleteByCreatedAtBefore(LocalDateTime.now().minusYears(3))
                 .subscribe(res -> log.info("CLEAN UP EXPIRED LOGS: {}", res));
     }
 

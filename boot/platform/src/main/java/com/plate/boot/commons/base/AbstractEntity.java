@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.security.core.UserAuditor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.*;
-import org.springframework.data.relational.core.mapping.InsertOnlyProperty;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -34,9 +34,11 @@ import java.util.UUID;
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public abstract class AbstractEntity<T> implements BaseEntity<T> {
 
     @Id
+    @EqualsAndHashCode.Include
     protected T id;
 
     /**
@@ -59,28 +61,26 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
      * use User. Class code property
      */
     @CreatedBy
-    @InsertOnlyProperty
-    protected UserAuditor creator;
+    protected UserAuditor createdBy;
 
     /**
      * Data entity create time, timestamp column
      */
     @CreatedDate
-    @InsertOnlyProperty
-    protected LocalDateTime createdTime;
+    protected LocalDateTime createdAt;
 
     /**
      * Data entity update operator
      * use User.class code property
      */
     @LastModifiedBy
-    protected UserAuditor updater;
+    protected UserAuditor updatedBy;
 
     /**
      * Data entity update time,timestamp column
      */
     @LastModifiedDate
-    protected LocalDateTime updatedTime;
+    protected LocalDateTime updatedAt;
 
 
     /**

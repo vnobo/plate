@@ -55,7 +55,7 @@ public class GroupsService extends AbstractCache {
         } else {
             assert group.getId() != null;
             return this.groupsRepository.findById(group.getId()).flatMap(old -> {
-                group.setCreatedTime(old.getCreatedTime());
+                group.setCreatedAt(old.getCreatedAt());
                 group.setCode(old.getCode());
                 return this.groupsRepository.save(group);
             });
