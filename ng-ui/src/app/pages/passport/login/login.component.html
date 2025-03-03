@@ -12,26 +12,23 @@
 <div class="card card-md">
   <div class="card-body">
     <h2 class="h2 text-center mb-4">登录你的账号</h2>
-    <form (ngSubmit)="onSubmit()" [formGroup]="loginForm" autocomplete="off" class="needs-validation" novalidate>
+    <form
+      (ngSubmit)="onSubmit()"
+      [formGroup]="loginForm"
+      aria-label="登录表单"
+      autocomplete="on"
+      class="needs-validation"
+      novalidate
+      role="form">
       <div class="container">
         <div class="input-icon mb-3">
           <div class="input-icon-addon">
-            <label class="text-blue-400" for="username"><i class="bi bi-person-fill"></i></label>
+            <label class="text-blue-400" for="username">
+              <i aria-hidden="true" class="bi bi-person-fill"></i>
+              <span class="visually-hidden">用户名</span>
+            </label>
           </div>
-          <input
-            id="username"
-            name="username"
-            class="form-control"
-            placeholder="手机号或电子邮件"
-            type="text"
-            autocomplete="off"
-            autofocus
-            tabindex="1"
-            formControlName="username"
-            [class.is-invalid]="
-              loginForm.controls.username.invalid && (loginForm.controls.username.dirty || loginForm.controls.username.touched)
-            "
-            [class.is-valid]="loginForm.controls.username.valid" />
+          <input [class.is-valid]="loginForm.controls.username.valid" class="form-control" id="username" name="username" />
         </div>
         <div class="mb-2">
           <div class="form-label form-label-description">
