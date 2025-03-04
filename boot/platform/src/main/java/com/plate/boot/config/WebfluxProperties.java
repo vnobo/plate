@@ -9,16 +9,17 @@ import java.util.List;
 /**
  * Configuration properties for web settings.
  * <p>
- * This class binds properties prefixed with `spring.web` from the application's configuration.
+ * This class binds properties prefixed with `spring.webflux.properties` from the application's configuration.
  * It includes settings for maximum and default page sizes, as well as path prefixes.
  * </p>
  *
  * <p>
  * Example configuration:
  * <pre>
- * spring.web.maxPageSize=100
- * spring.web.defaultPageSize=25
- * spring.web.pathPrefixes.somePrefix=/some/path
+ * spring.webflux.properties.maxPageSize=100
+ * spring.webflux.properties.defaultPageSize=25
+ * spring.webflux.properties.pathPrefixes[0].path=/api
+ * spring.webflux.properties.pathPrefixes[0].basePackage=com.example.api
  * </pre>
  * </p>
  *
