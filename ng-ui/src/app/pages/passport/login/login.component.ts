@@ -20,17 +20,13 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly _message = inject(NzNotificationService);
   private readonly _loginSer = inject(LoginService);
 
-  /** 是否正在提交表单 */
-  isSubmitting = false;
-
-  /** 密码字段是否显示为文本 */
-  passwordFieldTextType = false;
-
   /** 用于管理组件销毁时的订阅清理 */
   private readonly destroy$ = new Subject<void>();
 
   /** 登录表单配置 */
   loginForm = new FormGroup({
+    isSubmitting: new FormControl(false),
+    passwordFieldTextType: new FormControl(false),
     username: new FormControl('', {
       validators: [Validators.required, Validators.minLength(5), Validators.maxLength(32)],
       nonNullable: true,
@@ -61,9 +57,9 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** 处理表单提交 */
   onSubmit(): void {
-    if (this.loginForm.invalid || this.isSubmitting) return;
+    if (this.loginForm.invalid || this.loginForm.controls.isSubmitting.value) return;
 
-    this.isSubmitting = true;
+    this.loginForm.patchValue({ isSubmitting: true });
     const credentials = this.loginForm.getRawValue();
 
     if (credentials.remember) {
@@ -101,7 +97,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
         distinctUntilChanged(),
         retry({ count: 3, delay: 1000 }),
         takeUntil(this.destroy$),
-        finalize(() => (this.isSubmitting = false)),
+        finalize(() => this.loginForm.patchValue({ isSubmitting: false })),
       )
       .subscribe({
         next: res => this.handleLoginSuccess(res),

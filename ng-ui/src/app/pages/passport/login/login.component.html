@@ -25,10 +25,21 @@
           <div class="input-icon-addon">
             <label class="text-blue-400" for="username">
               <i aria-hidden="true" class="bi bi-person-fill"></i>
-              <span class="visually-hidden">用户名</span>
+              <span class="visually-hidden">手机或电子邮件</span>
             </label>
           </div>
-          <input [class.is-valid]="loginForm.controls.username.valid" class="form-control" id="username" name="username" />
+          <input
+            id="username"
+            name="username"
+            class="form-control is-valid-lite"
+            placeholder="手机或电子邮件"
+            autocomplete="on"
+            tabindex="1"
+            formControlName="username"
+            [class.is-invalid]="
+              loginForm.controls.username.invalid && (loginForm.controls.username.dirty || loginForm.controls.username.touched)
+            "
+            [class.is-valid]="loginForm.controls.username.valid" />
         </div>
         <div class="mb-2">
           <div class="form-label form-label-description">
@@ -36,15 +47,15 @@
           </div>
           <div class="input-group input-group-flat">
             <div class="input-group-text">
-              <label class="text-blue-400" for="password"><i class="bi bi-key-fill"></i></label>
+              <label class="text-blue-400" for="password"><i class="bi bi-key-fill"></i> <span class="visually-hidden">密 码</span></label>
             </div>
             <input
               id="password"
               name="password"
               class="form-control is-valid-lite"
               placeholder="密   码"
-              [type]="passwordFieldTextType ? 'text' : 'password'"
-              autocomplete="off"
+              [type]="loginForm.controls.passwordFieldTextType.value ? 'text' : 'password'"
+              autocomplete="on"
               tabindex="2"
               formControlName="password"
               [class.is-invalid]="
@@ -53,13 +64,13 @@
               [class.is-valid]="loginForm.controls.password.valid" />
             <span class="input-group-text">
               <a
-                (click)="passwordFieldTextType = !passwordFieldTextType"
+                (click)="loginForm.controls.passwordFieldTextType.setValue(!loginForm.controls.passwordFieldTextType.value)"
                 aria-label="显示密码"
                 class="link-secondary"
                 data-bs-original-title="显示密码"
                 data-bs-toggle="tooltip"
                 data-bs-placement="left">
-                @if (passwordFieldTextType) {
+                @if (loginForm.controls.passwordFieldTextType.value) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
                   <path
                     d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z" />
@@ -89,16 +100,20 @@
           <label class="form-check">
             <input
               class="form-check-input"
-              formControlName="remember"
               id="flexCheckRemember"
               name="remember"
               tabindex="3"
-              type="checkbox" />
+              type="checkbox"
+              formControlName="remember" />
             <span class="form-check-label" for="flexCheckRemember">在这个设备上记住我</span>
           </label>
         </div>
         <div class="form-footer">
-          <button [disabled]="loginForm.invalid || this.isSubmitting" class="btn btn-primary w-100" tabindex="4" type="submit"
+          <button
+            [disabled]="loginForm.invalid || loginForm.controls.isSubmitting.value"
+            class="btn btn-primary w-100"
+            tabindex="4"
+            type="submit"
             >登 录
           </button>
         </div>
