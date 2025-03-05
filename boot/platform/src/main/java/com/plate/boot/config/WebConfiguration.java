@@ -28,8 +28,16 @@ import java.util.List;
 @EnableConfigurationProperties({WebfluxProperties.class})
 public class WebConfiguration extends DelegatingWebFluxConfiguration {
 
+    /**
+     * Holds the webflux properties configuration.
+     */
     private final WebfluxProperties webfluxProperties;
 
+    /**
+     * Constructs a new WebConfiguration instance with the specified WebfluxProperties.
+     *
+     * @param webfluxProperties the webflux properties to be used for configuration
+     */
     public WebConfiguration(WebfluxProperties webfluxProperties) {
         this.webfluxProperties = webfluxProperties;
     }

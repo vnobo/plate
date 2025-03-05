@@ -69,7 +69,8 @@ import static org.springframework.security.web.server.csrf.CsrfWebFilter.DEFAULT
 public class LoggerFilter implements WebFilter {
     /**
      * Constants for the attribute key used to cache request body information.
-     * This string represents the attribute name under which the cached request body can be stored or retrieved in a context where attributes are managed.
+     * This string represents the attribute name under which
+     * the cached request body can be stored or retrieved in a context where attributes are managed.
      */
     public static final String CACHED_REQUEST_BODY_ATTR = "cachedRequestBody";
     /**
