@@ -58,8 +58,17 @@ import static com.plate.boot.config.SessionConfiguration.X_REQUESTED_WITH;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
+    /**
+     * Repository for managing security context in a reactive web session.
+     * This repository stores the security context in the web session.
+     */
     private final ServerSecurityContextRepository securityContextRepository =
             new WebSessionServerSecurityContextRepository();
+
+    /**
+     * Handler for successful OAuth2 authentication.
+     * This handler is invoked upon successful OAuth2 authentication.
+     */
     private final Oauth2SuccessHandler authenticationSuccessHandler;
 
     /**
