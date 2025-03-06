@@ -11,7 +11,6 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
-import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
@@ -25,14 +24,6 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping("/oauth2")
 public class SecurityController {
-
-    /**
-     * Repository responsible for managing the security context within the server's web sessions.
-     * It stores and retrieves the security context associated with each user's session, ensuring
-     * that security-related information persists across requests within the same session.
-     */
-    private final WebSessionServerSecurityContextRepository securityContextRepository =
-            new WebSessionServerSecurityContextRepository();
 
     /**
      * The {@code securityManager} field is a final instance of {@link SecurityManager}, responsible for handling
@@ -84,7 +75,6 @@ public class SecurityController {
     @GetMapping("login")
     public Mono<AuthenticationToken> loginToken(ServerWebExchange exchange, Authentication authentication) {
         return ReactiveSecurityContextHolder.getContext()
-                .delayUntil(cts -> this.securityContextRepository.save(exchange, cts))
                 .flatMap(context -> exchange.getSession())
                 .flatMap(session -> Mono.just(AuthenticationToken.build(session, authentication)));
     }

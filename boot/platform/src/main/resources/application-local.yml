@@ -11,6 +11,14 @@ logging:
 server.port: 8080
 
 spring:
+  ssl.bundle.jks:
+    plateBundle:
+      key:
+        alias: "plate"
+      keystore:
+        location: "classpath:plate.p12"
+        password: "123456"
+        type: "PKCS12"
   application.name: plate
   r2dbc:
     url: r2dbc:postgres://127.0.0.1:5432/plate?fetchSize=5000

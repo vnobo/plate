@@ -37,7 +37,23 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
      * Represents the username of the security principal.
      * This field stores the unique identifier for a user within the system, typically used for authentication and authorization purposes.
      */
+    @JsonIgnore
     private String username;
+    /**
+     * The password field securely stores the authentication credential for a user.
+     * This field is marked as ignored for JSON serialization and deserialization to prevent
+     * password exposure in transit or storage. Use the provided password methods to handle
+     * password operations safely.
+     */
+    @JsonIgnore
+    private String password;
+
+    /**
+     * Indicates whether the security details are disabled.
+     * This field is not serialized during JSON processing due to the {@link JsonIgnore} annotation.
+     */
+    @JsonIgnore
+    private Boolean disabled;
 
     /**
      * Represents the nickname of a user within the security details.
@@ -61,22 +77,6 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
     private Set<GroupMemberRes> groups;
 
     /**
-     * The password field securely stores the authentication credential for a user.
-     * This field is marked as ignored for JSON serialization and deserialization to prevent
-     * password exposure in transit or storage. Use the provided password methods to handle
-     * password operations safely.
-     */
-    @JsonIgnore
-    private String password;
-
-    /**
-     * Indicates whether the security details are disabled.
-     * This field is not serialized during JSON processing due to the {@link JsonIgnore} annotation.
-     */
-    @JsonIgnore
-    private Boolean disabled;
-
-    /**
      * Indicates whether the account has expired or not.
      * This field is not serialized in JSON responses due to the {@link JsonIgnore} annotation.
      */
@@ -96,19 +96,6 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
      */
     @JsonIgnore
     private Boolean credentialsExpired;
-
-    /**
-     * The email address associated with the user.
-     * This field holds the user's email which is used for communication and can be a primary contact point.
-     */
-    private String email;
-
-    /**
-     * Represents the user's contact phone number.
-     * This string field holds the phone number associated with a user's profile.
-     * It is used for communication purposes, such as account verification, service notifications, or support contacts.
-     */
-    private String phone;
 
     /**
      * Represents the profile picture or graphical representation associated with a user.
@@ -138,39 +125,23 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
     /**
      * Creates a new SecurityDetails instance with the specified code, authorities, attributes, and name attribute key.
      *
-     * @param code             the unique identifier code for the security details
-     * @param authorities      the collection of granted authorities
-     * @param attributes       the attributes associated with the user
-     * @param nameAttributeKey the key used to access the user's name attribute
+     * @param authorities the collection of granted authorities
+     * @param user        the user information to populate the security details
      * @return a new SecurityDetails instance
      */
-    public static SecurityDetails of(UUID code, Collection<? extends GrantedAuthority> authorities,
-                                     Map<String, Object> attributes, String nameAttributeKey) {
-        SecurityDetails securityDetails = new SecurityDetails(authorities, attributes, nameAttributeKey);
-        securityDetails.setCode(code);
-        return securityDetails;
-    }
-
-    /**
-     * Builds and populates the SecurityDetails instance with the provided user information.
-     *
-     * @param user the user information to populate the security details
-     * @return the populated SecurityDetails instance
-     */
-    public SecurityDetails buildUser(User user) {
-        this.setCode(user.getCode());
-        this.setUsername(user.getUsername());
-        this.setPassword(user.getPassword());
-        this.setNickname(user.getName());
-        this.setEmail(user.getEmail());
-        this.setPhone(user.getPhone());
-        this.setAvatar(user.getAvatar());
-        this.setBio(user.getBio());
-        this.setDisabled(user.getDisabled());
-        this.setAccountExpired(user.getAccountExpired());
-        this.setAccountLocked(user.getAccountLocked());
-        this.setCredentialsExpired(user.getCredentialsExpired());
-        return this;
+    public static SecurityDetails of(User user, Collection<? extends GrantedAuthority> authorities, Map<String, Object> attributes) {
+        SecurityDetails details = new SecurityDetails(authorities, attributes, "username");
+        details.setCode(user.getCode());
+        details.setUsername(user.getUsername());
+        details.setPassword(user.getPassword());
+        details.setNickname(user.getName());
+        details.setAvatar(user.getAvatar());
+        details.setBio(user.getBio());
+        details.setDisabled(user.getDisabled());
+        details.setAccountExpired(user.getAccountExpired());
+        details.setAccountLocked(user.getAccountLocked());
+        details.setCredentialsExpired(user.getCredentialsExpired());
+        return details;
     }
 
     /**

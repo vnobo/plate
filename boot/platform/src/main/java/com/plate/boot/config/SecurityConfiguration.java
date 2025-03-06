@@ -27,6 +27,8 @@ import org.springframework.security.oauth2.client.registration.ReactiveClientReg
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.HttpBasicServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.authentication.logout.*;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
+import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.security.web.server.csrf.CookieServerCsrfTokenRepository;
 import org.springframework.security.web.server.csrf.ServerCsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.server.header.ClearSiteDataServerHttpHeadersWriter;
@@ -56,6 +58,8 @@ import static com.plate.boot.config.SessionConfiguration.X_REQUESTED_WITH;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
+    private final ServerSecurityContextRepository securityContextRepository =
+            new WebSessionServerSecurityContextRepository();
     private final Oauth2SuccessHandler authenticationSuccessHandler;
 
     /**
@@ -111,10 +115,11 @@ public class SecurityConfiguration {
                         concurrency.maximumSessions((authentication) -> {
                             if (authentication.getAuthorities().stream().anyMatch(a ->
                                     RULE_ADMINISTRATORS.equals(a.getAuthority()))) {
-                                return Mono.empty();
+                                return Mono.just(2);
                             }
-                            return Mono.just(3);
+                            return Mono.just(1);
                         })));
+        http.securityContextRepository(securityContextRepository);
         http.httpBasic(httpBasicSpec -> httpBasicSpec
                 .authenticationEntryPoint(new CustomServerAuthenticationEntryPoint()));
         http.formLogin(Customizer.withDefaults());

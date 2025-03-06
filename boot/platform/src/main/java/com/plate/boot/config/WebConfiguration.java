@@ -9,8 +9,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.method.HandlerTypePredicate;
-import org.springframework.web.reactive.config.DelegatingWebFluxConfiguration;
 import org.springframework.web.reactive.config.PathMatchConfigurer;
+import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
 
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.List;
 @EnableScheduling
 @EnableAsync
 @EnableConfigurationProperties({WebfluxProperties.class})
-public class WebConfiguration extends DelegatingWebFluxConfiguration {
+public class WebConfiguration implements WebFluxConfigurer {
 
     /**
      * Holds the webflux properties configuration.
@@ -52,7 +52,6 @@ public class WebConfiguration extends DelegatingWebFluxConfiguration {
      */
     @Override
     public void configureArgumentResolvers(@NonNull ArgumentResolverConfigurer configurer) {
-        super.configureArgumentResolvers(configurer);
         ReactivePageableHandlerMethodArgumentResolver pageableResolver =
                 new ReactivePageableHandlerMethodArgumentResolver();
         pageableResolver.setMaxPageSize(webfluxProperties.getMaxPageSize());
@@ -70,7 +69,6 @@ public class WebConfiguration extends DelegatingWebFluxConfiguration {
      */
     @Override
     public void configurePathMatching(@NonNull PathMatchConfigurer configurer) {
-        super.configurePathMatching(configurer);
         List<WebfluxProperties.RouteDefinition> pathPrefixes = this.webfluxProperties.getPathPrefixes();
         if (ObjectUtils.isEmpty(pathPrefixes)) {
             return;
