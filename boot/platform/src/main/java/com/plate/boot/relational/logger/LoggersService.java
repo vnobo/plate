@@ -93,20 +93,35 @@ public class LoggersService extends AbstractCache {
         }
     }
 
-    @Scheduled(cron = "0 0 1 * * ?")
-    public void clearLoggers() {
-        this.loggersRepository.deleteByCreatedAtBefore(LocalDateTime.now().minusYears(3))
-                .subscribe(res -> log.info("CLEAN UP EXPIRED LOGS: {}", res));
+/**
+ * Scheduled task to clear outdated log records.
+ * <p>
+ * This method is scheduled to run daily at 1 AM. It deletes log records that are older than three years
+ * from the current date. The result of the deletion operation is logged.
+ * </p>
+ */
+@Scheduled(cron = "0 0 1 * * ?")
+public void clearLoggers() {
+    this.loggersRepository.deleteByCreatedAtBefore(LocalDateTime.now().minusYears(3))
+            .subscribe(res -> log.info("CLEAN UP EXPIRED LOGS: {}", res));
+}
+
+/**
+ * Event listener for processing logger events.
+ * <p>
+ * This method listens for {@link LoggerEvent} instances. If the event kind is INSERT, it converts the event's
+ * entity to a {@link Logger} and saves it using the {@link #operate(LoggerReq)} method. The result of the save
+ * operation is logged.
+ * </p>
+ *
+ * @param event The {@link LoggerEvent} to process.
+ */
+@EventListener
+public void processLoggerEvent(LoggerEvent event) {
+    if (event.kind() == LoggerEvent.Kind.INSERT) {
+        var logger = event.entity();
+        this.operate(logger).subscribe(res ->
+                log.debug("Client request log save result. log: {}", logger.getContext()));
     }
-
-    @EventListener
-    public void processLoggerEvent(LoggerEvent event) {
-        if (event.kind() == LoggerEvent.Kind.INSERT) {
-            var logger = event.entity();
-            this.operate(logger).subscribe(res ->
-                    log.debug("Client request log save result. log: {}", logger.getContext()));
-        }
-
-    }
-
+}
 }
