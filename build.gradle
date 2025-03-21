@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '3.4.3' apply false
+    id 'org.springframework.boot' version '3.4.4' apply false
     id 'io.spring.dependency-management' version '1.1.7' apply false
     id 'org.graalvm.buildtools.native' version '0.10.5' apply false
 }
@@ -45,11 +45,6 @@ configure(subprojects - project(":boot")) { project ->
         }
     }
 
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.boot:spring-boot-dependencies:$springBootVersion"
-        }
-    }
     tasks.named("bootBuildImage") {
         createdDate = "now"
         imageName = "localhost:5000/${rootProject.name}-${project.name}:latest"
@@ -84,5 +79,11 @@ configure(subprojects - project(":boot")) { project ->
 
         implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
 
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:$springBootVersion"
+        }
     }
 }
