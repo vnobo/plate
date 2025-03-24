@@ -1,8 +1,8 @@
-/* Importing Bootstrap SCSS file. */
-@use '@tabler/core/src/scss/config';
+@use '@tabler/core/scss/_config';
 
-// Override less variables to here
-// View all variables: https://github.com/NG-ZORRO/ng-zorro-antd/blob/master/components/style/themes/default.less
-//@primary-color: #1890ff;
+// 这里自定义自己的变量
 
-@use '@tabler/core/src/scss/tabler';
+@use '@tabler/core/scss/tabler';
+:root {
+  --tblr-font-sans-serif: 'LXGW WenKai', 'Inter';
+}

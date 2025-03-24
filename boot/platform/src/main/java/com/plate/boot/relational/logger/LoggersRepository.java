@@ -35,5 +35,5 @@ public interface LoggersRepository extends R2dbcRepository<Logger, Long> {
      * @param createdTime The threshold LocalDateTime before which log records should be deleted.
      * @return A Mono emitting the number of log records deleted upon successful execution.
      */
-    Mono<Long> deleteByCreatedTimeBefore(LocalDateTime createdTime);
+    Mono<Long> deleteByCreatedAtBefore(LocalDateTime createdTime);
 }

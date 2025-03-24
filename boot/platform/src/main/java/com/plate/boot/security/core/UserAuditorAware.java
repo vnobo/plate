@@ -30,9 +30,22 @@ import java.util.UUID;
 @Component
 public class UserAuditorAware implements ReactiveAuditorAware<UserAuditor> {
 
-    private final UsersRepository usersRepository;
+    /**
+     * Cache instance used to store and retrieve user auditor information.
+     */
     private final Cache cache;
 
+    /**
+     * Repository for accessing user data.
+     */
+    private final UsersRepository usersRepository;
+
+    /**
+     * Constructs a new UserAuditorAware instance.
+     *
+     * @param usersRepository the repository for accessing user data, must not be null
+     * @param cacheManager    the cache manager for managing cache instances, must not be null
+     */
     public UserAuditorAware(UsersRepository usersRepository, CacheManager cacheManager) {
         var cacheName = this.getClass().getName().concat(".cache");
         this.usersRepository = usersRepository;
@@ -42,7 +55,6 @@ public class UserAuditorAware implements ReactiveAuditorAware<UserAuditor> {
             log.debug("Initializing UserAuditorAware [{}] cache names: {}",
                     cache.getNativeCache().getClass().getSimpleName(), cache.getName());
         }
-
     }
 
     /**
@@ -74,7 +86,7 @@ public class UserAuditorAware implements ReactiveAuditorAware<UserAuditor> {
     public Mono<UserAuditor> loadByCode(UUID code) {
         UserAuditor userAuditor = this.cache.get(code, () -> null);
         return Mono.justOrEmpty(userAuditor).switchIfEmpty(this.usersRepository.findByCode(code).map(UserAuditor::withUser)
-                        .doOnNext(sourceData -> this.cache.put(code, sourceData)));
+                .doOnNext(sourceData -> this.cache.put(code, sourceData)));
     }
 
 

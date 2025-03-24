@@ -38,9 +38,28 @@ import java.util.regex.Pattern;
 @EnableRedisIndexedWebSession
 public class SessionConfiguration {
 
+    /**
+     * The name of the custom header used for session ID resolution.
+     * This header is used to store and retrieve the session ID in AJAX requests.
+     */
     public static final String HEADER_SESSION_ID_NAME = "X-Auth-Token";
+
+    /**
+     * The name of the header used to identify AJAX requests.
+     * This header is typically set to "XMLHttpRequest" for AJAX requests.
+     */
     public static final String X_REQUESTED_WITH = "X-Requested-With";
+
+    /**
+     * The value of the X-Requested-With header for AJAX requests.
+     * This value is used to identify requests made via XMLHttpRequest.
+     */
     public static final String XML_HTTP_REQUEST = "XMLHttpRequest";
+
+    /**
+     * A regular expression pattern for extracting Bearer tokens from the Authorization header.
+     * This pattern matches the Bearer token format and extracts the token value.
+     */
     public static final Pattern AUTHORIZATION_PATTERN = Pattern.compile(
             "^Bearer (?<token>[a-zA-Z0-9-._~+/]+=*)$", Pattern.CASE_INSENSITIVE);
 
@@ -98,9 +117,21 @@ public class SessionConfiguration {
      * </ul>
      */
     static class CustomWebSessionIdResolver extends HeaderWebSessionIdResolver {
-
+        /**
+         * Resolver for session IDs using cookies.
+         * This resolver is used as a fallback when the request does not contain specific headers.
+         */
         private final CookieWebSessionIdResolver cookieWebSessionIdResolver = new CookieWebSessionIdResolver();
 
+        /**
+         * Resolves the access token from the request parameters.
+         * This method checks for the presence of an "access_token" parameter in the request query parameters.
+         * If a single token is found, it is returned; if multiple tokens are found, an exception is thrown.
+         *
+         * @param request The server HTTP request from which to extract the access token.
+         * @return The access token as a String, or null if no token is found.
+         * @throws RestServerException if multiple tokens are found in the request.
+         */
         private static String resolveAccessTokenFromRequest(ServerHttpRequest request) {
             List<String> parameterTokens = request.getQueryParams().get("access_token");
             if (CollectionUtils.isEmpty(parameterTokens)) {
@@ -112,10 +143,25 @@ public class SessionConfiguration {
             throw invalidTokenError("Found multiple bearer tokens in the request");
         }
 
+        /**
+         * Creates a RestServerException for invalid tokens.
+         * This method constructs an exception with a specific message and a nested AccessTokenValidationException.
+         *
+         * @param message The error message to be included in the exception.
+         * @return A RestServerException with the provided message and a nested AccessTokenValidationException.
+         */
         private static RestServerException invalidTokenError(String message) {
             return RestServerException.withMsg(message, new AccessTokenValidationException("Bearer token is malformed"));
         }
 
+        /**
+         * Sets the session ID in the server web exchange.
+         * This method determines whether to use a header-based or cookie-based approach for setting the session ID
+         * based on the presence of specific headers in the request.
+         *
+         * @param exchange The server web exchange containing the request and response.
+         * @param id       The session ID to be set.
+         */
         @Override
         public void setSessionId(@NonNull ServerWebExchange exchange, @NonNull String id) {
             if (exchange.getRequest().getHeaders().containsKey(X_REQUESTED_WITH)) {

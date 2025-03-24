@@ -22,10 +22,19 @@ basic system information such as users, roles, tenants, menus, etc., and provide
 
 ## 🖥 Environment Support
 
-* Spring boot `3.4.0`
-*
+* Spring boot `3.4.3`
+* SSL support
+
+```shell
+keytool -genkeypair -alias plate -keyalg RSA -keysize 2048 -validity 365 -keystore plate.jks -storetype JKS -storepass 123456 -keypass 123456 -dname "CN=localhost, OU=PlateUnit, O=PlateOrg, L=Xi'an, ST=Shaanxi, C=CN"
+```
+
+```shell
+  keytool -importkeystore -srckeystore plate.jks -srcstoretype JKS -srcstorepass 123456 -destkeystore plate.p12 -deststoretype PKCS12 -deststorepass 123456
+```
 
 Angular `^19.0.0`
+
 * ng-zorro-antd `17.2.0`
 * Server-side Rendering
 * Modern browsers including the following [specific versions](https://angular.io/guide/browser-support)

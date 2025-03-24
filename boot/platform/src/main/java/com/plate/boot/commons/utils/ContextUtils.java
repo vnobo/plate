@@ -1,8 +1,7 @@
 package com.plate.boot.commons.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.plate.boot.commons.base.BaseEvent;
-import com.plate.boot.commons.exception.RestServerException;
+import com.plate.boot.commons.base.AbstractEvent;
 import com.plate.boot.security.SecurityDetails;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
@@ -13,16 +12,17 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
+import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Utility class providing context-related operations and services for the application.
@@ -49,11 +49,7 @@ public final class ContextUtils implements InitializingBean {
      * request attribute, or any other data structure where keys are strings.
      */
     public final static String CSRF_TOKEN_CONTEXT = "CSRF_TOKEN_CONTEXT";
-    /**
-     * A constant holding a pre-initialized instance of {@link MessageDigest}.
-     * This digest can be used for cryptographic hashing operations.
-     */
-    public final static MessageDigest MD;
+
     /**
      * An array of strings representing the possible header names that could contain
      * the client's IP address in HTTP requests. This is typically used when working
@@ -78,14 +74,6 @@ public final class ContextUtils implements InitializingBean {
             "HTTP_VIA",
             "REMOTE_ADDR"
     };
-
-    static {
-        try {
-            MD = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw RestServerException.withMsg("SHA-256 algorithm not found", e);
-        }
-    }
 
     /**
      * A shared static instance of Jackson's {@link ObjectMapper}, which is utilized for
@@ -128,8 +116,64 @@ public final class ContextUtils implements InitializingBean {
         ContextUtils.APPLICATION_EVENT_PUBLISHER = applicationEventPublisher;
     }
 
-    public static void eventPublisher(BaseEvent<?> object) {
-       ContextUtils.APPLICATION_EVENT_PUBLISHER.publishEvent(object);
+    public static void eventPublisher(AbstractEvent<?> object) {
+        ContextUtils.APPLICATION_EVENT_PUBLISHER.publishEvent(object);
+    }
+
+    /**
+     * Creates a {@link DelegatingPasswordEncoder} with default mappings. Additional
+     * mappings may be added and the encoding will be updated to conform with best
+     * practices. However, due to the nature of {@link DelegatingPasswordEncoder} the
+     * updates should not impact users. The mappings current are:
+     *
+     * <ul>
+     * <li>bcrypt - {@link BCryptPasswordEncoder} (Also used for encoding)</li>
+     * <li>ldap -
+     * {@link org.springframework.security.crypto.password.LdapShaPasswordEncoder}</li>
+     * <li>MD4 -
+     * {@link org.springframework.security.crypto.password.Md4PasswordEncoder}</li>
+     * <li>MD5 - {@code new MessageDigestPasswordEncoder("MD5")}</li>
+     * <li>noop -
+     * {@link org.springframework.security.crypto.password.NoOpPasswordEncoder}</li>
+     * <li>pbkdf2 - {@link Pbkdf2PasswordEncoder#defaultsForSpringSecurity_v5_5()}</li>
+     * <li>pbkdf2@SpringSecurity_v5_8 -
+     * {@link Pbkdf2PasswordEncoder#defaultsForSpringSecurity_v5_8()}</li>
+     * <li>scrypt - {@link SCryptPasswordEncoder#defaultsForSpringSecurity_v4_1()}</li>
+     * <li>scrypt@SpringSecurity_v5_8 -
+     * {@link SCryptPasswordEncoder#defaultsForSpringSecurity_v5_8()}</li>
+     * <li>SHA-1 - {@code new MessageDigestPasswordEncoder("SHA-1")}</li>
+     * <li>SHA-256 - {@code new MessageDigestPasswordEncoder("SHA-256")}</li>
+     * <li>sha256 -
+     * {@link org.springframework.security.crypto.password.StandardPasswordEncoder}</li>
+     * <li>argon2 - {@link Argon2PasswordEncoder#defaultsForSpringSecurity_v5_2()}</li>
+     * <li>argon2@SpringSecurity_v5_8 -
+     * {@link Argon2PasswordEncoder#defaultsForSpringSecurity_v5_8()}</li>
+     * </ul>
+     *
+     * @return the {@link PasswordEncoder} to use
+     */
+    @SuppressWarnings("deprecation")
+    public static PasswordEncoder createDelegatingPasswordEncoder(String encodingId) {
+        if (!StringUtils.hasLength(encodingId)) {
+            encodingId = "bcrypt";
+        }
+        Map<String, PasswordEncoder> encoders = new HashMap<>();
+        encoders.put("bcrypt", new BCryptPasswordEncoder());
+        encoders.put("ldap", new org.springframework.security.crypto.password.LdapShaPasswordEncoder());
+        encoders.put("MD4", new org.springframework.security.crypto.password.Md4PasswordEncoder());
+        encoders.put("MD5", new org.springframework.security.crypto.password.MessageDigestPasswordEncoder("MD5"));
+        encoders.put("noop", org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance());
+        encoders.put("pbkdf2", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_5());
+        encoders.put("pbkdf2@SpringSecurity_v5_8", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8());
+        encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v4_1());
+        encoders.put("scrypt@SpringSecurity_v5_8", SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8());
+        encoders.put("SHA-1", new org.springframework.security.crypto.password.MessageDigestPasswordEncoder("SHA-1"));
+        encoders.put("SHA-256",
+                new org.springframework.security.crypto.password.MessageDigestPasswordEncoder("SHA-256"));
+        encoders.put("sha256", new org.springframework.security.crypto.password.StandardPasswordEncoder());
+        encoders.put("argon2", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_2());
+        encoders.put("argon2@SpringSecurity_v5_8", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8());
+        return new DelegatingPasswordEncoder(encodingId, encoders);
     }
 
     /**
@@ -140,8 +184,7 @@ public final class ContextUtils implements InitializingBean {
      * @return A base64 encoded string representing the MD5 hash of the input string.
      */
     public static String encodeToSHA256(String input) {
-        byte[] bytes = MD.digest(input.getBytes(StandardCharsets.UTF_8));
-        return Base64.getEncoder().encodeToString(bytes);
+        return createDelegatingPasswordEncoder("MD5").encode(input);
     }
 
     /**

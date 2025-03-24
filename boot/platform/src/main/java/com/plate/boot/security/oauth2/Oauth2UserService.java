@@ -178,15 +178,14 @@ public class Oauth2UserService extends DefaultReactiveOAuth2UserService {
      * It augments the OAuth2User's attributes with additional details from the User object,
      * preparing the user information for security context population with enriched data.
      *
-     * @param details    The User entity containing local user details like username, password, and account status.
+     * @param user    The User entity containing local user details like username, password, and account status.
      * @param oAuth2User The original OAuth2User object carrying OAuth provider-specific attributes and authorities.
      * @return A new OAuth2User instance, SecurityDetails, with combined attributes from both the User and OAuth2User,
      * including custom attributes such as 'username'.
      */
-    public OAuth2User convertToOauth2User(User details, OAuth2User oAuth2User) {
+    public OAuth2User convertToOauth2User(User user, OAuth2User oAuth2User) {
         Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
-        attributes.put("username", details.getUsername());
-        return SecurityDetails.of(details.getCode(), oAuth2User.getAuthorities(), attributes, "username")
-                .buildUser(details);
+        attributes.put("username", user.getUsername());
+        return SecurityDetails.of(user, oAuth2User.getAuthorities(),attributes);
     }
 }

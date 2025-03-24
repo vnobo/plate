@@ -1,7 +1,6 @@
 package com.plate.boot.security;
 
 import com.plate.boot.commons.base.AbstractCache;
-import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.DatabaseUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.security.core.group.authority.GroupAuthority;
@@ -9,7 +8,6 @@ import com.plate.boot.security.core.group.member.GroupMemberRes;
 import com.plate.boot.security.core.tenant.member.TenantMemberRes;
 import com.plate.boot.security.core.user.User;
 import com.plate.boot.security.core.user.UserReq;
-import com.plate.boot.security.core.user.UserRes;
 import com.plate.boot.security.core.user.UsersService;
 import com.plate.boot.security.core.user.authority.UserAuthority;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +29,7 @@ import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * SecurityManager is a service class that extends the functionality of AbstractDatabase
@@ -178,7 +173,7 @@ public class SecurityManager extends AbstractCache
                 .onErrorResume(throwable -> Mono.defer(() ->
                         Mono.error(new BadCredentialsException(throwable.getMessage(), throwable))))
                 .publishOn(Schedulers.boundedElastic())
-                .doOnSuccess(securityDetails -> this.loginSuccess(securityDetails.getUsername())
+                .doOnSuccess(details -> this.loginSuccess(details.getUsername())
                         .subscribe(res -> log.debug("登录成功! 登录信息修改: {}", res)));
     }
 
@@ -191,8 +186,8 @@ public class SecurityManager extends AbstractCache
      * @return A Mono emitting the fully constructed SecurityDetails object, including group and tenant memberships.
      */
     private Mono<SecurityDetails> buildUserDetails(User user, Set<GrantedAuthority> authorities) {
-        SecurityDetails userDetails = SecurityDetails.of(user.getCode(), authorities,
-                BeanUtils.beanToMap(UserRes.withUser(user)), "username").buildUser(user);
+        SecurityDetails userDetails = SecurityDetails.of(user, authorities,
+                Map.of("username", user.getUsername(), "userCode", user.getCode()));
         Mono<Tuple2<List<GroupMemberRes>, List<TenantMemberRes>>> groupsAndTenantsMono =
                 Mono.zipDelayError(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
         return groupsAndTenantsMono.doOnNext(tuple2 -> {

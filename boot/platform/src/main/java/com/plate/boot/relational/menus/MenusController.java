@@ -41,19 +41,43 @@ import static com.plate.boot.commons.utils.ContextUtils.RULE_ADMINISTRATORS;
 @RequestMapping("/menus")
 @RequiredArgsConstructor
 public class MenusController {
-
+    /**
+     * Service for managing menu operations.
+     */
     private final MenusService menusService;
 
+    /**
+     * Handles HTTP GET requests to search for menus based on the provided request and pageable information.
+     * The result is a distinct flux of menus based on their authority.
+     *
+     * @param request  The menu request containing search criteria.
+     * @param pageable The pagination information.
+     * @return A Flux of Menu entities matching the search criteria.
+     */
     @GetMapping("search")
     public Flux<Menu> search(MenuReq request, Pageable pageable) {
         return this.menusService.search(request, pageable).distinct(Menu::getAuthority);
     }
 
+    /**
+     * Handles HTTP GET requests to retrieve a paginated list of menus based on the provided request and pageable information.
+     *
+     * @param request  The menu request containing search criteria.
+     * @param pageable The pagination information.
+     * @return A Mono of Page containing Menu entities.
+     */
     @GetMapping("page")
     public Mono<Page<Menu>> page(MenuReq request, Pageable pageable) {
         return this.menusService.page(request, pageable);
     }
 
+    /**
+     * Handles HTTP GET requests to load menus tailored to the currently authenticated user's permissions.
+     * If the user does not have administrator privileges, their specific rules are applied to the request.
+     *
+     * @param request The menu request containing search criteria.
+     * @return A Flux of Menu entities matching the user's permissions.
+     */
     @GetMapping("me")
     public Flux<Menu> load(MenuReq request) {
         return ReactiveSecurityContextHolder.getContext().flatMapMany(securityContext -> {
@@ -70,6 +94,13 @@ public class MenusController {
         });
     }
 
+    /**
+     * Handles HTTP POST requests to save a new or modify an existing menu based on the provided request body.
+     * If the request indicates a new menu, it is added; otherwise, it is modified.
+     *
+     * @param request The menu request containing the details of the menu to be saved.
+     * @return A Mono of the saved or modified Menu entity.
+     */
     @PostMapping("save")
     public Mono<Menu> save(@Valid @RequestBody MenuReq request) {
         if (request.isNew()) {
@@ -78,6 +109,13 @@ public class MenusController {
         return this.menusService.modify(request);
     }
 
+    /**
+     * Handles HTTP DELETE requests to delete a menu identified by the request parameters.
+     * Ensures that the request contains valid ID and code before proceeding with the deletion.
+     *
+     * @param request The menu request containing the details of the menu to be deleted.
+     * @return A Mono indicating completion of the delete operation.
+     */
     @DeleteMapping("delete")
     public Mono<Void> delete(@Valid @RequestBody MenuReq request) {
         Assert.isTrue(!request.isNew(), "Delete [ID] cannot be empty!");

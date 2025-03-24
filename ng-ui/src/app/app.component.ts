@@ -6,7 +6,7 @@ import { VERSION as VERSION_ZORRO } from 'ng-zorro-antd/version';
 
 /**
  * The root component of the application.
- * 
+ *
  * @selector app-root
  * @imports RouterOutlet, MatProgressBarModule, NgIf
  * @template
@@ -46,7 +46,7 @@ export class AppComponent implements OnInit {
 
   /**
    * Constructs the AppComponent and sets initial attributes on the host element.
-   * 
+   *
    * @param el - The element reference of the host element.
    * @param renderer - The renderer for manipulating the DOM.
    */

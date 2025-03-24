@@ -15,8 +15,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.reactivestreams.Publisher;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.core.io.buffer.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
@@ -68,10 +66,11 @@ import static org.springframework.security.web.server.csrf.CsrfWebFilter.DEFAULT
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class LoggerFilter implements WebFilter, ApplicationEventPublisherAware {
+public class LoggerFilter implements WebFilter {
     /**
      * Constants for the attribute key used to cache request body information.
-     * This string represents the attribute name under which the cached request body can be stored or retrieved in a context where attributes are managed.
+     * This string represents the attribute name under which
+     * the cached request body can be stored or retrieved in a context where attributes are managed.
      */
     public static final String CACHED_REQUEST_BODY_ATTR = "cachedRequestBody";
     /**
@@ -98,12 +97,6 @@ public class LoggerFilter implements WebFilter, ApplicationEventPublisherAware {
      * This matcher is initialized with the DEFAULT_CSRF_MATCHER constant.
      */
     private final ServerWebExchangeMatcher defaultLoggerMatcher = DEFAULT_CSRF_MATCHER;
-    /**
-     * Represents a private final instance of the LoggersService class.
-     * This service is responsible for handling logging operations within the application,
-     * providing functionality to log messages at various levels of severity.
-     */
-    private ApplicationEventPublisher publisher;
 
     /**
      * Caches the request body of a ServerWebExchange and decorates the ServerHttpRequest
@@ -392,8 +385,8 @@ public class LoggerFilter implements WebFilter, ApplicationEventPublisherAware {
         LoggerReq logger = LoggerReq.of(tenantCode, userDetails.getUsername(), prefix,
                 method, status, path, contentNode);
         var userAuditor = UserAuditor.withDetails(userDetails);
-        logger.setCreator(userAuditor);
-        logger.setUpdater(userAuditor);
+        logger.setCreatedBy(userAuditor);
+        logger.setUpdatedBy(userAuditor);
         ContextUtils.eventPublisher(LoggerEvent.insert(logger));
     }
 
@@ -421,8 +414,4 @@ public class LoggerFilter implements WebFilter, ApplicationEventPublisherAware {
         }
     }
 
-    @Override
-    public void setApplicationEventPublisher(@NonNull ApplicationEventPublisher publisher) {
-        this.publisher = publisher;
-    }
 }

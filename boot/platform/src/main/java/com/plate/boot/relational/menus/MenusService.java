@@ -38,18 +38,48 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class MenusService extends AbstractCache {
+    /**
+     * Prefix for authority roles.
+     */
     public final static String AUTHORITY_PREFIX = "ROLE_";
 
+    /**
+     * Repository for managing menu entities.
+     */
     private final MenusRepository menusRepository;
+
+    /**
+     * Repository for managing group authorities.
+     */
     private final GroupAuthoritiesRepository groupAuthoritiesRepository;
+
+    /**
+     * Repository for managing user authorities.
+     */
     private final UserAuthoritiesRepository userAuthoritiesRepository;
 
+    /**
+     * Searches for menus based on the provided request and pageable information.
+     * Caches the result using a generated cache key.
+     *
+     * @param request  The menu request containing search criteria.
+     * @param pageable The pagination information.
+     * @return A Flux of Menu entities matching the search criteria.
+     */
     public Flux<Menu> search(MenuReq request, Pageable pageable) {
         var cacheKey = BeanUtils.cacheKey(request, pageable);
         Query query = Query.query(request.toCriteria()).with(pageable).sort(Sort.by("sortNo"));
         return this.queryWithCache(cacheKey, query, Menu.class);
     }
 
+    /**
+     * Retrieves a paginated list of menus based on the provided request and pageable information.
+     * Combines the search results with the total count of matching menus.
+     *
+     * @param request  The menu request containing search criteria.
+     * @param pageable The pagination information.
+     * @return A Mono of Page containing Menu entities.
+     */
     public Mono<Page<Menu>> page(MenuReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         Query query = Query.query(request.toCriteria());
@@ -58,6 +88,13 @@ public class MenusService extends AbstractCache {
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
 
+    /**
+     * Adds a new menu based on the provided request.
+     * Checks for the existence of a menu with the same criteria before adding.
+     *
+     * @param request The menu request containing the details of the menu to be added.
+     * @return A Mono of the added Menu entity.
+     */
     public Mono<Menu> add(MenuReq request) {
         log.debug("Menu add request: {}", request);
         Criteria criteria = MenuReq.of(request.getTenantCode(), request.getAuthority()).toCriteria();
@@ -70,6 +107,13 @@ public class MenusService extends AbstractCache {
         return existsMono.flatMap((b) -> this.operate(request));
     }
 
+    /**
+     * Modifies an existing menu based on the provided request.
+     * Checks for the existence of the menu before modifying.
+     *
+     * @param request The menu request containing the details of the menu to be modified.
+     * @return A Mono of the modified Menu entity.
+     */
     public Mono<Menu> modify(MenuReq request) {
         log.debug("Menu modify request: {}", request);
         var oldMunuMono = this.menusRepository.findByCode(request.getCode())
@@ -86,10 +130,10 @@ public class MenusService extends AbstractCache {
     }
 
     /**
-     * save menu entity
+     * Saves a menu entity based on the provided request.
      *
-     * @param request menu request
-     * @return Mono menu entity
+     * @param request The menu request containing the details of the menu to be saved.
+     * @return A Mono of the saved Menu entity.
      */
     public Mono<Menu> operate(MenuReq request) {
         log.debug("Menu operate request: {}", request);
@@ -100,6 +144,13 @@ public class MenusService extends AbstractCache {
         return this.save(menu).doAfterTerminate(() -> this.cache.clear());
     }
 
+    /**
+     * Saves a menu entity.
+     * If the menu is new, it is inserted; otherwise, it is updated.
+     *
+     * @param menu The menu entity to be saved.
+     * @return A Mono of the saved Menu entity.
+     */
     public Mono<Menu> save(Menu menu) {
         if (menu.isNew()) {
             return this.menusRepository.save(menu);
@@ -107,12 +158,19 @@ public class MenusService extends AbstractCache {
             assert menu.getId() != null;
             return this.menusRepository.findById(menu.getId()).flatMap(old -> {
                 menu.setCode(old.getCode());
-                menu.setCreatedTime(old.getCreatedTime());
+                menu.setCreatedAt(old.getCreatedAt());
                 return this.menusRepository.save(menu);
             });
         }
     }
 
+    /**
+     * Deletes a menu based on the provided request.
+     * If the tenant code is "0", associated authorities are also deleted.
+     *
+     * @param request The menu request containing the details of the menu to be deleted.
+     * @return A Mono indicating completion of the delete operation.
+     */
     @Transactional(rollbackFor = Exception.class)
     public Mono<Void> delete(MenuReq request) {
         log.warn("Delete menu request: {}", request);

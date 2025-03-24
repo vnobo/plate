@@ -15,7 +15,7 @@ import org.springframework.data.relational.core.mapping.event.AbstractRelational
  * @see ResolvableType
  */
 @EqualsAndHashCode(callSuper = true)
-public abstract class BaseEvent<E> extends AbstractRelationalEvent<E> {
+public abstract class AbstractEvent<E> extends AbstractRelationalEvent<E> {
 
     /**
      * The entity associated with the event.
@@ -34,7 +34,7 @@ public abstract class BaseEvent<E> extends AbstractRelationalEvent<E> {
      * @param entity the entity associated with the event, must not be null
      * @param kind   the kind of event, must not be null
      */
-    protected BaseEvent(@NonNull E entity, @NonNull Kind kind) {
+    protected AbstractEvent(@NonNull E entity, @NonNull Kind kind) {
         super(entity);
         this.entity = entity;
         this.kind = kind;

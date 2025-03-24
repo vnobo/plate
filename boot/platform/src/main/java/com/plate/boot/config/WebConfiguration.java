@@ -1,12 +1,19 @@
 package com.plate.boot.config;
 
+import lombok.NonNull;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.method.HandlerTypePredicate;
+import org.springframework.web.reactive.config.PathMatchConfigurer;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
+
+import java.util.List;
 
 /**
  * Configures web-related settings and behaviors for an application, including RSocket setup,
@@ -18,7 +25,22 @@ import org.springframework.web.reactive.result.method.annotation.ArgumentResolve
 @Configuration(proxyBeanMethods = false)
 @EnableScheduling
 @EnableAsync
+@EnableConfigurationProperties({WebfluxProperties.class})
 public class WebConfiguration implements WebFluxConfigurer {
+
+    /**
+     * Holds the webflux properties configuration.
+     */
+    private final WebfluxProperties webfluxProperties;
+
+    /**
+     * Constructs a new WebConfiguration instance with the specified WebfluxProperties.
+     *
+     * @param webfluxProperties the webflux properties to be used for configuration
+     */
+    public WebConfiguration(WebfluxProperties webfluxProperties) {
+        this.webfluxProperties = webfluxProperties;
+    }
 
     /**
      * Configures custom argument resolvers for handler methods in a reactive environment.
@@ -29,12 +51,30 @@ public class WebConfiguration implements WebFluxConfigurer {
      * @param configurer The {@link ArgumentResolverConfigurer} used to register custom argument resolvers.
      */
     @Override
-    public void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
+    public void configureArgumentResolvers(@NonNull ArgumentResolverConfigurer configurer) {
         ReactivePageableHandlerMethodArgumentResolver pageableResolver =
                 new ReactivePageableHandlerMethodArgumentResolver();
-        pageableResolver.setMaxPageSize(100);
-        pageableResolver.setFallbackPageable(Pageable.ofSize(25));
+        pageableResolver.setMaxPageSize(webfluxProperties.getMaxPageSize());
+        pageableResolver.setFallbackPageable(Pageable.ofSize(webfluxProperties.getDefaultPageSize()));
         configurer.addCustomResolver(pageableResolver);
     }
 
+    /**
+     * Configures path matching options for the application.
+     * This method uses the {@link PathMatchConfigurer} to add path prefixes for specific base packages.
+     * For example, it adds the "/oauth/v1" prefix for handler methods in the "com.plate.boot.security" package
+     * and the "/rela/v1" prefix for handler methods in the "com.plate.boot.relational" package.
+     *
+     * @param configurer The {@link PathMatchConfigurer} used to configure path matching options.
+     */
+    @Override
+    public void configurePathMatching(@NonNull PathMatchConfigurer configurer) {
+        List<WebfluxProperties.RouteDefinition> pathPrefixes = this.webfluxProperties.getPathPrefixes();
+        if (ObjectUtils.isEmpty(pathPrefixes)) {
+            return;
+        }
+        for (WebfluxProperties.RouteDefinition entry : pathPrefixes) {
+            configurer.addPathPrefix(entry.getPath(), HandlerTypePredicate.forBasePackage(entry.getBasePackage()));
+        }
+    }
 }

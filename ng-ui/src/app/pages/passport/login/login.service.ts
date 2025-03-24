@@ -32,7 +32,7 @@ export class LoginService {
     const headers: HttpHeaders = new HttpHeaders({
       authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
     });
-    return this._http.get<Authentication>('/oauth2/login', { headers: headers }).pipe(
+    return this._http.get<Authentication>('/sec/v1/oauth2/login', { headers: headers }).pipe(
       tap(authentication => {
         this._auth.login(authentication);
       }),
@@ -55,6 +55,6 @@ export class LoginService {
   logout() {
     this._storage.remove(this.storageKey);
     this._auth.logout();
-    this._http.get('/oauth2/logout').subscribe(res => console.log(res));
+    this._http.get('/sec/v1/oauth2/logout').subscribe(res => console.log(res));
   }
 }

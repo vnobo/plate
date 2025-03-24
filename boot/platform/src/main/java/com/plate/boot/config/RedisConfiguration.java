@@ -58,7 +58,7 @@ public class RedisConfiguration {
      * @param objectMapper An {@link ObjectMapper} instance used for serializing and deserializing Java objects
      *                     to and from JSON. This is crucial for handling value serialization in a way that is
      *                     compatible with the application's object model.
-     * @return A configured instance of {@link ReactiveRedisTemplate<String, Object>} ready to perform
+     * @return A configured instance of {@link ReactiveRedisTemplate} ready to perform
      * reactive Redis operations, with keys as strings and values as arbitrary Java objects (serialized as JSON).
      */
     @Bean
