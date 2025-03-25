@@ -82,5 +82,5 @@ import {NzMenuModule} from 'ng-zorro-antd/menu';
 export class LayoutSidebarComponent {
   private readonly menusSer = inject(MenusService);
 
-  myMenus = toSignal(this.menusSer.getMyMenus({pcode: '00000000-0000-0000-0000-000000000000', tenantCode: '0'}));
+  myMenus = toSignal(this.menusSer.meMerge({ pcode: '00000000-0000-0000-0000-000000000000', tenantCode: '0' }));
 }
