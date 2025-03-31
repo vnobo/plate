@@ -63,4 +63,5 @@ export const SHARED_ZORRO_MODULES = [
   NzSpinModule,
   NzSpaceModule,
   NzPopconfirmModule,
+  NzSelectModule,
 ];
