@@ -1,13 +1,34 @@
+@use '@angular/material' as mat;
+
 :root {
-  --tblr-font-sans-serif: 'Inter';
+  @include mat.progress-spinner-overrides(
+    (
+      active-indicator-color: var(--tblr-primary),
+    )
+  );
+
+  @include mat.theme-overrides(
+    (
+      color: (
+        primary: var(--tblr-primary),
+        secondary: var(--tblr-secondary),
+        error: var(--tblr-error),
+        warning: var(--tblr-warning),
+        info: var(--tblr-info),
+        success: var(--tblr-success),
+      ),
+      font-family: (
+        sans-serif: var(--tblr-font-sans-serif),
+      ),
+    )
+  );
 }
 
-html,
-body {
-  height: 100%;
-  font-family: 'LXGW WenKai', Roboto, 'Helvetica Neue', sans-serif;
-}
-
-body {
-  margin: 0;
+html {
+  color-scheme: light dark;
+  @include mat.theme((
+    color: mat.$violet-palette,
+    typography: Roboto,
+    density: 0
+  ));
 }
