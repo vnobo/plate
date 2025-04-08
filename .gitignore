@@ -21,6 +21,7 @@ build/
 *.iml
 *.ipr
 out/
+.lingma
 
 ### NetBeans ###
 /nbproject/private/
