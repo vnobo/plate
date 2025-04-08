@@ -1,8 +1,10 @@
-import { NgIf } from '@angular/common';
-import { Component, ElementRef, forwardRef, inject, OnInit, Renderer2, signal } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, Renderer2, signal } from '@angular/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet } from '@angular/router';
+import { NzFloatButtonModule } from 'ng-zorro-antd/float-button';
 import { VERSION as VERSION_ZORRO } from 'ng-zorro-antd/version';
+import { debounceTime, delay } from 'rxjs';
 
 /**
  * The root component of the application.
@@ -17,12 +19,15 @@ import { VERSION as VERSION_ZORRO } from 'ng-zorro-antd/version';
  */
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MatProgressBarModule, NgIf],
+  imports: [RouterOutlet, MatProgressBarModule, NzFloatButtonModule],
   template: `
+    @if (progressShow()) {
     <div class="fixed-top">
-      <mat-progress-bar *ngIf="progressShow()" mode="query"></mat-progress-bar>
+      <mat-progress-bar mode="query"></mat-progress-bar>
     </div>
+    }
     <router-outlet></router-outlet>
+    <nz-float-button-top [nzVisibilityHeight]="100"></nz-float-button-top>
   `,
   styles: [
     `
@@ -37,8 +42,7 @@ export class AppComponent implements OnInit {
   /**
    * Signal to control the visibility of the progress bar.
    */
-  progressShow = signal(false);
-
+  progressShow = signal(true);
   /**
    * Router instance for subscribing to navigation events.
    */
@@ -58,20 +62,5 @@ export class AppComponent implements OnInit {
   /**
    * Initializes the component and subscribes to router events to control the progress bar visibility.
    */
-  ngOnInit(): void {
-    let configLoad = false;
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationStart) {
-        configLoad = true;
-        this.progressShow.set(true);
-      }
-      if (configLoad && event instanceof NavigationError) {
-        console.error(event.error);
-      }
-      if (event instanceof NavigationEnd) {
-        configLoad = false;
-        this.progressShow.set(false);
-      }
-    });
-  }
+  ngOnInit(): void {}
 }
