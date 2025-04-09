@@ -1,10 +1,10 @@
-import { Component, ElementRef, inject, OnInit, Renderer2, signal } from '@angular/core';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { NavigationEnd, NavigationError, NavigationStart, Router, RouterOutlet } from '@angular/router';
-import { NzFloatButtonModule } from 'ng-zorro-antd/float-button';
-import { VERSION as VERSION_ZORRO } from 'ng-zorro-antd/version';
-import { debounceTime, delay } from 'rxjs';
+import {CommonModule} from '@angular/common';
+import {Component, ElementRef, inject, OnInit, Renderer2} from '@angular/core';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {RouterOutlet} from '@angular/router';
+import {NzFloatButtonModule} from 'ng-zorro-antd/float-button';
+import {VERSION as VERSION_ZORRO} from 'ng-zorro-antd/version';
+import {ProgressBar} from './core/services/progress-bar';
 
 /**
  * The root component of the application.
@@ -19,9 +19,9 @@ import { debounceTime, delay } from 'rxjs';
  */
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MatProgressBarModule, NzFloatButtonModule],
+  imports: [RouterOutlet, MatProgressBarModule, NzFloatButtonModule, CommonModule],
   template: `
-    @if (progressShow()) {
+    @if (progressBar.isShow$ | async) {
     <div class="fixed-top">
       <mat-progress-bar mode="query"></mat-progress-bar>
     </div>
@@ -39,28 +39,11 @@ import { debounceTime, delay } from 'rxjs';
   ],
 })
 export class AppComponent implements OnInit {
-  /**
-   * Signal to control the visibility of the progress bar.
-   */
-  progressShow = signal(true);
-  /**
-   * Router instance for subscribing to navigation events.
-   */
-  private readonly router = inject(Router);
-
-  /**
-   * Constructs the AppComponent and sets initial attributes on the host element.
-   *
-   * @param el - The element reference of the host element.
-   * @param renderer - The renderer for manipulating the DOM.
-   */
+  progressBar = inject(ProgressBar);
   constructor(el: ElementRef, renderer: Renderer2) {
     renderer.setAttribute(el.nativeElement, 'ng-zorro-version', VERSION_ZORRO.full);
     //renderer.setAttribute(el.nativeElement.parentElement, 'data-bs-theme', 'dark');
   }
 
-  /**
-   * Initializes the component and subscribes to router events to control the progress bar visibility.
-   */
   ngOnInit(): void {}
 }
