@@ -1,8 +1,9 @@
-import { Component, inject, OnInit, output, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Authentication } from '@app/core/types';
-import { LoginService } from '@app/pages';
-import { SharedModule } from '@app/shared/shared.module';
+import {Component, ElementRef, inject, OnInit, output, Renderer2, signal} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ThemeService} from '@app/core/services/theme.service';
+import {Authentication} from '@app/core/types';
+import {LoginService} from '@app/pages';
+import {SharedModule} from '@app/shared/shared.module';
 
 @Component({
   selector: 'layout-navbar,[layoutNavbar]',
@@ -313,8 +314,11 @@ import { SharedModule } from '@app/shared/shared.module';
 })
 export class LayoutNavbarComponent implements OnInit {
   private readonly loginSer = inject(LoginService);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
+  private readonly themeSer = inject(ThemeService);
+
+  constructor(private router: Router, private route: ActivatedRoute, el: ElementRef, renderer: Renderer2) {
+    //renderer.setAttribute(el.nativeElement.parentElement, 'data-bs-theme', 'dark');
+  }
 
   outputCollapsed = output<boolean>();
   authenticationToken = signal<Authentication | null>({} as Authentication);
