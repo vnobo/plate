@@ -1,6 +1,7 @@
 package com.plate.boot.commons.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.f4b6a3.uuid.UuidCreator;
 import com.plate.boot.commons.base.AbstractEvent;
 import com.plate.boot.security.SecurityDetails;
 import lombok.extern.log4j.Log4j2;
@@ -231,7 +232,7 @@ public final class ContextUtils implements InitializingBean {
      * @return A newly created {@link UUID} instance, providing a unique identifier.
      */
     public static UUID nextId() {
-        return UUID.randomUUID();
+        return UuidCreator.getTimeOrderedEpoch();
     }
 
     /**
