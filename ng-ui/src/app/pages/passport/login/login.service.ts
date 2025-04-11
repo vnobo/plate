@@ -1,8 +1,8 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { Observable, tap } from 'rxjs';
-import { AuthService, BrowserStorage } from '@app/core';
-import { Authentication, Credentials } from '@app/core/types';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {inject, Injectable} from '@angular/core';
+import {Observable, tap} from 'rxjs';
+import {AuthService, BrowserStorage} from '@app/core';
+import {Authentication, Credentials} from '@app/core/types';
 import dayjs from 'dayjs';
 
 @Injectable({
@@ -55,6 +55,6 @@ export class LoginService {
   logout() {
     this._storage.remove(this.storageKey);
     this._auth.logout();
-    this._http.get('/sec/v1/oauth2/logout').subscribe(res => console.log(res));
+    this._http.get('/oauth2/logout').subscribe(res => console.log('Logout successfully. ', res));
   }
 }

@@ -1,4 +1,4 @@
-import {Component, ElementRef, inject, OnInit, output, Renderer2, signal} from '@angular/core';
+import {Component, ElementRef, inject, OnInit, output, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ThemeService} from '@app/core/services/theme.service';
 import {Authentication} from '@app/core/types';
@@ -64,12 +64,12 @@ import {SharedModule} from '@app/shared/shared.module';
         </div>
         <div class="d-none d-md-flex">
           <a
-            href="?theme=dark"
             class="nav-link px-0 hide-theme-dark"
             data-bs-toggle="tooltip"
             data-bs-placement="bottom"
-            aria-label="Enable dark mode"
-            data-bs-original-title="Enable dark mode">
+            aria-label="暗黑主题"
+            data-bs-original-title="暗黑主题"
+            (click)="onToggleTheme()">
             <!-- Download SVG icon from http://tabler-icons.io/i/moon -->
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -87,12 +87,12 @@ import {SharedModule} from '@app/shared/shared.module';
             </svg>
           </a>
           <a
-            href="?theme=light"
+            (click)="onToggleTheme()"
             class="nav-link px-0 hide-theme-light"
             data-bs-toggle="tooltip"
             data-bs-placement="bottom"
-            aria-label="Enable light mode"
-            data-bs-original-title="Enable light mode">
+            aria-label="浅色模式"
+            data-bs-original-title="浅色模式">
             <!-- Download SVG icon from http://tabler-icons.io/i/sun -->
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -107,7 +107,8 @@ import {SharedModule} from '@app/shared/shared.module';
               class="icon">
               <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
               <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
-              <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"></path>
+              <path
+                d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"></path>
             </svg>
           </a>
           <div class="nav-item dropdown d-none d-md-flex me-3">
@@ -203,7 +204,9 @@ import {SharedModule} from '@app/shared/shared.module';
                       <div class="col-auto"><span class="status-dot d-block"></span></div>
                       <div class="col text-truncate">
                         <a href="#" class="text-body d-block">Example 3</a>
-                        <div class="d-block text-secondary text-truncate mt-n1"> Update change-version.js (#29736) </div>
+                        <div class="d-block text-secondary text-truncate mt-n1">
+                          Update change-version.js (#29736)
+                        </div>
                       </div>
                       <div class="col-auto">
                         <a href="#" class="list-group-item-actions">
@@ -232,7 +235,9 @@ import {SharedModule} from '@app/shared/shared.module';
                       <div class="col-auto"><span class="status-dot status-dot-animated bg-green d-block"></span> </div>
                       <div class="col text-truncate">
                         <a href="#" class="text-body d-block">Example 4</a>
-                        <div class="d-block text-secondary text-truncate mt-n1"> Regenerate package-lock.json (#29730) </div>
+                        <div class="d-block text-secondary text-truncate mt-n1">
+                          Regenerate package-lock.json (#29730)
+                        </div>
                       </div>
                       <div class="col-auto">
                         <a href="#" class="list-group-item-actions">
@@ -313,18 +318,25 @@ import {SharedModule} from '@app/shared/shared.module';
   ],
 })
 export class LayoutNavbarComponent implements OnInit {
-  private readonly loginSer = inject(LoginService);
-  private readonly themeSer = inject(ThemeService);
+  private readonly _loginSer = inject(LoginService);
+  private readonly _themeSer = inject(ThemeService);
 
-  constructor(private router: Router, private route: ActivatedRoute, el: ElementRef, renderer: Renderer2) {
-    //renderer.setAttribute(el.nativeElement.parentElement, 'data-bs-theme', 'dark');
-  }
+  constructor(private _router: Router, private _route: ActivatedRoute, private _el: ElementRef) {}
 
   outputCollapsed = output<boolean>();
   authenticationToken = signal<Authentication | null>({} as Authentication);
   isCollapsed = signal(false);
+
   ngOnInit(): void {
-    this.authenticationToken.set(this.loginSer._auth.authenticationToken());
+    this.authenticationToken.set(this._loginSer._auth.authenticationToken());
+    this.initializeTooltips();
+  }
+
+  onToggleTheme() {
+    this._themeSer
+      .toggleTheme()
+      .then(res => console.log('切换主题成功!', res))
+      .catch(err => console.log('切换主题失败!', err));
   }
 
   onCollapsed(isCollapsed: boolean) {
@@ -333,7 +345,19 @@ export class LayoutNavbarComponent implements OnInit {
   }
 
   loginOut() {
-    this.loginSer.logout();
-    this.router.navigate([this.loginSer._auth.loginUrl], { relativeTo: this.route }).then();
+    this._loginSer.logout();
+    this._router.navigate([this._loginSer._auth.loginUrl], { relativeTo: this._route }).then();
+  }
+
+  private initializeTooltips(): void {
+    const tooltipTriggerList = Array.from(this._el.nativeElement.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach((tooltipTriggerEl: any) => {
+      const options = {
+        delay: { show: 50, hide: 50 },
+        html: tooltipTriggerEl.getAttribute('data-bs-html') === 'true',
+        placement: tooltipTriggerEl.getAttribute('data-bs-placement') ?? 'auto',
+      };
+      return new bootstrap.Tooltip(tooltipTriggerEl, options);
+    });
   }
 }

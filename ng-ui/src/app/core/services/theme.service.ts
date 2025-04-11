@@ -20,14 +20,20 @@ export class ThemeService {
     }
     return new Promise<Event>((resolve, reject) => {
       this.loadCss(`${theme}.css`, theme).then(
-        (e) => {
+        e => {
           if (!firstLoad) {
             document.documentElement.classList.add(theme);
+            if (theme === ThemeType.dark) {
+              document.body.setAttribute('data-bs-theme', 'dark');
+            } else {
+              document.body.removeAttribute('data-bs-theme');
+            }
           }
           this.removeUnusedTheme(this.reverseTheme(theme));
+
           resolve(e);
         },
-        (e) => reject(e)
+        e => reject(e),
       );
     });
   }

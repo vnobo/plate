@@ -1,11 +1,11 @@
-import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { debounceTime, distinctUntilChanged, finalize, retry, Subject, takeUntil } from 'rxjs';
-import { Credentials } from '@app/core/types';
-import { SHARED_IMPORTS } from '@app/shared/shared-imports';
-import { LoginService } from '@app/pages';
+import {AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit} from '@angular/core';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {NzNotificationService} from 'ng-zorro-antd/notification';
+import {debounceTime, distinctUntilChanged, retry, Subject, takeUntil} from 'rxjs';
+import {Credentials} from '@app/core/types';
+import {SHARED_IMPORTS} from '@app/shared/shared-imports';
+import {LoginService} from '@app/pages';
 
 @Component({
   selector: 'app-login',
@@ -14,12 +14,13 @@ import { LoginService } from '@app/pages';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
-  private readonly _router = inject(Router);
-  private readonly _route = inject(ActivatedRoute);
-  private readonly _el = inject(ElementRef);
-  private readonly _message = inject(NzNotificationService);
   private readonly _loginSer = inject(LoginService);
-
+  constructor(
+    private _el: ElementRef,
+    private _router: Router,
+    private _route: ActivatedRoute,
+    private _message: NzNotificationService,
+  ) {}
   /** 用于管理组件销毁时的订阅清理 */
   private readonly destroy$ = new Subject<void>();
 
@@ -60,6 +61,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.loginForm.invalid || this.loginForm.controls.isSubmitting.value) return;
 
     this.loginForm.patchValue({ isSubmitting: true });
+
     const credentials = this.loginForm.getRawValue();
 
     if (credentials.remember) {
@@ -88,25 +90,25 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   /** 执行登录操作 */
-  private login(credentials: Credentials): void {
-    this._loginSer
+  private login(credentials: Credentials) {
+    return this._loginSer
       .login(credentials)
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        retry({ count: 3, delay: 1000 }),
-        takeUntil(this.destroy$),
-        finalize(() => this.loginForm.patchValue({ isSubmitting: false })),
-      )
+      .pipe(debounceTime(300), distinctUntilChanged(), retry({ count: 3, delay: 1000 }), takeUntil(this.destroy$))
       .subscribe({
         next: res => this.handleLoginSuccess(res),
         error: err => this.handleLoginError(err),
+        complete: () => this.loginForm.patchValue({ isSubmitting: false }),
       });
   }
 
   /** 处理登录成功 */
-  private handleLoginSuccess(res: any): void {
+  private handleLoginSuccess(res: any) {
     this._message.success('登录系统成功', `欢迎 ${res.details.name} 登录系统!`, {
       nzDuration: 3000,
     });
@@ -114,15 +116,10 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /** 处理登录错误 */
-  private handleLoginError(err: any): void {
+  private handleLoginError(err: any) {
     this._message.error('登录系统失败', err.errors ?? '未知错误', {
       nzDuration: 5000,
     });
     this._loginSer.logout();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
