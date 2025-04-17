@@ -4,9 +4,10 @@ plugins {
     id 'org.graalvm.buildtools.native' version '0.10.5' apply false
 }
 ext {
-    javaVersion = 21
-    springBootVersion = '3.4.3'
-    guavaVersion = '33.+'
+    set('javaVersion', 21)
+    set('guavaVersion', '33.+')
+    set('springAiVersion', "1.+")
+
 }
 
 configure(allprojects) { project ->
@@ -16,6 +17,7 @@ configure(allprojects) { project ->
     repositories {
         mavenLocal()
         mavenCentral()
+        maven { url "https://repo.spring.io/milestone" }
     }
 
     configurations.configureEach {
@@ -83,7 +85,7 @@ configure(subprojects - project(":boot")) { project ->
 
     dependencyManagement {
         imports {
-            mavenBom "org.springframework.boot:spring-boot-dependencies:$springBootVersion"
+            mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
         }
     }
 }
