@@ -12,6 +12,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -222,8 +223,16 @@ public final class ContextUtils implements InitializingBean {
      */
     public static Mono<SecurityDetails> securityDetails() {
         return ReactiveSecurityContextHolder.getContext()
-                .map(securityContext -> securityContext.getAuthentication().getPrincipal())
-                .cast(SecurityDetails.class);
+                .flatMap(securityContext -> {
+                    Authentication authentication = securityContext.getAuthentication();
+                    if (authentication == null) {
+                        return Mono.empty();
+                    }
+                    Object principal = authentication.getPrincipal();
+                    return principal instanceof SecurityDetails
+                            ? Mono.just((SecurityDetails) principal)
+                            : Mono.empty();
+                });
     }
 
     /**
