@@ -243,7 +243,6 @@ public final class BeanUtils implements InitializingBean {
      * The Mono completes when all processing is finished.
      */
     public static <T> Mono<T> serializeUserAuditor(T object) {
-        log.debug("Serialize user auditor property: {}", object.getClass().getSimpleName());
         PropertyDescriptor[] propertyDescriptors = org.springframework.beans.BeanUtils.getPropertyDescriptors(object.getClass());
         var propertyFlux = Flux.fromArray(propertyDescriptors)
                 .filter(propertyDescriptor -> propertyDescriptor.getPropertyType() == UserAuditor.class)
