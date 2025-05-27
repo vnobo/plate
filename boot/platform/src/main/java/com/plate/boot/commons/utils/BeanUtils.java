@@ -202,12 +202,14 @@ public final class BeanUtils implements InitializingBean {
      * @param ignoreNullValue   If true, excludes keys with null values from the resulting Map. Defaults to false.
      * @return A Map representation of the input JavaBean, optionally with keys transformed to snake_case and null values excluded.
      */
-    public static <T> Map<String, Object> beanToMap(T bean, final boolean isToUnderlineCase, final boolean ignoreNullValue) {
+    public static <T> Map<String, Object> beanToMap(T bean, final boolean isToUnderlineCase,
+                                                    final boolean ignoreNullValue) {
         if (ObjectUtils.isEmpty(bean)) {
             return null;
         }
         Class<?> actualEditable = bean.getClass();
-        PropertyDescriptor[] propertyDescriptors = org.springframework.beans.BeanUtils.getPropertyDescriptors(actualEditable);
+        PropertyDescriptor[] propertyDescriptors = org.springframework.beans.BeanUtils
+                .getPropertyDescriptors(actualEditable);
         Map<String, Object> beanMap = Maps.newHashMap();
         for (PropertyDescriptor targetPd : propertyDescriptors) {
             String key = targetPd.getName();
