@@ -1,5 +1,32 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
 :root {
   --tblr-font-sans-serif: 'LXGW WenKai', 'Inter Var', Inter, '-apple-system', 'BlinkMacSystemFont',
     'San Francisco', 'Segoe UI', Roboto, 'Helvetica Neue', 'sans-serif';
+  @include mat.progress-bar-overrides(
+    (
+      active-indicator-color: orange,
+      track-color: blue,
+    )
+  );
+}
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: var(--tblr-font-sans-serif);
+}
+
+html {
+  color-scheme: light dark;
+  @include mat.theme(
+    (
+      color: mat.$violet-palette,
+      typography: Roboto,
+      density: 0,
+    )
+  );
 }
