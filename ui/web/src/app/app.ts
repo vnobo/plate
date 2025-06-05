@@ -1,11 +1,18 @@
-import {Component} from '@angular/core';
-import {RouterOutlet} from '@angular/router';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.scss'
+  template: `<router-outlet />`,
+  styles: [
+    `
+      :host {
+        min-height: 100%;
+        min-width: 100%;
+      }
+    `,
+  ],
 })
 export class App {
   protected title = 'web';
