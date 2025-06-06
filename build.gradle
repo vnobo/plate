@@ -16,8 +16,8 @@ configure(allprojects) { project ->
 
     repositories {
         mavenLocal()
-        mavenCentral()
         maven { url "https://repo.spring.io/milestone" }
+        mavenCentral()
     }
 
     configurations.configureEach {
