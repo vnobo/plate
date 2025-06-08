@@ -3,10 +3,11 @@
 :root {
   --tblr-font-sans-serif: 'LXGW WenKai', 'Inter Var', Inter, '-apple-system', 'BlinkMacSystemFont',
     'San Francisco', 'Segoe UI', Roboto, 'Helvetica Neue', 'sans-serif';
+
   @include mat.progress-bar-overrides(
     (
-      active-indicator-color: orange,
-      track-color: blue,
+      active-indicator-color: var(--tblr-orange),
+      track-color: var(--tblr-blue),
     )
   );
 }
@@ -21,7 +22,7 @@ body {
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: dark;
   @include mat.theme(
     (
       color: mat.$violet-palette,
