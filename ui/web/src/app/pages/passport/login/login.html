@@ -20,7 +20,7 @@
     </div>
     <div class="card card-md">
       <div class="card-body">
-        <h2 class="h2 text-center mb-4 text-info">登录你的账号</h2>
+        <h2 class="card-title text-center h2 mb-4">登录你的账号</h2>
         <form
           aria-label="登录表单"
           autocomplete="on"
@@ -28,9 +28,42 @@
           novalidate
           role="form">
           <div class="container">
-            <div class="mb-3 input-icon">
-              <div class="input-icon-addon">
-                <label class="text-blue-400" for="username">
+            <div class="input-icon mb-3">
+              <label class="input-icon-addon" for="username">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="icon icon-tabler icons-tabler-outline icon-tabler-user-circle">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                  <path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                  <path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" />
+                </svg>
+                <span class="visually-hidden">手机或电子邮件</span>
+              </label>
+              <input
+                id="username"
+                name="username"
+                class="form-control"
+                placeholder="手机或电子邮件"
+                autocomplete="on"
+                tabindex="1" />
+            </div>
+            <div class="mb-2">
+              <div class="form-label">
+                <span class="form-label-description mb-1">
+                  <a routerLink="forgot-password">忘记密码?</a>
+                </span>
+              </div>
+              <div class="input-group input-group-flat">
+                <label class="input-group-text" for="password">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -41,58 +74,21 @@
                     stroke-width="2"
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    class="icon icon-tabler icons-tabler-outline icon-tabler-user-circle">
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-lock-password">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-                    <path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
-                    <path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" />
+                    <path
+                      d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z" />
+                    <path d="M8 11v-4a4 4 0 1 1 8 0v4" />
+                    <path d="M15 16h.01" />
+                    <path d="M12.01 16h.01" />
+                    <path d="M9.02 16h.01" />
                   </svg>
-                  <span class="visually-hidden">手机或电子邮件</span>
+                  <span class="visually-hidden">密 码</span>
                 </label>
-              </div>
-              <input
-                id="username"
-                name="username"
-                class="form-control is-valid-lite"
-                placeholder="手机或电子邮件"
-                autocomplete="on"
-                tabindex="1" />
-            </div>
-            <div class="mb-2">
-              <label class="form-label">
-                <span class="form-label-description">
-                  <a routerLink="forgot-password">忘记密码?</a>
-                </span>
-              </label>
-              <div class="input-group input-group-flat">
-                <div class="input-group-text">
-                  <label class="text-blue-400" for="password">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      class="icon icon-tabler icons-tabler-outline icon-tabler-lock-password">
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                      <path
-                        d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z" />
-                      <path d="M8 11v-4a4 4 0 1 1 8 0v4" />
-                      <path d="M15 16h.01" />
-                      <path d="M12.01 16h.01" />
-                      <path d="M9.02 16h.01" />
-                    </svg>
-                    <span class="visually-hidden">密 码</span>
-                  </label>
-                </div>
                 <input
                   id="password"
                   name="password"
-                  class="form-control is-valid-lite"
+                  class="form-control"
                   placeholder="密   码"
                   autocomplete="on"
                   tabindex="2" />
