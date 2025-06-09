@@ -1,16 +1,8 @@
-import {
-  afterEveryRender,
-  afterNextRender,
-  Component,
-  ElementRef,
-  inject,
-  OnInit,
-  Renderer2,
-} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { afterNextRender, Component, ElementRef, inject, OnInit, Renderer2 } from '@angular/core';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RouterOutlet } from '@angular/router';
 import { ProgressBar } from './core/services/progress-bar';
-import { CommonModule } from '@angular/common';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +16,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
   styles: [
     `
       :host {
-        min-height: 100vh;
+        min-height: 100%;
         min-width: 100%;
       }
     `,
@@ -34,14 +26,14 @@ export class App implements OnInit {
   progressBar = inject(ProgressBar);
 
   constructor(el: ElementRef, renderer: Renderer2) {
-    afterEveryRender(() => {
+    afterNextRender(() => {
       // get html element
       const targetElement = el.nativeElement.parentElement.parentElement;
       const attributes = [
         { name: 'data-bs-theme-base', value: 'slate' },
-        { name: 'data-bs-theme', value: 'dark' },
+        { name: 'data-bs-theme', value: 'light' },
         { name: 'data-bs-theme-radius', value: '1' },
-        { name: 'data-bs-theme-primary', value: 'orange' },
+        { name: 'data-bs-theme-primary', value: 'teal' },
       ];
 
       attributes.forEach(attr => {
@@ -51,6 +43,6 @@ export class App implements OnInit {
   }
 
   ngOnInit(): void {
-    this.progressBar.show();
+    //this.progressBar.show();
   }
 }

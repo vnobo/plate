@@ -20,7 +20,7 @@
     </div>
     <div class="card card-md">
       <div class="card-body">
-        <h2 class="h2 text-center mb-4">登录你的账号</h2>
+        <h2 class="h2 text-center mb-4 text-info">登录你的账号</h2>
         <form
           aria-label="登录表单"
           autocomplete="on"
@@ -28,10 +28,25 @@
           novalidate
           role="form">
           <div class="container">
-            <div class="input-icon mb-3">
+            <div class="mb-3 input-icon">
               <div class="input-icon-addon">
                 <label class="text-blue-400" for="username">
-                  <i aria-hidden="true" class="bi bi-person-fill"></i>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-user-circle">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                    <path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                    <path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" />
+                  </svg>
                   <span class="visually-hidden">手机或电子邮件</span>
                 </label>
               </div>
@@ -51,8 +66,26 @@
               </label>
               <div class="input-group input-group-flat">
                 <div class="input-group-text">
-                  <label class="text-blue-400" for="password"
-                    ><i class="bi bi-key-fill"></i>
+                  <label class="text-blue-400" for="password">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="icon icon-tabler icons-tabler-outline icon-tabler-lock-password">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path
+                        d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z" />
+                      <path d="M8 11v-4a4 4 0 1 1 8 0v4" />
+                      <path d="M15 16h.01" />
+                      <path d="M12.01 16h.01" />
+                      <path d="M9.02 16h.01" />
+                    </svg>
                     <span class="visually-hidden">密 码</span>
                   </label>
                 </div>
@@ -69,7 +102,7 @@
                     class="link-secondary"
                     data-bs-original-title="显示密码"
                     data-bs-toggle="tooltip"
-                    data-bs-placement="left">
+                    data-bs-placement="right">
                     @if (loginForm.controls.passwordFieldTextType.value) {
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -111,7 +144,9 @@
                   name="remember"
                   tabindex="3"
                   type="checkbox" />
-                <span class="form-check-label" for="flexCheckRemember">在这个设备上记住我</span>
+                <div class="form-check-label" for="flexCheckRemember">
+                  <span class="text-info">在这个设备上记住我 </span>
+                </div>
               </label>
             </div>
             <div class="form-footer">
@@ -157,9 +192,11 @@
           >
         </div>
       </div>
-    </div>
-    <div class="text-center text-secondary mt-3">
-      Don't have account yet? <a href="#" tabindex="-1">Sign up</a>
+      <div class="card-body">
+        <div class="text-center">
+          <span class="text-info">你还没有账号? </span><a href="#" tabindex="5">现在注册</a>
+        </div>
+      </div>
     </div>
   </div>
 </div>

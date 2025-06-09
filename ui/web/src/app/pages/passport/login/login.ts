@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { afterEveryRender, Component, ElementRef } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
@@ -9,6 +9,10 @@ import { RouterModule } from '@angular/router';
   styleUrl: './login.scss',
 })
 export class Login {
+  constructor() {
+    //afterEveryRender(() => {});
+  }
+
   loginForm = new FormGroup({
     isSubmitting: new FormControl(false),
     passwordFieldTextType: new FormControl(false),
