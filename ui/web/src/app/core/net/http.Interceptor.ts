@@ -33,7 +33,11 @@ function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
   return next(req).pipe(
     catchError(error => {
       if (error.status === 401) {
-        if (error.error && typeof error.error === 'object' && error.error.path === '/oauth2/login') {
+        if (
+          error.error &&
+          typeof error.error === 'object' &&
+          error.error.path === '/oauth2/login'
+        ) {
           return throwError(() => error.error);
         }
         _auth.logout();

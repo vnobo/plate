@@ -27,13 +27,8 @@
               },
               {
                 "glob": "**/*",
-                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
-                "output": "/assets/icons/ant-design/"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/bootstrap-icons/icons/",
-                "output": "/assets/icons/bootstrap/"
+                "input": "@tabler/icons/icons/",
+                "output": "/assets/icons/"
               }
             ],
             "styles": [
@@ -42,12 +37,16 @@
                 "bundleName": "magenta-style"
               },
               {
-                "input": "bootstrap-icons/font/bootstrap-icons.css",
-                "bundleName": "bootstrap-icons-style"
-              },
-              {
                 "input": "@tabler/core/dist/css/tabler.css",
                 "bundleName": "tabler-style"
+              },
+              {
+                "input": "@tabler/core/dist/css/tabler-themes.css",
+                "bundleName": "tabler-themes-style"
+              },
+              {
+                "input": "@tabler/core/dist/css/tabler-socials.css",
+                "bundleName": "tabler-socials-style"
               },
               {
                 "input": "src/styles.scss",

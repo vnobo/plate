@@ -11,23 +11,3 @@
     )
   );
 }
-
-html,
-body {
-  height: 100%;
-}
-body {
-  margin: 0;
-  font-family: var(--tblr-font-sans-serif);
-}
-
-html {
-  color-scheme: dark;
-  @include mat.theme(
-    (
-      color: mat.$violet-palette,
-      typography: Roboto,
-      density: 0,
-    )
-  );
-}
