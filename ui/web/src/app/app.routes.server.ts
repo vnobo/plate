@@ -2,10 +2,6 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
   {
-    path: '',
-    renderMode: RenderMode.Client,
-  },
-  {
     path: 'exception/403',
     renderMode: RenderMode.Prerender,
   },
@@ -22,8 +18,12 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Prerender,
   },
   {
-    path: 'passport/login', // This page requires user-specific data, so we use SSR
+    path: 'passport/login',
     renderMode: RenderMode.Server,
+  },
+  {
+    path: '',
+    renderMode: RenderMode.Client,
   },
   {
     path: '**',

@@ -22,7 +22,6 @@
     "@angular/router": "^20.0.0",
     "@angular/service-worker": "^20.0.0",
     "@angular/ssr": "^20.0.0",
-    "@chinese-fonts/lxgwwenkaibright": "^1.0.2",
     "@tabler/core": "latest",
     "@tabler/icons": "latest",
     "dayjs": "latest",

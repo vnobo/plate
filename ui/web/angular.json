@@ -55,9 +55,12 @@
             ],
             "scripts": [
               {
-                "input": "@tabler/core/dist/js/tabler.min.js",
-                "inject": true,
+                "input": "@tabler/core/dist/js/tabler.js",
                 "bundleName": "tabler-script"
+              },
+              {
+                "input": "@tabler/core/dist/js/tabler-theme.js",
+                "bundleName": "tabler-theme-script"
               }
             ],
             "server": "src/main.server.ts",

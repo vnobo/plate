@@ -31,7 +31,7 @@ export class ProgressBar {
   isShow$: Observable<boolean> = toObservable(this.isShow).pipe(
     debounceTime(100),
     distinctUntilChanged(),
-    tap(res => console.log(`Progress bar show is: ${res}`)),
+    tap(res => console.debug(`Progress bar show is: ${res}`)),
   );
 
   show(): void {

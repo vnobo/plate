@@ -1,6 +1,8 @@
-import { afterEveryRender, Component, ElementRef } from '@angular/core';
+import { afterNextRender, Component, ElementRef, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+
+import dayjs from 'dayjs';
 
 @Component({
   selector: 'app-login',
@@ -9,10 +11,6 @@ import { RouterModule } from '@angular/router';
   styleUrl: './login.scss',
 })
 export class Login {
-  constructor() {
-    //afterEveryRender(() => {});
-  }
-
   loginForm = new FormGroup({
     isSubmitting: new FormControl(false),
     passwordFieldTextType: new FormControl(false),
@@ -26,4 +24,10 @@ export class Login {
     }),
     remember: new FormControl(false),
   });
+
+  constructor(private _el: ElementRef) {
+    afterNextRender(() => {
+      console.log('初始化时间: ', dayjs().format('YYYY-MM-DD HH:mm:ss'));
+    });
+  }
 }
