@@ -30,4 +30,8 @@ export class Login {
       console.log('初始化时间: ', dayjs().format('YYYY-MM-DD HH:mm:ss'));
     });
   }
+
+  onSubmit() {
+    console.log('登录表单: ', this.loginForm.value);
+  }
 }

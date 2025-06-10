@@ -26,7 +26,9 @@
           autocomplete="on"
           class="needs-validation"
           novalidate
-          role="form">
+          role="form"
+          [formGroup]="loginForm"
+          (ngSubmit)="onSubmit()">
           <div class="container">
             <div class="input-icon mb-3">
               <label class="input-icon-addon" for="username">
@@ -51,10 +53,16 @@
               <input
                 id="username"
                 name="username"
-                class="form-control"
+                class="form-control is-invalid-lite"
                 placeholder="手机或电子邮件"
                 autocomplete="on"
-                tabindex="1" />
+                tabindex="1"
+                formControlName="username"
+                [class.is-invalid]="
+                  loginForm.controls.username.invalid &&
+                  (loginForm.controls.username.dirty || loginForm.controls.username.touched)
+                "
+                [class.is-valid]="loginForm.controls.username.valid" />
             </div>
             <div class="mb-2">
               <div class="form-label">
@@ -88,17 +96,26 @@
                 <input
                   id="password"
                   name="password"
-                  class="form-control"
+                  class="form-control is-invalid-lite"
                   placeholder="密   码"
                   autocomplete="on"
-                  tabindex="2" />
+                  tabindex="2"
+                  formControlName="password"
+                  [type]="loginForm.controls.passwordFieldTextType.value?'text':'password'"
+                  [class.is-invalid]="
+                  loginForm.controls.password.invalid &&
+                  (loginForm.controls.password.dirty || loginForm.controls.password.touched)
+                "
+                  [class.is-valid]="loginForm.controls.password.valid" />
                 <span class="input-group-text">
                   <a
                     aria-label="显示密码"
                     class="link-secondary"
                     data-bs-original-title="显示密码"
                     data-bs-toggle="tooltip"
-                    data-bs-placement="right">
+                    data-bs-placement="right"
+                    formControlName="passwordFieldTextType"
+                    (click)="loginForm.controls.passwordFieldTextType.setValue(!loginForm.controls.passwordFieldTextType.value)">
                     @if (loginForm.controls.passwordFieldTextType.value) {
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -139,14 +156,21 @@
                   id="flexCheckRemember"
                   name="remember"
                   tabindex="3"
-                  type="checkbox" />
+                  type="checkbox"
+                  formControlName="remember" />
                 <div class="form-check-label" for="flexCheckRemember">
                   <span class="text-info">在这个设备上记住我 </span>
                 </div>
               </label>
             </div>
             <div class="form-footer">
-              <button class="btn btn-primary w-100" tabindex="4" type="submit">登 录 </button>
+              <button
+                class="btn btn-primary w-100"
+                tabindex="4"
+                type="submit"
+                [disabled]="!loginForm.valid"
+                >登 录
+              </button>
             </div>
           </div>
         </form>
