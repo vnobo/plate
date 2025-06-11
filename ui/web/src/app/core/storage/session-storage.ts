@@ -1,30 +1,38 @@
-import {Inject, Injectable, InjectionToken} from '@angular/core';
-
-export const SESSION_STORAGE = new InjectionToken<Storage>('Session Storage', {
-  providedIn: 'root',
-  factory: () => sessionStorage,
-});
+import { isPlatformBrowser } from '@angular/common';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SessionStorageService {
-  constructor(@Inject(SESSION_STORAGE) public storage: Storage) {
+  private isBrowser: boolean;
+
+  constructor(@Inject(PLATFORM_ID) private _platformId: Object) {
+    this.isBrowser = isPlatformBrowser(_platformId);
   }
 
-  get(key: string) {
-    return this.storage.getItem(key);
+  setItem(key: string, value: string): void {
+    if (this.isBrowser) {
+      sessionStorage.setItem(key, value);
+    }
   }
 
-  set(key: string, value: string) {
-    this.storage.setItem(key, value);
+  getItem(key: string): string | null {
+    if (this.isBrowser) {
+      return sessionStorage.getItem(key);
+    }
+    return null;
   }
 
-  remove(key: string) {
-    this.storage.removeItem(key);
+  removeItem(key: string): void {
+    if (this.isBrowser) {
+      sessionStorage.removeItem(key);
+    }
   }
 
-  clear() {
-    this.storage.clear();
+  clear(): void {
+    if (this.isBrowser) {
+      sessionStorage.clear();
+    }
   }
 }

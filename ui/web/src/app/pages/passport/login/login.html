@@ -101,7 +101,7 @@
                   autocomplete="on"
                   tabindex="2"
                   formControlName="password"
-                  [type]="loginForm.controls.passwordFieldTextType.value?'text':'password'"
+                  [type]="passwordFieldTextType()?'text':'password'"
                   [class.is-invalid]="
                   loginForm.controls.password.invalid &&
                   (loginForm.controls.password.dirty || loginForm.controls.password.touched)
@@ -114,9 +114,8 @@
                     data-bs-original-title="显示密码"
                     data-bs-toggle="tooltip"
                     data-bs-placement="right"
-                    formControlName="passwordFieldTextType"
-                    (click)="loginForm.controls.passwordFieldTextType.setValue(!loginForm.controls.passwordFieldTextType.value)">
-                    @if (loginForm.controls.passwordFieldTextType.value) {
+                    (click)="showPassword()">
+                    @if (passwordFieldTextType()) {
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="16"
@@ -168,8 +167,16 @@
                 class="btn btn-primary w-100"
                 tabindex="4"
                 type="submit"
-                [disabled]="!loginForm.valid"
-                >登 录
+                [disabled]="!loginForm.valid || isSubmitting()">
+                @if (isSubmitting()) {
+                <span
+                  class="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"></span>
+                <span>登录中...</span>
+                } @else {
+                <span>登 录</span>
+                }
               </button>
             </div>
           </div>

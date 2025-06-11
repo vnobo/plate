@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 
 import { ProgressBar } from '@app/core/services/progress-bar';
 import { TokenService } from '@app/core/services/token.service';
-import { environment } from '@environment/env';
+import { environment } from '@envs/env';
 
 function defaultInterceptor(
   req: HttpRequest<unknown>,
