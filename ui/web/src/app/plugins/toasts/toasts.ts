@@ -136,31 +136,26 @@ export class ToastService {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="toast-container position-fixed top-0 end-0 p-3">
+    <div class="toast-container p-3 bottom-0 end-0 ">
       @for (toast of toastService.toastList(); track toast.id) {
       <div
-        class="toast show"
-        [ngClass]="getToastClass(toast.type)"
         role="alert"
         aria-live="assertive"
-        aria-atomic="true">
-        <div class="toast-header">
-          @if (toast.avatar) {
-          <span
-            class="avatar avatar-xs me-2"
-            [style.background-image]="'url(' + toast.avatar + ')'"></span>
-          } @else {
-          <span class="toast-icon me-2" [ngClass]="getIconClass(toast.type)"></span>
-          }
-          <strong class="me-auto">{{ toast.title }}</strong>
-          <small>{{ getTimeAgo(toast.timestamp) }}</small>
+        aria-atomic="true"
+        class="toast"
+        data-bs-delay="3000"
+        data-bs-autohide="true"
+        data-bs-toggle="toast"
+        class="toast align-items-center"
+        [ngClass]="getToastClass(toast.type)">
+        <div class="d-flex">
+          <div class="toast-body">{{ toast.message }}</div>
           <button
             type="button"
-            class="ms-2 btn-close"
-            (click)="closeToast(toast.id)"
+            class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
             aria-label="Close"></button>
         </div>
-        <div class="toast-body">{{ toast.message }}</div>
       </div>
       }
     </div>
@@ -168,42 +163,6 @@ export class ToastService {
   styles: `
     .toast-container {
       z-index: 1050;
-    }
-    .toast-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-    }
-    .toast-icon.success {
-      background-color: #5eba00;
-      color: white;
-    }
-    .toast-icon.error {
-      background-color: #cd201f;
-      color: white;
-    }
-    .toast-icon.warning {
-      background-color: #f59f00;
-      color: white;
-    }
-    .toast-icon.info {
-      background-color: #467fcf;
-      color: white;
-    }
-    .toast.success {
-      border-left: 4px solid #5eba00;
-    }
-    .toast.error {
-      border-left: 4px solid #cd201f;
-    }
-    .toast.warning {
-      border-left: 4px solid #f59f00;
-    }
-    .toast.info {
-      border-left: 4px solid #467fcf;
     }
   `,
 })
