@@ -1,14 +1,5 @@
-import {
-  Component,
-  Injectable,
-  OnDestroy,
-  afterEveryRender,
-  computed,
-  effect,
-  inject,
-  signal,
-} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, Injectable, OnDestroy, afterEveryRender, inject, signal } from '@angular/core';
 
 // Toast类型定义
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -146,17 +137,15 @@ export class ToastService {
   imports: [CommonModule],
   template: `
     <div class="toast-container p-3 bottom-0 end-0 ">
-      @for (toast of toastService.toastList(); track toast.id) {
+      @for (toast of toasts(); track toast.id) {
       <div
         role="alert"
         aria-live="assertive"
         aria-atomic="true"
-        class="toast"
-        data-bs-delay="3000"
-        data-bs-autohide="true"
+        class="toast align-items-center text-bg-success border-0"
         data-bs-toggle="toast"
-        class="toast align-items-center"
-        [ngClass]="getToastClass(toast.type)">
+        [attr.data-bs-delay]="toast.delay || 3000"
+        [attr.data-bs-autohide]="toast.autohide">
         <div class="d-flex">
           <div class="toast-body">{{ toast.message }}</div>
           <button
@@ -176,47 +165,23 @@ export class ToastService {
   `,
 })
 export class Toasts implements OnDestroy {
-  // 注入Toast服务
-  toastService = inject(ToastService);
+  // 使用signal管理toast列表
+  toasts = signal<Toast[]>([]);
 
   // 构造函数
   constructor() {
     afterEveryRender(() => {});
   }
 
-  // 获取Toast类型对应的CSS类
-  getToastClass(type: ToastType): string {
-    return type;
+  remove(id: string) {
+    this.toasts.update(list => list.filter(toast => toast.id !== id));
   }
 
-  // 获取Toast类型对应的图标类
-  getIconClass(type: ToastType): string {
-    return type;
+  clear() {
+    this.toasts.set([]);
   }
 
-  // 计算时间差显示
-  getTimeAgo(timestamp: Date): string {
-    const now = new Date();
-    const diff = Math.floor((now.getTime() - timestamp.getTime()) / 1000);
-
-    if (diff < 60) {
-      return '刚刚';
-    } else if (diff < 3600) {
-      return `${Math.floor(diff / 60)} 分钟前`;
-    } else if (diff < 86400) {
-      return `${Math.floor(diff / 3600)} 小时前`;
-    } else {
-      return `${Math.floor(diff / 86400)} 天前`;
-    }
-  }
-
-  // 关闭指定的Toast
-  closeToast(id: string): void {
-    this.toastService.remove(id);
-  }
-
-  // 组件销毁时的清理工作
-  ngOnDestroy(): void {
-    this.toastService.clear();
+  ngOnDestroy() {
+    this.clear();
   }
 }
