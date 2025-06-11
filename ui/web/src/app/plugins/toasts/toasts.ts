@@ -1,5 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, Injectable, OnDestroy, afterEveryRender, inject, signal } from '@angular/core';
+import {
+  ApplicationRef,
+  Component,
+  EnvironmentInjector,
+  Injectable,
+  OnDestroy,
+  afterEveryRender,
+  createComponent,
+  inject,
+  signal,
+} from '@angular/core';
 
 // Toast类型定义
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -21,12 +31,22 @@ export interface Toast {
   providedIn: 'root',
 })
 export class ToastService {
-  // 使用signal管理toast列表
-  private toasts = signal<Toast[]>([]);
+  constructor(private appRef: ApplicationRef, private injector: EnvironmentInjector) {}
 
-  // 公开的只读toast列表
-  public readonly toastList = this.toasts.asReadonly();
+  open(text: string) {
+    // Create a `ComponentRef` instance.
+    const dialogRef = createComponent(Toasts, {
+      environmentInjector: this.injector,
+    });
 
+    dialogRef.setInput('text', text);
+
+    document.body.appendChild(dialogRef.location.nativeElement);
+
+    // Register the newly created ref using the `ApplicationRef` instance
+    // to include the component view into change detection cycles.
+    this.appRef.attachView(dialogRef.hostView);
+  }
   /**
    * 添加一个新的toast消息
    * @param title 标题
