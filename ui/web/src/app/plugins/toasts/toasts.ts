@@ -1,4 +1,13 @@
-import { Component, Injectable, OnDestroy, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  Injectable,
+  OnDestroy,
+  afterEveryRender,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 // Toast类型定义
@@ -172,7 +181,7 @@ export class Toasts implements OnDestroy {
 
   // 构造函数
   constructor() {
-    // 可以在这里添加初始化逻辑
+    afterEveryRender(() => {});
   }
 
   // 获取Toast类型对应的CSS类
@@ -208,6 +217,6 @@ export class Toasts implements OnDestroy {
 
   // 组件销毁时的清理工作
   ngOnDestroy(): void {
-    // 可以在这里添加清理逻辑
+    this.toastService.clear();
   }
 }
