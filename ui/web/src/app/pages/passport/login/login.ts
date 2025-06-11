@@ -1,6 +1,6 @@
 import { afterNextRender, Component, ElementRef, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -17,6 +17,7 @@ import dayjs from 'dayjs';
 import { Authentication, Credentials } from 'typings';
 import { TokenService } from '@app/core/services/token.service';
 import { BrowserStorage } from '@app/core';
+import { AlertService, ToastService } from '@app/plugins';
 
 @Component({
   selector: 'app-login',
@@ -25,6 +26,8 @@ import { BrowserStorage } from '@app/core';
   styleUrl: './login.scss',
 })
 export class Login {
+  private readonly storageKey = 'credentials';
+
   passwordFieldTextType = signal(false);
   // 使用Signal管理提交状态
   isSubmitting = signal(false);
@@ -36,6 +39,8 @@ export class Login {
 
   private readonly _tokenSer = inject(TokenService);
   private readonly _storage = inject(BrowserStorage);
+  private readonly _toastService = inject(ToastService);
+  private readonly _alertService = inject(AlertService);
 
   loginForm = new FormGroup({
     username: new FormControl('', {
@@ -49,7 +54,12 @@ export class Login {
     remember: new FormControl(false),
   });
 
-  constructor(private _el: ElementRef, private _http: HttpClient) {
+  constructor(
+    private _el: ElementRef,
+    private _http: HttpClient,
+    private _router: Router,
+    private _route: ActivatedRoute,
+  ) {
     afterNextRender(() => {
       // 设置防抖提交处理
       this.submitSubject
@@ -89,13 +99,56 @@ export class Login {
         this.rememberMe(credentials);
       }
 
+      // 表单验证提示
+      if (
+        this.loginForm.get('username')?.hasError('required') ||
+        this.loginForm.get('password')?.hasError('required')
+      ) {
+        this._toastService.warning('验证失败', '用户名和密码不能为空', {
+          autohide: true,
+          delay: 3000,
+        });
+        this.isSubmitting.set(false);
+        return;
+      }
+
+      if (
+        this.loginForm.get('username')?.hasError('minlength') ||
+        this.loginForm.get('username')?.hasError('maxlength')
+      ) {
+        this._toastService.warning('验证失败', '用户名长度必须在5-32个字符之间', {
+          autohide: true,
+          delay: 3000,
+        });
+        this.isSubmitting.set(false);
+        return;
+      }
+
+      if (
+        this.loginForm.get('password')?.hasError('minlength') ||
+        this.loginForm.get('password')?.hasError('maxlength')
+      ) {
+        this._toastService.warning('验证失败', '密码长度必须在6-32个字符之间', {
+          autohide: true,
+          delay: 3000,
+        });
+        this.isSubmitting.set(false);
+        return;
+      }
+
       this.login(credentials).subscribe({
-        next: res => console.log('登录成功: ', res),
-        error: err => console.error('登录失败: ', err),
+        error: error => {
+          this.handleLoginError(error);
+          this.isSubmitting.set(false);
+        },
         complete: () => this.isSubmitting.set(false),
       });
     } catch (error) {
       console.error('登录过程中发生错误: ', error);
+      this._toastService.error('系统错误', '登录过程中发生未知错误，请稍后重试', {
+        autohide: true,
+        delay: 5000,
+      });
       // 确保即使出错也重置提交状态
       this.isSubmitting.set(false);
     }
@@ -114,12 +167,46 @@ export class Login {
       distinctUntilChanged(),
       retry({ count: 3, delay: 1000 }),
       takeUntil(this.destroy$),
-      tap(authentication => this._tokenSer.login(authentication)),
+      tap({
+        next: authentication => {
+          this._tokenSer.login(authentication);
+          this.handleLoginSuccess(authentication);
+        },
+        error: error => this.handleLoginError(error),
+      }),
     );
   }
+
   private rememberMe(credentials: Credentials) {
     let crstr = JSON.stringify(credentials);
     crstr = btoa(crstr);
-    this._storage.setItem('credentials', crstr);
+    this._storage.setItem(this.storageKey, crstr);
+  }
+
+  private handleLoginSuccess(authentication: Authentication) {
+    this._toastService.success(
+      '登录成功',
+      `欢迎 ${authentication.user?.name || '用户'} 登录系统！`,
+      {
+        autohide: true,
+        delay: 3000,
+      },
+    );
+    this._router.navigate(['/home'], { relativeTo: this._route }).then();
+  }
+
+  private handleLoginError(error: any) {
+    // 清除可能存在的登录信息
+    this._tokenSer.clear();
+    this._storage.remove(this.storageKey);
+
+    this._toastService.error(
+      '登录失败',
+      error.errors || error.message || '登录系统失败，请检查您的用户名和密码',
+      {
+        autohide: true,
+        delay: 5000,
+      },
+    );
   }
 }
