@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import {Routes} from '@angular/router';
 
 export const routes: Routes = [
   {
@@ -7,7 +7,6 @@ export const routes: Routes = [
     data: { title: '管理平台' },
   },
   { path: 'exception', loadChildren: () => import('./pages/index').then(m => m.EXCEPTION_ROUTES) },
-  { path: 'examples', loadChildren: () => import('./pages/index').then(m => m.EXAMPLE_ROUTES) },
   { path: '', pathMatch: 'full', redirectTo: '/passport' },
   { path: '**', redirectTo: 'exception/404' },
 ];

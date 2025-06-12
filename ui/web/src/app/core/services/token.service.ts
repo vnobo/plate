@@ -1,7 +1,7 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { afterNextRender, inject, Injectable } from '@angular/core';
-import { SessionStorageService } from '@app/core';
-import { Authentication } from '@app/core/types';
+import {HttpErrorResponse} from '@angular/common/http';
+import {afterNextRender, inject, Injectable} from '@angular/core';
+import {SessionStorageService} from '@app/core';
+import {Authentication} from '@plate/types';
 import dayjs from 'dayjs';
 
 @Injectable({ providedIn: 'root' })

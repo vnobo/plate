@@ -1,12 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { afterNextRender, Component, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { BrowserStorage } from '@app/core';
-import { TokenService } from '@app/core/services/token.service';
-import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } from 'rxjs';
-import { Authentication, Credentials } from 'typings';
+import {CommonModule} from '@angular/common';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {afterNextRender, Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
+import {BrowserStorage} from '@app/core';
+import {TokenService} from '@app/core/services/token.service';
+import {ToastService} from '@app/plugins';
+import {Authentication, Credentials} from '@plate/types';
+import {debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap} from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -14,7 +15,7 @@ import { Authentication, Credentials } from 'typings';
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class Login {
+export class Login implements OnInit, OnDestroy {
   private readonly storageKey = 'credentials';
 
   passwordFieldTextType = signal(false);
@@ -28,6 +29,7 @@ export class Login {
 
   private readonly _tokenSer = inject(TokenService);
   private readonly _storage = inject(BrowserStorage);
+  private readonly _toasts = inject(ToastService);
 
   loginForm = new FormGroup({
     username: new FormControl('', {
@@ -53,6 +55,19 @@ export class Login {
           this.processLogin();
         });
     });
+  }
+  ngOnInit(): void {
+    this._toasts.info('欢迎使用', '这是一个简单测试');
+    this._toasts.info('欢迎使用', '这是一个简单测试');
+    this._toasts.info('欢迎使用', '这是一个简单测试');
+    this._toasts.info('欢迎使用', '这是一个简单测试');
+    this._toasts.info('欢迎使用', '这是一个简单测试');
+    this._toasts.info('欢迎使用', '这是一个简单测试');
+    this._toasts.info('欢迎使用', '这是一个简单测试');
+    this._toasts.info('欢迎使用', '这是一个简单测试');
+    this._toasts.info('欢迎使用', '这是一个简单测试');
+    this._toasts.info('欢迎使用', '这是一个简单测试');
+    this._toasts.info('欢迎使用', '这是一个简单测试');
   }
 
   // 组件销毁时清理资源

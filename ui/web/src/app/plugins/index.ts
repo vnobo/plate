@@ -5,4 +5,4 @@ export {
   type AlertOptions,
   type AlertData,
 } from '../plugins/alerts/alerts';
-export { Toasts, ToastService, type Toast, type ToastType } from '../plugins/toasts/toasts';
+export { Toasts, MessageService as ToastService, type ToastType } from '../plugins/toasts/toasts';
