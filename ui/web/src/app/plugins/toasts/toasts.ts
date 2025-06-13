@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import {
   afterNextRender,
@@ -5,13 +6,15 @@ import {
   Component,
   ComponentRef,
   createComponent,
+  ElementRef,
   EnvironmentInjector,
   Injectable,
   model,
   OnDestroy,
   OnInit,
+  Renderer2,
 } from '@angular/core';
-import { animate, style, transition, trigger } from '@angular/animations';
+import { Toast } from '@tabler/core';
 
 // Toast类型定义
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -110,19 +113,22 @@ export class MessageService {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="toast-container p-3 bottom-0 end-0">
+    <div class="toast-container">
       @for (toast of toasts(); track toast.id) {
       <div
-        [attr.data-toast-id]="toast.id"
+        class="toast"
         role="alert"
         aria-live="assertive"
         aria-atomic="true"
-        class="toast align-items-center text-bg-{{ toast.type }} border-0">
+        data-bs-autohide="false"
+        data-bs-toggle="toast"
+        [attr.data-toast-id]="toast.id">
         <div class="d-flex">
           <div class="toast-body">{{ toast.message }}</div>
           <button
             type="button"
             class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
             (click)="remove(toast.id)"
             aria-label="Close"></button>
         </div>
@@ -130,46 +136,27 @@ export class MessageService {
       }
     </div>
   `,
-  styles: `
-    :host {
-      position: fixed;
-      bottom: 0;
-      right: 0;
-      z-index: 1050;
-    }
-  `,
-  animations: [
-    trigger('toastAnimation', [
-      transition(':enter', [
-        style({ opacity: 0, transform: 'translateX(100%)' }),
-        animate('300ms ease-out', style({ opacity: 1, transform: 'translateX(0)' })),
-      ]),
-      transition(':leave', [
-        animate('300ms ease-in', style({ opacity: 0, transform: 'translateX(100%)' })),
-      ]),
-    ]),
+  styles: [
+    `
+      :host {
+      }
+    `,
   ],
 })
 export class Toasts implements OnInit, OnDestroy {
   // 使用signal管理toast列表
   toasts = model<ToastMessage[]>([]);
-
-  constructor() {
+  toastEls: Toast[] = [];
+  constructor(el: ElementRef, renderer: Renderer2) {
     afterNextRender(() => {
-      //const toastEl = document.querySelector('.toast');
-      //if (toastEl) {
-      //  const toast = new Toast(toastEl, {
-      //    autohide: true,
-      //    delay: 3000,
-      //  });
-      //  toast.show();
-      //}
+      const toastEl = el.nativeElement.querySelectorAll('.toast');
+      toastEl.forEach((toastEl: Element) => {
+        console.log(toastEl);
+      });
     });
   }
 
-  ngOnInit(): void {
-    console.log('ToastComponent init');
-  }
+  ngOnInit(): void {}
 
   public add(toast: ToastMessage): void {
     this.toasts.update(list => [...list, toast]);

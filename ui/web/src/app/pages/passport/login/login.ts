@@ -54,21 +54,14 @@ export class Login implements OnInit, OnDestroy {
         .subscribe(() => {
           this.processLogin();
         });
-
-      this._toasts.info('欢迎使用', '这是一个简单测试');
-      this._toasts.info('欢迎使用', '这是一个简单测试');
-      this._toasts.info('欢迎使用', '这是一个简单测试');
-      this._toasts.info('欢迎使用', '这是一个简单测试');
-      this._toasts.info('欢迎使用', '这是一个简单测试');
-      this._toasts.info('欢迎使用', '这是一个简单测试');
-      this._toasts.info('欢迎使用', '这是一个简单测试');
-      this._toasts.info('欢迎使用', '这是一个简单测试');
-      this._toasts.info('欢迎使用', '这是一个简单测试');
-      this._toasts.info('欢迎使用', '这是一个简单测试');
-      this._toasts.info('欢迎使用', '这是一个简单测试');
+      for (let i = 0; i < 10; i++) {
+        this._toasts.info('欢迎使用', `这是一个简单测试,消息 ${i + 1}`);
+      }
     });
   }
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this._toasts.info('欢迎使用', `这是一个简单测试`);
+  }
 
   // 组件销毁时清理资源
   ngOnDestroy() {

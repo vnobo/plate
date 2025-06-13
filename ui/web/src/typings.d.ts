@@ -1,3 +1,7 @@
+declare var document: Document;
+declare var window: Window;
+declare var global: any;
+
 declare module '@plate/types' {
   export interface UserAuditor {
     code: string;
