@@ -1,13 +1,13 @@
-import {CommonModule} from '@angular/common';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {afterNextRender, Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ActivatedRoute, Router, RouterModule} from '@angular/router';
-import {BrowserStorage} from '@app/core';
-import {TokenService} from '@app/core/services/token.service';
-import {ToastService} from '@app/plugins';
-import {Authentication, Credentials} from '@plate/types';
-import {debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap} from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { afterNextRender, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { BrowserStorage } from '@app/core';
+import { TokenService } from '@app/core/services/token.service';
+import { ToastService } from '@app/plugins';
+import { Authentication, Credentials } from '@plate/types';
+import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -54,21 +54,21 @@ export class Login implements OnInit, OnDestroy {
         .subscribe(() => {
           this.processLogin();
         });
+
+      this._toasts.info('欢迎使用', '这是一个简单测试');
+      this._toasts.info('欢迎使用', '这是一个简单测试');
+      this._toasts.info('欢迎使用', '这是一个简单测试');
+      this._toasts.info('欢迎使用', '这是一个简单测试');
+      this._toasts.info('欢迎使用', '这是一个简单测试');
+      this._toasts.info('欢迎使用', '这是一个简单测试');
+      this._toasts.info('欢迎使用', '这是一个简单测试');
+      this._toasts.info('欢迎使用', '这是一个简单测试');
+      this._toasts.info('欢迎使用', '这是一个简单测试');
+      this._toasts.info('欢迎使用', '这是一个简单测试');
+      this._toasts.info('欢迎使用', '这是一个简单测试');
     });
   }
-  ngOnInit(): void {
-    this._toasts.info('欢迎使用', '这是一个简单测试');
-    this._toasts.info('欢迎使用', '这是一个简单测试');
-    this._toasts.info('欢迎使用', '这是一个简单测试');
-    this._toasts.info('欢迎使用', '这是一个简单测试');
-    this._toasts.info('欢迎使用', '这是一个简单测试');
-    this._toasts.info('欢迎使用', '这是一个简单测试');
-    this._toasts.info('欢迎使用', '这是一个简单测试');
-    this._toasts.info('欢迎使用', '这是一个简单测试');
-    this._toasts.info('欢迎使用', '这是一个简单测试');
-    this._toasts.info('欢迎使用', '这是一个简单测试');
-    this._toasts.info('欢迎使用', '这是一个简单测试');
-  }
+  ngOnInit(): void {}
 
   // 组件销毁时清理资源
   ngOnDestroy() {

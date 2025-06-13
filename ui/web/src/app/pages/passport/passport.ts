@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { Login } from './login/login';
 
 export const PASSPORT_ROUTES: Routes = [
-  // passport
   {
     path: '',
     children: [

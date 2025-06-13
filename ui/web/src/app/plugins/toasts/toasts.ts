@@ -1,6 +1,6 @@
-import {CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
-  afterEveryRender,
+  afterNextRender,
   ApplicationRef,
   Component,
   ComponentRef,
@@ -11,6 +11,7 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 // Toast类型定义
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -137,13 +138,33 @@ export class MessageService {
       z-index: 1050;
     }
   `,
+  animations: [
+    trigger('toastAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(100%)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'translateX(0)' })),
+      ]),
+      transition(':leave', [
+        animate('300ms ease-in', style({ opacity: 0, transform: 'translateX(100%)' })),
+      ]),
+    ]),
+  ],
 })
 export class Toasts implements OnInit, OnDestroy {
   // 使用signal管理toast列表
   toasts = model<ToastMessage[]>([]);
 
   constructor() {
-    afterEveryRender(() => {});
+    afterNextRender(() => {
+      //const toastEl = document.querySelector('.toast');
+      //if (toastEl) {
+      //  const toast = new Toast(toastEl, {
+      //    autohide: true,
+      //    delay: 3000,
+      //  });
+      //  toast.show();
+      //}
+    });
   }
 
   ngOnInit(): void {
