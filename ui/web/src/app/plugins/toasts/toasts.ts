@@ -18,7 +18,7 @@ import {
 import { trigger, transition, style, animate } from '@angular/animations';
 
 // Toast类型定义
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
+export type ToastType = 'success' | 'danger' | 'warning' | 'info';
 
 // Toast消息接口
 export interface Message {
@@ -46,7 +46,6 @@ export class MessageService {
     document.body.appendChild(this.toastRef.location.nativeElement);
     this.appRef.attachView(this.toastRef.hostView);
     this.toastRef.instance.toastsDropped.subscribe(() => {
-      console.log('销毁');
       this.toastRef?.destroy();
       this.toastRef = null;
     });
@@ -83,7 +82,7 @@ export class MessageService {
   }
 
   error(message: string, options: Partial<Omit<Message, 'id' | 'message' | 'type'>> = {}): string {
-    return this.show(message, 'error', options);
+    return this.show(message, 'danger', options);
   }
 
   warning(
@@ -134,18 +133,108 @@ export class TablerToastInit {
       @for (toast of msgs(); track toast) {
       <div
         id="{{ toast.id }}"
-        class="toast align-items-center text-bg-primary border-0"
+        class="toast align-items-center border-0"
         role="alert"
         aria-live="assertive"
         aria-atomic="true"
         data-bs-toggle="toast"
+        [ngClass]="{
+          'text-bg-success': toast.type === 'success',
+          'text-bg-danger': toast.type === 'danger',
+          'text-bg-warning': toast.type === 'warning',
+          'text-bg-info': toast.type === 'info',
+          'text-bg-primary': toast.type === undefined
+        }"
+        [@toastAnimation]
         [attr.data-bs-animation]="toast.animation"
         [attr.data-bs-delay]="toast.delay"
         [attr.data-bs-autohide]="toast.autohide"
         tablerToastInit
         (onHidden)="remove($event)">
         <div class="d-flex">
-          <div class="toast-body">{{ toast.message }}</div>
+          <div class="toast-body">
+            @if(toast.type === 'success') {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-2">
+              <path d="M5 12l5 5l10 -10" />
+            </svg>
+            } @else if(toast.type === 'danger') {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-2">
+              <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+              <path d="M12 8v4" />
+              <path d="M12 16h.01" />
+            </svg>
+            } @else if(toast.type === 'warning') {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-2">
+              <path d="M12 9v4" />
+              <path
+                d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" />
+              <path d="M12 16h.01" />
+            </svg>
+            } @else if(toast.type === 'info') {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-2">
+              <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+              <path d="M12 9h.01" />
+              <path d="M11 12h1v4h1" />
+            </svg>
+            }@else {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-2">
+              <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+              <path d="M12 9h.01" />
+              <path d="M11 12h1v4h1" />
+            </svg>
+            }
+            {{ toast.message }}
+          </div>
           <button
             type="button"
             class="btn-close btn-close-white me-2 m-auto"
@@ -160,6 +249,12 @@ export class TablerToastInit {
   styles: [
     `
       :host {
+        max-width: 100%;
+      }
+    `,
+    `
+      .toast-container {
+        overflow: hidden; /* 隐藏溢出内容 */
       }
     `,
   ],

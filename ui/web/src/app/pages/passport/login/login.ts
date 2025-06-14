@@ -58,7 +58,22 @@ export class Login implements OnDestroy {
   }
 
   openToast() {
-    this._toasts.success('登录成功', {
+    this._toasts.success('登录成功success', {
+      autohide: true,
+      delay: 3000,
+      animation: true,
+    });
+    this._toasts.info('登录消息info', {
+      autohide: true,
+      delay: 3000,
+      animation: true,
+    });
+    this._toasts.error('登录错误error', {
+      autohide: true,
+      delay: 3000,
+      animation: true,
+    });
+    this._toasts.warning('登录警告warning', {
       autohide: true,
       delay: 3000,
       animation: true,
