@@ -1,30 +1,31 @@
-import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import {
   afterNextRender,
   ApplicationRef,
   Component,
   ComponentRef,
+  computed,
   createComponent,
+  Directive,
   ElementRef,
   EnvironmentInjector,
+  inject,
   Injectable,
-  model,
   OnDestroy,
-  OnInit,
-  Renderer2,
+  output,
+  signal,
 } from '@angular/core';
-import { Toast } from '@tabler/core';
+import { trigger, transition, style, animate } from '@angular/animations';
 
 // Toast类型定义
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 // Toast消息接口
-export interface ToastMessage {
+export interface Message {
   id: string;
-  title?: string;
   message: string;
   type: ToastType;
+  animation?: boolean;
   autohide?: boolean;
   delay?: number;
 }
@@ -42,23 +43,26 @@ export class MessageService {
     this.toastRef = createComponent(Toasts, {
       environmentInjector: this.injector,
     });
-
     document.body.appendChild(this.toastRef.location.nativeElement);
     this.appRef.attachView(this.toastRef.hostView);
+    this.toastRef.instance.toastsDropped.subscribe(() => {
+      console.log('销毁');
+      this.toastRef?.destroy();
+      this.toastRef = null;
+    });
   }
 
   show(
-    title: string,
     message: string,
     type: ToastType = 'info',
-    options: Partial<Omit<ToastMessage, 'id' | 'title' | 'message' | 'type'>> = {},
+    options: Partial<Omit<Message, 'id' | 'message' | 'type'>> = {},
   ) {
-    const id = this.generateId();
-    const toast: ToastMessage = {
+    const id = this.generateCryptoId();
+    const toast: Message = {
       id,
-      title,
       message,
       type,
+      animation: options.animation ?? true,
       autohide: options.autohide ?? true,
       delay: options.delay ?? 5000,
     };
@@ -72,57 +76,74 @@ export class MessageService {
   }
 
   success(
-    title: string,
     message: string,
-    options: Partial<Omit<ToastMessage, 'id' | 'title' | 'message' | 'type'>> = {},
+    options: Partial<Omit<Message, 'id' | 'message' | 'type'>> = {},
   ): string {
-    return this.show(title, message, 'success', options);
+    return this.show(message, 'success', options);
   }
 
-  error(
-    title: string,
-    message: string,
-    options: Partial<Omit<ToastMessage, 'id' | 'title' | 'message' | 'type'>> = {},
-  ): string {
-    return this.show(title, message, 'error', options);
+  error(message: string, options: Partial<Omit<Message, 'id' | 'message' | 'type'>> = {}): string {
+    return this.show(message, 'error', options);
   }
 
   warning(
-    title: string,
     message: string,
-    options: Partial<Omit<ToastMessage, 'id' | 'title' | 'message' | 'type'>> = {},
+    options: Partial<Omit<Message, 'id' | 'message' | 'type'>> = {},
   ): string {
-    return this.show(title, message, 'warning', options);
+    return this.show(message, 'warning', options);
   }
 
-  info(
-    title: string,
-    message: string,
-    options: Partial<Omit<ToastMessage, 'id' | 'title' | 'message' | 'type'>> = {},
-  ): string {
-    return this.show(title, message, 'info', options);
+  info(message: string, options: Partial<Omit<Message, 'id' | 'message' | 'type'>> = {}): string {
+    return this.show(message, 'info', options);
   }
 
-  private generateId(): string {
-    return `toast-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  private generateCryptoId() {
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+  }
+}
+
+@Directive({
+  selector: '[tablerToastInit]',
+})
+export class TablerToastInit {
+  private readonly el = inject(ElementRef);
+  onHidden = output<string>();
+  constructor() {
+    afterNextRender(async () => {
+      const m = await import('@tabler/core');
+      const ele = this.el.nativeElement;
+      const toast = m.Toast.getOrCreateInstance(ele);
+      ele.addEventListener('hidden.bs.toast', () => this.onHidden.emit(ele.id));
+      toast.show();
+    });
   }
 }
 
 @Component({
   selector: 'tabler-toasts',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TablerToastInit],
+  host: {
+    'aria-live': 'polite',
+    'aria-atomic': 'true',
+  },
   template: `
-    <div class="toast-container">
-      @for (toast of toasts(); track toast.id) {
+    <div class="toast-container bottom-0 end-0 p-3">
+      @for (toast of msgs(); track toast) {
       <div
-        class="toast"
+        id="{{ toast.id }}"
+        class="toast align-items-center text-bg-primary border-0"
         role="alert"
         aria-live="assertive"
         aria-atomic="true"
-        data-bs-autohide="false"
         data-bs-toggle="toast"
-        [attr.data-toast-id]="toast.id">
+        [attr.data-bs-animation]="toast.animation"
+        [attr.data-bs-delay]="toast.delay"
+        [attr.data-bs-autohide]="toast.autohide"
+        tablerToastInit
+        (onHidden)="remove($event)">
         <div class="d-flex">
           <div class="toast-body">{{ toast.message }}</div>
           <button
@@ -142,35 +163,35 @@ export class MessageService {
       }
     `,
   ],
+  animations: [
+    trigger('toastAnimation', [
+      transition(':enter', [
+        style({ transform: 'translateX(100%)', opacity: 0 }),
+        animate('300ms ease-out', style({ transform: 'translateX(0)', opacity: 1 })),
+      ]),
+      transition(':leave', [
+        animate('300ms ease-in', style({ transform: 'translateX(100%)', opacity: 0 })),
+      ]),
+    ]),
+  ],
 })
-export class Toasts implements OnInit, OnDestroy {
-  // 使用signal管理toast列表
-  toasts = model<ToastMessage[]>([]);
-  toastEls: Toast[] = [];
-  constructor(el: ElementRef, renderer: Renderer2) {
-    afterNextRender(() => {
-      const toastEl = el.nativeElement.querySelectorAll('.toast');
-      toastEl.forEach((toastEl: Element) => {
-        console.log(toastEl);
-      });
-    });
-  }
+export class Toasts implements OnDestroy {
+  msgs = signal<Message[]>([]);
+  toastCount = computed(() => this.msgs().length);
+  toastsDropped = output<void>();
 
-  ngOnInit(): void {}
-
-  public add(toast: ToastMessage): void {
-    this.toasts.update(list => [...list, toast]);
+  add(toast: Message): void {
+    this.msgs.update(list => [...list, toast]);
   }
 
   remove(id: string): void {
-    this.toasts.update(list => list.filter(t => t.id !== id));
-  }
-
-  clear(): void {
-    this.toasts.set([]);
+    this.msgs.update(list => list.filter(t => t.id !== id));
+    if (this.toastCount() === 0) {
+      this.toastsDropped.emit();
+    }
   }
 
   ngOnDestroy(): void {
-    this.clear();
+    this.msgs.set([]);
   }
 }

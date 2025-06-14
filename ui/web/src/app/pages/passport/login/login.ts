@@ -15,7 +15,7 @@ import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } fr
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class Login implements OnInit, OnDestroy {
+export class Login implements OnDestroy {
   private readonly storageKey = 'credentials';
 
   passwordFieldTextType = signal(false);
@@ -54,16 +54,17 @@ export class Login implements OnInit, OnDestroy {
         .subscribe(() => {
           this.processLogin();
         });
-      for (let i = 0; i < 10; i++) {
-        this._toasts.info('欢迎使用', `这是一个简单测试,消息 ${i + 1}`);
-      }
     });
   }
-  ngOnInit(): void {
-    this._toasts.info('欢迎使用', `这是一个简单测试`);
+
+  openToast() {
+    this._toasts.success('登录成功', {
+      autohide: true,
+      delay: 3000,
+      animation: true,
+    });
   }
 
-  // 组件销毁时清理资源
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -73,7 +74,6 @@ export class Login implements OnInit, OnDestroy {
     if (this.loginForm.invalid || this.isSubmitting()) {
       return;
     }
-
     // 触发防抖提交
     this.submitSubject.next();
   }

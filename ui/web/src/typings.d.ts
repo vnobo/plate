@@ -1,7 +1,3 @@
-declare var document: Document;
-declare var window: Window;
-declare var global: any;
-
 declare module '@plate/types' {
   export interface UserAuditor {
     code: string;
@@ -53,6 +49,7 @@ declare module '@plate/types' {
 }
 
 declare module '@tabler/core' {
+  export { bootstrap as Bootstrap } from '@tabler/core/js/tabler';
   // Bootstrap 组件选项接口
   interface ToastOptions {
     animation?: boolean;
@@ -216,21 +213,4 @@ declare module '@tabler/core' {
     hide(): void;
     dispose(): void;
   }
-
-  // Tabler 主题配置
-  export namespace tabler {
-    interface TablerConfig {
-      theme?: 'light' | 'dark';
-      'theme-base'?: string;
-      'theme-font'?: string;
-      'theme-primary'?: string;
-      'theme-radius'?: string;
-    }
-
-    function setTheme(config: Partial<TablerConfig>): void;
-    function getTheme(): TablerConfig;
-  }
-
-  // 重导出 bootstrap 命名空间
-  export * as bootstrap from 'bootstrap';
 }
