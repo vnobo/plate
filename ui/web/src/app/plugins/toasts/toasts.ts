@@ -112,9 +112,9 @@ export class TablerToastInit {
   onHidden = output<string>();
   constructor() {
     afterNextRender(async () => {
-      const m = await import('@tabler/core');
+      const tabler = await import('@tabler/core');
       const ele = this.el.nativeElement;
-      const toast = m.Toast.getOrCreateInstance(ele);
+      const toast = tabler.Toast.getOrCreateInstance(ele);
       ele.addEventListener('hidden.bs.toast', () => this.onHidden.emit(ele.id));
       toast.show();
     });
