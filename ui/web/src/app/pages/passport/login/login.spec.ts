@@ -5,8 +5,8 @@ import { provideRouter } from '@angular/router';
 import { Login } from './login';
 import { BrowserStorage } from '@app/core';
 import { TokenService } from '@app/core/services/token.service';
-import { ToastService } from '@app/plugins';
 import { Router } from '@angular/router';
+import { MessageService } from '@app/plugins';
 
 describe('Login', () => {
   let component: Login;
@@ -14,7 +14,7 @@ describe('Login', () => {
   let httpMock: HttpTestingController;
   let tokenService: jasmine.SpyObj<TokenService>;
   let storageService: jasmine.SpyObj<BrowserStorage>;
-  let toastService: jasmine.SpyObj<ToastService>;
+  let messageService: jasmine.SpyObj<MessageService>;
   let router: Router;
 
   beforeEach(async () => {
@@ -30,7 +30,7 @@ describe('Login', () => {
         provideRouter([]),
         { provide: TokenService, useValue: tokenServiceSpy },
         { provide: BrowserStorage, useValue: storageServiceSpy },
-        { provide: ToastService, useValue: toastServiceSpy },
+        { provide: MessageService, useValue: toastServiceSpy },
       ],
     }).compileComponents();
 
@@ -39,7 +39,7 @@ describe('Login', () => {
     httpMock = TestBed.inject(HttpTestingController);
     tokenService = TestBed.inject(TokenService) as jasmine.SpyObj<TokenService>;
     storageService = TestBed.inject(BrowserStorage) as jasmine.SpyObj<BrowserStorage>;
-    toastService = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
+    messageService = TestBed.inject(MessageService) as jasmine.SpyObj<MessageService>;
     router = TestBed.inject(Router);
     fixture.detectChanges();
   });
@@ -63,7 +63,7 @@ describe('Login', () => {
     it('should inject all required services', () => {
       expect(tokenService).toBeTruthy();
       expect(storageService).toBeTruthy();
-      expect(toastService).toBeTruthy();
+      expect(MessageService).toBeTruthy();
     });
   });
 

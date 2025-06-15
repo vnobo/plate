@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { afterNextRender, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { afterNextRender, Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { BrowserStorage } from '@app/core';
 import { TokenService } from '@app/core/services/token.service';
-import { ToastService } from '@app/plugins';
+import { MessageService } from '@app/plugins';
 import { Authentication, Credentials } from '@plate/types';
 import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } from 'rxjs';
 
@@ -29,7 +29,7 @@ export class Login implements OnDestroy {
 
   private readonly _tokenSer = inject(TokenService);
   private readonly _storage = inject(BrowserStorage);
-  private readonly _toasts = inject(ToastService);
+  private readonly _toasts = inject(MessageService);
 
   loginForm = new FormGroup({
     username: new FormControl('', {

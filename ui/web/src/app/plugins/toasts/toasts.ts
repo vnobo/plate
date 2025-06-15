@@ -65,7 +65,7 @@ export class MessageService {
       autohide: options.autohide ?? true,
       delay: options.delay ?? 5000,
     };
-    if (!this.toastRef) {
+    if (!this.toastRef || this.toastRef === null || this.toastRef === undefined) {
       this.create();
     }
     if (this.toastRef) {
@@ -125,11 +125,12 @@ export class TablerToastInit {
   standalone: true,
   imports: [CommonModule, TablerToastInit],
   host: {
+    class: 'overflow-hidden',
     'aria-live': 'polite',
     'aria-atomic': 'true',
   },
   template: `
-    <div class="toast-container bottom-0 end-0 p-3">
+    <div class="toast-container bottom-0 end-0 p-3 overflow-hidden">
       @for (toast of msgs(); track toast) {
       <div
         id="{{ toast.id }}"
@@ -138,6 +139,7 @@ export class TablerToastInit {
         aria-live="assertive"
         aria-atomic="true"
         data-bs-toggle="toast"
+        [@toastAnimation]
         [ngClass]="{
           'text-bg-success': toast.type === 'success',
           'text-bg-danger': toast.type === 'danger',
@@ -145,7 +147,6 @@ export class TablerToastInit {
           'text-bg-info': toast.type === 'info',
           'text-bg-primary': toast.type === undefined
         }"
-        [@toastAnimation]
         [attr.data-bs-animation]="toast.animation"
         [attr.data-bs-delay]="toast.delay"
         [attr.data-bs-autohide]="toast.autohide"
@@ -250,11 +251,6 @@ export class TablerToastInit {
     `
       :host {
         max-width: 100%;
-      }
-    `,
-    `
-      .toast-container {
-        overflow: hidden; /* 隐藏溢出内容 */
       }
     `,
   ],
