@@ -96,7 +96,11 @@ export class Login implements OnDestroy {
         complete: () => this.isSubmitting.set(false),
       });
     } catch (error) {
-      this._message.error('登录失败，请稍后再试! 错误: ' + (error || '未知错误'));
+      this._message.error('登录失败，请稍后再试! 错误: ' + (error || '未知错误'), {
+        autohide: false,
+        animation: false,
+        delay: 100000,
+      });
       this.isSubmitting.set(false);
     }
   }
@@ -139,9 +143,9 @@ export class Login implements OnDestroy {
   private handleLoginError(error: any) {
     const errorMessage = error.errors || error.message || '登录系统失败，请检查您的用户名和密码';
     this._message.error(errorMessage, {
-      autohide: true,
-      delay: 3000,
-      animation: true,
+      autohide: false,
+      animation: false,
+      delay: 100000,
     });
   }
 
