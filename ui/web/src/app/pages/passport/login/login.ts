@@ -17,22 +17,19 @@ import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } fr
 export class Login implements OnDestroy {
   private readonly storageKey = 'credentials';
 
-  passwordFieldTextType = signal(false);
-  // 使用Signal管理提交状态
-  isSubmitting = signal(false);
-
-  // 用于防抖处理的Subject
-  private submitSubject = new Subject<void>();
-  // 用于取消订阅的Subject
-  private destroy$ = new Subject<void>();
-
   private readonly _tokenSer = inject(TokenService);
   private readonly _storage = inject(BrowserStorage);
-  private readonly _toasts = inject(MessageService);
+  private readonly _message = inject(MessageService);
+
+  private submitSubject = new Subject<void>();
+  private destroy$ = new Subject<void>();
+
+  passwordFieldTextType = signal(false);
+  isSubmitting = signal(false);
 
   loginForm = new FormGroup({
     username: new FormControl('', {
-      validators: [Validators.required, Validators.minLength(5), Validators.maxLength(32)],
+      validators: [Validators.required, Validators.minLength(5), Validators.maxLength(64)],
       nonNullable: true,
     }),
     password: new FormControl('', {
@@ -44,88 +41,51 @@ export class Login implements OnDestroy {
 
   constructor(private _http: HttpClient, private _router: Router, private _route: ActivatedRoute) {
     afterNextRender(() => {
-      // 设置防抖提交处理
       this.submitSubject
-        .pipe(
-          debounceTime(300), // 300ms内的多次提交只会执行一次
-          takeUntil(this.destroy$),
-        )
-        .subscribe(() => {
-          this.processLogin();
-        });
+        .pipe(debounceTime(300), takeUntil(this.destroy$))
+        .subscribe(() => this.processLogin());
     });
-  }
-
-  openToast() {
-    this._toasts.success('登录成功success', {
-      autohide: true,
-      delay: 3000,
-      animation: true,
-    });
-    this._toasts.info('登录消息info', {
-      autohide: true,
-      delay: 3000,
-      animation: true,
-    });
-    this._toasts.error('登录错误error', {
-      autohide: true,
-      delay: 3000,
-      animation: true,
-    });
-    this._toasts.warning('登录警告warning', {
-      autohide: true,
-      delay: 3000,
-      animation: true,
-    });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   onSubmit() {
     if (this.loginForm.invalid || this.isSubmitting()) {
       return;
     }
-    // 触发防抖提交
+    if (
+      this.loginForm.get('username')?.hasError('required') ||
+      this.loginForm.get('password')?.hasError('required')
+    ) {
+      this.isSubmitting.set(false);
+      return;
+    }
+
+    if (
+      this.loginForm.get('username')?.hasError('minlength') ||
+      this.loginForm.get('username')?.hasError('maxlength')
+    ) {
+      this.isSubmitting.set(false);
+      return;
+    }
+
+    if (
+      this.loginForm.get('password')?.hasError('minlength') ||
+      this.loginForm.get('password')?.hasError('maxlength')
+    ) {
+      this.isSubmitting.set(false);
+      return;
+    }
+
     this.submitSubject.next();
   }
 
   // 处理登录逻辑
   private processLogin() {
-    // 设置提交状态为true
     this.isSubmitting.set(true);
     try {
       const credentials = this.loginForm.getRawValue();
 
       if (credentials.remember) {
         this.rememberMe(credentials);
-      }
-
-      // 表单验证提示
-      if (
-        this.loginForm.get('username')?.hasError('required') ||
-        this.loginForm.get('password')?.hasError('required')
-      ) {
-        this.isSubmitting.set(false);
-        return;
-      }
-
-      if (
-        this.loginForm.get('username')?.hasError('minlength') ||
-        this.loginForm.get('username')?.hasError('maxlength')
-      ) {
-        this.isSubmitting.set(false);
-        return;
-      }
-
-      if (
-        this.loginForm.get('password')?.hasError('minlength') ||
-        this.loginForm.get('password')?.hasError('maxlength')
-      ) {
-        this.isSubmitting.set(false);
-        return;
       }
 
       this.login(credentials).subscribe({
@@ -136,8 +96,7 @@ export class Login implements OnDestroy {
         complete: () => this.isSubmitting.set(false),
       });
     } catch (error) {
-      console.error('登录过程中发生错误: ', error);
-      // 确保即使出错也重置提交状态
+      this._message.error('登录失败，请稍后再试! 错误: ' + (error || '未知错误'));
       this.isSubmitting.set(false);
     }
   }
@@ -173,9 +132,24 @@ export class Login implements OnDestroy {
 
   private handleLoginSuccess(authentication: Authentication) {
     this._router.navigate(['/home'], { relativeTo: this._route }).then();
+    this._message.success('登录成功, 欢迎 ' + authentication.details?.username + '!', {
+      autohide: true,
+      delay: 3000,
+      animation: true,
+    });
   }
 
   private handleLoginError(error: any) {
     const errorMessage = error.errors || error.message || '登录系统失败，请检查您的用户名和密码';
+    this._message.error(errorMessage, {
+      autohide: true,
+      delay: 3000,
+      animation: true,
+    });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
