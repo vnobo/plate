@@ -42,7 +42,6 @@ function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
         }
         _auth.logout();
         _route.navigate([_auth.loginUrl]).then();
-        return throwError(() => error.error);
       }
       console.error(`Backend returned code ${error.status}, body was: `, JSON.stringify(error));
       return throwError(() => error);
@@ -50,13 +49,6 @@ function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
   );
 }
 
-/**
- * 认证令牌拦截器
- * 在发送 HTTP 请求前，检查用户是否已登录。如果已登录，则在请求头中添加认证令牌。
- * @param req - 原始 HTTP 请求
- * @param next - 下一个处理程序函数
- * @returns 返回一个 Observable，包含修改后的 HTTP 事件
- */
 function authTokenInterceptor(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn,

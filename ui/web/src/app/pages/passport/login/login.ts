@@ -114,12 +114,9 @@ export class Login implements OnDestroy {
       distinctUntilChanged(),
       retry({ count: 3, delay: 1000 }),
       takeUntil(this.destroy$),
-      tap({
-        next: authentication => {
-          this._tokenSer.login(authentication);
-          this.handleLoginSuccess(authentication);
-        },
-        error: error => this.handleLoginError(error),
+      tap(authentication => {
+        this._tokenSer.login(authentication);
+        this.handleLoginSuccess(authentication);
       }),
     );
   }
@@ -131,12 +128,12 @@ export class Login implements OnDestroy {
   }
 
   private handleLoginSuccess(authentication: Authentication) {
-    this._router.navigate(['/home'], { relativeTo: this._route }).then();
     this._message.success('登录成功, 欢迎 ' + authentication.details?.username + '!', {
       autohide: true,
       delay: 3000,
       animation: true,
     });
+    this._router.navigate(['/home'], { relativeTo: this._route }).then();
   }
 
   private handleLoginError(error: any) {
