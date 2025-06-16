@@ -24,7 +24,7 @@ import {Injectable, signal} from '@angular/core';
 import {toObservable} from '@angular/core/rxjs-interop';
 import {debounceTime, distinctUntilChanged, Observable, tap} from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class ProgressBar {
   private isShow = signal(false);
 
