@@ -134,8 +134,8 @@ export class Login implements OnDestroy {
   private handleLoginSuccess(authentication: Authentication) {
     this._message.success('登录成功, 欢迎 ' + authentication.details?.username + '!', {
       autohide: true,
-      delay: 3000,
-      animation: true,
+      delay: 5000,
+      animation: false,
     });
     this._router.navigate(['/home'], { relativeTo: this._route }).then();
   }
@@ -145,7 +145,7 @@ export class Login implements OnDestroy {
     this._message.error(errorMessage, {
       autohide: false,
       animation: false,
-      delay: 100000,
+      delay: 5000,
     });
   }
 

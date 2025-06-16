@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { afterNextRender, Component, ElementRef, inject, OnInit, Renderer2 } from '@angular/core';
+import {
+  afterNextRender,
+  Component,
+  ElementRef,
+  inject,
+  OnInit,
+  Renderer2,
+  signal,
+} from '@angular/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RouterOutlet } from '@angular/router';
 import { ProgressBar } from './core/services/progress-bar';
@@ -7,7 +15,7 @@ import { ProgressBar } from './core/services/progress-bar';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, CommonModule, MatProgressBarModule],
-  template: ` @if (progressBar.isShow$ | async) {
+  template: ` @if (progress()) {
     <div class="fixed-top">
       <mat-progress-bar mode="query"></mat-progress-bar>
     </div>
@@ -23,7 +31,9 @@ import { ProgressBar } from './core/services/progress-bar';
   ],
 })
 export class App implements OnInit {
-  progressBar = inject(ProgressBar);
+  private readonly progressBar = inject(ProgressBar);
+
+  progress = signal(false);
 
   constructor(el: ElementRef, renderer: Renderer2) {
     afterNextRender(() => {
@@ -43,6 +53,8 @@ export class App implements OnInit {
   }
 
   ngOnInit(): void {
-    //this.progressBar.show();
+    this.progressBar.isShow$.subscribe(isShow => {
+      this.progress.set(isShow);
+    });
   }
 }

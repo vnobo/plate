@@ -122,7 +122,6 @@ export class TablerToastInit {
 
 @Component({
   selector: 'tabler-toasts',
-  standalone: true,
   imports: [CommonModule, TablerToastInit],
   host: {
     class: 'overflow-hidden',

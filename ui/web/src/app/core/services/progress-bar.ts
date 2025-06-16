@@ -20,7 +20,7 @@
  * });
  * ```
  */
-import { Injectable, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, Observable, tap } from 'rxjs';
 
@@ -28,11 +28,7 @@ import { debounceTime, distinctUntilChanged, Observable, tap } from 'rxjs';
 export class ProgressBar {
   private isShow = signal(false);
 
-  isShow$: Observable<boolean> = toObservable(this.isShow).pipe(
-    debounceTime(100),
-    distinctUntilChanged(),
-    tap(res => console.debug(`Progress bar show is: ${res}`)),
-  );
+  isShow$ = toObservable(this.isShow).pipe(debounceTime(500), distinctUntilChanged());
 
   show(): void {
     this.isShow.set(true);

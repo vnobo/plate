@@ -207,7 +207,6 @@ export class AlertService {
  */
 @Component({
   selector: 'tabler-alerts',
-  standalone: true,
   imports: [CommonModule],
   template: `
     @for (alert of alertService.alerts(); track alert.id) {
@@ -294,30 +293,6 @@ export class AlertService {
     }
   `,
   styles: `
-    :host {
-      display: block;
-      position: relative;
-      width: 100%;
-    }
-    
-    .alert {
-      display: flex;
-      align-items: flex-start;
-    }
-    
-    .alert-icon {
-      margin-right: 1rem;
-    }
-    
-    .alert-heading {
-      margin-top: 0;
-      margin-bottom: 0.25rem;
-      font-weight: 600;
-    }
-    
-    .alert-description {
-      margin-bottom: 0;
-    }
   `,
 })
 export class Alerts implements OnInit, OnDestroy {
