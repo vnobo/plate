@@ -8,7 +8,7 @@
       "request": "launch",
       "preLaunchTask": "npm: start",
       "url": "http://localhost:4200/",
-      "runtimeArgs": ["--incognito"],
+      //"runtimeArgs": ["--incognito"],
       "webRoot": "${workspaceFolder}",
       "sourceMaps": true,
       "sourceMapPathOverrides": {
@@ -20,8 +20,8 @@
       "type": "chrome",
       "request": "launch",
       "preLaunchTask": "npm: test",
-      "url": "http://localhost:9876/debug.html",
-      "runtimeArgs": ["--incognito"]
+      "url": "http://localhost:9876/debug.html"
+      //"runtimeArgs": ["--incognito"]
     }
   ]
 }
