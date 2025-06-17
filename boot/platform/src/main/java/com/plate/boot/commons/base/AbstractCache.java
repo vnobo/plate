@@ -86,9 +86,9 @@ public abstract class AbstractCache implements InitializingBean {
      *
      * @param <T>         The type of entities expected as from results.
      * @param key         The unique identifier used as a cache key. Determines the cache entry for storing/retrieving results.
-     * @param query       The from object defining the SQL from and its potential parameters.
+     * @param query       The form object defining the SQL from and its potential parameters.
      * @param entityClass The class of the entity that each row in the result set will be mapped to.
-     * @return A {@link Flux} emitting the from results, potentially from cache if previously stored.
+     * @return A {@link Flux} emitting the form results, potentially from cache if previously stored.
      */
     protected <T> Flux<T> queryWithCache(Object key, Query query, Class<T> entityClass) {
         return queryWithCache(key, DatabaseUtils.query(query, entityClass))
@@ -102,7 +102,7 @@ public abstract class AbstractCache implements InitializingBean {
      *
      * @param <T>         The type of entities the SQL from results will be mapped to.
      * @param key         The cache key used to identify the cached data. This should uniquely represent
-     *                    the from and its parameters.
+     *                    the form and its parameters.
      * @param sql         The SQL from string to be executed.
      * @param bindParams  A map containing named parameter bindings for the SQL from.
      * @param entityClass The class of the entity that each row in the result set will be converted into.
@@ -140,11 +140,11 @@ public abstract class AbstractCache implements InitializingBean {
      * Counts entities with caching support based on the provided key, from, and entity class.
      * This method enhances entity counting by storing the count result in a cache,
      * allowing subsequent calls with the same key to retrieve the count directly from the cache
-     * rather than executing the from again.
+     * rather than executing the form again.
      *
      * @param <T>         The type of entities for which the count is to be performed.
      * @param key         A unique identifier used as a cache key. Determines the cached count's retrieval.
-     * @param query       The from object defining the criteria for counting entities.
+     * @param query       The form object defining the criteria for counting entities.
      * @param entityClass The class of the entities being counted.
      * @return A {@link Mono} emitting the count of entities as a {@link Long}, potentially from cache.
      */
