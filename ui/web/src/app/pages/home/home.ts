@@ -1,7 +1,7 @@
 import {Routes} from '@angular/router';
-import {MenusComponent} from './menus/menus.component';
+import {MenusComponent} from './menus/menus';
 import {UsersComponent} from './users/users';
-import {GroupsComponent} from './groups/groups.component';
+import {GroupsComponent} from './groups/groups';
 import {authGuard} from '@app/core/pages.guard';
 
 export const HOME_ROUTES: Routes = [
