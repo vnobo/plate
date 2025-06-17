@@ -164,19 +164,17 @@
             </div>
             <div class="form-footer">
               <button
-                class="btn btn-primary w-100"
+                [class.disabled]="isSubmitting()"
                 tabindex="4"
                 type="submit"
+                class="btn btn-primary w-100 border-0"
                 [disabled]="!loginForm.valid || isSubmitting()">
                 @if (isSubmitting()) {
                 <span
                   class="spinner-border spinner-border-sm me-2"
                   role="status"
                   aria-hidden="true"></span>
-                <span>登录中...</span>
-                } @else {
-                <span>登 录</span>
-                }
+                登录中... } @else { 登 录 }
               </button>
             </div>
           </div>
