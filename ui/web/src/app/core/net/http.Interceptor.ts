@@ -1,11 +1,10 @@
-import { inject } from '@angular/core';
-import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
-import { catchError, finalize, Observable, throwError, timeout } from 'rxjs';
-import { Router } from '@angular/router';
+import {inject} from '@angular/core';
+import {HttpEvent, HttpHandlerFn, HttpRequest} from '@angular/common/http';
+import {catchError, finalize, Observable, throwError, timeout} from 'rxjs';
+import {Router} from '@angular/router';
 
-import { ProgressBar } from '@app/core/services/progress-bar';
-import { TokenService } from '@app/core/services/token.service';
-import { environment } from '@envs/env';
+import {ProgressBar, TokenService} from '@app/core';
+import {environment} from '@envs/env';
 
 function defaultInterceptor(
   req: HttpRequest<unknown>,
