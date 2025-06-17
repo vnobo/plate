@@ -10,7 +10,7 @@ import {debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap} from
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterModule, CommonModule],
+    imports: [ReactiveFormsModule, RouterModule, CommonModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
