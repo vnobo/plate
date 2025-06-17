@@ -1,6 +1,6 @@
 import {Routes} from '@angular/router';
 import {MenusComponent} from './menus/menus.component';
-import {UsersComponent} from './users/users.component';
+import {UsersComponent} from './users/users';
 import {GroupsComponent} from './groups/groups.component';
 import {authGuard} from '@app/core/pages.guard';
 
