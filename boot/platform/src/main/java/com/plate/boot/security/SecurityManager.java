@@ -148,9 +148,9 @@ public class SecurityManager extends AbstractCache
     public Mono<User> loadByUsername(String username) {
         Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
         var userFlux = DatabaseUtils.query(query, User.class);
-        return this.queryWithCache(username, userFlux).switchIfEmpty(Mono.defer(() ->
-                        Mono.error(new UsernameNotFoundException("登录用户不存在,用户名: " + username))))
-                .last();
+        return this.queryWithCache(username, userFlux).singleOrEmpty()
+                .switchIfEmpty(Mono.defer(() ->
+                        Mono.error(new UsernameNotFoundException("登录用户不存在,用户名: " + username))));
     }
 
     /**
