@@ -1,12 +1,12 @@
-import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { afterNextRender, Component, inject, OnDestroy, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { BrowserStorage, TokenService } from '@app/core';
-import { MessageService } from '@app/plugins';
-import { Authentication, Credentials } from '@plate/types';
-import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } from 'rxjs';
+import {CommonModule} from '@angular/common';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {afterNextRender, Component, inject, OnDestroy, signal} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
+import {BrowserStorage, TokenService} from '@app/core';
+import {MessageService} from '@app/plugins';
+import {Authentication, Credentials} from '@plate/types';
+import {debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap} from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -132,10 +132,10 @@ export class Login implements OnDestroy {
   }
 
   private handleLoginSuccess(authentication: Authentication) {
-    this._message.success('登录成功, 欢迎 ' + authentication.details?.username + '!', {
+    this._message.success('登录成功, 欢迎 ' + authentication.details?.nickname + '!', {
       autohide: true,
       delay: 5000,
-      animation: false,
+      animation: true,
     });
     this._router.navigate(['/home'], { relativeTo: this._route }).then();
   }
@@ -143,8 +143,8 @@ export class Login implements OnDestroy {
   private handleLoginError(error: any) {
     const errorMessage = error.errors || error.message || '登录系统失败，请检查您的用户名和密码';
     this._message.error(errorMessage, {
-      autohide: false,
-      animation: false,
+      autohide: true,
+      animation: true,
       delay: 5000,
     });
   }
