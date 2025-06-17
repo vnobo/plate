@@ -142,7 +142,7 @@ public final class QueryJsonHelper {
         String sortedProperty = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, keys[0]);
         int lastIndex = keys.length - 1;
         if (lastIndex > 0) {
-            sortedProperty = sortedProperty + buildJsonQueryPath(Arrays.copyOfRange(keys, 1, lastIndex))
+            sortedProperty = sortedProperty + "->" + buildJsonQueryPath(Arrays.copyOfRange(keys, 1, lastIndex))
                     + "->>'" + keys[lastIndex] + "'";
         }
         return Sort.Order.by(sortedProperty).with(order.getDirection());
@@ -263,6 +263,14 @@ public final class QueryJsonHelper {
         String key = lastKey.substring(0, lastKey.length() - exps.getKey().length());
         conditionSql.append(key).append("' ");
         Map<String, Object> params;
+
+        value = switch (exps.getKey()) {
+            case "StartingWith" -> value + "%";
+            case "EndingWith" -> "%" + value;
+            case "Containing" -> "%" + value + "%";
+            default -> value;
+        };
+
         if ("Between".equals(exps.getKey()) || "NotBetween".equals(exps.getKey())) {
             String startKey = paramName + "_start";
             String endKey = paramName + "_end";
