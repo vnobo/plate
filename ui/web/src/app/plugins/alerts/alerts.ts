@@ -1,7 +1,8 @@
 import {CommonModule} from '@angular/common';
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, signal} from '@angular/core';
 
 export type AlertType = 'success' | 'danger' | 'warning' | 'info';
+
 export interface Alert {
   id: string;
   message: string;
@@ -40,9 +41,8 @@ export interface Alert {
   `,
 })
 export class Alerts implements OnInit, OnDestroy {
-  ngOnInit(): void {
-    // 组件初始化逻辑
-  }
+  alerts = signal<Alert[]>([]);
+  ngOnInit(): void {}
 
   ngOnDestroy(): void {}
 }
