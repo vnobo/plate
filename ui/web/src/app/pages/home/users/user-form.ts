@@ -1,92 +1,80 @@
 import {CommonModule} from '@angular/common';
 import {Component, computed, effect, inject, OnInit, output, signal} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {User} from '@app/pages/home/users/user.types';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {User} from './user.types';
 
 @Component({
   selector: 'app-user-form',
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <form (ngSubmit)="onSubmit()" [formGroup]="userForm" class="form-wrapper" nz-form>
-      <nz-form-item>
-        <nz-form-label [nzSpan]="6" nzFor="username" nzRequired
-          >用&nbsp;&nbsp;户&nbsp;&nbsp;名</nz-form-label
-        >
-        <nz-form-control [nzSpan]="14" nzErrorTip="Please input your username!">
-          <input formControlName="username" id="username" nz-input />
-        </nz-form-control>
-      </nz-form-item>
-      @if (created()) {
-      <nz-form-item>
-        <nz-form-label [nzSpan]="6" nzFor="password" nzRequired
-          >密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码
-        </nz-form-label>
-        <nz-form-control [nzSpan]="14" nzErrorTip="Password must be at least 6 characters!">
-          <input nz-input type="password" formControlName="password" id="password" />
-        </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
-        <nz-form-label [nzSpan]="6" nzFor="confirmPassword" nzRequired>确认密码</nz-form-label>
-        <nz-form-control [nzSpan]="14" nzErrorTip="Password must be at least 6 characters!">
-          <input nz-input type="password" formControlName="confirmPassword" id="confirmPassword" />
-        </nz-form-control>
-      </nz-form-item>
-      }
+    <div class="container">
+      <form (ngSubmit)="onSubmit()" [formGroup]="userForm" class="form-wrapper">
+        <div class="mb-3">
+          <label class="form-label" for="username">用&nbsp;&nbsp;户&nbsp;&nbsp;名</label>
+          <input class="form-control" type="text" formControlName="username" id="username" />
+        </div>
+        @if (created()) {
+        <div class="mb-3">
+          <label class="form-label" for="password">
+            密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码
+          </label>
+          <input class="form-control" type="password" formControlName="password" id="password" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="confirmPassword">确认密码</label>
+          <input
+            class="form-control"
+            type="password"
+            formControlName="confirmPassword"
+            id="confirmPassword" />
+        </div>
+        }
 
-      <nz-form-item>
-        <nz-form-label [nzSpan]="6" nzFor="name" nzRequired
-          >昵&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;称
-        </nz-form-label>
-        <nz-form-control [nzSpan]="14" nzErrorTip="Please input your name!">
-          <input formControlName="name" id="name" nz-input />
-        </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
-        <nz-form-label [nzSpan]="6" nzFor="avatar">
-          头&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;像
-        </nz-form-label>
-        <nz-form-control [nzSpan]="14">
-          <input formControlName="avatar" id="avatar" nz-input />
-        </nz-form-control>
-      </nz-form-item>
+        <div class="mb-3">
+          <label class="form-label" for="name">
+            昵&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;称
+          </label>
+          <input class="form-control" type="text" formControlName="name" id="name" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="avatar">
+            头&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;像
+          </label>
+          <input class="form-control" type="url" formControlName="avatar" id="avatar" />
+        </div>
 
-      <nz-form-item>
-        <nz-form-label [nzSpan]="6" nzFor="email">电子邮件</nz-form-label>
-        <nz-form-control [nzSpan]="14">
-          <input formControlName="email" id="email" nz-input type="email" />
-        </nz-form-control>
-      </nz-form-item>
+        <div class="mb-3">
+          <label class="form-label" for="email">电子邮件</label>
+          <input
+            class="form-control"
+            type="email"
+            formControlName="email"
+            id="email"
+            type="email" />
+        </div>
 
-      <nz-form-item>
-        <nz-form-label [nzSpan]="6" nzFor="phone"
-          >手&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;机</nz-form-label
-        >
-        <nz-form-control [nzSpan]="14">
-          <input formControlName="phone" id="phone" nz-input />
-        </nz-form-control>
-      </nz-form-item>
+        <div class="mb-3">
+          <label class="form-label" for="phone">
+            手&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;机
+          </label>
+          <input class="form-control" type="text" formControlName="phone" id="phone" />
+        </div>
 
-      <nz-form-item>
-        <nz-form-label [nzSpan]="6" nzFor="bio">个人简介</nz-form-label>
-        <nz-form-control [nzSpan]="14">
-          <textarea formControlName="bio" id="bio" nz-input></textarea>
-        </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
-        <nz-form-control [nzOffset]="6" [nzSpan]="5">
-          <button nz-button type="reset">重置</button>
-        </nz-form-control>
-        <nz-form-control [nzOffset]="3" [nzSpan]="5">
+        <div class="mb-3">
+          <label class="form-label" for="bio">个人简介</label>
+          <textarea class="form-control" type="text" formControlName="bio" id="bio"></textarea>
+        </div>
+        <div class="mb-3">
+          <button class="btn btn-danger" type="reset">重置</button>
           <button
+            class="btn btn-primary me-auto"
             [disabled]="userForm.invalid || (!userForm.touched && !userForm.dirty)"
-            nz-button
-            nzType="primary"
-            type="submit"
-            >保存</button
-          >
-        </nz-form-control>
-      </nz-form-item>
-    </form>
+            type="submit">
+            保存
+          </button>
+        </div>
+      </form>
+    </div>
   `,
   styles: [
     `
@@ -97,7 +85,7 @@ import {User} from '@app/pages/home/users/user.types';
     `,
   ],
 })
-export class UserFormComponent implements OnInit {
+export class UserForm implements OnInit {
   userData = signal<User>({} as User);
   created = computed(() => this.userData().code == undefined);
   formSubmit = output<User>();

@@ -1,41 +1,48 @@
-import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import {delay, tap} from 'rxjs';
 
-import {UserFormComponent} from '@app/pages';
+import {CommonModule} from '@angular/common';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {MessageService} from '@app/plugins';
+import {Page, Pageable} from '@plate/types';
+import {UserForm} from './user-form';
 import {User} from './user.types';
-import {UsersService} from './users.service';
 
 @Component({
   selector: 'app-users',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './users.html',
   styleUrl: './users.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UsersComponent {
-  userData = signal({} as Page<User>);
-  page = signal({
+  pageable = signal<Pageable>({
     page: 1,
     size: 10,
     sorts: ['id,desc'],
-  } as Pageable);
+  });
+  private readonly _message = inject(MessageService);
+  private readonly _modal = inject(ModalService);
+
+  userData = signal({} as Page<User>);
+  private readonly API_PREFIX = '/sec';
   search = signal({
     pcode: '0',
   } as User);
-  private readonly _userSer = inject(UsersService);
+
+  constructor(private _http: HttpClient) {}
 
   fetchUserData() {
-    this.loadData(this.search(), this.page()).subscribe(() =>
-      this._message.success('数据加载成功!', ``, { nzDuration: 3000 }),
+    this.loadData(this.search(), this.pageable()).subscribe(() =>
+      this._message.success('数据加载成功!'),
     );
   }
 
-  onTableQueryChange($event: NzTableQueryParams) {
-    this.page().sorts = ['id,desc'];
+  onTableQueryChange($event) {
+    this.pageable().sorts = ['id,desc'];
     for (const item of $event.sort) {
       if (item.value) {
         const sort = item.key + ',' + (item.value == 'descend' ? 'desc' : 'asc');
-        this.page().sorts.push(sort);
+        this.pageable().sorts.push(sort);
       }
     }
     this.fetchUserData();
@@ -44,7 +51,7 @@ export class UsersComponent {
   openUserForm(user: User) {
     const modal = this._modal.create<UserFormComponent, User>({
       nzTitle: '用户表单',
-      nzContent: UserFormComponent,
+      nzContent: UserForm,
       nzFooter: null,
       nzZIndex: 2000,
     });
@@ -52,31 +59,52 @@ export class UsersComponent {
     ref.userData.set(user);
     ref.formSubmit.subscribe(us => {
       if (us.code) {
-        this._userSer.modify(us).subscribe(res => {
+        this.modify(us).subscribe(res => {
           modal.close();
-          this._message.success('修改成功!', ``, { nzDuration: 3000 });
+          this._message.success('修改成功!');
           this.fetchUserData();
         });
       } else {
-        this._userSer.add(us).subscribe(res => {
+        this.add(us).subscribe(res => {
           modal.close();
-          this._message.success('添加成功!', ``, { nzDuration: 3000 });
+          this._message.success('添加成功!');
           this.fetchUserData();
         });
       }
     });
   }
+
   onDelete(user: User) {
-    this._userSer
-      .delete(user)
+    this.delete(user)
       .pipe(
-        tap(() => this._message.success('删除成功!', ``, { nzDuration: 3000 })),
+        tap(() => this._message.success('删除成功!')),
         delay(1500),
       )
       .subscribe(() => this.fetchUserData());
   }
 
+  page(request: User, page: Pageable) {
+    let params = new HttpParams({ fromObject: request as never });
+    params = params.appendAll({ page: page.page - 1, size: page.size });
+    for (const sort in page.sorts) {
+      params = params.appendAll({ sort: page.sorts[sort] });
+    }
+    return this._http.get<Page<User>>(this.API_PREFIX + '/users/page', { params: params });
+  }
+
   private loadData(search: User, page: Pageable) {
-    return this._userSer.page(search, page).pipe(tap(result => this.userData.set(result)));
+    return this.page(search, page).pipe(tap(result => this.userData.set(result)));
+  }
+
+  private add(request: User) {
+    return this._http.post<User>(this.API_PREFIX + '/users/add', request);
+  }
+
+  private modify(request: User) {
+    return this._http.put<User>(this.API_PREFIX + '/users/modify', request);
+  }
+
+  private delete(request: User) {
+    return this._http.delete<User>(this.API_PREFIX + '/users/delete', { body: request });
   }
 }

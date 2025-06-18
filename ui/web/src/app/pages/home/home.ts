@@ -3,11 +3,13 @@ import {MenusComponent} from './menus/menus';
 import {UsersComponent} from './users/users';
 import {GroupsComponent} from './groups/groups';
 import {authGuard} from '@app/core/pages.guard';
+import {Base} from '@app/layout';
 
 export const HOME_ROUTES: Routes = [
   {
     path: '',
     canActivate: [authGuard],
+    component: Base,
     children: [
       {
         path: 'roles',
