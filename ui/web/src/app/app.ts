@@ -1,16 +1,8 @@
-import { CommonModule } from '@angular/common';
-import {
-  afterNextRender,
-  Component,
-  ElementRef,
-  inject,
-  OnInit,
-  Renderer2,
-  signal,
-} from '@angular/core';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { RouterOutlet } from '@angular/router';
-import { ProgressBar } from './core/services/progress-bar';
+import {CommonModule} from '@angular/common';
+import {afterNextRender, Component, ElementRef, inject, OnInit, Renderer2, signal,} from '@angular/core';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {RouterOutlet} from '@angular/router';
+import {ProgressBar} from './core/services/progress-bar';
 
 @Component({
   selector: 'app-root',
@@ -37,7 +29,6 @@ export class App implements OnInit {
 
   constructor(el: ElementRef, renderer: Renderer2) {
     afterNextRender(() => {
-      // get html element
       const targetElement = el.nativeElement.parentElement.parentElement;
       const attributes = [
         { name: 'data-bs-theme-base', value: 'slate' },
