@@ -50,6 +50,7 @@ declare module '@plate/types' {
 
 declare module '@tabler/core' {
   export { bootstrap as Bootstrap } from '@tabler/core/js/tabler';
+
   // Bootstrap 组件选项接口
   interface ToastOptions {
     animation?: boolean;
@@ -104,7 +105,7 @@ declare module '@tabler/core' {
   }
 
   export class Modal {
-    constructor(element: Element, options?: ModalOptions);
+    constructor(element: Element | string, options?: ModalOptions);
     static getInstance(element: Element): Modal | null;
     static getOrCreateInstance(element: Element, config?: ModalOptions): Modal;
     show(): void;
