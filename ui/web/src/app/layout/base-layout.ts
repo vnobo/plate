@@ -20,4 +20,4 @@ import {RouterModule} from '@angular/router';
   </div>`,
   styles: [``],
 })
-export class Base {}
+export class BaseLayout {}
