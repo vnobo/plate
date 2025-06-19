@@ -7,18 +7,45 @@ import {User} from './user.types';
   selector: 'app-user-form',
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="container">
+    <div class="container-fluid">
       <form (ngSubmit)="onSubmit()" [formGroup]="userForm" class="form-wrapper">
-        <div class="mb-3">
-          <label class="form-label" for="username">用&nbsp;&nbsp;户&nbsp;&nbsp;名</label>
-          <input class="form-control" type="text" formControlName="username" id="username" />
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="mb-3">
+              <label class="form-label" for="username">用&nbsp;&nbsp;户&nbsp;&nbsp;名</label>
+              <input
+                class="form-control"
+                type="text"
+                formControlName="username"
+                id="username"
+                autocomplete="off" />
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="mb-3">
+              <label class="form-label" for="name">
+                昵&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;称
+              </label>
+              <input
+                class="form-control"
+                type="text"
+                formControlName="name"
+                id="name"
+                autocomplete="off" />
+            </div>
+          </div>
         </div>
         @if (created()) {
         <div class="mb-3">
           <label class="form-label" for="password">
             密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码
           </label>
-          <input class="form-control" type="password" formControlName="password" id="password" />
+          <input
+            class="form-control"
+            type="password"
+            formControlName="password"
+            id="password"
+            autocomplete="off" />
         </div>
         <div class="mb-3">
           <label class="form-label" for="confirmPassword">确认密码</label>
@@ -26,16 +53,10 @@ import {User} from './user.types';
             class="form-control"
             type="password"
             formControlName="confirmPassword"
-            id="confirmPassword" />
+            id="confirmPassword"
+            autocomplete="off" />
         </div>
         }
-
-        <div class="mb-3">
-          <label class="form-label" for="name">
-            昵&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;称
-          </label>
-          <input class="form-control" type="text" formControlName="name" id="name" />
-        </div>
         <div class="mb-3">
           <label class="form-label" for="avatar">
             头&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;像
@@ -64,13 +85,27 @@ import {User} from './user.types';
           <label class="form-label" for="bio">个人简介</label>
           <textarea class="form-control" type="text" formControlName="bio" id="bio"></textarea>
         </div>
-        <div class="mb-3">
-          <button class="btn btn-danger" type="reset">重置</button>
+        <div class="mb-3 d-flex">
+          <button class="btn btn-danger" type="reset">重置表单</button>
           <button
-            class="btn btn-primary me-auto"
+            class="btn btn-primary ms-auto"
             [disabled]="userForm.invalid || (!userForm.touched && !userForm.dirty)"
             type="submit">
-            保存
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-1">
+              <path d="M12 5l0 14" />
+              <path d="M5 12l14 0" />
+            </svg>
+            保存用户信息
           </button>
         </div>
       </form>
