@@ -1,1 +1,1 @@
-export { Base } from './base';
+export { BaseLayout } from './base-layout';

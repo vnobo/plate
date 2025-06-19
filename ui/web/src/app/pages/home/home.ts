@@ -1,36 +1,15 @@
 import {Routes} from '@angular/router';
-import {MenusComponent} from './menus/menus';
-import {UsersComponent} from './users/users';
-import {GroupsComponent} from './groups/groups';
-import {authGuard} from '@app/core/pages.guard';
-import {Base} from '@app/layout';
+import {BaseLayout} from '@app/layout';
+import {Users} from './users/users';
 
 export const HOME_ROUTES: Routes = [
   {
     path: '',
-    canActivate: [authGuard],
-    component: Base,
+    component: BaseLayout,
     children: [
       {
-        path: 'roles',
-        data: {
-          title: '角色管理',
-        },
-        component: GroupsComponent,
-      },
-      {
         path: 'users',
-        data: {
-          title: '用户管理',
-        },
-        component: UsersComponent,
-      },
-      {
-        path: 'menus',
-        data: {
-          title: '菜单管理',
-        },
-        component: MenusComponent,
+        component: Users,
       },
       {
         path: '',
