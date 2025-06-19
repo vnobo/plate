@@ -4,13 +4,14 @@ import {afterNextRender, Component, inject, OnDestroy, signal} from '@angular/co
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import {BrowserStorage, TokenService} from '@app/core';
-import {MessageService} from '@app/plugins';
+import {UserForm} from '@app/pages/home/users/user-form';
+import {MessageService, ModalsService} from '@app/plugins';
 import {Authentication, Credentials} from '@plate/types';
 import {debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap} from 'rxjs';
 
 @Component({
   selector: 'app-login',
-    imports: [ReactiveFormsModule, RouterModule, CommonModule],
+  imports: [ReactiveFormsModule, RouterModule, CommonModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -20,6 +21,7 @@ export class Login implements OnDestroy {
   private readonly _tokenSer = inject(TokenService);
   private readonly _storage = inject(BrowserStorage);
   private readonly _message = inject(MessageService);
+  private readonly _modal = inject(ModalsService);
 
   private submitSubject = new Subject<void>();
   private destroy$ = new Subject<void>();
@@ -44,6 +46,13 @@ export class Login implements OnDestroy {
       this.submitSubject
         .pipe(debounceTime(300), takeUntil(this.destroy$))
         .subscribe(() => this.processLogin());
+    });
+  }
+
+  openModal() {
+    this._modal.create({
+      title: '用户表单',
+      contentRef: UserForm,
     });
   }
 
