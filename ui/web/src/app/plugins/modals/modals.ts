@@ -1,23 +1,24 @@
-import {CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
-    afterNextRender,
-    ApplicationRef,
-    Component,
-    ComponentRef,
-    createComponent,
-    Directive,
-    ElementRef,
-    EnvironmentInjector,
-    inject,
-    Injectable,
-    input,
-    inputBinding,
-    OnDestroy,
-    OnInit,
-    output,
-    signal,
-    Type,
+  afterNextRender,
+  ApplicationRef,
+  Component,
+  ComponentRef,
+  createComponent,
+  Directive,
+  ElementRef,
+  EnvironmentInjector,
+  inject,
+  Injectable,
+  input,
+  inputBinding,
+  OnDestroy,
+  OnInit,
+  output,
+  signal,
+  Type,
 } from '@angular/core';
+import { fromEvent } from 'rxjs';
 
 export interface ModalRef {
   title?: string;
@@ -119,7 +120,8 @@ export class Modals implements OnInit, OnDestroy {
       };
       const modalEl = this._el.nativeElement.querySelector('#exampleModal');
       const myModalAlternative = tabler.Modal.getOrCreateInstance(modalEl, options);
-      modalEl.addEventListener('hidden.bs.modal', ($event: any) => {
+
+      fromEvent(modalEl, 'hidden.bs.modal').subscribe(($event: any) => {
         console.log('modal closed', $event);
         this.dropped.emit($event);
       });

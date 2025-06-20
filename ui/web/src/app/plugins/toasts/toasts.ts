@@ -1,21 +1,22 @@
-import {CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
-    afterNextRender,
-    ApplicationRef,
-    Component,
-    ComponentRef,
-    computed,
-    createComponent,
-    Directive,
-    ElementRef,
-    EnvironmentInjector,
-    inject,
-    Injectable,
-    OnDestroy,
-    output,
-    signal,
+  afterNextRender,
+  ApplicationRef,
+  Component,
+  ComponentRef,
+  computed,
+  createComponent,
+  Directive,
+  ElementRef,
+  EnvironmentInjector,
+  inject,
+  Injectable,
+  OnDestroy,
+  output,
+  signal,
 } from '@angular/core';
-import {animate, style, transition, trigger} from '@angular/animations';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { fromEvent } from 'rxjs';
 
 // Toast类型定义
 export type ToastType = 'success' | 'danger' | 'warning' | 'info';
@@ -114,7 +115,7 @@ export class TablerToastInit {
       const tabler = await import('@tabler/core');
       const ele = this.el.nativeElement;
       const toast = tabler.Toast.getOrCreateInstance(ele);
-      ele.addEventListener('hidden.bs.toast', () => this.onHidden.emit(ele.id));
+      fromEvent(ele, 'hidden.bs.toast').subscribe(() => this.onHidden.emit(ele.id));
       toast.show();
     });
   }
