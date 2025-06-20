@@ -1,12 +1,12 @@
-import {afterNextRender, Component, inject, signal} from '@angular/core';
-import {delay, tap} from 'rxjs';
+import { afterNextRender, Component, inject, signal } from '@angular/core';
+import { delay, tap } from 'rxjs';
 
-import {CommonModule} from '@angular/common';
-import {HttpClient, HttpParams} from '@angular/common/http';
-import {MessageService, ModalsService} from '@app/plugins';
-import {Page, Pageable} from '@plate/types';
-import {UserForm} from './user-form';
-import {User} from './user.types';
+import { CommonModule } from '@angular/common';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { MessageService, ModalsService } from '@app/plugins';
+import { Page, Pageable } from '@plate/types';
+import { UserForm } from './user-form';
+import { User } from './user.types';
 
 @Component({
   selector: 'app-users',
@@ -31,6 +31,13 @@ export class Users {
   constructor(private _http: HttpClient) {
     afterNextRender(() => {
       console.log('users service init');
+    });
+  }
+
+  openModal() {
+    this._modal.create({
+      title: '用户表单',
+      contentRef: UserForm,
     });
   }
 

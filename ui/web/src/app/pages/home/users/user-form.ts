@@ -1,7 +1,7 @@
-import {CommonModule} from '@angular/common';
-import {Component, computed, effect, inject, OnInit, output, signal} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {User} from './user.types';
+import { CommonModule } from '@angular/common';
+import { Component, computed, effect, inject, OnInit, output, signal } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { User } from './user.types';
 
 @Component({
   selector: 'app-user-form',
@@ -9,78 +9,69 @@ import {User} from './user.types';
   template: `
     <div class="container-fluid">
       <form (ngSubmit)="onSubmit()" [formGroup]="userForm" class="form-wrapper">
-        <div class="row">
+        <div class="row mb-3">
           <div class="col-lg-6">
-            <div class="mb-3">
-              <label class="form-label" for="username">用&nbsp;&nbsp;户&nbsp;&nbsp;名</label>
-              <input
-                class="form-control"
-                type="text"
-                formControlName="username"
-                id="username"
-                autocomplete="off" />
-            </div>
+            <label class="form-label" for="username">用&nbsp;&nbsp;户&nbsp;&nbsp;名</label>
+            <input
+              class="form-control"
+              type="text"
+              formControlName="username"
+              id="username"
+              autocomplete="off" />
           </div>
           <div class="col-lg-6">
-            <div class="mb-3">
-              <label class="form-label" for="name">
-                昵&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;称
-              </label>
-              <input
-                class="form-control"
-                type="text"
-                formControlName="name"
-                id="name"
-                autocomplete="off" />
-            </div>
+            <label class="form-label" for="name">
+              昵&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;称
+            </label>
+            <input
+              class="form-control"
+              type="text"
+              formControlName="name"
+              id="name"
+              autocomplete="off" />
           </div>
         </div>
         @if (created()) {
-        <div class="mb-3">
-          <label class="form-label" for="password">
-            密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码
-          </label>
-          <input
-            class="form-control"
-            type="password"
-            formControlName="password"
-            id="password"
-            autocomplete="off" />
-        </div>
-        <div class="mb-3">
-          <label class="form-label" for="confirmPassword">确认密码</label>
-          <input
-            class="form-control"
-            type="password"
-            formControlName="confirmPassword"
-            id="confirmPassword"
-            autocomplete="off" />
+        <div class="row mb-3">
+          <div class="col-lg-6">
+            <label class="form-label" for="password">
+              密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码
+            </label>
+            <input
+              class="form-control"
+              type="password"
+              formControlName="password"
+              id="password"
+              autocomplete="off" />
+          </div>
+          <div class="col-lg-6">
+            <label class="form-label" for="confirmPassword">确认密码</label>
+            <input
+              class="form-control"
+              type="password"
+              formControlName="confirmPassword"
+              id="confirmPassword"
+              autocomplete="off" />
+          </div>
         </div>
         }
-        <div class="mb-3">
-          <label class="form-label" for="avatar">
-            头&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;像
-          </label>
-          <input class="form-control" type="url" formControlName="avatar" id="avatar" />
+        <div class="row mb-3">
+          <div class="col-lg-6">
+            <label class="form-label" for="email">电子邮件</label>
+            <input
+              class="form-control"
+              type="email"
+              formControlName="email"
+              id="email"
+              type="email" />
+          </div>
+          <div class="col-lg-6">
+            <label class="form-label" for="phone">
+              手&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;机
+            </label>
+            <input class="form-control" type="text" formControlName="phone" id="phone" />
+          </div>
         </div>
-
-        <div class="mb-3">
-          <label class="form-label" for="email">电子邮件</label>
-          <input
-            class="form-control"
-            type="email"
-            formControlName="email"
-            id="email"
-            type="email" />
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label" for="phone">
-            手&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;机
-          </label>
-          <input class="form-control" type="text" formControlName="phone" id="phone" />
-        </div>
-
         <div class="mb-3">
           <label class="form-label" for="bio">个人简介</label>
           <textarea class="form-control" type="text" formControlName="bio" id="bio"></textarea>
