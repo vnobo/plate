@@ -3,6 +3,7 @@ package com.plate.boot.commons.converters;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.commons.utils.MethodType;
 import io.r2dbc.postgresql.codec.Json;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
@@ -92,4 +93,38 @@ public class JsonNodeConverters implements InitializingBean {
             }
         }
     }
+
+    @Component
+    @ReadingConverter
+    public static class MethodTypeReadConverter implements Converter<String, MethodType> {
+        /**
+         * Converts a custom {@link Json} object to a Jackson {@link JsonNode} for read operations.
+         *
+         * @param source The {@link Json} object to be converted. Must not be null.
+         * @return The converted {@link JsonNode} instance ready for read operations.
+         * @throws JsonException If an {@link IOException} occurs during the conversion process.
+         */
+        @Override
+        public MethodType convert(@NonNull String source) {
+            return MethodType.value(source);
+        }
+    }
+
+    @Component
+    @WritingConverter
+    public static class MethodTypeWriteConverter implements Converter<MethodType, String> {
+        /**
+         * Converts a Jackson {@link JsonNode} to a custom {@link Json} object.
+         *
+         * @param source The JsonNode to be converted. Must not be null.
+         * @return A {@link Json} object representing the stringified input JsonNode.
+         * @throws NullPointerException if the source argument is null.
+         */
+        @Override
+        public String convert(@NonNull MethodType source) {
+            return source.name();
+        }
+    }
+
+
 }

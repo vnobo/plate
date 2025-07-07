@@ -1,7 +1,6 @@
 package com.plate.boot.config;
 
 import com.google.common.collect.Lists;
-import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +28,7 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
      * These converters facilitate the mapping of application-specific objects to database-compatible representations and vice versa.
      */
     private final List<Converter<?, ?>> customConverters;
+    private final ConnectionFactory factory;
 
     /**
      * Establishes and returns the configured R2DBC Connection Factory instance.
@@ -39,7 +39,7 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
      */
     @Override
     public @NonNull ConnectionFactory connectionFactory() {
-        return ConnectionFactories.get("r2dbc:..");
+        return factory;
     }
 
     /**

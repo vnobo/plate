@@ -212,7 +212,6 @@ public final class QueryHelper {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         Map<String, Object> filterMap = ObjectUtils.isEmpty(objectMap) ? Map.of() :
                 Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && !skipKeys.contains(key));
-
         QueryFragment queryFragment = QueryFragment.withMap(pageable.getPageSize(), pageable.getOffset(), filterMap);
         applySort(queryFragment, pageable.getSort(), prefix);
         applyWhere(queryFragment, prefix);
