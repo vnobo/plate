@@ -197,7 +197,7 @@ public class QueryFragment extends HashMap<String, Object> {
             var c = DatabaseUtils.R2DBC_CONVERTER.writeValue(en.getValue(), t);
             resultMap.put(en.getKey(), c);
         }
-        return new QueryFragment(resultMap);
+        return new QueryFragment(params);
     }
 
     /**

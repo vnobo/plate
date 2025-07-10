@@ -8,7 +8,8 @@ import org.springframework.lang.Nullable;
  */
 public enum MethodType {
 
-    DELETE;
+    DELETE,
+    UNKNOWN;
 
     private static final MethodType[] VALUES;
 

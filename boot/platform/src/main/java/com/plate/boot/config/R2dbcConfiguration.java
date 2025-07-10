@@ -3,6 +3,7 @@ package com.plate.boot.config;
 import com.google.common.collect.Lists;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
@@ -21,7 +22,7 @@ import java.util.List;
 @EnableTransactionManagement
 @EnableR2dbcAuditing
 @RequiredArgsConstructor
-public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
+public class R2dbcConfiguration extends AbstractR2dbcConfiguration implements InitializingBean {
 
     /**
      * A collection of custom converters used to adapt between various data types when interacting with the database.
@@ -55,4 +56,8 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
         return Lists.newArrayList(customConverters);
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+
+    }
 }
