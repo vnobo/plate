@@ -3,6 +3,7 @@ package com.plate.boot.config;
 import com.google.common.collect.Lists;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -18,6 +19,7 @@ import java.util.List;
  * This class sets up the R2DBC connection factory, custom converters, enables transaction management,
  * and provides an auditor aware component for reactive auditing purposes.
  */
+@Log4j2
 @Configuration(proxyBeanMethods = false)
 @EnableTransactionManagement
 @EnableR2dbcAuditing
@@ -58,6 +60,6 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration implements In
 
     @Override
     public void afterPropertiesSet() throws Exception {
-
+        log.debug("R2DBC configuration initialized!");
     }
 }

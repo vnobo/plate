@@ -7,7 +7,6 @@ ext {
     set('javaVersion', 21)
     set('guavaVersion', '33.+')
     set('springAiVersion', "1.+")
-
 }
 
 configure(allprojects) { project ->
