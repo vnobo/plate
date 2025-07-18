@@ -48,6 +48,7 @@ configure(subprojects - project(":boot")) { project ->
     tasks.named("bootBuildImage") {
         createdDate = "now"
         imageName = "localhost:5000/${rootProject.name}-${project.name}:latest"
+        imagePlatform = "linux/amd64,linux/arm64"
         environment = [
                 "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
                 "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 " +
