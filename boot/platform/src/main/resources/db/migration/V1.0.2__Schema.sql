@@ -9,7 +9,7 @@ drop table if exists se_tenant_members;
 drop table if exists se_menus;
 drop table if exists se_loggers;
 
-create table oauth2_authorized_client
+create table if not exists oauth2_authorized_client
 (
     client_registration_id  varchar(100)                            not null,
     principal_name          varchar(200)                            not null,

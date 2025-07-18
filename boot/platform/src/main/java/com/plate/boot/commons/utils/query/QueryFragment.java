@@ -2,7 +2,9 @@ package com.plate.boot.commons.utils.query;
 
 import com.google.common.base.CaseFormat;
 import com.plate.boot.commons.exception.QueryException;
+import com.plate.boot.commons.utils.DatabaseUtils;
 import lombok.Getter;
+import org.springframework.data.util.TypeInformation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -189,7 +191,13 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return a new QueryFragment instance with the specified parameters
      */
     public static QueryFragment withMap(Map<String, Object> params) {
-        return new QueryFragment(params);
+        var resultMap = new HashMap<String, Object>();
+        for (var en : params.entrySet()) {
+            var t = TypeInformation.of(en.getValue().getClass());
+            var c = DatabaseUtils.R2DBC_CONVERTER.writeValue(en.getValue(), t);
+            resultMap.put(en.getKey(), c);
+        }
+        return new QueryFragment(resultMap);
     }
 
     /**

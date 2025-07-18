@@ -1,12 +1,12 @@
 plugins {
-    id 'org.springframework.boot' version '3.4.4' apply false
+    id 'org.springframework.boot' version '3.5.3' apply false
     id 'io.spring.dependency-management' version '1.1.7' apply false
     id 'org.graalvm.buildtools.native' version '0.10.5' apply false
 }
 ext {
-    javaVersion = 21
-    springBootVersion = '3.4.3'
-    guavaVersion = '33.+'
+    set('javaVersion', 21)
+    set('guavaVersion', '33.+')
+    set('springAiVersion', "1.+")
 }
 
 configure(allprojects) { project ->
@@ -48,6 +48,7 @@ configure(subprojects - project(":boot")) { project ->
     tasks.named("bootBuildImage") {
         createdDate = "now"
         imageName = "localhost:5000/${rootProject.name}-${project.name}:latest"
+        imagePlatform = "linux/amd64,linux/arm64"
         environment = [
                 "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
                 "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 " +
@@ -56,7 +57,6 @@ configure(subprojects - project(":boot")) { project ->
     }
 
     dependencies {
-
         implementation("com.google.guava:guava:$guavaVersion")
         implementation("org.springframework.boot:spring-boot-starter-actuator")
 
@@ -78,12 +78,11 @@ configure(subprojects - project(":boot")) { project ->
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
         implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
-
     }
 
     dependencyManagement {
         imports {
-            mavenBom "org.springframework.boot:spring-boot-dependencies:$springBootVersion"
+            mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
         }
     }
 }

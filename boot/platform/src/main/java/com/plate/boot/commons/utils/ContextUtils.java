@@ -1,6 +1,7 @@
 package com.plate.boot.commons.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.f4b6a3.uuid.UuidCreator;
 import com.plate.boot.commons.base.AbstractEvent;
 import com.plate.boot.security.SecurityDetails;
 import lombok.extern.log4j.Log4j2;
@@ -11,6 +12,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -221,8 +223,16 @@ public final class ContextUtils implements InitializingBean {
      */
     public static Mono<SecurityDetails> securityDetails() {
         return ReactiveSecurityContextHolder.getContext()
-                .map(securityContext -> securityContext.getAuthentication().getPrincipal())
-                .cast(SecurityDetails.class);
+                .flatMap(securityContext -> {
+                    Authentication authentication = securityContext.getAuthentication();
+                    if (authentication == null) {
+                        return Mono.empty();
+                    }
+                    Object principal = authentication.getPrincipal();
+                    return principal instanceof SecurityDetails
+                            ? Mono.just((SecurityDetails) principal)
+                            : Mono.empty();
+                });
     }
 
     /**
@@ -231,7 +241,7 @@ public final class ContextUtils implements InitializingBean {
      * @return A newly created {@link UUID} instance, providing a unique identifier.
      */
     public static UUID nextId() {
-        return UUID.randomUUID();
+        return UuidCreator.getTimeOrderedEpoch();
     }
 
     /**

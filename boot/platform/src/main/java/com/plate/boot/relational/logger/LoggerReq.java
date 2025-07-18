@@ -2,6 +2,7 @@ package com.plate.boot.relational.logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.MethodType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -36,7 +37,7 @@ public class LoggerReq extends Logger {
         request.setOperator(operator);
         request.setPrefix(prefix);
         request.setUrl(url);
-        request.setMethod(method);
+        request.setMethod(MethodType.value(method));
         request.setStatus(status);
         request.setContext(context);
         return request;

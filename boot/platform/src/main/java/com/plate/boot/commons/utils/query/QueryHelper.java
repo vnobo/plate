@@ -51,7 +51,7 @@ public final class QueryHelper {
      * }
      * </pre>
      * In this example, a UserReq object is created with a username filter, and a Pageable object is defined for pagination.
-     * The from method is then called to generate a QueryFragment, which can be used to execute a SQL from with pagination and filtering.
+     * The form method is then called to generate a QueryFragment, which can be used to execute a SQL from with pagination and filtering.
      *
      * @param object   The object to be converted into a map for from construction.
      * @param pageable The Pageable object containing pagination information.
@@ -87,7 +87,7 @@ public final class QueryHelper {
      * }
      * </pre>
      * In this example, a UserReq object is created with a username filter, and a collection of keys to be excluded is defined.
-     * The from method is then called to generate a QueryFragment, which can be used to execute a SQL from with filtering.
+     * The form method is then called to generate a QueryFragment, which can be used to execute a SQL from with filtering.
      *
      * @param object   The object to be converted into a map for from construction.
      * @param skipKeys A collection of keys to be excluded from the object map.
@@ -123,7 +123,7 @@ public final class QueryHelper {
      * }
      * </pre>
      * In this example, a UserReq object is created with a username filter, and a collection of keys to be excluded is defined.
-     * The from method is then called to generate a QueryFragment, which can be used to execute a SQL from with filtering.
+     * The form method is then called to generate a QueryFragment, which can be used to execute a SQL from with filtering.
      *
      * @param object   The object to be converted into a map for from construction.
      * @param skipKeys A collection of keys to be excluded from the object map.
@@ -161,7 +161,7 @@ public final class QueryHelper {
      * }
      * </pre>
      * In this example, a UserReq object is created with a username filter, and a Pageable object is defined for pagination.
-     * The from method is then called to generate a QueryFragment, which can be used to execute a SQL from with pagination and filtering.
+     * The form method is then called to generate a QueryFragment, which can be used to execute a SQL from with pagination and filtering.
      *
      * @param object   The object to be converted into a map for from construction.
      * @param pageable The Pageable object containing pagination information.
@@ -199,7 +199,7 @@ public final class QueryHelper {
      * }
      * </pre>
      * In this example, a UserReq object is created with a username filter, a Pageable object is defined for pagination,
-     * and a collection of keys to be excluded is provided. The from method is then called to generate a QueryFragment,
+     * and a collection of keys to be excluded is provided. The form method is then called to generate a QueryFragment,
      * which can be used to execute a SQL from with pagination and filtering.
      *
      * @param object   The object to be converted into a map for from construction.
@@ -212,7 +212,6 @@ public final class QueryHelper {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         Map<String, Object> filterMap = ObjectUtils.isEmpty(objectMap) ? Map.of() :
                 Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && !skipKeys.contains(key));
-
         QueryFragment queryFragment = QueryFragment.withMap(pageable.getPageSize(), pageable.getOffset(), filterMap);
         applySort(queryFragment, pageable.getSort(), prefix);
         applyWhere(queryFragment, prefix);
@@ -244,7 +243,7 @@ public final class QueryHelper {
     }
 
     /**
-     * Processes the 'securityCode' key in the object map and adds the corresponding condition to the from fragment.
+     * Processes the 'securityCode' key in the object map and adds the corresponding condition to the form fragment.
      *
      * @param queryFragment The QueryFragment to which the security code condition will be added.
      * @param objectMap     The map representation of the object containing the 'securityCode' key.
@@ -261,7 +260,7 @@ public final class QueryHelper {
     }
 
     /**
-     * Processes the 'search' key in the object map and adds the corresponding condition to the from fragment.
+     * Processes the 'search' key in the object map and adds the corresponding condition to the form fragment.
      *
      * @param queryFragment The QueryFragment to which the search condition will be added.
      * @param objectMap     The map representation of the object containing the 'search' key.
@@ -296,7 +295,7 @@ public final class QueryHelper {
      * QueryHelper.applySort(queryFragment, sort, "u");
      * }
      * </pre>
-     * In this example, a Sort object is created with ascending order for the username field (case insensitive)
+     * In this example, a Sort object is created with ascending order for the username field (case-insensitive)
      * and descending order for the createdTime field. The applySort method is then called to append the ORDER BY
      * clause to the QueryFragment with the prefix "u".
      *
@@ -330,11 +329,11 @@ public final class QueryHelper {
     }
 
     /**
-     * Applies the from SQL based on the provided object's table annotation.
+     * Applies the form SQL based on the provided object's table annotation.
      * If the object does not have a table annotation, it throws a QueryException.
      *
-     * @param queryFragment The QueryFragment to which the from SQL will be applied.
-     * @param object        The object containing the table annotation and data for the from.
+     * @param queryFragment The QueryFragment to which the form SQL will be applied.
+     * @param object        The object containing the table annotation and data for the form.
      * @throws QueryException If the object does not have a table annotation.
      */
     public static void applyQuerySql(QueryFragment queryFragment, Object object) {

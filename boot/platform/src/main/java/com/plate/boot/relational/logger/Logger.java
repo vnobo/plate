@@ -3,6 +3,7 @@ package com.plate.boot.relational.logger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.commons.base.AbstractEntity;
 import com.plate.boot.commons.base.BaseEntity;
+import com.plate.boot.commons.utils.MethodType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.relational.core.mapping.Table;
@@ -54,7 +55,7 @@ public class Logger extends AbstractEntity<Long> {
      * This string field captures the type of HTTP request method (e.g., GET, POST, PUT, DELETE)
      * associated with the logged activity, providing insights into the nature of the operation performed.
      */
-    private String method;
+    private MethodType method;
 
     /**
      * Represents the status of the logging event.

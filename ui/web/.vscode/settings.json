@@ -1,0 +1,33 @@
+{
+  "[markdown]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true
+  },
+  "files.autoSave": "afterDelay",
+  "angular.forceStrictTemplates": true,
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
+  "editor.inlineSuggest.enabled": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.markdownlint": "always"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "angular.view-engine": false,
+  "merge-conflict.autoNavigateNextConflict.enabled": true,
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.foldingStrategy": "indentation",
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "prettier.bracketSameLine": true,
+  "css.styleSheets": [
+    "node_modules/@angular/material/prebuilt-themes/magenta-violet.css",
+    "node_modules/@tabler/core/dist/css/tabler.css",
+    "node_modules/@tabler/core/dist/css/tabler-themes.css",
+    "node_modules/@tabler/core/dist/css/tabler-socials.css",
+    "src/**/*.scss"
+  ]
+}

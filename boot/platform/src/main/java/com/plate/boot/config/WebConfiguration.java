@@ -1,12 +1,11 @@
 package com.plate.boot.config;
 
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.reactive.config.PathMatchConfigurer;
@@ -23,24 +22,14 @@ import java.util.List;
  * strategies for handler methods.
  */
 @Configuration(proxyBeanMethods = false)
-@EnableScheduling
-@EnableAsync
 @EnableConfigurationProperties({WebfluxProperties.class})
+@RequiredArgsConstructor
 public class WebConfiguration implements WebFluxConfigurer {
 
     /**
      * Holds the webflux properties configuration.
      */
     private final WebfluxProperties webfluxProperties;
-
-    /**
-     * Constructs a new WebConfiguration instance with the specified WebfluxProperties.
-     *
-     * @param webfluxProperties the webflux properties to be used for configuration
-     */
-    public WebConfiguration(WebfluxProperties webfluxProperties) {
-        this.webfluxProperties = webfluxProperties;
-    }
 
     /**
      * Configures custom argument resolvers for handler methods in a reactive environment.

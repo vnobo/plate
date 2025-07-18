@@ -247,30 +247,22 @@ public class SecurityConfiguration {
         @Override
         public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException e) {
             log.error("Authentication Failure: {}", e.getMessage(), e);
+
             ServerHttpRequest request = exchange.getRequest();
             String requestedWith = request.getHeaders().getFirst(X_REQUESTED_WITH);
-
             if (!isXmlHttpRequest(requestedWith)) {
                 return super.commence(exchange, e);
             }
 
-            ServerHttpResponse response = exchange.getResponse();
             ErrorResponse errorResponse = createErrorResponse(exchange, e);
 
-            // 提前设置响应属性
+            ServerHttpResponse response = exchange.getResponse();
             response.setStatusCode(errorResponse.getStatusCode());
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-
-            return Mono.fromCallable(() -> BeanUtils.objectToBytes(errorResponse.getBody()))
-                    .map(bytes -> response.bufferFactory().wrap(bytes))
-                    .flatMap(buffer ->
-                            response.writeWith(Mono.just(buffer))
-                                    .doOnError(error -> DataBufferUtils.release(buffer))
-                    )
-                    .onErrorResume(ex -> {
-                        log.error("Error writing response", ex);
-                        return Mono.empty();
-                    });
+            var bytes = BeanUtils.objectToBytes(errorResponse.getBody());
+            var buffer = response.bufferFactory().wrap(bytes);
+            return response.writeWith(Mono.just(buffer))
+                    .doAfterTerminate(() -> DataBufferUtils.release(buffer));
         }
 
         /**
@@ -293,11 +285,11 @@ public class SecurityConfiguration {
          * original request and the exception message.
          */
         private ErrorResponse createErrorResponse(ServerWebExchange exchange, AuthenticationException ex) {
-            ErrorResponse.Builder builder = ErrorResponse.builder(ex, HttpStatus.UNAUTHORIZED, "Authentication Failure");
-            return builder.headers(httpHeaders -> httpHeaders
-                            .addAll(exchange.getRequest().getHeaders()))
+            return ErrorResponse.builder(ex, HttpStatus.UNAUTHORIZED, ex.getMessage())
                     .title("Authentication Failure").type(exchange.getRequest().getURI())
-                    .detail(ex.getMessage()).build();
+                    .headers(httpHeaders -> httpHeaders.addAll(exchange.getResponse().getHeaders()))
+                    .build();
+
         }
     }
 }

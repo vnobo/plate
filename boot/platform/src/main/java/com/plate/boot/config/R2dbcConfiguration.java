@@ -1,9 +1,10 @@
 package com.plate.boot.config;
 
 import com.google.common.collect.Lists;
-import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
@@ -18,17 +19,19 @@ import java.util.List;
  * This class sets up the R2DBC connection factory, custom converters, enables transaction management,
  * and provides an auditor aware component for reactive auditing purposes.
  */
+@Log4j2
 @Configuration(proxyBeanMethods = false)
 @EnableTransactionManagement
 @EnableR2dbcAuditing
 @RequiredArgsConstructor
-public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
+public class R2dbcConfiguration extends AbstractR2dbcConfiguration implements InitializingBean {
 
     /**
      * A collection of custom converters used to adapt between various data types when interacting with the database.
      * These converters facilitate the mapping of application-specific objects to database-compatible representations and vice versa.
      */
     private final List<Converter<?, ?>> customConverters;
+    private final ConnectionFactory factory;
 
     /**
      * Establishes and returns the configured R2DBC Connection Factory instance.
@@ -39,7 +42,7 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
      */
     @Override
     public @NonNull ConnectionFactory connectionFactory() {
-        return ConnectionFactories.get("r2dbc:..");
+        return factory;
     }
 
     /**
@@ -55,4 +58,8 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration {
         return Lists.newArrayList(customConverters);
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        log.debug("R2DBC configuration initialized!");
+    }
 }
