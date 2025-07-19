@@ -89,7 +89,14 @@ configure(subprojects - project(":boot")) { project ->
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
         annotationProcessor 'org.projectlombok:lombok'
 
+        developmentOnly 'org.springframework.boot:spring-boot-devtools'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+        testImplementation 'io.projectreactor:reactor-test'
+        testImplementation 'org.testcontainers:junit-jupiter'
+        testImplementation 'org.testcontainers:r2dbc'
+        testImplementation 'org.testcontainers:postgresql'
+        testImplementation 'com.redis:testcontainers-redis'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
         implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
