@@ -1,9 +1,9 @@
 package com.plate.boot.config;
 
+import com.redis.testcontainers.RedisContainer;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -20,17 +20,13 @@ public class InfrastructureConfiguration {
     
     @Bean
     @ServiceConnection(name = "redis")
-    public GenericContainer<?> redisContainer() {
-        return new GenericContainer<>(DockerImageName.parse("redis:latest"))
-                .withExposedPorts(6379);
+    public RedisContainer redisContainer() {
+        return new RedisContainer(DockerImageName.parse("redis:latest"));
     }
 
     @Bean
     @ServiceConnection(name = "postgres")
     public PostgreSQLContainer<?> postgresContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"))
-                .withDatabaseName("testdb")
-                .withUsername("test")
-                .withPassword("test");
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
     }
 }
