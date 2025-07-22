@@ -1,17 +1,22 @@
 package com.plate.boot.security;
 
 import com.plate.boot.security.core.AuthenticationToken;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,8 +56,15 @@ class SecurityControllerTest {
                 .expectBody(AuthenticationToken.class)
                 .value(token -> {
                     assertThat(token).isNotNull();
-                    assertThat(token.details()).isNotNull();
-                    assertThat(token.details()).hasFieldOrProperty("username").isEqualTo("admin");
+                    var expected = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond() + token.expires();
+                    assertThat(token.lastAccessTime()).isLessThan(expected);
+                    assertThat(token.details()).isNotNull().hasFieldOrProperty("username")
+                            .extracting("username").isEqualTo("admin");
+                    assertThat(token.details()).hasFieldOrProperty("authorities")
+                            .extracting("authorities")
+                            .asInstanceOf(InstanceOfAssertFactories.list(GrantedAuthority.class))
+                            .isNotEmpty();
+
                 });
     }
 }

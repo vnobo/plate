@@ -53,7 +53,8 @@ public class ApplicationTests {
                 () -> assertThat(applicationContext.containsBean("connectionFactory")).isTrue(),
                 () -> assertThat(applicationContext.containsBean("reactiveRedisTemplate")).isTrue(),
                 () -> assertThat(applicationContext.containsBean("r2dbcEntityTemplate")).isTrue(),
-                () -> assertThat(applicationContext.containsBean("springSecurityFilterChain")).isTrue()
+                () -> assertThat(applicationContext.containsBean("springSecurityFilterChain")).isTrue(),
+                () -> assertThat(applicationContext.containsBean("oAuth2ClientService")).isTrue()
         );
     }
 }
