@@ -9,4 +9,3 @@ pluginManagement {
 rootProject.name = "plate"
 
 include ":boot:platform"
-//include ":boot:oauth2"
