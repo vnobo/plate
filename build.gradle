@@ -48,27 +48,12 @@ configure(subprojects - project(":boot")) { project ->
     tasks.named("bootBuildImage") {
         createdDate = "now"
         imageName = "localhost:5000/${rootProject.name}-${project.name}:latest"
-        imagePlatform = "linux/amd64,linux/arm64"
+        imagePlatform = "linux/amd64"
         environment = [
                 "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
                 "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError" +
                         "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
         ]
-        buildWorkspace {
-            bind {
-                source = "/tmp/cache-${rootProject.name}.work"
-            }
-        }
-        buildCache {
-            bind {
-                source = "/tmp/cache-${rootProject.name}.build"
-            }
-        }
-        launchCache {
-            bind {
-                source = "/tmp/cache-${rootProject.name}.launch"
-            }
-        }
     }
 
     dependencies {
