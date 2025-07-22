@@ -1,6 +1,7 @@
 package com.plate.boot.commons.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.plate.boot.commons.exception.JsonException;
 import org.springframework.stereotype.Component;
@@ -38,6 +39,30 @@ public class JsonUtils {
             return objectMapper.readValue(json, clazz);
         } catch (Exception e) {
             throw JsonException.withMsg("反序列化失败", e);
+        }
+    }
+
+    public static JsonNode toJsonNode(String json) {
+        try {
+            return objectMapper.readTree(json);
+        } catch (Exception e) {
+            throw JsonException.withMsg("JSON解析失败", e);
+        }
+    }
+
+    public static String toJsonString(Object obj) {
+        return toJson(obj);
+    }
+
+    public static <T> T fromJsonString(String json, Class<T> clazz) {
+        return fromJson(json, clazz);
+    }
+
+    public static <T> T fromJsonNode(JsonNode node, Class<T> clazz) {
+        try {
+            return objectMapper.treeToValue(node, clazz);
+        } catch (Exception e) {
+            throw JsonException.withMsg("JSON节点转换失败", e);
         }
     }
 }
