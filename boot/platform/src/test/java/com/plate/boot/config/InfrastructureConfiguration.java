@@ -9,15 +9,15 @@ import org.testcontainers.utility.DockerImageName;
 
 /**
  * Test Infrastructure Configuration
- * 
+ *
  * <p>This configuration sets up the necessary infrastructure components for testing,
  * including Redis and PostgreSQL containers.</p>
- * 
+ *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
 @TestConfiguration(proxyBeanMethods = false)
 public class InfrastructureConfiguration {
-    
+
     @Bean
     @ServiceConnection(name = "redis")
     public RedisContainer redisContainer() {
@@ -27,6 +27,9 @@ public class InfrastructureConfiguration {
     @Bean
     @ServiceConnection(name = "postgres")
     public PostgreSQLContainer<?> postgresContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+        var postgresImage = DockerImageName.parse("ghcr.io/vnobo/postgres:latest")
+                .asCompatibleSubstituteFor("postgres:latest");
+        return new PostgreSQLContainer<>(postgresImage)
+                .withCommand("postgres", "-c", "fsync=off", "-c", "full_page_writes=off");
     }
 }
