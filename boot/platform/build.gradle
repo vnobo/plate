@@ -7,8 +7,6 @@ plugins {
 
 dependencies {
 
-    implementation('org.springframework.ai:spring-ai-starter-model-openai')
-
     implementation('com.github.f4b6a3:uuid-creator:6.+')
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
@@ -25,9 +23,14 @@ dependencies {
     runtimeOnly 'org.flywaydb:flyway-database-postgresql'
     runtimeOnly 'org.springframework:spring-jdbc'
 
-    testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.springframework.security:spring-security-test'
 
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:r2dbc'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'com.redis:testcontainers-redis'
 }
 
 tasks.named("test") {

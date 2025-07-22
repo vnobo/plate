@@ -22,6 +22,11 @@ import java.util.Map;
 @Log4j2
 @Component
 public class DatabaseUtils implements InitializingBean {
+
+    /**
+     * The maximum number of elements that can be stored in the cache.
+     * This value is used to determine when the cache should be cleared to avoid memory overflow.
+     */
     public static ReactiveRedisTemplate<String, Object> REACTIVE_REDIS_TEMPLATE;
     /**
      * Represents the maximum size of data that can be held in memory.
@@ -154,7 +159,7 @@ public class DatabaseUtils implements InitializingBean {
      *
      * @param dataSize The maximum in-memory size limit defined as a {@link DataSize}. Defaults to 256 kilobytes if not explicitly set.
      */
-    @Value("${spring.codec.max-in-memory-size:256kb}")
+    @Value("${spring.codec.max-in-memory-size:256KB}")
     public void setMaxInMemorySize(DataSize dataSize) {
         MAX_IN_MEMORY_SIZE = dataSize;
     }
