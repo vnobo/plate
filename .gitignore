@@ -16,6 +16,7 @@ build/
 .sts4-cache
 
 ### IntelliJ IDEA ###
+.roo
 .claude
 .idea
 *.iws
