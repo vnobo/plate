@@ -5,7 +5,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.wait.strategy.DockerHealthcheckWaitStrategy;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
 /**
@@ -22,21 +22,15 @@ public class InfrastructureConfiguration {
     @Bean
     @ServiceConnection(name = "redis")
     public RedisContainer redisContainer() {
-        return new RedisContainer(DockerImageName.parse("redis:latest"));
+        return new RedisContainer("redis:latest");
     }
 
     @Bean
     @ServiceConnection(name = "postgres")
     public PostgreSQLContainer<?> postgresContainer() {
         var postgresImage = DockerImageName.parse("ghcr.io/vnobo/postgres:latest")
-                .asCompatibleSubstituteFor("postgres:latest");
-        return new PostgreSQLContainer<>(postgresImage)  // 添加性能优化参数
-                .withCommand("postgres",
-                        "-c", "fsync=off",
-                        "-c", "full_page_writes=off",
-                        "-c", "synchronous_commit=off",
-                        "-c", "max_connections=200")
-                // 添加健康检查确保容器完全启动
-                .waitingFor(new DockerHealthcheckWaitStrategy());
+                .asCompatibleSubstituteFor("postgres");
+        return new PostgreSQLContainer<>(postgresImage)
+                .waitingFor(Wait.forLogMessage("^.*数据库系统准备接受连接.*$", 2));
     }
 }
