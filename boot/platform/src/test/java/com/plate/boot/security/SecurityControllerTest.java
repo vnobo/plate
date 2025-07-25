@@ -35,9 +35,9 @@ import static org.mockito.Mockito.*;
 
 /**
  * SecurityController的全面单元测试类
- *  admin 具有超级管理员权限  密码 123456
- *  user 具有普通用户权限 密码 123456
- *  测试使用以上两个账号测试
+ * admin 具有超级管理员权限  密码 123456
+ * user 具有普通用户权限 密码 123456
+ * 测试使用以上两个账号测试
  * <p>测试覆盖SecurityController的所有公共方法，包括：</p>
  * <ul>
  *   <li>登录令牌获取 - loginToken</li>
@@ -45,9 +45,9 @@ import static org.mockito.Mockito.*;
  *   <li>OAuth2客户端绑定 - bindOauth2</li>
  *   <li>密码修改 - changePassword</li>
  * </ul>
- * 
+ *
  * <p>每个方法都包含正常场景和异常场景的测试用例，确保全面的测试覆盖。</p>
- * 
+ *
  * @author Alex
  */
 @WebFluxTest(controllers = SecurityController.class)
@@ -69,22 +69,16 @@ class SecurityControllerTest {
     @MockitoBean
     private ServerOAuth2AuthorizedClientRepository clientRepository;
 
-    private UserDetails testUser;
     private List<GrantedAuthority> testAuthorities;
 
     @BeforeEach
     void setUp() {
         // 准备测试数据
         testAuthorities = List.of(
-            new SimpleGrantedAuthority("ROLE_USER"),
-            new SimpleGrantedAuthority("ROLE_ADMIN")
+                new SimpleGrantedAuthority("ROLE_USER"),
+                new SimpleGrantedAuthority("ROLE_ADMIN")
         );
-        
-        testUser = User.builder()
-            .username("admin")
-            .password("123456")
-            .authorities(testAuthorities)
-            .build();
+
     }
 
     @Nested
@@ -93,27 +87,27 @@ class SecurityControllerTest {
 
         @Test
         @DisplayName("成功获取认证令牌 - 已认证用户")
-        @WithMockUser(username = "admin", password = "123456", authorities = {"ROLE_USER", "ROLE_ADMIN"})
+        @WithMockUser(username = "admin", password = "123456", authorities = {"ROLE_USER", "ROLE_SYSTEM_ADMINISTRATORS","ROLE_ADMINISTRATORS"})
         void shouldReturnAuthenticationTokenForAuthenticatedUser() {
             webTestClient.get()
-                .uri("/sec/v1/oauth2/login")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.token").value(token -> assertThat(token).isNotNull())
-                .jsonPath("$.expires").value(expires -> assertThat(expires).isInstanceOf(Number.class))
-                .jsonPath("$.lastAccessTime").value(lastAccessTime -> assertThat(lastAccessTime).isInstanceOf(Number.class))
-                .jsonPath("$.details.username").isEqualTo("admin")
-                .jsonPath("$.details.authorities").value(authorities -> assertThat(authorities).isInstanceOf(List.class));
+                    .uri("/sec/v1/oauth2/login")
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBody()
+                    .jsonPath("$.token").value(token -> assertThat(token).isNotNull())
+                    .jsonPath("$.expires").value(expires -> assertThat(expires).isInstanceOf(Number.class))
+                    .jsonPath("$.lastAccessTime").value(lastAccessTime -> assertThat(lastAccessTime).isInstanceOf(Number.class))
+                    .jsonPath("$.details.username").isEqualTo("admin")
+                    .jsonPath("$.details.authorities").value(authorities -> assertThat(authorities).isInstanceOf(List.class));
         }
 
         @Test
         @DisplayName("未认证用户访问应返回302重定向")
         void shouldReturn302ForUnauthenticatedUser() {
             webTestClient.get()
-                .uri("/sec/v1/oauth2/login")
-                .exchange()
-                .expectStatus().is3xxRedirection();
+                    .uri("/sec/v1/oauth2/login")
+                    .exchange()
+                    .expectStatus().is3xxRedirection();
         }
 
         @Test
@@ -121,14 +115,14 @@ class SecurityControllerTest {
         @WithMockUser(username = "anotheruser", password = "password", authorities = {"ROLE_USER"})
         void shouldReturnDifferentTokenForDifferentUser() {
             webTestClient.get()
-                .uri("/sec/v1/oauth2/login")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.details.username").isEqualTo("anotheruser")
-                .jsonPath("$.details.authorities").isArray()
-                .jsonPath("$.details.authorities.length()").isEqualTo(1)
-                .jsonPath("$.details.authorities[0].authority").isEqualTo("ROLE_USER");
+                    .uri("/sec/v1/oauth2/login")
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBody()
+                    .jsonPath("$.details.username").isEqualTo("anotheruser")
+                    .jsonPath("$.details.authorities").isArray()
+                    .jsonPath("$.details.authorities.length()").isEqualTo(1)
+                    .jsonPath("$.details.authorities[0].authority").isEqualTo("ROLE_USER");
         }
     }
 
@@ -141,15 +135,15 @@ class SecurityControllerTest {
         @WithMockUser(username = "admin")
         void shouldReturnCsrfTokenWhenPresent() {
             webTestClient
-                .mutateWith(SecurityMockServerConfigurers.csrf())
-                .get()
-                .uri("/sec/v1/oauth2/csrf")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.headerName").isEqualTo("X-CSRF-TOKEN")
-                .jsonPath("$.parameterName").isEqualTo("_csrf")
-                .jsonPath("$.token").isNotEmpty();
+                    .mutateWith(SecurityMockServerConfigurers.csrf())
+                    .get()
+                    .uri("/sec/v1/oauth2/csrf")
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBody()
+                    .jsonPath("$.headerName").isEqualTo("X-CSRF-TOKEN")
+                    .jsonPath("$.parameterName").isEqualTo("_csrf")
+                    .jsonPath("$.token").isNotEmpty();
         }
 
         @Test
@@ -157,9 +151,9 @@ class SecurityControllerTest {
         @WithMockUser(username = "testuser")
         void shouldReturnEmptyWhenCsrfTokenNotPresent() {
             webTestClient.get()
-                .uri("/sec/v1/oauth2/csrf")
-                .exchange()
-                .expectStatus().isOk();
+                    .uri("/sec/v1/oauth2/csrf")
+                    .exchange()
+                    .expectStatus().isOk();
         }
     }
 
@@ -174,41 +168,41 @@ class SecurityControllerTest {
             // 准备测试数据
             String clientRegistrationId = "github";
             OAuth2AccessToken accessToken = new OAuth2AccessToken(
-                OAuth2AccessToken.TokenType.BEARER,
-                "test-access-token",
-                Instant.now(),
-                Instant.now().plusSeconds(3600)
+                    OAuth2AccessToken.TokenType.BEARER,
+                    "test-access-token",
+                    Instant.now(),
+                    Instant.now().plusSeconds(3600)
             );
-            
+
             ClientRegistration clientRegistration = ClientRegistration.withRegistrationId(clientRegistrationId)
-                .clientId("test-client-id")
-                .clientSecret("test-client-secret")
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .redirectUri("http://localhost:8080/login/oauth2/code/github")
-                .authorizationUri("https://github.com/login/oauth/authorize")
-                .tokenUri("https://github.com/login/oauth/access_token")
-                .build();
-            
+                    .clientId("test-client-id")
+                    .clientSecret("test-client-secret")
+                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                    .redirectUri("http://localhost:8080/login/oauth2/code/github")
+                    .authorizationUri("https://github.com/login/oauth/authorize")
+                    .tokenUri("https://github.com/login/oauth/access_token")
+                    .build();
+
             OAuth2AuthorizedClient authorizedClient = new OAuth2AuthorizedClient(
-                clientRegistration,
-                "admin",
-                accessToken
+                    clientRegistration,
+                    "admin",
+                    accessToken
             );
 
             // 模拟客户端仓库行为
             when(clientRepository.loadAuthorizedClient(eq(clientRegistrationId), any(), any()))
-                .thenReturn(Mono.just(authorizedClient));
+                    .thenReturn(Mono.just(authorizedClient));
 
             webTestClient.get()
-                .uri(uriBuilder -> uriBuilder
-                    .path("/sec/v1/oauth2/bind")
-                    .queryParam("clientRegistrationId", clientRegistrationId)
-                    .build())
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.tokenValue").isEqualTo("test-access-token")
-                .jsonPath("$.tokenType.value").isEqualTo("Bearer");
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/sec/v1/oauth2/bind")
+                            .queryParam("clientRegistrationId", clientRegistrationId)
+                            .build())
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBody()
+                    .jsonPath("$.tokenValue").isEqualTo("test-access-token")
+                    .jsonPath("$.tokenType.value").isEqualTo("Bearer");
 
             // 验证方法调用
             verify(clientRepository).loadAuthorizedClient(eq(clientRegistrationId), any(), any());
@@ -219,31 +213,31 @@ class SecurityControllerTest {
         @WithMockUser(username = "admin")
         void shouldReturnEmptyWhenClientNotFound() {
             String clientRegistrationId = "nonexistent";
-            
+
             when(clientRepository.loadAuthorizedClient(eq(clientRegistrationId), any(), any()))
-                .thenReturn(Mono.empty());
+                    .thenReturn(Mono.empty());
 
             webTestClient.get()
-                .uri(uriBuilder -> uriBuilder
-                    .path("/sec/v1/oauth2/bind")
-                    .queryParam("clientRegistrationId", clientRegistrationId)
-                    .build())
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .isEmpty();
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/sec/v1/oauth2/bind")
+                            .queryParam("clientRegistrationId", clientRegistrationId)
+                            .build())
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBody()
+                    .isEmpty();
         }
 
         @Test
         @DisplayName("未认证用户绑定客户端应返回302重定向")
         void shouldReturn302ForUnauthenticatedUserBinding() {
             webTestClient.get()
-                .uri(uriBuilder -> uriBuilder
-                    .path("/sec/v1/oauth2/bind")
-                    .queryParam("clientRegistrationId", "github")
-                    .build())
-                .exchange()
-                .expectStatus().is3xxRedirection();
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/sec/v1/oauth2/bind")
+                            .queryParam("clientRegistrationId", "github")
+                            .build())
+                    .exchange()
+                    .expectStatus().is3xxRedirection();
         }
 
         @Test
@@ -251,17 +245,17 @@ class SecurityControllerTest {
         @WithMockUser(username = "admin")
         void shouldHandleClientRepositoryError() {
             String clientRegistrationId = "github";
-            
+
             when(clientRepository.loadAuthorizedClient(eq(clientRegistrationId), any(), any()))
-                .thenReturn(Mono.error(new RuntimeException("客户端仓库错误")));
+                    .thenReturn(Mono.error(new RuntimeException("客户端仓库错误")));
 
             webTestClient.get()
-                .uri(uriBuilder -> uriBuilder
-                    .path("/sec/v1/oauth2/bind")
-                    .queryParam("clientRegistrationId", clientRegistrationId)
-                    .build())
-                .exchange()
-                .expectStatus().is5xxServerError();
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/sec/v1/oauth2/bind")
+                            .queryParam("clientRegistrationId", clientRegistrationId)
+                            .build())
+                    .exchange()
+                    .expectStatus().is5xxServerError();
         }
     }
 
@@ -277,31 +271,31 @@ class SecurityControllerTest {
             ChangePasswordRequest request = new ChangePasswordRequest();
             request.setPassword("123456");
             request.setNewPassword("newPassword");
-            
+
             UserDetails updatedUser = User.builder()
-                .username("admin")
-                .password("newEncodedPassword")
-                .authorities(testAuthorities)
-                .build();
+                    .username("admin")
+                    .password("newEncodedPassword")
+                    .authorities(testAuthorities)
+                    .build();
 
             // 模拟密码编码器和安全管理器行为
             when(passwordEncoder.matches("123456", "123456")).thenReturn(true);
             when(passwordEncoder.encode("newPassword")).thenReturn("newEncodedPassword");
             when(securityManager.updatePassword(any(UserDetails.class), eq("newEncodedPassword")))
-                .thenReturn(Mono.just(updatedUser));
+                    .thenReturn(Mono.just(updatedUser));
 
             webTestClient
-                .mutateWith(SecurityMockServerConfigurers.csrf())
-                .post()
-                .uri("/sec/v1/oauth2/change/password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(objectMapper.writeValueAsString(request))
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.username").isEqualTo("admin")
-                .jsonPath("$.password").isEqualTo("newEncodedPassword")
-                .jsonPath("$.authorities").isArray();
+                    .mutateWith(SecurityMockServerConfigurers.csrf())
+                    .post()
+                    .uri("/sec/v1/oauth2/change/password")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(objectMapper.writeValueAsString(request))
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBody()
+                    .jsonPath("$.username").isEqualTo("admin")
+                    .jsonPath("$.password").isEqualTo("newEncodedPassword")
+                    .jsonPath("$.authorities").isArray();
 
             // 验证方法调用
             verify(passwordEncoder).matches("123456", "123456");
@@ -318,13 +312,13 @@ class SecurityControllerTest {
             request.setNewPassword("samePassword");
 
             webTestClient
-                .mutateWith(SecurityMockServerConfigurers.csrf())
-                .post()
-                .uri("/sec/v1/oauth2/change/password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(objectMapper.writeValueAsString(request))
-                .exchange()
-                .expectStatus().is5xxServerError();
+                    .mutateWith(SecurityMockServerConfigurers.csrf())
+                    .post()
+                    .uri("/sec/v1/oauth2/change/password")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(objectMapper.writeValueAsString(request))
+                    .exchange()
+                    .expectStatus().is5xxServerError();
 
             // 验证没有调用密码相关方法
             verify(passwordEncoder, never()).matches(anyString(), anyString());
@@ -344,13 +338,13 @@ class SecurityControllerTest {
             when(passwordEncoder.matches("wrongPassword", "123456")).thenReturn(false);
 
             webTestClient
-                .mutateWith(SecurityMockServerConfigurers.csrf())
-                .post()
-                .uri("/sec/v1/oauth2/change/password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(objectMapper.writeValueAsString(request))
-                .exchange()
-                .expectStatus().is5xxServerError();
+                    .mutateWith(SecurityMockServerConfigurers.csrf())
+                    .post()
+                    .uri("/sec/v1/oauth2/change/password")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(objectMapper.writeValueAsString(request))
+                    .exchange()
+                    .expectStatus().is5xxServerError();
 
             // 验证只调用了密码匹配，没有进行后续操作
             verify(passwordEncoder).matches("wrongPassword", "123456");
@@ -367,13 +361,13 @@ class SecurityControllerTest {
             request.setNewPassword("newPassword");
 
             webTestClient
-                .mutateWith(SecurityMockServerConfigurers.csrf())
-                .post()
-                .uri("/sec/v1/oauth2/change/password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(objectMapper.writeValueAsString(request))
-                .exchange()
-                .expectStatus().isBadRequest();
+                    .mutateWith(SecurityMockServerConfigurers.csrf())
+                    .post()
+                    .uri("/sec/v1/oauth2/change/password")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(objectMapper.writeValueAsString(request))
+                    .exchange()
+                    .expectStatus().isBadRequest();
         }
 
         @Test
@@ -385,13 +379,13 @@ class SecurityControllerTest {
             request.setNewPassword(""); // 空新密码
 
             webTestClient
-                .mutateWith(SecurityMockServerConfigurers.csrf())
-                .post()
-                .uri("/sec/v1/oauth2/change/password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(objectMapper.writeValueAsString(request))
-                .exchange()
-                .expectStatus().isBadRequest();
+                    .mutateWith(SecurityMockServerConfigurers.csrf())
+                    .post()
+                    .uri("/sec/v1/oauth2/change/password")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(objectMapper.writeValueAsString(request))
+                    .exchange()
+                    .expectStatus().isBadRequest();
         }
 
         @Test
@@ -403,13 +397,13 @@ class SecurityControllerTest {
             request.setNewPassword("newPassword");
 
             webTestClient
-                .mutateWith(SecurityMockServerConfigurers.csrf())
-                .post()
-                .uri("/sec/v1/oauth2/change/password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(objectMapper.writeValueAsString(request))
-                .exchange()
-                .expectStatus().isBadRequest();
+                    .mutateWith(SecurityMockServerConfigurers.csrf())
+                    .post()
+                    .uri("/sec/v1/oauth2/change/password")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(objectMapper.writeValueAsString(request))
+                    .exchange()
+                    .expectStatus().isBadRequest();
         }
 
         @Test
@@ -420,13 +414,13 @@ class SecurityControllerTest {
             request.setNewPassword("newPassword");
 
             webTestClient
-                .mutateWith(SecurityMockServerConfigurers.csrf())
-                .post()
-                .uri("/sec/v1/oauth2/change/password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(objectMapper.writeValueAsString(request))
-                .exchange()
-                .expectStatus().is3xxRedirection();
+                    .mutateWith(SecurityMockServerConfigurers.csrf())
+                    .post()
+                    .uri("/sec/v1/oauth2/change/password")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(objectMapper.writeValueAsString(request))
+                    .exchange()
+                    .expectStatus().is3xxRedirection();
         }
 
         @Test
@@ -441,16 +435,16 @@ class SecurityControllerTest {
             when(passwordEncoder.matches("123456", "123456")).thenReturn(true);
             when(passwordEncoder.encode("newPassword")).thenReturn("newEncodedPassword");
             when(securityManager.updatePassword(any(UserDetails.class), eq("newEncodedPassword")))
-                .thenReturn(Mono.error(new RuntimeException("数据库更新失败")));
+                    .thenReturn(Mono.error(new RuntimeException("数据库更新失败")));
 
             webTestClient
-                .mutateWith(SecurityMockServerConfigurers.csrf())
-                .post()
-                .uri("/sec/v1/oauth2/change/password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(objectMapper.writeValueAsString(request))
-                .exchange()
-                .expectStatus().is5xxServerError();
+                    .mutateWith(SecurityMockServerConfigurers.csrf())
+                    .post()
+                    .uri("/sec/v1/oauth2/change/password")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(objectMapper.writeValueAsString(request))
+                    .exchange()
+                    .expectStatus().is5xxServerError();
 
             // 验证所有方法都被调用了
             verify(passwordEncoder).matches("123456", "123456");
@@ -467,12 +461,12 @@ class SecurityControllerTest {
             request.setNewPassword("newPassword");
 
             webTestClient
-                .post()
-                .uri("/sec/v1/oauth2/change/password")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(objectMapper.writeValueAsString(request))
-                .exchange()
-                .expectStatus().isForbidden();
+                    .post()
+                    .uri("/sec/v1/oauth2/change/password")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(objectMapper.writeValueAsString(request))
+                    .exchange()
+                    .expectStatus().isForbidden();
         }
     }
 
@@ -486,27 +480,27 @@ class SecurityControllerTest {
         void shouldAllowAdminUserAccessToAllEndpoints() {
             // 测试登录令牌端点
             webTestClient.get()
-                .uri("/sec/v1/oauth2/login")
-                .exchange()
-                .expectStatus().isOk();
+                    .uri("/sec/v1/oauth2/login")
+                    .exchange()
+                    .expectStatus().isOk();
 
             // 测试CSRF令牌端点
             webTestClient.get()
-                .uri("/sec/v1/oauth2/csrf")
-                .exchange()
-                .expectStatus().isOk();
+                    .uri("/sec/v1/oauth2/csrf")
+                    .exchange()
+                    .expectStatus().isOk();
 
             // 测试OAuth2绑定端点
             when(clientRepository.loadAuthorizedClient(anyString(), any(), any()))
-                .thenReturn(Mono.empty());
-            
+                    .thenReturn(Mono.empty());
+
             webTestClient.get()
-                .uri(uriBuilder -> uriBuilder
-                    .path("/sec/v1/oauth2/bind")
-                    .queryParam("clientRegistrationId", "github")
-                    .build())
-                .exchange()
-                .expectStatus().isOk();
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/sec/v1/oauth2/bind")
+                            .queryParam("clientRegistrationId", "github")
+                            .build())
+                    .exchange()
+                    .expectStatus().isOk();
         }
 
         @Test
@@ -515,24 +509,24 @@ class SecurityControllerTest {
         void shouldAllowUserAccessToBasicEndpoints() {
             // 测试登录令牌端点
             webTestClient.get()
-                .uri("/sec/v1/oauth2/login")
-                .exchange()
-                .expectStatus().isOk();
+                    .uri("/sec/v1/oauth2/login")
+                    .exchange()
+                    .expectStatus().isOk();
 
             // 测试CSRF令牌端点
             webTestClient.get()
-                .uri("/sec/v1/oauth2/csrf")
-                .exchange()
-                .expectStatus().isOk();
+                    .uri("/sec/v1/oauth2/csrf")
+                    .exchange()
+                    .expectStatus().isOk();
         }
 
         @Test
         @DisplayName("无权限用户应被拒绝访问")
         void shouldDenyAccessToUnauthorizedUser() {
             webTestClient.get()
-                .uri("/sec/v1/oauth2/login")
-                .exchange()
-                .expectStatus().is3xxRedirection();
+                    .uri("/sec/v1/oauth2/login")
+                    .exchange()
+                    .expectStatus().is3xxRedirection();
         }
     }
 }
