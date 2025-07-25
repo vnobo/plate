@@ -11,10 +11,17 @@ spring:
   threads.virtual.enabled: true
   main.keep-alive: true
   application.name: plate
-  webflux.format:
-    time: "HH:mm:ss"
-    date-time: "yyyy-MM-dd HH:mm:ss"
-    date: "yyyy-MM-dd"
+  webflux:
+    format:
+      time: "HH:mm:ss"
+      date-time: "yyyy-MM-dd HH:mm:ss"
+      date: "yyyy-MM-dd"
+    properties:
+      path-prefixes:
+        - path: rel/v1
+          base-package: com.plate.boot.relational
+        - path: sec/v1
+          base-package: com.plate.boot.security
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
     time-zone: "GMT+8"
@@ -35,3 +42,13 @@ spring:
     baseline-on-migrate: true
     baseline-version: 1.0.0
     baseline-description: "Baseline version V1.0.0,See https://github.com/plate/plate"
+  r2dbc.pool:
+    max-idle-time: 10m
+    validation-query: select version()
+  data.redis:
+    timeout: 30s
+    connect-timeout: 10s
+    repositories.enabled: false
+  security.oauth2.client.registration:
+    github:
+      client-id: "${github.client-id:Iv1.14a97a700a228437}"
