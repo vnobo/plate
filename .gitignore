@@ -8,6 +8,7 @@ build/
 ### vscode ###
 bin
 .codebuddy
+.vscode
 
 ### STS ###
 .apt_generated
