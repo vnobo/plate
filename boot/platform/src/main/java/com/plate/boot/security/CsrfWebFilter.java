@@ -38,14 +38,14 @@ public class CsrfWebFilter implements WebFilter {
      * If a CSRF token is found, the Mono will also ensure the token is available in the context.
      */
     @Override
-    public @NonNull Mono<Void> filter(ServerWebExchange exchange, @NonNull WebFilterChain chain) {
+    public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         exchange.getRequest().getQueryParams();
         log.debug("{}Csrf filter chain [CsrfWebFilter] next.", exchange.getLogPrefix());
         Mono<CsrfToken> csrfTokenMono = exchange.getAttribute(CsrfToken.class.getName());
         if (csrfTokenMono != null) {
             return csrfTokenMono.flatMap(csrfToken -> Mono.defer(() -> chain.filter(exchange))
-                    .contextWrite((context) -> context.hasKey(ContextUtils.CSRF_TOKEN_CONTEXT) ?
-                            context : context.put(ContextUtils.CSRF_TOKEN_CONTEXT, csrfToken)));
+                    .contextWrite((context) -> context.hasKey(ContextUtils.CSRF_TOKEN_CONTEXT) ? context
+                            : context.put(ContextUtils.CSRF_TOKEN_CONTEXT, csrfToken)));
         }
         return chain.filter(exchange);
     }
