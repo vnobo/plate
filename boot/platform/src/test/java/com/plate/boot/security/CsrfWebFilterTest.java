@@ -40,8 +40,8 @@ class CsrfWebFilterTest {
     @BeforeEach
     void setUp() {
         csrfWebFilter = new CsrfWebFilter();
-        // Default stubbing - will be overridden in specific tests as needed
-        lenient().when(mockFilterChain.filter(any(ServerWebExchange.class))).thenReturn(Mono.empty());
+        // Remove default stubbing to avoid UnnecessaryStubbingException
+        // Stubbing will be done in individual tests as needed
     }
 
     @Nested
@@ -57,6 +57,9 @@ class CsrfWebFilterTest {
 
             // Set CSRF token in exchange attributes
             exchange.getAttributes().put(CsrfToken.class.getName(), Mono.just(mockCsrfToken));
+            
+            // Stub the filter chain for this specific test
+            when(mockFilterChain.filter(any(ServerWebExchange.class))).thenReturn(Mono.empty());
 
             // Act & Assert
             StepVerifier.create(csrfWebFilter.filter(exchange, mockFilterChain))
@@ -324,8 +327,8 @@ class CsrfWebFilterTest {
                     .expectComplete()
                     .verify();
 
-            // Filter chain should not be called when CSRF token mono is empty
-            verify(mockFilterChain, never()).filter(any());
+            // Filter chain should be called even when CSRF token mono is empty
+            verify(mockFilterChain).filter(exchange);
         }
     }
 

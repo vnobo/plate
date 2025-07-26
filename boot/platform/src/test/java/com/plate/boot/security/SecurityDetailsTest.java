@@ -101,19 +101,16 @@ class SecurityDetailsTest {
     void testGetTenantCodeWithEnabledTenant() {
         // Arrange
         TenantMemberRes tenant1 = new TenantMemberRes();
-        tenant1.setCode(ContextUtils.nextId()); // Set code for tenant1 (correct)
         tenant1.setTenantCode("tenant1");
         tenant1.setName("Tenant 1");
         tenant1.setEnabled(false);
 
         TenantMemberRes tenant2 = new TenantMemberRes();
-        tenant2.setCode(ContextUtils.nextId()); // FIXED: Set code for tenant2 (was tenant1)
         tenant2.setTenantCode("tenant2");
         tenant2.setName("Tenant 2");
         tenant2.setEnabled(false);
 
         TenantMemberRes tenant3 = new TenantMemberRes();
-        tenant3.setCode(ContextUtils.nextId()); // FIXED: Set code for tenant3 (was tenant1)
         tenant3.setTenantCode("tenant3");
         tenant3.setName("Tenant 3");
         tenant3.setEnabled(true);
