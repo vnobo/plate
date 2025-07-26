@@ -24,7 +24,6 @@ A comprehensive system management platform built with **Spring Boot 3** and **An
 ### 🚀 Technical Highlights
 - **Reactive Architecture**: Built with Spring WebFlux for high performance
 - **Real-time Updates**: WebSocket support for live data synchronization
-- **AI Integration**: Spring AI with OpenAI/DeepSeek integration
 - **SSL/HTTPS**: Built-in SSL support for secure communications
 - **Server-Side Rendering**: Angular SSR for improved SEO and performance
 - **Progressive Web App**: PWA capabilities with service workers
@@ -40,12 +39,12 @@ A comprehensive system management platform built with **Spring Boot 3** and **An
 
 ### Backend Requirements
 - **Java**: OpenJDK 21 or later
-- **Database**: PostgreSQL 14+ with SSL support
-- **Cache**: Redis 6.0+ for session storage and caching
-- **Build Tool**: Gradle 8.5+
+- **Database**: PostgreSQL 17+ with SSL support
+- **Cache**: Redis 7.0+ for session storage and caching
+- **Build Tool**: Gradle 8.14+
 
 ### Frontend Requirements
-- **Node.js**: 18.0+ (LTS recommended)
+- **Node.js**: 22.0+ (LTS recommended)
 - **Package Manager**: npm 9.0+ or yarn 1.22+
 - **Browser Support**: Modern browsers (Chrome 90+, Firefox 88+, Safari 14+)
 
