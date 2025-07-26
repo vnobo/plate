@@ -1,7 +1,7 @@
 package com.plate.boot.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.plate.boot.config.InfrastructureConfiguration;
+import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.security.SecurityController.ChangePasswordRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -36,9 +35,9 @@ import static org.mockito.Mockito.*;
 
 /**
  * SecurityController的全面单元测试类
- *  admin 具有超级管理员权限  密码 123456
- *  user 具有普通用户权限 密码 123456
- *  测试使用以上两个账号测试
+ * admin 具有超级管理员权限  密码 123456
+ * user 具有普通用户权限 密码 123456
+ * 测试使用以上两个账号测试
  * <p>测试覆盖SecurityController的所有公共方法，包括：</p>
  * <ul>
  *   <li>登录令牌获取 - loginToken</li>
@@ -52,7 +51,6 @@ import static org.mockito.Mockito.*;
  * @author Alex
  */
 @WebFluxTest(controllers = SecurityController.class)
-@Import({SecurityController.class, InfrastructureConfiguration.class})
 class SecurityControllerTest {
 
     @Autowired
@@ -70,7 +68,6 @@ class SecurityControllerTest {
     @MockitoBean
     private ServerOAuth2AuthorizedClientRepository clientRepository;
 
-    private UserDetails testUser;
     private List<GrantedAuthority> testAuthorities;
 
     @BeforeEach
@@ -80,12 +77,6 @@ class SecurityControllerTest {
                 new SimpleGrantedAuthority("ROLE_USER"),
                 new SimpleGrantedAuthority("ROLE_ADMIN")
         );
-
-        testUser = User.builder()
-                .username("admin")
-                .password("123456")
-                .authorities(testAuthorities)
-                .build();
     }
 
     @Nested
@@ -254,7 +245,7 @@ class SecurityControllerTest {
             String clientRegistrationId = "github";
 
             when(clientRepository.loadAuthorizedClient(eq(clientRegistrationId), any(), any()))
-                    .thenReturn(Mono.error(new RuntimeException("客户端仓库错误")));
+                    .thenReturn(Mono.error(RestServerException.withMsg("github客户端仓库错误", new RuntimeException("error"))));
 
             webTestClient.get()
                     .uri(uriBuilder -> uriBuilder
