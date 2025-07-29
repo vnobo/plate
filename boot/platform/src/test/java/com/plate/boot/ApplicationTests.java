@@ -359,7 +359,7 @@ public class ApplicationTests {
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(changePasswordRequest))
                     .exchange()
-                    .expectStatus().is5xxServerError()
+                    .expectStatus().is4xxClientError()
                     .expectBody()
                     .jsonPath("$.message").exists()
                     .consumeWith(result -> {
@@ -387,7 +387,7 @@ public class ApplicationTests {
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(changePasswordRequest))
                     .exchange()
-                    .expectStatus().is5xxServerError()
+                    .expectStatus().is4xxClientError()
                     .expectBody()
                     .jsonPath("$.message").exists()
                     .consumeWith(result -> {
