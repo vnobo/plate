@@ -58,9 +58,10 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
       - name: Execute Gradle Plate bootBuildImage
         run: |
-          chmod +x ./boot/gradlew
-          ./boot/gradlew bootBuildImage --imagePlatform=linux/amd64 --network=host --publishImage --scan
-          ./boot/gradlew bootBuildImage --imagePlatform=linux/arm64 --network=host --publishImage --scan
+          cd boot
+          chmod +x ./gradlew
+          ./gradlew bootBuildImage --imagePlatform=linux/amd64 --network=host --publishImage --scan
+          ./gradlew bootBuildImage --imagePlatform=linux/arm64 --network=host --publishImage --scan
       - name: Inspect
         run: |
           docker buildx imagetools inspect localhost:5000/plate-oauth2:latest

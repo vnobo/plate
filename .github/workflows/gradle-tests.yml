@@ -34,8 +34,9 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
       - name: Build with Gradle Wrapper
         run: |
-          chmod +x ./boot/gradlew
-          ./boot/gradlew test --info
+          cd boot
+          chmod +x ./gradlew
+          ./gradlew test --info
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@v4
         with:
