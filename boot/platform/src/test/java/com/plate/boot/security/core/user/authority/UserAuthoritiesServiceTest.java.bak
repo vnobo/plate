@@ -1,0 +1,152 @@
+package com.plate.boot.security.core.user.authority;
+
+import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.DatabaseUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.relational.core.query.Query;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class UserAuthoritiesServiceTest {
+
+    @Mock
+    private UserAuthoritiesRepository authoritiesRepository;
+
+    @InjectMocks
+    private UserAuthoritiesService authoritiesService;
+
+    private UserAuthority testUserAuthority;
+    private UserAuthorityReq testUserAuthorityReq;
+
+    @BeforeEach
+    void setUp() {
+        testUserAuthority = new UserAuthority();
+        testUserAuthority.setUserCode(UUID.randomUUID());
+        testUserAuthority.setAuthority("ROLE_USER");
+
+        testUserAuthorityReq = new UserAuthorityReq();
+        testUserAuthorityReq.setUserCode(testUserAuthority.getUserCode());
+        testUserAuthorityReq.setAuthority("ROLE_ADMIN");
+    }
+
+    @Nested
+    @DisplayName("Authority search tests")
+    class AuthoritySearchTests {
+
+        @Test
+        @DisplayName("Should search authorities successfully")
+        void shouldSearchAuthoritiesSuccessfully() {
+            try (MockedStatic<DatabaseUtils> mockedDatabaseUtils = mockStatic(DatabaseUtils.class)) {
+                mockedDatabaseUtils.when(() -> DatabaseUtils.query(any(Query.class), eq(UserAuthority.class)))
+                        .thenReturn(Flux.just(testUserAuthority));
+
+                StepVerifier.create(authoritiesService.search(testUserAuthorityReq))
+                        .expectNext(testUserAuthority)
+                        .verifyComplete();
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("Authority operation tests")
+    class AuthorityOperationTests {
+
+        @Test
+        @DisplayName("Should update existing authority on operate")
+        void shouldUpdateExistingAuthorityOnOperate() {
+            try (MockedStatic<DatabaseUtils> mockedDatabaseUtils = mockStatic(DatabaseUtils.class);
+                 MockedStatic<BeanUtils> mockedBeanUtils = mockStatic(BeanUtils.class)) {
+
+                mockedDatabaseUtils.when(() -> DatabaseUtils.selectOne(any(Query.class), eq(UserAuthority.class)))
+                        .thenReturn(Mono.just(testUserAuthority));
+
+                mockedBeanUtils.when(() -> BeanUtils.copyProperties(any(), any())).then(invocation -> null);
+
+                when(authoritiesRepository.save(any(UserAuthority.class))).thenReturn(Mono.just(testUserAuthority));
+
+                StepVerifier.create(authoritiesService.operate(testUserAuthorityReq))
+                        .expectNext(testUserAuthority)
+                        .verifyComplete();
+            }
+        }
+
+        @Test
+        @DisplayName("Should create new authority when not found on operate")
+        void shouldCreateNewAuthorityWhenNotFoundOnOperate() {
+            try (MockedStatic<DatabaseUtils> mockedDatabaseUtils = mockStatic(DatabaseUtils.class)) {
+                mockedDatabaseUtils.when(() -> DatabaseUtils.selectOne(any(Query.class), eq(UserAuthority.class)))
+                        .thenReturn(Mono.empty());
+
+                when(authoritiesRepository.save(any(UserAuthority.class))).thenAnswer(invocation -> {
+                    UserAuthority argument = invocation.getArgument(0);
+                    return Mono.just(argument);
+                });
+
+                StepVerifier.create(authoritiesService.operate(testUserAuthorityReq))
+                        .expectNextMatches(saved -> saved.getUserCode().equals(testUserAuthorityReq.getUserCode())
+                                && saved.getAuthority().equals(testUserAuthorityReq.getAuthority()))
+                        .verifyComplete();
+            }
+        }
+
+        @Test
+        @DisplayName("Should delete an authority successfully")
+        void shouldDeleteAuthoritySuccessfully() {
+            when(authoritiesRepository.deleteByUserCode(any(UUID.class))).thenReturn(Mono.just(1));
+
+            StepVerifier.create(authoritiesService.delete(testUserAuthorityReq))
+                    .verifyComplete();
+        }
+    }
+
+    @Nested
+    @DisplayName("Authority save tests")
+    class AuthoritySaveTests {
+
+        @Test
+        @DisplayName("Should save new authority")
+        void shouldSaveNewAuthority() {
+            testUserAuthority.setId(null);
+            when(authoritiesRepository.save(testUserAuthority)).thenReturn(Mono.just(testUserAuthority));
+
+            StepVerifier.create(authoritiesService.save(testUserAuthority))
+                    .expectNext(testUserAuthority)
+                    .verifyComplete();
+        }
+
+        @Test
+        @DisplayName("Should update existing authority")
+        void shouldUpdateExistingAuthority() {
+            testUserAuthority.setId(1);
+            UserAuthority existingAuthority = new UserAuthority();
+            existingAuthority.setId(1);
+
+            try (MockedStatic<BeanUtils> mockedBeanUtils = mockStatic(BeanUtils.class)) {
+                mockedBeanUtils.when(() -> BeanUtils.copyProperties(any(), any())).then(invocation -> null);
+                when(authoritiesRepository.findById(1)).thenReturn(Mono.just(existingAuthority));
+                when(authoritiesRepository.save(existingAuthority)).thenReturn(Mono.just(existingAuthority));
+
+                StepVerifier.create(authoritiesService.save(testUserAuthority))
+                        .expectNext(existingAuthority)
+                        .verifyComplete();
+            }
+        }
+    }
+}

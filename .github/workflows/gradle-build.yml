@@ -58,6 +58,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
       - name: Execute Gradle Plate bootBuildImage
         run: |
+          cd boot
           chmod +x ./gradlew
           ./gradlew bootBuildImage --imagePlatform=linux/amd64 --network=host --publishImage --scan
           ./gradlew bootBuildImage --imagePlatform=linux/arm64 --network=host --publishImage --scan

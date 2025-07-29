@@ -14,10 +14,14 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 /**
- * A WebFilter implementation that provides CSRF protection by ensuring a valid CSRF token is present in the request.
- * It integrates with the server's request processing pipeline to check for the presence of a CSRF token attribute.
- * If the token is found, it is propagated through the context for further use downstream.
- * This filter is designed to be executed early in the filter chain with a low precedence order.
+ * A WebFilter implementation that provides CSRF protection by ensuring a valid
+ * CSRF token is present in the request.
+ * It integrates with the server's request processing pipeline to check for the
+ * presence of a CSRF token attribute.
+ * If the token is found, it is propagated through the context for further use
+ * downstream.
+ * This filter is designed to be executed early in the filter chain with a low
+ * precedence order.
  */
 @Log4j2
 @Order(Ordered.LOWEST_PRECEDENCE - 1)
@@ -30,22 +34,27 @@ public class CsrfWebFilter implements WebFilter {
     /**
      * Filters the incoming server web exchange to ensure CSRF protection.
      * It checks for the presence of a CSRF token in the exchange attributes.
-     * If the token is present, it propagates it through the context for downstream use.
+     * If the token is present, it propagates it through the context for downstream
+     * use.
      *
-     * @param exchange The current server web exchange containing the request and response information.
-     * @param chain    The next WebFilterChain to proceed with if the filtering condition is met.
-     * @return A Mono that, when subscribed to, will execute the remainder of the filter chain.
-     * If a CSRF token is found, the Mono will also ensure the token is available in the context.
+     * @param exchange The current server web exchange containing the request and
+     *                 response information.
+     * @param chain    The next WebFilterChain to proceed with if the filtering
+     *                 condition is met.
+     * @return A Mono that, when subscribed to, will execute the remainder of the
+     *         filter chain.
+     *         If a CSRF token is found, the Mono will also ensure the token is
+     *         available in the context.
      */
     @Override
-    public @NonNull Mono<Void> filter(ServerWebExchange exchange, @NonNull WebFilterChain chain) {
+    public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         exchange.getRequest().getQueryParams();
         log.debug("{}Csrf filter chain [CsrfWebFilter] next.", exchange.getLogPrefix());
         Mono<CsrfToken> csrfTokenMono = exchange.getAttribute(CsrfToken.class.getName());
         if (csrfTokenMono != null) {
             return csrfTokenMono.flatMap(csrfToken -> Mono.defer(() -> chain.filter(exchange))
-                    .contextWrite((context) -> context.hasKey(ContextUtils.CSRF_TOKEN_CONTEXT) ?
-                            context : context.put(ContextUtils.CSRF_TOKEN_CONTEXT, csrfToken)));
+                    .contextWrite((context) -> context.hasKey(ContextUtils.CSRF_TOKEN_CONTEXT) ? context
+                            : context.put(ContextUtils.CSRF_TOKEN_CONTEXT, csrfToken)));
         }
         return chain.filter(exchange);
     }

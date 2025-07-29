@@ -127,18 +127,19 @@ public class SecurityController {
     @PostMapping("/change/password")
     public Mono<UserDetails> changePassword(@Valid @RequestBody ChangePasswordRequest request,
                                             Authentication authentication) {
-        if (!request.getPassword().equals(request.getNewPassword())) {
-            throw RestServerException.withMsg("Password and newPassword not match",
-                    new IllegalArgumentException("Password and newPassword not match"));
+        if (request.getPassword().equals(request.getNewPassword())) {
+            throw RestServerException.withMsg("New password cannot be the same as current password",
+                    new IllegalArgumentException("New password cannot be the same as current password"));
         }
-        String presentedPassword = (String) authentication.getCredentials();
-        if (!this.passwordEncoder.matches(presentedPassword, request.getPassword())) {
+        String presentedPassword = request.getPassword();
+        String currentEncodedPassword = (String) authentication.getCredentials();
+        if (!this.passwordEncoder.matches(presentedPassword, currentEncodedPassword)) {
             throw RestServerException.withMsg(
-                    "Password verification failed, presented password not match",
-                    new IllegalArgumentException("Password verification failed, presented password not match"));
+                    "Current password verification failed",
+                    new IllegalArgumentException("Current password verification failed"));
         }
         String newPassword = this.passwordEncoder.encode(request.getNewPassword());
-        UserDetails userDetails = (UserDetails) authentication.getDetails();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         return this.securityManager.updatePassword(userDetails, newPassword);
     }
 

@@ -19,7 +19,7 @@ The application encompasses the following key features:
 
 The project depends on several dependencies, including:
 
-- Spring Boot 3.x.x
+- Spring Boot 3.5.x
 - Spring Data R2DBC
 - Spring Security
 - Redis

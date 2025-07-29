@@ -1,13 +1,12 @@
-import {CommonModule} from '@angular/common';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {afterNextRender, Component, inject, OnDestroy, signal} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ActivatedRoute, Router, RouterModule} from '@angular/router';
-import {BrowserStorage, TokenService} from '@app/core';
-import {UserForm} from '@app/pages/home/users/user-form';
-import {MessageService, ModalsService} from '@app/plugins';
-import {Authentication, Credentials} from '@plate/types';
-import {debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap} from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { afterNextRender, Component, inject, OnDestroy, signal } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { BrowserStorage, TokenService } from '@app/core';
+import { MessageService, ModalsService } from '@app/plugins';
+import { Authentication, Credentials } from '@plate/types';
+import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -46,13 +45,6 @@ export class Login implements OnDestroy {
       this.submitSubject
         .pipe(debounceTime(300), takeUntil(this.destroy$))
         .subscribe(() => this.processLogin());
-    });
-  }
-
-  openModal() {
-    this._modal.create({
-      title: '用户表单',
-      contentRef: UserForm,
     });
   }
 
