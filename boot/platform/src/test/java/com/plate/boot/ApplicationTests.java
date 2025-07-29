@@ -9,6 +9,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -44,19 +45,19 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(InfrastructureConfiguration.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Sql(scripts = "/test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@DisplayName("SecurityController 完整集成测试")
+@ActiveProfiles("test")
+@Sql("/db/migration/V1.0.4__InitTestData.sql")
 public class ApplicationTests {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationTests.class);
 
     private final ApplicationContext applicationContext;
-    // 测试用户凭据
-    private static final String ADMIN_USERNAME = "admin";
 
     @LocalServerPort
     private int port;
+
+    // 测试用户凭据
+    private static final String ADMIN_USERNAME = "admin";
     private static final String ADMIN_PASSWORD = "123456";
     private static final String USER_USERNAME = "user";
     private static final String USER_PASSWORD = "123456";
@@ -200,11 +201,11 @@ public class ApplicationTests {
                     .encodeToString((ADMIN_USERNAME + ":" + ADMIN_PASSWORD).getBytes());
 
             var changePasswordRequest = """
-                {
-                    "password": "123456",
-                    "newPassword": "newPassword123"
-                }
-                """;
+                    {
+                        "password": "123456",
+                        "newPassword": "newPassword123"
+                    }
+                    """;
 
             webTestClient.post()
                     .uri("/sec/v1/oauth2/change/password")
@@ -265,11 +266,11 @@ public class ApplicationTests {
                     .encodeToString((USER_USERNAME + ":" + USER_PASSWORD).getBytes());
 
             var changePasswordRequest = """
-                {
-                    "password": "123456",
-                    "newPassword": "userNewPassword123"
-                }
-                """;
+                    {
+                        "password": "123456",
+                        "newPassword": "userNewPassword123"
+                    }
+                    """;
 
             webTestClient.post()
                     .uri("/sec/v1/oauth2/change/password")
@@ -347,11 +348,11 @@ public class ApplicationTests {
                     .encodeToString((USER_USERNAME + ":" + USER_PASSWORD).getBytes());
 
             var changePasswordRequest = """
-                {
-                    "password": "123456",
-                    "newPassword": "123456"
-                }
-                """;
+                    {
+                        "password": "123456",
+                        "newPassword": "123456"
+                    }
+                    """;
 
             webTestClient.post()
                     .uri("/sec/v1/oauth2/change/password")
@@ -375,11 +376,11 @@ public class ApplicationTests {
                     .encodeToString((USER_USERNAME + ":" + USER_PASSWORD).getBytes());
 
             var changePasswordRequest = """
-                {
-                    "password": "wrongPassword",
-                    "newPassword": "newPassword123"
-                }
-                """;
+                    {
+                        "password": "wrongPassword",
+                        "newPassword": "newPassword123"
+                    }
+                    """;
 
             webTestClient.post()
                     .uri("/sec/v1/oauth2/change/password")
@@ -403,11 +404,11 @@ public class ApplicationTests {
                     .encodeToString((USER_USERNAME + ":" + USER_PASSWORD).getBytes());
 
             var changePasswordRequest = """
-                {
-                    "password": "",
-                    "newPassword": ""
-                }
-                """;
+                    {
+                        "password": "",
+                        "newPassword": ""
+                    }
+                    """;
 
             webTestClient.post()
                     .uri("/sec/v1/oauth2/change/password")
