@@ -1,7 +1,7 @@
-import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, OnInit, output, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { User } from './user.types';
+import {CommonModule} from '@angular/common';
+import {Component, computed, effect, inject, input, OnInit, output, signal} from '@angular/core';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {User} from './user.types';
 
 @Component({
   selector: 'app-user-form',
@@ -112,6 +112,9 @@ import { User } from './user.types';
   ],
 })
 export class UserForm implements OnInit {
+  // Add input property to receive user data
+  inputData = input<User | null>(null);
+  
   userData = signal<User>({} as User);
   created = computed(() => this.userData().code == undefined);
   formSubmit = output<User>();
@@ -136,6 +139,8 @@ export class UserForm implements OnInit {
 
   constructor() {
     effect(() => {
+      // Use input data if provided, otherwise use signal data
+      const data = this.inputData() || this.userData();
       if (this.created()) {
         this.userForm.controls['password'].addValidators([
           Validators.required,
@@ -150,12 +155,17 @@ export class UserForm implements OnInit {
         this.userForm.controls['password'].clearValidators();
         this.userForm.controls['confirmPassword'].clearValidators();
         this.userForm.controls['username'].disable({ onlySelf: true });
-        this.userForm.patchValue(this.userData());
+        this.userForm.patchValue(data);
       }
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // Set userData signal from input data if provided
+    if (this.inputData()) {
+      this.userData.set(this.inputData()!);
+    }
+  }
 
   onSubmit(): void {
     if (this.userForm.valid) {
