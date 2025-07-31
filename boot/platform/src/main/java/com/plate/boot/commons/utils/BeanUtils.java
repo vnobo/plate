@@ -60,19 +60,20 @@ public final class BeanUtils implements InitializingBean {
      *                       or if there is an issue converting the JsonNode to the target class.
      */
     public static <T> T jsonPathToBean(JsonNode json, String path, Class<T> clazz) {
-
-        String[] paths = StringUtils.commaDelimitedListToStringArray(path);
-        StringJoiner pathJoiner = new StringJoiner("/");
-        for (String p : paths) {
-            pathJoiner.add(p);
-        }
-        JsonPointer jsonPointer = JsonPointer.valueOf(pathJoiner.toString());
-        JsonNode valueNode = json.at(jsonPointer);
-        if (valueNode.isMissingNode()) {
-            throw JsonPointerException.withError("Json pointer path error, path: {}" + pathJoiner,
-                    new IllegalArgumentException(pathJoiner + " is not found in the json [" + json + "]"));
-        }
         try {
+            String[] paths = StringUtils.commaDelimitedListToStringArray(path);
+            StringJoiner pathJoiner = new StringJoiner("/");
+            for (String p : paths) {
+                pathJoiner.add(p);
+            }
+            JsonPointer jsonPointer = JsonPointer.valueOf(pathJoiner.toString());
+            JsonNode valueNode = json.at(jsonPointer);
+            if (valueNode.isMissingNode()) {
+                throw JsonPointerException.withError(
+                    "Json pointer path error, path: " + pathJoiner,
+                    new IllegalArgumentException(pathJoiner + " is not found in the json [" + json + "]")
+                );
+            }
             return ContextUtils.OBJECT_MAPPER.convertValue(valueNode, clazz);
         } catch (IllegalArgumentException e) {
             throw JsonPointerException.withError("Json pointer covert error", e);
@@ -111,10 +112,14 @@ public final class BeanUtils implements InitializingBean {
                     keyJoiner.add(sort.getProperty() + "_" + sort.getDirection().name());
                 }
             }
-            var objMap = BeanUtils.beanToMap(obj, true);
-            var setStr = objMap.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue())
+            // 优化：只在需要时才进行beanToMap转换
+            if (!(obj instanceof Pageable)) {
+                var objMap = BeanUtils.beanToMap(obj, true);
+                var setStr = objMap.entrySet().stream()
+                    .map(entry -> entry.getKey() + "=" + entry.getValue())
                     .collect(Collectors.toSet());
-            setStr.forEach(keyJoiner::add);
+                setStr.forEach(keyJoiner::add);
+            }
         }
         return ContextUtils.encodeToSHA256(keyJoiner.toString());
     }
@@ -158,7 +163,9 @@ public final class BeanUtils implements InitializingBean {
         Map<String, Object> targetMap = BeanUtils.beanToMap(source);
         String[] nullKeys = new String[0];
         if (ignoreNullValue) {
-            nullKeys = Maps.filterEntries(targetMap, entry -> ObjectUtils.isEmpty(entry.getValue())).keySet().toArray(String[]::new);
+            nullKeys = Maps.filterEntries(targetMap, entry -> ObjectUtils.isEmpty(entry.getValue()))
+                .keySet()
+                .toArray(String[]::new);
         }
         if (nullKeys.length > 0) {
             org.springframework.beans.BeanUtils.copyProperties(source, target, nullKeys);
@@ -223,12 +230,16 @@ public final class BeanUtils implements InitializingBean {
             if (Optional.ofNullable(readMethod).isEmpty()) {
                 continue;
             }
-            ReflectionUtils.makeAccessible(readMethod);
-            Object value = ReflectionUtils.invokeMethod(readMethod, bean);
-            if (ignoreNullValue && ObjectUtils.isEmpty(value)) {
-                continue;
+            try {
+                ReflectionUtils.makeAccessible(readMethod);
+                Object value = ReflectionUtils.invokeMethod(readMethod, bean);
+                if (ignoreNullValue && ObjectUtils.isEmpty(value)) {
+                    continue;
+                }
+                beanMap.put(key, value);
+            } catch (Exception e) {
+                log.warn("Error reading property {} from bean: {}", key, e.getMessage());
             }
-            beanMap.put(key, value);
         }
         return beanMap;
     }
@@ -245,6 +256,10 @@ public final class BeanUtils implements InitializingBean {
      * The Mono completes when all processing is finished.
      */
     public static <T> Mono<T> serializeUserAuditor(T object) {
+        if (object == null) {
+            return Mono.empty();
+        }
+        
         PropertyDescriptor[] propertyDescriptors = org.springframework.beans.BeanUtils.getPropertyDescriptors(object.getClass());
         var propertyFlux = Flux.fromArray(propertyDescriptors)
                 .filter(propertyDescriptor -> propertyDescriptor.getPropertyType() == UserAuditor.class)
@@ -266,16 +281,24 @@ public final class BeanUtils implements InitializingBean {
      * - Emits an error signal if there are issues invoking methods on the property descriptor.
      */
     private static <T> Mono<String> serializeUserAuditorProperty(T object, PropertyDescriptor propertyDescriptor) {
-        UserAuditor userAuditor = (UserAuditor) ReflectionUtils.invokeMethod(propertyDescriptor.getReadMethod(), object);
-        if (ObjectUtils.isEmpty(userAuditor)) {
-            String msg = "User auditor is empty, No serializable." + propertyDescriptor.getName();
-            log.warn(msg);
-            return Mono.just(msg);
+        try {
+            UserAuditor userAuditor = (UserAuditor) ReflectionUtils.invokeMethod(propertyDescriptor.getReadMethod(), object);
+            if (ObjectUtils.isEmpty(userAuditor)) {
+                String msg = "User auditor is empty, No serializable." + propertyDescriptor.getName();
+                log.warn(msg);
+                return Mono.just(msg);
+            }
+            return USER_AUDITOR_AWARE.loadByCode(userAuditor.code()).cache().flatMap(user -> {
+                ReflectionUtils.invokeMethod(propertyDescriptor.getWriteMethod(), object, user);
+                return Mono.just("User auditor serializable success. " + propertyDescriptor.getName());
+            }).onErrorResume(throwable -> {
+                log.error("Error serializing user auditor for property: {}", propertyDescriptor.getName(), throwable);
+                return Mono.just("User auditor serialization failed for property: " + propertyDescriptor.getName());
+            });
+        } catch (Exception e) {
+            log.error("Error accessing property: {}", propertyDescriptor.getName(), e);
+            return Mono.just("Error accessing property: " + propertyDescriptor.getName());
         }
-        return USER_AUDITOR_AWARE.loadByCode(userAuditor.code()).cache().flatMap(user -> {
-            ReflectionUtils.invokeMethod(propertyDescriptor.getWriteMethod(), object, user);
-            return Mono.just("User auditor serializable success. " + propertyDescriptor.getName());
-        });
     }
 
     /**
