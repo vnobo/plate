@@ -6,7 +6,6 @@ plugins {
 ext {
     set('javaVersion', 21)
     set('guavaVersion', '33.+')
-    set('springAiVersion', "1.+")
 }
 
 configure(allprojects) { project ->
@@ -78,11 +77,5 @@ configure(subprojects) { project ->
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
         implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
-    }
-
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
-        }
     }
 }
