@@ -70,8 +70,8 @@ public final class BeanUtils implements InitializingBean {
             JsonNode valueNode = json.at(jsonPointer);
             if (valueNode.isMissingNode()) {
                 throw JsonPointerException.withError(
-                    "Json pointer path error, path: " + pathJoiner,
-                    new IllegalArgumentException(pathJoiner + " is not found in the json [" + json + "]")
+                        "Json pointer path error, path: " + pathJoiner,
+                        new IllegalArgumentException(pathJoiner + " is not found in the json [" + json + "]")
                 );
             }
             return ContextUtils.OBJECT_MAPPER.convertValue(valueNode, clazz);
@@ -116,8 +116,8 @@ public final class BeanUtils implements InitializingBean {
             if (!(obj instanceof Pageable)) {
                 var objMap = BeanUtils.beanToMap(obj, true);
                 var setStr = objMap.entrySet().stream()
-                    .map(entry -> entry.getKey() + "=" + entry.getValue())
-                    .collect(Collectors.toSet());
+                        .map(entry -> entry.getKey() + "=" + entry.getValue())
+                        .collect(Collectors.toSet());
                 setStr.forEach(keyJoiner::add);
             }
         }
@@ -164,8 +164,8 @@ public final class BeanUtils implements InitializingBean {
         String[] nullKeys = new String[0];
         if (ignoreNullValue) {
             nullKeys = Maps.filterEntries(targetMap, entry -> ObjectUtils.isEmpty(entry.getValue()))
-                .keySet()
-                .toArray(String[]::new);
+                    .keySet()
+                    .toArray(String[]::new);
         }
         if (nullKeys.length > 0) {
             org.springframework.beans.BeanUtils.copyProperties(source, target, nullKeys);
@@ -259,11 +259,14 @@ public final class BeanUtils implements InitializingBean {
         if (object == null) {
             return Mono.empty();
         }
-        
-        PropertyDescriptor[] propertyDescriptors = org.springframework.beans.BeanUtils.getPropertyDescriptors(object.getClass());
+
+        PropertyDescriptor[] propertyDescriptors = org.springframework.beans.BeanUtils
+                .getPropertyDescriptors(object.getClass());
         var propertyFlux = Flux.fromArray(propertyDescriptors)
-                .filter(propertyDescriptor -> propertyDescriptor.getPropertyType() == UserAuditor.class)
-                .flatMap(propertyDescriptor -> serializeUserAuditorProperty(object, propertyDescriptor));
+                .filter(propertyDescriptor ->
+                        propertyDescriptor.getPropertyType() == UserAuditor.class)
+                .flatMap(propertyDescriptor ->
+                        serializeUserAuditorProperty(object, propertyDescriptor), 2);
         return propertyFlux.then(Mono.just(object));
     }
 
