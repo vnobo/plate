@@ -6,10 +6,10 @@ $do$
         batch_size  INTEGER := 10000;
         batch_count INTEGER := 0;
     begin
-        for i in 1..100000
+        for i in 1..1000
             loop
                 -- 生成用户代码
-                if i < 1000 then
+                if i < 10 then
                     v_code := 'U' || lpad(i::text, 4, '0');
                 else
                     v_code := 'U' || (i + 3)::text;
