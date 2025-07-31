@@ -229,9 +229,7 @@ public final class ContextUtils implements InitializingBean {
                         return Mono.empty();
                     }
                     Object principal = authentication.getPrincipal();
-                    return principal instanceof SecurityDetails
-                            ? Mono.just((SecurityDetails) principal)
-                            : Mono.empty();
+                    return principal instanceof SecurityDetails ? Mono.just((SecurityDetails) principal): Mono.empty();
                 });
     }
 
