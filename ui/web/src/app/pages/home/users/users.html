@@ -1,1 +1,123 @@
-<h1>users page</h1>
+<div class="container-fluid">
+  <!-- Page header -->
+  <div class="page-header d-print-none">
+    <div class="row align-items-center">
+      <div class="col">
+        <h2 class="page-title">用户管理</h2>
+        <div class="page-pretitle">管理系统中的所有用户</div>
+      </div>
+      <div class="col-auto ms-auto d-print-none">
+        <div class="btn-list">
+          <button (click)="openModal()" class="btn btn-primary d-none d-sm-inline-block" type="button">
+            <svg class="icon icon-tabler icon-tabler-plus" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+              <path d="M12 5l0 14"></path>
+              <path d="M5 12l14 0"></path>
+            </svg>
+            添加用户
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card for user table -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">用户列表</h3>
+    </div>
+
+    <div class="card-body border-bottom py-3">
+      <div class="d-flex">
+        <div class="text-muted">
+          显示 {{ ((pageable().page - 1) * pageable().size) + 1 }} 到 {{ Math.min(pageable().page * pageable().size, userData().totalElements || 0) }} 项，共 {{ userData().totalElements || 0 }} 项
+        </div>
+        <div class="ms-auto text-muted">
+          搜索:
+          <div class="ms-2 d-inline-block">
+            <input aria-label="搜索用户" class="form-control form-control-sm" placeholder="搜索用户..." type="text">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table card-table table-vcenter text-nowrap datatable">
+        <thead>
+          <tr>
+            <th class="w-1">序号</th>
+            <th>用户名</th>
+            <th>昵称</th>
+            <th>电子邮件</th>
+            <th>手机号</th>
+            <th>状态</th>
+            <th>创建时间</th>
+            <th class="w-1"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of userData().content; track user.id) {
+          <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.phone }}</td>
+            <td>
+              @if (user.disabled) {
+              <span class="badge bg-danger me-1"></span>禁用
+              } @else {
+              <span class="badge bg-success me-1"></span>启用
+              }
+            </td>
+            <td>{{ user.createdTime | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td>
+              <div class="btn-list flex-nowrap">
+                <button (click)="openUserForm(user)" class="btn btn-outline-primary btn-sm">编辑</button>
+                <button (click)="onDelete(user)" class="btn btn-outline-danger btn-sm">删除</button>
+              </div>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="8" class="text-center">暂无数据</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer d-flex align-items-center">
+      <p class="m-0 text-muted">
+        显示 {{ ((pageable().page - 1) * pageable().size) + 1 }} 到 {{ Math.min(pageable().page * pageable().size, userData().totalElements || 0) }} 项，共 {{ userData().totalElements || 0 }} 项
+      </p>
+      <ul class="pagination m-0 ms-auto">
+        <li [class.disabled]="pageable().page <= 1" class="page-item">
+          <a (click)="changePage(pageable().page - 1)" aria-disabled="pageable().page <= 1" class="page-link" href="javascript:void(0)" tabindex="-1">
+            <svg class="icon" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+              <path d="M15 6l-6 6l6 6"></path>
+            </svg>
+            上一页
+          </a>
+        </li>
+        
+        @for (page of getPageNumbers(); track page) {
+        <li class="page-item" [class.active]="page === pageable().page">
+          <a class="page-link" href="javascript:void(0)" (click)="changePage(page)">{{ page }}</a>
+        </li>
+        }
+        
+        <li [class.disabled]="pageable().page >= getTotalPages()" class="page-item">
+          <a (click)="changePage(pageable().page + 1)" class="page-link" href="javascript:void(0)">
+            下一页
+            <svg class="icon" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+              <path d="M9 6l6 6l-6 6"></path>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

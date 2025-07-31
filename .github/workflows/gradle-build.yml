@@ -58,12 +58,12 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
       - name: Execute Gradle Plate bootBuildImage
         run: |
+          cd boot
           chmod +x ./gradlew
           ./gradlew bootBuildImage --imagePlatform=linux/amd64 --network=host --publishImage --scan
           ./gradlew bootBuildImage --imagePlatform=linux/arm64 --network=host --publishImage --scan
       - name: Inspect
         run: |
-          docker buildx imagetools inspect localhost:5000/plate-oauth2:latest
           docker buildx imagetools inspect localhost:5000/plate-platform:latest
 
       - name: Log into registry ${{ env.GITHUB_REGISTRY }}
@@ -103,27 +103,3 @@ jobs:
         run: |
           echo "Upload images ${{ steps.meta.outputs.tags }} to registry."
           echo "Upload labels ${{ steps.meta.outputs.labels }} to registry"
-
-      - name: Extract oauth2 metadata (tags, labels) for Docker
-        id: oauth2
-        uses: docker/metadata-action@v5
-        with:
-          flavor: |
-            latest=true
-          images: |
-            ${{ env.GITHUB_REGISTRY }}/plate-oauth2
-            ${{ env.DOCKER_REGISTRY }}/plate-oauth2
-          tags: ${{ env.tags }}
-
-      - name: Build and Push Oauth2
-        uses: docker/build-push-action@v6
-        with:
-          platforms: linux/amd64,linux/arm64
-          context: ./boot/oauth2
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.oauth2.outputs.tags }}
-          labels: ${{ steps.oauth2.outputs.labels }}
-      - name: Upload Oauth2 Image to Registry
-        run: |
-          echo "Upload images ${{ steps.oauth2.outputs.tags }} to registry."
-          echo "Upload labels ${{ steps.oauth2.outputs.labels }} to registry"

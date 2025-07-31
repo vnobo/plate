@@ -1,12 +1,12 @@
-import { afterNextRender, Component, inject, signal } from '@angular/core';
-import { delay, tap } from 'rxjs';
+import {afterNextRender, Component, inject, inputBinding, signal} from '@angular/core';
+import {delay, tap} from 'rxjs';
 
-import { CommonModule } from '@angular/common';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { MessageService, ModalsService } from '@app/plugins';
-import { Page, Pageable } from '@plate/types';
-import { UserForm } from './user-form';
-import { User } from './user.types';
+import {CommonModule} from '@angular/common';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {MessageService, ModalsService} from '@app/plugins';
+import {Page, Pageable} from '@plate/types';
+import {UserForm} from './user-form';
+import {User} from './user.types';
 
 @Component({
   selector: 'app-users',
@@ -28,9 +28,14 @@ export class Users {
     pcode: '0',
   } as User);
 
+  // Expose Math to template
+  Math = Math;
+
   constructor(private _http: HttpClient) {
     afterNextRender(() => {
       console.log('users service init');
+      // Load initial data
+      this.fetchUserData();
     });
   }
 
@@ -50,8 +55,14 @@ export class Users {
   onTableQueryChange($event: Pageable) {}
 
   openUserForm(user: User) {
+    // Create a signal with the user data
+    const userSignal = signal(user);
+    
     const modal = this._modal.create({
+      title: user.id ? '编辑用户' : '添加用户',
       contentRef: UserForm,
+      // Pass user data through contentBindings
+      contentBindings: [inputBinding('inputData', userSignal)]
     });
   }
 
@@ -62,6 +73,61 @@ export class Users {
         delay(1500),
       )
       .subscribe(() => this.fetchUserData());
+  }
+
+  // Pagination methods
+  changePage(page: number) {
+    if (page < 1 || page > this.getTotalPages()) {
+      return;
+    }
+    
+    this.pageable.update(p => ({
+      ...p,
+      page: page
+    }));
+    
+    this.fetchUserData();
+  }
+
+  getPageNumbers(): number[] {
+    const totalPages = this.getTotalPages();
+    const currentPage = this.pageable().page;
+    const pages: number[] = [];
+    
+    // Show first page
+    if (totalPages >= 1) {
+      pages.push(1);
+    }
+    
+    // Show ellipsis if needed
+    if (currentPage > 3) {
+      pages.push(-1); // -1 represents ellipsis
+    }
+    
+    // Show pages around current page
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+      if (i > 1 && i < totalPages) {
+        pages.push(i);
+      }
+    }
+    
+    // Show ellipsis if needed
+    if (currentPage < totalPages - 2) {
+      pages.push(-1); // -1 represents ellipsis
+    }
+    
+    // Show last page
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+    
+    return pages;
+  }
+
+  getTotalPages(): number {
+    const totalElements = this.userData().totalElements || 0;
+    const size = this.pageable().size;
+    return Math.ceil(totalElements / size);
   }
 
   page(request: User, page: Pageable) {

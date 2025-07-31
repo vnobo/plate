@@ -1,30 +1,32 @@
-import { CommonModule } from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {
-  afterNextRender,
-  ApplicationRef,
-  Component,
-  ComponentRef,
-  createComponent,
-  Directive,
-  ElementRef,
-  EnvironmentInjector,
-  inject,
-  Injectable,
-  input,
-  inputBinding,
-  OnDestroy,
-  OnInit,
-  output,
-  signal,
-  Type,
+    afterNextRender,
+    ApplicationRef,
+    Component,
+    ComponentRef,
+    createComponent,
+    Directive,
+    ElementRef,
+    EnvironmentInjector,
+    inject,
+    Injectable,
+    input,
+    inputBinding,
+    OnDestroy,
+    OnInit,
+    output,
+    signal,
+    Type,
 } from '@angular/core';
-import { fromEvent } from 'rxjs';
+import {fromEvent} from 'rxjs';
 
 export interface ModalRef {
   title?: string;
   headerRef?: Type<any> | null;
   contentRef?: Type<any> | null;
   footerRef?: Type<any> | null;
+  // Optional bindings for content component
+  contentBindings?: any[];
 }
 
 export interface ModalOptions {
@@ -42,9 +44,15 @@ export class ModalsService {
 
   create(modalRef: ModalRef) {
     const modalRefSignal = signal(modalRef);
+    // Combine default bindings with content bindings if provided
+    const bindings = [inputBinding('modalRef', modalRefSignal)];
+    if (modalRef.contentBindings) {
+      bindings.push(...modalRef.contentBindings);
+    }
+    
     this.modalRef = createComponent(Modals, {
       environmentInjector: this.injector,
-      bindings: [inputBinding('modalRef', modalRefSignal)],
+      bindings: bindings,
     });
     document.body.appendChild(this.modalRef.location.nativeElement);
     this.appRef.attachView(this.modalRef.hostView);
