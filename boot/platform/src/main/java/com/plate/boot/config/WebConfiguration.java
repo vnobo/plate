@@ -3,6 +3,9 @@ package com.plate.boot.config;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.ssl.SslBundle;
+import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver;
@@ -11,7 +14,10 @@ import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.reactive.config.PathMatchConfigurer;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
+import reactor.netty.http.Http3SslContextSpec;
+import reactor.netty.http.HttpProtocol;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -64,6 +70,32 @@ public class WebConfiguration implements WebFluxConfigurer {
         }
         for (WebfluxProperties.RouteDefinition entry : pathPrefixes) {
             configurer.addPathPrefix(entry.getPath(), HandlerTypePredicate.forBasePackage(entry.getBasePackage()));
+        }
+    }
+
+    //@Component
+    static class Http3NettyWebServerCustomizer implements WebServerFactoryCustomizer<NettyReactiveWebServerFactory> {
+
+        @Override
+        public void customize(NettyReactiveWebServerFactory factory) {
+            factory.addServerCustomizers(server -> {
+                SslBundle sslBundle = factory.getSslBundles().getBundle("plate-bundle");
+                Http3SslContextSpec sslContextSpec =
+                        Http3SslContextSpec.forServer(sslBundle.getManagers().getKeyManagerFactory(),
+                                sslBundle.getKey().getPassword());
+
+                return server
+                        // Configure HTTP/3 protocol
+                        .protocol(HttpProtocol.HTTP3)
+                        // Configure HTTP/3 SslContext
+                        .secure(spec -> spec.sslContext(sslContextSpec))
+                        // Configure HTTP/3 settings
+                        .http3Settings(spec -> spec
+                                .idleTimeout(Duration.ofSeconds(5))
+                                .maxData(10_000_000)
+                                .maxStreamDataBidirectionalRemote(1_000_000)
+                                .maxStreamsBidirectional(100));
+            });
         }
     }
 }

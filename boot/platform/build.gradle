@@ -16,9 +16,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
 
-    implementation 'org.postgresql:r2dbc-postgresql'
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+    implementation 'org.postgresql:r2dbc-postgresql'
 
+    runtimeOnly("io.netty:netty-tcnative-boringssl-static")
+    //runtimeOnly("io.netty.incubator:netty-incubator-codec-http3:0.+")
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'org.flywaydb:flyway-database-postgresql'
     runtimeOnly 'org.springframework:spring-jdbc'
