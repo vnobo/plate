@@ -43,8 +43,13 @@ spring:
     baseline-version: 1.0.0
     baseline-description: "Baseline version V1.0.0,See https://github.com/plate/plate"
   r2dbc.pool:
+    max-size: 32
     max-idle-time: 10m
+    max-acquire-time: 30s
+    acquire-retry: 3
     validation-query: select version()
+    max-validation-time: 10s
+    max-create-connection-time: 2s
   data.redis:
     timeout: 30s
     connect-timeout: 10s
