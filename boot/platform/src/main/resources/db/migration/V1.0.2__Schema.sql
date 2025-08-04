@@ -1,14 +1,35 @@
 drop table if exists oauth2_authorized_client;
-drop table if exists se_users;
 drop table if exists se_authorities;
-drop table if exists se_groups;
 drop table if exists se_group_authorities;
 drop table if exists se_group_members;
-drop table if exists se_tenants;
 drop table if exists se_tenant_members;
 drop table if exists se_menus;
 drop table if exists se_loggers;
+drop table if exists se_users;
+drop table if exists se_tenants;
+drop table if exists se_groups;
 
+create table if not exists se_menus
+(
+    id          serial8 primary key,
+    code        uuid         not null unique,
+    pcode       uuid         not null default '00000000-0000-0000-0000-000000000000',
+    tenant_code varchar(64)  not null default '0',
+    type        varchar(20)  not null default 'MENU',
+    authority   varchar(256) not null unique,
+    name        varchar(256) not null,
+    path        text,
+    sort_no     int                   default 0,
+    extend      jsonb,
+    created_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
+    updated_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
+    created_at  timestamp    not null default current_timestamp,
+    updated_at  timestamp    not null default current_timestamp
+);
+
+create index se_menus_pttn_idx on se_menus (pcode, tenant_code, type, name);
+create index se_menus_extend_gin_idx on se_menus using gin (extend);
+comment on table se_menus is '菜单权限表';
 create table if not exists oauth2_authorized_client
 (
     client_registration_id  varchar(100)                            not null,
@@ -69,7 +90,8 @@ create table if not exists se_authorities
     updated_by uuid         not null default '00000000-0000-0000-0000-000000000000',
     created_at timestamp    not null default current_timestamp,
     updated_at timestamp    not null default current_timestamp,
-    unique (user_code, authority)
+    unique (user_code, authority),
+    foreign key (user_code) references se_users (code)
 );
 comment on table se_authorities is '用户权限表';
 
@@ -102,7 +124,8 @@ create table if not exists se_group_authorities
     updated_by uuid         not null default '00000000-0000-0000-0000-000000000000',
     created_at timestamp    not null default current_timestamp,
     updated_at timestamp    not null default current_timestamp,
-    unique (group_code, authority)
+    unique (group_code, authority),
+    foreign key (group_code) references se_groups (code)
 );
 comment on table se_group_authorities is '角色权限表';
 
@@ -117,7 +140,9 @@ create table if not exists se_group_members
     updated_by uuid      not null default '00000000-0000-0000-0000-000000000000',
     created_at timestamp not null default current_timestamp,
     updated_at timestamp not null default current_timestamp,
-    unique (group_code, user_code)
+    unique (group_code, user_code),
+    foreign key (group_code) references se_groups (code),
+    foreign key (user_code) references se_users (code)
 );
 comment on table se_group_members is '角色用户关系表';
 
@@ -147,30 +172,12 @@ create table if not exists se_tenant_members
     updated_by  uuid        not null default '00000000-0000-0000-0000-000000000000',
     created_at  timestamp   not null default current_timestamp,
     updated_at  timestamp   not null default current_timestamp,
-    unique (tenant_code, user_code)
+    unique (tenant_code, user_code),
+    foreign key (tenant_code) references se_tenants (code),
+    foreign key (user_code) references se_users (code)
 );
 comment on table se_tenant_members is '租户用户关系表';
 
-create table if not exists se_menus
-(
-    id          serial8 primary key,
-    code        uuid         not null unique,
-    pcode       uuid         not null default '00000000-0000-0000-0000-000000000000',
-    tenant_code varchar(64)  not null default '0',
-    type        varchar(20)  not null default 'MENU',
-    authority   varchar(256) not null unique,
-    name        varchar(256) not null,
-    path        text,
-    sort_no     int                   default 0,
-    extend      jsonb,
-    created_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
-    updated_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
-    created_at  timestamp    not null default current_timestamp,
-    updated_at  timestamp    not null default current_timestamp
-);
-create index se_menus_pttn_idx on se_menus (pcode, tenant_code, type, name);
-create index se_menus_extend_gin_idx on se_menus using gin (extend);
-comment on table se_menus is '菜单权限表';
 
 create table if not exists se_loggers
 (
