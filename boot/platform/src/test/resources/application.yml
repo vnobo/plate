@@ -1,11 +1,9 @@
-logging:
-  register-shutdown-hook: true
-  level:
-    web: debug
-    com.plate.boot.*: debug
-    org.springframework.r2dbc: debug
-    io.r2dbc.postgresql.PARAM: debug
-logging.register-shutdown-hook: true
+logging.level:
+  web: debug
+  com.plate.boot.*: debug
+  org.springframework.r2dbc: debug
+  io.r2dbc.postgresql.PARAM: debug
+
 
 server:
   port: "${port:8080}"

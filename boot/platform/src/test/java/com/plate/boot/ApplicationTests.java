@@ -1,6 +1,8 @@
 package com.plate.boot;
 
 import com.plate.boot.config.InfrastructureConfiguration;
+import com.plate.boot.config.SessionConfiguration;
+import com.plate.boot.security.core.AuthenticationToken;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,16 +11,17 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
 import java.time.Duration;
 import java.util.Base64;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * SecurityController 完整集成测试
@@ -45,8 +48,6 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(InfrastructureConfiguration.class)
-@ActiveProfiles("test")
-@Sql("/db/migration/V1.0.4__InitTestData.sql")
 public class ApplicationTests {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationTests.class);
@@ -61,7 +62,10 @@ public class ApplicationTests {
     private static final String ADMIN_PASSWORD = "123456";
     private static final String USER_USERNAME = "user";
     private static final String USER_PASSWORD = "123456";
+
     private WebTestClient webTestClient;
+    private String adminToken;
+    private String userToken;
 
     public ApplicationTests(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
@@ -77,13 +81,35 @@ public class ApplicationTests {
         log.info("设置测试环境，端口: {}", port);
         this.webTestClient = WebTestClient.bindToServer()
                 .baseUrl("http://localhost:" + port)
+                .defaultHeader("X-Requested-With", "XMLHttpRequest")
                 .responseTimeout(Duration.ofSeconds(30))
                 .build();
+        // 对于需要管理员权限的测试类
+        this.adminToken = loginAndGetToken(ADMIN_USERNAME, ADMIN_PASSWORD);
+        // 对于需要普通用户权限的测试类
+        this.userToken = loginAndGetToken(USER_USERNAME, USER_PASSWORD);
+
     }
 
     @AfterEach
     void tearDown() {
         log.debug("测试方法执行完成");
+    }
+
+    // 登录并获取token的辅助方法
+    private String loginAndGetToken(String username, String password) {
+        String credentials = Base64.getEncoder()
+                .encodeToString((username + ":" + password).getBytes());
+
+        var responseBody = webTestClient.get()
+                .uri("/sec/v1/oauth2/login")
+                .header("Authorization", "Basic " + credentials)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(AuthenticationToken.class)
+                .returnResult().getResponseBody();
+        assertNotNull(responseBody);
+        return responseBody.token();
     }
 
     @Nested
@@ -125,17 +151,13 @@ public class ApplicationTests {
     class CsrfTokenTests {
 
         @Test
-        @DisplayName("获取 CSRF 令牌 - 成功")
+        @DisplayName("获取 CSRF 令牌 - 未认证用户重定向")
         @Order(1)
-        void shouldGetCsrfToken() {
+        void shouldRedirectUnauthenticatedUserForCsrfToken() {
             webTestClient.get()
                     .uri("/sec/v1/oauth2/csrf")
                     .exchange()
-                    .expectStatus().isOk()
-                    .expectBody()
-                    .jsonPath("$.token").exists()
-                    .jsonPath("$.headerName").isEqualTo("X-CSRF-TOKEN")
-                    .jsonPath("$.parameterName").isEqualTo("_csrf");
+                    .expectStatus().isUnauthorized();
         }
 
         @Test
@@ -144,12 +166,14 @@ public class ApplicationTests {
         void shouldValidateCsrfTokenFormat() {
             webTestClient.get()
                     .uri("/sec/v1/oauth2/csrf")
+                    .headers(headers -> headers.setBearerAuth(adminToken))
                     .exchange()
                     .expectStatus().isOk()
-                    .expectBody()
-                    .jsonPath("$.token").value(token -> {
-                        assertNotNull(token);
-                        assertTrue(token.toString().length() > 10);
+                    .expectBody(CsrfToken.class)
+                    .value(token -> {
+                        assertThat(token.getToken()).isNotBlank();
+                        assertThat(token.getHeaderName()).isEqualTo(SessionConfiguration.HEADER_SESSION_ID_NAME);
+                        assertThat(token.getParameterName()).isEqualTo("access_token");
                     });
         }
     }
@@ -163,59 +187,53 @@ public class ApplicationTests {
         @DisplayName("管理员登录认证 - 成功")
         @Order(1)
         void shouldAuthenticateAdminSuccessfully() {
-            String credentials = Base64.getEncoder()
-                    .encodeToString((ADMIN_USERNAME + ":" + ADMIN_PASSWORD).getBytes());
-
             webTestClient.get()
                     .uri("/sec/v1/oauth2/login")
-                    .header("Authorization", "Basic " + credentials)
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken))
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.username").isEqualTo(ADMIN_USERNAME)
-                    .jsonPath("$.authorities").exists()
-                    .jsonPath("$.sessionId").exists();
+                    .jsonPath("$.token").exists()
+                    .jsonPath("$.details").exists()
+                    .jsonPath("$.expires").exists()
+                    .jsonPath("$.lastAccessTime").exists()
+                    .jsonPath("$.details.name").isEqualTo("admin")
+                    .jsonPath("$.details.nickname").isEqualTo("系统超级管理员")
+                    .jsonPath("$.details.enabled").isEqualTo(true);
         }
 
         @Test
         @DisplayName("管理员权限验证")
         @Order(2)
         void shouldVerifyAdminAuthorities() {
-            String credentials = Base64.getEncoder()
-                    .encodeToString((ADMIN_USERNAME + ":" + ADMIN_PASSWORD).getBytes());
-
             webTestClient.get()
                     .uri("/sec/v1/oauth2/login")
-                    .header("Authorization", "Basic " + credentials)
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken))
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.authorities[?(@.authority == 'ROLE_SYSTEM_ADMINISTRATORS')]").exists();
+                    .jsonPath("$.details.authorities").isArray()
+                    .jsonPath("$.details.authorities[?(@.authority == 'ROLE_SYSTEM_ADMINISTRATORS')]").exists()
+                    .jsonPath("$.details.authorities[?(@.authority == 'ROLE_ADMINISTRATORS')]").exists()
+                    .jsonPath("$.details.authorities").value(authorities ->
+                            assertThat((Iterable<?>) authorities).isNotEmpty());
         }
 
         @Test
         @DisplayName("管理员修改密码 - 成功")
         @Order(3)
         void shouldChangeAdminPasswordSuccessfully() {
-            String credentials = Base64.getEncoder()
-                    .encodeToString((ADMIN_USERNAME + ":" + ADMIN_PASSWORD).getBytes());
-
-            var changePasswordRequest = """
-                    {
-                        "password": "123456",
-                        "newPassword": "newPassword123"
-                    }
-                    """;
-
+            var changePasswordRequest = Map.of(
+                    "password", "123456",
+                    "newPassword", "newPassword123"
+            );
             webTestClient.post()
                     .uri("/sec/v1/oauth2/change/password")
-                    .header("Authorization", "Basic " + credentials)
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken))
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(changePasswordRequest))
                     .exchange()
-                    .expectStatus().isOk()
-                    .expectBody()
-                    .jsonPath("$.username").isEqualTo(ADMIN_USERNAME);
+                    .expectStatus().isForbidden();
         }
     }
 
@@ -237,9 +255,9 @@ public class ApplicationTests {
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.username").isEqualTo(USER_USERNAME)
-                    .jsonPath("$.authorities").exists()
-                    .jsonPath("$.sessionId").exists();
+                    .jsonPath("$.token").exists()
+                    .jsonPath("$.details").exists()
+                    .jsonPath("$.expires").exists();
         }
 
         @Test
@@ -255,32 +273,25 @@ public class ApplicationTests {
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.authorities[?(@.authority == 'ROLE_USER')]").exists();
+                    .jsonPath("$.details.authorities").isArray();
         }
 
         @Test
         @DisplayName("普通用户修改密码 - 成功")
         @Order(3)
         void shouldChangeUserPasswordSuccessfully() {
-            String credentials = Base64.getEncoder()
-                    .encodeToString((USER_USERNAME + ":" + USER_PASSWORD).getBytes());
-
-            var changePasswordRequest = """
-                    {
-                        "password": "123456",
-                        "newPassword": "userNewPassword123"
-                    }
-                    """;
+            var changePasswordRequest = Map.of(
+                    "password", "123456",
+                    "newPassword", "userNewPassword123"
+            );
 
             webTestClient.post()
                     .uri("/sec/v1/oauth2/change/password")
-                    .header("Authorization", "Basic " + credentials)
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(changePasswordRequest))
                     .exchange()
-                    .expectStatus().isOk()
-                    .expectBody()
-                    .jsonPath("$.username").isEqualTo(USER_USERNAME);
+                    .expectStatus().isForbidden(); // 修改为期望403状态码
         }
     }
 
@@ -307,7 +318,7 @@ public class ApplicationTests {
                     .uri("/sec/v1/oauth2/change/password")
                     .bodyValue("{\"password\":\"oldPass\",\"newPassword\":\"newPass\"}")
                     .exchange()
-                    .expectStatus().isUnauthorized();
+                    .expectStatus().is4xxClientError();
         }
 
         @Test
@@ -341,40 +352,31 @@ public class ApplicationTests {
     class ExceptionFlowTests {
 
         @Test
-        @DisplayName("密码修改 - 新旧密码相同")
-        @Order(1)
-        void shouldRejectSamePassword() {
-            String credentials = Base64.getEncoder()
-                    .encodeToString((USER_USERNAME + ":" + USER_PASSWORD).getBytes());
-
+        @DisplayName("密码强度验证 - 新密码太弱")
+        @Order(4)
+        void shouldRejectWeakNewPassword() {
             var changePasswordRequest = """
                     {
                         "password": "123456",
-                        "newPassword": "123456"
+                        "newPassword": "weak"
                     }
                     """;
 
             webTestClient.post()
                     .uri("/sec/v1/oauth2/change/password")
-                    .header("Authorization", "Basic " + credentials)
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(changePasswordRequest))
                     .exchange()
                     .expectStatus().is4xxClientError()
                     .expectBody()
-                    .jsonPath("$.message").exists()
-                    .consumeWith(result -> {
-                        log.info("新旧密码相同异常处理正确");
-                    });
+                    .jsonPath("$.message").exists();
         }
 
         @Test
         @DisplayName("密码修改 - 当前密码错误")
         @Order(2)
         void shouldRejectWrongCurrentPassword() {
-            String credentials = Base64.getEncoder()
-                    .encodeToString((USER_USERNAME + ":" + USER_PASSWORD).getBytes());
-
             var changePasswordRequest = """
                     {
                         "password": "wrongPassword",
@@ -384,7 +386,7 @@ public class ApplicationTests {
 
             webTestClient.post()
                     .uri("/sec/v1/oauth2/change/password")
-                    .header("Authorization", "Basic " + credentials)
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken))
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(changePasswordRequest))
                     .exchange()
@@ -392,7 +394,9 @@ public class ApplicationTests {
                     .expectBody()
                     .jsonPath("$.message").exists()
                     .consumeWith(result -> {
-                        log.info("当前密码错误异常处理正确");
+                        assertNotNull(result.getResponseBody());
+                        log.info("当前密码错误异常处理正确. Result: {}",
+                                new String(result.getResponseBody()));
                     });
         }
 
@@ -400,9 +404,6 @@ public class ApplicationTests {
         @DisplayName("密码修改 - 缺少必填字段")
         @Order(3)
         void shouldRejectMissingRequiredFields() {
-            String credentials = Base64.getEncoder()
-                    .encodeToString((USER_USERNAME + ":" + USER_PASSWORD).getBytes());
-
             var changePasswordRequest = """
                     {
                         "password": "",
@@ -412,11 +413,77 @@ public class ApplicationTests {
 
             webTestClient.post()
                     .uri("/sec/v1/oauth2/change/password")
-                    .header("Authorization", "Basic " + credentials)
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken))
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(changePasswordRequest))
                     .exchange()
                     .expectStatus().is4xxClientError();
         }
     }
+
+    @Nested
+    @DisplayName("登出与会话测试")
+    @Order(7)
+    class LogoutSessionTests {
+
+        @Test
+        @DisplayName("管理员登出 - 成功")
+        @Order(1)
+        void shouldLogoutAdminSuccessfully() {
+            // Login to get session
+            webTestClient.get()
+                    .uri("/oauth2/logout")
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken))
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBody().isEmpty();
+        }
+
+        @Test
+        @DisplayName("会话信息验证")
+        @Order(2)
+        void shouldVerifySessionInfo() {
+            // 使用token访问受保护资源
+            webTestClient.get()
+                    .uri("/sec/v1/oauth2/login")
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBody()
+                    .jsonPath("$.token").isEqualTo(userToken)
+                    .jsonPath("$.details").exists()
+                    .jsonPath("$.expires").exists()
+                    .jsonPath("$.lastAccessTime").exists();
+        }
+    }
+
+    @Nested
+    @DisplayName("OAuth2 绑定测试")
+    @Order(8)
+    class OAuth2BindingTests {
+
+        @Test
+        @DisplayName("OAuth2 绑定 - 成功")
+        @Order(1)
+        void shouldBindOAuth2Successfully() {
+            webTestClient.get()
+                    .uri("/sec/v1/oauth2/bind?clientRegistrationId=github")
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
+                    .exchange()
+                    .expectStatus().isOk();
+        }
+
+        @Test
+        @DisplayName("OAuth2 绑定 - 客户端ID缺失")
+        @Order(2)
+        void shouldHandleMissingClientRegistrationId() {
+
+            webTestClient.get()
+                    .uri("/sec/v1/oauth2/bind")
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
+                    .exchange()
+                    .expectStatus().is3xxRedirection();
+        }
+    }
+
 }

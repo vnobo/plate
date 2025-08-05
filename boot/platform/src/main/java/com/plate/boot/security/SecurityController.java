@@ -112,6 +112,9 @@ public class SecurityController {
     @GetMapping("bind")
     public Mono<Object> bindOauth2(String clientRegistrationId, Authentication authentication, ServerWebExchange exchange) {
         return this.clientRepository.loadAuthorizedClient(clientRegistrationId, authentication, exchange)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(RestServerException.withMsg("Client ["
+                                + clientRegistrationId + "] not found",
+                        new RuntimeException("Client [" + clientRegistrationId + "] not found")))))
                 .flatMap(oAuth2AuthorizedClient -> Mono.just(oAuth2AuthorizedClient.getAccessToken()));
     }
 

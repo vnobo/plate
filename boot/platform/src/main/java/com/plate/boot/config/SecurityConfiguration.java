@@ -253,16 +253,13 @@ public class SecurityConfiguration {
             if (!isXmlHttpRequest(requestedWith)) {
                 return super.commence(exchange, e);
             }
-
             ErrorResponse errorResponse = createErrorResponse(exchange, e);
-
             ServerHttpResponse response = exchange.getResponse();
             response.setStatusCode(errorResponse.getStatusCode());
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             var bytes = BeanUtils.objectToBytes(errorResponse.getBody());
             var buffer = response.bufferFactory().wrap(bytes);
-            return response.writeWith(Mono.just(buffer))
-                    .doAfterTerminate(() -> DataBufferUtils.release(buffer));
+            return response.writeWith(Mono.just(buffer)).doOnError((err) -> DataBufferUtils.release(buffer));
         }
 
         /**
