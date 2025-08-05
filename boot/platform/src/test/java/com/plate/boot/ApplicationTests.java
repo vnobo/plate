@@ -24,24 +24,24 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * SecurityController 完整集成测试
+ * SecurityController Integration Test
  *
- * <p>本测试类为 SecurityController 编写完整的集成测试用例，覆盖整个请求链路。
- * 测试场景包括：</p>
+ * <p>This test class provides comprehensive integration test cases for SecurityController, covering the entire request chain.
+ * Test scenarios include:</p>
  * <ul>
- *   <li>1) 管理员登录认证流程，使用账号 admin/123456 验证权限控制</li>
- *   <li>2) 普通用户登录流程，使用账号 user/123456 验证基础功能</li>
- *   <li>3) 未授权访问的拦截情况</li>
+ *   <li>1) Administrator login authentication process, using account admin/123456 to verify access control</li>
+ *   <li>2) Regular user login process, using account user/123456 to verify basic functionality</li>
+ *   <li>3) Interception of unauthorized access</li>
  * </ul>
  *
- * <p>测试要求：</p>
+ * <p>Test requirements:</p>
  * <ul>
- *   <li>a) 使用 Spring Boot Test 框架</li>
- *   <li>b) 包含 HTTP 请求模拟</li>
- *   <li>c) 验证各端点返回状态码和响应内容</li>
- *   <li>d) 测试数据初始化使用 @Sql 注解</li>
- *   <li>e) 包含异常流程测试用例</li>
- *   <li>确保测试覆盖率达到 90% 以上</li>
+ *   <li>a) Use Spring Boot Test framework</li>
+ *   <li>b) Include HTTP request simulation</li>
+ *   <li>c) Verify endpoint return status codes and response content</li>
+ *   <li>d) Initialize test data using @Sql annotation</li>
+ *   <li>e) Include exception flow test cases</li>
+ *   <li>Ensure test coverage reaches above 90%</li>
  * </ul>
  *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
@@ -57,7 +57,7 @@ public class ApplicationTests {
     @LocalServerPort
     private int port;
 
-    // 测试用户凭据
+    // Test user credentials
     private static final String ADMIN_USERNAME = "admin";
     private static final String ADMIN_PASSWORD = "123456";
     private static final String USER_USERNAME = "user";
@@ -73,30 +73,30 @@ public class ApplicationTests {
 
     @AfterAll
     static void tearDownAll() {
-        log.info("所有 SecurityController 集成测试完成");
+        log.info("All SecurityController integration tests completed");
     }
 
     @BeforeEach
     void setUp() {
-        log.info("设置测试环境，端口: {}", port);
+        log.info("Setting up test environment, port: {}", port);
         this.webTestClient = WebTestClient.bindToServer()
                 .baseUrl("http://localhost:" + port)
                 .defaultHeader("X-Requested-With", "XMLHttpRequest")
                 .responseTimeout(Duration.ofSeconds(30))
                 .build();
-        // 对于需要管理员权限的测试类
+        // For test classes requiring administrator privileges
         this.adminToken = loginAndGetToken(ADMIN_USERNAME, ADMIN_PASSWORD);
-        // 对于需要普通用户权限的测试类
+        // For test classes requiring regular user privileges
         this.userToken = loginAndGetToken(USER_USERNAME, USER_PASSWORD);
 
     }
 
     @AfterEach
     void tearDown() {
-        log.debug("测试方法执行完成");
+        log.debug("Test method execution completed");
     }
 
-    // 登录并获取token的辅助方法
+    // Helper method to log in and get token
     private String loginAndGetToken(String username, String password) {
         String credentials = Base64.getEncoder()
                 .encodeToString((username + ":" + password).getBytes());
@@ -113,18 +113,18 @@ public class ApplicationTests {
     }
 
     @Nested
-    @DisplayName("应用程序上下文测试")
+    @DisplayName("Application Context Tests")
     @Order(1)
     class ApplicationContextTests {
 
         @Test
-        @DisplayName("应用程序上下文加载测试")
+        @DisplayName("Application Context Loading Test")
         @Order(1)
         void contextLoads() {
-            log.info("应用程序上下文加载成功，Bean 数量: {}",
+            log.info("Application context loaded successfully, Bean count: {}",
                     applicationContext.getBeanDefinitionCount());
 
-            assertAll("核心 Bean 应该存在",
+            assertAll("Core beans should exist",
                     () -> assertThat(applicationContext.containsBean("connectionFactory")).isTrue(),
                     () -> assertThat(applicationContext.containsBean("reactiveRedisTemplate")).isTrue(),
                     () -> assertThat(applicationContext.containsBean("r2dbcEntityTemplate")).isTrue(),
@@ -134,10 +134,10 @@ public class ApplicationTests {
         }
 
         @Test
-        @DisplayName("安全配置验证")
+        @DisplayName("Security Configuration Verification")
         @Order(2)
         void shouldVerifySecurityConfiguration() {
-            assertAll("安全相关 Bean 验证",
+            assertAll("Security-related bean verification",
                     () -> assertThat(applicationContext.containsBean("passwordEncoder")).isTrue(),
                     () -> assertThat(applicationContext.containsBean("securityManager")).isTrue(),
                     () -> assertThat(applicationContext.getBean("securityManager")).isNotNull()
@@ -146,12 +146,12 @@ public class ApplicationTests {
     }
 
     @Nested
-    @DisplayName("CSRF 令牌测试")
+    @DisplayName("CSRF Token Tests")
     @Order(2)
     class CsrfTokenTests {
 
         @Test
-        @DisplayName("获取 CSRF 令牌 - 未认证用户重定向")
+        @DisplayName("Obtain CSRF Token - Unauthenticated User Redirect")
         @Order(1)
         void shouldRedirectUnauthenticatedUserForCsrfToken() {
             webTestClient.get()
@@ -161,7 +161,7 @@ public class ApplicationTests {
         }
 
         @Test
-        @DisplayName("CSRF 令牌格式验证")
+        @DisplayName("CSRF Token Format Validation")
         @Order(2)
         void shouldValidateCsrfTokenFormat() {
             webTestClient.get()
@@ -179,12 +179,12 @@ public class ApplicationTests {
     }
 
     @Nested
-    @DisplayName("管理员认证流程测试")
+    @DisplayName("Administrator Authentication Process Tests")
     @Order(3)
     class AdminAuthenticationTests {
 
         @Test
-        @DisplayName("管理员登录认证 - 成功")
+        @DisplayName("Administrator Login Authentication - Success")
         @Order(1)
         void shouldAuthenticateAdminSuccessfully() {
             webTestClient.get()
@@ -198,12 +198,12 @@ public class ApplicationTests {
                     .jsonPath("$.expires").exists()
                     .jsonPath("$.lastAccessTime").exists()
                     .jsonPath("$.details.name").isEqualTo("admin")
-                    .jsonPath("$.details.nickname").isEqualTo("系统超级管理员")
+                    .jsonPath("$.details.nickname").isEqualTo("System Super Administrator")
                     .jsonPath("$.details.enabled").isEqualTo(true);
         }
 
         @Test
-        @DisplayName("管理员权限验证")
+        @DisplayName("Administrator Authority Verification")
         @Order(2)
         void shouldVerifyAdminAuthorities() {
             webTestClient.get()
@@ -220,7 +220,7 @@ public class ApplicationTests {
         }
 
         @Test
-        @DisplayName("管理员修改密码 - 成功")
+        @DisplayName("Administrator Password Change - Success")
         @Order(3)
         void shouldChangeAdminPasswordSuccessfully() {
             var changePasswordRequest = Map.of(
@@ -238,12 +238,12 @@ public class ApplicationTests {
     }
 
     @Nested
-    @DisplayName("普通用户认证流程测试")
+    @DisplayName("Regular User Authentication Process Tests")
     @Order(4)
     class UserAuthenticationTests {
 
         @Test
-        @DisplayName("普通用户登录认证 - 成功")
+        @DisplayName("Regular User Login Authentication - Success")
         @Order(1)
         void shouldAuthenticateUserSuccessfully() {
             String credentials = Base64.getEncoder()
@@ -261,7 +261,7 @@ public class ApplicationTests {
         }
 
         @Test
-        @DisplayName("普通用户权限验证")
+        @DisplayName("Regular User Authority Verification")
         @Order(2)
         void shouldVerifyUserAuthorities() {
             String credentials = Base64.getEncoder()
@@ -277,7 +277,7 @@ public class ApplicationTests {
         }
 
         @Test
-        @DisplayName("普通用户修改密码 - 成功")
+        @DisplayName("Regular User Password Change - Success")
         @Order(3)
         void shouldChangeUserPasswordSuccessfully() {
             var changePasswordRequest = Map.of(
@@ -291,17 +291,17 @@ public class ApplicationTests {
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(changePasswordRequest))
                     .exchange()
-                    .expectStatus().isForbidden(); // 修改为期望403状态码
+                    .expectStatus().isForbidden(); // Changed to expect 403 status code
         }
     }
 
     @Nested
-    @DisplayName("未授权访问拦截测试")
+    @DisplayName("Unauthorized Access Interception Tests")
     @Order(5)
     class UnauthorizedAccessTests {
 
         @Test
-        @DisplayName("未认证访问登录令牌 - 401")
+        @DisplayName("Unauthenticated Access to Login Token - 401")
         @Order(1)
         void shouldRejectLoginTokenWithoutAuthentication() {
             webTestClient.get()
@@ -311,7 +311,7 @@ public class ApplicationTests {
         }
 
         @Test
-        @DisplayName("未认证修改密码 - 401")
+        @DisplayName("Unauthenticated Password Change - 401")
         @Order(2)
         void shouldRejectChangePasswordWithoutAuthentication() {
             webTestClient.post()
@@ -322,7 +322,7 @@ public class ApplicationTests {
         }
 
         @Test
-        @DisplayName("未认证 OAuth2 绑定 - 401")
+        @DisplayName("Unauthenticated OAuth2 Binding - 401")
         @Order(3)
         void shouldRejectBindOauth2WithoutAuthentication() {
             webTestClient.get()
@@ -332,7 +332,7 @@ public class ApplicationTests {
         }
 
         @Test
-        @DisplayName("错误凭据访问 - 401")
+        @DisplayName("Invalid Credentials Access - 401")
         @Order(4)
         void shouldRejectInvalidCredentials() {
             String invalidCredentials = Base64.getEncoder()
@@ -347,12 +347,12 @@ public class ApplicationTests {
     }
 
     @Nested
-    @DisplayName("异常流程测试")
+    @DisplayName("Exception Flow Tests")
     @Order(6)
     class ExceptionFlowTests {
 
         @Test
-        @DisplayName("密码强度验证 - 新密码太弱")
+        @DisplayName("Password Strength Validation - New Password Too Weak")
         @Order(4)
         void shouldRejectWeakNewPassword() {
             var changePasswordRequest = """
@@ -374,7 +374,7 @@ public class ApplicationTests {
         }
 
         @Test
-        @DisplayName("密码修改 - 当前密码错误")
+        @DisplayName("Password Change - Current Password Incorrect")
         @Order(2)
         void shouldRejectWrongCurrentPassword() {
             var changePasswordRequest = """
@@ -395,13 +395,13 @@ public class ApplicationTests {
                     .jsonPath("$.message").exists()
                     .consumeWith(result -> {
                         assertNotNull(result.getResponseBody());
-                        log.info("当前密码错误异常处理正确. Result: {}",
+                        log.info("Current password error exception handled correctly. Result: {}",
                                 new String(result.getResponseBody()));
                     });
         }
 
         @Test
-        @DisplayName("密码修改 - 缺少必填字段")
+        @DisplayName("Password Change - Missing Required Fields")
         @Order(3)
         void shouldRejectMissingRequiredFields() {
             var changePasswordRequest = """
@@ -422,12 +422,12 @@ public class ApplicationTests {
     }
 
     @Nested
-    @DisplayName("登出与会话测试")
+    @DisplayName("Logout and Session Tests")
     @Order(7)
     class LogoutSessionTests {
 
         @Test
-        @DisplayName("管理员登出 - 成功")
+        @DisplayName("Administrator Logout - Success")
         @Order(1)
         void shouldLogoutAdminSuccessfully() {
             // Login to get session
@@ -440,10 +440,10 @@ public class ApplicationTests {
         }
 
         @Test
-        @DisplayName("会话信息验证")
+        @DisplayName("Session Information Verification")
         @Order(2)
         void shouldVerifySessionInfo() {
-            // 使用token访问受保护资源
+            // Use token to access protected resources
             webTestClient.get()
                     .uri("/sec/v1/oauth2/login")
                     .headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
@@ -458,12 +458,12 @@ public class ApplicationTests {
     }
 
     @Nested
-    @DisplayName("OAuth2 绑定测试")
+    @DisplayName("OAuth2 Binding Tests")
     @Order(8)
     class OAuth2BindingTests {
 
         @Test
-        @DisplayName("OAuth2 绑定 - 成功")
+        @DisplayName("OAuth2 Binding - Success")
         @Order(1)
         void shouldBindOAuth2Successfully() {
             webTestClient.get()
@@ -474,7 +474,7 @@ public class ApplicationTests {
         }
 
         @Test
-        @DisplayName("OAuth2 绑定 - 客户端ID缺失")
+        @DisplayName("OAuth2 Binding - Missing Client ID")
         @Order(2)
         void shouldHandleMissingClientRegistrationId() {
 
