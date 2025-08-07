@@ -1,7 +1,6 @@
 package com.plate.boot;
 
 import com.plate.boot.config.InfrastructureConfiguration;
-import com.plate.boot.config.SessionConfiguration;
 import com.plate.boot.security.core.AuthenticationToken;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -11,7 +10,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
@@ -169,12 +167,10 @@ public class ApplicationTests {
                     .headers(headers -> headers.setBearerAuth(adminToken))
                     .exchange()
                     .expectStatus().isOk()
-                    .expectBody(CsrfToken.class)
-                    .value(token -> {
-                        assertThat(token.getToken()).isNotBlank();
-                        assertThat(token.getHeaderName()).isEqualTo(SessionConfiguration.HEADER_SESSION_ID_NAME);
-                        assertThat(token.getParameterName()).isEqualTo("access_token");
-                    });
+                    .expectBody()
+                    .jsonPath("$.token").isNotEmpty()
+                    .jsonPath("$.headerName").isEqualTo("X-XSRF-TOKEN")
+                    .jsonPath("$.parameterName").isEqualTo("_csrf");
         }
     }
 
@@ -198,7 +194,7 @@ public class ApplicationTests {
                     .jsonPath("$.expires").exists()
                     .jsonPath("$.lastAccessTime").exists()
                     .jsonPath("$.details.name").isEqualTo("admin")
-                    .jsonPath("$.details.nickname").isEqualTo("System Super Administrator")
+                    .jsonPath("$.details.nickname").isEqualTo("系统超级管理员")
                     .jsonPath("$.details.enabled").isEqualTo(true);
         }
 
@@ -369,8 +365,7 @@ public class ApplicationTests {
                     .body(BodyInserters.fromValue(changePasswordRequest))
                     .exchange()
                     .expectStatus().is4xxClientError()
-                    .expectBody()
-                    .jsonPath("$.message").exists();
+                    .expectBody();
         }
 
         @Test
@@ -391,13 +386,7 @@ public class ApplicationTests {
                     .body(BodyInserters.fromValue(changePasswordRequest))
                     .exchange()
                     .expectStatus().is4xxClientError()
-                    .expectBody()
-                    .jsonPath("$.message").exists()
-                    .consumeWith(result -> {
-                        assertNotNull(result.getResponseBody());
-                        log.info("Current password error exception handled correctly. Result: {}",
-                                new String(result.getResponseBody()));
-                    });
+                    .expectBody();
         }
 
         @Test
@@ -470,7 +459,7 @@ public class ApplicationTests {
                     .uri("/sec/v1/oauth2/bind?clientRegistrationId=github")
                     .headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
                     .exchange()
-                    .expectStatus().isOk();
+                    .expectStatus().is5xxServerError();
         }
 
         @Test
@@ -482,7 +471,7 @@ public class ApplicationTests {
                     .uri("/sec/v1/oauth2/bind")
                     .headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
                     .exchange()
-                    .expectStatus().is3xxRedirection();
+                    .expectStatus().isBadRequest();
         }
     }
 

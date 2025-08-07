@@ -5,6 +5,7 @@ build/
 !**/src/main/**
 !**/src/test/**
 *.log
+
 ### vscode ###
 bin
 .codebuddy
