@@ -1,287 +1,218 @@
 package com.plate.boot.security.core.user;
 
 import com.plate.boot.commons.exception.RestServerException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Pageable;
+import com.plate.boot.config.InfrastructureConfiguration;
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.List;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
-/**
- * UsersService Unit Tests
- *
- * <p>This test class provides unit tests for the UsersService class, covering:</p>
- * <ul>
- *   <li>User search and pagination</li>
- *   <li>User addition and modification</li>
- *   <li>User deletion</li>
- *   <li>Password encoding upgrades</li>
- * </ul>
- *
- * @author Qwen Code
- */
+@SpringBootTest
+@Import(InfrastructureConfiguration.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UsersServiceTest {
-
+    @Autowired
     private UsersService usersService;
-    private PasswordEncoder passwordEncoder;
+
+    @Autowired
     private UsersRepository usersRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    private User createUser(String username, String password) {
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(password);
+        user.setDisabled(false);
+        return user;
+    }
 
     @BeforeEach
     void setUp() {
-        passwordEncoder = mock(PasswordEncoder.class);
-        usersRepository = mock(UsersRepository.class);
-        usersService = new UsersService(passwordEncoder, usersRepository);
+        usersRepository.deleteAll().block();
     }
 
-    @Nested
-    @DisplayName("Search Tests")
-    class SearchTests {
-
-        @Test
-        @DisplayName("Should search users")
-        void shouldSearchUsers() {
-            // Given
-            UserReq request = new UserReq();
-            Pageable pageable = Pageable.unpaged();
-
-            UserRes userRes = new UserRes();
-            userRes.setUsername("testuser");
-
-            // Note: We can't directly mock the repository method since it's not in the interface
-            // This would be tested in integration tests with a real database
-
-            // For unit testing, we'll skip this test since we can't easily mock the repository method
-        }
+    @Test
+    @Order(1)
+    void testSaveNewUser() {
+        User user = createUser("testuser", "Password123");
+        StepVerifier.create(usersService.save(user))
+                .assertNext(savedUser -> {
+                    Assertions.assertNotNull(savedUser.getId());
+                    Assertions.assertEquals("testuser", savedUser.getUsername());
+                })
+                .verifyComplete();
     }
 
-    @Nested
-    @DisplayName("Page Tests")
-    class PageTests {
+    @Test
+    @Order(2)
+    void testSaveExistingUser() {
+        User user = createUser("testuser", "Password123");
+        User saved = usersService.save(user).block();
+        Assertions.assertNotNull(saved);
 
-        @Test
-        @DisplayName("Should page users")
-        void shouldPageUsers() {
-            // Given
-            UserReq request = new UserReq();
-            Pageable pageable = Pageable.unpaged();
-
-            UserRes userRes = new UserRes();
-            userRes.setUsername("testuser");
-            List<UserRes> userResList = List.of(userRes);
-
-            // Note: We can't directly mock the repository method since it's not in the interface
-            // This would be tested in integration tests with a real database
-
-            // For unit testing, we'll skip this test since we can't easily mock the repository method
-        }
+        saved.setName("Updated Name");
+        StepVerifier.create(usersService.save(saved))
+                .assertNext(updatedUser -> {
+                    Assertions.assertEquals("Updated Name", updatedUser.getName());
+                    Assertions.assertEquals(saved.getId(), updatedUser.getId());
+                })
+                .verifyComplete();
     }
 
-    @Nested
-    @DisplayName("Add Tests")
-    class AddTests {
+    @Test
+    @Order(3)
+    void testFindByUsername() {
+        User user = createUser("testuser", "Password123");
+        usersService.save(user).block();
 
-        @Test
-        @DisplayName("Should add new user when username does not exist")
-        void shouldAddNewUserWhenUsernameDoesNotExist() {
-            // Given
-            UserReq request = new UserReq();
-            request.setUsername("newuser");
-            request.setPassword("TestPass123");
-
-            when(usersRepository.existsByUsernameIgnoreCase("newuser")).thenReturn(Mono.just(false));
-            when(usersRepository.save(any(User.class))).thenAnswer(invocation -> {
-                User user = invocation.getArgument(0);
-                user.setCode(UUID.randomUUID());
-                return Mono.just(user);
-            });
-
-            // When
-            Mono<User> result = usersService.add(request);
-
-            // Then
-            StepVerifier.create(result)
-                    .expectNextMatches(user -> {
-                        assertThat(user).isNotNull();
-                        assertThat(user.getUsername()).isEqualTo("newuser");
-                        return true;
-                    })
-                    .verifyComplete();
-
-            // Verify repository methods were called
-            verify(usersRepository).existsByUsernameIgnoreCase("newuser");
-            verify(usersRepository).save(any(User.class));
-        }
-
-        @Test
-        @DisplayName("Should throw exception when username already exists")
-        void shouldThrowExceptionWhenUsernameAlreadyExists() {
-            // Given
-            UserReq request = new UserReq();
-            request.setUsername("existinguser");
-
-            when(usersRepository.existsByUsernameIgnoreCase("existinguser")).thenReturn(Mono.just(true));
-
-            // When
-            Mono<User> result = usersService.add(request);
-
-            // Then
-            StepVerifier.create(result)
-                    .expectError(RestServerException.class)
-                    .verify();
-
-            // Verify repository method was called
-            verify(usersRepository).existsByUsernameIgnoreCase("existinguser");
-        }
+        StepVerifier.create(usersService.findByUsername("testuser"))
+                .expectNextCount(1)
+                .verifyComplete();
     }
 
-    @Nested
-    @DisplayName("Modify Tests")
-    class ModifyTests {
-
-        @Test
-        @DisplayName("Should modify existing user")
-        void shouldModifyExistingUser() {
-            // Given
-            UserReq request = new UserReq();
-            request.setUsername("existinguser");
-
-            User existingUser = new User();
-            existingUser.setId(1L);
-            existingUser.setCode(UUID.randomUUID());
-            existingUser.setUsername("existinguser");
-
-            User modifiedUser = new User();
-            modifiedUser.setId(1L);
-            modifiedUser.setCode(existingUser.getCode());
-            modifiedUser.setUsername("existinguser");
-            modifiedUser.setName("Modified Name");
-
-            when(usersRepository.findByUsername("existinguser")).thenReturn(Mono.just(existingUser));
-            when(usersRepository.save(any(User.class))).thenReturn(Mono.just(modifiedUser));
-
-            // When
-            Mono<User> result = usersService.modify(request);
-
-            // Then
-            StepVerifier.create(result)
-                    .expectNextMatches(user -> {
-                        assertThat(user).isNotNull();
-                        assertThat(user.getUsername()).isEqualTo("existinguser");
-                        assertThat(user.getName()).isEqualTo("Modified Name");
-                        return true;
-                    })
-                    .verifyComplete();
-
-            // Verify repository methods were called
-            verify(usersRepository).findByUsername("existinguser");
-            verify(usersRepository).save(any(User.class));
-        }
-
-        @Test
-        @DisplayName("Should throw exception when user not found for modification")
-        void shouldThrowExceptionWhenUserNotFoundForModification() {
-            // Given
-            UserReq request = new UserReq();
-            request.setUsername("nonexistentuser");
-
-            when(usersRepository.findByUsername("nonexistentuser")).thenReturn(Mono.empty());
-
-            // When
-            Mono<User> result = usersService.modify(request);
-
-            // Then
-            StepVerifier.create(result)
-                    .expectError(RestServerException.class)
-                    .verify();
-
-            // Verify repository method was called
-            verify(usersRepository).findByUsername("nonexistentuser");
-        }
+    @Test
+    @Order(4)
+    void testFindByUsername_NotFound() {
+        StepVerifier.create(usersService.findByUsername("nonexistent"))
+                .expectError(RestServerException.class)
+                .verify();
     }
 
-    @Nested
-    @DisplayName("Operate Tests")
-    class OperateTests {
+    @Test
+    @Order(5)
+    void testDelete() {
+        User user = createUser("testuser", "Password123");
+        User saved = usersService.save(user).block();
+        Assertions.assertNotNull(saved);
 
-        @Test
-        @DisplayName("Should operate on user request")
-        void shouldOperateOnUserRequest() {
-            // Given
-            UserReq request = new UserReq();
-            request.setCode(UUID.randomUUID());
-            request.setUsername("testuser");
-            request.setPassword("TestPass123");
+        StepVerifier.create(usersService.delete(saved.getId()))
+                .verifyComplete();
 
-            User existingUser = new User();
-            existingUser.setCode(request.getCode());
-            existingUser.setUsername("testuser");
-
-            when(usersRepository.findByCode(request.getCode())).thenReturn(Mono.just(existingUser));
-            when(usersRepository.save(any(User.class))).thenReturn(Mono.just(existingUser));
-            when(passwordEncoder.upgradeEncoding("TestPass123")).thenReturn(false);
-
-            // When
-            Mono<User> result = usersService.operate(request);
-
-            // Then
-            StepVerifier.create(result)
-                    .expectNextMatches(user -> {
-                        assertThat(user).isNotNull();
-                        assertThat(user.getUsername()).isEqualTo("testuser");
-                        return true;
-                    })
-                    .verifyComplete();
-
-            // Verify repository methods were called
-            verify(usersRepository).findByCode(request.getCode());
-            verify(usersRepository).save(any(User.class));
-        }
+        StepVerifier.create(usersRepository.findById(saved.getId()))
+                .expectNextCount(0)
+                .verifyComplete();
     }
 
-    @Nested
-    @DisplayName("Delete Tests")
-    class DeleteTests {
-
-        @Test
-        @DisplayName("Should delete user")
-        void shouldDeleteUser() {
-            // Given
-            UserReq request = new UserReq();
-            request.setCode(UUID.randomUUID());
-
-            User userToDelete = new User();
-            userToDelete.setCode(request.getCode());
-
-            when(usersRepository.findByCode(request.getCode())).thenReturn(Mono.just(userToDelete));
-            when(usersRepository.delete(userToDelete)).thenReturn(Mono.empty());
-
-            // When
-            Mono<Void> result = usersService.delete(request);
-
-            // Then
-            StepVerifier.create(result)
-                    .verifyComplete();
-
-            // Verify repository methods were called
-            verify(usersRepository).findByCode(request.getCode());
-            verify(usersRepository).delete(userToDelete);
-        }
+    @Test
+    @Order(6)
+    void testDelete_NotFound() {
+        StepVerifier.create(usersService.delete(999L))
+                .expectError(RestServerException.class)
+                .verify();
     }
 
-    @Nested
-    @DisplayName("Password Encoding Tests")
-    class PasswordEncodingTests {
+    @Test
+    @Order(7)
+    void testQuery() {
+        usersService.save(createUser("user1", "Password123")).block();
+        usersService.save(createUser("user2", "Password123")).block();
 
-        // Note: upgradeEncodingIfPassword is a private method and cannot be directly tested
-        // This would be tested indirectly through other methods that use it
+        StepVerifier.create(usersService.query(PageRequest.of(0, 10)))
+                .assertNext(page -> {
+                    Assertions.assertEquals(2, page.getTotalElements());
+                    Assertions.assertEquals(2, page.getContent().size());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    @Order(8)
+    void testQuery_Empty() {
+        StepVerifier.create(usersService.query(PageRequest.of(0, 10)))
+                .assertNext(page -> {
+                    Assertions.assertEquals(0, page.getTotalElements());
+                    Assertions.assertTrue(page.getContent().isEmpty());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    @Order(9)
+    void testAddUser() {
+        UserReq req = new UserReq();
+        req.setUsername("newuser");
+        req.setPassword("Password123");
+        StepVerifier.create(usersService.add(req))
+                .assertNext(addedUser -> {
+                    Assertions.assertNotNull(addedUser.getId());
+                    Assertions.assertEquals("newuser", addedUser.getUsername());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    @Order(10)
+    void testAddUser_AlreadyExists() {
+        usersService.save(createUser("existinguser", "Password123")).block();
+        UserReq req = new UserReq();
+        req.setUsername("existinguser");
+        req.setPassword("Password123");
+        StepVerifier.create(usersService.add(req))
+                .expectError(RestServerException.class)
+                .verify();
+    }
+
+    @Test
+    @Order(11)
+    void testModifyUser() {
+        User saved = usersService.save(createUser("modifyuser", "Password123")).block();
+        Assertions.assertNotNull(saved);
+
+        UserReq req = new UserReq();
+        req.setUsername("modifyuser");
+        req.setName("Modified Name");
+
+        StepVerifier.create(usersService.modify(req))
+                .assertNext(modifiedUser -> {
+                    Assertions.assertEquals("Modified Name", modifiedUser.getName());
+                    Assertions.assertEquals(saved.getId(), modifiedUser.getId());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    @Order(12)
+    void testModifyUser_NotFound() {
+        UserReq req = new UserReq();
+        req.setUsername("nonexistent");
+        StepVerifier.create(usersService.modify(req))
+                .expectError(RestServerException.class)
+                .verify();
+    }
+
+    @Test
+    @Order(13)
+    void testPage() {
+        usersService.save(createUser("user1", "Password123")).block();
+        usersService.save(createUser("user2", "Password123")).block();
+        UserReq req = new UserReq();
+        StepVerifier.create(usersService.page(req, PageRequest.of(0, 10)))
+                .assertNext(page -> {
+                    Assertions.assertEquals(2, page.getTotalElements());
+                    Assertions.assertEquals(2, page.getContent().size());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    @Order(14)
+    void testDeleteUserReq() {
+        User saved = usersService.save(createUser("deleteuser", "Password123")).block();
+        Assertions.assertNotNull(saved);
+
+        UserReq req = new UserReq();
+        req.setCode(saved.getCode());
+
+        StepVerifier.create(usersService.delete(req))
+                .verifyComplete();
+
+        StepVerifier.create(usersRepository.findById(saved.getId()))
+                .expectNextCount(0)
+                .verifyComplete();
     }
 }

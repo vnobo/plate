@@ -2,7 +2,6 @@ package com.plate.boot.security.oauth2;
 
 import com.plate.boot.security.SecurityDetails;
 import com.plate.boot.security.SecurityManager;
-import com.plate.boot.security.core.user.User;
 import com.plate.boot.security.core.user.UserReq;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

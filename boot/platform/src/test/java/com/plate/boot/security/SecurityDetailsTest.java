@@ -1,8 +1,6 @@
 package com.plate.boot.security;
 
-import com.plate.boot.security.core.group.member.GroupMemberRes;
 import com.plate.boot.security.core.tenant.member.TenantMemberRes;
-import com.plate.boot.security.core.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

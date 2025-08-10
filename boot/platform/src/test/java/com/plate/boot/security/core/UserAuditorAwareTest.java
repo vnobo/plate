@@ -2,7 +2,6 @@ package com.plate.boot.security.core;
 
 import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.security.SecurityDetails;
-import com.plate.boot.security.core.user.User;
 import com.plate.boot.security.core.user.UsersRepository;
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
