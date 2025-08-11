@@ -1,5 +1,6 @@
 package com.plate.boot.security;
 
+import com.plate.boot.security.core.user.User;
 import com.plate.boot.security.core.user.UserReq;
 import com.plate.boot.security.core.user.UsersService;
 import org.junit.jupiter.api.DisplayName;
