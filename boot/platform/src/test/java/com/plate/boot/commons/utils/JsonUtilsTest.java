@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
@@ -18,22 +17,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DisplayName("JsonUtils Unit Tests")
 class JsonUtilsTest {
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @BeforeEach
     void setUp() {
-        // Initialize JsonUtils with ObjectMapper
-        new JsonUtils(objectMapper);
     }
 
     // Test classes
     static class TestObject {
         public String name;
         public Integer value;
-
-        public TestObject() {
-        }
 
         public TestObject(String name, Integer value) {
             this.name = name;
@@ -44,9 +35,6 @@ class JsonUtilsTest {
     static class ComplexObject {
         public String name;
         public List<TestObject> items;
-
-        public ComplexObject() {
-        }
 
         public ComplexObject(String name, List<TestObject> items) {
             this.name = name;
@@ -134,8 +122,8 @@ class JsonUtilsTest {
             ComplexObject obj = JsonUtils.fromJson(json, ComplexObject.class);
             assertThat(obj.name).isEqualTo("main");
             assertThat(obj.items).hasSize(1);
-            assertThat(obj.items.get(0).name).isEqualTo("nested");
-            assertThat(obj.items.get(0).value).isEqualTo(456);
+            assertThat(obj.items.getFirst().name).isEqualTo("nested");
+            assertThat(obj.items.getFirst().value).isEqualTo(456);
         }
 
         @Test
@@ -248,11 +236,7 @@ class JsonUtilsTest {
         @DisplayName("Should handle large objects")
         void shouldHandleLargeObjects() {
             // Create a large object with many fields
-            StringBuilder nameBuilder = new StringBuilder();
-            for (int i = 0; i < 1000; i++) {
-                nameBuilder.append("a");
-            }
-            TestObject obj = new TestObject(nameBuilder.toString(), 123);
+            TestObject obj = new TestObject("a".repeat(1000), 123);
             String json = JsonUtils.toJson(obj);
             TestObject deserialized = JsonUtils.fromJson(json, TestObject.class);
             assertThat(deserialized.name).hasSize(1000);
