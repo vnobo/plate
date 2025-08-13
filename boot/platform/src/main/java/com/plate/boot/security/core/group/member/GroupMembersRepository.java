@@ -1,6 +1,7 @@
 package com.plate.boot.security.core.group.member;
 
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -24,4 +25,12 @@ public interface GroupMembersRepository extends R2dbcRepository<GroupMember, Lon
      * @return a Mono emitting the number of records deleted
      */
     Mono<Integer> deleteByUserCode(UUID userCode);
+
+    /**
+     * Finds group members by the provided userCode.
+     *
+     * @param userCode the userCode to filter by
+     * @return a Flux emitting matching group members
+     */
+    Flux<GroupMember> findByUserCode(UUID userCode);
 }
