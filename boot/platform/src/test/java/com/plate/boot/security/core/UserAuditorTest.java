@@ -1,6 +1,7 @@
 package com.plate.boot.security.core;
 
 import com.plate.boot.security.SecurityDetails;
+import com.plate.boot.security.core.user.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
