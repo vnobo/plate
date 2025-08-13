@@ -3,8 +3,6 @@ package com.plate.boot.relational.logger;
 import com.plate.boot.config.InfrastructureConfiguration;
 import com.plate.boot.security.core.AuthenticationToken;
 import org.junit.jupiter.api.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -29,8 +27,6 @@ import java.util.Base64;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class LoggersControllerTest {
 
-    private static final Logger log = LoggerFactory.getLogger(LoggersControllerTest.class);
-
     private WebTestClient webTestClient;
     private String adminToken;
 
@@ -52,6 +48,7 @@ public class LoggersControllerTest {
                 .expectBody(AuthenticationToken.class)
                 .returnResult().getResponseBody();
 
+        Assertions.assertNotNull(responseBody);
         this.adminToken = responseBody.token();
     }
 
