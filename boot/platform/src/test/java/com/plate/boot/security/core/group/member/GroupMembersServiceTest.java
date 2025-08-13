@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import reactor.test.StepVerifier;
 
+import java.util.UUID;
+
 @SpringBootTest
 @Import(InfrastructureConfiguration.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -33,7 +35,7 @@ class GroupMembersServiceTest {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
-    private User testUser;
+    private com.plate.boot.security.core.user.User testUser;
     private Group testGroup;
 
     @BeforeEach
@@ -42,13 +44,15 @@ class GroupMembersServiceTest {
         usersRepository.deleteAll().block();
         groupsRepository.deleteAll().block();
 
-        User user = new User();
+        com.plate.boot.security.core.user.User user = new com.plate.boot.security.core.user.User();
         user.setUsername("testuser");
         user.setPassword("Password123");
+        user.setCode(UUID.randomUUID());
         testUser = usersRepository.save(user).block();
 
         Group group = new Group();
         group.setName("TestGroup");
+        group.setCode(UUID.randomUUID());
         testGroup = groupsRepository.save(group).block();
     }
 

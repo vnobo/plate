@@ -23,7 +23,6 @@ class GroupsServiceTest {
     private Group createGroup(String name) {
         Group group = new Group();
         group.setName(name);
-        group.setDescription("Test Group Description");
         return group;
     }
 
@@ -51,10 +50,8 @@ class GroupsServiceTest {
         Group saved = groupsService.save(group).block();
         Assertions.assertNotNull(saved);
 
-        saved.setDescription("Updated Description");
         StepVerifier.create(groupsService.save(saved))
                 .assertNext(updatedGroup -> {
-                    Assertions.assertEquals("Updated Description", updatedGroup.getDescription());
                     Assertions.assertEquals(saved.getId(), updatedGroup.getId());
                 })
                 .verifyComplete();
@@ -65,8 +62,7 @@ class GroupsServiceTest {
     void testAddGroup() {
         GroupReq req = new GroupReq();
         req.setName("NewGroup");
-        req.setDescription("New Group Description");
-        StepVerifier.create(groupsService.add(req))
+        StepVerifier.create(groupsService.operate(req))
                 .assertNext(addedGroup -> {
                     Assertions.assertNotNull(addedGroup.getId());
                     Assertions.assertEquals("NewGroup", addedGroup.getName());
@@ -80,7 +76,7 @@ class GroupsServiceTest {
         groupsService.save(createGroup("ExistingGroup")).block();
         GroupReq req = new GroupReq();
         req.setName("ExistingGroup");
-        StepVerifier.create(groupsService.add(req))
+        StepVerifier.create(groupsService.operate(req))
                 .expectError(RestServerException.class)
                 .verify();
     }
@@ -94,11 +90,9 @@ class GroupsServiceTest {
         GroupReq req = new GroupReq();
         req.setCode(saved.getCode());
         req.setName("ModifyGroup");
-        req.setDescription("Modified Description");
 
-        StepVerifier.create(groupsService.modify(req))
+        StepVerifier.create(groupsService.operate(req))
                 .assertNext(modifiedGroup -> {
-                    Assertions.assertEquals("Modified Description", modifiedGroup.getDescription());
                     Assertions.assertEquals(saved.getId(), modifiedGroup.getId());
                 })
                 .verifyComplete();
@@ -108,9 +102,8 @@ class GroupsServiceTest {
     @Order(6)
     void testModifyGroup_NotFound() {
         GroupReq req = new GroupReq();
-        req.setCode("nonexistent");
-        req.setName("NonExistentGroup");
-        StepVerifier.create(groupsService.modify(req))
+        req.setCode(java.util.UUID.randomUUID());
+        StepVerifier.create(groupsService.operate(req))
                 .expectError(RestServerException.class)
                 .verify();
     }
