@@ -3,9 +3,6 @@ package com.plate.boot.relational.menus;
 import com.plate.boot.config.InfrastructureConfiguration;
 import com.plate.boot.security.core.AuthenticationToken;
 import org.junit.jupiter.api.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -37,11 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MenusControllerTest {
 
-    private static final Logger log = LoggerFactory.getLogger(MenusControllerTest.class);
-
-    @Autowired
-    private MenusService menusService;
-
     private WebTestClient webTestClient;
     private String adminToken;
 
@@ -63,6 +55,7 @@ public class MenusControllerTest {
                 .expectBody(AuthenticationToken.class)
                 .returnResult().getResponseBody();
 
+        Assertions.assertNotNull(responseBody);
         this.adminToken = responseBody.token();
     }
 
@@ -173,6 +166,7 @@ public class MenusControllerTest {
 
         // Now delete the menu
         MenuReq deleteRequest = new MenuReq();
+        Assertions.assertNotNull(createdMenu);
         deleteRequest.setId(createdMenu.getId());
         deleteRequest.setCode(createdMenu.getCode());
 
