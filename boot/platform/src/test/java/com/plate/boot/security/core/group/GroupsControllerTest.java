@@ -3,8 +3,6 @@ package com.plate.boot.security.core.group;
 import com.plate.boot.config.InfrastructureConfiguration;
 import com.plate.boot.security.core.AuthenticationToken;
 import org.junit.jupiter.api.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -34,8 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(InfrastructureConfiguration.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class GroupsControllerTest {
-
-    private static final Logger log = LoggerFactory.getLogger(GroupsControllerTest.class);
 
     private WebTestClient webTestClient;
     private String adminToken;
