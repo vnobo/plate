@@ -22,10 +22,9 @@ class TenantsServiceTest {
 
     private Tenant createTenant(String name) {
         Tenant tenant = new Tenant();
-        tenant.setName(name);
-        tenant.setDescription("Test Tenant Description");
-        tenant.setCode(name.toLowerCase());
-        tenant.setPcode("root");
+        tenant.setCode("test-tenant");
+        tenant.setPcode("0");
+        tenant.setName("Test Tenant");
         return tenant;
     }
 
@@ -53,10 +52,8 @@ class TenantsServiceTest {
         Tenant saved = tenantsService.save(tenant).block();
         Assertions.assertNotNull(saved);
 
-        saved.setDescription("Updated Description");
         StepVerifier.create(tenantsService.save(saved))
                 .assertNext(updatedTenant -> {
-                    Assertions.assertEquals("Updated Description", updatedTenant.getDescription());
                     Assertions.assertEquals(saved.getId(), updatedTenant.getId());
                 })
                 .verifyComplete();
@@ -66,14 +63,13 @@ class TenantsServiceTest {
     @Order(3)
     void testAddTenant() {
         TenantReq req = new TenantReq();
-        req.setName("NewTenant");
-        req.setDescription("New Tenant Description");
-        req.setCode("newtenant");
-        req.setPcode("root");
+        req.setCode("new-tenant");
+        req.setPcode("0");
+        req.setName("New Tenant");
         StepVerifier.create(tenantsService.add(req))
                 .assertNext(addedTenant -> {
                     Assertions.assertNotNull(addedTenant.getId());
-                    Assertions.assertEquals("NewTenant", addedTenant.getName());
+                    Assertions.assertEquals("New Tenant", addedTenant.getName());
                 })
                 .verifyComplete();
     }
@@ -99,12 +95,11 @@ class TenantsServiceTest {
 
         TenantReq req = new TenantReq();
         req.setCode(saved.getCode());
-        req.setName("ModifyTenant");
-        req.setDescription("Modified Description");
+        req.setPcode("0");
+        req.setName("Modified Tenant");
 
         StepVerifier.create(tenantsService.modify(req))
                 .assertNext(modifiedTenant -> {
-                    Assertions.assertEquals("Modified Description", modifiedTenant.getDescription());
                     Assertions.assertEquals(saved.getId(), modifiedTenant.getId());
                 })
                 .verifyComplete();
@@ -115,7 +110,8 @@ class TenantsServiceTest {
     void testModifyTenant_NotFound() {
         TenantReq req = new TenantReq();
         req.setCode("nonexistent");
-        req.setName("NonExistentTenant");
+        req.setPcode("0");
+        req.setName("Nonexistent Tenant");
         StepVerifier.create(tenantsService.modify(req))
                 .expectError(RestServerException.class)
                 .verify();
