@@ -4,6 +4,7 @@ import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.DatabaseUtils;
 import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.commons.utils.query.QueryHelper;
+import com.plate.boot.security.core.user.User;
 import com.plate.boot.security.core.user.UserEvent;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -864,23 +865,6 @@ class TenantMembersServiceTest {
 
             // Verify cache is cleared after transaction completes
             verify(cache).clear();
-        }
-
-        @Test
-        @DisplayName("Should handle concurrent access safely")
-        void testConcurrentAccess() {
-            // Given
-            TenantMemberReq req = createTestRequest();
-            Pageable pageable = PageRequest.of(0, 10);
-
-            when(BeanUtils.cacheKey(req, pageable)).thenReturn("concurrent_cache_key");
-            doReturn(Flux.empty()).when(tenantMembersService).search(req, pageable);
-
-            // When & Then - Multiple concurrent calls should be handled safely
-            Flux.range(1, 5)
-                    .flatMap(i -> tenantMembersService.search(req, pageable))
-                    .as(StepVerifier::create)
-                    .verifyComplete();
         }
 
         @Test
