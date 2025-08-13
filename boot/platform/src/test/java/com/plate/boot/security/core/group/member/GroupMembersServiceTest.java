@@ -127,6 +127,7 @@ class GroupMembersServiceTest {
         StepVerifier.create(membersService.delete(req))
                 .verifyComplete();
 
+        Assertions.assertNotNull(saved.getId());
         StepVerifier.create(membersRepository.findById(saved.getId()))
                 .expectNextCount(0)
                 .verifyComplete();

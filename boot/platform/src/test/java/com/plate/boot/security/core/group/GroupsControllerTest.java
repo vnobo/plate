@@ -73,9 +73,7 @@ public class GroupsControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(Group.class)
-                .consumeWith(response -> {
-                    assertThat(response.getResponseBody()).isNotNull();
-                });
+                .consumeWith(response -> assertThat(response.getResponseBody()).isNotNull());
     }
 
     @Test
@@ -134,7 +132,7 @@ public class GroupsControllerTest {
                 .getResponseBody();
 
         if (groups != null && !groups.isEmpty()) {
-            Group group = groups.get(0);
+            Group group = groups.getFirst();
             GroupReq request = new GroupReq();
             request.setId(group.getId());
 
