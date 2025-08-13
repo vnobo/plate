@@ -58,6 +58,7 @@ public class GroupsControllerTest {
                 .expectBody(AuthenticationToken.class)
                 .returnResult().getResponseBody();
 
+        Assertions.assertNotNull(responseBody);
         this.adminToken = responseBody.token();
     }
 
