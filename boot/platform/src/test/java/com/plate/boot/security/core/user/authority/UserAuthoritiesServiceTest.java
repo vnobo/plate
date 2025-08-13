@@ -1,6 +1,7 @@
 package com.plate.boot.security.core.user.authority;
 
 import com.plate.boot.config.InfrastructureConfiguration;
+import com.plate.boot.security.core.user.User;
 import com.plate.boot.security.core.user.UserEvent;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
