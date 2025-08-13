@@ -51,9 +51,7 @@ class GroupsServiceTest {
         Assertions.assertNotNull(saved);
 
         StepVerifier.create(groupsService.save(saved))
-                .assertNext(updatedGroup -> {
-                    Assertions.assertEquals(saved.getId(), updatedGroup.getId());
-                })
+                .assertNext(updatedGroup -> Assertions.assertEquals(saved.getId(), updatedGroup.getId()))
                 .verifyComplete();
     }
 
@@ -92,9 +90,7 @@ class GroupsServiceTest {
         req.setName("ModifyGroup");
 
         StepVerifier.create(groupsService.operate(req))
-                .assertNext(modifiedGroup -> {
-                    Assertions.assertEquals(saved.getId(), modifiedGroup.getId());
-                })
+                .assertNext(modifiedGroup -> Assertions.assertEquals(saved.getId(), modifiedGroup.getId()))
                 .verifyComplete();
     }
 
@@ -120,6 +116,7 @@ class GroupsServiceTest {
         StepVerifier.create(groupsService.delete(req))
                 .verifyComplete();
 
+        Assertions.assertNotNull(saved.getId());
         StepVerifier.create(groupsRepository.findById(saved.getId()))
                 .expectNextCount(0)
                 .verifyComplete();
