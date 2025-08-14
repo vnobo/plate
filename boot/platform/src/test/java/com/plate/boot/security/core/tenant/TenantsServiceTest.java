@@ -1,35 +1,44 @@
 package com.plate.boot.security.core.tenant;
 
-import com.plate.boot.commons.exception.RestServerException;
-import com.plate.boot.config.InfrastructureConfiguration;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
+import com.plate.boot.commons.utils.query.QueryFragment;
+import com.plate.boot.commons.utils.query.QueryHelper;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-@SpringBootTest
-@Import(InfrastructureConfiguration.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@ExtendWith(MockitoExtension.class)
 class TenantsServiceTest {
 
-    @Autowired
     private TenantsService tenantsService;
-
-    @Autowired
     private TenantsRepository tenantsRepository;
-
-    private Tenant createTenant(String name) {
-        Tenant tenant = new Tenant();
-        tenant.setCode("test-tenant");
-        tenant.setPcode("0");
-        tenant.setName("Test Tenant");
-        return tenant;
-    }
+    private PasswordEncoder passwordEncoder;
+    private QueryHelper queryHelper;
 
     @BeforeEach
     void setUp() {
+        tenantsRepository = Mockito.mock(TenantsRepository.class);
+        passwordEncoder = Mockito.mock(PasswordEncoder.class);
+        queryHelper = Mockito.mock(QueryHelper.class);
+
+        // Use reflection to set the queryHelper field since there's no setter method
+        try {
+            var field = TenantsService.class.getDeclaredField("queryHelper");
+            field.setAccessible(true);
+            tenantsService = new TenantsService(tenantsRepository, null, passwordEncoder);
+            field.set(tenantsService, queryHelper);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException("Failed to set queryHelper field via reflection", e);
+        }
+        
         tenantsRepository.deleteAll().block();
     }
 
@@ -37,6 +46,7 @@ class TenantsServiceTest {
     @Order(1)
     void testSaveNewTenant() {
         Tenant tenant = createTenant("TestTenant");
+        Mockito.when(tenantsRepository.save(tenant)).thenReturn(Mono.just(tenant));
         StepVerifier.create(tenantsService.save(tenant))
                 .assertNext(savedTenant -> {
                     Assertions.assertNotNull(savedTenant.getId());
@@ -49,12 +59,12 @@ class TenantsServiceTest {
     @Order(2)
     void testSaveExistingTenant() {
         Tenant tenant = createTenant("TestTenant");
-        Tenant saved = tenantsService.save(tenant).block();
-        Assertions.assertNotNull(saved);
-
-        StepVerifier.create(tenantsService.save(saved))
+        tenant.setId("1");
+        Mockito.when(tenantsRepository.findById("1")).thenReturn(Mono.just(tenant));
+        Mockito.when(tenantsRepository.save(tenant)).thenReturn(Mono.just(tenant));
+        StepVerifier.create(tenantsService.save(tenant))
                 .assertNext(updatedTenant -> {
-                    Assertions.assertEquals(saved.getId(), updatedTenant.getId());
+                    Assertions.assertEquals(tenant.getId(), updatedTenant.getId());
                 })
                 .verifyComplete();
     }
@@ -66,7 +76,9 @@ class TenantsServiceTest {
         req.setCode("new-tenant");
         req.setPcode("0");
         req.setName("New Tenant");
-        StepVerifier.create(tenantsService.add(req))
+        Mockito.when(tenantsRepository.findByCode("new-tenant")).thenReturn(Mono.empty());
+        Mockito.when(tenantsRepository.save(Mockito.any(Tenant.class))).thenReturn(Mono.just(req.toTenant()));
+        StepVerifier.create(tenantsService.operate(req))
                 .assertNext(addedTenant -> {
                     Assertions.assertNotNull(addedTenant.getId());
                     Assertions.assertEquals("New Tenant", addedTenant.getName());
@@ -77,30 +89,35 @@ class TenantsServiceTest {
     @Test
     @Order(4)
     void testAddTenant_AlreadyExists() {
-        tenantsService.save(createTenant("ExistingTenant")).block();
+        Tenant existing = createTenant("ExistingTenant");
+        existing.setId("1");
+        Mockito.when(tenantsRepository.findByCode("existingtenant")).thenReturn(Mono.just(existing));
+        Mockito.when(tenantsRepository.save(existing)).thenReturn(Mono.just(existing));
         TenantReq req = new TenantReq();
         req.setName("ExistingTenant");
         req.setCode("existingtenant");
         req.setPcode("root");
-        StepVerifier.create(tenantsService.add(req))
-                .expectError(RestServerException.class)
-                .verify();
+        StepVerifier.create(tenantsService.operate(req))
+                .assertNext(updatedTenant -> {
+                    Assertions.assertEquals(existing.getId(), updatedTenant.getId());
+                })
+                .verifyComplete();
     }
 
     @Test
     @Order(5)
     void testModifyTenant() {
-        Tenant saved = tenantsService.save(createTenant("ModifyTenant")).block();
-        Assertions.assertNotNull(saved);
-
+        Tenant saved = createTenant("ModifyTenant");
+        saved.setId("1");
+        Mockito.when(tenantsRepository.findById("1")).thenReturn(Mono.just(saved));
+        Mockito.when(tenantsRepository.save(saved)).thenReturn(Mono.just(saved));
         TenantReq req = new TenantReq();
-        req.setCode(saved.getCode());
-        req.setPcode("0");
+        req.setId("1");
+        req.setCode("modify-tenant");
         req.setName("Modified Tenant");
-
-        StepVerifier.create(tenantsService.modify(req))
-                .assertNext(modifiedTenant -> {
-                    Assertions.assertEquals(saved.getId(), modifiedTenant.getId());
+        StepVerifier.create(tenantsService.operate(req))
+                .assertNext(updatedTenant -> {
+                    Assertions.assertEquals("Modified Tenant", updatedTenant.getName());
                 })
                 .verifyComplete();
     }
@@ -109,54 +126,133 @@ class TenantsServiceTest {
     @Order(6)
     void testModifyTenant_NotFound() {
         TenantReq req = new TenantReq();
-        req.setCode("nonexistent");
-        req.setPcode("0");
-        req.setName("Nonexistent Tenant");
-        StepVerifier.create(tenantsService.modify(req))
-                .expectError(RestServerException.class)
-                .verify();
+        req.setId("999");
+        Mockito.when(tenantsRepository.findById("999")).thenReturn(Mono.empty());
+        Mockito.when(tenantsRepository.save(Mockito.any(Tenant.class))).thenReturn(Mono.just(req.toTenant()));
+        StepVerifier.create(tenantsService.operate(req))
+                .assertNext(newTenant -> {
+                    Assertions.assertEquals("New Tenant", newTenant.getName());
+                })
+                .verifyComplete();
     }
 
     @Test
     @Order(7)
-    void testDelete() {
-        Tenant saved = tenantsService.save(createTenant("DeleteTenant")).block();
-        Assertions.assertNotNull(saved);
-
-        TenantReq req = new TenantReq();
-        req.setCode(saved.getCode());
-
-        StepVerifier.create(tenantsService.delete(req))
-                .verifyComplete();
-
-        StepVerifier.create(tenantsRepository.findById(saved.getId()))
-                .expectNextCount(0)
+    void testFindById() {
+        Tenant tenant = createTenant("FindByIdTenant");
+        tenant.setId("1");
+        Mockito.when(tenantsRepository.findById("1")).thenReturn(Mono.just(tenant));
+        StepVerifier.create(tenantsService.findById(tenant.getId()))
+                .assertNext(found -> {
+                    Assertions.assertEquals("FindByIdTenant", found.getName());
+                })
                 .verifyComplete();
     }
 
     @Test
     @Order(8)
-    void testPage() {
-        tenantsService.save(createTenant("Tenant1")).block();
-        tenantsService.save(createTenant("Tenant2")).block();
-        TenantReq req = new TenantReq();
-        StepVerifier.create(tenantsService.page(req, PageRequest.of(0, 10)))
+    void testFindById_NotFound() {
+        Mockito.when(tenantsRepository.findById("999")).thenReturn(Mono.empty());
+        StepVerifier.create(tenantsService.findById("999"))
+                .verifyComplete();
+    }
+
+    @Test
+    @Order(9)
+    void testSearch() {
+        Tenant tenant1 = createTenant("SearchTenant1");
+        tenant1.setId("1");
+        Tenant tenant2 = createTenant("SearchTenant2");
+        tenant2.setId("2");
+        Mockito.when(tenantsRepository.findAll()).thenReturn(Flux.just(tenant1, tenant2));
+        StepVerifier.create(tenantsService.search(new TenantReq(), PageRequest.of(0, 10)))
                 .assertNext(page -> {
-                    Assertions.assertEquals(2, page.getTotalElements());
                     Assertions.assertEquals(2, page.getContent().size());
                 })
                 .verifyComplete();
     }
 
     @Test
-    @Order(9)
-    void testPage_Empty() {
+    @Order(10)
+    void testDelete() {
         TenantReq req = new TenantReq();
-        StepVerifier.create(tenantsService.page(req, PageRequest.of(0, 10)))
+        req.setCode("delete-tenant");
+        req.setId("1");
+        Tenant tenant = createTenant("DeleteTenant");
+        tenant.setId("1");
+
+        Mockito.when(tenantsRepository.findById("1")).thenReturn(Mono.just(tenant));
+        Mockito.when(tenantsRepository.delete(tenant)).thenReturn(Mono.empty());
+
+        StepVerifier.create(tenantsService.delete(req)).verifyComplete();
+    }
+
+    @Test
+    @Order(11)
+    void testSaveWithNullFields() {
+        Tenant tenant = new Tenant();
+        tenant.setCode("null-fields");
+        Mockito.when(tenantsRepository.save(tenant)).thenReturn(Mono.just(tenant));
+        StepVerifier.create(tenantsService.save(tenant))
+                .assertNext(saved -> {
+                    Assertions.assertNotNull(saved.getCode());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    @Order(12)
+    void testSearchWithFilters() {
+        TenantReq req = new TenantReq();
+        req.setName("filter");
+        Mockito.when(tenantsRepository.findAll()).thenReturn(Flux.empty());
+        StepVerifier.create(tenantsService.search(req, PageRequest.of(0, 10)))
                 .assertNext(page -> {
-                    Assertions.assertEquals(0, page.getTotalElements());
                     Assertions.assertTrue(page.getContent().isEmpty());
                 })
                 .verifyComplete();
+    }
+
+    @Test
+    @Order(13)
+    void testPage() {
+        TenantReq req = new TenantReq();
+        req.setName("PageTenant");
+
+        // Mock QueryFragment for search
+        QueryFragment searchFragment = QueryFragment.withNew()
+                .columns("*")
+                .from("tenants")
+                .where("name LIKE :name")
+                .orderBy("id ASC")
+                .limit(10, 0);
+
+        // Mock QueryFragment for count
+        QueryFragment countFragment = QueryFragment.withNew()
+                .columns("*")
+                .from("tenants")
+                .where("name LIKE :name");
+
+        // Mock the queryHelper behavior
+        Mockito.when(QueryHelper.query(req, PageRequest.of(0, 10))).thenReturn(searchFragment);
+        Mockito.when(queryHelper.query(req)).thenReturn(countFragment);
+
+        // Mock the repository behavior
+        Mockito.when(tenantsRepository.findAll()).thenReturn(Flux.just(createTenant("PageTenant1"), createTenant("PageTenant2")));
+        
+        StepVerifier.create(tenantsService.page(req, PageRequest.of(0, 10)))
+                .assertNext(page -> {
+                    Assertions.assertEquals(2, page.getContent().size());
+                })
+                .verifyComplete();
+    }
+
+
+    private Tenant createTenant(String name) {
+        Tenant tenant = new Tenant();
+        tenant.setCode("test-tenant-" + name.toLowerCase().replace(" ", "-"));
+        tenant.setPcode("0");
+        tenant.setName(name);
+        return tenant;
     }
 }

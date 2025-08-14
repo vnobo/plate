@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Represents a request model for operations involving group members, extending the {@link GroupMember} entity.
@@ -45,7 +46,7 @@ import java.util.Set;
 @ToString(callSuper = true)
 public class GroupMemberReq extends GroupMember {
 
-    private Set<String> users;
+    private Set<UUID> users;
 
     private String username;
 
@@ -60,13 +61,11 @@ public class GroupMemberReq extends GroupMember {
     public QueryFragment toParamSql() {
         QueryFragment queryFragment = QueryHelper.query(this, List.of("users", "username"), "a");
         if (!ObjectUtils.isEmpty(this.getUsers())) {
-            queryFragment.where("a.user_code in (:users)");
-            queryFragment.put("users", this.getUsers());
+            queryFragment = queryFragment.in("a.user_code", this.getUsers());
         }
 
         if (StringUtils.hasLength(this.getUsername())) {
-            queryFragment.where("c.username = :username");
-            queryFragment.put("username", this.getUsername());
+            queryFragment = queryFragment.like("c.username", this.getUsername());
         }
 
         return queryFragment;

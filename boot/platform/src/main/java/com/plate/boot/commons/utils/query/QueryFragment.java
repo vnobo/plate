@@ -5,10 +5,12 @@ import com.plate.boot.commons.exception.QueryException;
 import com.plate.boot.commons.utils.DatabaseUtils;
 import lombok.Getter;
 import org.springframework.data.util.TypeInformation;
+import org.springframework.util.Assert;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Represents a SQL parameter structure consisting of a conditional SQL fragment and a map of parameters
@@ -132,6 +134,34 @@ public class QueryFragment extends HashMap<String, Object> {
      */
     public QueryFragment(Map<String, Object> params) {
         super(params);
+    }
+
+    public QueryFragment in(String column, Iterable<?> values) {
+        Assert.notNull(values, "In values not null!");
+        StringJoiner joiner = new StringJoiner(",");
+        AtomicInteger index = new AtomicInteger(0);
+        values.forEach(item -> {
+            var key = column.replace(".", "_") + index.getAndIncrement();
+            joiner.add(":" + key);
+            this.put(key, item);
+        });
+        String inClause = column + " IN (" + joiner + ")";
+        this.where.add(inClause);
+        return this;
+    }
+
+    public QueryFragment notIn(String column, Iterable<?> values) {
+        Assert.notNull(values, "Not in values not null!");
+        StringJoiner joiner = new StringJoiner(",");
+        AtomicInteger index = new AtomicInteger(0);
+        values.forEach(item -> {
+            var key = column.replace(".", "_") + index.getAndIncrement();
+            joiner.add(":" + key);
+            this.put(key, item);
+        });
+        String inClause = column + " NOT IN (" + joiner + ")";
+        this.where.add(inClause);
+        return this;
     }
 
     /**
@@ -417,6 +447,187 @@ public class QueryFragment extends HashMap<String, Object> {
         from(",TO_TSQUERY('chinese',:" + column + ") AS " + queryTable);
         where(queryTable + " @@ " + lowerCamelCol);
         put(column, value);
+        return this;
+    }
+
+    /**
+     * Adds a LIKE condition to the WHERE clause.
+     *
+     * @param column  the column to apply the LIKE condition to
+     * @param pattern the pattern to match
+     * @return the QueryFragment instance with the added LIKE condition
+     */
+    public QueryFragment like(String column, String pattern) {
+        String key = column.replace(".", "_");
+        this.put(key, pattern);
+        this.where.add(column + " LIKE :" + key);
+        return this;
+    }
+
+    /**
+     * Adds a LIKE condition to the WHERE clause for values starting with the specified pattern.
+     *
+     * @param column  the column to apply the LIKE condition to
+     * @param pattern the starting pattern to match
+     * @return the QueryFragment instance with the added LIKE condition
+     */
+    public QueryFragment startingWith(String column, String pattern) {
+        return like(column, pattern + "%");
+    }
+
+    /**
+     * Adds a LIKE condition to the WHERE clause for values ending with the specified pattern.
+     *
+     * @param column  the column to apply the LIKE condition to
+     * @param pattern the ending pattern to match
+     * @return the QueryFragment instance with the added LIKE condition
+     */
+    public QueryFragment endingWith(String column, String pattern) {
+        return like(column, "%" + pattern);
+    }
+
+    /**
+     * Adds a NOT LIKE condition to the WHERE clause.
+     *
+     * @param column  the column to apply the NOT LIKE condition to
+     * @param pattern the pattern to match
+     * @return the QueryFragment instance with the added NOT LIKE condition
+     */
+    public QueryFragment notLike(String column, String pattern) {
+        String key = column.replace(".", "_");
+        this.put(key, pattern);
+        this.where.add(column + " NOT LIKE :" + key);
+        return this;
+    }
+
+    /**
+     * Adds a BETWEEN condition to the WHERE clause.
+     *
+     * @param column the column to apply the BETWEEN condition to
+     * @param value1 the lower bound of the range
+     * @param value2 the upper bound of the range
+     * @return the QueryFragment instance with the added BETWEEN condition
+     */
+    public QueryFragment between(String column, Object value1, Object value2) {
+        String key1 = column.replace(".", "_") + "1";
+        String key2 = column.replace(".", "_") + "2";
+        this.put(key1, value1);
+        this.put(key2, value2);
+        this.where.add(column + " BETWEEN :" + key1 + " AND :" + key2);
+        return this;
+    }
+
+    /**
+     * Adds an IS NULL condition to the WHERE clause.
+     *
+     * @param column the column to check for NULL
+     * @return the QueryFragment instance with the added IS NULL condition
+     */
+    public QueryFragment isNull(String column) {
+        this.where.add(column + " IS NULL");
+        return this;
+    }
+
+    /**
+     * Adds an IS NOT NULL condition to the WHERE clause.
+     *
+     * @param column the column to check for NOT NULL
+     * @return the QueryFragment instance with the added IS NOT NULL condition
+     */
+    public QueryFragment isNotNull(String column) {
+        this.where.add(column + " IS NOT NULL");
+        return this;
+    }
+
+    /**
+     * Adds a > condition to the WHERE clause.
+     *
+     * @param column the column to compare
+     * @param value  the value to compare against
+     * @return the QueryFragment instance with the added > condition
+     */
+    public QueryFragment after(String column, Object value) {
+        String key = column.replace(".", "_");
+        this.put(key, value);
+        this.where.add(column + " > :" + key);
+        return this;
+    }
+
+    /**
+     * Adds a >= condition to the WHERE clause.
+     *
+     * @param column the column to compare
+     * @param value  the value to compare against
+     * @return the QueryFragment instance with the added >= condition
+     */
+    public QueryFragment greaterThanOrEqual(String column, Object value) {
+        String key = column.replace(".", "_");
+        this.put(key, value);
+        this.where.add(column + " >= :" + key);
+        return this;
+    }
+
+    /**
+     * Adds a < condition to the WHERE clause.
+     *
+     * @param column the column to compare
+     * @param value  the value to compare against
+     * @return the QueryFragment instance with the added < condition
+     */
+    public QueryFragment before(String column, Object value) {
+        String key = column.replace(".", "_");
+        this.put(key, value);
+        this.where.add(column + " < :" + key);
+        return this;
+    }
+
+    /**
+     * Adds a <= condition to the WHERE clause.
+     *
+     * @param column the column to compare
+     * @param value  the value to compare against
+     * @return the QueryFragment instance with the added <= condition
+     */
+    public QueryFragment lessThanOrEqual(String column, Object value) {
+        String key = column.replace(".", "_");
+        this.put(key, value);
+        this.where.add(column + " <= :" + key);
+        return this;
+    }
+
+    /**
+     * Adds a != condition to the WHERE clause.
+     *
+     * @param column the column to compare
+     * @param value  the value to compare against
+     * @return the QueryFragment instance with the added != condition
+     */
+    public QueryFragment not(String column, Object value) {
+        String key = column.replace(".", "_");
+        this.put(key, value);
+        this.where.add(column + " != :" + key);
+        return this;
+    }
+
+    /**
+     * Adds an IS TRUE condition to the WHERE clause.
+     *
+     * @param column the column to check for TRUE
+     * @return the QueryFragment instance with the added IS TRUE condition
+     */
+    public QueryFragment isTrue(String column) {
+        this.where.add(column + " IS TRUE");
+        return this;
+    }
+
+    /**
+     * Adds an IS FALSE condition to the WHERE clause.
+     *
+     * @param column the column to check for FALSE
+     * @return the QueryFragment instance with the added IS FALSE condition
+     */
+    public QueryFragment isFalse(String column) {
+        this.where.add(column + " IS FALSE");
         return this;
     }
 
