@@ -145,7 +145,8 @@ public class QueryFragment extends HashMap<String, Object> {
             joiner.add(":" + key);
             this.put(key, item);
         });
-        String inClause = column + " IN (" + joiner + ")";
+        String inClause = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
+                + " IN (" + joiner + ")";
         this.where.add(inClause);
         return this;
     }
@@ -159,7 +160,8 @@ public class QueryFragment extends HashMap<String, Object> {
             joiner.add(":" + key);
             this.put(key, item);
         });
-        String inClause = column + " NOT IN (" + joiner + ")";
+        String inClause = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
+                + " NOT IN (" + joiner + ")";
         this.where.add(inClause);
         return this;
     }
@@ -460,7 +462,7 @@ public class QueryFragment extends HashMap<String, Object> {
     public QueryFragment like(String column, String pattern) {
         String key = column.replace(".", "_");
         this.put(key, pattern);
-        this.where.add(column + " LIKE :" + key);
+        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " LIKE :" + key);
         return this;
     }
 
@@ -496,7 +498,7 @@ public class QueryFragment extends HashMap<String, Object> {
     public QueryFragment notLike(String column, String pattern) {
         String key = column.replace(".", "_");
         this.put(key, pattern);
-        this.where.add(column + " NOT LIKE :" + key);
+        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " NOT LIKE :" + key);
         return this;
     }
 
@@ -513,7 +515,7 @@ public class QueryFragment extends HashMap<String, Object> {
         String key2 = column.replace(".", "_") + "2";
         this.put(key1, value1);
         this.put(key2, value2);
-        this.where.add(column + " BETWEEN :" + key1 + " AND :" + key2);
+        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " BETWEEN :" + key1 + " AND :" + key2);
         return this;
     }
 
@@ -524,7 +526,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added IS NULL condition
      */
     public QueryFragment isNull(String column) {
-        this.where.add(column + " IS NULL");
+        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " IS NULL");
         return this;
     }
 
@@ -535,7 +537,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added IS NOT NULL condition
      */
     public QueryFragment isNotNull(String column) {
-        this.where.add(column + " IS NOT NULL");
+        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " IS NOT NULL");
         return this;
     }
 
@@ -549,7 +551,7 @@ public class QueryFragment extends HashMap<String, Object> {
     public QueryFragment after(String column, Object value) {
         String key = column.replace(".", "_");
         this.put(key, value);
-        this.where.add(column + " > :" + key);
+        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " > :" + key);
         return this;
     }
 
@@ -563,7 +565,7 @@ public class QueryFragment extends HashMap<String, Object> {
     public QueryFragment greaterThanOrEqual(String column, Object value) {
         String key = column.replace(".", "_");
         this.put(key, value);
-        this.where.add(column + " >= :" + key);
+        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " >= :" + key);
         return this;
     }
 
@@ -577,7 +579,7 @@ public class QueryFragment extends HashMap<String, Object> {
     public QueryFragment before(String column, Object value) {
         String key = column.replace(".", "_");
         this.put(key, value);
-        this.where.add(column + " < :" + key);
+        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " < :" + key);
         return this;
     }
 
@@ -591,7 +593,7 @@ public class QueryFragment extends HashMap<String, Object> {
     public QueryFragment lessThanOrEqual(String column, Object value) {
         String key = column.replace(".", "_");
         this.put(key, value);
-        this.where.add(column + " <= :" + key);
+        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " <= :" + key);
         return this;
     }
 
@@ -605,7 +607,7 @@ public class QueryFragment extends HashMap<String, Object> {
     public QueryFragment not(String column, Object value) {
         String key = column.replace(".", "_");
         this.put(key, value);
-        this.where.add(column + " != :" + key);
+        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " != :" + key);
         return this;
     }
 
@@ -616,7 +618,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added IS TRUE condition
      */
     public QueryFragment isTrue(String column) {
-        this.where.add(column + " IS TRUE");
+        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " IS TRUE");
         return this;
     }
 
@@ -627,7 +629,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added IS FALSE condition
      */
     public QueryFragment isFalse(String column) {
-        this.where.add(column + " IS FALSE");
+        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " IS FALSE");
         return this;
     }
 

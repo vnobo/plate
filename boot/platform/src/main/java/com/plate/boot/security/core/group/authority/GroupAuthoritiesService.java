@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
 import java.util.Map;
@@ -57,8 +56,7 @@ public class GroupAuthoritiesService extends AbstractCache {
         });
 
         return nextDataFlux.then(Mono.fromRunnable(() -> this.cache.clear()))
-                .thenReturn(200)
-                .publishOn(Schedulers.boundedElastic());
+                .thenReturn(200);
     }
 
     public Mono<GroupAuthority> operate(GroupAuthorityReq request) {
