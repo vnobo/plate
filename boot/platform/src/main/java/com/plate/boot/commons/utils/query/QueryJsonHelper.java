@@ -10,7 +10,6 @@ import org.springframework.util.StringUtils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
@@ -146,18 +145,18 @@ public final class QueryJsonHelper {
         // Validate the first key (column name)
         String firstKey = validateColumnName(keys[0]);
 
-        String sortedProperty = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, firstKey);
+        StringBuilder sortedProperty = new StringBuilder(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, firstKey));
         int lastIndex = keys.length - 1;
         if (lastIndex > 0) {
             String[] joinKeys = Arrays.copyOfRange(keys, 1, lastIndex);
             for (String path : joinKeys) {
-                sortedProperty += "->'" + escapeJsonKey(path) + "'";
+                sortedProperty.append("->'").append(escapeJsonKey(path)).append("'");
             }
-            sortedProperty += "->>'" + escapeJsonKey(keys[lastIndex]) + "'";
+            sortedProperty.append("->>'").append(escapeJsonKey(keys[lastIndex])).append("'");
         } else {
-            sortedProperty += "->>'" + escapeJsonKey(keys[0]) + "'";
+            sortedProperty.append("->>'").append(escapeJsonKey(keys[0])).append("'");
         }
-        return Sort.Order.by(sortedProperty).with(order.getDirection());
+        return Sort.Order.by(sortedProperty.toString()).with(order.getDirection());
     }
 
     // Whitelist-based column name validation
@@ -314,24 +313,6 @@ public final class QueryJsonHelper {
             params = Map.of(paramName, value);
         }
         return QueryFragment.withMap(params).where(conditionSql.toString());
-    }
-
-    /**
-     * Constructs a JSON path from string from an array of keys meant to be used in SQL queries
-     * targeting JSON data. Each key in the array is appended to the path with the appropriate
-     * SQL-JSON operator, allowing for traversal of nested JSON objects.
-     *
-     * @param joinKeys An array of strings representing keys in a JSON object which will be combined
-     *                 to form a JSON path from expression.
-     * @return StringBuilder A StringBuilder object containing the concatenated JSON path
-     * from expression, suitable for use in SQL queries with JSON columns.
-     */
-    private static String buildJsonQueryPath(String[] joinKeys) {
-        StringJoiner jsonPath = new StringJoiner("->");
-        for (String path : joinKeys) {
-            jsonPath.add("'" + escapeJsonKey(path) + "'");
-        }
-        return jsonPath.toString();
     }
 
     /**
