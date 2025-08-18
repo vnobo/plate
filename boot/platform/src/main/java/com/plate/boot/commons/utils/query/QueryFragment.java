@@ -57,7 +57,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * }
      * </pre>
      */
-    private final StringJoiner columns = new StringJoiner(",");
+    private final StringJoiner columns = new StringJoiner(",").setEmptyValue("");
 
     /**
      * A StringJoiner to accumulate the main SQL from parts (e.g., table names).
@@ -68,7 +68,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * }
      * </pre>
      */
-    private final StringJoiner from = new StringJoiner(" ");
+    private final StringJoiner from = new StringJoiner(" ").setEmptyValue("");
 
     /**
      * A StringJoiner to accumulate WHERE conditions.
@@ -79,7 +79,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * }
      * </pre>
      */
-    private final StringJoiner where = new StringJoiner(" AND ");
+    private final StringJoiner where = new StringJoiner(" AND ").setEmptyValue("");
 
     /**
      * A StringJoiner to accumulate ORDER BY clauses.
@@ -90,7 +90,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * }
      * </pre>
      */
-    private final StringJoiner orderBy = new StringJoiner(",");
+    private final StringJoiner orderBy = new StringJoiner(",").setEmptyValue("");
 
     /**
      * A StringJoiner to accumulate columns for the GROUP BY clause.
@@ -105,7 +105,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * }
      * </pre>
      */
-    private final StringJoiner groupBy = new StringJoiner(",");
+    private final StringJoiner groupBy = new StringJoiner(",").setEmptyValue("");
 
     /**
      * The maximum number of rows to return (LIMIT clause).
@@ -136,36 +136,6 @@ public class QueryFragment extends HashMap<String, Object> {
         super(params);
     }
 
-    public QueryFragment in(String column, Iterable<?> values) {
-        Assert.notNull(values, "In values not null!");
-        StringJoiner joiner = new StringJoiner(",");
-        AtomicInteger index = new AtomicInteger(0);
-        values.forEach(item -> {
-            var key = column.replace(".", "_") + index.getAndIncrement();
-            joiner.add(":" + key);
-            this.put(key, item);
-        });
-        String inClause = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
-                + " IN (" + joiner + ")";
-        this.where.add(inClause);
-        return this;
-    }
-
-    public QueryFragment notIn(String column, Iterable<?> values) {
-        Assert.notNull(values, "Not in values not null!");
-        StringJoiner joiner = new StringJoiner(",");
-        AtomicInteger index = new AtomicInteger(0);
-        values.forEach(item -> {
-            var key = column.replace(".", "_") + index.getAndIncrement();
-            joiner.add(":" + key);
-            this.put(key, item);
-        });
-        String inClause = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
-                + " NOT IN (" + joiner + ")";
-        this.where.add(inClause);
-        return this;
-    }
-
     /**
      * Creates a new QueryFragment instance with the specified columns.
      *
@@ -183,7 +153,8 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return a new QueryFragment instance with the specified columns
      */
     public static QueryFragment withColumns(CharSequence... columns) {
-        return withMap(Map.of()).columns(columns);
+        QueryFragment fragment = new QueryFragment(Map.of());
+        return fragment.columns(columns);
     }
 
     /**
@@ -202,7 +173,43 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return a new QueryFragment instance with an empty map
      */
     public static QueryFragment withNew() {
-        return withMap(Map.of());
+        return new QueryFragment(Map.of());
+    }
+
+    public QueryFragment in(String column, Iterable<?> values) {
+        Assert.notNull(values, "In values not null!");
+        Assert.hasText(column, "Column name must not be empty");
+
+        StringJoiner joiner = new StringJoiner(",");
+        AtomicInteger index = new AtomicInteger(0);
+        values.forEach(item -> {
+            var key = column.replaceAll("[.\\W]", "_") + index.getAndIncrement();
+            joiner.add(":" + key);
+            this.put(key, item);
+        });
+
+        String inClause = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
+                + " IN (" + joiner + ")";
+        this.where.add(inClause);
+        return this;
+    }
+
+    public QueryFragment notIn(String column, Iterable<?> values) {
+        Assert.notNull(values, "Not in values not null!");
+        Assert.hasText(column, "Column name must not be empty");
+
+        StringJoiner joiner = new StringJoiner(",");
+        AtomicInteger index = new AtomicInteger(0);
+        values.forEach(item -> {
+            var key = column.replaceAll("[.\\W]", "_") + index.getAndIncrement();
+            joiner.add(":" + key);
+            this.put(key, item);
+        });
+
+        String inClause = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
+                + " NOT IN (" + joiner + ")";
+        this.where.add(inClause);
+        return this;
     }
 
     /**
@@ -314,6 +321,7 @@ public class QueryFragment extends HashMap<String, Object> {
      */
     public QueryFragment columns(CharSequence... columns) {
         for (CharSequence column : columns) {
+            Assert.hasText(column.toString(), "Column name must not be empty");
             this.columns.add(column);
         }
         return this;
@@ -335,8 +343,8 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added queries
      */
     public QueryFragment from(CharSequence... queries) {
-        this.from.setEmptyValue("");
         for (CharSequence query : queries) {
+            Assert.hasText(query.toString(), "Query must not be empty");
             this.from.add(query);
         }
         return this;
@@ -358,6 +366,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added condition
      */
     public QueryFragment where(CharSequence where) {
+        Assert.hasText(where.toString(), "WHERE condition must not be empty");
         this.where.add(where);
         return this;
     }
@@ -378,6 +387,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added ORDER BY clause
      */
     public QueryFragment orderBy(CharSequence order) {
+        Assert.hasText(order.toString(), "Order must not be empty");
         this.orderBy.add(order);
         return this;
     }
@@ -399,6 +409,7 @@ public class QueryFragment extends HashMap<String, Object> {
      */
     public QueryFragment groupBy(CharSequence... columns) {
         for (CharSequence column : columns) {
+            Assert.hasText(column.toString(), "GroupBy column must not be empty");
             this.groupBy.add(column);
         }
         return this;
@@ -421,6 +432,9 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added LIMIT and OFFSET clauses
      */
     public QueryFragment limit(int size, long offset) {
+        Assert.isTrue(size >= 0, "Size must be non-negative");
+        Assert.isTrue(offset >= 0, "Offset must be non-negative");
+
         this.size = size;
         this.offset = offset;
         return this;
@@ -443,8 +457,12 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added full-text search condition
      */
     public QueryFragment ts(String column, Object value) {
+        Assert.hasText(column, "Column name must not be empty");
+
         String lowerCamelCol = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column);
         String queryTable = "ts_" + lowerCamelCol;
+
+        // 使用更安全的列选择
         columns("TS_RANK_CD(" + lowerCamelCol + ", " + queryTable + ") AS rank");
         from(",TO_TSQUERY('chinese',:" + column + ") AS " + queryTable);
         where(queryTable + " @@ " + lowerCamelCol);
@@ -460,10 +478,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added LIKE condition
      */
     public QueryFragment like(String column, String pattern) {
-        String key = column.replace(".", "_");
-        this.put(key, pattern);
-        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " LIKE :" + key);
-        return this;
+        return addCondition(column, pattern, "LIKE");
     }
 
     /**
@@ -496,10 +511,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added NOT LIKE condition
      */
     public QueryFragment notLike(String column, String pattern) {
-        String key = column.replace(".", "_");
-        this.put(key, pattern);
-        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " NOT LIKE :" + key);
-        return this;
+        return addCondition(column, pattern, "NOT LIKE");
     }
 
     /**
@@ -511,11 +523,14 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added BETWEEN condition
      */
     public QueryFragment between(String column, Object value1, Object value2) {
-        String key1 = column.replace(".", "_") + "1";
-        String key2 = column.replace(".", "_") + "2";
+        String key1 = column.replaceAll("[.\\W]", "_") + "1";
+        String key2 = column.replaceAll("[.\\W]", "_") + "2";
         this.put(key1, value1);
         this.put(key2, value2);
-        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " BETWEEN :" + key1 + " AND :" + key2);
+
+        String condition = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
+                + " BETWEEN :" + key1 + " AND :" + key2;
+        this.where.add(condition);
         return this;
     }
 
@@ -526,8 +541,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added IS NULL condition
      */
     public QueryFragment isNull(String column) {
-        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " IS NULL");
-        return this;
+        return addCondition(column, null, "IS NULL");
     }
 
     /**
@@ -537,8 +551,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added IS NOT NULL condition
      */
     public QueryFragment isNotNull(String column) {
-        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " IS NOT NULL");
-        return this;
+        return addCondition(column, null, "IS NOT NULL");
     }
 
     /**
@@ -549,10 +562,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added > condition
      */
     public QueryFragment after(String column, Object value) {
-        String key = column.replace(".", "_");
-        this.put(key, value);
-        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " > :" + key);
-        return this;
+        return addCondition(column, value, ">");
     }
 
     /**
@@ -563,10 +573,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added >= condition
      */
     public QueryFragment greaterThanOrEqual(String column, Object value) {
-        String key = column.replace(".", "_");
-        this.put(key, value);
-        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " >= :" + key);
-        return this;
+        return addCondition(column, value, ">=");
     }
 
     /**
@@ -577,10 +584,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added < condition
      */
     public QueryFragment before(String column, Object value) {
-        String key = column.replace(".", "_");
-        this.put(key, value);
-        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " < :" + key);
-        return this;
+        return addCondition(column, value, "<");
     }
 
     /**
@@ -591,10 +595,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added <= condition
      */
     public QueryFragment lessThanOrEqual(String column, Object value) {
-        String key = column.replace(".", "_");
-        this.put(key, value);
-        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " <= :" + key);
-        return this;
+        return addCondition(column, value, "<=");
     }
 
     /**
@@ -605,9 +606,23 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added != condition
      */
     public QueryFragment not(String column, Object value) {
-        String key = column.replace(".", "_");
-        this.put(key, value);
-        this.where.add(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column) + " != :" + key);
+        return addCondition(column, value, "!=");
+    }
+
+    private QueryFragment addCondition(String column, Object value, String operator) {
+        Assert.hasText(column, "Column name must not be empty");
+
+        if (value != null) {
+            String key = column.replaceAll("[.\\W]", "_");
+            this.put(key, value);
+            String condition = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
+                    + " " + operator + " :" + key;
+            this.where.add(condition);
+        } else if (operator.equals("IS NULL") || operator.equals("IS NOT NULL")) {
+            String condition = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
+                    + " " + operator;
+            this.where.add(condition);
+        }
         return this;
     }
 
@@ -694,12 +709,28 @@ public class QueryFragment extends HashMap<String, Object> {
      * @throws QueryException if the querySql is null, indicating that the form structure is incomplete.
      */
     public String querySql() {
-        if (this.from.length() > 0) {
-            return String.format("SELECT %s FROM %s %s %s %s LIMIT %d OFFSET %d",
-                    this.columns, this.from, whereSql(), orderSql(), groupSql(), this.size, this.offset);
+        if (this.from.length() == 0) {
+            throw QueryException.withError("This querySql is null, please use whereSql() method!",
+                    new IllegalArgumentException("This querySql is null, please use whereSql() method"));
         }
-        throw QueryException.withError("This querySql is null, please use whereSql() method!",
-                new IllegalArgumentException("This querySql is null, please use whereSql() method"));
+
+        StringBuilder sql = new StringBuilder("SELECT ");
+        sql.append(columns.length() > 0 ? columns : "*");
+        sql.append(" FROM ").append(from);
+
+        if (where.length() > 0) {
+            sql.append(" WHERE ").append(where);
+        }
+
+        if (groupBy.length() > 0) {
+            sql.append(" GROUP BY ").append(groupBy);
+        }
+
+        if (orderBy.length() > 0) {
+            sql.append(" ORDER BY ").append(orderBy);
+        }
+
+        return sql.append(String.format(" LIMIT %d OFFSET %d", size, offset)).toString();
     }
 
     /**
@@ -714,11 +745,12 @@ public class QueryFragment extends HashMap<String, Object> {
      * @throws QueryException if the countSql is null, indicating that the form structure is incomplete.
      */
     public String countSql() {
-        if (this.from.length() > 0) {
-            return "SELECT COUNT(*) FROM (" + String.format("SELECT %s FROM %s", this.columns, this.from)
-                    + whereSql() + ") t";
+        if (this.from.length() == 0) {
+            throw QueryException.withError("This countSql is null, please use whereSql() method!",
+                    new IllegalArgumentException("This countSql is null, please use whereSql() method"));
         }
-        throw QueryException.withError("This countSql is null, please use whereSql() method!",
-                new IllegalArgumentException("This countSql is null, please use whereSql() method"));
+
+        return String.format("SELECT COUNT(*) FROM (SELECT 1 FROM %s %s) t",
+                from, whereSql());
     }
 }

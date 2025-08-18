@@ -57,11 +57,17 @@ public class DatabaseUtils implements InitializingBean {
      */
     public static R2dbcConverter R2DBC_CONVERTER;
 
-    DatabaseUtils(R2dbcEntityTemplate entityTemplate, ReactiveRedisTemplate<String, Object> redisTemplate) {
-        DatabaseUtils.ENTITY_TEMPLATE = entityTemplate;
-        DatabaseUtils.DATABASE_CLIENT = entityTemplate.getDatabaseClient();
-        DatabaseUtils.R2DBC_CONVERTER = entityTemplate.getConverter();
-        DatabaseUtils.REACTIVE_REDIS_TEMPLATE = redisTemplate;
+    private final R2dbcEntityTemplate entityTemplate;
+    private final ReactiveRedisTemplate<String, Object> redisTemplate;
+    private final DatabaseClient databaseClient;
+    private final R2dbcConverter r2dbcConverter;
+
+    public DatabaseUtils(R2dbcEntityTemplate entityTemplate,
+                         ReactiveRedisTemplate<String, Object> redisTemplate) {
+        this.entityTemplate = entityTemplate;
+        this.redisTemplate = redisTemplate;
+        this.databaseClient = entityTemplate.getDatabaseClient();
+        this.r2dbcConverter = entityTemplate.getConverter();
     }
 
     /**
@@ -76,7 +82,9 @@ public class DatabaseUtils implements InitializingBean {
      */
     public static <T> Flux<T> query(Query query, Class<T> entityClass) {
         Flux<T> source = ENTITY_TEMPLATE.select(query, entityClass);
-        return source.flatMapSequential(BeanUtils::serializeUserAuditor).cache();
+        return source
+                .flatMapSequential(BeanUtils::serializeUserAuditor)
+                .cache();
     }
 
     /**
@@ -92,12 +100,14 @@ public class DatabaseUtils implements InitializingBean {
      */
     public static <T> Flux<T> query(String sql,
                                     Map<String, Object> bindParams, Class<T> entityClass) {
-        var executeSpec = DatabaseUtils.DATABASE_CLIENT.sql(() -> sql);
+        var executeSpec = DATABASE_CLIENT.sql(() -> sql);
         executeSpec = executeSpec.bindValues(bindParams);
         Flux<T> source = executeSpec
-                .map((row, rowMetadata) -> DatabaseUtils.R2DBC_CONVERTER.read(entityClass, row, rowMetadata))
+                .map((row, rowMetadata) -> R2DBC_CONVERTER.read(entityClass, row, rowMetadata))
                 .all();
-        return source.flatMapSequential(BeanUtils::serializeUserAuditor).cache();
+        return source
+                .flatMapSequential(BeanUtils::serializeUserAuditor)
+                .cache();
     }
 
     /**
@@ -140,14 +150,14 @@ public class DatabaseUtils implements InitializingBean {
      */
     public static DataSize getBeanSize(Object obj) {
         if (ObjectUtils.isEmpty(obj)) {
-            log.warn("Object is empty,This object not null.");
+            log.warn("Object is empty or null");
             return DataSize.ofBytes(0);
         }
         try {
             int size = BeanUtils.objectToBytes(obj).length;
             return DataSize.ofBytes(size);
         } catch (Exception e) {
-            log.error("Bean Size IO exception! msg: {}", e.getLocalizedMessage());
+            log.error("Bean Size calculation failed: {}", e.toString());
             return DataSize.ofBytes(0);
         }
     }
@@ -178,5 +188,10 @@ public class DatabaseUtils implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         log.info("Initializing utils [DatabaseUtils]");
+        // Initialize static fields from instance fields
+        ENTITY_TEMPLATE = this.entityTemplate;
+        DATABASE_CLIENT = this.databaseClient;
+        R2DBC_CONVERTER = this.r2dbcConverter;
+        REACTIVE_REDIS_TEMPLATE = this.redisTemplate;
     }
 }
