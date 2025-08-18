@@ -234,7 +234,7 @@ public final class QueryHelper {
      */
     @SuppressWarnings("unchecked")
     private static void processQueryKey(QueryFragment queryFragment, Map<String, Object> objectMap, String prefix) {
-        if (objectMap.containsKey("query")) {
+        if (objectMap.containsKey("query") && objectMap.get("query") instanceof Map) {
             var jsonMap = (Map<String, Object>) objectMap.get("query");
             var jsonQueryFragment = QueryJsonHelper.queryJson(jsonMap, prefix);
             queryFragment.getWhere().merge(jsonQueryFragment.getWhere());
@@ -337,6 +337,11 @@ public final class QueryHelper {
      * @throws QueryException If the object does not have a table annotation.
      */
     public static void applyQuerySql(QueryFragment queryFragment, Object object) {
+        if (object == null) {
+            throw QueryException.withMsg("Object cannot be null",
+                    new IllegalArgumentException("Cannot process null object"));
+        }
+        
         Class<?> objectClass = object.getClass();
         Table table = objectClass.getAnnotation(Table.class);
 
@@ -345,7 +350,8 @@ public final class QueryHelper {
                     new IllegalArgumentException("This object does not have a table annotation"));
         }
 
-        String tableName = StringUtils.hasLength(table.value()) ? table.value() : objectClass.getName();
+        String tableName = StringUtils.hasLength(table.value()) ? table.value() :
+                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, objectClass.getSimpleName());
         queryFragment.columns("*");
         queryFragment.from(tableName);
     }
@@ -399,7 +405,7 @@ public final class QueryHelper {
         if (ObjectUtils.isEmpty(objectMap)) {
             return Criteria.empty();
         }
-        List<Criteria> criteriaList = objectMap.entrySet().parallelStream().map(entry ->
+        List<Criteria> criteriaList = objectMap.entrySet().stream().map(entry ->
                 switch (entry.getValue()) {
                     case UUID value -> Criteria.where(entry.getKey()).is(value);
                     case String value -> Criteria.where(entry.getKey()).like(value).ignoreCase(true);

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * Represents a SQL parameter structure consisting of a conditional SQL fragment and a map of parameters
@@ -117,7 +118,10 @@ public class QueryFragment extends HashMap<String, Object> {
      */
     private long offset = 0;
 
-    public QueryFragment(QueryFragment fragment) {
+    // 编译正则表达式以提高性能
+    private static final Pattern COLUMN_REPLACE_PATTERN = java.util.regex.Pattern.compile("[.\\W]");
+
+    private QueryFragment(QueryFragment fragment) {
         super(fragment);
         this.size = fragment.size;
         this.offset = fragment.offset;
@@ -132,7 +136,7 @@ public class QueryFragment extends HashMap<String, Object> {
      *
      * @param params the parameters to initialize the QueryFragment with
      */
-    public QueryFragment(Map<String, Object> params) {
+    private QueryFragment(Map<String, Object> params) {
         super(params);
     }
 
@@ -176,42 +180,6 @@ public class QueryFragment extends HashMap<String, Object> {
         return new QueryFragment(Map.of());
     }
 
-    public QueryFragment in(String column, Iterable<?> values) {
-        Assert.notNull(values, "In values not null!");
-        Assert.hasText(column, "Column name must not be empty");
-
-        StringJoiner joiner = new StringJoiner(",");
-        AtomicInteger index = new AtomicInteger(0);
-        values.forEach(item -> {
-            var key = column.replaceAll("[.\\W]", "_") + index.getAndIncrement();
-            joiner.add(":" + key);
-            this.put(key, item);
-        });
-
-        String inClause = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
-                + " IN (" + joiner + ")";
-        this.where.add(inClause);
-        return this;
-    }
-
-    public QueryFragment notIn(String column, Iterable<?> values) {
-        Assert.notNull(values, "Not in values not null!");
-        Assert.hasText(column, "Column name must not be empty");
-
-        StringJoiner joiner = new StringJoiner(",");
-        AtomicInteger index = new AtomicInteger(0);
-        values.forEach(item -> {
-            var key = column.replaceAll("[.\\W]", "_") + index.getAndIncrement();
-            joiner.add(":" + key);
-            this.put(key, item);
-        });
-
-        String inClause = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
-                + " NOT IN (" + joiner + ")";
-        this.where.add(inClause);
-        return this;
-    }
-
     /**
      * Creates a new QueryFragment instance with the specified parameters.
      *
@@ -236,7 +204,45 @@ public class QueryFragment extends HashMap<String, Object> {
             var c = DatabaseUtils.R2DBC_CONVERTER.writeValue(en.getValue(), t);
             resultMap.put(en.getKey(), c);
         }
-        return new QueryFragment(resultMap);
+        QueryFragment fragment = new QueryFragment(Map.of());
+        fragment.putAll(resultMap);
+        return fragment;
+    }
+
+    public QueryFragment in(String column, Iterable<?> values) {
+        Assert.notNull(values, "In values not null!");
+        Assert.hasText(column, "Column name must not be empty");
+
+        StringJoiner joiner = new StringJoiner(",");
+        AtomicInteger index = new AtomicInteger(0);
+        values.forEach(item -> {
+            var key = COLUMN_REPLACE_PATTERN.matcher(column).replaceAll("_") + index.getAndIncrement();
+            joiner.add(":" + key);
+            this.put(key, item);
+        });
+
+        String inClause = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
+                + " IN (" + joiner + ")";
+        this.where.add(inClause);
+        return this;
+    }
+
+    public QueryFragment notIn(String column, Iterable<?> values) {
+        Assert.notNull(values, "Not in values not null!");
+        Assert.hasText(column, "Column name must not be empty");
+
+        StringJoiner joiner = new StringJoiner(",");
+        AtomicInteger index = new AtomicInteger(0);
+        values.forEach(item -> {
+            var key = COLUMN_REPLACE_PATTERN.matcher(column).replaceAll("_") + index.getAndIncrement();
+            joiner.add(":" + key);
+            this.put(key, item);
+        });
+
+        String inClause = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
+                + " NOT IN (" + joiner + ")";
+        this.where.add(inClause);
+        return this;
     }
 
     /**
@@ -523,8 +529,8 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the QueryFragment instance with the added BETWEEN condition
      */
     public QueryFragment between(String column, Object value1, Object value2) {
-        String key1 = column.replaceAll("[.\\W]", "_") + "1";
-        String key2 = column.replaceAll("[.\\W]", "_") + "2";
+        String key1 = COLUMN_REPLACE_PATTERN.matcher(column).replaceAll("_") + "1";
+        String key2 = COLUMN_REPLACE_PATTERN.matcher(column).replaceAll("_") + "2";
         this.put(key1, value1);
         this.put(key2, value2);
 
@@ -613,7 +619,7 @@ public class QueryFragment extends HashMap<String, Object> {
         Assert.hasText(column, "Column name must not be empty");
 
         if (value != null) {
-            String key = column.replaceAll("[.\\W]", "_");
+            String key = COLUMN_REPLACE_PATTERN.matcher(column).replaceAll("_");
             this.put(key, value);
             String condition = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
                     + " " + operator + " :" + key;
@@ -730,7 +736,8 @@ public class QueryFragment extends HashMap<String, Object> {
             sql.append(" ORDER BY ").append(orderBy);
         }
 
-        return sql.append(String.format(" LIMIT %d OFFSET %d", size, offset)).toString();
+        sql.append(" LIMIT ").append(size).append(" OFFSET ").append(offset);
+        return sql.toString();
     }
 
     /**
@@ -750,7 +757,13 @@ public class QueryFragment extends HashMap<String, Object> {
                     new IllegalArgumentException("This countSql is null, please use whereSql() method"));
         }
 
-        return String.format("SELECT COUNT(*) FROM (SELECT 1 FROM %s %s) t",
-                from, whereSql());
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM (SELECT 1 FROM ")
+                .append(from);
+
+        if (where.length() > 0) {
+            sql.append(" WHERE ").append(where);
+        }
+
+        return sql.append(") t").toString();
     }
 }

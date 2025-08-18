@@ -139,13 +139,38 @@ public final class QueryJsonHelper {
      */
     private static Sort.Order convertSortOrderToCamelCase(Sort.Order order) {
         String[] keys = StringUtils.delimitedListToStringArray(order.getProperty(), ".");
-        String sortedProperty = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, keys[0]);
+        if (keys.length == 0) {
+            throw new IllegalArgumentException("Empty property name in sort order");
+        }
+
+        // Validate the first key (column name)
+        String firstKey = validateColumnName(keys[0]);
+
+        String sortedProperty = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, firstKey);
         int lastIndex = keys.length - 1;
         if (lastIndex > 0) {
-            sortedProperty = sortedProperty + "->" + buildJsonQueryPath(Arrays.copyOfRange(keys, 1, lastIndex))
-                    + "->>'" + keys[lastIndex] + "'";
+            String[] joinKeys = Arrays.copyOfRange(keys, 1, lastIndex);
+            for (String path : joinKeys) {
+                sortedProperty += "->'" + escapeJsonKey(path) + "'";
+            }
+            sortedProperty += "->>'" + escapeJsonKey(keys[lastIndex]) + "'";
+        } else {
+            sortedProperty += "->>'" + escapeJsonKey(keys[0]) + "'";
         }
         return Sort.Order.by(sortedProperty).with(order.getDirection());
+    }
+
+    // Whitelist-based column name validation
+    private static String validateColumnName(String columnName) {
+        if (columnName == null || columnName.isEmpty()) {
+            throw new IllegalArgumentException("Column name cannot be null or empty");
+        }
+
+        // Simple regex for column names (whitelist: letters, numbers, and underscores)
+        if (!columnName.matches("[a-zA-Z0-9_]+")) {
+            throw new IllegalArgumentException("Invalid column name: " + columnName);
+        }
+        return columnName;
     }
 
     /**
@@ -207,7 +232,7 @@ public final class QueryJsonHelper {
         String[] keys = StringUtils.delimitedListToStringArray(entry.getKey(), ".");
         if (keys.length < 2) {
             throw QueryException.withError("Json from column path [from[" + entry.getKey() + "]] error",
-                    new Throwable("Json path example: extend.username," +
+                    new IllegalArgumentException("Json path example: extend.username," +
                             "Request from params:" +
                             "from[extend.usernameLike]=aa," +
                             "from[extend.age]=23," +
@@ -224,7 +249,7 @@ public final class QueryJsonHelper {
         if (lastIndex > 1) {
             String[] joinKeys = Arrays.copyOfRange(keys, 1, lastIndex);
             for (String path : joinKeys) {
-                conditionBuilder.append("->'").append(path).append("'");
+                conditionBuilder.append("->'").append(escapeJsonKey(path)).append("'");
             }
         }
         QueryFragment lastCondition = buildLastCondition(keys, entry.getValue());
@@ -256,12 +281,12 @@ public final class QueryJsonHelper {
 
         Map.Entry<String, String> exps = queryKeywordMapper(lastKey);
         if (exps == null) {
-            conditionSql.append(lastKey).append("' = :").append(paramName);
+            conditionSql.append(escapeJsonKey(lastKey)).append("' = :").append(paramName);
             return QueryFragment.withMap(Map.of(paramName, value)).where(conditionSql.toString());
         }
 
         String key = lastKey.substring(0, lastKey.length() - exps.getKey().length());
-        conditionSql.append(key).append("' ");
+        conditionSql.append(escapeJsonKey(key)).append("' ");
         Map<String, Object> params;
 
         value = switch (exps.getKey()) {
@@ -276,6 +301,9 @@ public final class QueryJsonHelper {
             String endKey = paramName + "_end";
             conditionSql.append(exps.getValue()).append(" :").append(startKey).append(" and :").append(endKey);
             var values = StringUtils.commaDelimitedListToStringArray(String.valueOf(value));
+            if (values.length < 2) {
+                throw new IllegalArgumentException("Between operation requires two values");
+            }
             params = Map.of(startKey, values[0], endKey, values[1]);
         } else if ("NotIn".equals(exps.getKey()) || "In".equals(exps.getKey())) {
             conditionSql.append(exps.getValue()).append(" (:").append(paramName).append(")");
@@ -298,12 +326,25 @@ public final class QueryJsonHelper {
      * @return StringBuilder A StringBuilder object containing the concatenated JSON path
      * from expression, suitable for use in SQL queries with JSON columns.
      */
-    private static StringJoiner buildJsonQueryPath(String[] joinKeys) {
+    private static String buildJsonQueryPath(String[] joinKeys) {
         StringJoiner jsonPath = new StringJoiner("->");
         for (String path : joinKeys) {
-            jsonPath.add("'" + path + "'");
+            jsonPath.add("'" + escapeJsonKey(path) + "'");
         }
-        return jsonPath;
+        return jsonPath.toString();
+    }
+
+    /**
+     * Escapes special characters in JSON keys to prevent SQL injection.
+     *
+     * @param key The JSON key to escape
+     * @return The escaped JSON key
+     */
+    private static String escapeJsonKey(String key) {
+        if (key == null) {
+            return null;
+        }
+        return key.replace("'", "''");
     }
 
     /**
