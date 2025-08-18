@@ -121,16 +121,6 @@ public class QueryFragment extends HashMap<String, Object> {
     // 编译正则表达式以提高性能
     private static final Pattern COLUMN_REPLACE_PATTERN = java.util.regex.Pattern.compile("[.\\W]");
 
-    private QueryFragment(QueryFragment fragment) {
-        super(fragment);
-        this.size = fragment.size;
-        this.offset = fragment.offset;
-        this.columns.merge(fragment.getColumns());
-        this.from.merge(fragment.getFrom());
-        this.orderBy.merge(fragment.getOrderBy());
-        this.where.merge(fragment.getWhere());
-    }
-
     /**
      * Creates a new QueryFragment instance with the specified parameters.
      *

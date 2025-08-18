@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
  * System.out.println(sqlQuery);
  * }
  * </pre>
- * In this example, a JSON-based from is constructed using the QueryJsonHelper class. The from searches
- * for a user with a username like "Test User" and an email equal to "testuser@example.com". The from is
+ * In this example, a JSON-based from is constructed using the QueryJsonHelper class. The form searches
+ * for a user with a username like "Test User" and an email equal to "testuser@example.com". The form is
  * then converted into an SQL from string that can be executed against a database.
  *
  * <p>For a JSON object with nested fields, such as:
