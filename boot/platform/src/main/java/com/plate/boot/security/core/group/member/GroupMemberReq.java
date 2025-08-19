@@ -1,8 +1,8 @@
 package com.plate.boot.security.core.group.member;
 
+import com.plate.boot.commons.query.QueryFragment;
+import com.plate.boot.commons.query.QueryHelper;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.QueryFragment;
-import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

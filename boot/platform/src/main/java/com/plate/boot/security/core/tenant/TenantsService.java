@@ -1,9 +1,9 @@
 package com.plate.boot.security.core.tenant;
 
 import com.plate.boot.commons.base.AbstractCache;
+import com.plate.boot.commons.query.QueryFragment;
+import com.plate.boot.commons.query.QueryHelper;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.QueryFragment;
-import com.plate.boot.commons.utils.query.QueryHelper;
 import com.plate.boot.security.core.tenant.member.TenantMembersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

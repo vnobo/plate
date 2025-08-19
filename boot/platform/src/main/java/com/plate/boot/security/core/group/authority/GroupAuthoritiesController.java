@@ -1,14 +1,15 @@
 package com.plate.boot.security.core.group.authority;
 
+import com.plate.boot.commons.ProgressEvent;
+import com.plate.boot.commons.utils.DatabaseUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
@@ -30,11 +31,15 @@ public class GroupAuthoritiesController {
         return this.authoritiesService.operate(request);
     }
 
-    @PostMapping("batch")
-    public Mono<Object> batch(@RequestBody GroupAuthorityReq request) {
-        Assert.notNull(request.getAuthorities(), "Authorities param [authorities] cannot be null!");
-        return this.authoritiesService.batch(request).thenReturn(Map.of("success", 200,
-                "message", "The operation succeeds and takes effect in a few minutes!"));
+    /**
+     * Endpoint for batch inserting data with progress monitoring via SSE.
+     *
+     * @param requests Batch insert request containing data and parameters
+     * @return Flux of progress updates as Server-Sent Events
+     */
+    @PostMapping(path = "batch", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ProgressEvent> saveBatch(@Valid @RequestBody Flux<GroupAuthorityReq> requests) {
+        return DatabaseUtils.batchEvent(requests, this::save);
     }
 
     @DeleteMapping("delete")

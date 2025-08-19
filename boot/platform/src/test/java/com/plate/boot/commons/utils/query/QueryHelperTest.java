@@ -1,5 +1,7 @@
 package com.plate.boot.commons.utils.query;
 
+import com.plate.boot.commons.query.QueryFragment;
+import com.plate.boot.commons.query.QueryHelper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

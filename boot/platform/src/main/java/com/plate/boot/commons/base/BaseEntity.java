@@ -1,9 +1,9 @@
 package com.plate.boot.commons.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.plate.boot.commons.query.QueryFragment;
+import com.plate.boot.commons.query.QueryHelper;
 import com.plate.boot.commons.utils.ContextUtils;
-import com.plate.boot.commons.utils.query.QueryFragment;
-import com.plate.boot.commons.utils.query.QueryHelper;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.query.Criteria;
 

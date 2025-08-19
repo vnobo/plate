@@ -1,4 +1,4 @@
-package com.plate.boot.commons.utils.query;
+package com.plate.boot.commons.query;
 
 import com.google.common.base.CaseFormat;
 import com.plate.boot.commons.exception.QueryException;

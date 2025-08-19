@@ -1,9 +1,9 @@
 package com.plate.boot.commons.converters;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.plate.boot.commons.MethodType;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.utils.ContextUtils;
-import com.plate.boot.commons.utils.MethodType;
 import io.r2dbc.postgresql.codec.Json;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;

@@ -1,10 +1,10 @@
 package com.plate.boot.security.core.tenant.member;
 
 import com.plate.boot.commons.base.AbstractCache;
+import com.plate.boot.commons.query.QueryFragment;
+import com.plate.boot.commons.query.QueryHelper;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.DatabaseUtils;
-import com.plate.boot.commons.utils.query.QueryFragment;
-import com.plate.boot.commons.utils.query.QueryHelper;
 import com.plate.boot.security.core.user.UserEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;

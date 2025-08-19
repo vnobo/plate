@@ -1,5 +1,7 @@
 package com.plate.boot.commons.utils;
 
+import com.plate.boot.commons.ProgressEvent;
+import com.plate.boot.commons.exception.RestServerException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +16,9 @@ import org.springframework.util.unit.DataSize;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
@@ -193,5 +197,22 @@ public class DatabaseUtils implements InitializingBean {
         DATABASE_CLIENT = this.databaseClient;
         R2DBC_CONVERTER = this.r2dbcConverter;
         REACTIVE_REDIS_TEMPLATE = this.redisTemplate;
+    }
+
+    public static <T> Flux<ProgressEvent> batchEvent(Flux<T> requests, Function<T, Mono<?>> saveFunction) {
+        var startMono = Mono.fromCallable(() -> ProgressEvent.of(0L, null)
+                .withMessage("Starting batch processing..."));
+        var itemsFlux = requests.index().flatMap(tuple2 -> {
+            var index = tuple2.getT1() + 1;
+            var req = tuple2.getT2();
+            var event = ProgressEvent.of(index, req);
+            return saveFunction.apply(req).flatMap(res -> Mono.just(event.withResult(
+                            "Processed success batch save item.", res)))
+                    .onErrorResume(err -> Mono.just(event.withError("Processed failed batch save item.",
+                            RestServerException.withMsg(err.getCause().getLocalizedMessage(), err))));
+        }).delayElements(Duration.ofMillis(100));
+        var endMono = Mono.fromCallable(() -> ProgressEvent.of(0L, null)
+                .withMessage("Batch processing completed"));
+        return Flux.concat(startMono, itemsFlux, endMono);
     }
 }

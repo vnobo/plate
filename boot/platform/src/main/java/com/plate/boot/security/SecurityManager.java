@@ -1,8 +1,8 @@
 package com.plate.boot.security;
 
 import com.plate.boot.commons.base.AbstractCache;
+import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.utils.DatabaseUtils;
-import com.plate.boot.commons.utils.query.QueryFragment;
 import com.plate.boot.security.core.group.authority.GroupAuthority;
 import com.plate.boot.security.core.group.member.GroupMemberRes;
 import com.plate.boot.security.core.tenant.member.TenantMemberRes;
