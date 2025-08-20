@@ -139,7 +139,7 @@ public final class QueryJsonHelper {
     private static Sort.Order convertSortOrderToCamelCase(Sort.Order order) {
         String[] keys = StringUtils.delimitedListToStringArray(order.getProperty(), ".");
         if (keys.length == 0) {
-            throw RestServerException.withMsg("Delimited list to string property empty",
+            throw QueryException.withError("Delimited list to string property empty",
                     new IllegalArgumentException("Empty property name in sort order"));
         }
 
@@ -159,12 +159,12 @@ public final class QueryJsonHelper {
 
     private static String validateColumnName(String columnName) {
         if (columnName == null || columnName.isEmpty()) {
-            throw RestServerException.withMsg("Column name is empty",
+            throw QueryException.withError("Column name is empty",
                     new IllegalArgumentException("Column name cannot be null or empty"));
         }
 
         if (!columnName.matches("[a-zA-Z0-9_]+")) {
-            throw RestServerException.withMsg("Invalid column name",
+            throw QueryException.withError("Invalid column name",
                     new IllegalArgumentException("Invalid column name: " + columnName));
         }
         return columnName;
@@ -299,7 +299,8 @@ public final class QueryJsonHelper {
             conditionSql.append(exps.getValue()).append(" :").append(startKey).append(" and :").append(endKey);
             var values = StringUtils.commaDelimitedListToStringArray(String.valueOf(value));
             if (values.length < 2) {
-                throw new IllegalArgumentException("Between operation requires two values");
+                throw QueryException.withError("Json between error",
+                        new IllegalArgumentException("Between operation requires two values"));
             }
             params = Map.of(startKey, values[0], endKey, values[1]);
         } else if ("NotIn".equals(exps.getKey()) || "In".equals(exps.getKey())) {
