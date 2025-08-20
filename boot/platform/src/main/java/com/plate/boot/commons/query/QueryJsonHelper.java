@@ -139,10 +139,10 @@ public final class QueryJsonHelper {
     private static Sort.Order convertSortOrderToCamelCase(Sort.Order order) {
         String[] keys = StringUtils.delimitedListToStringArray(order.getProperty(), ".");
         if (keys.length == 0) {
-            throw new IllegalArgumentException("Empty property name in sort order");
+            throw RestServerException.withMsg("Delimited list to string property empty",
+                    new IllegalArgumentException("Empty property name in sort order"));
         }
 
-        // Validate the first key (column name)
         String firstKey = validateColumnName(keys[0]);
 
         StringBuilder sortedProperty = new StringBuilder(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, firstKey));
@@ -153,21 +153,19 @@ public final class QueryJsonHelper {
                 sortedProperty.append("->'").append(escapeJsonKey(path)).append("'");
             }
             sortedProperty.append("->>'").append(escapeJsonKey(keys[lastIndex])).append("'");
-        } else {
-            sortedProperty.append("->>'").append(escapeJsonKey(keys[0])).append("'");
         }
         return Sort.Order.by(sortedProperty.toString()).with(order.getDirection());
     }
 
-    // Whitelist-based column name validation
     private static String validateColumnName(String columnName) {
         if (columnName == null || columnName.isEmpty()) {
-            throw new IllegalArgumentException("Column name cannot be null or empty");
+            throw RestServerException.withMsg("Column name is empty",
+                    new IllegalArgumentException("Column name cannot be null or empty"));
         }
 
-        // Simple regex for column names (whitelist: letters, numbers, and underscores)
         if (!columnName.matches("[a-zA-Z0-9_]+")) {
-            throw new IllegalArgumentException("Invalid column name: " + columnName);
+            throw RestServerException.withMsg("Invalid column name",
+                    new IllegalArgumentException("Invalid column name: " + columnName));
         }
         return columnName;
     }
