@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 
 /**
  * Configures session management for web applications with support for custom session ID resolution,
- * particularly tailored for handling both AJAX requests and cases where a Bearer token might be
+ * particularly tailored for handling both AJAX requests and cases toSql a Bearer token might be
  * present either in the request header or from parameters.
  * <p>
  * This configuration class enhances the session handling by introducing a custom strategy to read

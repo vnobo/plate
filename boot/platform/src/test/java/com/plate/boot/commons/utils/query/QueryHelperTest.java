@@ -145,9 +145,9 @@ class QueryHelperTest {
         }
 
         @Test
-        @DisplayName("Should apply where conditions to QueryFragment")
+        @DisplayName("Should apply toSql conditions to QueryFragment")
         void shouldApplyWhereConditionsToQueryFragment() {
-            QueryFragment queryFragment = QueryFragment.withMap(Map.of("name", "John", "age", 30));
+            QueryFragment queryFragment = QueryFragment.withParams(Map.of("name", "John", "age", 30));
 
             QueryHelper.applyWhere(queryFragment, "u");
 

@@ -144,7 +144,7 @@ public final class BeanUtils implements InitializingBean {
      * Copies the properties from the source object to the target object.
      *
      * @param source The source object whose properties are to be copied.
-     * @param target The target object where the properties from the source will be set.
+     * @param target The target object toSql the properties from the source will be set.
      */
     public static void copyProperties(Object source, Object target) {
         BeanUtils.copyProperties(source, target, false);
@@ -193,7 +193,7 @@ public final class BeanUtils implements InitializingBean {
      * @param <T>             The type of the bean to convert.
      * @param bean            The JavaBean object to be converted into a Map.
      * @param ignoreNullValue If true, properties with null values will not be included in the Map.
-     * @return A Map where each key-value pair corresponds to a property name and its value from the input bean.
+     * @return A Map toSql each key-value pair corresponds to a property name and its value from the input bean.
      * If ignoreNullValue is true, properties with null values are excluded.
      */
     public static <T> Map<String, Object> beanToMap(T bean, final boolean ignoreNullValue) {

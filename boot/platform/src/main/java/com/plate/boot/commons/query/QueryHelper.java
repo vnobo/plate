@@ -47,7 +47,7 @@ public final class QueryHelper {
      * userRequest.setUsername("john");
      * Pageable pageable = PageRequest.of(0, 10);
      * QueryFragment queryFragment = QueryHelper.from(userRequest, pageable);
-     * String sqlQuery = queryFragment.querySql();
+     * String sqlQuery = queryFragment.query();
      * }
      * </pre>
      * In this example, a UserReq object is created with a username filter, and a Pageable object is defined for pagination.
@@ -83,7 +83,7 @@ public final class QueryHelper {
      * UserReq userRequest = new UserReq();
      * userRequest.setUsername("john");
      * QueryFragment queryFragment = QueryHelper.from(userRequest, List.of("username"));
-     * String sqlQuery = queryFragment.querySql();
+     * String sqlQuery = queryFragment.query();
      * }
      * </pre>
      * In this example, a UserReq object is created with a username filter, and a collection of keys to be excluded is defined.
@@ -119,7 +119,7 @@ public final class QueryHelper {
      * UserReq userRequest = new UserReq();
      * userRequest.setUsername("john");
      * QueryFragment queryFragment = QueryHelper.from(userRequest, List.of("username"), "a");
-     * String sqlQuery = queryFragment.querySql();
+     * String sqlQuery = queryFragment.query();
      * }
      * </pre>
      * In this example, a UserReq object is created with a username filter, and a collection of keys to be excluded is defined.
@@ -157,7 +157,7 @@ public final class QueryHelper {
      * userRequest.setUsername("john");
      * Pageable pageable = PageRequest.of(0, 10);
      * QueryFragment queryFragment = QueryHelper.from(userRequest, pageable, "a");
-     * String sqlQuery = queryFragment.querySql();
+     * String sqlQuery = queryFragment.query();
      * }
      * </pre>
      * In this example, a UserReq object is created with a username filter, and a Pageable object is defined for pagination.
@@ -195,7 +195,7 @@ public final class QueryHelper {
      * userRequest.setUsername("john");
      * Pageable pageable = PageRequest.of(0, 10);
      * QueryFragment queryFragment = QueryHelper.from(userRequest, pageable, List.of("username"), "a");
-     * String sqlQuery = queryFragment.querySql();
+     * String sqlQuery = queryFragment.query();
      * }
      * </pre>
      * In this example, a UserReq object is created with a username filter, a Pageable object is defined for pagination,
@@ -210,9 +210,9 @@ public final class QueryHelper {
      */
     public static QueryFragment query(Object object, Pageable pageable, Collection<String> skipKeys, String prefix) {
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
-        Map<String, Object> filterMap = ObjectUtils.isEmpty(objectMap) ? Map.of() :
+        objectMap = ObjectUtils.isEmpty(objectMap) ? Map.of() :
                 Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && !skipKeys.contains(key));
-        QueryFragment queryFragment = QueryFragment.withMap(pageable.getPageSize(), pageable.getOffset(), filterMap);
+        QueryFragment queryFragment = QueryFragment.withParams(objectMap);
         applySort(queryFragment, pageable.getSort(), prefix);
         applyWhere(queryFragment, prefix);
         applyQuerySql(queryFragment, object);
@@ -316,9 +316,9 @@ public final class QueryHelper {
     }
 
     /**
-     * Applies where conditions to the QueryFragment based on its current entries.
+     * Applies toSql conditions to the QueryFragment based on its current entries.
      *
-     * @param queryFragment The QueryFragment to which the where conditions will be applied.
+     * @param queryFragment The QueryFragment to which the toSql conditions will be applied.
      * @param prefix        An optional prefix to be applied to column names.
      */
     public static void applyWhere(QueryFragment queryFragment, String prefix) {
@@ -341,7 +341,7 @@ public final class QueryHelper {
             throw QueryException.withMsg("Object cannot be null",
                     new IllegalArgumentException("Cannot process null object"));
         }
-        
+
         Class<?> objectClass = object.getClass();
         Table table = objectClass.getAnnotation(Table.class);
 
@@ -353,7 +353,25 @@ public final class QueryHelper {
         String tableName = StringUtils.hasLength(table.value()) ? table.value() :
                 CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, objectClass.getSimpleName());
         queryFragment.columns("*");
-        queryFragment.from(tableName);
+        QueryFragment.from(tableName);
+    }
+
+    public static String annotationTableName(Object object) {
+        if (object == null) {
+            throw QueryException.withMsg("Object cannot be null",
+                    new IllegalArgumentException("Cannot process null object"));
+        }
+
+        Class<?> objectClass = object.getClass();
+        Table table = objectClass.getAnnotation(Table.class);
+
+        if (ObjectUtils.isEmpty(table)) {
+            throw QueryException.withMsg("Table annotation not found",
+                    new IllegalArgumentException("This object does not have a table annotation"));
+        }
+
+        return StringUtils.hasLength(table.value()) ? table.value() :
+                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, objectClass.getSimpleName());
     }
 
     /**

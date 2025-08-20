@@ -36,7 +36,7 @@ public record UserAuditor(UUID code, String name) implements Serializable {
      * Creates a {@link UserAuditor} instance with the specified code and default null values for username and name.
      * <p>
      * This factory method is useful when only the auditor's code is known or relevant, initializing
-     * the other fields to null. It promotes the creation of auditor objects in scenarios where
+     * the other fields to null. It promotes the creation of auditor objects in scenarios toSql
      * partial information is available or when the username and name are not required for a given operation.
      *
      * @param code The unique code identifying the user auditor. Must not be null.

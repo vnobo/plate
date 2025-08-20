@@ -36,7 +36,7 @@ class QueryFragmentTest {
         @DisplayName("Should create QueryFragment with map")
         void shouldCreateQueryFragmentWithMap() {
             Map<String, Object> params = Map.of("name", "John", "age", 30);
-            QueryFragment queryFragment = QueryFragment.withMap(params);
+            QueryFragment queryFragment = QueryFragment.withParams(params);
             assertThat(queryFragment.get("name")).isEqualTo("John");
             assertThat(queryFragment.get("age")).isEqualTo(30);
         }
@@ -45,7 +45,7 @@ class QueryFragmentTest {
         @DisplayName("Should create QueryFragment with map and pagination")
         void shouldCreateQueryFragmentWithMapAndPagination() {
             Map<String, Object> params = Map.of("name", "John");
-            QueryFragment queryFragment = QueryFragment.withMap(10, 5, params);
+            QueryFragment queryFragment = QueryFragment.withParams(10, 5, params);
             assertThat(queryFragment.get("name")).isEqualTo("John");
             assertThat(queryFragment.getSize()).isEqualTo(10);
             assertThat(queryFragment.getOffset()).isEqualTo(5);
@@ -54,7 +54,8 @@ class QueryFragmentTest {
         @Test
         @DisplayName("Should create QueryFragment from another QueryFragment")
         void shouldCreateQueryFragmentFromAnotherQueryFragment() {
-            QueryFragment original = QueryFragment.withColumns("id").from("users").where("age > :age");
+            QueryFragment.withColumns("id");
+            QueryFragment original = QueryFragment.from("users").where("age > :age");
             original.put("age", 18);
             QueryFragment copy = QueryFragment.of(original);
             assertThat(copy.getColumns().toString()).contains("id");
@@ -89,12 +90,13 @@ class QueryFragmentTest {
         @Test
         @DisplayName("Should add from clause to QueryFragment")
         void shouldAddFromClauseToQueryFragment() {
-            QueryFragment queryFragment = QueryFragment.withNew().from("users", "orders");
+            QueryFragment.withNew();
+            QueryFragment queryFragment = QueryFragment.from("users", "orders");
             assertThat(queryFragment.getFrom().toString()).contains("users", "orders");
         }
 
         @Test
-        @DisplayName("Should add where conditions to QueryFragment")
+        @DisplayName("Should add toSql conditions to QueryFragment")
         void shouldAddWhereConditionsToQueryFragment() {
             QueryFragment queryFragment = QueryFragment.withNew().where("age > :age").where("name LIKE :name");
             assertThat(queryFragment.getWhere().toString()).contains("age > :age", "name LIKE :name");
@@ -126,7 +128,7 @@ class QueryFragmentTest {
         @DisplayName("Should add full-text search condition to QueryFragment")
         void shouldAddFullTextSearchConditionToQueryFragment() {
             QueryFragment queryFragment = QueryFragment.withNew().ts("description", "search term");
-            // Verify that the columns, from, and where clauses are updated
+            // Verify that the columns, from, and toSql clauses are updated
             assertThat(queryFragment.getColumns().toString()).contains("TS_RANK_CD");
             assertThat(queryFragment.getFrom().toString()).contains("TO_TSQUERY");
             assertThat(queryFragment.getWhere().toString()).contains("@@");
@@ -136,9 +138,10 @@ class QueryFragmentTest {
         @Test
         @DisplayName("Should chain multiple builder methods")
         void shouldChainMultipleBuilderMethods() {
-            QueryFragment queryFragment = QueryFragment.withNew()
-                    .columns("id", "name")
-                    .from("users")
+            QueryFragment.withNew()
+                    .columns("id", "name");
+            QueryFragment queryFragment = QueryFragment
+            .from("users")
                     .where("age > :age")
                     .orderBy("name ASC")
                     .groupBy("category")
@@ -211,9 +214,10 @@ class QueryFragmentTest {
         @Test
         @DisplayName("Should generate query SQL")
         void shouldGenerateQuerySql() {
-            QueryFragment queryFragment = QueryFragment.withNew()
-                    .columns("id", "name")
-                    .from("users")
+            QueryFragment.withNew()
+                    .columns("id", "name");
+            QueryFragment queryFragment = QueryFragment
+            .from("users")
                     .where("age > :age")
                     .orderBy("name ASC")
                     .groupBy("category")
@@ -230,15 +234,16 @@ class QueryFragmentTest {
             QueryFragment queryFragment = QueryFragment.withNew().columns("id", "name");
             assertThatThrownBy(queryFragment::querySql)
                     .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("This querySql is null");
+                    .hasMessageContaining("This query is null");
         }
 
         @Test
         @DisplayName("Should generate count SQL")
         void shouldGenerateCountSql() {
-            QueryFragment queryFragment = QueryFragment.withNew()
-                    .columns("id", "name")
-                    .from("users")
+            QueryFragment.withNew()
+                    .columns("id", "name");
+            QueryFragment queryFragment = QueryFragment
+            .from("users")
                     .where("age > :age");
             queryFragment.put("age", 18);
 

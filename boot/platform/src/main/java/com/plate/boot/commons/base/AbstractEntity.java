@@ -1,6 +1,5 @@
 package com.plate.boot.commons.base;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.security.core.UserAuditor;
 import lombok.Data;
@@ -98,17 +97,6 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
     /**
      * Support security code for sensitive data
      */
-    @JsonIgnore
     @Transient
     protected String securityCode;
-
-    @JsonIgnore
-    public String getSearch() {
-        return search;
-    }
-
-    @JsonIgnore
-    public Map<String, Object> getQuery() {
-        return query;
-    }
 }

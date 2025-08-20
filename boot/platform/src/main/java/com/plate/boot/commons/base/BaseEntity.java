@@ -1,6 +1,7 @@
 package com.plate.boot.commons.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.plate.boot.commons.query.Condition;
 import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.query.QueryHelper;
 import com.plate.boot.commons.utils.ContextUtils;
@@ -9,6 +10,7 @@ import org.springframework.data.relational.core.query.Criteria;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -83,7 +85,13 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
      * part of the from (e.g., WHERE clause), and the parameters are mapped to
      * prevent SQL injection, ensuring secure from execution.
      */
-    default QueryFragment querySql(Collection<String> skipKeys) {
-        return QueryHelper.query(this, skipKeys);
+    default QueryFragment query(Collection<String> skipKeys) {
+        var criteria = criteria(skipKeys);
+        var tableName = QueryHelper.annotationTableName(this);
+        return QueryFragment.from(tableName).condition(Condition.of(criteria));
+    }
+
+    default QueryFragment query() {
+        return query(List.of());
     }
 }

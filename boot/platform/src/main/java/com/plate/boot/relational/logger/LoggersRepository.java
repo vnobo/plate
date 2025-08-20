@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
  * </ul>
  *
  * <p>Usage of this repository promotes scalable and responsive logging systems, particularly in
- * scenarios where high throughput and low latency are critical.</p>
+ * scenarios toSql high throughput and low latency are critical.</p>
  *
  * @see R2dbcRepository for the base repository functionality provided.
  * @see Logger for the entity this repository manages.

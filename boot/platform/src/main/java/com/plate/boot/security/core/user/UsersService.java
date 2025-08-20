@@ -3,7 +3,6 @@ package com.plate.boot.security.core.user;
 import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.query.QueryFragment;
-import com.plate.boot.commons.query.QueryHelper;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -39,7 +36,7 @@ public class UsersService extends AbstractCache {
      * @return A Flux object containing a stream of UserRes data.
      */
     public Flux<UserRes> search(UserReq request, Pageable pageable) {
-        QueryFragment queryFragment = QueryHelper.query(request, pageable);
+        QueryFragment queryFragment = request.query().pageable(pageable);
         String key = BeanUtils.cacheKey(request, pageable);
         return super.queryWithCache(key, queryFragment.querySql(), queryFragment, UserRes.class);
     }
@@ -57,7 +54,7 @@ public class UsersService extends AbstractCache {
      */
     public Mono<Page<UserRes>> page(UserReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        QueryFragment queryFragment = request.querySql(List.of());
+        QueryFragment queryFragment = request.query();
         var countMono = super.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));

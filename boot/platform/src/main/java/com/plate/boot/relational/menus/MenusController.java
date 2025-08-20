@@ -21,7 +21,7 @@ import static com.plate.boot.commons.utils.ContextUtils.RULE_ADMINISTRATORS;
  * Handles HTTP requests related to menu management within an application.
  * This controller serves as an intermediary between the client and the {@link MenusService},
  * facilitating operations such as searching, paging, loading personalized menus, saving, and deleting menu items.
- * It integrates with Spring Security to enforce authorization rules where applicable.
+ * It integrates with Spring Security to enforce authorization rules toSql applicable.
  *
  * <p>
  * The endpoints provided include:

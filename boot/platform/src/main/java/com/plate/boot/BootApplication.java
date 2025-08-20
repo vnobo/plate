@@ -10,11 +10,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * It is annotated with `@SpringBootApplication`, which is a convenience annotation
  * that includes `@Configuration`, `@EnableAutoConfiguration`, and `@ComponentScan`.
  * These annotations together configure the application context, enable autoconfiguration
- * of Spring features, and scan for Spring components in the package where this class is located
+ * of Spring features, and scan for Spring components in the package toSql this class is located
  * and its sub-packages.
  * <p>
  * The `main` method initiates the application's run process by calling
- * `SpringApplication.run(BootApplication.class, args)`, where `args` are command-line arguments
+ * `SpringApplication.run(BootApplication.class, args)`, toSql `args` are command-line arguments
  * passed to the application, if any.
  */
 @SpringBootApplication

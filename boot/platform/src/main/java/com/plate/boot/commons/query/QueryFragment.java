@@ -4,6 +4,8 @@ import com.google.common.base.CaseFormat;
 import com.plate.boot.commons.exception.QueryException;
 import com.plate.boot.commons.utils.DatabaseUtils;
 import lombok.Getter;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.util.Assert;
 
@@ -17,7 +19,6 @@ import java.util.regex.Pattern;
  * Represents a SQL parameter structure consisting of a conditional SQL fragment and a map of parameters
  * to be bound to a PreparedStatement. This class facilitates the construction of dynamic SQL queries
  * with placeholders for improved performance and security against SQL injection.
- *
  * <p>The QueryFragment class is designed to be flexible and modular, allowing users to build complex
  * SQL queries by chaining method calls. It manages the SQL from structure, including the SELECT
  * columns, FROM clause, WHERE conditions, ORDER BY clause, and LIMIT/OFFSET for pagination.
@@ -28,7 +29,7 @@ import java.util.regex.Pattern;
  * QueryFragment queryFragment = QueryFragment.withNew()
  *     .columns("id", "name", "email")
  *     .from("users")
- *     .where("age > :age", 18)
+ *     .toSql("age > :age", 18)
  *     .orderBy("name ASC")
  *     .orderBy("email DESC");
  *
@@ -36,13 +37,13 @@ import java.util.regex.Pattern;
  * queryFragment.put("age", 18);
  *
  * // Generate SQL from
- * String sql = queryFragment.querySql();
+ * String sql = queryFragment.query();
  * System.out.println(sql);
  * }
  * </pre>
  * In this example, a QueryFragment instance is created and configured with columns, a table name,
  * a WHERE condition, and ORDER BY clauses. Parameters are added to the form fragment, and finally,
- * the SQL from string is generated using the querySql() method.
+ * the SQL from string is generated using the query() method.
  *
  * @see QueryHelper for utility methods to construct QueryFragment instances from objects.
  */
@@ -76,7 +77,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * Example usage:
      * <pre>
      * {@code
-     * queryFragment.where("age > :age");
+     * queryFragment.toSql("age > :age");
      * }
      * </pre>
      */
@@ -131,6 +132,54 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     /**
+     * Private constructor to initialize QueryFragment with specified tables.
+     *
+     * @param tables the table names to be used in the query
+     */
+    private QueryFragment(String... tables) {
+        for (String table : tables) {
+            this.from.add(table);
+        }
+    }
+
+    /**
+     * Static factory method to create a new QueryFragment instance with specified tables.
+     *
+     * @param tables the table names to be used in the query
+     * @return a new QueryFragment instance
+     */
+    public static QueryFragment from(String... tables) {
+        return new QueryFragment(tables);
+    }
+
+    /**
+     * Creates a new QueryFragment instance with the specified parameters.
+     *
+     * <p>This method initializes a new QueryFragment with the provided parameters. It is a convenient way
+     * to create a QueryFragment instance with predefined parameters.
+     *
+     * <p>Example usage:
+     * <pre>
+     * {@code
+     * Map<String, Object> params = Map.of("name", "John", "age", 30);
+     * QueryFragment queryFragment = QueryFragment.withParams(params);
+     * }
+     * </pre>
+     *
+     * @param params the parameters to initialize the QueryFragment with
+     * @return a new QueryFragment instance with the specified parameters
+     */
+    public static QueryFragment withParams(Map<String, Object> params) {
+        var resultMap = new HashMap<String, Object>();
+        for (var en : params.entrySet()) {
+            var k = TypeInformation.of(en.getValue().getClass());
+            var v = DatabaseUtils.R2DBC_CONVERTER.writeValue(en.getValue(), k);
+            resultMap.put(en.getKey(), v);
+        }
+        return new QueryFragment(resultMap);
+    }
+
+    /**
      * Creates a new QueryFragment instance with the specified columns.
      *
      * <p>This method initializes a new QueryFragment with an empty map and sets the specified columns.
@@ -171,32 +220,26 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     /**
-     * Creates a new QueryFragment instance with the specified parameters.
+     * Creates a new QueryFragment instance with the specified size, offset, and parameters.
      *
-     * <p>This method initializes a new QueryFragment with the provided parameters. It is a convenient way
-     * to create a QueryFragment instance with predefined parameters.
+     * <p>This method initializes a new QueryFragment with the provided parameters and sets the limit
+     * for pagination using the specified size and offset values.
      *
      * <p>Example usage:
      * <pre>
      * {@code
      * Map<String, Object> params = Map.of("name", "John", "age", 30);
-     * QueryFragment queryFragment = QueryFragment.withMap(params);
+     * QueryFragment queryFragment = QueryFragment.withParams(10, 0, params);
      * }
      * </pre>
      *
+     * @param size   the maximum number of rows to return (LIMIT clause)
+     * @param offset the number of rows to skip before starting to return rows (OFFSET clause)
      * @param params the parameters to initialize the QueryFragment with
-     * @return a new QueryFragment instance with the specified parameters
+     * @return a new QueryFragment instance with the specified size, offset, and parameters
      */
-    public static QueryFragment withMap(Map<String, Object> params) {
-        var resultMap = new HashMap<String, Object>();
-        for (var en : params.entrySet()) {
-            var t = TypeInformation.of(en.getValue().getClass());
-            var c = DatabaseUtils.R2DBC_CONVERTER.writeValue(en.getValue(), t);
-            resultMap.put(en.getKey(), c);
-        }
-        QueryFragment fragment = new QueryFragment(Map.of());
-        fragment.putAll(resultMap);
-        return fragment;
+    public static QueryFragment withParams(int size, long offset, Map<String, Object> params) {
+        return withParams(params).limit(size, offset);
     }
 
     public QueryFragment in(String column, Iterable<?> values) {
@@ -236,26 +279,17 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     /**
-     * Creates a new QueryFragment instance with the specified size, offset, and parameters.
+     * Add condition collections to the query.
      *
-     * <p>This method initializes a new QueryFragment with the provided parameters and sets the limit
-     * for pagination using the specified size and offset values.
-     *
-     * <p>Example usage:
-     * <pre>
-     * {@code
-     * Map<String, Object> params = Map.of("name", "John", "age", 30);
-     * QueryFragment queryFragment = QueryFragment.withMap(10, 0, params);
-     * }
-     * </pre>
-     *
-     * @param size   the maximum number of rows to return (LIMIT clause)
-     * @param offset the number of rows to skip before starting to return rows (OFFSET clause)
-     * @param params the parameters to initialize the QueryFragment with
-     * @return a new QueryFragment instance with the specified size, offset, and parameters
+     * @param conditions the condition collections to be added to the query
+     * @return the current QueryFragment instance for method chaining
      */
-    public static QueryFragment withMap(int size, long offset, Map<String, Object> params) {
-        return withMap(params).limit(size, offset);
+    public QueryFragment condition(Condition... conditions) {
+        for (Condition condition : conditions) {
+            this.putAll(condition);
+            this.where.add(condition.toSql());
+        }
+        return this;
     }
 
     /**
@@ -354,7 +388,7 @@ public class QueryFragment extends HashMap<String, Object> {
      * <p>Example usage:
      * <pre>
      * {@code
-     * queryFragment.where("age > :age");
+     * queryFragment.toSql("age > :age");
      * }
      * </pre>
      *
@@ -412,6 +446,27 @@ public class QueryFragment extends HashMap<String, Object> {
     }
 
     /**
+     * Configures the QueryFragment with pagination and sorting information from a Pageable object.
+     *
+     * <p>This method sets the LIMIT and OFFSET clauses based on the Pageable's page size and offset,
+     * and applies sorting orders by transforming them to SQL ORDER BY clauses. Each sort property
+     * can be converted to lowercase for case-insensitive sorting if specified in the Sort.Order.
+     *
+     * @param pageable the Pageable object containing pagination and sorting information
+     * @return the QueryFragment instance with applied pagination and sorting
+     */
+    public QueryFragment pageable(Pageable pageable) {
+        this.limit(pageable.getPageSize(), pageable.getOffset());
+        var sort = QueryJsonHelper.transformSortForJson(pageable.getSort());
+        for (Sort.Order order : sort) {
+            String sortedPropertyName = order.getProperty();
+            String sortedProperty = order.isIgnoreCase() ? "LOWER(" + sortedPropertyName + ")" : sortedPropertyName;
+            this.orderBy(sortedProperty + (order.isAscending() ? " ASC" : " DESC"));
+        }
+        return this;
+    }
+
+    /**
      * Adds a LIMIT and OFFSET clause to the query.
      *
      * <p>This method allows setting the LIMIT and OFFSET clauses for pagination in the SQL statement.
@@ -430,7 +485,6 @@ public class QueryFragment extends HashMap<String, Object> {
     public QueryFragment limit(int size, long offset) {
         Assert.isTrue(size >= 0, "Size must be non-negative");
         Assert.isTrue(offset >= 0, "Offset must be non-negative");
-
         this.size = size;
         this.offset = offset;
         return this;
@@ -652,10 +706,10 @@ public class QueryFragment extends HashMap<String, Object> {
      * @return the WHERE clause as a String
      */
     public String whereSql() {
-        if (this.where.length() > 0) {
-            return " WHERE " + this.where;
+        if (this.where.length() == 0) {
+            return "";
         }
-        return "";
+        return " WHERE " + this.where;
     }
 
     /**
@@ -702,12 +756,12 @@ public class QueryFragment extends HashMap<String, Object> {
      * <p>If no table or columns are specified, an exception is thrown to prevent generating an invalid from.
      *
      * @return A String representing the complete SQL from.
-     * @throws QueryException if the querySql is null, indicating that the form structure is incomplete.
+     * @throws QueryException if the query is null, indicating that the form structure is incomplete.
      */
     public String querySql() {
         if (this.from.length() == 0) {
-            throw QueryException.withError("This querySql is null, please use whereSql() method!",
-                    new IllegalArgumentException("This querySql is null, please use whereSql() method"));
+            throw QueryException.withError("This query is null, please use whereSql() method!",
+                    new IllegalArgumentException("This query is null, please use whereSql() method"));
         }
 
         StringBuilder sql = new StringBuilder("SELECT ");

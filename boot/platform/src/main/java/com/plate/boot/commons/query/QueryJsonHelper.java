@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * jsonParams.put("extend.usernameLike", "Test User");
  * jsonParams.put("extend.emailEq", "testuser@example.com");
  * QueryFragment queryFragment = QueryJsonHelper.queryJson(jsonParams, "a");
- * String sqlQuery = queryFragment.querySql();
+ * String sqlQuery = queryFragment.query();
  * System.out.println(sqlQuery);
  * }
  * </pre>
@@ -177,7 +177,7 @@ public final class QueryJsonHelper {
      * used to build an SQL from targeting JSON data. The method iterates over the provided parameters,
      * converting each into a properly formatted SQL condition using the provided prefix to namespace JSON keys.
      *
-     * @param params A map where each key represents a JSON path (possibly prefixed) and the value is the
+     * @param params A map toSql each key represents a JSON path (possibly prefixed) and the value is the
      *               condition's value or further criteria for complex operations like 'Between', 'In', etc.
      * @param prefix A string prefix to prepend to each JSON key to form the full column name in SQL queries.
      * @return A QueryFragment containing the constructed SQL conditions for querying JSON data.
@@ -210,13 +210,13 @@ public final class QueryJsonHelper {
      * QueryFragment queryFragment = QueryJsonHelper.queryJson(jsonParams, "a");
      *
      * // Get the SQL from string
-     * String sqlQuery = queryFragment.querySql();
+     * String sqlQuery = queryFragment.query();
      *
      * // Now you can execute the sqlQuery against your database using a JDBC template or similar
      * }
      * </pre>
      *
-     * @param entry  A map entry where the key is a dot-delimited string indicating a JSON path
+     * @param entry  A map entry toSql the key is a dot-delimited string indicating a JSON path
      *               (e.g., "extend.usernameLike"), and the value is the target value for the condition.
      * @param prefix A prefix to prepend to the first key of the JSON path to qualify column names
      *               in the SQL from, ensuring correct scoping or avoiding naming collisions.
@@ -251,7 +251,7 @@ public final class QueryJsonHelper {
         }
         QueryFragment lastCondition = buildLastCondition(keys, entry.getValue());
         conditionBuilder.append(lastCondition.getWhere());
-        return QueryFragment.withMap(lastCondition).where(conditionBuilder.toString());
+        return QueryFragment.withParams(lastCondition).where(conditionBuilder.toString());
     }
 
     /**
@@ -279,7 +279,7 @@ public final class QueryJsonHelper {
         Map.Entry<String, String> exps = queryKeywordMapper(lastKey);
         if (exps == null) {
             conditionSql.append(escapeJsonKey(lastKey)).append("' = :").append(paramName);
-            return QueryFragment.withMap(Map.of(paramName, value)).where(conditionSql.toString());
+            return QueryFragment.withParams(Map.of(paramName, value)).where(conditionSql.toString());
         }
 
         String key = lastKey.substring(0, lastKey.length() - exps.getKey().length());
@@ -311,7 +311,7 @@ public final class QueryJsonHelper {
             conditionSql.append(exps.getValue()).append(" :").append(paramName);
             params = Map.of(paramName, value);
         }
-        return QueryFragment.withMap(params).where(conditionSql.toString());
+        return QueryFragment.withParams(params).where(conditionSql.toString());
     }
 
     /**
