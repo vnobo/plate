@@ -23,10 +23,12 @@ public class Condition extends HashMap<String, Object> {
 
     private final @Nullable Criteria criteria;
     private final String prefix;
+    private final StringBuilder sqlBuilder = new StringBuilder();
 
     private Condition(@Nullable Criteria criteria, String prefix) {
         this.criteria = criteria;
         this.prefix = prefix;
+        unroll(this.criteria, sqlBuilder);
     }
 
     public static Condition of(Criteria criteria) {
@@ -45,14 +47,7 @@ public class Condition extends HashMap<String, Object> {
      * @return the WHERE clause as a String
      */
     public String toSql() {
-        if (this.criteria != null && this.criteria.isEmpty()) {
-            return "";
-        }
-
-        StringBuilder builder = new StringBuilder();
-        unroll(this.criteria, builder);
-
-        return builder.toString();
+        return sqlBuilder.toString();
     }
 
     private void unroll(CriteriaDefinition criteria, StringBuilder stringBuilder) {
