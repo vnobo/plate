@@ -90,7 +90,8 @@ public class Condition extends HashMap<String, Object> {
             }
 
             if (!first) {
-                CriteriaDefinition.Combinator combinator = criterion.getCombinator() == CriteriaDefinition.Combinator.INITIAL ? CriteriaDefinition.Combinator.AND
+                CriteriaDefinition.Combinator combinator = criterion.getCombinator()
+                        == CriteriaDefinition.Combinator.INITIAL ? CriteriaDefinition.Combinator.AND
                         : criterion.getCombinator();
                 stringBuilder.append(' ').append(combinator.name()).append(' ');
             }
@@ -117,7 +118,7 @@ public class Condition extends HashMap<String, Object> {
         if (this.prefix != null && !this.prefix.isEmpty()) {
             column = this.prefix + "." + column;
         }
-
+        var relColumn = column.replaceAll("[^\\p{Alnum}]", "_");
         stringBuilder.append(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column))
                 .append(' ').append(Objects.requireNonNull(criteria.getComparator()).getComparator());
 
@@ -125,8 +126,8 @@ public class Condition extends HashMap<String, Object> {
             case BETWEEN:
             case NOT_BETWEEN:
                 Pair<Object, Object> pair = (Pair<Object, Object>) criteria.getValue();
-                var key1 = column.replace(".", "_") + "1";
-                var key2 = column.replace(".", "_") + "2";
+                var key1 = relColumn + "1";
+                var key2 = relColumn + "2";
                 if (pair != null) {
                     this.add(key1, pair.getFirst());
                     this.add(key2, pair.getSecond());
@@ -142,20 +143,20 @@ public class Condition extends HashMap<String, Object> {
 
             case IN:
             case NOT_IN:
-                this.add(column, Objects.requireNonNull(criteria.getValue()));
-                stringBuilder.append(" (:").append(column.replace(".", "_")).append(')');
+                this.add(relColumn, Objects.requireNonNull(criteria.getValue()));
+                stringBuilder.append(" (:").append(relColumn).append(')');
                 break;
 
             default:
-                this.add(column, Objects.requireNonNull(criteria.getValue()));
-                stringBuilder.append(" :").append(column.replace(".", "_"));
+                this.add(relColumn, Objects.requireNonNull(criteria.getValue()));
+                stringBuilder.append(" :").append(relColumn);
         }
     }
 
     private void add(String column, Object value) {
         var k = TypeInformation.of(value.getClass());
         var v = DatabaseUtils.R2DBC_CONVERTER.writeValue(value, k);
-        this.put(column.replace(".", "_"), v);
+        this.put(column, v);
     }
 
 }
