@@ -37,7 +37,7 @@ public final class QueryHelper {
      *     <li>Filters out the excluded keys from the map.</li>
      *     <li>Creates a QueryFragment instance with pagination information from the Pageable object.</li>
      *     <li>Applies sorting and WHERE conditions based on the object's properties.</li>
-     *     <li>Generates the SQL from string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
+     *     <li>Generates the SQL from string by concatenating the column, table name, WHERE clause, and ORDER BY clause.</li>
      * </ul>
      *
      * <p>Example usage:
@@ -74,7 +74,7 @@ public final class QueryHelper {
      *     <li>Filters out the excluded keys from the map.</li>
      *     <li>Creates a QueryFragment instance with pagination information from a default Pageable object.</li>
      *     <li>Applies sorting and WHERE conditions based on the object's properties.</li>
-     *     <li>Generates the SQL from string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
+     *     <li>Generates the SQL from string by concatenating the column, table name, WHERE clause, and ORDER BY clause.</li>
      * </ul>
      *
      * <p>Example usage:
@@ -110,7 +110,7 @@ public final class QueryHelper {
      *     <li>Filters out the excluded keys from the map.</li>
      *     <li>Creates a QueryFragment instance with pagination information from a default Pageable object.</li>
      *     <li>Applies sorting and WHERE conditions based on the object's properties.</li>
-     *     <li>Generates the SQL from string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
+     *     <li>Generates the SQL from string by concatenating the column, table name, WHERE clause, and ORDER BY clause.</li>
      * </ul>
      *
      * <p>Example usage:
@@ -147,7 +147,7 @@ public final class QueryHelper {
      *     <li>Filters out the excluded keys from the map.</li>
      *     <li>Creates a QueryFragment instance with pagination information from the Pageable object.</li>
      *     <li>Applies sorting and WHERE conditions based on the object's properties.</li>
-     *     <li>Generates the SQL from string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
+     *     <li>Generates the SQL from string by concatenating the column, table name, WHERE clause, and ORDER BY clause.</li>
      * </ul>
      *
      * <p>Example usage:
@@ -185,7 +185,7 @@ public final class QueryHelper {
      *     <li>Filters out the excluded keys from the map.</li>
      *     <li>Creates a QueryFragment instance with pagination information from the Pageable object.</li>
      *     <li>Applies sorting and WHERE conditions based on the object's properties.</li>
-     *     <li>Generates the SQL from string by concatenating the columns, table name, WHERE clause, and ORDER BY clause.</li>
+     *     <li>Generates the SQL from string by concatenating the column, table name, WHERE clause, and ORDER BY clause.</li>
      * </ul>
      *
      * <p>Example usage:
@@ -209,13 +209,21 @@ public final class QueryHelper {
      * @return A QueryFragment instance representing the constructed from.
      */
     public static QueryFragment query(Object object, Pageable pageable, Collection<String> skipKeys, String prefix) {
+        Class<?> objectClass = object.getClass();
+        Table table = objectClass.getAnnotation(Table.class);
+        if (ObjectUtils.isEmpty(table)) {
+            throw QueryException.withMsg("Table annotation not found",
+                    new IllegalArgumentException("This object does not have a table annotation"));
+        }
+        String tableName = StringUtils.hasLength(table.value()) ? table.value() :
+                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, objectClass.getSimpleName());
+        QueryFragment queryFragment = QueryFragment.from(tableName);
         Map<String, Object> objectMap = BeanUtils.beanToMap(object, false, true);
         objectMap = ObjectUtils.isEmpty(objectMap) ? Map.of() :
                 Maps.filterKeys(objectMap, key -> !SKIP_CRITERIA_KEYS.contains(key) && !skipKeys.contains(key));
-        QueryFragment queryFragment = QueryFragment.withParams(objectMap);
+        queryFragment.putAll(objectMap);
         applySort(queryFragment, pageable.getSort(), prefix);
         applyWhere(queryFragment, prefix);
-        applyQuerySql(queryFragment, object);
 
         if (!ObjectUtils.isEmpty(objectMap)) {
             processQueryKey(queryFragment, objectMap, prefix);
@@ -237,8 +245,7 @@ public final class QueryHelper {
         if (objectMap.containsKey("query") && objectMap.get("query") instanceof Map) {
             var jsonMap = (Map<String, Object>) objectMap.get("query");
             var jsonQueryFragment = QueryJsonHelper.queryJson(jsonMap, prefix);
-            queryFragment.getWhere().merge(jsonQueryFragment.getWhere());
-            queryFragment.putAll(jsonQueryFragment);
+            queryFragment.condition(jsonQueryFragment);
         }
     }
 
@@ -352,7 +359,7 @@ public final class QueryHelper {
 
         String tableName = StringUtils.hasLength(table.value()) ? table.value() :
                 CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, objectClass.getSimpleName());
-        queryFragment.columns("*");
+        queryFragment.column("*");
         QueryFragment.from(tableName);
     }
 
