@@ -107,7 +107,7 @@ create table if not exists se_groups
     created_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
     updated_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
     created_at  timestamp    not null default current_timestamp,
-    updated_at  timestamp not null default current_timestamp,
+    updated_at timestamp not null default current_timestamp,
     text_search tsvector generated always as (
         setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
         setweight(to_tsvector('chinese', tenant_code), 'A') || ' ' ||
@@ -161,7 +161,7 @@ create table if not exists se_tenants
     created_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
     updated_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
     created_at  timestamp    not null default current_timestamp,
-    updated_at  timestamp not null default current_timestamp,
+    updated_at timestamp not null default current_timestamp,
     text_search tsvector generated always as (
         setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(name, '')), 'B')
@@ -206,6 +206,9 @@ create table if not exists se_loggers
     updated_at  timestamp   not null default current_timestamp,
     text_search tsvector generated always as (
         setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', tenant_code), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', prefix), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', url), 'A') || ' ' ||
         setweight(to_tsvector('chinese', operator), 'A') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(method, '')), 'B') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(url, '')), 'C') || ' ' ||

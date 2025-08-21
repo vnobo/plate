@@ -35,7 +35,7 @@ public class LoggersService extends AbstractCache {
      * @return A Flux of Logger objects matching the search criteria, respecting the specified pagination.
      */
     public Flux<Logger> search(LoggerReq request, Pageable pageable) {
-        QueryFragment queryFragment = request.query();
+        QueryFragment queryFragment = request.query().pageable(pageable);
         var cacheKey = BeanUtils.cacheKey(request, pageable);
         return this.queryWithCache(cacheKey, queryFragment.querySql(), queryFragment, Logger.class);
     }
