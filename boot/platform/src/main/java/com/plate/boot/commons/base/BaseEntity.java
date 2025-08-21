@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plate.boot.commons.query.Condition;
 import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.query.QueryHelper;
+import com.plate.boot.commons.query.QueryJsonHelper;
 import com.plate.boot.commons.utils.ContextUtils;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.*;
@@ -111,7 +113,13 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
         var tableName = QueryHelper.annotationTableName(this);
         var fragment = QueryFragment.from(tableName).condition(Condition.of(criteria));
         if (!ObjectUtils.isEmpty(getSearch())) {
-            fragment = fragment.ts("text_search", getSearch());
+            fragment.ts("text_search", getSearch());
+        }
+        if (!ObjectUtils.isEmpty(getQuery())) {
+            fragment.condition(QueryJsonHelper.queryJson(getQuery(), null));
+        }
+        if (StringUtils.hasLength(getSecurityCode())) {
+            fragment.like("tenantCode", getSecurityCode());
         }
         return fragment;
     }
