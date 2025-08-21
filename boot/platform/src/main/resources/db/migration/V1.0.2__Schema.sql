@@ -107,7 +107,12 @@ create table if not exists se_groups
     created_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
     updated_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
     created_at  timestamp    not null default current_timestamp,
-    updated_at  timestamp    not null default current_timestamp
+    updated_at  timestamp not null default current_timestamp,
+    text_search tsvector generated always as (
+        setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', tenant_code), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', coalesce(name, '')), 'B')
+        ) stored
 );
 create index se_groups_tn_idx on se_groups (tenant_code, name);
 create index se_groups_extend_gin_idx on se_groups using gin (extend);
@@ -156,7 +161,11 @@ create table if not exists se_tenants
     created_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
     updated_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
     created_at  timestamp    not null default current_timestamp,
-    updated_at  timestamp    not null default current_timestamp
+    updated_at  timestamp not null default current_timestamp,
+    text_search tsvector generated always as (
+        setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', coalesce(name, '')), 'B')
+        ) stored
 );
 create index se_tenants_extend_gin_idx on se_tenants using gin (extend);
 comment on table se_tenants is '租户表';

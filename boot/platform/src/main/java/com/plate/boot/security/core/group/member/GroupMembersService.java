@@ -30,27 +30,15 @@ public class GroupMembersService extends AbstractCache {
     private final GroupMembersRepository memberRepository;
 
     public Flux<GroupMemberRes> search(GroupMemberReq request, Pageable pageable) {
-        QueryFragment fragment = request.toParamSql();
-        QueryFragment queryFragment = QueryFragment.from("se_group_members a",
-                        "inner join se_groups b on a.group_code = b.code",
-                        "inner join se_users c on c.code = a.user_code")
-                .column("a.*", "b.name as group_name",
-                        "b.extend as group_extend", "c.name as login_name", "c.username")
-                .where(fragment.getWheres().toString());
-        queryFragment.putAll(fragment);
-        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(),
-                queryFragment, GroupMemberRes.class);
+        QueryFragment fragment = request.toParamSql().pageable(pageable);
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), fragment.querySql(),
+                fragment, GroupMemberRes.class);
     }
 
     public Mono<Page<GroupMemberRes>> page(GroupMemberReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment fragment = request.toParamSql();
-        QueryFragment queryFragment = QueryFragment.from("se_group_members a",
-                        "inner join se_groups b on a.group_code = b.code",
-                        "inner join se_users c on c.code = a.user_code")
-                .column("*")
-                .where(fragment.getWheres().toString());
-        var countMono = this.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
+        var countMono = this.countWithCache(BeanUtils.cacheKey(request), fragment.countSql(), fragment);
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }

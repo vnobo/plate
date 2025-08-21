@@ -2,7 +2,6 @@ package com.plate.boot.security.core.group;
 
 import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.query.QueryFragment;
-import com.plate.boot.commons.query.QueryHelper;
 import com.plate.boot.commons.utils.BeanUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,13 +21,14 @@ public class GroupsService extends AbstractCache {
     private final GroupsRepository groupsRepository;
 
     public Flux<Group> search(GroupReq request, Pageable pageable) {
-        QueryFragment queryFragment = QueryHelper.query(request, pageable);
-        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(), queryFragment, Group.class);
+        QueryFragment queryFragment = request.query();
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable),
+                queryFragment.querySql(), queryFragment, Group.class);
     }
 
     public Mono<Page<Group>> page(GroupReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        QueryFragment queryFragment = QueryHelper.query(request, pageable);
+        QueryFragment queryFragment = request.query();
         var countMono = this.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
 
         return searchMono.zipWith(countMono)

@@ -1,7 +1,7 @@
 package com.plate.boot.security.core.group.member;
 
+import com.plate.boot.commons.query.Condition;
 import com.plate.boot.commons.query.QueryFragment;
-import com.plate.boot.commons.query.QueryHelper;
 import com.plate.boot.commons.utils.BeanUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,7 +10,6 @@ import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -59,16 +58,22 @@ public class GroupMemberReq extends GroupMember {
     }
 
     public QueryFragment toParamSql() {
-        QueryFragment queryFragment = QueryHelper.query(this, List.of("users", "username"), "a");
+        Criteria criteria = toCriteria();
         if (!ObjectUtils.isEmpty(this.getUsers())) {
-            queryFragment = queryFragment.in("a.user_code", this.getUsers());
+            criteria = criteria.and("userCode").in(this.getUsers());
         }
+        var conditionA = Condition.of(criteria, "a");
 
+        Criteria criteriaB = Criteria.empty();
         if (StringUtils.hasLength(this.getUsername())) {
-            queryFragment = queryFragment.like("c.username", this.getUsername());
+            criteriaB = criteriaB.and("username").is(this.getUsername());
         }
-
-        return queryFragment;
+        var conditionB = Condition.of(criteriaB, "c");
+        return QueryFragment.conditional(conditionA, conditionB).table("se_group_members a",
+                        "inner join se_groups b on a.group_code = b.code",
+                        "inner join se_users c on c.code = a.user_code")
+                .column("a.*", "b.name as group_name",
+                        "b.extend as group_extend", "c.name as login_name", "c.username");
     }
 
 }

@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.util.Map;
-
 /**
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
@@ -14,10 +12,6 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class GroupReq extends Group {
-
-    private Map<String, Object> query;
-
-    private String securityCode;
 
     public GroupReq securityCode(String securityCode) {
         this.setSecurityCode(securityCode);

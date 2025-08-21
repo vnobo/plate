@@ -87,6 +87,10 @@ public class TenantMemberReq extends TenantMember {
             criteriaB = criteriaB.and("username").is(this.getUsername());
         }
         var conditionB = Condition.of(criteriaB, "c");
-        return QueryFragment.conditional(conditionA, conditionB);
+        return QueryFragment.conditional(conditionA, conditionB).column("a.*", "b.name as tenant_name",
+                        "b.extend as tenant_extend", "c.name as login_name", "c.username")
+                .table("se_tenant_members a",
+                        "inner join se_tenants b on a.tenant_code = b.code",
+                        "inner join se_users c on c.code = a.user_code");
     }
 }
