@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.util.Assert;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -116,7 +117,9 @@ public final class QueryFragment extends HashMap<String, Object> {
      */
     private long offset = 0;
 
-    // 编译正则表达式以提高性能
+    /**
+     * A pattern to replace characters in column names.
+     */
     private static final Pattern COLUMN_REPLACE_PATTERN = java.util.regex.Pattern.compile("[.\\W]");
 
     /**
@@ -149,40 +152,24 @@ public final class QueryFragment extends HashMap<String, Object> {
         return new QueryFragment(queries);
     }
 
-    public QueryFragment in(String column, Iterable<?> values) {
-        Assert.notNull(values, "In values not null!");
-        Assert.hasText(column, "Column name must not be empty");
-
-        StringJoiner joiner = new StringJoiner(",");
-        AtomicInteger index = new AtomicInteger(0);
-        values.forEach(item -> {
-            var key = COLUMN_REPLACE_PATTERN.matcher(column).replaceAll("_") + index.getAndIncrement();
-            joiner.add(":" + key);
-            this.put(key, item);
-        });
-
-        String inClause = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
-                + " IN (" + joiner + ")";
-        this.wheres.add(inClause);
-        return this;
-    }
-
-    public QueryFragment notIn(String column, Iterable<?> values) {
-        Assert.notNull(values, "Not in values not null!");
-        Assert.hasText(column, "Column name must not be empty");
-
-        StringJoiner joiner = new StringJoiner(",");
-        AtomicInteger index = new AtomicInteger(0);
-        values.forEach(item -> {
-            var key = COLUMN_REPLACE_PATTERN.matcher(column).replaceAll("_") + index.getAndIncrement();
-            joiner.add(":" + key);
-            this.put(key, item);
-        });
-
-        String inClause = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
-                + " NOT IN (" + joiner + ")";
-        this.wheres.add(inClause);
-        return this;
+    /**
+     * Adds the specified queries to the FROM clause.
+     *
+     * <p>This method allows adding multiple queries to the FROM clause of the SQL statement.
+     *
+     * <p>Example usage:
+     * <pre>
+     * {@code
+     * queryFragment.conditional(c,c,c);
+     * }
+     * </pre>
+     *
+     * @param queries the queries to be added to the FROM clause
+     * @return the QueryFragment instance with the added queries
+     */
+    public static QueryFragment conditional(Condition... queries) {
+        var fragment = new QueryFragment();
+        return fragment.condition(queries);
     }
 
     /**
@@ -201,7 +188,7 @@ public final class QueryFragment extends HashMap<String, Object> {
      * @param params the parameters to initialize the QueryFragment with
      * @return a new QueryFragment instance with the specified parameters
      */
-    public static QueryFragment of(QueryFragment params) {
+    public static QueryFragment of(Map<String, Object> params) {
         return of(Integer.MAX_VALUE, 0, params);
     }
 
@@ -223,8 +210,58 @@ public final class QueryFragment extends HashMap<String, Object> {
      * @param params the parameters to initialize the QueryFragment with
      * @return a new QueryFragment instance with the specified size, offset, and parameters
      */
-    public static QueryFragment of(int size, long offset, QueryFragment params) {
+    public static QueryFragment of(int size, long offset, Map<String, Object> params) {
         return of(params).limit(size, offset);
+    }
+
+    /**
+     * Adds an IN condition to the WHERE clause.
+     *
+     * @param column the column name
+     * @param values the values to match
+     * @return the QueryFragment instance with the added IN condition
+     */
+    public QueryFragment in(String column, Iterable<?> values) {
+        Assert.notNull(values, "In values not null!");
+        Assert.hasText(column, "Column name must not be empty");
+
+        StringJoiner joiner = new StringJoiner(",");
+        AtomicInteger index = new AtomicInteger(0);
+        values.forEach(item -> {
+            var key = COLUMN_REPLACE_PATTERN.matcher(column).replaceAll("_") + index.getAndIncrement();
+            joiner.add(":" + key);
+            this.put(key, item);
+        });
+
+        String inClause = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
+                + " IN (" + joiner + ")";
+        this.wheres.add(inClause);
+        return this;
+    }
+
+    /**
+     * Adds a NOT IN condition to the WHERE clause.
+     *
+     * @param column the column name
+     * @param values the values to match
+     * @return the QueryFragment instance with the added NOT IN condition
+     */
+    public QueryFragment notIn(String column, Iterable<?> values) {
+        Assert.notNull(values, "Not in values not null!");
+        Assert.hasText(column, "Column name must not be empty");
+
+        StringJoiner joiner = new StringJoiner(",");
+        AtomicInteger index = new AtomicInteger(0);
+        values.forEach(item -> {
+            var key = COLUMN_REPLACE_PATTERN.matcher(column).replaceAll("_") + index.getAndIncrement();
+            joiner.add(":" + key);
+            this.put(key, item);
+        });
+
+        String inClause = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column)
+                + " NOT IN (" + joiner + ")";
+        this.wheres.add(inClause);
+        return this;
     }
 
     /**
@@ -419,10 +456,11 @@ public final class QueryFragment extends HashMap<String, Object> {
             column("*");
         }
         put(column, value);
-        return column("TS_RANK_CD(" + lowerCamelCol + ", " + queryTable + ") AS rank")
-                .table(",TO_TSQUERY('chinese',:" + column + ") AS " + queryTable)
-                .where(queryTable + " @@ " + lowerCamelCol)
-                .orderBy("rank desc");
+        column("TS_RANK_CD(" + lowerCamelCol + ", " + queryTable + ") AS rank");
+        table(",TO_TSQUERY('chinese',:" + column + ") AS " + queryTable);
+        where(queryTable + " @@ " + lowerCamelCol);
+        orderBy("rank desc");
+        return this;
     }
 
     /**
