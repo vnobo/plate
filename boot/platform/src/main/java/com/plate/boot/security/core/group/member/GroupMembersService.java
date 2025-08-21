@@ -31,12 +31,12 @@ public class GroupMembersService extends AbstractCache {
 
     public Flux<GroupMemberRes> search(GroupMemberReq request, Pageable pageable) {
         QueryFragment fragment = request.toParamSql();
-        QueryFragment queryFragment = QueryFragment.withColumns("a.*", "b.name as group_name",
-                        "b.extend as group_extend", "c.name as login_name", "c.username")
-                .from("se_group_members a",
+        QueryFragment queryFragment = QueryFragment.from("se_group_members a",
                         "inner join se_groups b on a.group_code = b.code",
                         "inner join se_users c on c.code = a.user_code")
-                .where(fragment.getWhere().toString());
+                .column("a.*", "b.name as group_name",
+                        "b.extend as group_extend", "c.name as login_name", "c.username")
+                .where(fragment.getWheres().toString());
         queryFragment.putAll(fragment);
         return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(),
                 queryFragment, GroupMemberRes.class);
@@ -45,10 +45,11 @@ public class GroupMembersService extends AbstractCache {
     public Mono<Page<GroupMemberRes>> page(GroupMemberReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment fragment = request.toParamSql();
-        QueryFragment queryFragment = QueryFragment.withColumns("*").from("se_group_members a",
+        QueryFragment queryFragment = QueryFragment.from("se_group_members a",
                         "inner join se_groups b on a.group_code = b.code",
                         "inner join se_users c on c.code = a.user_code")
-                .where(fragment.getWhere().toString());
+                .column("*")
+                .where(fragment.getWheres().toString());
         var countMono = this.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
