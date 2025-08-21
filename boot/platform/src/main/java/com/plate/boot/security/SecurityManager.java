@@ -60,24 +60,24 @@ import java.util.*;
 public class SecurityManager extends AbstractCache
         implements ReactiveUserDetailsService, ReactiveUserDetailsPasswordService {
 
-    private final static QueryFragment QUERY_GROUP_MEMBERS_FRAGMENT = QueryFragment.withNew()
-            .columns("a.*", "b.name", "b.extend")
+    private final static QueryFragment QUERY_GROUP_MEMBERS_FRAGMENT = QueryFragment
             .from("se_group_members a", "join se_groups b on a.group_code=b.code")
+            .column("a.*", "b.name", "b.extend")
             .where("a.user_code = :userCode");
-    private final static QueryFragment QUERY_TENANT_MEMBERS_FRAGMENT = QueryFragment.withNew()
-            .columns("a.*", "b.name", "b.extend")
+    private final static QueryFragment QUERY_TENANT_MEMBERS_FRAGMENT = QueryFragment
             .from("se_tenant_members a", "join se_tenants b on a.tenant_code=b.code")
+            .column("a.*", "b.name", "b.extend")
             .where("a.user_code = :userCode");
-    private final static QueryFragment QUERY_USER_AUTHORITY_FRAGMENT = QueryFragment.withNew()
-            .columns("*")
+    private final static QueryFragment QUERY_USER_AUTHORITY_FRAGMENT = QueryFragment
             .from("se_authorities")
+            .column("*")
             .where("user_code = :userCode");
-    private final static QueryFragment QUERY_GROUP_AUTHORITY_FRAGMENT = QueryFragment.withNew()
-            .columns("ga.*")
+    private final static QueryFragment QUERY_GROUP_AUTHORITY_FRAGMENT = QueryFragment
             .from("se_group_authorities ga",
                     "join se_group_members gm on ga.group_code = gm.group_code",
                     "join se_users su on gm.user_code = su.code",
                     "join se_groups sg on gm.group_code = sg.code and sg.tenant_code = su.tenant_code")
+            .column("ga.*")
             .where("gm.user_code = :userCode");
 
     /**
@@ -130,7 +130,7 @@ public class SecurityManager extends AbstractCache
      * @return A Mono emitting the User if found, or an empty Mono if no user matches the given OAuth2 binding data.
      */
     public Mono<User> loadByOauth2(String bindType, String openid) {
-        QueryFragment queryFragment = QueryFragment.withNew().columns("*").from("se_users")
+        QueryFragment queryFragment = QueryFragment.from("se_users").column("*")
                 .where("extend->'oauth2'->:bindType->>'openid'::varchar = :openid");
         queryFragment.put("bindType", bindType);
         queryFragment.put("openid", openid);
