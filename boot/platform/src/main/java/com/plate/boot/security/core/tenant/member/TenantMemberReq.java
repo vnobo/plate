@@ -1,7 +1,7 @@
 package com.plate.boot.security.core.tenant.member;
 
+import com.plate.boot.commons.query.Condition;
 import com.plate.boot.commons.query.QueryFragment;
-import com.plate.boot.commons.query.QueryHelper;
 import com.plate.boot.commons.utils.BeanUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,8 +10,8 @@ import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Represents a request for tenant member operations, extending the TenantMember class.
@@ -29,7 +29,7 @@ public class TenantMemberReq extends TenantMember {
     /**
      * A set of user codes associated with the tenant member request.
      */
-    private Set<String> users;
+    private Set<UUID> users;
 
     /**
      * The username associated with the tenant member request.
@@ -67,7 +67,7 @@ public class TenantMemberReq extends TenantMember {
      * @return the created Criteria object
      */
     public Criteria toCriteria() {
-        return criteria(Set.of("securityCode", "users", "username"));
+        return criteria(Set.of("users", "username"));
     }
 
     /**
@@ -76,23 +76,17 @@ public class TenantMemberReq extends TenantMember {
      * @return the generated QueryFragment object
      */
     public QueryFragment toParamSql() {
-        QueryFragment fragment = QueryHelper.query(this, List.of("users", "securityCode", "username"), "a");
-
+        Criteria criteria = toCriteria();
         if (!ObjectUtils.isEmpty(this.getUsers())) {
-            fragment.where("a.user_code in (:users)");
-            fragment.put("users", StringUtils.collectionToCommaDelimitedString(this.getUsers()));
+            criteria = criteria.and("userCode").in(this.getUsers());
         }
+        var conditionA = Condition.of(criteria, "a");
 
-        if (StringUtils.hasLength(this.getSecurityCode())) {
-            fragment.where("a.tenant_code like :securityCode");
-            fragment.put("securityCode", this.getSecurityCode());
-        }
-
+        Criteria criteriaB = Criteria.empty();
         if (StringUtils.hasLength(this.getUsername())) {
-            fragment.where("c.username = :username");
-            fragment.put("username", this.getUsername());
+            criteriaB = criteriaB.and("username").is(this.getUsername());
         }
-
-        return fragment;
+        var conditionB = Condition.of(criteriaB, "c");
+        return QueryFragment.conditional(conditionA, conditionB);
     }
 }

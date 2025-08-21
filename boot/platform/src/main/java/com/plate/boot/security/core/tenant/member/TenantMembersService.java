@@ -2,7 +2,6 @@ package com.plate.boot.security.core.tenant.member;
 
 import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.query.QueryFragment;
-import com.plate.boot.commons.query.QueryHelper;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.DatabaseUtils;
 import com.plate.boot.security.core.user.UserEvent;
@@ -42,17 +41,14 @@ public class TenantMembersService extends AbstractCache {
      * @return a Flux of TenantMemberRes objects matching the search criteria
      */
     public Flux<TenantMemberRes> search(TenantMemberReq request, Pageable pageable) {
-        QueryFragment fragment = request.toParamSql();
-        QueryFragment.of(pageable.getPageSize(), pageable.getOffset(), fragment)
+        QueryFragment fragment = request.toParamSql().pageable(pageable)
                 .column("a.*", "b.name as tenant_name",
-                        "b.extend as tenant_extend", "c.name as login_name", "c.username");
-        QueryFragment queryFragment = QueryFragment
-.from("se_tenant_members a",
+                        "b.extend as tenant_extend", "c.name as login_name", "c.username")
+                .table("se_tenant_members a",
                         "inner join se_tenants b on a.tenant_code = b.code",
                         "inner join se_users c on c.code = a.user_code");
-        QueryHelper.applySort(queryFragment, pageable.getSort(), "a");
-        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(),
-                queryFragment, TenantMemberRes.class);
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), fragment.querySql(),
+                fragment, TenantMemberRes.class);
     }
 
     /**
