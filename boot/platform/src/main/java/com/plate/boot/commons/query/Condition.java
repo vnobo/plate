@@ -10,10 +10,8 @@ import org.springframework.data.util.Pair;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.lang.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
@@ -104,7 +102,6 @@ public class Condition extends HashMap<String, Object> {
     }
 
     private void render(CriteriaDefinition criteria, StringBuilder stringBuilder) {
-
         if (criteria.isEmpty()) {
             return;
         }
@@ -118,7 +115,8 @@ public class Condition extends HashMap<String, Object> {
         if (this.prefix != null && !this.prefix.isEmpty()) {
             column = this.prefix + "." + column;
         }
-        var relColumn = column.replaceAll("[^\\p{Alnum}]", "_");
+        // 优化列名替换逻辑：合并连续下划线并去除首尾下划线
+        var relColumn = column.replaceAll("[^\\p{Alnum}]+", "_").replaceAll("^_|_$", "");
         stringBuilder.append(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column))
                 .append(' ').append(Objects.requireNonNull(criteria.getComparator()).getComparator());
 
@@ -143,17 +141,37 @@ public class Condition extends HashMap<String, Object> {
 
             case IN:
             case NOT_IN:
-                this.add(relColumn, Objects.requireNonNull(criteria.getValue()));
-                stringBuilder.append(" (:").append(relColumn).append(')');
+                stringBuilder.append(" (");
+                Collection<?> values = (Collection<?>) criteria.getValue();
+                if (values != null && !values.isEmpty()) {
+                    StringJoiner joiner = new StringJoiner(", ");
+                    AtomicInteger indexRef = new AtomicInteger(0);
+                    for (Object item : values) {
+                        var key = relColumn + indexRef.get();
+                        this.add(key, item);
+                        joiner.add(":" + key);
+                        indexRef.incrementAndGet();
+                    }
+                    stringBuilder.append(joiner);
+                }
+                stringBuilder.append(')');
                 break;
 
             default:
-                this.add(relColumn, Objects.requireNonNull(criteria.getValue()));
+                // 优化null处理逻辑
+                Object value = criteria.getValue();
+                if (value == null) {
+                    throw new IllegalArgumentException("Criteria value cannot be null for column: " + relColumn);
+                }
+                this.add(relColumn, value);
                 stringBuilder.append(" :").append(relColumn);
         }
     }
 
     private void add(String column, Object value) {
+        if (value == null) {
+            return;
+        }
         var k = TypeInformation.of(value.getClass());
         var v = DatabaseUtils.R2DBC_CONVERTER.writeValue(value, k);
         this.put(column, v);
