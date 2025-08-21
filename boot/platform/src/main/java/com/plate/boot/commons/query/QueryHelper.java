@@ -335,34 +335,6 @@ public final class QueryHelper {
         }
     }
 
-    /**
-     * Applies the form SQL based on the provided object's table annotation.
-     * If the object does not have a table annotation, it throws a QueryException.
-     *
-     * @param queryFragment The QueryFragment to which the form SQL will be applied.
-     * @param object        The object containing the table annotation and data for the form.
-     * @throws QueryException If the object does not have a table annotation.
-     */
-    public static void applyQuerySql(QueryFragment queryFragment, Object object) {
-        if (object == null) {
-            throw QueryException.withMsg("Object cannot be null",
-                    new IllegalArgumentException("Cannot process null object"));
-        }
-
-        Class<?> objectClass = object.getClass();
-        Table table = objectClass.getAnnotation(Table.class);
-
-        if (ObjectUtils.isEmpty(table)) {
-            throw QueryException.withMsg("Table annotation not found",
-                    new IllegalArgumentException("This object does not have a table annotation"));
-        }
-
-        String tableName = StringUtils.hasLength(table.value()) ? table.value() :
-                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, objectClass.getSimpleName());
-        queryFragment.column("*");
-        QueryFragment.from(tableName);
-    }
-
     public static String annotationTableName(Object object) {
         if (object == null) {
             throw QueryException.withMsg("Object cannot be null",
