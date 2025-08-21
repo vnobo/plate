@@ -7,12 +7,10 @@ import com.plate.boot.commons.query.QueryHelper;
 import com.plate.boot.commons.utils.ContextUtils;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.query.Criteria;
+import org.springframework.util.ObjectUtils;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Represents the base entity contract for entities that require common functionality
@@ -20,6 +18,29 @@ import java.util.UUID;
  * Implementing classes should provide concrete behavior for these base operations.
  */
 public interface BaseEntity<T> extends Serializable, Persistable<T> {
+    /**
+     * Support from for json column
+     */
+    @JsonIgnore
+    default Map<String, Object> getQuery() {
+        return null;
+    }
+
+    /**
+     * Support full text search for tsvector column
+     */
+    @JsonIgnore
+    default String getSearch() {
+        return null;
+    }
+
+    /**
+     * Support security code for sensitive data
+     */
+    @JsonIgnore
+    default String getSecurityCode() {
+        return null;
+    }
 
     /**
      * Retrieves the unique code assigned to the entity.
@@ -88,7 +109,11 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
     default QueryFragment query(Collection<String> skipKeys) {
         var criteria = criteria(skipKeys);
         var tableName = QueryHelper.annotationTableName(this);
-        return QueryFragment.from(tableName).condition(Condition.of(criteria));
+        var fragment = QueryFragment.from(tableName).condition(Condition.of(criteria));
+        if (!ObjectUtils.isEmpty(getSearch())) {
+            fragment = fragment.ts("text_search", getSearch());
+        }
+        return fragment;
     }
 
     default QueryFragment query() {
