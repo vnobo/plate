@@ -105,19 +105,39 @@ public final class ContextUtils implements InitializingBean {
      */
     public static CacheManager CACHE_MANAGER;
 
+    /**
+     * Global application event publisher instance
+     * <p>
+     * This static member variable provides an application-level event publishing access point, making it convenient to publish events across different layers.
+     * Ensure that the injection or initialization of this instance is completed during the system initialization phase (typically through a dependency injection framework like Spring configuration).
+     * <p>
+     * Notes:
+     * 1. Since it uses a public static variable, ensure that the ApplicationEventPublisher implementation itself is thread-safe when used in a multi-threaded environment.
+     * 2. Avoid directly modifying this variable in unit tests or uncontrolled environments.
+     */
     public static ApplicationEventPublisher APPLICATION_EVENT_PUBLISHER;
+
+    private final ObjectMapper objectMapper;
+    private final CacheManager cacheManager;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * Initializes the ContextUtils class with necessary dependencies.
      *
      * @param objectMapper The ObjectMapper instance used for JSON serialization and deserialization.
      */
-    ContextUtils(ObjectMapper objectMapper, CacheManager cacheManager, ApplicationEventPublisher applicationEventPublisher) {
-        ContextUtils.OBJECT_MAPPER = objectMapper;
-        ContextUtils.CACHE_MANAGER = cacheManager;
-        ContextUtils.APPLICATION_EVENT_PUBLISHER = applicationEventPublisher;
+    ContextUtils(ObjectMapper objectMapper, CacheManager cacheManager,
+                 ApplicationEventPublisher applicationEventPublisher) {
+        this.objectMapper = objectMapper;
+        this.cacheManager = cacheManager;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
+    /**
+     * Publishes an event to the application event publisher.
+     *
+     * @param object The event object to be published.
+     */
     public static void eventPublisher(AbstractEvent<?> object) {
         ContextUtils.APPLICATION_EVENT_PUBLISHER.publishEvent(object);
     }
@@ -229,7 +249,7 @@ public final class ContextUtils implements InitializingBean {
                         return Mono.empty();
                     }
                     Object principal = authentication.getPrincipal();
-                    return principal instanceof SecurityDetails ? Mono.just((SecurityDetails) principal): Mono.empty();
+                    return principal instanceof SecurityDetails ? Mono.just((SecurityDetails) principal) : Mono.empty();
                 });
     }
 
@@ -252,5 +272,8 @@ public final class ContextUtils implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         log.info("Initializing utils [ContextUtils]...");
+        OBJECT_MAPPER = this.objectMapper;
+        CACHE_MANAGER = this.cacheManager;
+        APPLICATION_EVENT_PUBLISHER = this.applicationEventPublisher;
     }
 }
