@@ -1,6 +1,5 @@
 package com.plate.boot.security.core.group.member;
 
-import com.plate.boot.commons.query.Condition;
 import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.utils.BeanUtils;
 import lombok.Data;
@@ -62,13 +61,13 @@ public class GroupMemberReq extends GroupMember {
         if (!ObjectUtils.isEmpty(this.getUsers())) {
             criteria = criteria.and("userCode").in(this.getUsers());
         }
-        var conditionA = Condition.of(criteria, "a");
+        var conditionA = QueryFragment.Condition.of(criteria, "a");
 
         Criteria criteriaB = Criteria.empty();
         if (StringUtils.hasLength(this.getUsername())) {
             criteriaB = criteriaB.and("username").is(this.getUsername());
         }
-        var conditionB = Condition.of(criteriaB, "c");
+        var conditionB = QueryFragment.Condition.of(criteriaB, "c");
         return QueryFragment.conditional(conditionA, conditionB).table("se_group_members a",
                         "inner join se_groups b on a.group_code = b.code",
                         "inner join se_users c on c.code = a.user_code")
