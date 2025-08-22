@@ -1,7 +1,6 @@
 package com.plate.boot.commons.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.plate.boot.commons.query.Condition;
 import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.query.QueryHelper;
 import com.plate.boot.commons.query.QueryJsonHelper;
@@ -111,7 +110,7 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
     default QueryFragment query(Collection<String> skipKeys) {
         var criteria = criteria(skipKeys);
         var tableName = QueryHelper.annotationTableName(this);
-        var fragment = QueryFragment.from(tableName).condition(Condition.of(criteria));
+        var fragment = QueryFragment.from(tableName).condition(QueryFragment.Condition.of(criteria));
         if (!ObjectUtils.isEmpty(getSearch())) {
             fragment.ts("text_search", getSearch());
         }

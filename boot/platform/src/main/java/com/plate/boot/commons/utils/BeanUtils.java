@@ -40,8 +40,15 @@ public final class BeanUtils implements InitializingBean {
      */
     public static UserAuditorAware USER_AUDITOR_AWARE;
 
+    private final UserAuditorAware auditorAware;
+
+    /**
+     * Constructs a new BeanUtils instance with the provided UsersService.
+     *
+     * @param usersService The UsersService instance to be used for user-related operations.
+     */
     public BeanUtils(UserAuditorAware usersService) {
-        BeanUtils.USER_AUDITOR_AWARE = usersService;
+        this.auditorAware = usersService;
     }
 
     /**
@@ -314,5 +321,6 @@ public final class BeanUtils implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         log.info("Initializing utils [BeanUtils]...");
+        USER_AUDITOR_AWARE = this.auditorAware;
     }
 }
