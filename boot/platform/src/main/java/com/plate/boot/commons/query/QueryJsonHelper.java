@@ -205,12 +205,12 @@ public final class QueryJsonHelper {
      * @return A QueryFragment containing the constructed SQL conditions for querying JSON data.
      * @throws IllegalArgumentException If any processing error occurs due to invalid input structure or content.
      */
-    public static Condition queryJson(Map<String, Object> params, String prefix) {
+    public static QueryFragment.Condition queryJson(Map<String, Object> params, String prefix) {
         Criteria criteria = Criteria.empty();
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             criteria = criteria.and(buildJsonCondition(entry));
         }
-        return Condition.of(criteria, prefix);
+        return QueryFragment.Condition.of(criteria, prefix);
     }
 
     /**
