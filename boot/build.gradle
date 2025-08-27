@@ -1,7 +1,9 @@
 plugins {
     id 'org.springframework.boot' version '3.5.5' apply false
-    id 'org.graalvm.buildtools.native' version '0.10.5' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
+    id 'org.graalvm.buildtools.native' version '0.10.6' apply false
 }
+
 ext {
     set('javaVersion', 21)
     set('guavaVersion', '33.+')
@@ -73,7 +75,5 @@ configure(subprojects) { project ->
 
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-        implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
     }
 }

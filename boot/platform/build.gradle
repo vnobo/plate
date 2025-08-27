@@ -2,9 +2,8 @@ plugins {
     id "java"
     id "org.springframework.boot"
     id 'org.graalvm.buildtools.native'
+    id 'io.spring.dependency-management'
 }
-
-apply plugin: 'io.spring.dependency-management'
 
 dependencies {
 

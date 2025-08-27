@@ -242,15 +242,14 @@ public final class ContextUtils implements InitializingBean {
      * current authentication context, or an empty Mono if no authentication is present.
      */
     public static Mono<SecurityDetails> securityDetails() {
-        return ReactiveSecurityContextHolder.getContext()
-                .flatMap(securityContext -> {
-                    Authentication authentication = securityContext.getAuthentication();
-                    if (authentication == null) {
-                        return Mono.empty();
-                    }
-                    Object principal = authentication.getPrincipal();
-                    return principal instanceof SecurityDetails ? Mono.just((SecurityDetails) principal) : Mono.empty();
-                });
+        return ReactiveSecurityContextHolder.getContext().flatMap(securityContext -> {
+            Authentication authentication = securityContext.getAuthentication();
+            if (authentication == null) {
+                return Mono.empty();
+            }
+            Object principal = authentication.getPrincipal();
+            return principal instanceof SecurityDetails ? Mono.just((SecurityDetails) principal) : Mono.empty();
+        });
     }
 
     /**
