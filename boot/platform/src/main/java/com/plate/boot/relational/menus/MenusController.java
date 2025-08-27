@@ -2,8 +2,8 @@ package com.plate.boot.relational.menus;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -67,8 +67,8 @@ public class MenusController {
      * @return A Mono of Page containing Menu entities.
      */
     @GetMapping("page")
-    public Mono<Page<Menu>> page(MenuReq request, Pageable pageable) {
-        return this.menusService.page(request, pageable);
+    public Mono<PagedModel<Menu>> page(MenuReq request, Pageable pageable) {
+        return this.menusService.page(request, pageable).map(PagedModel::new);
     }
 
     /**

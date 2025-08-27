@@ -5,8 +5,8 @@ import com.plate.boot.commons.ProgressEvent;
 import com.plate.boot.commons.utils.DatabaseUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +32,8 @@ public class GroupMembersController {
     }
 
     @GetMapping("page")
-    public Mono<Page<GroupMemberRes>> page(GroupMemberReq request, Pageable pageable) {
-        return this.groupMembersService.page(request, pageable);
+    public Mono<PagedModel<GroupMemberRes>> page(GroupMemberReq request, Pageable pageable) {
+        return this.groupMembersService.page(request, pageable).map(PagedModel::new);
     }
 
     @PostMapping("save")
