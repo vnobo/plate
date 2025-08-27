@@ -32,15 +32,15 @@ public class LoggerReq extends Logger {
      */
     public static LoggerReq of(String tenantCode, String operator, String prefix,
                                String method, String status, String url, JsonNode context) {
-        LoggerReq request = new LoggerReq();
-        request.setTenantCode(tenantCode);
-        request.setOperator(operator);
-        request.setPrefix(prefix);
-        request.setUrl(url);
-        request.setMethod(MethodType.value(method));
-        request.setStatus(status);
-        request.setContext(context);
-        return request;
+        LoggerReq req = new LoggerReq();
+        req.setTenantCode(tenantCode);
+        req.setOperator(operator);
+        req.setPrefix(prefix);
+        req.setUrl(url);
+        req.setMethod(MethodType.value(method));
+        req.setStatus(status);
+        req.setContext(context);
+        return req;
     }
 
     /**

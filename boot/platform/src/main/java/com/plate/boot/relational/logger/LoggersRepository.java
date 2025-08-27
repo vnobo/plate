@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
  *
  * <p>Notably, it includes:</p>
  * <ul>
- *   <li>{@link #deleteByCreatedTimeBefore(LocalDateTime)}: A method to remove outdated log entries
+ *   <li>{@link # deleteByCreatedTimeBefore(LocalDateTime)}: A method to remove outdated log entries
  *       based on the specified creation time threshold.</li>
  * </ul>
  *

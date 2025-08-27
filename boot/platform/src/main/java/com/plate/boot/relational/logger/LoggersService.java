@@ -34,10 +34,10 @@ public class LoggersService extends AbstractCache {
      * @param pageable Pagination details defining how the results should be sliced.
      * @return A Flux of Logger objects matching the search criteria, respecting the specified pagination.
      */
-    public Flux<Logger> search(LoggerReq request, Pageable pageable) {
+    public Flux<LoggerRes> search(LoggerReq request, Pageable pageable) {
         QueryFragment queryFragment = request.query().pageable(pageable);
         var cacheKey = BeanUtils.cacheKey(request, pageable);
-        return this.queryWithCache(cacheKey, queryFragment.querySql(), queryFragment, Logger.class);
+        return this.queryWithCache(cacheKey, queryFragment.querySql(), queryFragment, LoggerRes.class);
     }
 
     /**
@@ -49,7 +49,7 @@ public class LoggersService extends AbstractCache {
      * respecting the specified pagination and sorted accordingly. The {@link Page} includes both content and
      * metadata such as total elements, page number, and page size.
      */
-    public Mono<Page<Logger>> page(LoggerReq request, Pageable pageable) {
+    public Mono<Page<LoggerRes>> page(LoggerReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment queryFragment = request.query();
         var countMono = this.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);

@@ -258,7 +258,7 @@ public final class ContextUtils implements InitializingBean {
      * @return A newly created {@link UUID} instance, providing a unique identifier.
      */
     public static UUID nextId() {
-        return UuidCreator.getTimeOrderedEpoch();
+        return UuidCreator.getTimeOrderedEpochFast();
     }
 
     /**
