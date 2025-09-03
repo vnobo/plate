@@ -42,6 +42,22 @@ class DatabaseUtilsTest {
         databaseUtils = new DatabaseUtils(entityTemplate, redisTemplate);
     }
 
+    public DatabaseClient getDatabaseClient() {
+        return databaseClient;
+    }
+
+    public void setDatabaseClient(DatabaseClient databaseClient) {
+        this.databaseClient = databaseClient;
+    }
+
+    public R2dbcConverter getR2dbcConverter() {
+        return r2dbcConverter;
+    }
+
+    public void setR2dbcConverter(R2dbcConverter r2dbcConverter) {
+        this.r2dbcConverter = r2dbcConverter;
+    }
+
     // Test entity class
     static class TestEntity {
         private String name;
