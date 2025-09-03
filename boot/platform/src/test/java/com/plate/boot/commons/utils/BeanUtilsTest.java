@@ -38,7 +38,6 @@ class BeanUtilsTest {
         beanUtils = new BeanUtils(userAuditorAware);
     }
 
-    // Test classes
     static class TestUser {
         private String name;
         private int age;

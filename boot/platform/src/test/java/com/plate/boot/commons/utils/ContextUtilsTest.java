@@ -61,14 +61,12 @@ class ContextUtilsTest {
         @Test
         @DisplayName("Should publish event")
         void shouldPublishEvent() {
-            AbstractEvent<String> event = mock(AbstractEvent.class);
+            var event = mock(AbstractEvent.class);
             ContextUtils.eventPublisher(event);
 
             // This verification may not work due to static method mocking complexities
             // We'll just verify that the method doesn't throw an exception
-            assertDoesNotThrow(() -> {
-                ContextUtils.eventPublisher(event);
-            });
+            assertDoesNotThrow(() -> ContextUtils.eventPublisher(event));
         }
     }
 
