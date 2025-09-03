@@ -231,7 +231,12 @@ public class DatabaseUtils implements InitializingBean {
             return DataSize.ofBytes(0);
         }
         try {
-            int size = BeanUtils.objectToBytes(obj).length;
+            byte[] bytes = BeanUtils.objectToBytes(obj);
+            if (bytes == null) {
+                log.warn("Object serialization returned null bytes");
+                return DataSize.ofBytes(0);
+            }
+            int size = bytes.length;
             return DataSize.ofBytes(size);
         } catch (Exception e) {
             log.error("Bean Size calculation failed: {}", e.toString());
@@ -302,8 +307,9 @@ public class DatabaseUtils implements InitializingBean {
             var event = ProgressEvent.of(index, req);
             return saveFunction.apply(req).flatMap(res -> Mono.just(event.withResult(
                             "Processed success batch save item.", res)))
-                    .onErrorResume(err -> Mono.just(event.withError("Processed failed batch save item.",
-                            RestServerException.withMsg(err.getCause().getLocalizedMessage(), err))));
+                    .onErrorResume(err -> Mono.just(event.withError("Processed failed save item. msg: "
+                                    + err.getCause().getMessage(),
+                            RestServerException.withMsg(err.getLocalizedMessage(), err))));
         }).delayElements(Duration.ofMillis(100));
         var endMono = Mono.fromCallable(() -> ProgressEvent.of(0L, null)
                 .withMessage("Batch processing completed"));

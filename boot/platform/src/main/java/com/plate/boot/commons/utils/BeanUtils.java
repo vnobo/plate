@@ -292,14 +292,28 @@ public final class BeanUtils implements InitializingBean {
      */
     private static <T> Mono<String> serializeUserAuditorProperty(T object, PropertyDescriptor propertyDescriptor) {
         try {
-            UserAuditor userAuditor = (UserAuditor) ReflectionUtils.invokeMethod(propertyDescriptor.getReadMethod(), object);
+            var readMethod = propertyDescriptor.getReadMethod();
+            var writeMethod = propertyDescriptor.getWriteMethod();
+
+            if (readMethod == null || writeMethod == null) {
+                String msg = "Property " + propertyDescriptor.getName() + " is not readable or writable";
+                log.warn(msg);
+                return Mono.just(msg);
+            }
+
+            // Make methods accessible before invoking
+            ReflectionUtils.makeAccessible(readMethod);
+            ReflectionUtils.makeAccessible(writeMethod);
+
+            UserAuditor userAuditor = (UserAuditor) ReflectionUtils.invokeMethod(readMethod, object);
             if (ObjectUtils.isEmpty(userAuditor)) {
                 String msg = "User auditor is empty, No serializable." + propertyDescriptor.getName();
                 log.warn(msg);
                 return Mono.just(msg);
             }
+
             return USER_AUDITOR_AWARE.loadByCode(userAuditor.code()).cache().flatMap(user -> {
-                ReflectionUtils.invokeMethod(propertyDescriptor.getWriteMethod(), object, user);
+                ReflectionUtils.invokeMethod(writeMethod, object, user);
                 return Mono.just("User auditor serializable success. " + propertyDescriptor.getName());
             }).onErrorResume(throwable -> {
                 log.error("Error serializing user auditor for property: {}", propertyDescriptor.getName(), throwable);
