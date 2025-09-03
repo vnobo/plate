@@ -206,7 +206,8 @@ class DatabaseUtilsTest {
                     .expectNext() // First item succeeds
                     .expectNext() // Second item fails but is handled
                     .expectNextMatches(event -> event.getMessage().contains("completed"))
-                    .expectComplete();
+                    .expectComplete()
+                    .verify();
         }
     }
 
