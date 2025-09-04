@@ -5,7 +5,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -28,9 +27,6 @@ import reactor.core.publisher.Mono;
 @Component
 public class CsrfWebFilter implements WebFilter {
 
-    private static final String SIGN_HEADER = "X-Request-Sign";
-    private static final PasswordEncoder passwordEncoder = ContextUtils.createDelegatingPasswordEncoder("SHA-256");
-
     /**
      * Filters the incoming server web exchange to ensure CSRF protection.
      * It checks for the presence of a CSRF token in the exchange attributes.
@@ -42,13 +38,12 @@ public class CsrfWebFilter implements WebFilter {
      * @param chain    The next WebFilterChain to proceed with if the filtering
      *                 condition is met.
      * @return A Mono that, when subscribed to, will execute the remainder of the
-     *         filter chain.
-     *         If a CSRF token is found, the Mono will also ensure the token is
-     *         available in the context.
+     * filter chain.
+     * If a CSRF token is found, the Mono will also ensure the token is
+     * available in the context.
      */
     @Override
     public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
-        exchange.getRequest().getQueryParams();
         log.debug("{}Csrf filter chain [CsrfWebFilter] next.", exchange.getLogPrefix());
         Mono<CsrfToken> csrfTokenMono = exchange.getAttribute(CsrfToken.class.getName());
         if (csrfTokenMono != null) {
