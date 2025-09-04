@@ -2,7 +2,6 @@ package com.plate.boot.security.core.user.authority;
 
 import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.DatabaseUtils;
 import com.plate.boot.security.core.user.UserEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -50,7 +49,8 @@ public class UserAuthoritiesService extends AbstractCache {
      * @return a Mono emitting the operated user authority
      */
     public Mono<UserAuthority> operate(UserAuthorityReq request) {
-        var dataMono = DatabaseUtils.ENTITY_TEMPLATE.selectOne(Query.query(request.toCriteria()), UserAuthority.class);
+        var dataMono = this.userAuthoritiesRepository
+                .findByUserCodeAndAuthority(request.getUserCode(), request.getAuthority());
         dataMono = dataMono.switchIfEmpty(Mono.defer(() -> this.save(request.toAuthority())));
         return dataMono.doAfterTerminate(() -> this.cache.clear());
     }
