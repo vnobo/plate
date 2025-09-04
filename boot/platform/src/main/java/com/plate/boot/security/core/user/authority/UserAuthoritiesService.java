@@ -1,6 +1,7 @@
 package com.plate.boot.security.core.user.authority;
 
 import com.plate.boot.commons.base.AbstractCache;
+import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.security.core.user.UserEvent;
 import lombok.RequiredArgsConstructor;
@@ -49,10 +50,10 @@ public class UserAuthoritiesService extends AbstractCache {
      * @return a Mono emitting the operated user authority
      */
     public Mono<UserAuthority> operate(UserAuthorityReq request) {
-        var dataMono = this.userAuthoritiesRepository
-                .findByUserCodeAndAuthority(request.getUserCode(), request.getAuthority());
-        dataMono = dataMono.switchIfEmpty(Mono.defer(() -> this.save(request.toAuthority())));
-        return dataMono.doAfterTerminate(() -> this.cache.clear());
+        return this.userAuthoritiesRepository
+                .findByUserCodeAndAuthority(request.getUserCode(), request.getAuthority())
+                .switchIfEmpty(Mono.defer(() -> this.save(request.toAuthority())))
+                .doAfterTerminate(() -> this.cache.clear());
     }
 
     /**
@@ -77,8 +78,14 @@ public class UserAuthoritiesService extends AbstractCache {
         if (userAuthority.isNew()) {
             return this.userAuthoritiesRepository.save(userAuthority);
         } else {
-            assert userAuthority.getId() != null;
+            if (userAuthority.getId() == null) {
+                return Mono.error(RestServerException.withMsg("Id must not be null!",
+                        new IllegalArgumentException("User authority ID must not be null for existing entities")));
+            }
             return this.userAuthoritiesRepository.findById(userAuthority.getId())
+                    .switchIfEmpty(Mono.error(RestServerException.withMsg("Id must not be null!",
+                            new IllegalArgumentException("User authority not found with ID: "
+                                    + userAuthority.getId()))))
                     .flatMap(old -> this.userAuthoritiesRepository.save(userAuthority));
         }
     }
@@ -87,7 +94,8 @@ public class UserAuthoritiesService extends AbstractCache {
     public void onUserDeletedEvent(UserEvent event) {
         this.userAuthoritiesRepository.deleteByUserCode(event.entity().getCode())
                 .doAfterTerminate(() -> this.cache.clear())
-                .subscribe();
-
+                .subscribe(null, throwable ->
+                        log.error("Failed to delete user authorities for user code: {}",
+                                event.entity().getCode(), throwable));
     }
 }
