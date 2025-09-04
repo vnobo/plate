@@ -19,6 +19,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.session.ReactiveSessionRegistry;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.R2dbcReactiveOAuth2AuthorizedClientService;
@@ -26,6 +27,7 @@ import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.HttpBasicServerAuthenticationEntryPoint;
+import org.springframework.security.web.server.authentication.SessionLimit;
 import org.springframework.security.web.server.authentication.logout.*;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
@@ -35,6 +37,10 @@ import org.springframework.security.web.server.header.ClearSiteDataServerHttpHea
 import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
+import org.springframework.session.ReactiveFindByIndexNameSessionRepository;
+import org.springframework.session.ReactiveSessionRepository;
+import org.springframework.session.Session;
+import org.springframework.session.security.SpringSessionBackedReactiveSessionRegistry;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -44,7 +50,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.plate.boot.commons.utils.ContextUtils.RULE_ADMINISTRATORS;
 import static com.plate.boot.config.SessionConfiguration.XML_HTTP_REQUEST;
 import static com.plate.boot.config.SessionConfiguration.X_REQUESTED_WITH;
 
@@ -105,6 +110,25 @@ public class SecurityConfiguration {
     }
 
     /**
+     * Creates and configures a SpringSessionBackedReactiveSessionRegistry bean.
+     * This registry is designed to manage sessions within a reactive environment, backed by the provided
+     * ReactiveSessionRepository and ReactiveFindByIndexNameSessionRepository instances.
+     *
+     * @param <S>                      The type of session extending the Session interface.
+     * @param sessionRepository        A reactive session repository for storing and retrieving session data.
+     * @param indexedSessionRepository A reactive session repository capable of finding sessions by index name,
+     *                                 enhancing session management capabilities.
+     * @return An instance of SpringSessionBackedReactiveSessionRegistry configured with the given repositories,
+     * ready to manage and provide session-related services in a reactive context.
+     */
+    @Bean
+    public <S extends Session> ReactiveSessionRegistry sessionRegistry(
+            ReactiveSessionRepository<S> sessionRepository,
+            ReactiveFindByIndexNameSessionRepository<S> indexedSessionRepository) {
+        return new SpringSessionBackedReactiveSessionRegistry<>(sessionRepository, indexedSessionRepository);
+    }
+
+    /**
      * Configures and returns a SecurityWebFilterChain bean for Spring Security's WebFlux setup. This method customizes
      * various aspects of security including authorization rules, session management, basic authentication entry point,
      * form login, CSRF protection, logout handling, and OAuth2 login support.
@@ -114,20 +138,14 @@ public class SecurityConfiguration {
      */
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        http.authorizeExchange(exchange -> {
-            exchange.pathMatchers("/captcha/code", "/oauth2/qr/code").permitAll();
-            exchange.matchers(PathRequest.toStaticResources().atCommonLocations()).permitAll();
-            exchange.anyExchange().authenticated();
-        });
+        http.authorizeExchange(exchanges -> exchanges
+                .pathMatchers("/captcha/code", "/oauth2/qr/code").permitAll()
+                .matchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                .anyExchange().authenticated());
         http.sessionManagement((sessions) -> sessions
-                .concurrentSessions((concurrency) ->
-                        concurrency.maximumSessions((authentication) -> {
-                            if (authentication.getAuthorities().stream().anyMatch(a ->
-                                    RULE_ADMINISTRATORS.equals(a.getAuthority()))) {
-                                return Mono.just(2);
-                            }
-                            return Mono.just(1);
-                        })));
+                .concurrentSessions((concurrency) -> concurrency
+                        .maximumSessions(SessionLimit.of(1))
+                ));
         http.securityContextRepository(securityContextRepository);
         http.httpBasic(httpBasicSpec -> httpBasicSpec
                 .authenticationEntryPoint(new CustomServerAuthenticationEntryPoint()));
