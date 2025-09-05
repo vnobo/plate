@@ -31,8 +31,14 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class GroupMemberRes extends GroupMember {
 
+    /**
+     * The name of the group member.
+     */
     private String name;
 
+    /**
+     * Additional group-specific extension data in JSON format.
+     */
     private JsonNode groupExtend;
 
 }

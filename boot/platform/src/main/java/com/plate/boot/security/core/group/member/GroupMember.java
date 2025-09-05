@@ -1,7 +1,7 @@
 package com.plate.boot.security.core.group.member;
 
 import com.plate.boot.commons.base.AbstractEntity;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.relational.core.mapping.Table;
@@ -25,9 +25,15 @@ import java.util.UUID;
 @Table("se_group_members")
 public class GroupMember extends AbstractEntity<Long> {
 
-    @NotBlank(message = "Group member [groupCode] cannot be empty!")
+    /**
+     * The unique identifier of the group to which the member belongs.
+     */
+    @NotNull(message = "Group member [groupCode] cannot be empty!")
     private UUID groupCode;
 
-    @NotBlank(message = "Group member [username] cannot be empty!")
+    /**
+     * The unique identifier of the user who is a member of the group.
+     */
+    @NotNull(message = "Group member [username] cannot be empty!")
     private UUID userCode;
 }

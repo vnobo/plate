@@ -44,8 +44,14 @@ import java.util.UUID;
 @ToString(callSuper = true)
 public class GroupMemberReq extends GroupMember {
 
+    /**
+     * Set of user codes for filtering group members
+     */
     private Set<UUID> users;
 
+    /**
+     * Username for filtering group members
+     */
     private String username;
 
     /**
