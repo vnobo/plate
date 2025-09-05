@@ -118,8 +118,7 @@ public final class BeanUtils implements InitializingBean {
                 for (var sort : pageable.getSort()) {
                     keyJoiner.add(sort.getProperty() + "_" + sort.getDirection().name());
                 }
-            }
-            if (!(obj instanceof Pageable)) {
+            } else {
                 var objMap = BeanUtils.beanToMap(obj, true);
                 var setStr = objMap.entrySet().stream()
                         .map(entry -> entry.getKey() + "=" + entry.getValue())
@@ -310,12 +309,15 @@ public final class BeanUtils implements InitializingBean {
                 return Mono.just(msg);
             }
 
-            return USER_AUDITOR_AWARE.loadByCode(userAuditor.code()).cache().flatMap(user -> {
+            return USER_AUDITOR_AWARE.loadByCode(userAuditor.code()).flatMap(user -> {
                 ReflectionUtils.invokeMethod(writeMethod, object, user);
-                return Mono.just("User auditor serializable success. " + propertyDescriptor.getName());
+                return Mono.just("User auditor serializable success. "
+                        + propertyDescriptor.getName());
             }).onErrorResume(throwable -> {
-                log.error("Error serializing user auditor for property: {}", propertyDescriptor.getName(), throwable);
-                return Mono.just("User auditor serialization failed for property: " + propertyDescriptor.getName());
+                log.error("Error serializing user auditor for property: {}",
+                        propertyDescriptor.getName(), throwable);
+                return Mono.just("User auditor serialization failed for property: "
+                        + propertyDescriptor.getName());
             });
         } catch (Exception e) {
             log.error("Error accessing property: {}", propertyDescriptor.getName(), e);
