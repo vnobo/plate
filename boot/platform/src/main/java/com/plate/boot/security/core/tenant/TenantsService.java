@@ -27,7 +27,13 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class TenantsService extends AbstractCache {
 
+    /**
+     * Repository for managing tenants.
+     */
     private final TenantsRepository tenantsRepository;
+    /**
+     * Repository for managing tenant members.
+     */
     private final TenantMembersRepository membersRepository;
 
     /**

@@ -54,6 +54,12 @@ public class UserAuthority extends AbstractEntity<Integer> implements GrantedAut
         return this.authority;
     }
 
+    /**
+     * Returns the tenant code associated with the user.
+     * This method is required by the BaseEntity interface.
+     *
+     * @return the tenant code associated with the user
+     */
     @JsonIgnore
     @Override
     public String getTenantCode() {

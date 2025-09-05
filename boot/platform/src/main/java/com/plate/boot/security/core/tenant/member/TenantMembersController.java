@@ -24,6 +24,9 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class TenantMembersController {
 
+    /**
+     * Service for handling tenant member operations.
+     */
     private final TenantMembersService tenantMembersService;
 
     /**

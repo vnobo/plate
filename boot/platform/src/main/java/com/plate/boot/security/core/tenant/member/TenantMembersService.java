@@ -31,6 +31,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TenantMembersService extends AbstractCache {
 
+    /**
+     * Repository for tenant member operations.
+     */
     private final TenantMembersRepository tenantMembersRepository;
 
     /**

@@ -60,18 +60,35 @@ import java.util.*;
 public class SecurityManager extends AbstractCache
         implements ReactiveUserDetailsService, ReactiveUserDetailsPasswordService {
 
+    /**
+     * Represents the fragments for querying user, group, tenant, and authority information.
+     * These fragments are used to construct SQL queries for fetching user details, group members,
+     * tenant members, and user authorities.
+     */
     private final static QueryFragment QUERY_GROUP_MEMBERS_FRAGMENT = QueryFragment
             .from("se_group_members a", "join se_groups b on a.group_code=b.code")
             .column("a.*", "b.name", "b.extend")
             .where("a.user_code = :userCode");
+    /**
+     * Represents the fragments for querying tenant members and tenant information.
+     * These fragments are used to construct SQL queries for fetching tenant members and their details.
+     */
     private final static QueryFragment QUERY_TENANT_MEMBERS_FRAGMENT = QueryFragment
             .from("se_tenant_members a", "join se_tenants b on a.tenant_code=b.code")
             .column("a.*", "b.name", "b.extend")
             .where("a.user_code = :userCode");
+    /**
+     * Represents the fragments for querying user authorities.
+     * These fragments are used to construct SQL queries for fetching user authorities.
+     */
     private final static QueryFragment QUERY_USER_AUTHORITY_FRAGMENT = QueryFragment
             .from("se_authorities")
             .column("*")
             .where("user_code = :userCode");
+    /**
+     * Represents the fragments for querying group authorities.
+     * These fragments are used to construct SQL queries for fetching group authorities.
+     */
     private final static QueryFragment QUERY_GROUP_AUTHORITY_FRAGMENT = QueryFragment
             .from("se_group_authorities ga",
                     "join se_group_members gm on ga.group_code = gm.group_code",

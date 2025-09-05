@@ -90,6 +90,12 @@ public class UserAuthoritiesService extends AbstractCache {
         }
     }
 
+    /**
+     * Event listener method that is triggered when a user is deleted.
+     * It deletes all user authorities associated with the deleted user.
+     *
+     * @param event the user event containing information about the deleted user
+     */
     @EventListener(value = UserEvent.class, condition = "#event.kind.name() == 'DELETE'")
     public void onUserDeletedEvent(UserEvent event) {
         this.userAuthoritiesRepository.deleteByUserCode(event.entity().getCode())

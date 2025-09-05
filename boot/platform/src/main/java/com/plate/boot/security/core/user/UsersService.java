@@ -18,13 +18,20 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
+ * User service 
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Service
 @RequiredArgsConstructor
 public class UsersService extends AbstractCache {
 
+    /**
+     * The PasswordEncoder interface provides methods for encoding and validating passwords.
+     */
     private final PasswordEncoder passwordEncoder;
+    /**
+     * The UsersRepository interface provides methods for interacting with the user data in the database.
+     */
     private final UsersRepository usersRepository;
 
 

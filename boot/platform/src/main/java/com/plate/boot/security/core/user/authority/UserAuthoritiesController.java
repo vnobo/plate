@@ -27,6 +27,9 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UserAuthoritiesController {
 
+    /**
+     * The service for managing user authorities.
+     */
     private final UserAuthoritiesService authoritiesService;
 
     /**

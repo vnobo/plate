@@ -48,22 +48,39 @@ public class GroupMemberReq extends GroupMember {
 
     private String username;
 
+    /**
+     * Converts this request object to a GroupMember entity
+     *
+     * @return a new GroupMember instance with properties copied from this request
+     */
     public GroupMember toGroupMember() {
         return BeanUtils.copyProperties(this, GroupMember.class);
     }
 
+    /**
+     * Generates a Criteria object based on the request's filterable properties
+     *
+     * @return Criteria object for structured querying
+     */
     public Criteria toCriteria() {
         return criteria(Set.of("users", "username"));
     }
 
+    /**
+     * Constructs a QueryFragment for dynamic SQL generation with parameter placeholders
+     *
+     * @return QueryFragment for complex query construction with optional filters
+     */
     public QueryFragment toParamSql() {
         Criteria criteria = toCriteria();
+        // Add user code filter if users set is not empty
         if (!ObjectUtils.isEmpty(this.getUsers())) {
             criteria = criteria.and("userCode").in(this.getUsers());
         }
         var conditionA = QueryFragment.Condition.of(criteria, "a");
 
         Criteria criteriaB = Criteria.empty();
+        // Add username filter if username is provided
         if (StringUtils.hasLength(this.getUsername())) {
             criteriaB = criteriaB.and("username").is(this.getUsername());
         }
