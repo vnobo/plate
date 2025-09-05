@@ -119,7 +119,6 @@ public final class BeanUtils implements InitializingBean {
                     keyJoiner.add(sort.getProperty() + "_" + sort.getDirection().name());
                 }
             }
-            // 优化：只在需要时才进行beanToMap转换
             if (!(obj instanceof Pageable)) {
                 var objMap = BeanUtils.beanToMap(obj, true);
                 var setStr = objMap.entrySet().stream()
@@ -171,8 +170,7 @@ public final class BeanUtils implements InitializingBean {
         String[] nullKeys = new String[0];
         if (ignoreNullValue) {
             nullKeys = Maps.filterEntries(targetMap, entry -> ObjectUtils.isEmpty(entry.getValue()))
-                    .keySet()
-                    .toArray(String[]::new);
+                    .keySet().toArray(String[]::new);
         }
         if (nullKeys.length > 0) {
             org.springframework.beans.BeanUtils.copyProperties(source, target, nullKeys);
