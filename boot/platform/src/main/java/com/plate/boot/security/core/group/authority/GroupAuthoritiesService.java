@@ -3,7 +3,6 @@ package com.plate.boot.security.core.group.authority;
 
 import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.DatabaseUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.relational.core.query.Query;
@@ -44,8 +43,8 @@ public class GroupAuthoritiesService extends AbstractCache {
      * @return A Mono containing the operated GroupAuthority
      */
     public Mono<GroupAuthority> operate(GroupAuthorityReq request) {
-        var dataMono = DatabaseUtils.ENTITY_TEMPLATE.selectOne(Query.query(request.toCriteria()), GroupAuthority.class)
-                .defaultIfEmpty(request.toGroupAuthority());
+        var dataMono = this.authoritiesRepository.findByGroupCodeAndAuthority(request.getGroupCode(),
+                request.getAuthority()).defaultIfEmpty(request.toGroupAuthority());
         return dataMono.flatMap(this::save).doAfterTerminate(() -> this.cache.clear());
     }
 

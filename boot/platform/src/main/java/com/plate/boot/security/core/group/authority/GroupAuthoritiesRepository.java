@@ -1,7 +1,6 @@
 package com.plate.boot.security.core.group.authority;
 
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
@@ -12,7 +11,7 @@ import java.util.UUID;
  */
 public interface GroupAuthoritiesRepository extends R2dbcRepository<GroupAuthority, Integer> {
 
-/**
+    /**
      * Deletes users based on a set of permissions.
      * <p>
      * This function encapsulates an asynchronous deletion operation using Mono. It takes a set of permissions as a parameter and aims to delete all users who possess these permissions.
@@ -23,13 +22,19 @@ public interface GroupAuthoritiesRepository extends R2dbcRepository<GroupAuthori
      */
     Mono<Integer> deleteByAuthorityIn(Collection<String> authorities);
 
-/**
-     * Query permission information based on the group code.
+    /**
+     * Finds users based on a specific group code and permission.
      * <p>
-     * This method retrieves the permission groups associated with the specified group code. It allows the system to dynamically determine the permissions a user has based on their group membership. This is crucial for implementing Role-Based Access Control (RBAC).
+     * This function encapsulates an asynchronous search operation using Flux. It takes a group code and a permission as parameters and aims to find all users who belong to the specified group and have the specified permission.
+     * The use of the Reactive programming model enhances the efficiency of concurrent processing and elegantly handles asynchronous data streams.
      *
-     * @param groupCode The unique identifier code of the group. This parameter is the key criterion for filtering permission groups.
-     * @return Returns a Flux object containing the GroupAuthority entities that meet the criteria. Flux is a reactive stream that allows for non-blocking processing of asynchronous data sequences.
+     * @param groupCode The group code of the users to be searched. Users are located via their group membership, as group codes are often an effective way to identify users.
+     * @param authority The permission of the users to be searched. Users are located via their permission sets, as permissions are often an effective way to identify users.
+     * @return Flux<GroupAuthority> Represents the result of the asynchronous operation, returning a sequence of users that meet the search criteria. Flux is a Reactive Streams type used to represent a
+     * sequence of 0 or more elements.
+     * @see Mono
+     * @see GroupAuthority
+     * @see UUID
      */
-    Flux<GroupAuthority> findByGroupCode(UUID groupCode);
+    Mono<GroupAuthority> findByGroupCodeAndAuthority(UUID groupCode, String authority);
 }

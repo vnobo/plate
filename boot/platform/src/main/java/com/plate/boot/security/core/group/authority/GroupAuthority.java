@@ -2,10 +2,11 @@ package com.plate.boot.security.core.group.authority;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plate.boot.commons.base.AbstractEntity;
+import com.plate.boot.commons.base.BaseEntity;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -25,15 +26,14 @@ import java.util.UUID;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@NoArgsConstructor
 @Table("se_group_authorities")
-public class GroupAuthority extends AbstractEntity<Integer> implements GrantedAuthority {
+public class GroupAuthority extends AbstractEntity<Integer> implements GrantedAuthority, BaseEntity<Integer> {
 
     /**
      * The unique code of the group.
      * It is annotated with \@NotBlank to ensure it is not null or empty.
      */
-    @NotBlank(message = "Group authority [groupCode] cannot be empty!")
+    @NotNull(message = "Group authority [groupCode] cannot be empty!")
     private UUID groupCode;
 
     /**
@@ -42,17 +42,6 @@ public class GroupAuthority extends AbstractEntity<Integer> implements GrantedAu
      */
     @NotBlank(message = "Group authority [authority] cannot be empty!")
     private String authority;
-
-    /**
-     * Constructs a new GroupAuthority with the specified group code and authority.
-     *
-     * @param groupCode the unique code of the group
-     * @param authority the authority granted to the group
-     */
-    public GroupAuthority(UUID groupCode, String authority) {
-        this.groupCode = groupCode;
-        this.authority = authority;
-    }
 
     /**
      * Returns the tenant code associated with the group authority.
