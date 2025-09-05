@@ -126,9 +126,7 @@ public class DatabaseUtils implements InitializingBean {
      */
     public static <T> Flux<T> query(Query query, Class<T> entityClass) {
         Flux<T> source = ENTITY_TEMPLATE.select(query, entityClass);
-        return source
-                .flatMapSequential(BeanUtils::serializeUserAuditor)
-                .cache();
+        return source.flatMapSequential(BeanUtils::serializeUserAuditor).cache();
     }
 
     /**
@@ -158,9 +156,7 @@ public class DatabaseUtils implements InitializingBean {
         Flux<T> source = executeSpec
                 .map((row, rowMetadata) -> R2DBC_CONVERTER.read(entityClass, row, rowMetadata))
                 .all();
-        return source
-                .flatMapSequential(BeanUtils::serializeUserAuditor)
-                .cache();
+        return source.flatMapSequential(BeanUtils::serializeUserAuditor).cache();
     }
 
     /**

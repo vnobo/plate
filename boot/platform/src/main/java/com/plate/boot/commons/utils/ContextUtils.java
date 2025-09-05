@@ -125,6 +125,8 @@ public final class ContextUtils implements InitializingBean {
      * Initializes the ContextUtils class with necessary dependencies.
      *
      * @param objectMapper The ObjectMapper instance used for JSON serialization and deserialization.
+     * @param cacheManager The CacheManager instance used for cache operations.
+     * @param applicationEventPublisher The ApplicationEventPublisher instance used for event publishing.
      */
     ContextUtils(ObjectMapper objectMapper, CacheManager cacheManager,
                  ApplicationEventPublisher applicationEventPublisher) {
@@ -172,6 +174,7 @@ public final class ContextUtils implements InitializingBean {
      * {@link Argon2PasswordEncoder#defaultsForSpringSecurity_v5_8()}</li>
      * </ul>
      *
+     * @param encodingId The encoding ID to use as the default encoder
      * @return the {@link PasswordEncoder} to use
      */
     @SuppressWarnings("deprecation")
@@ -199,14 +202,14 @@ public final class ContextUtils implements InitializingBean {
     }
 
     /**
-     * Encodes the given input string into its MD5 hash representation, which is then
+     * Encodes the given input string into its SHA-256 hash representation, which is then
      * base64 encoded for a more compact and URL-friendly format.
      *
-     * @param input The string to be encoded into MD5 hash.
-     * @return A base64 encoded string representing the MD5 hash of the input string.
+     * @param input The string to be encoded into SHA-256 hash.
+     * @return A base64 encoded string representing the SHA-256 hash of the input string.
      */
     public static String encodeToSHA256(String input) {
-        return createDelegatingPasswordEncoder("MD5").encode(input);
+        return createDelegatingPasswordEncoder("SHA-256").encode(input);
     }
 
     /**
