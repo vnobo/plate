@@ -166,9 +166,17 @@ public class SecurityController {
     @Data
     public static class ChangePasswordRequest {
 
+        /**
+         * The user's current password
+         * Used to verify the user's identity to ensure that the password change request is made by the legitimate user
+         */
         @NotBlank(message = "Password not empty!")
         private String password;
 
+        /**
+         * The new password to be set by the user
+         * Must be different from the current password and meet the password strength requirements
+         */
         @NotBlank(message = "New password not empty!")
         private String newPassword;
     }

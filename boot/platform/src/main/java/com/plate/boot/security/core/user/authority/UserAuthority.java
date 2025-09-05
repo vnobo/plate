@@ -1,6 +1,5 @@
 package com.plate.boot.security.core.user.authority;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plate.boot.commons.base.AbstractEntity;
 import com.plate.boot.commons.base.BaseEntity;
 import jakarta.validation.constraints.NotBlank;
@@ -43,26 +42,4 @@ public class UserAuthority extends AbstractEntity<Integer> implements GrantedAut
     @NotBlank(message = "User entity [authority] cannot be empty!")
     private String authority;
 
-    /**
-     * Returns the authority granted to the user.
-     * This method is required by the GrantedAuthority interface.
-     *
-     * @return the authority granted to the user
-     */
-    @Override
-    public String getAuthority() {
-        return this.authority;
-    }
-
-    /**
-     * Returns the tenant code associated with the user.
-     * This method is required by the BaseEntity interface.
-     *
-     * @return the tenant code associated with the user
-     */
-    @JsonIgnore
-    @Override
-    public String getTenantCode() {
-        return this.tenantCode;
-    }
 }

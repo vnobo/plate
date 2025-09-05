@@ -1,12 +1,13 @@
 package com.plate.boot.security.core.group.authority;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.commons.base.AbstractEntity;
 import com.plate.boot.commons.base.BaseEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -44,14 +45,14 @@ public class GroupAuthority extends AbstractEntity<Integer> implements GrantedAu
     private String authority;
 
     /**
-     * Returns the tenant code associated with the group authority.
-     * This method is annotated with \@JsonIgnore to exclude it from JSON serialization.
-     *
-     * @return the tenant code
+     * Data tenant code
      */
-    @JsonIgnore
-    @Override
-    public String getTenantCode() {
-        return this.tenantCode;
-    }
+    @Transient
+    private String tenantCode;
+
+    /**
+     * Data entity extend,Json column
+     */
+    @Transient
+    private JsonNode extend;
 }

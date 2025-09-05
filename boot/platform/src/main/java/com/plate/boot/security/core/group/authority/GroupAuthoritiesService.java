@@ -43,9 +43,10 @@ public class GroupAuthoritiesService extends AbstractCache {
      * @return A Mono containing the operated GroupAuthority
      */
     public Mono<GroupAuthority> operate(GroupAuthorityReq request) {
-        var dataMono = this.authoritiesRepository.findByGroupCodeAndAuthority(request.getGroupCode(),
-                request.getAuthority()).defaultIfEmpty(request.toGroupAuthority());
-        return dataMono.flatMap(this::save).doAfterTerminate(() -> this.cache.clear());
+        return this.authoritiesRepository
+                .findByGroupCodeAndAuthority(request.getGroupCode(), request.getAuthority())
+                .switchIfEmpty(Mono.defer(() -> this.save(request.toGroupAuthority())))
+                .doAfterTerminate(() -> this.cache.clear());
     }
 
     /**

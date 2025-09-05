@@ -82,19 +82,20 @@ comment on table se_users is '用户表';
 
 create table if not exists se_authorities
 (
-    id         serial8 primary key,
-    code       uuid         not null unique,
-    user_code  uuid         not null,
-    authority  varchar(512) not null,
-    created_by uuid         not null default '00000000-0000-0000-0000-000000000000',
-    updated_by uuid         not null default '00000000-0000-0000-0000-000000000000',
-    created_at timestamp    not null default current_timestamp,
-    updated_at timestamp    not null default current_timestamp,
+    id          serial8 primary key,
+    code        uuid         not null unique,
+    tenant_code varchar(64)  not null default '0',
+    user_code   uuid         not null,
+    authority   varchar(512) not null,
+    extend      jsonb,
+    created_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
+    updated_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
+    created_at  timestamp    not null default current_timestamp,
+    updated_at  timestamp    not null default current_timestamp,
     unique (user_code, authority),
     foreign key (user_code) references se_users (code)
 );
 comment on table se_authorities is '用户权限表';
-
 
 create table if not exists se_groups
 (
@@ -118,33 +119,35 @@ create index se_groups_tn_idx on se_groups (tenant_code, name);
 create index se_groups_extend_gin_idx on se_groups using gin (extend);
 comment on table se_groups is '角色表';
 
-
 create table if not exists se_group_authorities
 (
-    id         serial8 primary key,
-    code       uuid         not null unique,
-    group_code uuid         not null,
-    authority  varchar(512) not null,
-    created_by uuid         not null default '00000000-0000-0000-0000-000000000000',
-    updated_by uuid         not null default '00000000-0000-0000-0000-000000000000',
-    created_at timestamp    not null default current_timestamp,
-    updated_at timestamp    not null default current_timestamp,
+    id          serial8 primary key,
+    code        uuid         not null unique,
+    tenant_code varchar(64)  not null default '0',
+    group_code  uuid         not null,
+    authority   varchar(512) not null,
+    extend      jsonb,
+    created_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
+    updated_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
+    created_at  timestamp    not null default current_timestamp,
+    updated_at  timestamp    not null default current_timestamp,
     unique (group_code, authority),
     foreign key (group_code) references se_groups (code)
 );
 comment on table se_group_authorities is '角色权限表';
 
-
 create table if not exists se_group_members
 (
-    id         serial8 primary key,
-    code       uuid      not null unique,
-    group_code uuid      not null,
-    user_code  uuid      not null,
-    created_by uuid      not null default '00000000-0000-0000-0000-000000000000',
-    updated_by uuid      not null default '00000000-0000-0000-0000-000000000000',
-    created_at timestamp not null default current_timestamp,
-    updated_at timestamp not null default current_timestamp,
+    id          serial8 primary key,
+    code        uuid        not null unique,
+    tenant_code varchar(64) not null default '0',
+    group_code  uuid        not null,
+    user_code   uuid        not null,
+    extend      jsonb,
+    created_by  uuid        not null default '00000000-0000-0000-0000-000000000000',
+    updated_by  uuid        not null default '00000000-0000-0000-0000-000000000000',
+    created_at  timestamp   not null default current_timestamp,
+    updated_at  timestamp   not null default current_timestamp,
     unique (group_code, user_code),
     foreign key (group_code) references se_groups (code),
     foreign key (user_code) references se_users (code)
@@ -174,9 +177,10 @@ create table if not exists se_tenant_members
 (
     id          serial8 primary key,
     code        uuid        not null unique,
-    tenant_code varchar(64) not null,
+    tenant_code varchar(64) not null default '0',
     user_code   uuid        not null,
     enabled     boolean     not null default true,
+    extend      jsonb,
     created_by  uuid        not null default '00000000-0000-0000-0000-000000000000',
     updated_by  uuid        not null default '00000000-0000-0000-0000-000000000000',
     created_at  timestamp   not null default current_timestamp,
@@ -186,7 +190,6 @@ create table if not exists se_tenant_members
     foreign key (user_code) references se_users (code)
 );
 comment on table se_tenant_members is '租户用户关系表';
-
 
 create table if not exists se_loggers
 (
