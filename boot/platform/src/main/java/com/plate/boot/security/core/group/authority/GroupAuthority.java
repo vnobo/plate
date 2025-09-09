@@ -1,13 +1,11 @@
 package com.plate.boot.security.core.group.authority;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.commons.base.AbstractEntity;
 import com.plate.boot.commons.base.BaseEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -44,15 +42,4 @@ public class GroupAuthority extends AbstractEntity<Integer> implements GrantedAu
     @NotBlank(message = "Group authority [authority] cannot be empty!")
     private String authority;
 
-    /**
-     * Data tenant code
-     */
-    @Transient
-    private String tenantCode;
-
-    /**
-     * Data entity extend,Json column
-     */
-    @Transient
-    private JsonNode extend;
 }

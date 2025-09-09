@@ -1,7 +1,6 @@
 package com.plate.boot.security.core.tenant.member;
 
 import com.plate.boot.commons.base.AbstractEntity;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,7 +30,7 @@ public class TenantMember extends AbstractEntity<Long> {
      *
      * @see UUID &#064;NotBlank  Validation constraint ensuring the value cannot be empty
      */
-    @NotBlank(message = "The user code [userCode] cannot be empty!")
+    @NotNull(message = "The user code [userCode] cannot be empty!")
     private UUID userCode;
 
     /**
