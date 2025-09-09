@@ -16,15 +16,38 @@ spring:
   threads.virtual.enabled: true
   main.keep-alive: true
   application.name: plate
-  webflux:
-    properties:
-      path-prefixes:
-        - path: rel/v1
-          base-package: com.plate.boot.relational
-        - path: sec/v1
-          base-package: com.plate.boot.security
+  webflux.format:
+    time: "HH:mm:ss"
+    date-time: "yyyy-MM-dd HH:mm:ss"
+    date: "yyyy-MM-dd"
+  jackson:
+    date-format: "yyyy-MM-dd HH:mm:ss"
+    time-zone: "GMT+8"
+    locale: "zh_CN"
+  http.codecs:
+    max-in-memory-size: 10MB
+    log-request-details: false
+  cache.redis:
+    key-prefix: "plate:caches:"
+    time-to-live: 5M
+    enable-statistics: true
+  session:
+    timeout: 8H
+    redis:
+      flush-mode: on_save
+      repository-type: indexed
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 1.0.0
+    baseline-description: "Baseline version V1.0.0,See https://github.com/plate/plate"
+  webflux.properties:
+    max-page-size: 100
+    default-page-size: 25
+    path-prefixes:
+      - path: "/sec/v1"
+        base-package: "com.plate.boot.security"
+      - path: "/rel/v1"
+        base-package: "com.plate.boot.relational"
   security.oauth2.client.registration:
     github:
-      client-id: "${github.client-id:Iv1.14a97a700a228437}"
-      client-secret: 9b6f9bb19d59c309e5f566525789e01a6f8f9644
-      scope: user
+      client-id: Iv1.14a97a700a228437
