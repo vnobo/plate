@@ -1,11 +1,16 @@
-logging:
-  register-shutdown-hook: true
+logging.level:
+  web: debug
+  com.plate.boot.*: debug
+  org.springframework.r2dbc: debug
+  io.r2dbc.postgresql.PARAM: debug
 
-  level:
-    web: debug
-    com.plate.boot.*: debug
-    org.springframework.r2dbc: debug
-    io.r2dbc.postgresql.PARAM: debug
+
+server:
+  port: "${port:8080}"
+  http2.enabled: true
+  shutdown: graceful
+  compression.enabled: true
+
 spring:
   lifecycle.timeout-per-shutdown-phase: 20s
   threads.virtual.enabled: true
@@ -41,5 +46,8 @@ spring:
     path-prefixes:
       - path: "/sec/v1"
         base-package: "com.plate.boot.security"
-      - path: "/rela/v1"
+      - path: "/rel/v1"
         base-package: "com.plate.boot.relational"
+  security.oauth2.client.registration:
+    github:
+      client-id: Iv1.14a97a700a228437

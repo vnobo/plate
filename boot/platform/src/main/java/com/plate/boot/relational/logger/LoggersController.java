@@ -4,6 +4,7 @@ import com.plate.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,10 +39,10 @@ public class LoggersController {
      * the current page and provides access to the actual log records.
      */
     @GetMapping("page")
-    public Mono<Page<Logger>> page(LoggerReq request, Pageable pageable) {
+    public Mono<PagedModel<LoggerRes>> page(LoggerReq request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMap(userDetails -> {
             request.setSecurityCode(userDetails.getTenantCode());
             return this.loggersService.page(request, pageable);
-        });
+        }).map(PagedModel::new);
     }
 }

@@ -1,16 +1,17 @@
 package com.plate.boot.commons.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.plate.boot.commons.query.QueryFragment;
+import com.plate.boot.commons.query.QueryHelper;
+import com.plate.boot.commons.query.QueryJsonHelper;
 import com.plate.boot.commons.utils.ContextUtils;
-import com.plate.boot.commons.utils.query.QueryFragment;
-import com.plate.boot.commons.utils.query.QueryHelper;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.query.Criteria;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Represents the base entity contract for entities that require common functionality
@@ -18,6 +19,29 @@ import java.util.UUID;
  * Implementing classes should provide concrete behavior for these base operations.
  */
 public interface BaseEntity<T> extends Serializable, Persistable<T> {
+    /**
+     * Support from for json column
+     */
+    @JsonIgnore
+    default Map<String, Object> getQuery() {
+        return null;
+    }
+
+    /**
+     * Support full text search for tsvector column
+     */
+    @JsonIgnore
+    default String getSearch() {
+        return null;
+    }
+
+    /**
+     * Support security code for sensitive data
+     */
+    @JsonIgnore
+    default String getSecurityCode() {
+        return null;
+    }
 
     /**
      * Retrieves the unique code assigned to the entity.
@@ -83,7 +107,23 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
      * part of the from (e.g., WHERE clause), and the parameters are mapped to
      * prevent SQL injection, ensuring secure from execution.
      */
-    default QueryFragment querySql(Collection<String> skipKeys) {
-        return QueryHelper.query(this, skipKeys);
+    default QueryFragment query(Collection<String> skipKeys) {
+        var criteria = criteria(skipKeys);
+        var tableName = QueryHelper.annotationTableName(this);
+        var fragment = QueryFragment.from(tableName).condition(QueryFragment.Condition.of(criteria));
+        if (!ObjectUtils.isEmpty(getSearch())) {
+            fragment.ts("text_search", getSearch());
+        }
+        if (!ObjectUtils.isEmpty(getQuery())) {
+            fragment.condition(QueryJsonHelper.queryJson(getQuery(), null));
+        }
+        if (StringUtils.hasLength(getSecurityCode())) {
+            fragment.like("tenantCode", getSecurityCode());
+        }
+        return fragment;
+    }
+
+    default QueryFragment query() {
+        return query(List.of());
     }
 }

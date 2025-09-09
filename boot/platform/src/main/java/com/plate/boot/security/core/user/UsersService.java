@@ -2,10 +2,9 @@ package com.plate.boot.security.core.user;
 
 import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.exception.RestServerException;
+import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.ContextUtils;
-import com.plate.boot.commons.utils.query.QueryFragment;
-import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -18,16 +17,21 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 /**
+ * User service 
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Service
 @RequiredArgsConstructor
 public class UsersService extends AbstractCache {
 
+    /**
+     * The PasswordEncoder interface provides methods for encoding and validating passwords.
+     */
     private final PasswordEncoder passwordEncoder;
+    /**
+     * The UsersRepository interface provides methods for interacting with the user data in the database.
+     */
     private final UsersRepository usersRepository;
 
 
@@ -39,7 +43,7 @@ public class UsersService extends AbstractCache {
      * @return A Flux object containing a stream of UserRes data.
      */
     public Flux<UserRes> search(UserReq request, Pageable pageable) {
-        QueryFragment queryFragment = QueryHelper.query(request, pageable);
+        QueryFragment queryFragment = request.query().pageable(pageable);
         String key = BeanUtils.cacheKey(request, pageable);
         return super.queryWithCache(key, queryFragment.querySql(), queryFragment, UserRes.class);
     }
@@ -57,7 +61,7 @@ public class UsersService extends AbstractCache {
      */
     public Mono<Page<UserRes>> page(UserReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        QueryFragment queryFragment = request.querySql(List.of());
+        QueryFragment queryFragment = request.query();
         var countMono = super.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
@@ -98,10 +102,9 @@ public class UsersService extends AbstractCache {
      * @return A Mono that, when subscribed to, emits the updated User entity after modification or throws an exception if the user was not found.
      */
     public Mono<User> modify(UserReq request) {
-        Mono<User> userFoundMono = Mono.defer(() -> Mono.error(RestServerException
-                .withMsg("User [" + request.getUsername() + "] not found",
-                        new UsernameNotFoundException("User by username [" + request.getUsername() + "] not found!"))));
-        return this.usersRepository.findByUsername(request.getUsername()).switchIfEmpty(userFoundMono)
+        return this.usersRepository.findByUsername(request.getUsername())
+                .switchIfEmpty(Mono.error(RestServerException.withMsg("User already exists",
+                        new UsernameNotFoundException("User by username [" + request.getUsername() + "] not found!"))))
                 .flatMap(user -> {
                     request.setId(user.getId());
                     request.setCode(user.getCode());
@@ -124,13 +127,18 @@ public class UsersService extends AbstractCache {
      * @return A Mono emitting the updated or newly created User after the operation is completed.
      */
     public Mono<User> operate(UserReq request) {
-        request.setPassword(this.upgradeEncodingIfPassword(request.getPassword()));
-        var userMono = this.usersRepository.findByCode(request.getCode()).defaultIfEmpty(request.toUser());
-        userMono = userMono.flatMap(user -> {
-            BeanUtils.copyProperties(request, user, true);
-            return this.save(user);
-        });
-        return userMono.doAfterTerminate(() -> this.cache.clear());
+        // 只有当密码不为空时才考虑升级编码
+        if (StringUtils.hasLength(request.getPassword())) {
+            request.setPassword(this.upgradeEncodingIfPassword(request.getPassword()));
+        }
+
+        return this.usersRepository.findByCode(request.getCode())
+                .defaultIfEmpty(request.toUser())
+                .flatMap(user -> {
+                    BeanUtils.copyProperties(request, user, true);
+                    return this.save(user);
+                })
+                .doAfterTerminate(() -> this.cache.clear());
     }
 
     /**
@@ -161,14 +169,18 @@ public class UsersService extends AbstractCache {
             return this.usersRepository.save(user)
                     .doOnNext(res -> ContextUtils.eventPublisher(UserEvent.insert(res)));
         } else {
-            assert user.getId() != null;
-            return this.usersRepository.findById(user.getId()).flatMap(old -> {
-                user.setPassword(old.getPassword());
-                user.setAccountExpired(old.getAccountExpired());
-                user.setAccountLocked(old.getAccountLocked());
-                user.setCredentialsExpired(old.getCredentialsExpired());
-                return this.usersRepository.save(user);
-            }).doOnNext(res -> ContextUtils.eventPublisher(UserEvent.save(res)));
+            if (user.getId() == null) {
+                return Mono.error(new IllegalArgumentException("User ID must not be null for existing entities"));
+            }
+            return this.usersRepository.findById(user.getId()).switchIfEmpty(
+                            Mono.error(new IllegalArgumentException("User not found with ID: " + user.getId())))
+                    .flatMap(old -> {
+                        user.setPassword(old.getPassword());
+                        user.setAccountExpired(old.getAccountExpired());
+                        user.setAccountLocked(old.getAccountLocked());
+                        user.setCredentialsExpired(old.getCredentialsExpired());
+                        return this.usersRepository.save(user);
+                    }).doOnNext(res -> ContextUtils.eventPublisher(UserEvent.save(res)));
         }
     }
 

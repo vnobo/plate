@@ -1,9 +1,8 @@
 package com.plate.boot.security.core.tenant;
 
 import com.plate.boot.commons.base.AbstractCache;
+import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.QueryFragment;
-import com.plate.boot.commons.utils.query.QueryHelper;
 import com.plate.boot.security.core.tenant.member.TenantMembersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,7 +27,13 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class TenantsService extends AbstractCache {
 
+    /**
+     * Repository for managing tenants.
+     */
     private final TenantsRepository tenantsRepository;
+    /**
+     * Repository for managing tenant members.
+     */
     private final TenantMembersRepository membersRepository;
 
     /**
@@ -39,8 +44,9 @@ public class TenantsService extends AbstractCache {
      * @return a Flux emitting the tenants that match the search criteria
      */
     public Flux<Tenant> search(TenantReq request, Pageable pageable) {
-        QueryFragment queryFragment = QueryHelper.query(request, pageable);
-        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), queryFragment.querySql(), queryFragment, Tenant.class);
+        QueryFragment queryFragment = request.query().pageable(pageable);
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable),
+                queryFragment.querySql(), queryFragment, Tenant.class);
     }
 
     /**
@@ -52,7 +58,7 @@ public class TenantsService extends AbstractCache {
      */
     public Mono<Page<Tenant>> page(TenantReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
-        QueryFragment queryFragment = QueryHelper.query(request, pageable);
+        QueryFragment queryFragment = request.query();
         var countMono = this.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
 
         return searchMono.zipWith(countMono)

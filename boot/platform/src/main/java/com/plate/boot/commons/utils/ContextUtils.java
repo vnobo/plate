@@ -48,14 +48,14 @@ public final class ContextUtils implements InitializingBean {
     /**
      * Constants for the context key used to store CSRF token information.
      * This string represents the identifier used to retrieve or store CSRF tokens in a context such as a thread local,
-     * request attribute, or any other data structure where keys are strings.
+     * request attribute, or any other data structure toSql keys are strings.
      */
     public final static String CSRF_TOKEN_CONTEXT = "CSRF_TOKEN_CONTEXT";
 
     /**
      * An array of strings representing the possible header names that could contain
      * the client's IP address in HTTP requests. This is typically used when working
-     * behind proxies or load balancers where the original client IP is not directly
+     * behind proxies or load balancers toSql the original client IP is not directly
      * available in the standard {@code REMOTE_ADDR} header.
      * <p>
      * The list includes common headers like {@code X-Forwarded-For}, {@code X-Real-IP},
@@ -105,19 +105,41 @@ public final class ContextUtils implements InitializingBean {
      */
     public static CacheManager CACHE_MANAGER;
 
+    /**
+     * Global application event publisher instance
+     * <p>
+     * This static member variable provides an application-level event publishing access point, making it convenient to publish events across different layers.
+     * Ensure that the injection or initialization of this instance is completed during the system initialization phase (typically through a dependency injection framework like Spring configuration).
+     * <p>
+     * Notes:
+     * 1. Since it uses a public static variable, ensure that the ApplicationEventPublisher implementation itself is thread-safe when used in a multi-threaded environment.
+     * 2. Avoid directly modifying this variable in unit tests or uncontrolled environments.
+     */
     public static ApplicationEventPublisher APPLICATION_EVENT_PUBLISHER;
+
+    private final ObjectMapper objectMapper;
+    private final CacheManager cacheManager;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * Initializes the ContextUtils class with necessary dependencies.
      *
      * @param objectMapper The ObjectMapper instance used for JSON serialization and deserialization.
+     * @param cacheManager The CacheManager instance used for cache operations.
+     * @param applicationEventPublisher The ApplicationEventPublisher instance used for event publishing.
      */
-    ContextUtils(ObjectMapper objectMapper, CacheManager cacheManager, ApplicationEventPublisher applicationEventPublisher) {
-        ContextUtils.OBJECT_MAPPER = objectMapper;
-        ContextUtils.CACHE_MANAGER = cacheManager;
-        ContextUtils.APPLICATION_EVENT_PUBLISHER = applicationEventPublisher;
+    ContextUtils(ObjectMapper objectMapper, CacheManager cacheManager,
+                 ApplicationEventPublisher applicationEventPublisher) {
+        this.objectMapper = objectMapper;
+        this.cacheManager = cacheManager;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
+    /**
+     * Publishes an event to the application event publisher.
+     *
+     * @param object The event object to be published.
+     */
     public static void eventPublisher(AbstractEvent<?> object) {
         ContextUtils.APPLICATION_EVENT_PUBLISHER.publishEvent(object);
     }
@@ -152,6 +174,7 @@ public final class ContextUtils implements InitializingBean {
      * {@link Argon2PasswordEncoder#defaultsForSpringSecurity_v5_8()}</li>
      * </ul>
      *
+     * @param encodingId The encoding ID to use as the default encoder
      * @return the {@link PasswordEncoder} to use
      */
     @SuppressWarnings("deprecation")
@@ -179,14 +202,14 @@ public final class ContextUtils implements InitializingBean {
     }
 
     /**
-     * Encodes the given input string into its MD5 hash representation, which is then
+     * Encodes the given input string into its SHA-256 hash representation, which is then
      * base64 encoded for a more compact and URL-friendly format.
      *
-     * @param input The string to be encoded into MD5 hash.
-     * @return A base64 encoded string representing the MD5 hash of the input string.
+     * @param input The string to be encoded into SHA-256 hash.
+     * @return A base64 encoded string representing the SHA-256 hash of the input string.
      */
     public static String encodeToSHA256(String input) {
-        return createDelegatingPasswordEncoder("MD5").encode(input);
+        return createDelegatingPasswordEncoder("SHA-256").encode(input);
     }
 
     /**
@@ -215,24 +238,21 @@ public final class ContextUtils implements InitializingBean {
      * <p>
      * This method accesses the security context asynchronously and extracts the principal,
      * which is then cast to a {@link SecurityDetails} object. It is designed to be used
-     * within a reactive environment where security information is required for further processing.
+     * within a reactive environment toSql security information is required for further processing.
      * </p>
      *
      * @return A {@link Mono} emitting the {@link SecurityDetails} associated with the
      * current authentication context, or an empty Mono if no authentication is present.
      */
     public static Mono<SecurityDetails> securityDetails() {
-        return ReactiveSecurityContextHolder.getContext()
-                .flatMap(securityContext -> {
-                    Authentication authentication = securityContext.getAuthentication();
-                    if (authentication == null) {
-                        return Mono.empty();
-                    }
-                    Object principal = authentication.getPrincipal();
-                    return principal instanceof SecurityDetails
-                            ? Mono.just((SecurityDetails) principal)
-                            : Mono.empty();
-                });
+        return ReactiveSecurityContextHolder.getContext().flatMap(securityContext -> {
+            Authentication authentication = securityContext.getAuthentication();
+            if (authentication == null) {
+                return Mono.empty();
+            }
+            Object principal = authentication.getPrincipal();
+            return principal instanceof SecurityDetails ? Mono.just((SecurityDetails) principal) : Mono.empty();
+        });
     }
 
     /**
@@ -241,7 +261,7 @@ public final class ContextUtils implements InitializingBean {
      * @return A newly created {@link UUID} instance, providing a unique identifier.
      */
     public static UUID nextId() {
-        return UuidCreator.getTimeOrderedEpoch();
+        return UuidCreator.getTimeOrderedEpochFast();
     }
 
     /**
@@ -254,5 +274,8 @@ public final class ContextUtils implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         log.info("Initializing utils [ContextUtils]...");
+        OBJECT_MAPPER = this.objectMapper;
+        CACHE_MANAGER = this.cacheManager;
+        APPLICATION_EVENT_PUBLISHER = this.applicationEventPublisher;
     }
 }

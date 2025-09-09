@@ -21,7 +21,7 @@ The Drive to Develop', 'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'f47ac10b-58cc-43
 insert into se_authorities(code, user_code, authority, created_by, updated_by)
 values ('1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed', 'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'ROLE_SYSTEM_ADMINISTRATORS',
         'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'f47ac10b-58cc-4372-a567-0e02b2c3d479'),
-       ('c9bf9e57-1685-4c89-badf-724a9e5d3a0e', '6ba7b810-9dad-11d1-80b4-00c04fd430c8', 'ROLE_USER',
+       ('c9bf9e57-1685-4c89-badf-724a9e5d3a0e', 'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'ROLE_USER',
         'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'f47ac10b-58cc-4372-a567-0e02b2c3d479'),
        ('3f2504e0-4f89-11d3-9a0c-0305e82c3301', '550e8400-e29b-41d4-a716-446655440000', 'ROLE_USER',
         'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'f47ac10b-58cc-4372-a567-0e02b2c3d479');
@@ -38,9 +38,9 @@ values ('2c5f5b3a-1b7d-4a1f-9c1a-0e5a9e2d3c4b', 'd3d0e4d5-7f3b-4d75-94a6-2b6a8e6
 insert into se_group_authorities(code, group_code, authority, created_by, updated_by)
 values ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'd3d0e4d5-7f3b-4d75-94a6-2b6a8e6d7e9f', 'ROLE_ADMINISTRATORS',
         'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'f47ac10b-58cc-4372-a567-0e02b2c3d479'),
-       ('e4d3f2a1-5c6d-4e7f-8a9b-3d1c2e3f4a5b', 'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'users:read',
+       ('e4d3f2a1-5c6d-4e7f-8a9b-3d1c2e3f4a5b', 'd3d0e4d5-7f3b-4d75-94a6-2b6a8e6d7e9f', 'users:read',
         'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'f47ac10b-58cc-4372-a567-0e02b2c3d479'),
-       ('9c4d6b8a-2e3c-4d5e-8f7a-1b9a8c7d6e5f', 'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'users:write',
+       ('9c4d6b8a-2e3c-4d5e-8f7a-1b9a8c7d6e5f', 'd3d0e4d5-7f3b-4d75-94a6-2b6a8e6d7e9f', 'users:write',
         'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'f47ac10b-58cc-4372-a567-0e02b2c3d479');
 
 

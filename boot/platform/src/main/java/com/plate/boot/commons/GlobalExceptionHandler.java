@@ -78,7 +78,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             logger.error(ex.getLocalizedMessage(), ex);
         }
         ProblemDetail problemDetail = ProblemDetail
-                .forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+                .forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getCause().getLocalizedMessage());
         problemDetail.setTitle("Bad Sql Grammar Data Access Exception");
         problemDetail.setType(exchange.getRequest().getURI());
         return handleExceptionInternal(ex, problemDetail, exchange.getRequest().getHeaders(),

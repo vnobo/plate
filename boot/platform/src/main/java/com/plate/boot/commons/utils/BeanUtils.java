@@ -40,8 +40,15 @@ public final class BeanUtils implements InitializingBean {
      */
     public static UserAuditorAware USER_AUDITOR_AWARE;
 
+    private final UserAuditorAware auditorAware;
+
+    /**
+     * Constructs a new BeanUtils instance with the provided UsersService.
+     *
+     * @param usersService The UsersService instance to be used for user-related operations.
+     */
     public BeanUtils(UserAuditorAware usersService) {
-        BeanUtils.USER_AUDITOR_AWARE = usersService;
+        this.auditorAware = usersService;
     }
 
     /**
@@ -60,19 +67,20 @@ public final class BeanUtils implements InitializingBean {
      *                       or if there is an issue converting the JsonNode to the target class.
      */
     public static <T> T jsonPathToBean(JsonNode json, String path, Class<T> clazz) {
-
-        String[] paths = StringUtils.commaDelimitedListToStringArray(path);
-        StringJoiner pathJoiner = new StringJoiner("/");
-        for (String p : paths) {
-            pathJoiner.add(p);
-        }
-        JsonPointer jsonPointer = JsonPointer.valueOf(pathJoiner.toString());
-        JsonNode valueNode = json.at(jsonPointer);
-        if (valueNode.isMissingNode()) {
-            throw JsonPointerException.withError("Json pointer path error, path: {}" + pathJoiner,
-                    new IllegalArgumentException(pathJoiner + " is not found in the json [" + json + "]"));
-        }
         try {
+            String[] paths = StringUtils.commaDelimitedListToStringArray(path);
+            StringJoiner pathJoiner = new StringJoiner("/");
+            for (String p : paths) {
+                pathJoiner.add(p);
+            }
+            JsonPointer jsonPointer = JsonPointer.valueOf(pathJoiner.toString());
+            JsonNode valueNode = json.at(jsonPointer);
+            if (valueNode.isMissingNode()) {
+                throw JsonPointerException.withError(
+                        "Json pointer path error, path: " + pathJoiner,
+                        new IllegalArgumentException(pathJoiner + " is not found in the json [" + json + "]")
+                );
+            }
             return ContextUtils.OBJECT_MAPPER.convertValue(valueNode, clazz);
         } catch (IllegalArgumentException e) {
             throw JsonPointerException.withError("Json pointer covert error", e);
@@ -110,11 +118,13 @@ public final class BeanUtils implements InitializingBean {
                 for (var sort : pageable.getSort()) {
                     keyJoiner.add(sort.getProperty() + "_" + sort.getDirection().name());
                 }
+            } else {
+                var objMap = BeanUtils.beanToMap(obj, true);
+                var setStr = objMap.entrySet().stream()
+                        .map(entry -> entry.getKey() + "=" + entry.getValue())
+                        .collect(Collectors.toSet());
+                setStr.forEach(keyJoiner::add);
             }
-            var objMap = BeanUtils.beanToMap(obj, true);
-            var setStr = objMap.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue())
-                    .collect(Collectors.toSet());
-            setStr.forEach(keyJoiner::add);
         }
         return ContextUtils.encodeToSHA256(keyJoiner.toString());
     }
@@ -139,7 +149,7 @@ public final class BeanUtils implements InitializingBean {
      * Copies the properties from the source object to the target object.
      *
      * @param source The source object whose properties are to be copied.
-     * @param target The target object where the properties from the source will be set.
+     * @param target The target object toSql the properties from the source will be set.
      */
     public static void copyProperties(Object source, Object target) {
         BeanUtils.copyProperties(source, target, false);
@@ -158,7 +168,8 @@ public final class BeanUtils implements InitializingBean {
         Map<String, Object> targetMap = BeanUtils.beanToMap(source);
         String[] nullKeys = new String[0];
         if (ignoreNullValue) {
-            nullKeys = Maps.filterEntries(targetMap, entry -> ObjectUtils.isEmpty(entry.getValue())).keySet().toArray(String[]::new);
+            nullKeys = Maps.filterEntries(targetMap, entry -> ObjectUtils.isEmpty(entry.getValue()))
+                    .keySet().toArray(String[]::new);
         }
         if (nullKeys.length > 0) {
             org.springframework.beans.BeanUtils.copyProperties(source, target, nullKeys);
@@ -186,7 +197,7 @@ public final class BeanUtils implements InitializingBean {
      * @param <T>             The type of the bean to convert.
      * @param bean            The JavaBean object to be converted into a Map.
      * @param ignoreNullValue If true, properties with null values will not be included in the Map.
-     * @return A Map where each key-value pair corresponds to a property name and its value from the input bean.
+     * @return A Map toSql each key-value pair corresponds to a property name and its value from the input bean.
      * If ignoreNullValue is true, properties with null values are excluded.
      */
     public static <T> Map<String, Object> beanToMap(T bean, final boolean ignoreNullValue) {
@@ -223,12 +234,16 @@ public final class BeanUtils implements InitializingBean {
             if (Optional.ofNullable(readMethod).isEmpty()) {
                 continue;
             }
-            ReflectionUtils.makeAccessible(readMethod);
-            Object value = ReflectionUtils.invokeMethod(readMethod, bean);
-            if (ignoreNullValue && ObjectUtils.isEmpty(value)) {
-                continue;
+            try {
+                ReflectionUtils.makeAccessible(readMethod);
+                Object value = ReflectionUtils.invokeMethod(readMethod, bean);
+                if (ignoreNullValue && ObjectUtils.isEmpty(value)) {
+                    continue;
+                }
+                beanMap.put(key, value);
+            } catch (Exception e) {
+                log.warn("Error reading property {} from bean: {}", key, e.getMessage());
             }
-            beanMap.put(key, value);
         }
         return beanMap;
     }
@@ -245,10 +260,17 @@ public final class BeanUtils implements InitializingBean {
      * The Mono completes when all processing is finished.
      */
     public static <T> Mono<T> serializeUserAuditor(T object) {
-        PropertyDescriptor[] propertyDescriptors = org.springframework.beans.BeanUtils.getPropertyDescriptors(object.getClass());
+        if (object == null) {
+            return Mono.empty();
+        }
+
+        PropertyDescriptor[] propertyDescriptors = org.springframework.beans.BeanUtils
+                .getPropertyDescriptors(object.getClass());
         var propertyFlux = Flux.fromArray(propertyDescriptors)
-                .filter(propertyDescriptor -> propertyDescriptor.getPropertyType() == UserAuditor.class)
-                .flatMap(propertyDescriptor -> serializeUserAuditorProperty(object, propertyDescriptor));
+                .filter(propertyDescriptor ->
+                        propertyDescriptor.getPropertyType() == UserAuditor.class)
+                .flatMap(propertyDescriptor ->
+                        serializeUserAuditorProperty(object, propertyDescriptor), 2);
         return propertyFlux.then(Mono.just(object));
     }
 
@@ -266,16 +288,41 @@ public final class BeanUtils implements InitializingBean {
      * - Emits an error signal if there are issues invoking methods on the property descriptor.
      */
     private static <T> Mono<String> serializeUserAuditorProperty(T object, PropertyDescriptor propertyDescriptor) {
-        UserAuditor userAuditor = (UserAuditor) ReflectionUtils.invokeMethod(propertyDescriptor.getReadMethod(), object);
-        if (ObjectUtils.isEmpty(userAuditor)) {
-            String msg = "User auditor is empty, No serializable." + propertyDescriptor.getName();
-            log.warn(msg);
-            return Mono.just(msg);
+        try {
+            var readMethod = propertyDescriptor.getReadMethod();
+            var writeMethod = propertyDescriptor.getWriteMethod();
+
+            if (readMethod == null || writeMethod == null) {
+                String msg = "Property " + propertyDescriptor.getName() + " is not readable or writable";
+                log.warn(msg);
+                return Mono.just(msg);
+            }
+
+            // Make methods accessible before invoking
+            ReflectionUtils.makeAccessible(readMethod);
+            ReflectionUtils.makeAccessible(writeMethod);
+
+            UserAuditor userAuditor = (UserAuditor) ReflectionUtils.invokeMethod(readMethod, object);
+            if (ObjectUtils.isEmpty(userAuditor)) {
+                String msg = "User auditor is empty, No serializable." + propertyDescriptor.getName();
+                log.warn(msg);
+                return Mono.just(msg);
+            }
+
+            return USER_AUDITOR_AWARE.loadByCode(userAuditor.code()).flatMap(user -> {
+                ReflectionUtils.invokeMethod(writeMethod, object, user);
+                return Mono.just("User auditor serializable success. "
+                        + propertyDescriptor.getName());
+            }).onErrorResume(throwable -> {
+                log.error("Error serializing user auditor for property: {}",
+                        propertyDescriptor.getName(), throwable);
+                return Mono.just("User auditor serialization failed for property: "
+                        + propertyDescriptor.getName());
+            });
+        } catch (Exception e) {
+            log.error("Error accessing property: {}", propertyDescriptor.getName(), e);
+            return Mono.just("Error accessing property: " + propertyDescriptor.getName());
         }
-        return USER_AUDITOR_AWARE.loadByCode(userAuditor.code()).cache().flatMap(user -> {
-            ReflectionUtils.invokeMethod(propertyDescriptor.getWriteMethod(), object, user);
-            return Mono.just("User auditor serializable success. " + propertyDescriptor.getName());
-        });
     }
 
     /**
@@ -288,5 +335,6 @@ public final class BeanUtils implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         log.info("Initializing utils [BeanUtils]...");
+        USER_AUDITOR_AWARE = this.auditorAware;
     }
 }

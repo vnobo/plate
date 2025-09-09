@@ -2,8 +2,8 @@ package com.plate.boot.relational.menus;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -21,7 +21,7 @@ import static com.plate.boot.commons.utils.ContextUtils.RULE_ADMINISTRATORS;
  * Handles HTTP requests related to menu management within an application.
  * This controller serves as an intermediary between the client and the {@link MenusService},
  * facilitating operations such as searching, paging, loading personalized menus, saving, and deleting menu items.
- * It integrates with Spring Security to enforce authorization rules where applicable.
+ * It integrates with Spring Security to enforce authorization rules toSql applicable.
  *
  * <p>
  * The endpoints provided include:
@@ -67,8 +67,8 @@ public class MenusController {
      * @return A Mono of Page containing Menu entities.
      */
     @GetMapping("page")
-    public Mono<Page<Menu>> page(MenuReq request, Pageable pageable) {
-        return this.menusService.page(request, pageable);
+    public Mono<PagedModel<Menu>> page(MenuReq request, Pageable pageable) {
+        return this.menusService.page(request, pageable).map(PagedModel::new);
     }
 
     /**

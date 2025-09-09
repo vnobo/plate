@@ -17,6 +17,15 @@ import java.util.UUID;
 public interface UserAuthoritiesRepository extends R2dbcRepository<UserAuthority, Integer> {
 
     /**
+     * Finds a UserAuthority entity by userCode and authority.
+     *
+     * @param userCode  the userCode to search by
+     * @param authority the authority to search by
+     * @return a Mono emitting the UserAuthority entity if found, or an empty Mono if not found
+     */
+    Mono<UserAuthority> findByUserCodeAndAuthority(UUID userCode, String authority);
+
+    /**
      * Deletes records from the database based on the provided authority values.
      *
      * @param authorities the list of authority values to delete by

@@ -1,10 +1,11 @@
 package com.plate.boot.security.core.user.authority;
 
 import com.plate.boot.commons.base.AbstractCache;
+import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.DatabaseUtils;
 import com.plate.boot.security.core.user.UserEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Query;
@@ -23,6 +24,7 @@ import reactor.core.publisher.Mono;
  * \@author
  * <a href="https://github.com/vnobo">Alex bob</a>
  */
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class UserAuthoritiesService extends AbstractCache {
@@ -48,9 +50,10 @@ public class UserAuthoritiesService extends AbstractCache {
      * @return a Mono emitting the operated user authority
      */
     public Mono<UserAuthority> operate(UserAuthorityReq request) {
-        var dataMono = DatabaseUtils.ENTITY_TEMPLATE.selectOne(Query.query(request.toCriteria()), UserAuthority.class);
-        dataMono = dataMono.switchIfEmpty(Mono.defer(() -> this.save(request.toAuthority())));
-        return dataMono.doAfterTerminate(() -> this.cache.clear());
+        return this.userAuthoritiesRepository
+                .findByUserCodeAndAuthority(request.getUserCode(), request.getAuthority())
+                .switchIfEmpty(Mono.defer(() -> this.save(request.toAuthority())))
+                .doAfterTerminate(() -> this.cache.clear());
     }
 
     /**
@@ -75,17 +78,30 @@ public class UserAuthoritiesService extends AbstractCache {
         if (userAuthority.isNew()) {
             return this.userAuthoritiesRepository.save(userAuthority);
         } else {
-            assert userAuthority.getId() != null;
+            if (userAuthority.getId() == null) {
+                return Mono.error(RestServerException.withMsg("Id must not be null!",
+                        new IllegalArgumentException("User authority ID must not be null for existing entities")));
+            }
             return this.userAuthoritiesRepository.findById(userAuthority.getId())
+                    .switchIfEmpty(Mono.error(RestServerException.withMsg("Id must not be null!",
+                            new IllegalArgumentException("User authority not found with ID: "
+                                    + userAuthority.getId()))))
                     .flatMap(old -> this.userAuthoritiesRepository.save(userAuthority));
         }
     }
 
+    /**
+     * Event listener method that is triggered when a user is deleted.
+     * It deletes all user authorities associated with the deleted user.
+     *
+     * @param event the user event containing information about the deleted user
+     */
     @EventListener(value = UserEvent.class, condition = "#event.kind.name() == 'DELETE'")
     public void onUserDeletedEvent(UserEvent event) {
         this.userAuthoritiesRepository.deleteByUserCode(event.entity().getCode())
                 .doAfterTerminate(() -> this.cache.clear())
-                .subscribe();
-
+                .subscribe(null, throwable ->
+                        log.error("Failed to delete user authorities for user code: {}",
+                                event.entity().getCode(), throwable));
     }
 }

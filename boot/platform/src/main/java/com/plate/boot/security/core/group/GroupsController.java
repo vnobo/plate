@@ -12,6 +12,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
+ * Group Controller
+ * Provides RESTful API endpoints for group management operations
+ *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @RestController
@@ -21,12 +24,26 @@ public class GroupsController {
 
     private final GroupsService groupsService;
 
+    /**
+     * Search for groups based on provided criteria
+     *
+     * @param request  The search criteria for groups
+     * @param pageable Pagination information
+     * @return Flux of Group objects matching the search criteria
+     */
     @GetMapping("search")
     public Flux<Group> search(GroupReq request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMapMany(securityDetails ->
                 this.groupsService.search(request.securityCode(securityDetails.getTenantCode()), pageable));
     }
 
+    /**
+     * Get groups with pagination
+     *
+     * @param request  The search criteria for groups
+     * @param pageable Pagination information
+     * @return Mono of PagedModel containing Group objects and pagination metadata
+     */
     @GetMapping("page")
     public Mono<PagedModel<Group>> page(GroupReq request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMap(securityDetails ->
@@ -34,12 +51,24 @@ public class GroupsController {
                 .map(PagedModel::new);
     }
 
+    /**
+     * Add or update a group
+     *
+     * @param request Group request data with validation
+     * @return Mono of Group representing the saved group
+     */
     @PostMapping("save")
     @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Group> add(@Valid @RequestBody GroupReq request) {
         return this.groupsService.operate(request);
     }
 
+    /**
+     * Delete a group by ID
+     *
+     * @param request Group request containing the ID of the group to delete
+     * @return Mono of Void representing completion of the deletion
+     */
     @DeleteMapping("delete")
     @PreAuthorize("hasRole(@contextUtils.RULE_ADMINISTRATORS)")
     public Mono<Void> delete(@Valid @RequestBody GroupReq request) {

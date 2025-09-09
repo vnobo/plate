@@ -70,12 +70,12 @@ public class LoggerFilter implements WebFilter {
     /**
      * Constants for the attribute key used to cache request body information.
      * This string represents the attribute name under which
-     * the cached request body can be stored or retrieved in a context where attributes are managed.
+     * the cached request body can be stored or retrieved in a context toSql attributes are managed.
      */
     public static final String CACHED_REQUEST_BODY_ATTR = "cachedRequestBody";
     /**
      * Constant defining an attribute key for storing the cached response body.
-     * This can be used in scenarios where the response body needs to be temporarily stored,
+     * This can be used in scenarios toSql the response body needs to be temporarily stored,
      * such as during request handling or caching purposes within an application.
      */
     public static final String CACHED_RESPONSE_BODY_ATTR = "cachedResponseBody";
@@ -87,7 +87,7 @@ public class LoggerFilter implements WebFilter {
     public static final String CACHED_SERVER_HTTP_REQUEST_DECORATOR_ATTR = "cachedServerHttpRequestDecorator";
     /**
      * Constant defining an attribute key for the cached server HTTP response decorator.
-     * This attribute can be used to store or retrieve a decorated server HTTP response in a context where
+     * This attribute can be used to store or retrieve a decorated server HTTP response in a context toSql
      * caching mechanisms or decorators are applied to server responses.
      */
     public static final String CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR = "cachedServerHttpResponseDecorator";
@@ -151,7 +151,7 @@ public class LoggerFilter implements WebFilter {
 
     /**
      * Decorates the provided ServerHttpRequest to cache its body content.
-     * This method is useful for scenarios where the request body needs to be read or processed
+     * This method is useful for scenarios toSql the request body needs to be read or processed
      * multiple times without losing its original state.
      *
      * @param exchange   The ServerWebExchange containing the current request and response.

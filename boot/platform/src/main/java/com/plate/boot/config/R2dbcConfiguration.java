@@ -59,7 +59,7 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration implements In
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         log.debug("R2DBC configuration initialized!");
     }
 }

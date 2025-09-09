@@ -1,10 +1,13 @@
 package com.plate.boot.security.core.tenant.member;
 
+import com.plate.boot.commons.ProgressEvent;
 import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.commons.utils.DatabaseUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -21,6 +24,9 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class TenantMembersController {
 
+    /**
+     * Service for handling tenant member operations.
+     */
     private final TenantMembersService tenantMembersService;
 
     /**
@@ -61,6 +67,17 @@ public class TenantMembersController {
     @PostMapping("save")
     public Mono<TenantMember> save(@Valid @RequestBody TenantMemberReq request) {
         return this.tenantMembersService.operate(request);
+    }
+
+    /**
+     * Endpoint for batch inserting data with progress monitoring via SSE.
+     *
+     * @param requests Batch insert request containing data and parameters
+     * @return Flux of progress updates as Server-Sent Events
+     */
+    @PostMapping(path = "batch", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ProgressEvent> saveBatch(@Valid @RequestBody Flux<TenantMemberReq> requests) {
+        return DatabaseUtils.batchEvent(requests, this::save);
     }
 
     /**

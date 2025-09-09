@@ -24,6 +24,11 @@ public class UserRes extends User {
     @ReadOnlyProperty
     private Double rank;
 
+    /**
+     * Overrides the getPhone method to mask the phone number.
+     *
+     * @return The masked phone number.
+     */
     @Override
     public String getPhone() {
         String phone = super.getPhone();
@@ -31,6 +36,11 @@ public class UserRes extends User {
                 phone.replaceAll("(\\d{3})\\d{4}(\\d*)", "$1****$2") : phone;
     }
 
+    /**
+     * Overrides the getEmail method to mask the email address.
+     *
+     * @return The masked email address.
+     */
     @Override
     public String getEmail() {
         String email = super.getEmail();
@@ -46,6 +56,11 @@ public class UserRes extends User {
         return email;
     }
 
+    /**
+     * Overrides the getPassword method to be ignored during JSON serialization.
+     *
+     * @return The password value.
+     */
     @JsonIgnore
     @Override
     public String getPassword() {

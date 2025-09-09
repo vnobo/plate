@@ -1,9 +1,9 @@
 package com.plate.boot.security.core.user.authority;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.plate.boot.commons.base.AbstractEntity;
 import com.plate.boot.commons.base.BaseEntity;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.relational.core.mapping.Table;
@@ -32,7 +32,7 @@ public class UserAuthority extends AbstractEntity<Integer> implements GrantedAut
      * The unique code of the user.
      * It is annotated with \@NotBlank to ensure it is not null or empty.
      */
-    @NotBlank(message = "User entity [userCode] cannot be empty!")
+    @NotNull(message = "User entity [userCode] cannot be empty!")
     private UUID userCode;
 
     /**
@@ -42,20 +42,4 @@ public class UserAuthority extends AbstractEntity<Integer> implements GrantedAut
     @NotBlank(message = "User entity [authority] cannot be empty!")
     private String authority;
 
-    /**
-     * Returns the authority granted to the user.
-     * This method is required by the GrantedAuthority interface.
-     *
-     * @return the authority granted to the user
-     */
-    @Override
-    public String getAuthority() {
-        return this.authority;
-    }
-
-    @JsonIgnore
-    @Override
-    public String getTenantCode() {
-        return this.tenantCode;
-    }
 }

@@ -1,7 +1,10 @@
 package com.plate.boot.security.core.user.authority;
 
+import com.plate.boot.commons.ProgressEvent;
+import com.plate.boot.commons.utils.DatabaseUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -24,6 +27,9 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UserAuthoritiesController {
 
+    /**
+     * The service for managing user authorities.
+     */
     private final UserAuthoritiesService authoritiesService;
 
     /**
@@ -47,6 +53,17 @@ public class UserAuthoritiesController {
     @PostMapping("save")
     public Mono<UserAuthority> save(@Valid @RequestBody UserAuthorityReq request) {
         return this.authoritiesService.operate(request);
+    }
+
+    /**
+     * Endpoint for batch inserting data with progress monitoring via SSE.
+     *
+     * @param requests Batch insert request containing data and parameters
+     * @return Flux of progress updates as Server-Sent Events
+     */
+    @PostMapping(path = "batch", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ProgressEvent> saveBatch(@Valid @RequestBody Flux<UserAuthorityReq> requests) {
+        return DatabaseUtils.batchEvent(requests, this::save);
     }
 
     /**

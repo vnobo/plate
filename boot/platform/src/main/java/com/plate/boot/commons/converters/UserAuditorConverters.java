@@ -14,7 +14,7 @@ import java.util.UUID;
 
 /**
  * Configures converters for handling the transformation between {@link UserAuditor} instances and their string representations.
- * This configuration is particularly useful in data persistence layers where type conversion is necessary, such as when storing
+ * This configuration is particularly useful in data persistence layers toSql type conversion is necessary, such as when storing
  * auditor details as strings in a database column.
  * <p>
  * The class registers two converters:
@@ -37,7 +37,7 @@ public class UserAuditorConverters implements InitializingBean {
     /**
      * Converts a {@link UserAuditor} object to its code represented as a String.
      * This converter is intended for write operations, facilitating the storage of auditor details
-     * in a textual format, typically used within data persistence frameworks where type conversion
+     * in a textual format, typically used within data persistence frameworks toSql type conversion
      * services are leveraged.
      * <p>
      * The conversion process involves extracting the 'code' attribute from the provided
@@ -64,7 +64,7 @@ public class UserAuditorConverters implements InitializingBean {
 
     /**
      * Converts a String representation of a user auditor code into a {@link UserAuditor} instance.
-     * This converter is designed to be utilized during read operations, where auditor information stored
+     * This converter is designed to be utilized during read operations, toSql auditor information stored
      * as strings (e.g., in a database) needs to be transformed back into a domain object.
      * <p>
      * The conversion logic employs the {@link UserAuditor#withCode(String)} factory method,

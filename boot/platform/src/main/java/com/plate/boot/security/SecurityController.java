@@ -110,8 +110,11 @@ public class SecurityController {
      * @return A Mono emitting the access token associated with the bound OAuth2 authorized client.
      */
     @GetMapping("bind")
-    public Mono<Object> bindOauth2(String clientRegistrationId, Authentication authentication, ServerWebExchange exchange) {
+    public Mono<Object> bindOauth2(@NotBlank(message = "ClientRegistrationId cannot be empty") String clientRegistrationId, Authentication authentication, ServerWebExchange exchange) {
         return this.clientRepository.loadAuthorizedClient(clientRegistrationId, authentication, exchange)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(RestServerException.withMsg("Client ["
+                                + clientRegistrationId + "] not found",
+                        new RuntimeException("Client [" + clientRegistrationId + "] not found")))))
                 .flatMap(oAuth2AuthorizedClient -> Mono.just(oAuth2AuthorizedClient.getAccessToken()));
     }
 
@@ -163,9 +166,17 @@ public class SecurityController {
     @Data
     public static class ChangePasswordRequest {
 
+        /**
+         * The user's current password
+         * Used to verify the user's identity to ensure that the password change request is made by the legitimate user
+         */
         @NotBlank(message = "Password not empty!")
         private String password;
 
+        /**
+         * The new password to be set by the user
+         * Must be different from the current password and meet the password strength requirements
+         */
         @NotBlank(message = "New password not empty!")
         private String newPassword;
     }

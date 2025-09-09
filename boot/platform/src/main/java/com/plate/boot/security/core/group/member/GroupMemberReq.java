@@ -1,8 +1,7 @@
 package com.plate.boot.security.core.group.member;
 
+import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.query.QueryFragment;
-import com.plate.boot.commons.utils.query.QueryHelper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -10,8 +9,8 @@ import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Represents a request model for operations involving group members, extending the {@link GroupMember} entity.
@@ -45,31 +44,58 @@ import java.util.Set;
 @ToString(callSuper = true)
 public class GroupMemberReq extends GroupMember {
 
-    private Set<String> users;
+    /**
+     * Set of user codes for filtering group members
+     */
+    private Set<UUID> users;
 
+    /**
+     * Username for filtering group members
+     */
     private String username;
 
+    /**
+     * Converts this request object to a GroupMember entity
+     *
+     * @return a new GroupMember instance with properties copied from this request
+     */
     public GroupMember toGroupMember() {
         return BeanUtils.copyProperties(this, GroupMember.class);
     }
 
+    /**
+     * Generates a Criteria object based on the request's filterable properties
+     *
+     * @return Criteria object for structured querying
+     */
     public Criteria toCriteria() {
         return criteria(Set.of("users", "username"));
     }
 
+    /**
+     * Constructs a QueryFragment for dynamic SQL generation with parameter placeholders
+     *
+     * @return QueryFragment for complex query construction with optional filters
+     */
     public QueryFragment toParamSql() {
-        QueryFragment queryFragment = QueryHelper.query(this, List.of("users", "username"), "a");
+        Criteria criteria = toCriteria();
+        // Add user code filter if users set is not empty
         if (!ObjectUtils.isEmpty(this.getUsers())) {
-            queryFragment.where("a.user_code in (:users)");
-            queryFragment.put("users", this.getUsers());
+            criteria = criteria.and("userCode").in(this.getUsers());
         }
+        var conditionA = QueryFragment.Condition.of(criteria, "a");
 
+        Criteria criteriaB = Criteria.empty();
+        // Add username filter if username is provided
         if (StringUtils.hasLength(this.getUsername())) {
-            queryFragment.where("c.username = :username");
-            queryFragment.put("username", this.getUsername());
+            criteriaB = criteriaB.and("username").is(this.getUsername());
         }
-
-        return queryFragment;
+        var conditionB = QueryFragment.Condition.of(criteriaB, "c");
+        return QueryFragment.conditional(conditionA, conditionB).table("se_group_members a",
+                        "inner join se_groups b on a.group_code = b.code",
+                        "inner join se_users c on c.code = a.user_code")
+                .column("a.*", "b.name as group_name",
+                        "b.extend as group_extend", "c.name as login_name", "c.username");
     }
 
 }

@@ -5,6 +5,7 @@ build/
 !**/src/main/**
 !**/src/test/**
 *.log
+
 ### vscode ###
 bin
 .codebuddy
@@ -38,3 +39,4 @@ out/
 
 ## End of https://www.toptal.com/developers/gitignore/api/java,gradle,sts,intellij idea,netbeans
 CLAUDE.md
+QWEN.md

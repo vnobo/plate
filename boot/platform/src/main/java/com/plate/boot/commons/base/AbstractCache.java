@@ -71,7 +71,8 @@ public abstract class AbstractCache implements InitializingBean {
      * @param cacheName The name of the cache to initialize.
      */
     public Cache initializingCache(String cacheName) {
-        var cache = Optional.ofNullable(ContextUtils.CACHE_MANAGER).map(manager -> manager.getCache(cacheName))
+        var cache = Optional.ofNullable(ContextUtils.CACHE_MANAGER)
+                .map(manager -> manager.getCache(cacheName))
                 .orElse(new ConcurrentMapCache(cacheName));
         cache.clear();
         log.debug("Initializing provider [{}] cache names: {}",

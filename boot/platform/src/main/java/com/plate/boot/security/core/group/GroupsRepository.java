@@ -6,17 +6,18 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 /**
+ * Group Repository Interface
+ * Provides data access operations for Group entities
+ *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 public interface GroupsRepository extends R2dbcRepository<Group, Integer> {
 
     /**
-     * 根据组代码查询组信息。
-     * <p>
-     * 本方法旨在通过提供的组代码，从数据库或其他数据源中检索对应的组信息。组代码是唯一标识一个组的标识符。
+     * Find group by code
      *
-     * @param code 组代码，作为查询的依据。
-     * @return 匹配组代码的组信息的Mono对象。Mono是一个表示单个值（或无值）的Reactive类型，这里用于异步返回组信息。
+     * @param code the unique code of the group to find
+     * @return Mono containing the found Group or empty if not found
      */
     Mono<Group> findByCode(UUID code);
 }

@@ -20,7 +20,7 @@ import lombok.ToString;
  * relevant to group configurations or permissions.
  *
  * <p>
- * This class is particularly useful in API responses where a more descriptive representation of a
+ * This class is particularly useful in API responses toSql a more descriptive representation of a
  * group member is required beyond just their identifiers, facilitating a richer understanding of
  * group membership contexts.
  *
@@ -31,8 +31,14 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class GroupMemberRes extends GroupMember {
 
+    /**
+     * The name of the group member.
+     */
     private String name;
 
+    /**
+     * Additional group-specific extension data in JSON format.
+     */
     private JsonNode groupExtend;
 
 }

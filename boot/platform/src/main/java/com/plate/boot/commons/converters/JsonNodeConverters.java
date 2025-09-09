@@ -1,9 +1,9 @@
 package com.plate.boot.commons.converters;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.plate.boot.commons.MethodType;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.utils.ContextUtils;
-import com.plate.boot.commons.utils.MethodType;
 import io.r2dbc.postgresql.codec.Json;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
@@ -94,15 +94,19 @@ public class JsonNodeConverters implements InitializingBean {
         }
     }
 
+    /**
+     * Converts a String to a MethodType enum for read operations.
+     * This converter is designed to be used within a Spring context and is annotated as a component
+     * and a reading converter.
+     */
     @Component
     @ReadingConverter
     public static class MethodTypeReadConverter implements Converter<String, MethodType> {
         /**
-         * Converts a custom {@link Json} object to a Jackson {@link JsonNode} for read operations.
+         * Converts a String to a MethodType enum value.
          *
-         * @param source The {@link Json} object to be converted. Must not be null.
-         * @return The converted {@link JsonNode} instance ready for read operations.
-         * @throws JsonException If an {@link IOException} occurs during the conversion process.
+         * @param source The String to be converted. Must not be null.
+         * @return The corresponding MethodType enum value.
          */
         @Override
         public MethodType convert(@NonNull String source) {
@@ -110,15 +114,19 @@ public class JsonNodeConverters implements InitializingBean {
         }
     }
 
+    /**
+     * Converts a MethodType enum to a String for write operations.
+     * This converter is designed to be used within a Spring context and is annotated as a component
+     * and a writing converter.
+     */
     @Component
     @WritingConverter
     public static class MethodTypeWriteConverter implements Converter<MethodType, String> {
         /**
-         * Converts a Jackson {@link JsonNode} to a custom {@link Json} object.
+         * Converts a MethodType enum value to its String representation.
          *
-         * @param source The JsonNode to be converted. Must not be null.
-         * @return A {@link Json} object representing the stringified input JsonNode.
-         * @throws NullPointerException if the source argument is null.
+         * @param source The MethodType to be converted. Must not be null.
+         * @return The String representation of the MethodType.
          */
         @Override
         public String convert(@NonNull MethodType source) {

@@ -8,11 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.NonNull;
-import org.springframework.session.ReactiveFindByIndexNameSessionRepository;
-import org.springframework.session.ReactiveSessionRepository;
-import org.springframework.session.Session;
 import org.springframework.session.data.redis.config.annotation.web.server.EnableRedisIndexedWebSession;
-import org.springframework.session.security.SpringSessionBackedReactiveSessionRegistry;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -26,7 +22,7 @@ import java.util.regex.Pattern;
 
 /**
  * Configures session management for web applications with support for custom session ID resolution,
- * particularly tailored for handling both AJAX requests and cases where a Bearer token might be
+ * particularly tailored for handling both AJAX requests and cases toSql a Bearer token might be
  * present either in the request header or from parameters.
  * <p>
  * This configuration class enhances the session handling by introducing a custom strategy to read
@@ -62,25 +58,6 @@ public class SessionConfiguration {
      */
     public static final Pattern AUTHORIZATION_PATTERN = Pattern.compile(
             "^Bearer (?<token>[a-zA-Z0-9-._~+/]+=*)$", Pattern.CASE_INSENSITIVE);
-
-    /**
-     * Creates and configures a SpringSessionBackedReactiveSessionRegistry bean.
-     * This registry is designed to manage sessions within a reactive environment, backed by the provided
-     * ReactiveSessionRepository and ReactiveFindByIndexNameSessionRepository instances.
-     *
-     * @param <S>                      The type of session extending the Session interface.
-     * @param sessionRepository        A reactive session repository for storing and retrieving session data.
-     * @param indexedSessionRepository A reactive session repository capable of finding sessions by index name,
-     *                                 enhancing session management capabilities.
-     * @return An instance of SpringSessionBackedReactiveSessionRegistry configured with the given repositories,
-     * ready to manage and provide session-related services in a reactive context.
-     */
-    @Bean
-    public <S extends Session> SpringSessionBackedReactiveSessionRegistry<S> sessionRegistry(
-            ReactiveSessionRepository<S> sessionRepository,
-            ReactiveFindByIndexNameSessionRepository<S> indexedSessionRepository) {
-        return new SpringSessionBackedReactiveSessionRegistry<>(sessionRepository, indexedSessionRepository);
-    }
 
     /**
      * Configures and provides a custom strategy for resolving the session ID from web requests.
