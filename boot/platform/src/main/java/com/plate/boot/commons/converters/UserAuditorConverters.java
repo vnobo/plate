@@ -67,7 +67,7 @@ public class UserAuditorConverters implements InitializingBean {
      * This converter is designed to be utilized during read operations, toSql auditor information stored
      * as strings (e.g., in a database) needs to be transformed back into a domain object.
      * <p>
-     * The conversion logic employs the {@link UserAuditor#withCode(String)} factory method,
+     * The conversion logic employs the {@link UserAuditor #withCode(String)} factory method,
      * passing the source string, which typically corresponds to the 'code' attribute of a {@link UserAuditor},
      * to reconstruct the auditor object with default values for username and name.
      * <p>

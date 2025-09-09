@@ -59,11 +59,24 @@ public class CaptchaFilter implements WebFilter, Ordered {
                 .onErrorResume(CaptchaException.class, ex -> ACCESS_DENIED_HANDLER.handle(exchange, ex));
     }
 
+    /**
+     * Continue the filter chain processing
+     *
+     * @param exchange the current server web exchange
+     * @param chain    the web filter chain
+     * @return a Mono that indicates when request processing is complete
+     */
     private Mono<Void> continueFilterChain(ServerWebExchange exchange, WebFilterChain chain) {
         log.debug("{}Captcha filter chain continue next.", exchange.getLogPrefix());
         return Mono.defer(() -> chain.filter(exchange));
     }
 
+    /**
+     * Validate the captcha token from the request
+     *
+     * @param exchange the current server web exchange
+     * @return a Mono that indicates when validation is complete
+     */
     private Mono<Void> validateToken(ServerWebExchange exchange) {
         return this.captchaTokenRepository.loadToken(exchange)
                 .switchIfEmpty(Mono.defer(() ->
@@ -74,35 +87,77 @@ public class CaptchaFilter implements WebFilter, Ordered {
                 .then(this.captchaTokenRepository.clearToken(exchange));
     }
 
+    /**
+     * Check if the request contains a valid captcha token
+     *
+     * @param exchange     the current server web exchange
+     * @param captchaToken the captcha token to validate
+     * @return a Mono containing true if the token is valid, false otherwise
+     */
     private Mono<Boolean> containsValidCaptchaToken(ServerWebExchange exchange, CaptchaToken captchaToken) {
         return this.resolveCaptchaTokenValue(exchange, captchaToken).map(captchaToken::validate);
     }
 
+    /**
+     * Resolve the captcha token value from the request headers
+     *
+     * @param exchange     the current server web exchange
+     * @param captchaToken the captcha token containing the header name
+     * @return a Mono containing the captcha code from the request header, or empty if not found
+     */
     private Mono<String> resolveCaptchaTokenValue(ServerWebExchange exchange, CaptchaToken captchaToken) {
         String captchaCode = exchange.getRequest().getHeaders().getFirst(captchaToken.headerName());
         return Mono.justOrEmpty(captchaCode);
     }
 
+    /**
+     * Get the order of this filter in the filter chain
+     *
+     * @return the order value - highest precedence
+     */
     @Override
     public int getOrder() {
         return Ordered.HIGHEST_PRECEDENCE;
     }
 
+    /**
+     * Custom exception for captcha validation failures
+     */
     static class CaptchaException extends AccessDeniedException {
+        /**
+         * Create a new CaptchaException with the specified message
+         *
+         * @param message the detail message
+         */
         public CaptchaException(String message) {
             super(message);
         }
     }
 
+    /**
+     * Custom access denied handler that returns JSON response for captcha validation failures
+     */
     @Log4j2
     static class CaptchaServerAccessDeniedHandler implements ServerAccessDeniedHandler {
         private final HttpStatus httpStatus;
 
+        /**
+         * Create a new CaptchaServerAccessDeniedHandler with the specified HTTP status
+         *
+         * @param httpStatus the HTTP status to return
+         */
         public CaptchaServerAccessDeniedHandler(HttpStatus httpStatus) {
             Assert.notNull(httpStatus, "httpStatus cannot be null");
             this.httpStatus = httpStatus;
         }
 
+        /**
+         * Handle the access denied exception by returning a JSON response
+         *
+         * @param exchange the current server web exchange
+         * @param ex       the access denied exception
+         * @return a Mono that indicates when response processing is complete
+         */
         @Override
         public Mono<Void> handle(ServerWebExchange exchange, AccessDeniedException ex) {
             if (log.isDebugEnabled()) {
