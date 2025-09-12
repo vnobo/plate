@@ -26,10 +26,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class R2dbcConfiguration extends AbstractR2dbcConfiguration implements InitializingBean {
 
-    /**
-     * A collection of custom converters used to adapt between various data types when interacting with the database.
-     * These converters facilitate the mapping of application-specific objects to database-compatible representations and vice versa.
-     */
     private final List<Converter<?, ?>> customConverters;
     private final ConnectionFactory factory;
 
