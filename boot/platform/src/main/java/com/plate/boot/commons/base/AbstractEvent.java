@@ -41,6 +41,39 @@ public abstract class AbstractEvent<E> extends AbstractRelationalEvent<E> {
     }
 
     /**
+     * Creates a new UserEvent for an insert operation.
+     *
+     * @param entity the entity associated with the event, must not be null
+     * @return a new UserEvent instance for the insert operation
+     */
+    public static <E> AbstractEvent<E> insert(E entity) {
+        return new AbstractEvent<>(entity, Kind.INSERT) {
+        };
+    }
+
+    /**
+     * Creates a new UserEvent for a save operation.
+     *
+     * @param entity the entity associated with the event, must not be null
+     * @return a new UserEvent instance for the save operation
+     */
+    public static <E> AbstractEvent<E> save(E entity) {
+        return new AbstractEvent<>(entity, Kind.SAVE) {
+        };
+    }
+
+    /**
+     * Creates a new UserEvent for a delete operation.
+     *
+     * @param entity the entity associated with the event, must not be null
+     * @return a new UserEvent instance for the delete operation
+     */
+    public static <E> AbstractEvent<E> delete(E entity) {
+        return new AbstractEvent<>(entity, Kind.DELETE) {
+        };
+    }
+    
+    /**
      * Returns the resolvable type of the event.
      *
      * @return the resolvable type
