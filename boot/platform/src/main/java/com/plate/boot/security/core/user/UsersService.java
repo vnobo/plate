@@ -18,7 +18,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * User service 
+ * User service
+ *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Service
@@ -132,8 +133,7 @@ public class UsersService extends AbstractCache {
             request.setPassword(this.upgradeEncodingIfPassword(request.getPassword()));
         }
 
-        return this.usersRepository.findByCode(request.getCode())
-                .defaultIfEmpty(request.toUser())
+        return this.usersRepository.findByCode(request.getCode()).defaultIfEmpty(request.toUser())
                 .flatMap(user -> {
                     BeanUtils.copyProperties(request, user, true);
                     return this.save(user);

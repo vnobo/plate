@@ -107,7 +107,7 @@ public class UsersController {
      * If the 'id' in the request is null, a NullPointerException will be thrown before the operation begins.
      */
     @DeleteMapping("delete")
-    public Mono<Void> delete(@Valid @RequestBody UserReq request) {
+    public Mono<Void> delete(@RequestBody UserReq request) {
         Assert.notNull(request.getCode(), "When deleting a user, the ID must not be null");
         return this.usersService.delete(request);
     }
