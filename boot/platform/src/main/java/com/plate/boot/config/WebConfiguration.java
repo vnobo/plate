@@ -26,9 +26,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebConfiguration implements WebFluxConfigurer {
 
-    /**
-     * Holds the webflux properties configuration.
-     */
     private final WebfluxProperties webfluxProperties;
 
     /**
