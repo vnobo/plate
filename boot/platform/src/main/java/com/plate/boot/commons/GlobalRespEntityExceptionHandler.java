@@ -3,13 +3,15 @@ package com.plate.boot.commons;
 import com.plate.boot.commons.exception.RestServerException;
 import io.r2dbc.spi.R2dbcException;
 import lombok.NonNull;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.*;
+import org.springframework.util.StringUtils;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler;
-import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -29,34 +31,7 @@ import reactor.core.publisher.Mono;
  * format before returning it in the body of a {@link ResponseEntity} with the appropriate HTTP status code.
  */
 @ControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-
-
-    /**
-     * Handles exceptions of type {@link RestServerException} by creating an appropriate error response.
-     * This method is designed to be used within a Spring MVC controller advice context to manage
-     * exceptions that occur during the execution of RESTful server operations.
-     *
-     * @param exchange The current server web exchange containing request and response information.
-     *                 This is used to extract details necessary for constructing the error response.
-     * @param ex       The {@link RestServerException} instance that was thrown, encapsulating
-     *                 error details such as error code, message, and any additional info.
-     * @return A {@link ResponseEntity} with status {@link HttpStatus#INTERNAL_SERVER_ERROR},
-     * content type set to {@link MediaType#APPLICATION_JSON}, and body containing
-     * an {@link ErrorResponse} object representing the details of the exception.
-     * The error response includes the request ID, the request path, the error code,
-     * the localized error message, and any custom message provided by the exception.
-     */
-    @Override
-    protected @NonNull Mono<ResponseEntity<Object>> handleServerErrorException(@NonNull ServerErrorException ex,
-                                                                               @NonNull HttpHeaders headers,
-                                                                               @NonNull HttpStatusCode status,
-                                                                               @NonNull ServerWebExchange exchange) {
-        if (logger.isDebugEnabled()) {
-            logger.error(ex.getLocalizedMessage(), ex);
-        }
-        return handleExceptionInternal(ex, null, headers, status, exchange);
-    }
+public class GlobalRespEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * Handles exceptions of type {@link DataAccessException} by creating an appropriate error response.
@@ -86,26 +61,32 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Overrides the handleExceptionInternal method to provide custom exception handling.
-     * This method logs the exception message if debug logging is enabled and then calls the superclass's
-     * handleExceptionInternal method to handle the exception.
+     * Customize the handling of {@link WebExchangeBindException}.
+     * <p>This method delegates to {@link #handleExceptionInternal}.
      *
-     * @param ex       The exception that was thrown.
-     * @param body     The body of the response.
-     * @param headers  The headers of the response.
-     * @param status   The HTTP status code of the response.
-     * @param exchange The current server web exchange.
-     * @return A Mono containing a ResponseEntity with the exception details.
+     * @param ex       the exception to handle
+     * @param headers  the headers to use for the response
+     * @param status   the status code to use for the response
+     * @param exchange the current request and response
+     * @return a {@code Mono} with the {@code ResponseEntity} for the response
      */
     @Override
-    protected @NonNull Mono<ResponseEntity<Object>> handleExceptionInternal(@NonNull Exception ex, Object body,
-                                                                            HttpHeaders headers,
-                                                                            @NonNull HttpStatusCode status,
-                                                                            @NonNull ServerWebExchange exchange) {
+    protected @NonNull Mono<ResponseEntity<Object>> handleWebExchangeBindException(@NonNull WebExchangeBindException ex,
+                                                                                   @NonNull HttpHeaders headers,
+                                                                                   @NonNull HttpStatusCode status,
+                                                                                   @NonNull ServerWebExchange exchange) {
         if (logger.isDebugEnabled()) {
-            logger.error(ex.getLocalizedMessage(), ex);
+            for (var err : ex.getAllErrors()) {
+                logger.error("Bind Request Error! Field: " + err.getObjectName() + ",Error: " + err.getDefaultMessage());
+            }
+            logger.error(ex.getMessage(), ex);
         }
-        return super.handleExceptionInternal(ex, body, headers, status, exchange);
+        var errMsg = ex.getAllErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
+        ProblemDetail problemDetail = ProblemDetail
+                .forStatusAndDetail(HttpStatus.BAD_REQUEST, StringUtils.collectionToCommaDelimitedString(errMsg));
+        problemDetail.setTitle("Bad Request Bind Params Error!");
+        problemDetail.setType(exchange.getRequest().getURI());
+        return handleExceptionInternal(ex, problemDetail, headers, status, exchange);
     }
-
 }
