@@ -115,7 +115,7 @@ public class LoggersService extends AbstractCache {
      *
      * @param event The {@link LoggerEvent} to process.
      */
-    @EventListener
+    @EventListener(LoggerEvent.class)
     public void processLoggerEvent(LoggerEvent event) {
         if (event.kind() == LoggerEvent.Kind.INSERT) {
             var logger = event.entity();

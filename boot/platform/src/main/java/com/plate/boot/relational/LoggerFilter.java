@@ -12,7 +12,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
 import io.netty.util.internal.EmptyArrays;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.reactivestreams.Publisher;
 import org.springframework.core.io.buffer.*;
@@ -32,7 +31,6 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -65,7 +63,6 @@ import static org.springframework.security.web.server.csrf.CsrfWebFilter.DEFAULT
  */
 @Log4j2
 @Component
-@RequiredArgsConstructor
 public class LoggerFilter implements WebFilter {
     /**
      * Constants for the attribute key used to cache request body information.
@@ -97,6 +94,9 @@ public class LoggerFilter implements WebFilter {
      * This matcher is initialized with the DEFAULT_CSRF_MATCHER constant.
      */
     private final ServerWebExchangeMatcher defaultLoggerMatcher = DEFAULT_CSRF_MATCHER;
+    private final HandlerStrategies strategies = HandlerStrategies.builder().codecs(
+            configurer -> configurer.defaultCodecs().maxInMemorySize(1024 * 1024 * 1024)
+    ).build();
 
     /**
      * Caches the request body of a ServerWebExchange and decorates the ServerHttpRequest
@@ -138,9 +138,7 @@ public class LoggerFilter implements WebFilter {
             public @NonNull Mono<Void> writeWith(@NonNull Publisher<? extends DataBuffer> body) {
                 var cachedDataBuffer = DataBufferUtils.join(body).doOnNext(dataBuffer -> {
                     Object previousCachedBody = exchange.getAttributes().put(CACHED_RESPONSE_BODY_ATTR, dataBuffer);
-                    if (previousCachedBody != null) {
-                        exchange.getAttributes().put("cachedOriginalResponseBodyBackup", previousCachedBody);
-                    }
+                    exchange.getAttributes().put("cachedOriginalResponseBodyBackup", previousCachedBody);
                 }).flatMap(dataBuffer -> Mono.fromSupplier(() -> buildDataBuffer(dataBuffer)));
                 return super.writeWith(cachedDataBuffer);
             }
@@ -161,9 +159,6 @@ public class LoggerFilter implements WebFilter {
      */
     private static ServerHttpRequest requestDecorate(ServerWebExchange exchange, DataBuffer dataBuffer) {
         if (dataBuffer.capacity() > 0) {
-            if (log.isTraceEnabled()) {
-                log.trace("Retaining body in exchange attribute");
-            }
             var cachedDataBuffer = exchange.getAttribute(CACHED_REQUEST_BODY_ATTR);
             if (!(cachedDataBuffer instanceof DataBuffer)) {
                 exchange.getAttributes().put(CACHED_REQUEST_BODY_ATTR, dataBuffer);
@@ -173,12 +168,8 @@ public class LoggerFilter implements WebFilter {
         var decorator = new ServerHttpRequestDecorator(exchange.getRequest()) {
             @Override
             public @NonNull Flux<DataBuffer> getBody() {
-                return Mono.fromSupplier(() -> {
-                    if (exchange.getAttribute(CACHED_REQUEST_BODY_ATTR) == null) {
-                        return null;
-                    }
-                    return buildDataBuffer(dataBuffer);
-                }).flux();
+                log.debug("{}Request Decorator getBody.", exchange.getLogPrefix());
+                return Mono.fromSupplier(() -> buildDataBuffer(dataBuffer)).flux();
             }
         };
         exchange.getAttributes().put(CACHED_SERVER_HTTP_REQUEST_DECORATOR_ATTR, decorator);
@@ -219,7 +210,8 @@ public class LoggerFilter implements WebFilter {
         try {
             return ContextUtils.OBJECT_MAPPER.readTree(bodyStr);
         } catch (IOException exception) {
-            throw JsonException.withError(exception);
+            log.warn("Failed to parse request body as JSON: {}", bodyStr, exception);
+            return ContextUtils.OBJECT_MAPPER.createObjectNode();
         }
     }
 
@@ -269,27 +261,13 @@ public class LoggerFilter implements WebFilter {
      */
     private Mono<Void> cacheFilterChain(ServerWebExchange exchange, WebFilterChain chain) {
         log.debug("{}Logger filter chain [cacheRequestBody] next.", exchange.getLogPrefix());
-        return cacheRequestBody(exchange, serverHttpRequest -> processRequestBody(exchange, serverHttpRequest))
-                .then(Mono.defer(() -> processFilter(exchange, chain)));
-    }
-
-    /**
-     * Processes the request body from the given ServerWebExchange and ServerHttpRequest.
-     *
-     * @param exchange          The current server web exchange which holds information about the HTTP request and response.
-     * @param serverHttpRequest The actual HTTP request containing the body to be processed.
-     * @return A Mono that emits the processed request body as a String.
-     */
-    private Mono<String> processRequestBody(ServerWebExchange exchange, ServerHttpRequest serverHttpRequest) {
-        ServerHttpResponse cachedResponse = responseDecorate(exchange);
-        ServerRequest serverRequest = ServerRequest.create(exchange.mutate()
-                        .request(serverHttpRequest).response(cachedResponse).build(),
-                HandlerStrategies.withDefaults().messageReaders());
-        return serverRequest.bodyToMono(String.class).doOnNext((objectValue) -> {
-            Object previousCachedBody = exchange.getAttributes().put(CACHED_REQUEST_BODY_ATTR, objectValue);
-            log.debug("{}Logger filter chain [processRequestBody] body: {}",
-                    exchange.getLogPrefix(), previousCachedBody);
-        });
+        return cacheRequestBody(exchange, serverHttpRequest -> {
+            ServerHttpResponse cachedResponse = responseDecorate(exchange);
+            ServerRequest serverRequest = ServerRequest.create(
+                    exchange.mutate().request(serverHttpRequest).response(cachedResponse).build(),
+                    this.strategies.messageReaders());
+            return serverRequest.bodyToMono(Object.class);
+        }).then(Mono.defer(() -> processFilter(exchange, chain)));
     }
 
     /**
@@ -316,36 +294,6 @@ public class LoggerFilter implements WebFilter {
                 .doFinally(s -> releaseResources(exchange));
     }
 
-    /**
-     * Releases the resources held by the cached request and response bodies in the given ServerWebExchange.
-     * This method retrieves the backup cached request body and response body from the exchange attributes
-     * and then calls the `releaseDataBuffer` method to free up the resources associated with these data buffers.
-     *
-     * @param exchange The ServerWebExchange context from which the cached bodies' resources will be released.
-     */
-    private void releaseResources(ServerWebExchange exchange) {
-        Object backupCachedBody = exchange.getAttributes().get("cachedOriginalRequestBodyBackup");
-        Object backupCachedBody1 = exchange.getAttributes().get("cachedOriginalResponseBodyBackup");
-
-        releaseDataBuffer(backupCachedBody);
-        releaseDataBuffer(backupCachedBody1);
-    }
-
-    /**
-     * Releases the given data buffer object if it is an instance of {@link DataBuffer}.
-     * This method ensures that the resources held by the data buffer are properly released.
-     *
-     * @param dataBufferObject The object that may be a DataBuffer instance to be released.
-     */
-    private void releaseDataBuffer(Object dataBufferObject) {
-        if (dataBufferObject instanceof DataBuffer dataBuffer) {
-            try {
-                DataBufferUtils.release(dataBuffer);
-            } catch (Exception e) {
-                log.error("Logger filter failed to release DataBuffer resource.", e);
-            }
-        }
-    }
 
     /**
      * Logs the details of an HTTP request along with optional user details for security audit purposes.
@@ -378,7 +326,10 @@ public class LoggerFilter implements WebFilter {
 
         String prefix = exchange.getLogPrefix();
         String method = request.getMethod().name();
-        String status = String.valueOf(Objects.requireNonNull(response.getStatusCode()).value());
+        String status = "Unknown";
+        if (response.getStatusCode() != null) {
+            status = String.valueOf(response.getStatusCode().value());
+        }
         String tenantCode = Optional.ofNullable(userDetails.getTenantCode()).orElse("0");
         String path = request.getPath().value();
 
@@ -414,4 +365,37 @@ public class LoggerFilter implements WebFilter {
         }
     }
 
+    /**
+     * Releases the resources held by the cached request and response bodies in the given ServerWebExchange.
+     * This method retrieves the backup cached request body and response body from the exchange attributes
+     * and then calls the `releaseDataBuffer` method to free up the resources associated with these data buffers.
+     *
+     * @param exchange The ServerWebExchange context from which the cached bodies' resources will be released.
+     */
+    private void releaseResources(ServerWebExchange exchange) {
+        Object backupCachedReqBody = exchange.getAttributes().get("cachedOriginalRequestBodyBackup");
+        Object backupCachedResBody = exchange.getAttributes().get("cachedOriginalResponseBodyBackup");
+
+        releaseDataBuffer(backupCachedReqBody);
+        releaseDataBuffer(backupCachedResBody);
+
+        exchange.getAttributes().remove("cachedOriginalRequestBodyBackup");
+        exchange.getAttributes().remove("cachedOriginalResponseBodyBackup");
+    }
+
+    /**
+     * Releases the given data buffer object if it is an instance of {@link DataBuffer}.
+     * This method ensures that the resources held by the data buffer are properly released.
+     *
+     * @param dataBufferObject The object that may be a DataBuffer instance to be released.
+     */
+    private void releaseDataBuffer(Object dataBufferObject) {
+        if (dataBufferObject instanceof DataBuffer dataBuffer) {
+            try {
+                DataBufferUtils.release(dataBuffer);
+            } catch (Exception e) {
+                log.warn("Logger filter failed to release DataBuffer resource.", e);
+            }
+        }
+    }
 }
