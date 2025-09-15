@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -31,7 +32,7 @@ import reactor.core.publisher.Mono;
  * format before returning it in the body of a {@link ResponseEntity} with the appropriate HTTP status code.
  */
 @ControllerAdvice
-public class GlobalRespEntityExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * Handles exceptions of type {@link DataAccessException} by creating an appropriate error response.
@@ -55,6 +56,33 @@ public class GlobalRespEntityExceptionHandler extends ResponseEntityExceptionHan
         ProblemDetail problemDetail = ProblemDetail
                 .forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getCause().getLocalizedMessage());
         problemDetail.setTitle("Bad Sql Grammar Data Access Exception");
+        problemDetail.setType(exchange.getRequest().getURI());
+        return handleExceptionInternal(ex, problemDetail, exchange.getRequest().getHeaders(),
+                HttpStatus.INSUFFICIENT_STORAGE, exchange);
+    }
+
+    /**
+     * Handles exceptions of type {@link RuntimeException} by creating an appropriate error response.
+     * This method is designed to be used within a Spring MVC controller advice context to manage
+     * uncaught runtime exceptions that occur during the execution of RESTful server operations.
+     *
+     * @param ex       The {@link RuntimeException} instance that was thrown, encapsulating
+     *                 error details such as error code, message, and any additional info.
+     * @param exchange The current server web exchange containing request and response information.
+     *                 This is used to extract details necessary for constructing the error response.
+     * @return A {@link Mono} containing a {@link ResponseEntity} with status {@link HttpStatus#INSUFFICIENT_STORAGE},
+     * content type set to {@link MediaType#APPLICATION_JSON}, and body containing
+     * a {@link ProblemDetail} object representing the details of the exception.
+     * The error response includes the request URI, the error message, and a custom title.
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public Mono<ResponseEntity<Object>> handleException(RuntimeException ex, ServerWebExchange exchange) {
+        if (logger.isDebugEnabled()) {
+            logger.error(ex.getMessage(), ex);
+        }
+        ProblemDetail problemDetail = ProblemDetail
+                .forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getLocalizedMessage());
+        problemDetail.setTitle("Runtime Server Error Exception");
         problemDetail.setType(exchange.getRequest().getURI());
         return handleExceptionInternal(ex, problemDetail, exchange.getRequest().getHeaders(),
                 HttpStatus.INSUFFICIENT_STORAGE, exchange);
@@ -85,7 +113,22 @@ public class GlobalRespEntityExceptionHandler extends ResponseEntityExceptionHan
                 .map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
         ProblemDetail problemDetail = ProblemDetail
                 .forStatusAndDetail(HttpStatus.BAD_REQUEST, StringUtils.collectionToCommaDelimitedString(errMsg));
-        problemDetail.setTitle("Bad Request Bind Params Error!");
+        problemDetail.setTitle("Bad Request Bind Params Error");
+        problemDetail.setType(exchange.getRequest().getURI());
+        return handleExceptionInternal(ex, problemDetail, headers, status, exchange);
+    }
+
+    @Override
+    protected @NonNull Mono<ResponseEntity<Object>> handleServerWebInputException(
+            @NonNull ServerWebInputException ex, @NonNull HttpHeaders headers, @NonNull HttpStatusCode status,
+            @NonNull ServerWebExchange exchange) {
+
+        if (logger.isDebugEnabled()) {
+            logger.error(ex.getCause().getMessage(), ex);
+        }
+        ProblemDetail problemDetail = ProblemDetail
+                .forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getCause().getLocalizedMessage());
+        problemDetail.setTitle("Bad Request Server Input Error");
         problemDetail.setType(exchange.getRequest().getURI());
         return handleExceptionInternal(ex, problemDetail, headers, status, exchange);
     }

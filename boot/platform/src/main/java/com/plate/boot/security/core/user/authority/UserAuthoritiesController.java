@@ -73,7 +73,7 @@ public class UserAuthoritiesController {
      * @return a Mono indicating when the deletion is complete
      */
     @DeleteMapping("delete")
-    public Mono<Void> delete(@Valid @RequestBody UserAuthorityReq request) {
+    public Mono<Void> delete(@RequestBody UserAuthorityReq request) {
         Assert.notNull(request.getId(), "When deleting a UserAuthority, the ID must not be null");
         return this.authoritiesService.delete(request);
     }

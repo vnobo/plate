@@ -1,8 +1,8 @@
 package com.plate.boot.relational.logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.plate.boot.commons.MethodType;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.relational.MethodType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

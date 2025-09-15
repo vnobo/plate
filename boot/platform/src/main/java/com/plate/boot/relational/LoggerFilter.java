@@ -9,7 +9,6 @@ import com.plate.boot.relational.logger.LoggerReq;
 import com.plate.boot.security.SecurityDetails;
 import com.plate.boot.security.core.UserAuditor;
 import io.netty.buffer.Unpooled;
-import io.netty.util.CharsetUtil;
 import io.netty.util.internal.EmptyArrays;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
@@ -30,7 +29,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -89,10 +87,6 @@ public class LoggerFilter implements WebFilter {
      */
     public static final String CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR = "cachedServerHttpResponseDecorator";
 
-    /**
-     * The default logger matcher instance used to match server web exchange requests.
-     * This matcher is initialized with the DEFAULT_CSRF_MATCHER constant.
-     */
     private final ServerWebExchangeMatcher defaultLoggerMatcher = DEFAULT_CSRF_MATCHER;
     private final HandlerStrategies strategies = HandlerStrategies.builder().codecs(
             configurer -> configurer.defaultCodecs().maxInMemorySize(1024 * 1024 * 1024)
@@ -113,7 +107,8 @@ public class LoggerFilter implements WebFilter {
         DataBufferFactory factory = response.bufferFactory();
         var requestBody = DataBufferUtils.join(exchange.getRequest().getBody());
         requestBody = requestBody.defaultIfEmpty(factory.wrap(EmptyArrays.EMPTY_BYTES));
-        var requestDecorate = requestBody.flatMap(dataBuffer -> Mono.just(requestDecorate(exchange, dataBuffer)));
+        var requestDecorate = requestBody.flatMap(dataBuffer ->
+                Mono.just(requestDecorate(exchange, dataBuffer)));
         return requestDecorate.flatMap(function);
     }
 
@@ -136,10 +131,10 @@ public class LoggerFilter implements WebFilter {
         ServerHttpResponseDecorator decorator = new ServerHttpResponseDecorator(exchange.getResponse()) {
             @Override
             public @NonNull Mono<Void> writeWith(@NonNull Publisher<? extends DataBuffer> body) {
-                var cachedDataBuffer = DataBufferUtils.join(body).doOnNext(dataBuffer -> {
-                    Object previousCachedBody = exchange.getAttributes().put(CACHED_RESPONSE_BODY_ATTR, dataBuffer);
+                var cachedDataBuffer = DataBufferUtils.join(body).doOnNext(data -> {
+                    Object previousCachedBody = exchange.getAttributes().put(CACHED_RESPONSE_BODY_ATTR, data);
                     exchange.getAttributes().put("cachedOriginalResponseBodyBackup", previousCachedBody);
-                }).flatMap(dataBuffer -> Mono.fromSupplier(() -> buildDataBuffer(dataBuffer)));
+                }).flatMap(data -> Mono.fromSupplier(() -> buildDataBuffer(data)));
                 return super.writeWith(cachedDataBuffer);
             }
         };
@@ -206,14 +201,32 @@ public class LoggerFilter implements WebFilter {
      * @throws JsonException if an IOException occurs during JSON parsing.
      */
     private JsonNode readRequestBody(ServerWebExchange exchange) {
-        String bodyStr = exchange.getRequiredAttribute(CACHED_REQUEST_BODY_ATTR);
+        DataBuffer dataBodyBuff = exchange.getRequiredAttribute(CACHED_REQUEST_BODY_ATTR);
         try {
-            return ContextUtils.OBJECT_MAPPER.readTree(bodyStr);
-        } catch (IOException exception) {
-            log.warn("Failed to parse request body as JSON: {}", bodyStr, exception);
-            return ContextUtils.OBJECT_MAPPER.createObjectNode();
+            return ContextUtils.OBJECT_MAPPER.readTree(dataBodyBuff.asInputStream());
+        } catch (IOException e) {
+            log.warn("{}Logger filter request body is null, Abort processing.", exchange.getLogPrefix(), e);
+            throw JsonException.withError(e);
         }
     }
+
+    /**
+     * Reads and parses the response body from the given server web exchange into a JSON node.
+     *
+     * @param exchange The ServerWebExchange containing the response body to be read.
+     * @return A JsonNode representing the parsed response body. If the body is empty or parsing fails, an empty ObjectNode is returned.
+     * @throws JsonException If an IOException occurs during JSON parsing.
+     */
+    private JsonNode readResponseBody(ServerWebExchange exchange) {
+        DataBuffer dataBuffer = exchange.getRequiredAttribute(CACHED_RESPONSE_BODY_ATTR);
+        try {
+            return ContextUtils.OBJECT_MAPPER.readTree(dataBuffer.asInputStream());
+        } catch (IOException e) {
+            log.warn("{}Logger filter response body is null, Abort processing.", exchange.getLogPrefix(), e);
+            throw JsonException.withError(e);
+        }
+    }
+
 
     /**
      * Filters the given server web exchange based on a matching condition and applies caching before continuing the filter chain.
@@ -228,8 +241,10 @@ public class LoggerFilter implements WebFilter {
     public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         var filterMono = defaultLoggerMatcher.matches(exchange);
         filterMono = filterMono.filter(ServerWebExchangeMatcher.MatchResult::isMatch);
-        filterMono = filterMono.switchIfEmpty(Mono.defer(() -> continueFilterChain(exchange, chain).then(Mono.empty())));
-        return filterMono.flatMap((m) -> cacheFilterChain(exchange, chain).then(Mono.defer(ContextUtils::securityDetails))
+        filterMono = filterMono.switchIfEmpty(Mono.defer(() ->
+                continueFilterChain(exchange, chain).then(Mono.empty())));
+        return filterMono.flatMap((m) -> cacheFilterChain(exchange, chain)
+                .then(Mono.defer(ContextUtils::securityDetails))
                 .doOnNext(userDetails -> logRequest(exchange, userDetails)).then());
     }
 
@@ -339,30 +354,6 @@ public class LoggerFilter implements WebFilter {
         logger.setCreatedBy(userAuditor);
         logger.setUpdatedBy(userAuditor);
         ContextUtils.eventPublisher(LoggerEvent.insert(logger));
-    }
-
-    /**
-     * Reads and parses the response body from the given server web exchange into a JSON node.
-     *
-     * @param exchange The ServerWebExchange containing the response body to be read.
-     * @return A JsonNode representing the parsed response body. If the body is empty or parsing fails, an empty ObjectNode is returned.
-     * @throws JsonException If an IOException occurs during JSON parsing.
-     */
-    private JsonNode readResponseBody(ServerWebExchange exchange) {
-        DataBuffer dataBuffer = exchange.getRequiredAttribute(CACHED_RESPONSE_BODY_ATTR);
-        if (dataBuffer.capacity() < 2) {
-            return ContextUtils.OBJECT_MAPPER.createObjectNode();
-        }
-        try (var byteBufferIterator = dataBuffer.readableByteBuffers()) {
-            StringBuilder bodyStr = new StringBuilder();
-            while (byteBufferIterator.hasNext()) {
-                ByteBuffer byteBuffer = byteBufferIterator.next();
-                bodyStr.append(CharsetUtil.UTF_8.decode(byteBuffer));
-            }
-            return ContextUtils.OBJECT_MAPPER.readTree(bodyStr.toString());
-        } catch (IOException exception) {
-            throw JsonException.withError(exception);
-        }
     }
 
     /**
