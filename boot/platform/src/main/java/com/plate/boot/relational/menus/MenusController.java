@@ -95,7 +95,7 @@ public class MenusController {
     }
 
     /**
-     * Handles HTTP POST requests to save a new or modify an existing menu based on the provided request body.
+     * Handles HTTP POST requests to save a new or update an existing menu based on the provided request body.
      * If the request indicates a new menu, it is added; otherwise, it is modified.
      *
      * @param request The menu request containing the details of the menu to be saved.

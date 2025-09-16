@@ -115,7 +115,7 @@ public class MenusService extends AbstractCache {
      * @return A Mono of the modified Menu entity.
      */
     public Mono<Menu> modify(MenuReq request) {
-        log.debug("Menu modify request: {}", request);
+        log.debug("Menu update request: {}", request);
         var oldMunuMono = this.menusRepository.findByCode(request.getCode())
                 .switchIfEmpty(Mono.error(RestServerException.withMsg(
                         "Modify menu [" + request.getName() + "] is empty",
