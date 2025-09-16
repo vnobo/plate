@@ -27,7 +27,7 @@ spring:
     time-zone: "GMT+8"
     locale: "zh_CN"
   http.codecs:
-    max-in-memory-size: 10MB
+    max-in-memory-size: 256KB
     log-request-details: false
   cache.redis:
     key-prefix: "plate:caches:"
