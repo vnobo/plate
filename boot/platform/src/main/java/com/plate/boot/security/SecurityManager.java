@@ -125,7 +125,7 @@ public class SecurityManager extends AbstractCache
     /**
      * Registers a new user or modifies an existing one based on the provided user request.
      *
-     * @param request A UserReq object containing the details necessary to register or modify a user.
+     * @param request A UserReq object containing the details necessary to register or update a user.
      *                If the request contains a non-empty 'code', it will be treated as a modification request.
      * @return A Mono emitting the updated or newly registered User instance upon successful operation.
      */
