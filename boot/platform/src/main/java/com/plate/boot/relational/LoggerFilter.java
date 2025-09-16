@@ -126,7 +126,7 @@ public class LoggerFilter implements WebFilter {
     }
 
     /**
-     * Decorates the ServerHttpResponse to cache the response body and modify it when written.
+     * Decorates the ServerHttpResponse to cache the response body and update it when written.
      * It stores an initial default message in case no response body is provided later.
      * The decoration process involves intercepting the write operation to cache the actual response
      * and restore a previous cached response if needed.

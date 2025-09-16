@@ -33,4 +33,23 @@ public class LoggerEvent extends AbstractEvent<LoggerReq> {
         return new LoggerEvent(entity, Kind.INSERT);
     }
 
+    /**
+     * Creates a new LoggerEvent for a update operation.
+     *
+     * @param entity the entity associated with the event, must not be null
+     * @return a new LoggerEvent instance for the update operation
+     */
+    public static LoggerEvent update(LoggerReq entity) {
+        return new LoggerEvent(entity, Kind.UPDATE);
+    }
+
+    /**
+     * Creates a new LoggerEvent for a delete operation.
+     *
+     * @param entity the entity associated with the event, must not be null
+     * @return a new LoggerEvent instance for the delete operation
+     */
+    public static LoggerEvent delete(LoggerReq entity) {
+        return new LoggerEvent(entity, Kind.DELETE);
+    }
 }
