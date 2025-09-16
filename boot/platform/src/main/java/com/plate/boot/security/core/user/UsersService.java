@@ -180,7 +180,7 @@ public class UsersService extends AbstractCache {
                         user.setAccountLocked(old.getAccountLocked());
                         user.setCredentialsExpired(old.getCredentialsExpired());
                         return this.usersRepository.save(user);
-                    }).doOnNext(res -> ContextUtils.eventPublisher(UserEvent.save(res)));
+                    }).doOnNext(res -> ContextUtils.eventPublisher(UserEvent.update(res)));
         }
     }
 

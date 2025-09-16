@@ -22,4 +22,34 @@ public class UserEvent extends AbstractEvent<User> {
     protected UserEvent(User entity, Kind kind) {
         super(entity, kind);
     }
+
+    /**
+     * Creates a new UserEvent for an insert operation.
+     *
+     * @param entity the entity associated with the event, must not be null
+     * @return a new UserEvent instance for the insert operation
+     */
+    public static UserEvent insert(User entity) {
+        return new UserEvent(entity, Kind.INSERT);
+    }
+
+    /**
+     * Creates a new UserEvent for a update operation.
+     *
+     * @param entity the entity associated with the event, must not be null
+     * @return a new UserEvent instance for the update operation
+     */
+    public static UserEvent update(User entity) {
+        return new UserEvent(entity, Kind.UPDATE);
+    }
+
+    /**
+     * Creates a new UserEvent for a delete operation.
+     *
+     * @param entity the entity associated with the event, must not be null
+     * @return a new UserEvent instance for the delete operation
+     */
+    public static UserEvent delete(User entity) {
+        return new UserEvent(entity, Kind.DELETE);
+    }
 }
