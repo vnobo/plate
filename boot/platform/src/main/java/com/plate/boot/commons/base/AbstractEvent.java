@@ -23,7 +23,7 @@ public abstract class AbstractEvent<E> extends AbstractRelationalEvent<E> {
     public final E entity;
 
     /**
-     * The kind of event (INSERT, SAVE, DELETE).
+     * The kind of event (INSERT, MODIFY, DELETE).
      */
     @Getter
     public final Kind kind;
@@ -40,39 +40,6 @@ public abstract class AbstractEvent<E> extends AbstractRelationalEvent<E> {
         this.kind = kind;
     }
 
-    /**
-     * Creates a new UserEvent for an insert operation.
-     *
-     * @param entity the entity associated with the event, must not be null
-     * @return a new UserEvent instance for the insert operation
-     */
-    public static <E> AbstractEvent<E> insert(E entity) {
-        return new AbstractEvent<>(entity, Kind.INSERT) {
-        };
-    }
-
-    /**
-     * Creates a new UserEvent for a save operation.
-     *
-     * @param entity the entity associated with the event, must not be null
-     * @return a new UserEvent instance for the save operation
-     */
-    public static <E> AbstractEvent<E> save(E entity) {
-        return new AbstractEvent<>(entity, Kind.SAVE) {
-        };
-    }
-
-    /**
-     * Creates a new UserEvent for a delete operation.
-     *
-     * @param entity the entity associated with the event, must not be null
-     * @return a new UserEvent instance for the delete operation
-     */
-    public static <E> AbstractEvent<E> delete(E entity) {
-        return new AbstractEvent<>(entity, Kind.DELETE) {
-        };
-    }
-    
     /**
      * Returns the resolvable type of the event.
      *
@@ -133,10 +100,9 @@ public abstract class AbstractEvent<E> extends AbstractRelationalEvent<E> {
         INSERT,
 
         /**
-         * A SAVE event, typically involves an insert or update on the aggregate root plus
-         * inserts, updates, and deletes on other elements of an aggregate.
+         * A UPDATE event, typically involves an update on the aggregate root.
          */
-        SAVE,
+        UPDATE,
 
         /**
          * A DELETE event, typically involves a delete on all contained entities.
