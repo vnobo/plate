@@ -33,7 +33,7 @@ public class GroupsService extends AbstractCache {
      * @return Stream of group information that meets the conditions
      */
     public Flux<Group> search(GroupReq request, Pageable pageable) {
-        QueryFragment queryFragment = request.query();
+        QueryFragment queryFragment = request.query().pageable(pageable);
         return super.queryWithCache(BeanUtils.cacheKey(request, pageable),
                 queryFragment.querySql(), queryFragment, Group.class);
     }
@@ -79,7 +79,8 @@ public class GroupsService extends AbstractCache {
     public Mono<Void> delete(GroupReq request) {
         return this.groupsRepository.findByCode(request.getCode())
                 .doOnNext(res -> ContextUtils.eventPublisher(GroupEvent.delete(res)))
-                .flatMap(this.groupsRepository::delete)
+                .then()
+                //.flatMap(this.groupsRepository::delete)
                 .doAfterTerminate(() -> this.cache.clear());
     }
 
@@ -102,7 +103,7 @@ public class GroupsService extends AbstractCache {
                         group.setCode(old.getCode());
                         return this.groupsRepository.save(group);
                     })
-                    .doOnNext(res -> ContextUtils.eventPublisher(GroupEvent.save(res)));
+                    .doOnNext(res -> ContextUtils.eventPublisher(GroupEvent.update(res)));
         }
     }
 
