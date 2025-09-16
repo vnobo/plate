@@ -79,8 +79,7 @@ public class GroupsService extends AbstractCache {
     public Mono<Void> delete(GroupReq request) {
         return this.groupsRepository.findByCode(request.getCode())
                 .doOnNext(res -> ContextUtils.eventPublisher(GroupEvent.delete(res)))
-                .then()
-                //.flatMap(this.groupsRepository::delete)
+                .flatMap(this.groupsRepository::delete)
                 .doAfterTerminate(() -> this.cache.clear());
     }
 
