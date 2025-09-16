@@ -4,7 +4,7 @@ import com.plate.boot.commons.ProgressEvent;
 import com.plate.boot.commons.exception.RestServerException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.http.codec.HttpCodecsProperties;
 import org.springframework.data.r2dbc.convert.R2dbcConverter;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -65,7 +65,7 @@ public class DatabaseUtils implements InitializingBean {
      * This threshold determines when data should be processed differently
      * (e.g., written to disk) to avoid exceeding memory constraints.
      *
-     * @see #setMaxInMemorySize(DataSize) for configuration
+     * @see HttpCodecsProperties #getMaxInMemorySize()
      */
     public static DataSize MAX_IN_MEMORY_SIZE;
 
@@ -97,13 +97,16 @@ public class DatabaseUtils implements InitializingBean {
     private final ReactiveRedisTemplate<String, Object> redisTemplate;
     private final DatabaseClient databaseClient;
     private final R2dbcConverter r2dbcConverter;
+    private final HttpCodecsProperties codecsProperties;
 
     public DatabaseUtils(R2dbcEntityTemplate entityTemplate,
-                         ReactiveRedisTemplate<String, Object> redisTemplate) {
+                         ReactiveRedisTemplate<String, Object> redisTemplate,
+                         HttpCodecsProperties codecsProperties) {
         this.entityTemplate = entityTemplate;
         this.redisTemplate = redisTemplate;
         this.databaseClient = entityTemplate.getDatabaseClient();
         this.r2dbcConverter = entityTemplate.getConverter();
+        this.codecsProperties = codecsProperties;
     }
 
     /**
@@ -228,49 +231,12 @@ public class DatabaseUtils implements InitializingBean {
         }
         try {
             byte[] bytes = BeanUtils.objectToBytes(obj);
-            if (bytes == null) {
-                log.warn("Object serialization returned null bytes");
-                return DataSize.ofBytes(0);
-            }
             int size = bytes.length;
             return DataSize.ofBytes(size);
         } catch (Exception e) {
-            log.error("Bean Size calculation failed: {}", e.toString());
+            log.error("Bean Size calculation failed: {}", e.getMessage(), e);
             return DataSize.ofBytes(0);
         }
-    }
-
-    /**
-     * Sets the maximum size of data that can be stored in memory before being written to disk.
-     * This method allows configuration of the maximum in-memory size limit, which is particularly
-     * useful for managing memory usage when handling large amounts of data, such as file uploads.
-     *
-     * @param dataSize The maximum in-memory size limit defined as a {@link DataSize}. Defaults to 256 kilobytes if not explicitly set.
-     */
-    @Value("${spring.codec.max-in-memory-size:256KB}")
-    public void setMaxInMemorySize(DataSize dataSize) {
-        MAX_IN_MEMORY_SIZE = dataSize;
-    }
-
-    /**
-     * Invoked by the containing {@code BeanFactory} after it has set all bean properties
-     * and satisfied all dependencies for this bean. This method allows the bean instance
-     * to perform initialization only possible when all bean properties have been set
-     * and to throw an exception in the event of misconfiguration.
-     *
-     * <p>In this implementation, the method sets up the {@code databaseClient} and
-     * {@code r2dbcConverter} by extracting them from the injected {@code entityTemplate}.
-     * It calls the superclass's {@code afterPropertiesSet} first to ensure any
-     * necessary setup in the parent class is also executed.
-     */
-    @Override
-    public void afterPropertiesSet() {
-        log.info("Initializing utils [DatabaseUtils]");
-        // Initialize static fields from instance fields
-        ENTITY_TEMPLATE = this.entityTemplate;
-        DATABASE_CLIENT = this.databaseClient;
-        R2DBC_CONVERTER = this.r2dbcConverter;
-        REACTIVE_REDIS_TEMPLATE = this.redisTemplate;
     }
 
     /**
@@ -306,9 +272,31 @@ public class DatabaseUtils implements InitializingBean {
                     .onErrorResume(err -> Mono.just(event.withError("Processed failed save item. msg: "
                                     + err.getCause().getMessage(),
                             RestServerException.withMsg(err.getLocalizedMessage(), err))));
-        }).delayElements(Duration.ofMillis(100));
-        var endMono = Mono.fromCallable(() -> ProgressEvent.of(0L, null)
+        });
+        var endMono = Mono.fromCallable(() -> ProgressEvent.of(100L, null)
                 .withMessage("Batch processing completed"));
-        return Flux.concat(startMono, itemsFlux, endMono);
+        return Flux.concatDelayError(startMono, itemsFlux, endMono);
+    }
+
+    /**
+     * Invoked by the containing {@code BeanFactory} after it has set all bean properties
+     * and satisfied all dependencies for this bean. This method allows the bean instance
+     * to perform initialization only possible when all bean properties have been set
+     * and to throw an exception in the event of misconfiguration.
+     *
+     * <p>In this implementation, the method sets up the {@code databaseClient} and
+     * {@code r2dbcConverter} by extracting them from the injected {@code entityTemplate}.
+     * It calls the superclass's {@code afterPropertiesSet} first to ensure any
+     * necessary setup in the parent class is also executed.
+     */
+    @Override
+    public void afterPropertiesSet() {
+        log.info("Initializing utils [DatabaseUtils]");
+        // Initialize static fields from instance fields
+        ENTITY_TEMPLATE = this.entityTemplate;
+        DATABASE_CLIENT = this.databaseClient;
+        R2DBC_CONVERTER = this.r2dbcConverter;
+        REACTIVE_REDIS_TEMPLATE = this.redisTemplate;
+        MAX_IN_MEMORY_SIZE = this.codecsProperties.getMaxInMemorySize();
     }
 }
