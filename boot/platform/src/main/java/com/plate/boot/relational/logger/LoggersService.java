@@ -101,7 +101,7 @@ public class LoggersService extends AbstractCache {
      */
     @Scheduled(cron = "0 0 1 * * ?")
     public void clearLoggers() {
-        this.loggersRepository.deleteByCreatedAtBefore(LocalDateTime.now().minusYears(3))
+        this.loggersRepository.deleteByCreatedAtBefore(LocalDateTime.now().minusYears(1))
                 .subscribe(res -> log.info("CLEAN UP EXPIRED LOGS: {}", res));
     }
 
@@ -120,7 +120,8 @@ public class LoggersService extends AbstractCache {
         if (event.kind() == LoggerEvent.Kind.INSERT) {
             var logger = event.entity();
             this.operate(logger).subscribe(res ->
-                    log.debug("Client request log save result. log: {}", logger.getContext()));
+                    log.debug("{}Client request log save result. log code: {}",
+                            res.getPrefix(), res.getCode()));
         }
     }
 }

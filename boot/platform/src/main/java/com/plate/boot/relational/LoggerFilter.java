@@ -13,6 +13,7 @@ import io.netty.util.internal.EmptyArrays;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.reactivestreams.Publisher;
+import org.springframework.boot.autoconfigure.http.codec.HttpCodecsProperties;
 import org.springframework.core.io.buffer.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
@@ -20,6 +21,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.reactive.function.server.HandlerStrategies;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.ServerWebExchange;
@@ -88,9 +91,19 @@ public class LoggerFilter implements WebFilter {
     public static final String CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR = "cachedServerHttpResponseDecorator";
 
     private final ServerWebExchangeMatcher defaultLoggerMatcher = DEFAULT_CSRF_MATCHER;
-    private final HandlerStrategies strategies = HandlerStrategies.builder().codecs(
-            configurer -> configurer.defaultCodecs().maxInMemorySize(1024 * 1024 * 1024)
-    ).build();
+    private final HandlerStrategies strategies;
+
+    public LoggerFilter(HttpCodecsProperties codecsProperties) {
+        var memorySize = codecsProperties.getMaxInMemorySize();
+        if (ObjectUtils.isEmpty(memorySize)) {
+            memorySize = DataSize.ofKilobytes(10);
+        }
+        DataSize finalMemorySize = memorySize;
+        this.strategies = HandlerStrategies.builder().codecs(
+                configurer -> configurer.defaultCodecs()
+                        .maxInMemorySize((int) finalMemorySize.toBytes())
+        ).build();
+    }
 
     /**
      * Caches the request body of a ServerWebExchange and decorates the ServerHttpRequest
