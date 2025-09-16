@@ -76,7 +76,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * The error response includes the request URI, the error message, and a custom title.
      */
     @ExceptionHandler(RuntimeException.class)
-    public Mono<ResponseEntity<Object>> handleException(RuntimeException ex, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Object>> handleRuntimeException(RuntimeException ex, ServerWebExchange exchange) {
         if (logger.isDebugEnabled()) {
             logger.error(ex.getMessage(), ex);
         }
