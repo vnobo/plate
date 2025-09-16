@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.commons.base.BaseEntity;
 import com.plate.boot.security.core.UserAuditor;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.*;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Represents a tenant entity in the system.
@@ -23,25 +26,52 @@ import java.time.LocalDateTime;
 @Table("se_tenants")
 public class Tenant implements BaseEntity<Integer> {
 
-    /**
-     * The unique identifier for the tenant.
-     */
     @Id
-    private Integer id;
+    @EqualsAndHashCode.Include
+    protected Integer id;
 
     /**
-     * The code of the tenant.
-     * This field is mandatory and cannot be blank.
+     * Data entity code
      */
-    @NotBlank(message = "Tenant [code] cannot be empty!")
-    private String code;
+    protected UUID code;
+
+    /**
+     * Data entity extend,Json column
+     */
+    protected JsonNode extend;
+
+    /**
+     * Data entity create operator
+     * use User. Class code property
+     */
+    @CreatedBy
+    protected UserAuditor createdBy;
+
+    /**
+     * Data entity create time, timestamp column
+     */
+    @CreatedDate
+    protected LocalDateTime createdAt;
+
+    /**
+     * Data entity update operator
+     * use User.class code property
+     */
+    @LastModifiedBy
+    protected UserAuditor updatedBy;
+
+    /**
+     * Data entity update time,timestamp column
+     */
+    @LastModifiedDate
+    protected LocalDateTime updatedAt;
 
     /**
      * The parent code of the tenant.
      * This field is mandatory and cannot be blank.
      */
-    @NotBlank(message = "Tenant parent code [pcode] cannot be empty!")
-    private String pcode;
+    @NotNull(message = "Tenant parent code [pcode] cannot be empty!")
+    private UUID pcode;
 
     /**
      * The name of the tenant.
@@ -51,35 +81,8 @@ public class Tenant implements BaseEntity<Integer> {
     private String name;
 
     /**
-     * Additional information about the tenant in JSON format.
+     * The description of the tenant.
      */
-    private JsonNode extend;
+    private String description;
 
-    /**
-     * The user who created the tenant.
-     * This field is automatically populated by the auditing framework.
-     */
-    @CreatedBy
-    private UserAuditor creator;
-
-    /**
-     * The user who last modified the tenant.
-     * This field is automatically populated by the auditing framework.
-     */
-    @LastModifiedBy
-    private UserAuditor updater;
-
-    /**
-     * The timestamp when the tenant was created.
-     * This field is automatically populated by the auditing framework.
-     */
-    @CreatedDate
-    private LocalDateTime createdTime;
-
-    /**
-     * The timestamp when the tenant was last modified.
-     * This field is automatically populated by the auditing framework.
-     */
-    @LastModifiedDate
-    private LocalDateTime updatedTime;
 }

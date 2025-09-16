@@ -36,17 +36,12 @@ public class TenantMemberReq extends TenantMember {
     private String username;
 
     /**
-     * The security code associated with the tenant member request.
-     */
-    private String securityCode;
-
-    /**
      * Sets the security code for the tenant member request.
      *
      * @param securityCode the security code to set
      * @return the updated TenantMemberReq instance
      */
-    public TenantMemberReq securityCode(String securityCode) {
+    public TenantMemberReq securityCode(UUID securityCode) {
         this.setSecurityCode(securityCode);
         return this;
     }

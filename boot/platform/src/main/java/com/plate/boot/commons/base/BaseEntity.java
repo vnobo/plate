@@ -8,7 +8,6 @@ import com.plate.boot.commons.utils.ContextUtils;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.*;
@@ -39,7 +38,7 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
      * Support security code for sensitive data
      */
     @JsonIgnore
-    default String getSecurityCode() {
+    default UUID getSecurityCode() {
         return null;
     }
 
@@ -117,8 +116,8 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
         if (!ObjectUtils.isEmpty(getQuery())) {
             fragment.condition(QueryJsonHelper.queryJson(getQuery(), null));
         }
-        if (StringUtils.hasLength(getSecurityCode())) {
-            fragment.like("tenantCode", getSecurityCode());
+        if (!ObjectUtils.isEmpty(getSecurityCode())) {
+            fragment.isEq("tenantCode", getSecurityCode());
         }
         return fragment;
     }

@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.plate.boot.commons.utils.ContextUtils.DEFAULT_UUID_CODE;
+
 /**
  * Represents security details for a user, extending the DefaultOAuth2User and implementing UserDetails.
  * This class encapsulates user identity and authentication information along with additional security-related properties.
@@ -161,13 +163,12 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
      *
      * @return the tenant code
      */
-    public String getTenantCode() {
-        var defaultTenantCode = "0";
+    public UUID getTenantCode() {
         if (ObjectUtils.isEmpty(this.getTenants())) {
-            return defaultTenantCode;
+            return DEFAULT_UUID_CODE;
         }
         return this.getTenants().stream().filter(TenantMemberRes::getEnabled).findAny()
-                .map(TenantMemberRes::getTenantCode).orElse(defaultTenantCode);
+                .map(TenantMemberRes::getTenantCode).orElse(DEFAULT_UUID_CODE);
     }
 
     /**

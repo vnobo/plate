@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.util.UUID;
+
 /**
  * Represents a logging request that extends the basic {@link Logger} functionality,
  * encapsulating details necessary for logging specific HTTP requests. This includes
@@ -30,7 +32,7 @@ public class LoggerReq extends Logger {
      * @param context    Additional contextual information in JSON format.
      * @return A configured {@link LoggerReq} object ready for logging purposes.
      */
-    public static LoggerReq of(String tenantCode, String operator, String prefix,
+    public static LoggerReq of(UUID tenantCode, String operator, String prefix,
                                String method, String status, String url, JsonNode context) {
         LoggerReq req = new LoggerReq();
         req.setTenantCode(tenantCode);

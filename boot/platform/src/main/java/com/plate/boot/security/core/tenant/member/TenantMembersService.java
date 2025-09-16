@@ -4,6 +4,7 @@ import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.DatabaseUtils;
+import com.plate.boot.security.core.tenant.TenantEvent;
 import com.plate.boot.security.core.user.UserEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -107,6 +108,16 @@ public class TenantMembersService extends AbstractCache {
      */
     public Mono<Void> delete(TenantMemberReq request) {
         return this.tenantMembersRepository.delete(request.toMemberTenant());
+    }
+
+    @EventListener(value = TenantEvent.class, condition = "#event.kind.name() == 'DELETE'")
+    public void onUserDeletedEvent(TenantEvent event) {
+        this.tenantMembersRepository.deleteByTenantCode(event.entity().getCode())
+                .doAfterTerminate(() -> this.cache.clear())
+                .subscribe(result -> log.info("Deleted tenant user for tenant code: {}," +
+                                "result count: {}.", event.entity().getCode(), result),
+                        throwable -> log.error("Failed to delete tenant user for tenant code: {}",
+                                event.entity().getCode(), throwable));
     }
 
     /**

@@ -154,7 +154,7 @@ public class UsersService extends AbstractCache {
     public Mono<Void> delete(UserReq request) {
         return this.usersRepository.findByCode(request.getCode())
                 .doOnNext(res -> ContextUtils.eventPublisher(UserEvent.delete(res)))
-                .delayElement(Duration.ofSeconds(10))
+                .delayElement(Duration.ofSeconds(2))
                 .flatMap(this.usersRepository::delete).doAfterTerminate(() -> this.cache.clear());
     }
 

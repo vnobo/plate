@@ -33,6 +33,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
 import static com.plate.boot.commons.utils.ContextUtils.getClientIpAddress;
@@ -358,7 +359,8 @@ public class LoggerFilter implements WebFilter {
         if (response.getStatusCode() != null) {
             status = String.valueOf(response.getStatusCode().value());
         }
-        String tenantCode = Optional.ofNullable(userDetails.getTenantCode()).orElse("0");
+        UUID tenantCode = Optional.ofNullable(userDetails.getTenantCode())
+                .orElse(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         String path = request.getPath().value();
 
         LoggerReq logger = LoggerReq.of(tenantCode, userDetails.getUsername(), prefix,

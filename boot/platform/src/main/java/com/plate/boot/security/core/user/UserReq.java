@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.util.UUID;
+
 
 /**
  * Represents a user request, extending the base User class with additional attributes specific to requests.
@@ -23,7 +25,7 @@ public class UserReq extends User {
      * @param securityCode The security code to be set for the user request.
      * @return The UserReq instance with the updated security code.
      */
-    public UserReq securityCode(String securityCode) {
+    public UserReq securityCode(UUID securityCode) {
         this.setSecurityCode(securityCode);
         return this;
     }

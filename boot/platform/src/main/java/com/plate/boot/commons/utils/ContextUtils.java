@@ -40,6 +40,7 @@ import java.util.*;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public final class ContextUtils implements InitializingBean {
 
+    public final static UUID DEFAULT_UUID_CODE = UUID.fromString("00000000-0000-0000-0000-000000000000");
     /**
      * Constant defining the role identifier for administrators within the system.
      * This role grants access to administrative functionalities and permissions.

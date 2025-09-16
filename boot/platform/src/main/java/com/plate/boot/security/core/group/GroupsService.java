@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+
 /**
  * Group Service Class
  * Provides core business functions such as create, delete, update, query, pagination query,
@@ -79,6 +81,7 @@ public class GroupsService extends AbstractCache {
     public Mono<Void> delete(GroupReq request) {
         return this.groupsRepository.findByCode(request.getCode())
                 .doOnNext(res -> ContextUtils.eventPublisher(GroupEvent.delete(res)))
+                .delayElement(Duration.ofSeconds(2))
                 .flatMap(this.groupsRepository::delete)
                 .doAfterTerminate(() -> this.cache.clear());
     }
