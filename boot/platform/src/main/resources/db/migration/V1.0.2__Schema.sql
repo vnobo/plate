@@ -23,8 +23,8 @@ create table if not exists se_menus
     extend      jsonb,
     created_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
     updated_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
-    created_at  timestamp    not null default current_timestamp,
-    updated_at  timestamp    not null default current_timestamp
+    created_at TIMESTAMPTZ not null default current_timestamp,
+    updated_at TIMESTAMPTZ not null default current_timestamp
 );
 
 create index se_menus_pttn_idx on se_menus (pcode, tenant_code, type, name);
@@ -36,12 +36,12 @@ create table if not exists oauth2_authorized_client
     principal_name          varchar(200)                            not null,
     access_token_type       varchar(100)                            not null,
     access_token_value      bytea                                   not null,
-    access_token_issued_at  timestamp                               not null,
-    access_token_expires_at timestamp                               not null,
+    access_token_issued_at  TIMESTAMPTZ                           not null,
+    access_token_expires_at TIMESTAMPTZ                           not null,
     access_token_scopes     varchar(1000) default null,
     refresh_token_value     bytea         default null,
-    refresh_token_issued_at timestamp     default null,
-    created_at              timestamp     default current_timestamp not null,
+    refresh_token_issued_at TIMESTAMPTZ default null,
+    created_at              TIMESTAMPTZ default current_timestamp not null,
     primary key (client_registration_id, principal_name)
 );
 
@@ -62,11 +62,11 @@ create table if not exists se_users
     avatar              text,
     bio                 text,
     extend              jsonb,
-    login_time          timestamp             default current_timestamp,
+    login_time TIMESTAMPTZ          default current_timestamp,
     created_by          uuid         not null default '00000000-0000-0000-0000-000000000000',
     updated_by          uuid         not null default '00000000-0000-0000-0000-000000000000',
-    created_at          timestamp    not null default current_timestamp,
-    updated_at          timestamp    not null default current_timestamp,
+    created_at TIMESTAMPTZ not null default current_timestamp,
+    updated_at TIMESTAMPTZ not null default current_timestamp,
     text_search         tsvector generated always as (
         setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
         setweight(to_tsvector('chinese', username), 'A') || ' ' ||
@@ -90,8 +90,8 @@ create table if not exists se_authorities
     extend      jsonb,
     created_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
     updated_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
-    created_at  timestamp    not null default current_timestamp,
-    updated_at  timestamp    not null default current_timestamp,
+    created_at TIMESTAMPTZ not null default current_timestamp,
+    updated_at TIMESTAMPTZ not null default current_timestamp,
     unique (user_code, authority),
     foreign key (user_code) references se_users (code)
 );
@@ -107,8 +107,8 @@ create table if not exists se_groups
     extend      jsonb,
     created_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
     updated_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
-    created_at  timestamp    not null default current_timestamp,
-    updated_at timestamp not null default current_timestamp,
+    created_at TIMESTAMPTZ not null default current_timestamp,
+    updated_at TIMESTAMPTZ not null default current_timestamp,
     text_search tsvector generated always as (
         setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
         setweight(to_tsvector('chinese', tenant_code), 'A') || ' ' ||
@@ -129,8 +129,8 @@ create table if not exists se_group_authorities
     extend      jsonb,
     created_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
     updated_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
-    created_at  timestamp    not null default current_timestamp,
-    updated_at  timestamp    not null default current_timestamp,
+    created_at TIMESTAMPTZ not null default current_timestamp,
+    updated_at TIMESTAMPTZ not null default current_timestamp,
     unique (group_code, authority),
     foreign key (group_code) references se_groups (code)
 );
@@ -146,8 +146,8 @@ create table if not exists se_group_members
     extend      jsonb,
     created_by  uuid        not null default '00000000-0000-0000-0000-000000000000',
     updated_by  uuid        not null default '00000000-0000-0000-0000-000000000000',
-    created_at  timestamp   not null default current_timestamp,
-    updated_at  timestamp   not null default current_timestamp,
+    created_at TIMESTAMPTZ not null default current_timestamp,
+    updated_at TIMESTAMPTZ not null default current_timestamp,
     unique (group_code, user_code),
     foreign key (group_code) references se_groups (code),
     foreign key (user_code) references se_users (code)
@@ -163,8 +163,8 @@ create table if not exists se_tenants
     extend      jsonb,
     created_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
     updated_by  uuid         not null default '00000000-0000-0000-0000-000000000000',
-    created_at  timestamp    not null default current_timestamp,
-    updated_at timestamp not null default current_timestamp,
+    created_at TIMESTAMPTZ not null default current_timestamp,
+    updated_at TIMESTAMPTZ not null default current_timestamp,
     text_search tsvector generated always as (
         setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(name, '')), 'B')
@@ -183,8 +183,8 @@ create table if not exists se_tenant_members
     extend      jsonb,
     created_by  uuid        not null default '00000000-0000-0000-0000-000000000000',
     updated_by  uuid        not null default '00000000-0000-0000-0000-000000000000',
-    created_at  timestamp   not null default current_timestamp,
-    updated_at  timestamp   not null default current_timestamp,
+    created_at TIMESTAMPTZ not null default current_timestamp,
+    updated_at TIMESTAMPTZ not null default current_timestamp,
     unique (tenant_code, user_code),
     foreign key (tenant_code) references se_tenants (code),
     foreign key (user_code) references se_users (code)
@@ -205,8 +205,8 @@ create table if not exists se_loggers
     extend      jsonb,
     created_by  uuid        not null default '00000000-0000-0000-0000-000000000000',
     updated_by  uuid        not null default '00000000-0000-0000-0000-000000000000',
-    created_at  timestamp   not null default current_timestamp,
-    updated_at  timestamp   not null default current_timestamp,
+    created_at TIMESTAMPTZ not null default current_timestamp,
+    updated_at TIMESTAMPTZ not null default current_timestamp,
     text_search tsvector generated always as (
         setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
         setweight(to_tsvector('chinese', tenant_code), 'A') || ' ' ||
