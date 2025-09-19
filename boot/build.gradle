@@ -5,7 +5,7 @@ plugins {
 }
 
 ext {
-    set('javaVersion', 21)
+    set('javaVersion', 25)
     set('guavaVersion', '33.+')
 }
 
