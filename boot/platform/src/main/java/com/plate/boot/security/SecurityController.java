@@ -110,7 +110,8 @@ public class SecurityController {
      * @return A Mono emitting the access token associated with the bound OAuth2 authorized client.
      */
     @GetMapping("bind")
-    public Mono<Object> bindOauth2(@NotBlank(message = "ClientRegistrationId cannot be empty") String clientRegistrationId, Authentication authentication, ServerWebExchange exchange) {
+    public Mono<Object> bindOauth2(@NotBlank(message = "ClientRegistrationId cannot be empty") String clientRegistrationId,
+                                   Authentication authentication, ServerWebExchange exchange) {
         return this.clientRepository.loadAuthorizedClient(clientRegistrationId, authentication, exchange)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(RestServerException.withMsg("Client ["
                                 + clientRegistrationId + "] not found",
