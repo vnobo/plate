@@ -88,7 +88,7 @@ public class UsersController {
      * @param request A validated {@link UserReq} containing the details for the user modification,
      *                with a non-null ID of the user to be modified.
      * @return A {@link Mono} emitting the updated user information as a {@link UserRes}.
-     * @throws IllegalArgumentException If the request's ID is null, indicating an attempt to modify a non-existent user.
+     * @throws IllegalArgumentException If the request's ID is null, indicating an attempt to update a non-existent user.
      */
     @PutMapping("modify")
     public Mono<UserRes> modify(@Validated(Update.class) @RequestBody UserReq request) {
@@ -107,7 +107,7 @@ public class UsersController {
      * If the 'id' in the request is null, a NullPointerException will be thrown before the operation begins.
      */
     @DeleteMapping("delete")
-    public Mono<Void> delete(@Valid @RequestBody UserReq request) {
+    public Mono<Void> delete(@RequestBody UserReq request) {
         Assert.notNull(request.getCode(), "When deleting a user, the ID must not be null");
         return this.usersService.delete(request);
     }

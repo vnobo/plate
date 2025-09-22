@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.util.Map;
-
 /**
  * Represents a request for tenant information, extending the Tenant class.
  * This class includes additional query parameters.
@@ -24,11 +22,6 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class TenantReq extends Tenant {
-
-    /**
-     * A map containing query parameters for the tenant request.
-     */
-    private Map<String, Object> query;
 
     /**
      * Converts this TenantReq instance to a Tenant instance.

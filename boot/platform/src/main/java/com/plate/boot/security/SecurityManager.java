@@ -113,19 +113,17 @@ public class SecurityManager extends AbstractCache
      */
     @Override
     public Mono<UserDetails> updatePassword(UserDetails userDetails, String newPassword) {
-        SecurityDetails securityDetails = (SecurityDetails) userDetails;
-        securityDetails.password(newPassword);
         Query query = Query.query(Criteria.where("username").is(userDetails.getUsername()).ignoreCase(true));
         Update update = Update.update("password", newPassword);
-        return DatabaseUtils.ENTITY_TEMPLATE.update(User.class).matching(query).apply(update)
-                .flatMap(result -> Mono.just((UserDetails) securityDetails))
+        return DatabaseUtils.ENTITY_TEMPLATE.update(query, update, User.class)
+                .flatMap(_ -> Mono.just(userDetails))
                 .doAfterTerminate(() -> this.cache.clear());
     }
 
     /**
      * Registers a new user or modifies an existing one based on the provided user request.
      *
-     * @param request A UserReq object containing the details necessary to register or modify a user.
+     * @param request A UserReq object containing the details necessary to register or update a user.
      *                If the request contains a non-empty 'code', it will be treated as a modification request.
      * @return A Mono emitting the updated or newly registered User instance upon successful operation.
      */

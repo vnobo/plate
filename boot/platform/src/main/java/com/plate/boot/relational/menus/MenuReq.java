@@ -14,6 +14,9 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+
+import static com.plate.boot.commons.utils.ContextUtils.DEFAULT_UUID_CODE;
 
 /**
  * MenuReq class extends Menu and provides additional properties and methods
@@ -53,7 +56,7 @@ public class MenuReq extends Menu {
      * @param authority  the authority
      * @return a new MenuReq object
      */
-    public static MenuReq of(String tenantCode, String authority) {
+    public static MenuReq of(UUID tenantCode, String authority) {
         MenuReq menuReq = new MenuReq();
         menuReq.setTenantCode(tenantCode);
         menuReq.setAuthority(authority);
@@ -85,8 +88,8 @@ public class MenuReq extends Menu {
     public Criteria toCriteria() {
         Criteria criteria = criteria(Set.of("permissions", "tenantCode", "icons", "menus", "rules"));
 
-        if (StringUtils.hasLength(this.getTenantCode())) {
-            criteria = criteria.and("tenantCode").in(List.of(this.getTenantCode(), "0"));
+        if (!ObjectUtils.isEmpty(this.getTenantCode())) {
+            criteria = criteria.and("tenantCode").in(List.of(this.getTenantCode(), DEFAULT_UUID_CODE));
         }
 
         if (StringUtils.hasLength(this.getAuthority())) {

@@ -23,7 +23,7 @@ public abstract class AbstractEvent<E> extends AbstractRelationalEvent<E> {
     public final E entity;
 
     /**
-     * The kind of event (INSERT, SAVE, DELETE).
+     * The kind of event (INSERT, MODIFY, DELETE).
      */
     @Getter
     public final Kind kind;
@@ -100,10 +100,9 @@ public abstract class AbstractEvent<E> extends AbstractRelationalEvent<E> {
         INSERT,
 
         /**
-         * A SAVE event, typically involves an insert or update on the aggregate root plus
-         * inserts, updates, and deletes on other elements of an aggregate.
+         * A UPDATE event, typically involves an update on the aggregate root.
          */
-        SAVE,
+        UPDATE,
 
         /**
          * A DELETE event, typically involves a delete on all contained entities.

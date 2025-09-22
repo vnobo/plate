@@ -20,7 +20,7 @@ public interface TenantMembersRepository extends R2dbcRepository<TenantMember, L
      * @param tenantCode the tenantCode to delete by
      * @return a Mono emitting the number of records deleted
      */
-    Mono<Integer> deleteByTenantCode(String tenantCode);
+    Mono<Integer> deleteByTenantCode(UUID tenantCode);
 
     /**
      * Deletes records from the database based on the provided userCode.

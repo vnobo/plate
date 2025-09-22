@@ -4,8 +4,10 @@ import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.DatabaseUtils;
+import com.plate.boot.security.core.group.GroupEvent;
 import com.plate.boot.security.core.user.UserEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -23,6 +25,7 @@ import reactor.core.publisher.Mono;
  *
  * @see GroupMembersRepository
  */
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class GroupMembersService extends AbstractCache {
@@ -107,6 +110,17 @@ public class GroupMembersService extends AbstractCache {
     public void onUserDeletedEvent(UserEvent event) {
         this.memberRepository.deleteByUserCode(event.entity().getCode())
                 .doAfterTerminate(() -> this.cache.clear())
-                .subscribe();
+                .subscribe(result -> log.info("Deleted user group for user code: {}," +
+                                "result count: {}.", event.entity().getCode(), result),
+                        throwable -> log.error("Failed to delete user group for user code: {}",
+                                event.entity().getCode(), throwable));
+    }
+
+    @EventListener(value = GroupEvent.class, condition = "#event.kind.name() == 'DELETE'")
+    public void onUserDeletedEvent(GroupEvent event) {
+        this.memberRepository.deleteByGroupCode(event.entity().getCode())
+                .doAfterTerminate(() -> this.cache.clear())
+                .subscribe(result -> log.info("Deleted group members for group coe: {}," +
+                        " result count: {}.", event.entity().getCode(), result));
     }
 }

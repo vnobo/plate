@@ -9,6 +9,7 @@ import com.plate.boot.security.core.user.User;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.util.ObjectUtils;
@@ -17,6 +18,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import static com.plate.boot.commons.utils.ContextUtils.DEFAULT_UUID_CODE;
 
 /**
  * Represents security details for a user, extending the DefaultOAuth2User and implementing UserDetails.
@@ -67,6 +70,7 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
      * tenant code, user code, enabled status, and audit details provided by {@link UserAuditor}.
      * This set facilitates management and access to tenant-specific data for the authenticated user within a security context.
      */
+    @JsonIgnore
     private Set<TenantMemberRes> tenants;
 
     /**
@@ -74,6 +78,7 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
      * This set encapsulates the group membership responses for a user, providing information about the groups
      * the user is a part of, including each group's name and additional metadata in the form of a JSON node.
      */
+    @JsonIgnore
     private Set<GroupMemberRes> groups;
 
     /**
@@ -145,29 +150,17 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
     }
 
     /**
-     * Sets the password for the security details.
-     *
-     * @param password the password to set
-     * @return the updated SecurityDetails instance
-     */
-    public SecurityDetails password(String password) {
-        this.setPassword(password);
-        return this;
-    }
-
-    /**
      * Retrieves the tenant code associated with the security details.
      * If no tenants are associated, returns the default tenant code "0".
      *
      * @return the tenant code
      */
-    public String getTenantCode() {
-        var defaultTenantCode = "0";
+    public UUID getTenantCode() {
         if (ObjectUtils.isEmpty(this.getTenants())) {
-            return defaultTenantCode;
+            return DEFAULT_UUID_CODE;
         }
         return this.getTenants().stream().filter(TenantMemberRes::getEnabled).findAny()
-                .map(TenantMemberRes::getTenantCode).orElse(defaultTenantCode);
+                .map(TenantMemberRes::getTenantCode).orElse(DEFAULT_UUID_CODE);
     }
 
     /**
@@ -184,6 +177,13 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
         }
         return this.getTenants().stream().filter(TenantMemberRes::getEnabled).findAny()
                 .map(TenantMemberRes::getName).orElse(defaultTenantName);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        var authorities = super.getAuthorities();
+        return authorities.stream().map(a ->
+                new SimpleGrantedAuthority(a.getAuthority())).toList();
     }
 
     /**

@@ -3,7 +3,10 @@ package com.plate.boot.security.core.group.authority;
 
 import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.security.core.group.GroupEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,7 @@ import reactor.core.publisher.Mono;
  *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class GroupAuthoritiesService extends AbstractCache {
@@ -76,5 +80,13 @@ public class GroupAuthoritiesService extends AbstractCache {
     public Mono<Void> delete(GroupAuthorityReq request) {
         return this.authoritiesRepository.delete(request.toGroupAuthority())
                 .doAfterTerminate(() -> this.cache.clear());
+    }
+
+    @EventListener(value = GroupEvent.class, condition = "#event.kind.name() == 'DELETE'")
+    public void onUserDeletedEvent(GroupEvent event) {
+        this.authoritiesRepository.deleteByGroupCode(event.entity().getCode())
+                .doAfterTerminate(() -> this.cache.clear())
+                .subscribe(res -> log.debug("Deleted group authorities by code [{}], " +
+                        "result count [{}].", event.entity().getCode(), res));
     }
 }

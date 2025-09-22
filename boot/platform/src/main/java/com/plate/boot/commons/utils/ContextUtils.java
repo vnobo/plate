@@ -40,6 +40,7 @@ import java.util.*;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public final class ContextUtils implements InitializingBean {
 
+    public final static UUID DEFAULT_UUID_CODE = UUID.fromString("00000000-0000-0000-0000-000000000000");
     /**
      * Constant defining the role identifier for administrators within the system.
      * This role grants access to administrative functionalities and permissions.
@@ -124,8 +125,8 @@ public final class ContextUtils implements InitializingBean {
     /**
      * Initializes the ContextUtils class with necessary dependencies.
      *
-     * @param objectMapper The ObjectMapper instance used for JSON serialization and deserialization.
-     * @param cacheManager The CacheManager instance used for cache operations.
+     * @param objectMapper              The ObjectMapper instance used for JSON serialization and deserialization.
+     * @param cacheManager              The CacheManager instance used for cache operations.
      * @param applicationEventPublisher The ApplicationEventPublisher instance used for event publishing.
      */
     ContextUtils(ObjectMapper objectMapper, CacheManager cacheManager,
@@ -141,6 +142,7 @@ public final class ContextUtils implements InitializingBean {
      * @param object The event object to be published.
      */
     public static void eventPublisher(AbstractEvent<?> object) {
+        log.debug("Publishing event: {}", object);
         ContextUtils.APPLICATION_EVENT_PUBLISHER.publishEvent(object);
     }
 
@@ -261,7 +263,7 @@ public final class ContextUtils implements InitializingBean {
      * @return A newly created {@link UUID} instance, providing a unique identifier.
      */
     public static UUID nextId() {
-        return UuidCreator.getTimeOrderedEpochFast();
+        return UuidCreator.getTimeOrderedEpoch();
     }
 
     /**

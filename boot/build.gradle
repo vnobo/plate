@@ -1,12 +1,7 @@
 plugins {
-    id 'org.springframework.boot' version '3.5.5' apply false
+    id 'org.springframework.boot' version '3.5.6' apply false
     id 'io.spring.dependency-management' version '1.1.7' apply false
-    id 'org.graalvm.buildtools.native' version '0.10.6' apply false
-}
-
-ext {
-    set('javaVersion', 21)
-    set('guavaVersion', '33.+')
+    id 'org.graalvm.buildtools.native' version '0.11.0' apply false
 }
 
 configure(allprojects) { project ->
@@ -32,6 +27,26 @@ configure(subprojects) { project ->
     apply plugin: "org.springframework.boot"
     apply plugin: "io.spring.dependency-management"
 
+    tasks.named("bootBuildImage") {
+        createdDate = "now"
+        imageName = "localhost:5000/${rootProject.name}-${project.name}:latest"
+        environment = [
+                "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
+                "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError" +
+                        "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
+        ]
+        buildCache {
+            volume {
+                name = "cache-${rootProject.name}-${project.name}.build"
+            }
+        }
+        launchCache {
+            volume {
+                name = "cache-${rootProject.name}-${project.name}.launch"
+            }
+        }
+    }
+
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(javaVersion)
@@ -44,18 +59,8 @@ configure(subprojects) { project ->
         }
     }
 
-    tasks.named("bootBuildImage") {
-        createdDate = "now"
-        imageName = "localhost:5000/${rootProject.name}-${project.name}:latest"
-        environment = [
-                "BPE_DELIM_JAVA_TOOL_OPTIONS" : " ",
-                "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError" +
-                        "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
-        ]
-    }
-
     dependencies {
-        implementation("com.google.guava:guava:$guavaVersion")
+        implementation("com.google.guava:guava:${guavaVersion}")
         implementation("org.springframework.boot:spring-boot-starter-actuator")
 
         implementation("org.springframework.boot:spring-boot-starter-log4j2") {

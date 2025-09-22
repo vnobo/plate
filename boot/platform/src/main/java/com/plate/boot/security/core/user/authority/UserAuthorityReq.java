@@ -5,10 +5,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.data.relational.core.query.Criteria;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Set;
+
+import static com.plate.boot.commons.utils.ContextUtils.DEFAULT_UUID_CODE;
 
 /**
  * Request class for UserAuthority operations.
@@ -42,8 +45,8 @@ public class UserAuthorityReq extends UserAuthority {
      */
     public Criteria toCriteria() {
         var criteria = criteria(Set.of());
-        if (StringUtils.hasLength(this.getTenantCode())) {
-            criteria = criteria.and("tenantCode").in(List.of(this.getTenantCode(), "0"));
+        if (!ObjectUtils.isEmpty(this.getTenantCode())) {
+            criteria = criteria.and("tenantCode").in(List.of(this.getTenantCode(), DEFAULT_UUID_CODE));
         }
         if (StringUtils.hasLength(this.getAuthority())) {
             criteria = criteria.and("authority").is(this.getAuthority());

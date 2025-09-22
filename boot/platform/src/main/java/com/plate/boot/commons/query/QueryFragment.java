@@ -654,6 +654,10 @@ public final class QueryFragment extends HashMap<String, Object> {
         return this;
     }
 
+    public QueryFragment isEq(String column, Object value) {
+        return addCondition(column, value, "=");
+    }
+
     /**
      * Generates the column list of the SQL statement.
      *

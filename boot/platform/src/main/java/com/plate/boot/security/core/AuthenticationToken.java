@@ -12,10 +12,10 @@ import java.io.Serializable;
  * It provides static factory methods to facilitate the creation of {@code AuthenticationToken} instances from individual components
  * or by extracting information from a {@code WebSession} and an {@code Authentication} object.
  *
- * @param token The authentication token string.
- * @param expires The timestamp indicating when the token expires, in seconds since the Unix epoch.
+ * @param token          The authentication token string.
+ * @param expires        The timestamp indicating when the token expires, in seconds since the Unix epoch.
  * @param lastAccessTime The timestamp of the last access made using this token, in seconds since the Unix epoch.
- * @param details Arbitrary object containing additional details associated with the authentication, typically the principal.
+ * @param details        Arbitrary object containing additional details associated with the authentication, typically the principal.
  */
 public record AuthenticationToken(String token, Long expires, Long lastAccessTime,
                                   Object details) implements Serializable {
@@ -37,12 +37,12 @@ public record AuthenticationToken(String token, Long expires, Long lastAccessTim
      * Constructs an {@link AuthenticationToken} instance using details extracted from the provided {@link WebSession} and
      * {@link Authentication} objects.
      *
-     * @param session The current web session from which the session ID and timestamps are retrieved.
-     * @param authentication The authentication object containing the principal detail.
+     * @param session   The current web session from which the session ID and timestamps are retrieved.
+     * @param principal The authentication object containing the principal detail.
      * @return A newly built {@link AuthenticationToken} representing the authenticated user's session with relevant metadata.
      */
-    public static AuthenticationToken build(WebSession session, Authentication authentication) {
+    public static AuthenticationToken build(WebSession session, Object principal) {
         return of(session.getId(), session.getMaxIdleTime().getSeconds(),
-                session.getLastAccessTime().getEpochSecond(), authentication.getPrincipal());
+                session.getLastAccessTime().getEpochSecond(), principal);
     }
 }

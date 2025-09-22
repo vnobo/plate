@@ -3,6 +3,7 @@ package com.plate.boot.security.core.group;
 import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -11,9 +12,11 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+
 /**
  * Group Service Class
- * Provides core business functions such as create, delete, update, query, pagination query, 
+ * Provides core business functions such as create, delete, update, query, pagination query,
  * and conditional search for user groups
  *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
@@ -32,7 +35,7 @@ public class GroupsService extends AbstractCache {
      * @return Stream of group information that meets the conditions
      */
     public Flux<Group> search(GroupReq request, Pageable pageable) {
-        QueryFragment queryFragment = request.query();
+        QueryFragment queryFragment = request.query().pageable(pageable);
         return super.queryWithCache(BeanUtils.cacheKey(request, pageable),
                 queryFragment.querySql(), queryFragment, Group.class);
     }
@@ -76,7 +79,11 @@ public class GroupsService extends AbstractCache {
      * @return Asynchronous response with empty result
      */
     public Mono<Void> delete(GroupReq request) {
-        return this.groupsRepository.delete(request.toGroup());
+        return this.groupsRepository.findByCode(request.getCode())
+                .doOnNext(res -> ContextUtils.eventPublisher(GroupEvent.delete(res)))
+                .delayElement(Duration.ofSeconds(2))
+                .flatMap(this.groupsRepository::delete)
+                .doAfterTerminate(() -> this.cache.clear());
     }
 
     /**
@@ -88,15 +95,17 @@ public class GroupsService extends AbstractCache {
     public Mono<Group> save(Group group) {
         // Add new group
         if (group.isNew()) {
-            return this.groupsRepository.save(group);
+            return this.groupsRepository.save(group)
+                    .doOnNext(res -> ContextUtils.eventPublisher(GroupEvent.insert(res)));
         } else {
             // Update group, preserving creation time and code information
             assert group.getId() != null;
             return this.groupsRepository.findById(group.getId()).flatMap(old -> {
-                group.setCreatedAt(old.getCreatedAt());
-                group.setCode(old.getCode());
-                return this.groupsRepository.save(group);
-            });
+                        group.setCreatedAt(old.getCreatedAt());
+                        group.setCode(old.getCode());
+                        return this.groupsRepository.save(group);
+                    })
+                    .doOnNext(res -> ContextUtils.eventPublisher(GroupEvent.update(res)));
         }
     }
 

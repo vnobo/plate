@@ -9,12 +9,11 @@ import com.plate.boot.relational.logger.LoggerReq;
 import com.plate.boot.security.SecurityDetails;
 import com.plate.boot.security.core.UserAuditor;
 import io.netty.buffer.Unpooled;
-import io.netty.util.CharsetUtil;
 import io.netty.util.internal.EmptyArrays;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.reactivestreams.Publisher;
+import org.springframework.boot.autoconfigure.http.codec.HttpCodecsProperties;
 import org.springframework.core.io.buffer.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
@@ -22,6 +21,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.reactive.function.server.HandlerStrategies;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.ServerWebExchange;
@@ -31,9 +32,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
 import static com.plate.boot.commons.utils.ContextUtils.getClientIpAddress;
@@ -65,7 +65,6 @@ import static org.springframework.security.web.server.csrf.CsrfWebFilter.DEFAULT
  */
 @Log4j2
 @Component
-@RequiredArgsConstructor
 public class LoggerFilter implements WebFilter {
     /**
      * Constants for the attribute key used to cache request body information.
@@ -92,11 +91,20 @@ public class LoggerFilter implements WebFilter {
      */
     public static final String CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR = "cachedServerHttpResponseDecorator";
 
-    /**
-     * The default logger matcher instance used to match server web exchange requests.
-     * This matcher is initialized with the DEFAULT_CSRF_MATCHER constant.
-     */
     private final ServerWebExchangeMatcher defaultLoggerMatcher = DEFAULT_CSRF_MATCHER;
+    private final HandlerStrategies strategies;
+
+    public LoggerFilter(HttpCodecsProperties codecsProperties) {
+        var memorySize = codecsProperties.getMaxInMemorySize();
+        if (ObjectUtils.isEmpty(memorySize)) {
+            memorySize = DataSize.ofKilobytes(10);
+        }
+        DataSize finalMemorySize = memorySize;
+        this.strategies = HandlerStrategies.builder().codecs(
+                configurer -> configurer.defaultCodecs()
+                        .maxInMemorySize((int) finalMemorySize.toBytes())
+        ).build();
+    }
 
     /**
      * Caches the request body of a ServerWebExchange and decorates the ServerHttpRequest
@@ -113,12 +121,13 @@ public class LoggerFilter implements WebFilter {
         DataBufferFactory factory = response.bufferFactory();
         var requestBody = DataBufferUtils.join(exchange.getRequest().getBody());
         requestBody = requestBody.defaultIfEmpty(factory.wrap(EmptyArrays.EMPTY_BYTES));
-        var requestDecorate = requestBody.flatMap(dataBuffer -> Mono.just(requestDecorate(exchange, dataBuffer)));
+        var requestDecorate = requestBody.flatMap(dataBuffer ->
+                Mono.just(requestDecorate(exchange, dataBuffer)));
         return requestDecorate.flatMap(function);
     }
 
     /**
-     * Decorates the ServerHttpResponse to cache the response body and modify it when written.
+     * Decorates the ServerHttpResponse to cache the response body and update it when written.
      * It stores an initial default message in case no response body is provided later.
      * The decoration process involves intercepting the write operation to cache the actual response
      * and restore a previous cached response if needed.
@@ -136,12 +145,10 @@ public class LoggerFilter implements WebFilter {
         ServerHttpResponseDecorator decorator = new ServerHttpResponseDecorator(exchange.getResponse()) {
             @Override
             public @NonNull Mono<Void> writeWith(@NonNull Publisher<? extends DataBuffer> body) {
-                var cachedDataBuffer = DataBufferUtils.join(body).doOnNext(dataBuffer -> {
-                    Object previousCachedBody = exchange.getAttributes().put(CACHED_RESPONSE_BODY_ATTR, dataBuffer);
-                    if (previousCachedBody != null) {
-                        exchange.getAttributes().put("cachedOriginalResponseBodyBackup", previousCachedBody);
-                    }
-                }).flatMap(dataBuffer -> Mono.fromSupplier(() -> buildDataBuffer(dataBuffer)));
+                var cachedDataBuffer = DataBufferUtils.join(body).doOnNext(data -> {
+                    Object previousCachedBody = exchange.getAttributes().put(CACHED_RESPONSE_BODY_ATTR, data);
+                    exchange.getAttributes().put("cachedOriginalResponseBodyBackup", previousCachedBody);
+                }).flatMap(data -> Mono.fromSupplier(() -> buildDataBuffer(data)));
                 return super.writeWith(cachedDataBuffer);
             }
         };
@@ -161,9 +168,6 @@ public class LoggerFilter implements WebFilter {
      */
     private static ServerHttpRequest requestDecorate(ServerWebExchange exchange, DataBuffer dataBuffer) {
         if (dataBuffer.capacity() > 0) {
-            if (log.isTraceEnabled()) {
-                log.trace("Retaining body in exchange attribute");
-            }
             var cachedDataBuffer = exchange.getAttribute(CACHED_REQUEST_BODY_ATTR);
             if (!(cachedDataBuffer instanceof DataBuffer)) {
                 exchange.getAttributes().put(CACHED_REQUEST_BODY_ATTR, dataBuffer);
@@ -173,12 +177,8 @@ public class LoggerFilter implements WebFilter {
         var decorator = new ServerHttpRequestDecorator(exchange.getRequest()) {
             @Override
             public @NonNull Flux<DataBuffer> getBody() {
-                return Mono.fromSupplier(() -> {
-                    if (exchange.getAttribute(CACHED_REQUEST_BODY_ATTR) == null) {
-                        return null;
-                    }
-                    return buildDataBuffer(dataBuffer);
-                }).flux();
+                log.debug("{}Request Decorator getBody.", exchange.getLogPrefix());
+                return Mono.fromSupplier(() -> buildDataBuffer(dataBuffer)).flux();
             }
         };
         exchange.getAttributes().put(CACHED_SERVER_HTTP_REQUEST_DECORATOR_ATTR, decorator);
@@ -215,13 +215,32 @@ public class LoggerFilter implements WebFilter {
      * @throws JsonException if an IOException occurs during JSON parsing.
      */
     private JsonNode readRequestBody(ServerWebExchange exchange) {
-        String bodyStr = exchange.getRequiredAttribute(CACHED_REQUEST_BODY_ATTR);
+        DataBuffer dataBodyBuff = exchange.getRequiredAttribute(CACHED_REQUEST_BODY_ATTR);
         try {
-            return ContextUtils.OBJECT_MAPPER.readTree(bodyStr);
-        } catch (IOException exception) {
-            throw JsonException.withError(exception);
+            return ContextUtils.OBJECT_MAPPER.readTree(dataBodyBuff.asInputStream());
+        } catch (IOException e) {
+            log.warn("{}Logger filter request body is null, Abort processing.", exchange.getLogPrefix(), e);
+            throw JsonException.withError(e);
         }
     }
+
+    /**
+     * Reads and parses the response body from the given server web exchange into a JSON node.
+     *
+     * @param exchange The ServerWebExchange containing the response body to be read.
+     * @return A JsonNode representing the parsed response body. If the body is empty or parsing fails, an empty ObjectNode is returned.
+     * @throws JsonException If an IOException occurs during JSON parsing.
+     */
+    private JsonNode readResponseBody(ServerWebExchange exchange) {
+        DataBuffer dataBuffer = exchange.getRequiredAttribute(CACHED_RESPONSE_BODY_ATTR);
+        try {
+            return ContextUtils.OBJECT_MAPPER.readTree(dataBuffer.asInputStream());
+        } catch (IOException e) {
+            log.warn("{}Logger filter response body is null, Abort processing.", exchange.getLogPrefix(), e);
+            throw JsonException.withError(e);
+        }
+    }
+
 
     /**
      * Filters the given server web exchange based on a matching condition and applies caching before continuing the filter chain.
@@ -236,8 +255,10 @@ public class LoggerFilter implements WebFilter {
     public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         var filterMono = defaultLoggerMatcher.matches(exchange);
         filterMono = filterMono.filter(ServerWebExchangeMatcher.MatchResult::isMatch);
-        filterMono = filterMono.switchIfEmpty(Mono.defer(() -> continueFilterChain(exchange, chain).then(Mono.empty())));
-        return filterMono.flatMap((m) -> cacheFilterChain(exchange, chain).then(Mono.defer(ContextUtils::securityDetails))
+        filterMono = filterMono.switchIfEmpty(Mono.defer(() ->
+                continueFilterChain(exchange, chain).then(Mono.empty())));
+        return filterMono.flatMap((_) -> cacheFilterChain(exchange, chain)
+                .then(Mono.defer(ContextUtils::securityDetails))
                 .doOnNext(userDetails -> logRequest(exchange, userDetails)).then());
     }
 
@@ -269,27 +290,13 @@ public class LoggerFilter implements WebFilter {
      */
     private Mono<Void> cacheFilterChain(ServerWebExchange exchange, WebFilterChain chain) {
         log.debug("{}Logger filter chain [cacheRequestBody] next.", exchange.getLogPrefix());
-        return cacheRequestBody(exchange, serverHttpRequest -> processRequestBody(exchange, serverHttpRequest))
-                .then(Mono.defer(() -> processFilter(exchange, chain)));
-    }
-
-    /**
-     * Processes the request body from the given ServerWebExchange and ServerHttpRequest.
-     *
-     * @param exchange          The current server web exchange which holds information about the HTTP request and response.
-     * @param serverHttpRequest The actual HTTP request containing the body to be processed.
-     * @return A Mono that emits the processed request body as a String.
-     */
-    private Mono<String> processRequestBody(ServerWebExchange exchange, ServerHttpRequest serverHttpRequest) {
-        ServerHttpResponse cachedResponse = responseDecorate(exchange);
-        ServerRequest serverRequest = ServerRequest.create(exchange.mutate()
-                        .request(serverHttpRequest).response(cachedResponse).build(),
-                HandlerStrategies.withDefaults().messageReaders());
-        return serverRequest.bodyToMono(String.class).doOnNext((objectValue) -> {
-            Object previousCachedBody = exchange.getAttributes().put(CACHED_REQUEST_BODY_ATTR, objectValue);
-            log.debug("{}Logger filter chain [processRequestBody] body: {}",
-                    exchange.getLogPrefix(), previousCachedBody);
-        });
+        return cacheRequestBody(exchange, serverHttpRequest -> {
+            ServerHttpResponse cachedResponse = responseDecorate(exchange);
+            ServerRequest serverRequest = ServerRequest.create(
+                    exchange.mutate().request(serverHttpRequest).response(cachedResponse).build(),
+                    this.strategies.messageReaders());
+            return serverRequest.bodyToMono(Object.class);
+        }).then(Mono.defer(() -> processFilter(exchange, chain)));
     }
 
     /**
@@ -313,39 +320,9 @@ public class LoggerFilter implements WebFilter {
         exchange.getAttributes().remove(CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR);
 
         return chain.filter(exchange.mutate().request(cachedRequest).response(cachedResponse).build())
-                .doFinally(s -> releaseResources(exchange));
+                .doFinally(_ -> releaseResources(exchange));
     }
 
-    /**
-     * Releases the resources held by the cached request and response bodies in the given ServerWebExchange.
-     * This method retrieves the backup cached request body and response body from the exchange attributes
-     * and then calls the `releaseDataBuffer` method to free up the resources associated with these data buffers.
-     *
-     * @param exchange The ServerWebExchange context from which the cached bodies' resources will be released.
-     */
-    private void releaseResources(ServerWebExchange exchange) {
-        Object backupCachedBody = exchange.getAttributes().get("cachedOriginalRequestBodyBackup");
-        Object backupCachedBody1 = exchange.getAttributes().get("cachedOriginalResponseBodyBackup");
-
-        releaseDataBuffer(backupCachedBody);
-        releaseDataBuffer(backupCachedBody1);
-    }
-
-    /**
-     * Releases the given data buffer object if it is an instance of {@link DataBuffer}.
-     * This method ensures that the resources held by the data buffer are properly released.
-     *
-     * @param dataBufferObject The object that may be a DataBuffer instance to be released.
-     */
-    private void releaseDataBuffer(Object dataBufferObject) {
-        if (dataBufferObject instanceof DataBuffer dataBuffer) {
-            try {
-                DataBufferUtils.release(dataBuffer);
-            } catch (Exception e) {
-                log.error("Logger filter failed to release DataBuffer resource.", e);
-            }
-        }
-    }
 
     /**
      * Logs the details of an HTTP request along with optional user details for security audit purposes.
@@ -378,8 +355,12 @@ public class LoggerFilter implements WebFilter {
 
         String prefix = exchange.getLogPrefix();
         String method = request.getMethod().name();
-        String status = String.valueOf(Objects.requireNonNull(response.getStatusCode()).value());
-        String tenantCode = Optional.ofNullable(userDetails.getTenantCode()).orElse("0");
+        String status = "Unknown";
+        if (response.getStatusCode() != null) {
+            status = String.valueOf(response.getStatusCode().value());
+        }
+        UUID tenantCode = Optional.ofNullable(userDetails.getTenantCode())
+                .orElse(UUID.fromString("00000000-0000-0000-0000-000000000000"));
         String path = request.getPath().value();
 
         LoggerReq logger = LoggerReq.of(tenantCode, userDetails.getUsername(), prefix,
@@ -391,27 +372,36 @@ public class LoggerFilter implements WebFilter {
     }
 
     /**
-     * Reads and parses the response body from the given server web exchange into a JSON node.
+     * Releases the resources held by the cached request and response bodies in the given ServerWebExchange.
+     * This method retrieves the backup cached request body and response body from the exchange attributes
+     * and then calls the `releaseDataBuffer` method to free up the resources associated with these data buffers.
      *
-     * @param exchange The ServerWebExchange containing the response body to be read.
-     * @return A JsonNode representing the parsed response body. If the body is empty or parsing fails, an empty ObjectNode is returned.
-     * @throws JsonException If an IOException occurs during JSON parsing.
+     * @param exchange The ServerWebExchange context from which the cached bodies' resources will be released.
      */
-    private JsonNode readResponseBody(ServerWebExchange exchange) {
-        DataBuffer dataBuffer = exchange.getRequiredAttribute(CACHED_RESPONSE_BODY_ATTR);
-        if (dataBuffer.capacity() < 2) {
-            return ContextUtils.OBJECT_MAPPER.createObjectNode();
-        }
-        try (var byteBufferIterator = dataBuffer.readableByteBuffers()) {
-            StringBuilder bodyStr = new StringBuilder();
-            while (byteBufferIterator.hasNext()) {
-                ByteBuffer byteBuffer = byteBufferIterator.next();
-                bodyStr.append(CharsetUtil.UTF_8.decode(byteBuffer));
-            }
-            return ContextUtils.OBJECT_MAPPER.readTree(bodyStr.toString());
-        } catch (IOException exception) {
-            throw JsonException.withError(exception);
-        }
+    private void releaseResources(ServerWebExchange exchange) {
+        Object backupCachedReqBody = exchange.getAttributes().get("cachedOriginalRequestBodyBackup");
+        Object backupCachedResBody = exchange.getAttributes().get("cachedOriginalResponseBodyBackup");
+
+        releaseDataBuffer(backupCachedReqBody);
+        releaseDataBuffer(backupCachedResBody);
+
+        exchange.getAttributes().remove("cachedOriginalRequestBodyBackup");
+        exchange.getAttributes().remove("cachedOriginalResponseBodyBackup");
     }
 
+    /**
+     * Releases the given data buffer object if it is an instance of {@link DataBuffer}.
+     * This method ensures that the resources held by the data buffer are properly released.
+     *
+     * @param dataBufferObject The object that may be a DataBuffer instance to be released.
+     */
+    private void releaseDataBuffer(Object dataBufferObject) {
+        if (dataBufferObject instanceof DataBuffer dataBuffer) {
+            try {
+                DataBufferUtils.release(dataBuffer);
+            } catch (Exception e) {
+                log.warn("Logger filter failed to release DataBuffer resource.", e);
+            }
+        }
+    }
 }

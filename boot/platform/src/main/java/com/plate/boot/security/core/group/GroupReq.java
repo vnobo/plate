@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.util.UUID;
+
 /**
  * Group Request DTO
  * Data Transfer Object for group operations, extends Group entity to provide additional request-specific functionality
@@ -22,7 +24,7 @@ public class GroupReq extends Group {
      * @param securityCode the security code to set
      * @return the current GroupReq instance for method chaining
      */
-    public GroupReq securityCode(String securityCode) {
+    public GroupReq securityCode(UUID securityCode) {
         this.setSecurityCode(securityCode);
         return this;
     }

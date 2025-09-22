@@ -1,4 +1,4 @@
-package com.plate.boot.commons;
+package com.plate.boot.relational;
 
 import com.plate.boot.commons.exception.RestServerException;
 import org.springframework.lang.Nullable;

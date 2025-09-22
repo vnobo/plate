@@ -17,8 +17,11 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+
 /**
- * User service 
+ * User service
+ *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Service
@@ -132,8 +135,7 @@ public class UsersService extends AbstractCache {
             request.setPassword(this.upgradeEncodingIfPassword(request.getPassword()));
         }
 
-        return this.usersRepository.findByCode(request.getCode())
-                .defaultIfEmpty(request.toUser())
+        return this.usersRepository.findByCode(request.getCode()).defaultIfEmpty(request.toUser())
                 .flatMap(user -> {
                     BeanUtils.copyProperties(request, user, true);
                     return this.save(user);
@@ -152,6 +154,7 @@ public class UsersService extends AbstractCache {
     public Mono<Void> delete(UserReq request) {
         return this.usersRepository.findByCode(request.getCode())
                 .doOnNext(res -> ContextUtils.eventPublisher(UserEvent.delete(res)))
+                .delayElement(Duration.ofSeconds(2))
                 .flatMap(this.usersRepository::delete).doAfterTerminate(() -> this.cache.clear());
     }
 
@@ -180,7 +183,7 @@ public class UsersService extends AbstractCache {
                         user.setAccountLocked(old.getAccountLocked());
                         user.setCredentialsExpired(old.getCredentialsExpired());
                         return this.usersRepository.save(user);
-                    }).doOnNext(res -> ContextUtils.eventPublisher(UserEvent.save(res)));
+                    }).doOnNext(res -> ContextUtils.eventPublisher(UserEvent.update(res)));
         }
     }
 

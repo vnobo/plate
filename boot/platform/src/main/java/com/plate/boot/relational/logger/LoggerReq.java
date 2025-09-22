@@ -1,11 +1,13 @@
 package com.plate.boot.relational.logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.plate.boot.commons.MethodType;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.relational.MethodType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+
+import java.util.UUID;
 
 /**
  * Represents a logging request that extends the basic {@link Logger} functionality,
@@ -30,7 +32,7 @@ public class LoggerReq extends Logger {
      * @param context    Additional contextual information in JSON format.
      * @return A configured {@link LoggerReq} object ready for logging purposes.
      */
-    public static LoggerReq of(String tenantCode, String operator, String prefix,
+    public static LoggerReq of(UUID tenantCode, String operator, String prefix,
                                String method, String status, String url, JsonNode context) {
         LoggerReq req = new LoggerReq();
         req.setTenantCode(tenantCode);

@@ -34,13 +34,13 @@ public class UserEvent extends AbstractEvent<User> {
     }
 
     /**
-     * Creates a new UserEvent for a save operation.
+     * Creates a new UserEvent for a update operation.
      *
      * @param entity the entity associated with the event, must not be null
-     * @return a new UserEvent instance for the save operation
+     * @return a new UserEvent instance for the update operation
      */
-    public static UserEvent save(User entity) {
-        return new UserEvent(entity, Kind.SAVE);
+    public static UserEvent update(User entity) {
+        return new UserEvent(entity, Kind.UPDATE);
     }
 
     /**

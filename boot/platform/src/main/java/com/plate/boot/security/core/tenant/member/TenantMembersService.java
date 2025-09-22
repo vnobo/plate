@@ -4,8 +4,10 @@ import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.DatabaseUtils;
+import com.plate.boot.security.core.tenant.TenantEvent;
 import com.plate.boot.security.core.user.UserEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,6 +29,7 @@ import java.util.UUID;
  * <p>
  * Author: <a href="https://github.com/vnobo">Alex bob</a>
  */
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class TenantMembersService extends AbstractCache {
@@ -107,6 +110,16 @@ public class TenantMembersService extends AbstractCache {
         return this.tenantMembersRepository.delete(request.toMemberTenant());
     }
 
+    @EventListener(value = TenantEvent.class, condition = "#event.kind.name() == 'DELETE'")
+    public void onUserDeletedEvent(TenantEvent event) {
+        this.tenantMembersRepository.deleteByTenantCode(event.entity().getCode())
+                .doAfterTerminate(() -> this.cache.clear())
+                .subscribe(result -> log.info("Deleted tenant user for tenant code: {}," +
+                                "result count: {}.", event.entity().getCode(), result),
+                        throwable -> log.error("Failed to delete tenant user for tenant code: {}",
+                                event.entity().getCode(), throwable));
+    }
+
     /**
      * Handles user deletion events to clean up tenant member data.
      * Deletes tenant members associated with the deleted user.
@@ -117,6 +130,9 @@ public class TenantMembersService extends AbstractCache {
     public void onUserDeletedEvent(UserEvent event) {
         this.tenantMembersRepository.deleteByUserCode(event.entity().getCode())
                 .doAfterTerminate(() -> this.cache.clear())
-                .subscribe();
+                .subscribe(result -> log.info("Deleted user tenant for user code: {}," +
+                                "result count: {}.", event.entity().getCode(), result),
+                        throwable -> log.error("Failed to delete user tenant for user code: {}",
+                                event.entity().getCode(), throwable));
     }
 }

@@ -48,7 +48,7 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
     /**
      * Data tenant code
      */
-    protected String tenantCode;
+    protected UUID tenantCode;
 
     /**
      * Data entity extend,Json column
@@ -98,5 +98,5 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
      * Support security code for sensitive data
      */
     @Transient
-    protected String securityCode;
+    protected UUID securityCode;
 }

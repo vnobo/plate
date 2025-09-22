@@ -7,13 +7,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
 import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
 
 /**
@@ -63,20 +63,20 @@ public class SecurityController {
         this.clientRepository = clientRepository;
     }
 
+
     /**
-     * Retrieves an authentication token for the logged-in user by utilizing the provided server web exchange and authentication objects.
-     * The method leverages the security context repository to save the security context and then extracts session information
-     * combined with the authentication details to construct an {@link AuthenticationToken}.
+     * Generates authentication token information for the current session
+     * <p>
+     * This method builds an AuthenticationToken object using the current WebSession and Authentication information,
+     * representing the user's authentication status
      *
-     * @param exchange       The {@link ServerWebExchange} representing the current server request and response.
-     * @param authentication The {@link Authentication} object representing the authenticated user.
-     * @return A {@link Mono} emitting the constructed {@link AuthenticationToken} containing session and authentication details.
+     * @param session        The current user's WebSession object, containing session ID and related time information
+     * @param authentication The current user's authentication information, containing principal and authority information
+     * @return An AuthenticationToken object containing session authentication information
      */
     @GetMapping("login")
-    public Mono<AuthenticationToken> loginToken(ServerWebExchange exchange, Authentication authentication) {
-        return ReactiveSecurityContextHolder.getContext()
-                .flatMap(context -> exchange.getSession())
-                .flatMap(session -> Mono.just(AuthenticationToken.build(session, authentication)));
+    public Mono<AuthenticationToken> loginToken(WebSession session, Authentication authentication) {
+        return Mono.just(AuthenticationToken.build(session, authentication.getPrincipal()));
     }
 
     /**

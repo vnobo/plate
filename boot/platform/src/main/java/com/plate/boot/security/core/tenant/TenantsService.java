@@ -3,7 +3,7 @@ package com.plate.boot.security.core.tenant;
 import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.security.core.tenant.member.TenantMembersRepository;
+import com.plate.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.Duration;
 
 /**
  * Service class for managing tenants.
@@ -31,10 +33,6 @@ public class TenantsService extends AbstractCache {
      * Repository for managing tenants.
      */
     private final TenantsRepository tenantsRepository;
-    /**
-     * Repository for managing tenant members.
-     */
-    private final TenantMembersRepository membersRepository;
 
     /**
      * Searches for tenants based on the given request and pageable parameters.
@@ -90,9 +88,11 @@ public class TenantsService extends AbstractCache {
      * @return a Mono indicating when the deletion is complete
      */
     public Mono<Void> delete(TenantReq request) {
-        return Flux.concatDelayError(
-                this.tenantsRepository.delete(request.toTenant()),
-                this.membersRepository.deleteByTenantCode(request.getCode())).then();
+        return this.tenantsRepository.findByCode(request.getCode())
+                .doOnNext(res -> ContextUtils.eventPublisher(TenantEvent.delete(res)))
+                .delayElement(Duration.ofSeconds(2))
+                .flatMap(this.tenantsRepository::delete)
+                .doAfterTerminate(() -> this.cache.clear());
     }
 
     /**
@@ -108,8 +108,7 @@ public class TenantsService extends AbstractCache {
         } else {
             assert tenant.getId() != null;
             return this.tenantsRepository.findById(tenant.getId()).flatMap(old -> {
-                tenant.setCreatedTime(old.getCreatedTime());
-                tenant.setCode(old.getCode());
+                tenant.setCreatedAt(old.getCreatedAt());
                 return this.tenantsRepository.save(tenant);
             });
         }

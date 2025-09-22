@@ -5,6 +5,7 @@ import com.plate.boot.commons.base.AbstractEntity;
 import com.plate.boot.commons.base.BaseEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.ReadOnlyProperty;
@@ -57,9 +58,8 @@ public class User extends AbstractEntity<Long> {
      * @see #getUsername()
      * @see #setUsername(String)
      */
-    @NotBlank(message = "Login username [username] cannot be empty!")
-    @Pattern(regexp = "^[a-zA-Z0-9_-]{6,16}$", message = "Login username [username] must be " +
-            "6 to 16 characters (letters, numbers, _, -)!")
+    @NotBlank(message = "Username [username] cannot be empty!")
+    @Size(min = 3, max = 64, message = "Username [username] must be between 3 and 64 characters!")
     private String username;
 
     /**
