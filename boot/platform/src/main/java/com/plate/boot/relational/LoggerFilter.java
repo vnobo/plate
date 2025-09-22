@@ -257,7 +257,7 @@ public class LoggerFilter implements WebFilter {
         filterMono = filterMono.filter(ServerWebExchangeMatcher.MatchResult::isMatch);
         filterMono = filterMono.switchIfEmpty(Mono.defer(() ->
                 continueFilterChain(exchange, chain).then(Mono.empty())));
-        return filterMono.flatMap((m) -> cacheFilterChain(exchange, chain)
+        return filterMono.flatMap((_) -> cacheFilterChain(exchange, chain)
                 .then(Mono.defer(ContextUtils::securityDetails))
                 .doOnNext(userDetails -> logRequest(exchange, userDetails)).then());
     }
@@ -320,7 +320,7 @@ public class LoggerFilter implements WebFilter {
         exchange.getAttributes().remove(CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR);
 
         return chain.filter(exchange.mutate().request(cachedRequest).response(cachedResponse).build())
-                .doFinally(s -> releaseResources(exchange));
+                .doFinally(_ -> releaseResources(exchange));
     }
 
 

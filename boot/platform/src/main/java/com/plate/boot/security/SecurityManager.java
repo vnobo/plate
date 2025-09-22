@@ -113,12 +113,10 @@ public class SecurityManager extends AbstractCache
      */
     @Override
     public Mono<UserDetails> updatePassword(UserDetails userDetails, String newPassword) {
-        SecurityDetails securityDetails = (SecurityDetails) userDetails;
-        securityDetails.password(newPassword);
         Query query = Query.query(Criteria.where("username").is(userDetails.getUsername()).ignoreCase(true));
         Update update = Update.update("password", newPassword);
-        return DatabaseUtils.ENTITY_TEMPLATE.update(User.class).matching(query).apply(update)
-                .flatMap(result -> Mono.just((UserDetails) securityDetails))
+        return DatabaseUtils.ENTITY_TEMPLATE.update(query, update, User.class)
+                .flatMap(_ -> Mono.just(userDetails))
                 .doAfterTerminate(() -> this.cache.clear());
     }
 
