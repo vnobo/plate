@@ -1,5 +1,6 @@
 package com.plate.boot.commons.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.security.core.UserAuditor;
 import lombok.Data;
@@ -36,9 +37,13 @@ import java.util.UUID;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public abstract class AbstractEntity<T> implements BaseEntity<T> {
 
-    @Id
     @EqualsAndHashCode.Include
-    protected T id;
+    protected @Id T id;
+
+    /**
+     * Data entity version
+     */
+    protected @Version Long version;
 
     /**
      * Data entity code
@@ -59,44 +64,47 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
      * Data entity create operator
      * use User. Class code property
      */
-    @CreatedBy
-    protected UserAuditor createdBy;
+    protected @CreatedBy UserAuditor createdBy;
 
     /**
      * Data entity create time, timestamp column
      */
-    @CreatedDate
-    protected LocalDateTime createdAt;
+    protected @CreatedDate LocalDateTime createdAt;
 
     /**
      * Data entity update operator
      * use User.class code property
      */
-    @LastModifiedBy
-    protected UserAuditor updatedBy;
+    protected @LastModifiedBy UserAuditor updatedBy;
 
     /**
      * Data entity update time,timestamp column
      */
-    @LastModifiedDate
-    protected LocalDateTime updatedAt;
+    protected @LastModifiedDate LocalDateTime updatedAt;
 
 
     /**
      * Support from for json column
      */
-    @Transient
-    protected Map<String, Object> query;
+    protected @Transient Map<String, Object> query;
 
     /**
      * Support full text search for tsvector column
      */
-    @Transient
-    protected String search;
+    protected @Transient String search;
 
     /**
      * Support security code for sensitive data
      */
-    @Transient
-    protected UUID securityCode;
+    protected @Transient UUID securityCode;
+
+    /**
+     * Get the version of the entity.
+     *
+     * @return The version of the entity.
+     */
+    @JsonIgnore
+    public Long getVersion() {
+        return version;
+    }
 }

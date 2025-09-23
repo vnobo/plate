@@ -14,6 +14,7 @@ create table if not exists se_menus
 (
     id          BIGSERIAL primary key,
     code        uuid        not null unique default gen_random_uuid(),
+    version     int         not null        default 0,
     pcode       uuid        not null        default '00000000-0000-0000-0000-000000000000',
     tenant_code uuid        not null        default '00000000-0000-0000-0000-000000000000',
     type        varchar(20) not null        default 'MENU',
@@ -51,6 +52,7 @@ create table if not exists se_users
 (
     id                  BIGSERIAL primary key,
     code                uuid        not null unique default gen_random_uuid(),
+    version             int         not null        default 0,
     tenant_code         uuid        not null        default '00000000-0000-0000-0000-000000000000',
     username            varchar(256) not null unique,
     password            text         not null,
@@ -87,6 +89,7 @@ create table if not exists se_authorities
 (
     id          BIGSERIAL primary key,
     code        uuid        not null unique default gen_random_uuid(),
+    version     int         not null        default 0,
     tenant_code uuid        not null        default '00000000-0000-0000-0000-000000000000',
     user_code   uuid         not null,
     authority   varchar(512) not null,
@@ -105,6 +108,7 @@ create table if not exists se_groups
 (
     id          BIGSERIAL primary key,
     code        uuid        not null unique default gen_random_uuid(),
+    version     int         not null        default 0,
     pcode       uuid        not null        default '00000000-0000-0000-0000-000000000000',
     tenant_code uuid        not null        default '00000000-0000-0000-0000-000000000000',
     name        varchar(512) not null,
@@ -125,16 +129,16 @@ comment on table se_groups is '角色表';
 
 create table if not exists se_group_authorities
 (
-    id          BIGSERIAL primary key,
-    code        uuid        not null unique default gen_random_uuid(),
-    tenant_code uuid        not null        default '00000000-0000-0000-0000-000000000000',
-    group_code  uuid         not null,
-    authority   varchar(512) not null,
-    extend      jsonb,
-    created_by  uuid        not null        default '00000000-0000-0000-0000-000000000000',
-    updated_by  uuid        not null        default '00000000-0000-0000-0000-000000000000',
-    created_at  TIMESTAMPTZ not null        default current_timestamp,
-    updated_at  TIMESTAMPTZ not null        default current_timestamp,
+    id         BIGSERIAL primary key,
+    code       uuid         not null unique default gen_random_uuid(),
+    version    int          not null        default 0,
+    group_code uuid         not null,
+    authority  varchar(512) not null,
+    extend     jsonb,
+    created_by uuid         not null        default '00000000-0000-0000-0000-000000000000',
+    updated_by uuid         not null        default '00000000-0000-0000-0000-000000000000',
+    created_at TIMESTAMPTZ  not null        default current_timestamp,
+    updated_at TIMESTAMPTZ  not null        default current_timestamp,
     unique (group_code, authority),
     foreign key (group_code) references se_groups (code) on delete cascade
 );
@@ -143,16 +147,16 @@ comment on table se_group_authorities is '角色权限表';
 
 create table if not exists se_group_members
 (
-    id          BIGSERIAL primary key,
-    code        uuid        not null unique default gen_random_uuid(),
-    tenant_code uuid        not null        default '00000000-0000-0000-0000-000000000000',
-    group_code  uuid        not null,
-    user_code   uuid        not null,
-    extend      jsonb,
-    created_by  uuid        not null        default '00000000-0000-0000-0000-000000000000',
-    updated_by  uuid        not null        default '00000000-0000-0000-0000-000000000000',
-    created_at  TIMESTAMPTZ not null        default current_timestamp,
-    updated_at  TIMESTAMPTZ not null        default current_timestamp,
+    id         BIGSERIAL primary key,
+    code       uuid        not null unique default gen_random_uuid(),
+    version    int         not null        default 0,
+    group_code uuid        not null,
+    user_code  uuid        not null,
+    extend     jsonb,
+    created_by uuid        not null        default '00000000-0000-0000-0000-000000000000',
+    updated_by uuid        not null        default '00000000-0000-0000-0000-000000000000',
+    created_at TIMESTAMPTZ not null        default current_timestamp,
+    updated_at TIMESTAMPTZ not null        default current_timestamp,
     unique (group_code, user_code),
     foreign key (group_code) references se_groups (code) on delete cascade,
     foreign key (user_code) references se_users (code) on delete cascade
@@ -163,15 +167,16 @@ comment on table se_group_members is '角色用户关系表';
 create table if not exists se_tenants
 (
     id          serial primary key,
-    code        uuid        not null unique default gen_random_uuid(),
-    pcode       uuid        not null        default '00000000-0000-0000-0000-000000000000',
+    code       uuid        not null unique default gen_random_uuid(),
+    version    int         not null        default 0,
+    pcode      uuid        not null        default '00000000-0000-0000-0000-000000000000',
     name        varchar(512) not null,
     description text,
     extend      jsonb,
-    created_by  uuid        not null        default '00000000-0000-0000-0000-000000000000',
-    updated_by  uuid        not null        default '00000000-0000-0000-0000-000000000000',
-    created_at  TIMESTAMPTZ not null        default current_timestamp,
-    updated_at  TIMESTAMPTZ not null        default current_timestamp,
+    created_by uuid        not null        default '00000000-0000-0000-0000-000000000000',
+    updated_by uuid        not null        default '00000000-0000-0000-0000-000000000000',
+    created_at TIMESTAMPTZ not null        default current_timestamp,
+    updated_at TIMESTAMPTZ not null        default current_timestamp,
     text_search tsvector generated always as (
         setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
         setweight(to_tsvector('chinese', pcode::text), 'A') || ' ' ||
@@ -186,6 +191,7 @@ create table if not exists se_tenant_members
 (
     id          BIGSERIAL primary key,
     code        uuid        not null unique default gen_random_uuid(),
+    version int not null default 0,
     tenant_code uuid        not null        default '00000000-0000-0000-0000-000000000000',
     user_code   uuid        not null,
     enabled     boolean     not null        default true,
@@ -205,6 +211,7 @@ create table if not exists se_loggers
 (
     id          BIGSERIAL primary key,
     code        uuid        not null unique default gen_random_uuid(),
+    version int not null default 0,
     tenant_code uuid        not null        default '00000000-0000-0000-0000-000000000000',
     prefix      varchar(64),
     operator    varchar(64),
