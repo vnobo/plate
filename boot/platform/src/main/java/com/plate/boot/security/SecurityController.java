@@ -2,7 +2,6 @@ package com.plate.boot.security;
 
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.ContextUtils;
-import com.plate.boot.security.core.AuthenticationToken;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

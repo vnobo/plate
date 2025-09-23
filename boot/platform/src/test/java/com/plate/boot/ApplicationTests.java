@@ -1,7 +1,7 @@
 package com.plate.boot;
 
 import com.plate.boot.config.InfrastructureConfiguration;
-import com.plate.boot.security.core.AuthenticationToken;
+import com.plate.boot.security.AuthenticationToken;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
