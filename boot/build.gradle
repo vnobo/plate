@@ -1,7 +1,7 @@
 plugins {
     id 'org.springframework.boot' version '3.5.6' apply false
     id 'io.spring.dependency-management' version '1.1.7' apply false
-    id 'org.graalvm.buildtools.native' version '0.11.0' apply false
+    //id 'org.graalvm.buildtools.native' version '0.11.0' apply false
 }
 
 configure(allprojects) { project ->
@@ -49,7 +49,7 @@ configure(subprojects) { project ->
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(javaVersion)
+            languageVersion = JavaLanguageVersion.of(25)
         }
     }
 
@@ -60,7 +60,7 @@ configure(subprojects) { project ->
     }
 
     dependencies {
-        implementation("com.google.guava:guava:${guavaVersion}")
+        implementation("com.google.guava:guava:33+")
         implementation("org.springframework.boot:spring-boot-starter-actuator")
 
         implementation("org.springframework.boot:spring-boot-starter-log4j2") {

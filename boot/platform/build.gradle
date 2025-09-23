@@ -2,16 +2,16 @@ plugins {
     id "java"
     id "org.springframework.boot"
     id 'io.spring.dependency-management'
-    id 'org.graalvm.buildtools.native'
+    //id 'org.graalvm.buildtools.native'
 }
 
-graalvmNative {
-    toolchainDetection = true
-    testSupport = false
-    binaries.configureEach {
-        resources.autodetect()
-    }
-}
+//graalvmNative {
+//    toolchainDetection = true
+//    testSupport = false
+//    binaries.configureEach {
+//        resources.autodetect()
+//    }
+//}
 
 dependencies {
 
