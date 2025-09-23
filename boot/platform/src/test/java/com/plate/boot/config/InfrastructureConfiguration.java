@@ -28,7 +28,7 @@ public class InfrastructureConfiguration {
     @Bean
     @ServiceConnection(name = "postgres")
     public PostgreSQLContainer<?> postgresContainer() {
-        var postgresImage = DockerImageName.parse("ghcr.io/vnobo/postgres:latest")
+        var postgresImage = DockerImageName.parse("alexbob/postgres")
                 .asCompatibleSubstituteFor("postgres");
         return new PostgreSQLContainer<>(postgresImage)
                 .waitingFor(Wait.forLogMessage("^.*数据库系统准备接受连接.*$", 2));
