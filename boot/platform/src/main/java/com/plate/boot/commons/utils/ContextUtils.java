@@ -45,7 +45,7 @@ public final class ContextUtils implements InitializingBean {
      * Constant defining the role identifier for administrators within the system.
      * This role grants access to administrative functionalities and permissions.
      */
-    public final static String RULE_ADMINISTRATORS = "ROLE_ADMINISTRATORS";
+    public final static String RULE_ADMINISTRATORS = "ROLE_SYSTEM_ADMINISTRATORS";
     /**
      * Constants for the context key used to store CSRF token information.
      * This string represents the identifier used to retrieve or store CSRF tokens in a context such as a thread local,
