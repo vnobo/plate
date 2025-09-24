@@ -37,9 +37,9 @@ jobs:
           ./gradlew test
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@v4
-        working-directory: boot
         with:
           build-scan-publish: true
           build-scan-terms-of-use-url: "https://gradle.com/help/legal-terms-of-use"
           build-scan-terms-of-use-agree: "yes"
+          build-root-directory: boot
         
