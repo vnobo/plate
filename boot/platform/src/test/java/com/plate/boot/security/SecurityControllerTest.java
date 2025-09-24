@@ -23,7 +23,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.NoSuchElementException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -146,8 +147,14 @@ class SecurityControllerTest {
         request.setNewPassword("currentPassword"); // Same as current password
         Authentication authentication = mock(Authentication.class);
 
-        // Act & Assert
-        assertThrows(RestServerException.class, () -> securityController.changePassword(request, authentication));
+        // In a real Spring WebFlux environment, synchronous exceptions in reactive methods are 
+        // automatically converted to Mono.error(). For testing, we need to simulate this behavior.
+        // Using Mono.defer ensures the exception is thrown during subscription.
+        Mono<UserDetails> result = Mono.defer(() -> securityController.changePassword(request, authentication));
+
+        StepVerifier.create(result)
+                .expectError(RestServerException.class)
+                .verify();
     }
 
     @Test
@@ -162,8 +169,12 @@ class SecurityControllerTest {
         when(authentication.getCredentials()).thenReturn(encodedCurrentPassword);
         when(passwordEncoder.matches("wrongCurrentPassword", encodedCurrentPassword)).thenReturn(false);
 
-        // Act & Assert
-        assertThrows(RestServerException.class, () -> securityController.changePassword(request, authentication));
+        // Using Mono.defer ensures the exception is thrown during subscription, not immediately
+        Mono<UserDetails> result = Mono.defer(() -> securityController.changePassword(request, authentication));
+
+        StepVerifier.create(result)
+                .expectError(RestServerException.class)
+                .verify();
     }
 
     @Test
