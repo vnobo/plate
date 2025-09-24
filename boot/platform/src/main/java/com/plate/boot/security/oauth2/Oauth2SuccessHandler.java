@@ -2,7 +2,7 @@ package com.plate.boot.security.oauth2;
 
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.security.core.AuthenticationToken;
+import com.plate.boot.security.AuthenticationToken;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

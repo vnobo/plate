@@ -1,4 +1,4 @@
-package com.plate.boot.security.core;
+package com.plate.boot.security;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.web.server.WebSession;

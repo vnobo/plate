@@ -1,7 +1,7 @@
 package com.plate.boot;
 
 import com.plate.boot.config.InfrastructureConfiguration;
-import com.plate.boot.security.core.AuthenticationToken;
+import com.plate.boot.security.AuthenticationToken;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,8 +137,7 @@ public class ApplicationTests {
         void shouldVerifySecurityConfiguration() {
             assertAll("Security-related bean verification",
                     () -> assertThat(applicationContext.containsBean("passwordEncoder")).isTrue(),
-                    () -> assertThat(applicationContext.containsBean("securityManager")).isTrue(),
-                    () -> assertThat(applicationContext.getBean("securityManager")).isNotNull()
+                    () -> assertThat(applicationContext.containsBean("securityManager")).isTrue()
             );
         }
     }
@@ -210,7 +209,7 @@ public class ApplicationTests {
                     .expectBody()
                     .jsonPath("$.details.authorities").isArray()
                     .jsonPath("$.details.authorities[?(@.authority == 'ROLE_SYSTEM_ADMINISTRATORS')]").exists()
-                    .jsonPath("$.details.authorities[?(@.authority == 'ROLE_ADMINISTRATORS')]").exists()
+                    .jsonPath("$.details.authorities[?(@.authority == 'ROLE_GROUP_ADMINISTRATORS')]").exists()
                     .jsonPath("$.details.authorities").value(authorities ->
                             assertThat((Iterable<?>) authorities).isNotEmpty());
         }

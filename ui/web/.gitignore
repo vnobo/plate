@@ -5,7 +5,8 @@
 /tmp
 /out-tsc
 /bazel-out
-
+AGENTS.md
+QWEN.md
 # Node
 /node_modules
 npm-debug.log

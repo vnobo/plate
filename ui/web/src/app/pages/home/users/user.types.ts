@@ -1,4 +1,4 @@
-import {Search, UserAuditor} from '@plate/types';
+import { Search, UserAuditor } from '@plate/types';
 
 export interface User extends Search {
   id?: number;
@@ -15,7 +15,7 @@ export interface User extends Search {
   name?: string;
   avatar?: string;
   bio?: string;
-  extend?: any;
+  extend?: Record<string, unknown>;
   loginTime?: Date;
   creator?: UserAuditor;
   updater?: UserAuditor;

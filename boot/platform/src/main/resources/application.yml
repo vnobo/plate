@@ -47,7 +47,7 @@ spring:
     max-idle-time: 10m
     max-acquire-time: 30s
     acquire-retry: 3
-    validation-query: SELECT version()
+    validation-query: SELECT 1
     max-validation-time: 2s
     max-create-connection-time: 1s
   data.redis:

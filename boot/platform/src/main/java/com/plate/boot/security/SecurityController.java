@@ -2,7 +2,6 @@ package com.plate.boot.security;
 
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.ContextUtils;
-import com.plate.boot.security.core.AuthenticationToken;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -110,7 +109,8 @@ public class SecurityController {
      * @return A Mono emitting the access token associated with the bound OAuth2 authorized client.
      */
     @GetMapping("bind")
-    public Mono<Object> bindOauth2(@NotBlank(message = "ClientRegistrationId cannot be empty") String clientRegistrationId, Authentication authentication, ServerWebExchange exchange) {
+    public Mono<Object> bindOauth2(@NotBlank(message = "ClientRegistrationId cannot be empty") String clientRegistrationId,
+                                   Authentication authentication, ServerWebExchange exchange) {
         return this.clientRepository.loadAuthorizedClient(clientRegistrationId, authentication, exchange)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(RestServerException.withMsg("Client ["
                                 + clientRegistrationId + "] not found",

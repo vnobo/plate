@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { afterNextRender, Component, inject, OnDestroy, signal } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnDestroy,
+  signal,
+} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { BrowserStorage, TokenService } from '@app/core';
@@ -21,6 +28,9 @@ export class Login implements OnDestroy {
   private readonly _storage = inject(BrowserStorage);
   private readonly _message = inject(MessageService);
   private readonly _modal = inject(ModalsService);
+  private readonly _http = inject(HttpClient);
+  private readonly _router = inject(Router);
+  private readonly _route = inject(ActivatedRoute);
 
   private submitSubject = new Subject<void>();
   private destroy$ = new Subject<void>();
@@ -40,7 +50,7 @@ export class Login implements OnDestroy {
     remember: new FormControl(false),
   });
 
-  constructor(private _http: HttpClient, private _router: Router, private _route: ActivatedRoute) {
+  constructor() {
     afterNextRender(() => {
       this.submitSubject
         .pipe(debounceTime(300), takeUntil(this.destroy$))
@@ -133,11 +143,14 @@ export class Login implements OnDestroy {
   }
 
   private handleLoginSuccess(authentication: Authentication) {
-    this._message.success('登录成功, 欢迎 ' + authentication.details?.nickname + '!', {
-      autohide: true,
-      delay: 5000,
-      animation: true,
-    });
+    this._message.success(
+      '登录成功, 欢迎 ' + (authentication.details?.['nickname'] as string) + '!',
+      {
+        autohide: true,
+        delay: 5000,
+        animation: true,
+      },
+    );
     this._router.navigate(['/home'], { relativeTo: this._route }).then();
   }
 

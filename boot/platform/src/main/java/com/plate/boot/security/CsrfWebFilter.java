@@ -2,8 +2,6 @@ package com.plate.boot.security;
 
 import com.plate.boot.commons.utils.ContextUtils;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
 import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.stereotype.Component;
@@ -23,7 +21,6 @@ import reactor.core.publisher.Mono;
  * precedence order.
  */
 @Log4j2
-@Order(Ordered.LOWEST_PRECEDENCE - 1)
 @Component
 public class CsrfWebFilter implements WebFilter {
 
