@@ -35,7 +35,6 @@ jobs:
           build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
           build-scan-terms-of-use-agree: 'yes'
           cache-overwrite-existing: true
-          cache-read-only: true
           cache-write-only: true
           cache-cleanup: always
       - name: Build with Gradle Wrapper
