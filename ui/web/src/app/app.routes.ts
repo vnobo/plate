@@ -1,15 +1,66 @@
-import {Routes} from '@angular/router';
+import { Routes } from '@angular/router';
+import {
+  createLazyRoute,
+  createRedirectRoute,
+  createWildcardRoute,
+  validateRoutes,
+} from './core/routing/routing-utils';
 
+/**
+ * 应用路由配置
+ *
+ * 路由结构说明：
+ * - home: 主应用页面（需要认证）
+ * - passport: 认证相关页面（登录、注册等）
+ * - exception: 异常页面（404、500等错误页面）
+ * - 默认重定向到 passport 页面
+ * - 通配符路由处理未匹配的路由
+ */
 export const routes: Routes = [
+  // 主应用路由 - 懒加载（需要认证）
   {
     path: 'home',
-    loadChildren: () => import('./pages/index').then(m => m.HOME_ROUTES),
+    ...createLazyRoute(() => import('./pages/index').then(m => m.HOME_ROUTES), '主应用'),
+    data: {
+      requiresAuth: true,
+      title: '主应用',
+      breadcrumb: '首页',
+    },
   },
+
+  // 认证路由 - 懒加载（无需认证）
   {
     path: 'passport',
-    loadChildren: () => import('./pages/index').then(m => m.PASSPORT_ROUTES),
+    ...createLazyRoute(() => import('./pages/index').then(m => m.PASSPORT_ROUTES), '认证'),
+    data: {
+      requiresAuth: false,
+      title: '认证',
+      breadcrumb: '登录',
+    },
   },
-  { path: 'exception', loadChildren: () => import('./pages/index').then(m => m.EXCEPTION_ROUTES) },
-  { path: '', pathMatch: 'full', redirectTo: '/passport' },
-  { path: '**', redirectTo: 'exception/404' },
+
+  // 异常页面路由 - 懒加载（无需认证）
+  {
+    path: 'exception',
+    ...createLazyRoute(() => import('./pages/index').then(m => m.EXCEPTION_ROUTES), '异常页面'),
+    data: {
+      requiresAuth: false,
+      title: '错误页面',
+      breadcrumb: '错误',
+    },
+  },
+
+  // 默认路由重定向
+  createRedirectRoute('/passport'),
+
+  // 通配符路由 - 处理未匹配的路由
+  createWildcardRoute('exception/404'),
 ];
+
+// 路由配置验证（开发环境）
+if (typeof ngDevMode === 'undefined' || ngDevMode) {
+  const validation = validateRoutes(routes);
+  if (!validation.isValid) {
+    console.warn('路由配置验证警告:', validation.errors);
+  }
+}

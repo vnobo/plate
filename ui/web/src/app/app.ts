@@ -1,11 +1,3 @@
-/**
- * 应用程序根组件
- *
- * 负责应用程序的全局布局和主题设置，包括：
- * - 全局进度条的显示与隐藏
- * - 应用主题属性的设置
- * - 路由出口的渲染
- */
 import { CommonModule } from '@angular/common';
 import {
   afterNextRender,
@@ -43,14 +35,13 @@ import { Subscription } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App implements OnInit, OnDestroy {
-  private readonly progressBar = inject(ProgressBar);
+  private readonly _progressBar = inject(ProgressBar);
   private subscription: Subscription | null = null;
 
   progress = signal(false);
 
   constructor(private el: ElementRef, private renderer: Renderer2) {
     afterNextRender(() => {
-      // 安全地获取目标元素，避免空引用异常
       const nativeElement = el.nativeElement;
       if (
         !nativeElement ||
@@ -76,7 +67,7 @@ export class App implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.subscription = this.progressBar.isShow$.subscribe(isShow => {
+    this.subscription = this._progressBar.isShow$.subscribe(isShow => {
       this.progress.set(isShow);
     });
   }
