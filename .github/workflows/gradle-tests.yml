@@ -37,6 +37,7 @@ jobs:
           cache-overwrite-existing: true
           cache-read-only: true
           cache-write-only: true
+          cache-cleanup: always
       - name: Build with Gradle Wrapper
         run: |
           cd boot
