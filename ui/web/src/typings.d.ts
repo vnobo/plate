@@ -7,7 +7,7 @@ declare module '@plate/types' {
 
   export interface Search {
     search?: string | null;
-    query?: Map<string, any>;
+    query?: Map<string, unknown>;
   }
 
   export interface Page<T> {
@@ -39,7 +39,7 @@ declare module '@plate/types' {
     token: string;
     expires: number;
     lastAccessTime: number;
-    details: any;
+    details: Record<string, unknown>;
   }
 
   export interface Credentials {
