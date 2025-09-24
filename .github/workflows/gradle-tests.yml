@@ -36,6 +36,7 @@ jobs:
           build-scan-terms-of-use-agree: 'yes'
           cache-overwrite-existing: true
           cache-read-only: true
+          cache-write-only: true
       - name: Build with Gradle Wrapper
         run: |
           cd boot
