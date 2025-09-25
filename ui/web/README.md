@@ -1018,7 +1018,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ using Angular v20**
+### Built with ❤️ using Angular v20
 
 _Last Updated: September 2025_
 
