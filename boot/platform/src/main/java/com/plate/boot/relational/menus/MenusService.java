@@ -98,12 +98,11 @@ public class MenusService extends AbstractCache {
                         "Modify menu [" + request.getName() + "] is empty",
                         new IllegalArgumentException("The menu does not exist, please choose another name. is code: "
                                 + request.getCode()))));
-        oldMunuMono = oldMunuMono.flatMap(old -> {
+        return oldMunuMono.flatMap(old -> {
             request.setId(old.getId());
             request.setAuthority(old.getAuthority());
             return this.operate(request);
         });
-        return oldMunuMono;
     }
 
     /**
@@ -114,7 +113,10 @@ public class MenusService extends AbstractCache {
      */
     public Mono<Menu> operate(MenuReq request) {
         log.debug("Menu operate request: {}", request);
-        return this.menusRepository.findByCode(request.getCode()).defaultIfEmpty(request.toMenu())
+        return this.menusRepository.findByCode(request.getCode())
+                .switchIfEmpty(Mono.defer(() -> this.menusRepository
+                        .findByTenantCodeAndAuthority(request.getTenantCode(), request.getAuthority())))
+                .defaultIfEmpty(request.toMenu())
                 .flatMap(user -> {
                     BeanUtils.copyProperties(request, user, true);
                     return this.save(user);

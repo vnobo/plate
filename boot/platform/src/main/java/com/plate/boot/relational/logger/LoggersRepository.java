@@ -4,6 +4,7 @@ import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Defines the repository interface for interacting with logger entities within a reactive environment.
@@ -28,6 +29,13 @@ import java.time.LocalDateTime;
  * @see Logger for the entity this repository manages.
  */
 public interface LoggersRepository extends R2dbcRepository<Logger, Long> {
+    /**
+     * Find group by code
+     *
+     * @param code the unique code of the group to find
+     * @return Mono containing the found Group or empty if not found
+     */
+    Mono<Logger> findByCode(UUID code);
 
     /**
      * Deletes all log records from the database whose creation time is before the specified timestamp.

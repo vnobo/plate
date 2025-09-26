@@ -121,6 +121,7 @@ create table if not exists se_groups
     pcode       uuid        not null        default '00000000-0000-0000-0000-000000000000',
     tenant_code uuid        not null        default '00000000-0000-0000-0000-000000000000',
     name        varchar(512) not null,
+    description text,
     extend      jsonb,
     created_by  uuid        not null        default '00000000-0000-0000-0000-000000000000',
     updated_by  uuid        not null        default '00000000-0000-0000-0000-000000000000',
