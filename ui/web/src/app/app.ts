@@ -67,9 +67,7 @@ export class App implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.subscription = this._progressBar.isShow$.subscribe(isShow => {
-      this.progress.set(isShow);
-    });
+    this.subscription = this._progressBar.isShow$.subscribe(isShow => this.progress.set(isShow));
   }
 
   ngOnDestroy(): void {

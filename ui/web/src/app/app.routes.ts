@@ -21,22 +21,14 @@ export const routes: Routes = [
   {
     path: 'home',
     ...createLazyRoute(() => import('./pages/index').then(m => m.HOME_ROUTES), '主应用'),
-    data: {
-      requiresAuth: true,
-      title: '主应用',
-      breadcrumb: '首页',
-    },
+    title: '应用主页',
   },
 
   // 认证路由 - 懒加载（无需认证）
   {
     path: 'passport',
-    ...createLazyRoute(() => import('./pages/index').then(m => m.PASSPORT_ROUTES), '认证'),
-    data: {
-      requiresAuth: false,
-      title: '认证',
-      breadcrumb: '登录',
-    },
+    ...createLazyRoute(() => import('./pages/index').then(m => m.PASSPORT_ROUTES), '登录页面'),
+    title: '欢迎登陆PLATE系统综合管理平台',
   },
 
   // 异常页面路由 - 懒加载（无需认证）

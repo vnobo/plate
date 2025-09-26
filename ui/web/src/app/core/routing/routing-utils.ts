@@ -17,7 +17,7 @@ export function createLazyRoute(importFn: () => Promise<any>, routeName: string)
     loadChildren: () =>
       importFn()
         .then(module => {
-          console.log(`✅ ${routeName}路由加载成功`);
+          console.debug(`✅ ${routeName}路由加载成功`);
           return module;
         })
         .catch(error => {
