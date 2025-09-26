@@ -51,30 +51,12 @@ public abstract class AbstractEvent<E> extends AbstractRelationalEvent<E> {
     }
 
     /**
-     * Returns the kind of event.
-     *
-     * @return the kind of event
-     */
-    public Kind kind() {
-        return getKind();
-    }
-
-    /**
-     * Returns the entity associated with the event.
-     *
-     * @return the entity
-     */
-    public E entity() {
-        return getEntity();
-    }
-
-    /**
      * Returns the entity associated with the event.
      *
      * @return the entity
      */
     @Override
-    public E getEntity() {
+    public @NonNull E getEntity() {
         return this.entity;
     }
 

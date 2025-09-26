@@ -98,11 +98,11 @@ public class UserAuthoritiesService extends AbstractCache {
      */
     @EventListener(value = UserEvent.class, condition = "#event.kind.name() == 'DELETE'")
     public void onUserDeletedEvent(UserEvent event) {
-        this.userAuthoritiesRepository.deleteByUserCode(event.entity().getCode())
+        this.userAuthoritiesRepository.deleteByUserCode(event.getEntity().getCode())
                 .doAfterTerminate(() -> this.cache.clear())
                 .subscribe(result -> log.info("Deleted user authorities for user code: {}," +
-                                "result count: {}.", event.entity().getCode(), result),
+                                "result count: {}.", event.getEntity().getCode(), result),
                         throwable -> log.error("Failed to delete user authorities for user code: {}",
-                                event.entity().getCode(), throwable));
+                                event.getEntity().getCode(), throwable));
     }
 }

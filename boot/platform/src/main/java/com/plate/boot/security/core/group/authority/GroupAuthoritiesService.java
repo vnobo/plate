@@ -84,9 +84,9 @@ public class GroupAuthoritiesService extends AbstractCache {
 
     @EventListener(value = GroupEvent.class, condition = "#event.kind.name() == 'DELETE'")
     public void onUserDeletedEvent(GroupEvent event) {
-        this.authoritiesRepository.deleteByGroupCode(event.entity().getCode())
+        this.authoritiesRepository.deleteByGroupCode(event.getEntity().getCode())
                 .doAfterTerminate(() -> this.cache.clear())
                 .subscribe(res -> log.debug("Deleted group authorities by code [{}], " +
-                        "result count [{}].", event.entity().getCode(), res));
+                        "result count [{}].", event.getEntity().getCode(), res));
     }
 }
