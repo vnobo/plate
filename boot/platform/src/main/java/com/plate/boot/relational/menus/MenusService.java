@@ -4,26 +4,18 @@ package com.plate.boot.relational.menus;
 import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
-import com.plate.boot.commons.utils.DatabaseUtils;
-import com.plate.boot.security.core.group.authority.GroupAuthoritiesRepository;
-import com.plate.boot.security.core.user.authority.UserAuthoritiesRepository;
+import com.plate.boot.commons.utils.ContextUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Service class for managing {@link Menu} entities.
@@ -43,20 +35,7 @@ public class MenusService extends AbstractCache {
      */
     public final static String AUTHORITY_PREFIX = "ROLE_";
 
-    /**
-     * Repository for managing menu entities.
-     */
     private final MenusRepository menusRepository;
-
-    /**
-     * Repository for managing group authorities.
-     */
-    private final GroupAuthoritiesRepository groupAuthoritiesRepository;
-
-    /**
-     * Repository for managing user authorities.
-     */
-    private final UserAuthoritiesRepository userAuthoritiesRepository;
 
     /**
      * Searches for menus based on the provided request and pageable information.
@@ -97,14 +76,12 @@ public class MenusService extends AbstractCache {
      */
     public Mono<Menu> add(MenuReq request) {
         log.debug("Menu add request: {}", request);
-        Criteria criteria = MenuReq.of(request.getTenantCode(), request.getAuthority()).toCriteria();
-        var existsMono = DatabaseUtils.ENTITY_TEMPLATE.exists(Query.query(criteria), Menu.class);
-        existsMono = existsMono.filter(isExists -> !isExists);
-        existsMono = existsMono.switchIfEmpty(Mono.error(RestServerException
-                .withMsg("Add menu[" + request.getName() + "] is exists",
-                        new IllegalArgumentException("The menu already exists, please try another name. is params: "
-                                + criteria))));
-        return existsMono.flatMap((_) -> this.operate(request));
+        var existsMono = this.menusRepository.findByTenantCodeAndAuthority(request.getTenantCode(), request.getAuthority());
+        existsMono = existsMono.flatMap(_ -> Mono.error(RestServerException.withMsg(
+                "Add menu[" + request.getName() + "] is exists",
+                new IllegalArgumentException("The menu already exists, please try another name. is params: "
+                        + request.getAuthority()))));
+        return existsMono.switchIfEmpty(Mono.defer(() -> this.operate(request)));
     }
 
     /**
@@ -137,11 +114,11 @@ public class MenusService extends AbstractCache {
      */
     public Mono<Menu> operate(MenuReq request) {
         log.debug("Menu operate request: {}", request);
-        if (ObjectUtils.isEmpty(request)) {
-            return Mono.empty();
-        }
-        var menu = request.toMenu();
-        return this.save(menu).doAfterTerminate(() -> this.cache.clear());
+        return this.menusRepository.findByCode(request.getCode()).defaultIfEmpty(request.toMenu())
+                .flatMap(user -> {
+                    BeanUtils.copyProperties(request, user, true);
+                    return this.save(user);
+                }).doAfterTerminate(() -> this.cache.clear());
     }
 
     /**
@@ -153,14 +130,15 @@ public class MenusService extends AbstractCache {
      */
     public Mono<Menu> save(Menu menu) {
         if (menu.isNew()) {
-            return this.menusRepository.save(menu);
+            return this.menusRepository.save(menu)
+                    .doOnNext((res) -> ContextUtils.eventPublisher(MenuEvent.insert(res)));
         } else {
             assert menu.getId() != null;
             return this.menusRepository.findById(menu.getId()).flatMap(old -> {
                 menu.setCode(old.getCode());
                 menu.setCreatedAt(old.getCreatedAt());
                 return this.menusRepository.save(menu);
-            });
+            }).doOnNext((res) -> ContextUtils.eventPublisher(MenuEvent.update(res)));
         }
     }
 
@@ -174,15 +152,9 @@ public class MenusService extends AbstractCache {
     @Transactional(rollbackFor = Exception.class)
     public Mono<Void> delete(MenuReq request) {
         log.warn("Delete menu request: {}", request);
-        if (ObjectUtils.nullSafeEquals(request.getTenantCode(), "0")) {
-            List<String> rules = new ArrayList<>(Collections.singletonList(request.getAuthority()));
-            var deleteAuthorityMono = Flux.concatDelayError(this.groupAuthoritiesRepository.deleteByAuthorityIn(rules),
-                    this.userAuthoritiesRepository.deleteByAuthorityIn(rules));
-            var deleteNextMono = Flux.concatDelayError(
-                    this.menusRepository.deleteByAuthority(request.getAuthority()), deleteAuthorityMono);
-            return deleteNextMono.then().doAfterTerminate(() -> this.cache.clear());
-        } else {
-            return this.menusRepository.delete(request.toMenu()).doAfterTerminate(() -> this.cache.clear());
-        }
+        return this.menusRepository.findByCode(request.getCode())
+                .doOnNext(res -> ContextUtils.eventPublisher(MenuEvent.delete(res)))
+                .flatMap(this.menusRepository::delete)
+                .doAfterTerminate(() -> this.cache.clear());
     }
 }

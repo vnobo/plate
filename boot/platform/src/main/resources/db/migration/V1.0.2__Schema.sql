@@ -13,22 +13,31 @@ drop table if exists
 create table if not exists se_menus
 (
     id          BIGSERIAL primary key,
-    code        uuid        not null unique default gen_random_uuid(),
-    version     int         not null        default 0,
-    pcode       uuid        not null        default '00000000-0000-0000-0000-000000000000',
-    tenant_code uuid        not null        default '00000000-0000-0000-0000-000000000000',
-    type        varchar(20) not null        default 'MENU',
-    authority   varchar(256) not null unique,
+    code        uuid         not null unique default gen_random_uuid(),
+    version     int          not null        default 0,
+    pcode       uuid         not null        default '00000000-0000-0000-0000-000000000000',
+    tenant_code uuid         not null        default '00000000-0000-0000-0000-000000000000',
+    authority   varchar(256) not null,
+    type        varchar(20)  not null        default 'MENU',
     name        varchar(256) not null,
     path        text,
-    sort_no     int                         default 0,
+    sort_no     int                          default 0,
     extend      jsonb,
-    created_by  uuid        not null        default '00000000-0000-0000-0000-000000000000',
-    updated_by  uuid        not null        default '00000000-0000-0000-0000-000000000000',
-    created_at  TIMESTAMPTZ not null        default current_timestamp,
-    updated_at  TIMESTAMPTZ not null        default current_timestamp
+    created_by  uuid         not null        default '00000000-0000-0000-0000-000000000000',
+    updated_by  uuid         not null        default '00000000-0000-0000-0000-000000000000',
+    created_at  TIMESTAMPTZ  not null        default current_timestamp,
+    updated_at  TIMESTAMPTZ  not null        default current_timestamp,
+    text_search tsvector generated always as (
+        setweight(to_tsvector('chinese', code::text), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', tenant_code::text), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', authority), 'A') || ' ' ||
+        setweight(to_tsvector('chinese', coalesce(name, '')), 'B') || ' ' ||
+        setweight(to_tsvector('chinese', coalesce(type, '')), 'B') || ' ' ||
+        setweight(to_tsvector('chinese', coalesce(path, '')), 'C')
+        ) stored,
+    constraint se_menus_tenant_authority_ux unique (tenant_code, authority)
 );
-create index se_menus_pttn_idx on se_menus (pcode, tenant_code, type, name);
+create index se_menus_pttn_idx on se_menus (tenant_code, authority);
 create index se_menus_extend_gin_idx on se_menus using gin (extend);
 comment on table se_menus is '菜单权限表';
 
@@ -239,3 +248,34 @@ create index se_loggers_context_gin_idx on se_loggers using gin (context);
 create index se_loggers_extend_gin_idx on se_loggers using gin (extend);
 create index se_loggers_text_search_gin_idx on se_loggers using gin (text_search);
 comment on table se_loggers is '操作日志表';
+
+create or replace function update_updated_at_column()
+    returns TRIGGER as
+$$
+begin
+    NEW.updated_at = current_timestamp;
+    return NEW;
+end;
+$$ language 'plpgsql';
+
+do
+$$
+    declare
+        table_name_var text;
+    begin
+        for table_name_var in
+            select table_name
+            from information_schema.columns
+            where column_name = 'updated_at'
+              and table_schema = 'public'
+            loop
+                execute format('DROP TRIGGER IF EXISTS %I_updated_at_trigger ON %I',
+                               table_name_var, table_name_var);
+                execute format('CREATE TRIGGER %I_updated_at_trigger
+                        BEFORE UPDATE ON %I
+                        FOR EACH ROW
+                        EXECUTE FUNCTION update_updated_at_column()',
+                               table_name_var, table_name_var);
+            end loop;
+    end
+$$;

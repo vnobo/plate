@@ -139,8 +139,7 @@ public class UsersService extends AbstractCache {
                 .flatMap(user -> {
                     BeanUtils.copyProperties(request, user, true);
                     return this.save(user);
-                })
-                .doAfterTerminate(() -> this.cache.clear());
+                }).doAfterTerminate(() -> this.cache.clear());
     }
 
     /**
