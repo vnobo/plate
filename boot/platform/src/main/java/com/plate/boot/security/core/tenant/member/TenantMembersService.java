@@ -112,12 +112,12 @@ public class TenantMembersService extends AbstractCache {
 
     @EventListener(value = TenantEvent.class, condition = "#event.kind.name() == 'DELETE'")
     public void onUserDeletedEvent(TenantEvent event) {
-        this.tenantMembersRepository.deleteByTenantCode(event.entity().getCode())
+        this.tenantMembersRepository.deleteByTenantCode(event.getEntity().getCode())
                 .doAfterTerminate(() -> this.cache.clear())
                 .subscribe(result -> log.info("Deleted tenant user for tenant code: {}," +
-                                "result count: {}.", event.entity().getCode(), result),
+                                "result count: {}.", event.getEntity().getCode(), result),
                         throwable -> log.error("Failed to delete tenant user for tenant code: {}",
-                                event.entity().getCode(), throwable));
+                                event.getEntity().getCode(), throwable));
     }
 
     /**
@@ -128,11 +128,11 @@ public class TenantMembersService extends AbstractCache {
      */
     @EventListener(value = UserEvent.class, condition = "#event.kind.name() == 'DELETE'")
     public void onUserDeletedEvent(UserEvent event) {
-        this.tenantMembersRepository.deleteByUserCode(event.entity().getCode())
+        this.tenantMembersRepository.deleteByUserCode(event.getEntity().getCode())
                 .doAfterTerminate(() -> this.cache.clear())
                 .subscribe(result -> log.info("Deleted user tenant for user code: {}," +
-                                "result count: {}.", event.entity().getCode(), result),
+                                "result count: {}.", event.getEntity().getCode(), result),
                         throwable -> log.error("Failed to delete user tenant for user code: {}",
-                                event.entity().getCode(), throwable));
+                                event.getEntity().getCode(), throwable));
     }
 }

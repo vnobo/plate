@@ -32,4 +32,9 @@ public class Group extends AbstractEntity<Integer> {
     @NotBlank(message = "Group [name] cannot be empty!")
     private String name;
 
+    /**
+     * The description of the tenant.
+     */
+    private String description;
+
 }

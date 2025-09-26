@@ -21,15 +21,11 @@ public interface MenusRepository extends R2dbcRepository<Menu, Integer> {
     Mono<Menu> findByCode(UUID code);
 
     /**
-     * Deletes menu records by the specified authority.
-     * <p>
-     * This operation uses Mono to represent the asynchronous deletion process,
-     * returning the number of deleted records wrapped in a Mono. It is designed
-     * to work seamlessly in reactive environments, suitable for applications requiring
-     * non-blocking handling of data operations.
+     * Finds a menu entry based on the provided tenant code and authority.
      *
-     * @param authority The authority identifier used to match menu records for deletion.
-     * @return A Mono containing the count of deleted menu records. If no records are deleted, returns Mono.empty().
+     * @param tenantCode The unique code that identifies the tenant.
+     * @param authority  The authority associated with the menu.
+     * @return A Mono emitting the found {@link Menu} object, or empty if no menu exists with the given tenant code and authority.
      */
-    Mono<Long> deleteByAuthority(String authority);
+    Mono<Menu> findByTenantCodeAndAuthority(UUID tenantCode, String authority);
 }

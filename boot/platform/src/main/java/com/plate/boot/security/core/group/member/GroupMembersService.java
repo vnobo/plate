@@ -108,19 +108,19 @@ public class GroupMembersService extends AbstractCache {
      */
     @EventListener(value = UserEvent.class, condition = "#event.kind.name() == 'DELETE'")
     public void onUserDeletedEvent(UserEvent event) {
-        this.memberRepository.deleteByUserCode(event.entity().getCode())
+        this.memberRepository.deleteByUserCode(event.getEntity().getCode())
                 .doAfterTerminate(() -> this.cache.clear())
                 .subscribe(result -> log.info("Deleted user group for user code: {}," +
-                                "result count: {}.", event.entity().getCode(), result),
+                                "result count: {}.", event.getEntity().getCode(), result),
                         throwable -> log.error("Failed to delete user group for user code: {}",
-                                event.entity().getCode(), throwable));
+                                event.getEntity().getCode(), throwable));
     }
 
     @EventListener(value = GroupEvent.class, condition = "#event.kind.name() == 'DELETE'")
     public void onUserDeletedEvent(GroupEvent event) {
-        this.memberRepository.deleteByGroupCode(event.entity().getCode())
+        this.memberRepository.deleteByGroupCode(event.getEntity().getCode())
                 .doAfterTerminate(() -> this.cache.clear())
                 .subscribe(result -> log.info("Deleted group members for group coe: {}," +
-                        " result count: {}.", event.entity().getCode(), result));
+                        " result count: {}.", event.getEntity().getCode(), result));
     }
 }

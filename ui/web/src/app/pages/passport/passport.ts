@@ -8,7 +8,7 @@ export const PASSPORT_ROUTES: Routes = [
       {
         path: 'login',
         component: Login,
-        data: { title: '登录' },
+        data: { title: '登录你的系统' },
       },
       {
         path: '',

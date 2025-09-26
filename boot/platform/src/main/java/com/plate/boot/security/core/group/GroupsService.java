@@ -63,8 +63,7 @@ public class GroupsService extends AbstractCache {
      * @return Operated group information
      */
     public Mono<Group> operate(GroupReq request) {
-        var dataMono = this.groupsRepository.findByCode(request.getCode())
-                .defaultIfEmpty(request.toGroup());
+        var dataMono = this.groupsRepository.findByCode(request.getCode()).defaultIfEmpty(request.toGroup());
         dataMono = dataMono.flatMap(data -> {
             BeanUtils.copyProperties(request, data, true);
             return this.save(data);
