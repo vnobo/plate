@@ -104,7 +104,7 @@ public class MenusService extends AbstractCache {
                 .withMsg("Add menu[" + request.getName() + "] is exists",
                         new IllegalArgumentException("The menu already exists, please try another name. is params: "
                                 + criteria))));
-        return existsMono.flatMap((b) -> this.operate(request));
+        return existsMono.flatMap((_) -> this.operate(request));
     }
 
     /**
