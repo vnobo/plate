@@ -3,6 +3,7 @@ package com.plate.boot.security.core.group.authority;
 
 import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.relational.menus.MenuEvent;
 import com.plate.boot.security.core.group.GroupEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -12,6 +13,8 @@ import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Set;
 
 /**
  * Group Authorities Service
@@ -87,6 +90,14 @@ public class GroupAuthoritiesService extends AbstractCache {
         this.authoritiesRepository.deleteByGroupCode(event.getEntity().getCode())
                 .doAfterTerminate(() -> this.cache.clear())
                 .subscribe(res -> log.debug("Deleted group authorities by code [{}], " +
+                        "result count [{}].", event.getEntity().getCode(), res));
+    }
+
+    @EventListener(value = MenuEvent.class, condition = "#event.kind.name() == 'DELETE'")
+    public void onMenuDeletedEvent(MenuEvent event) {
+        this.authoritiesRepository.deleteByAuthorityIn(Set.of(event.getEntity().getAuthority()))
+                .doAfterTerminate(() -> this.cache.clear())
+                .subscribe(res -> log.debug("Deleted group authorities by authority [{}], " +
                         "result count [{}].", event.getEntity().getCode(), res));
     }
 }

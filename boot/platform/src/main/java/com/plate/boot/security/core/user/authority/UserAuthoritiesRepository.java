@@ -3,7 +3,7 @@ package com.plate.boot.security.core.user.authority;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -31,7 +31,7 @@ public interface UserAuthoritiesRepository extends R2dbcRepository<UserAuthority
      * @param authorities the list of authority values to delete by
      * @return a Mono emitting the number of records deleted
      */
-    Mono<Integer> deleteByAuthorityIn(List<String> authorities);
+    Mono<Integer> deleteByAuthorityIn(Set<String> authorities);
 
     /**
      * Deletes records from the database based on the provided userCode.
