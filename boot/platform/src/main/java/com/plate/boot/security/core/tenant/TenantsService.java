@@ -71,8 +71,7 @@ public class TenantsService extends AbstractCache {
      * @return a Mono emitting the operated tenant
      */
     public Mono<Tenant> operate(TenantReq request) {
-        var tenantMono = this.tenantsRepository.findByCode(request.getCode())
-                .defaultIfEmpty(request.toTenant());
+        var tenantMono = this.tenantsRepository.findByCode(request.getCode()).defaultIfEmpty(request.toTenant());
         tenantMono = tenantMono.flatMap(data -> {
             BeanUtils.copyProperties(request, data);
             return this.save(data);

@@ -66,7 +66,12 @@ public class LoggersService extends AbstractCache {
      * @return A {@link Mono} emitting the saved {@link Logger} entity upon successful completion of the save operation.
      */
     public Mono<Logger> operate(LoggerReq request) {
-        return this.save(request.toLogger()).doAfterTerminate(() -> this.cache.clear());
+        var loggerMono = this.loggersRepository.findByCode(request.getCode()).defaultIfEmpty(request.toLogger());
+        loggerMono = loggerMono.flatMap(data -> {
+            BeanUtils.copyProperties(request, data);
+            return this.save(data);
+        });
+        return loggerMono.doAfterTerminate(() -> this.cache.clear());
     }
 
     /**
@@ -117,8 +122,8 @@ public class LoggersService extends AbstractCache {
      */
     @EventListener(LoggerEvent.class)
     public void processLoggerEvent(LoggerEvent event) {
-        if (event.kind() == LoggerEvent.Kind.INSERT) {
-            var logger = event.entity();
+        if (event.getKind() == LoggerEvent.Kind.INSERT) {
+            var logger = event.getEntity();
             this.operate(logger).subscribe(res ->
                     log.debug("{}Client request log save result. log code: {}",
                             res.getPrefix(), res.getCode()));

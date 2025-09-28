@@ -6,7 +6,6 @@ import com.plate.boot.security.core.UserAuditor;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.*;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -27,13 +26,31 @@ import java.util.UUID;
 public class Tenant implements BaseEntity<Integer> {
 
     @Id
-    @EqualsAndHashCode.Include
-    protected Integer id;
+    private Integer id;
 
     /**
      * Data entity code
      */
-    protected UUID code;
+    private UUID code;
+
+    /**
+     * The parent code of the tenant.
+     * This field is mandatory and cannot be blank.
+     */
+    @NotNull(message = "Tenant parent code [pcode] cannot be empty!")
+    private UUID pcode;
+
+    /**
+     * The name of the tenant.
+     * This field is mandatory and cannot be blank.
+     */
+    @NotBlank(message = "Tenant name [name] cannot be empty!")
+    private String name;
+
+    /**
+     * The description of the tenant.
+     */
+    private String description;
 
     /**
      * Data entity extend,Json column
@@ -65,24 +82,5 @@ public class Tenant implements BaseEntity<Integer> {
      */
     @LastModifiedDate
     protected LocalDateTime updatedAt;
-
-    /**
-     * The parent code of the tenant.
-     * This field is mandatory and cannot be blank.
-     */
-    @NotNull(message = "Tenant parent code [pcode] cannot be empty!")
-    private UUID pcode;
-
-    /**
-     * The name of the tenant.
-     * This field is mandatory and cannot be blank.
-     */
-    @NotBlank(message = "Tenant name [name] cannot be empty!")
-    private String name;
-
-    /**
-     * The description of the tenant.
-     */
-    private String description;
 
 }

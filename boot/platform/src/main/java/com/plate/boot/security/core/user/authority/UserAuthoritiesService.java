@@ -3,6 +3,7 @@ package com.plate.boot.security.core.user.authority;
 import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.relational.menus.MenuEvent;
 import com.plate.boot.security.core.user.UserEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -12,6 +13,8 @@ import org.springframework.data.relational.core.query.Query;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Set;
 
 /**
  * Service class for managing user authorities.
@@ -29,7 +32,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UserAuthoritiesService extends AbstractCache {
 
-    private final UserAuthoritiesRepository userAuthoritiesRepository;
+    private final UserAuthoritiesRepository authoritiesRepository;
 
     /**
      * Searches for user authorities based on the given request parameters.
@@ -50,7 +53,7 @@ public class UserAuthoritiesService extends AbstractCache {
      * @return a Mono emitting the operated user authority
      */
     public Mono<UserAuthority> operate(UserAuthorityReq request) {
-        return this.userAuthoritiesRepository
+        return this.authoritiesRepository
                 .findByUserCodeAndAuthority(request.getUserCode(), request.getAuthority())
                 .switchIfEmpty(Mono.defer(() -> this.save(request.toAuthority())))
                 .doAfterTerminate(() -> this.cache.clear());
@@ -63,7 +66,7 @@ public class UserAuthoritiesService extends AbstractCache {
      * @return a Mono indicating when the deletion is complete
      */
     public Mono<Void> delete(UserAuthorityReq request) {
-        return this.userAuthoritiesRepository.delete(request.toAuthority())
+        return this.authoritiesRepository.delete(request.toAuthority())
                 .doAfterTerminate(() -> this.cache.clear());
     }
 
@@ -76,17 +79,17 @@ public class UserAuthoritiesService extends AbstractCache {
      */
     public Mono<UserAuthority> save(UserAuthority userAuthority) {
         if (userAuthority.isNew()) {
-            return this.userAuthoritiesRepository.save(userAuthority);
+            return this.authoritiesRepository.save(userAuthority);
         } else {
             if (userAuthority.getId() == null) {
                 return Mono.error(RestServerException.withMsg("Id must not be null!",
                         new IllegalArgumentException("User authority ID must not be null for existing entities")));
             }
-            return this.userAuthoritiesRepository.findById(userAuthority.getId())
+            return this.authoritiesRepository.findById(userAuthority.getId())
                     .switchIfEmpty(Mono.error(RestServerException.withMsg("Id must not be null!",
                             new IllegalArgumentException("User authority not found with ID: "
                                     + userAuthority.getId()))))
-                    .flatMap(old -> this.userAuthoritiesRepository.save(userAuthority));
+                    .flatMap(old -> this.authoritiesRepository.save(userAuthority));
         }
     }
 
@@ -98,11 +101,19 @@ public class UserAuthoritiesService extends AbstractCache {
      */
     @EventListener(value = UserEvent.class, condition = "#event.kind.name() == 'DELETE'")
     public void onUserDeletedEvent(UserEvent event) {
-        this.userAuthoritiesRepository.deleteByUserCode(event.entity().getCode())
+        this.authoritiesRepository.deleteByUserCode(event.getEntity().getCode())
                 .doAfterTerminate(() -> this.cache.clear())
                 .subscribe(result -> log.info("Deleted user authorities for user code: {}," +
-                                "result count: {}.", event.entity().getCode(), result),
+                                "result count: {}.", event.getEntity().getCode(), result),
                         throwable -> log.error("Failed to delete user authorities for user code: {}",
-                                event.entity().getCode(), throwable));
+                                event.getEntity().getCode(), throwable));
+    }
+
+    @EventListener(value = MenuEvent.class, condition = "#event.kind.name() == 'DELETE'")
+    public void onMenuDeletedEvent(MenuEvent event) {
+        this.authoritiesRepository.deleteByAuthorityIn(Set.of(event.getEntity().getAuthority()))
+                .doAfterTerminate(() -> this.cache.clear())
+                .subscribe(res -> log.debug("Deleted user authorities by authority [{}], " +
+                        "result count [{}].", event.getEntity().getCode(), res));
     }
 }

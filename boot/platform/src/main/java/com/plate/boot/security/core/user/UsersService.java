@@ -135,12 +135,13 @@ public class UsersService extends AbstractCache {
             request.setPassword(this.upgradeEncodingIfPassword(request.getPassword()));
         }
 
-        return this.usersRepository.findByCode(request.getCode()).defaultIfEmpty(request.toUser())
+        return this.usersRepository.findByCode(request.getCode())
+                .switchIfEmpty(Mono.defer(() -> this.usersRepository.findByUsername(request.getUsername())))
+                .defaultIfEmpty(request.toUser())
                 .flatMap(user -> {
                     BeanUtils.copyProperties(request, user, true);
                     return this.save(user);
-                })
-                .doAfterTerminate(() -> this.cache.clear());
+                }).doAfterTerminate(() -> this.cache.clear());
     }
 
     /**
