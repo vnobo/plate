@@ -163,7 +163,8 @@
                 "input": "@tabler/core/dist/js/tabler-theme.js",
                 "bundleName": "tabler-theme-script"
               }
-            ]
+            ],
+            "main": "src/test.ts"
           }
         }
       }
