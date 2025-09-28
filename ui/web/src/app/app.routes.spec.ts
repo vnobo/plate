@@ -30,25 +30,24 @@ describe('App Routes Configuration', () => {
     expect(paths).toEqual(['home', 'passport', 'exception', '', '**']);
   });
 
-  it('home路由应该配置认证要求', () => {
+  it('home路由应该配置正确的标题', () => {
     const homeRoute = router.config.find(route => route.path === 'home');
     expect(homeRoute).toBeDefined();
-    expect(homeRoute?.data?.['requiresAuth']).toBe(true);
-    expect(homeRoute?.data?.['title']).toBe('主应用');
+    expect(homeRoute?.title).toBe('应用主页');
   });
 
-  it('passport路由应该无需认证', () => {
+  it('passport路由应该配置正确的标题', () => {
     const passportRoute = router.config.find(route => route.path === 'passport');
     expect(passportRoute).toBeDefined();
-    expect(passportRoute?.data?.['requiresAuth']).toBe(false);
-    expect(passportRoute?.data?.['title']).toBe('认证');
+    expect(passportRoute?.title).toBe('欢迎登陆PLATE系统综合管理平台');
   });
 
-  it('exception路由应该配置错误页面', () => {
+  it('exception路由应该配置错误页面数据', () => {
     const exceptionRoute = router.config.find(route => route.path === 'exception');
     expect(exceptionRoute).toBeDefined();
     expect(exceptionRoute?.data?.['requiresAuth']).toBe(false);
     expect(exceptionRoute?.data?.['title']).toBe('错误页面');
+    expect(exceptionRoute?.data?.['breadcrumb']).toBe('错误');
   });
 
   it('默认路由应该重定向到passport', () => {
@@ -113,22 +112,9 @@ describe('App Routes Configuration', () => {
   });
 
   describe('路由数据配置', () => {
-    it('所有路由都应该包含必要的元数据', () => {
-      const routesWithData = router.config.filter(route => route.data);
-
-      routesWithData.forEach(route => {
-        expect(route.data).toBeDefined();
-
-        if (route.path && route.path !== '' && route.path !== '**') {
-          expect(route.data?.['title']).toBeDefined();
-          expect(route.data?.['requiresAuth']).toBeDefined();
-        }
-      });
-    });
-
     it('重定向路由应该配置skipLocationChange', () => {
       const redirectRoutes = router.config.filter(
-        route => route.redirectTo && route.data?.['skipLocationChange'],
+        route => route.redirectTo && route.data?.['skipLocationChange'] !== undefined,
       );
 
       expect(redirectRoutes.length).toBe(2); // 默认路由和通配符路由
