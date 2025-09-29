@@ -16,6 +16,8 @@ graalvmNative {
 dependencies {
 
     implementation('com.github.f4b6a3:uuid-creator:6.+')
+
+    implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.session:spring-session-data-redis")
@@ -31,8 +33,9 @@ dependencies {
     //runtimeOnly("io.netty:netty-tcnative-boringssl-static")
     //runtimeOnly("io.netty.incubator:netty-incubator-codec-http3:0.+")
 
-    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'org.flywaydb:flyway-core'
     runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+    runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'org.springframework:spring-jdbc'
 
     testImplementation 'io.projectreactor:reactor-test'
