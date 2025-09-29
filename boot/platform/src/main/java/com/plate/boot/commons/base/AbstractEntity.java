@@ -1,11 +1,11 @@
 package com.plate.boot.commons.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.security.core.UserAuditor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.*;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDateTime;
 import java.util.Map;
