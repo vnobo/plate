@@ -1,8 +1,8 @@
 package com.plate.boot.security.core.tenant.member;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Represents a response for tenant member operations, extending the TenantMember class.

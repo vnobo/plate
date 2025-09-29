@@ -1,12 +1,12 @@
 package com.plate.boot.relational.logger;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.commons.base.AbstractEntity;
 import com.plate.boot.commons.base.BaseEntity;
 import com.plate.boot.relational.MethodType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.relational.core.mapping.Table;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Represents a database entity for logging activities within a system.

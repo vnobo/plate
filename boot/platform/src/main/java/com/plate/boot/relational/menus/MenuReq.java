@@ -1,6 +1,5 @@
 package com.plate.boot.relational.menus;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
@@ -10,6 +9,7 @@ import lombok.ToString;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.util.List;
 import java.util.Optional;

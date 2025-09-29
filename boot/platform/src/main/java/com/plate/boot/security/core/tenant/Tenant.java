@@ -1,6 +1,5 @@
 package com.plate.boot.security.core.tenant;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.commons.base.BaseEntity;
 import com.plate.boot.security.core.UserAuditor;
 import jakarta.validation.constraints.NotBlank;
@@ -8,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.data.annotation.*;
 import org.springframework.data.relational.core.mapping.Table;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
