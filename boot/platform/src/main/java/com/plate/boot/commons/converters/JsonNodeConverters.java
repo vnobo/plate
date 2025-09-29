@@ -1,6 +1,5 @@
 package com.plate.boot.commons.converters;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.relational.MethodType;
@@ -13,6 +12,8 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 import java.io.IOException;
 
@@ -50,12 +51,12 @@ public class JsonNodeConverters implements InitializingBean {
      */
     @Component
     @WritingConverter
-    public static class JsonToNodeWriteConverter implements Converter<JsonNode, Json> {
+    public static class JsonToNodeWriteConverter implements Converter<@NonNull JsonNode, @NonNull Json> {
         /**
          * Converts a Jackson {@link JsonNode} to a custom {@link Json} object.
          *
          * @param source The JsonNode to be converted. Must not be null.
-         * @return A {@link Json} object representing the stringified input JsonNode.
+         * @return A {@link Json} object representing the stringifies input JsonNode.
          * @throws NullPointerException if the source argument is null.
          */
         @Override
@@ -76,7 +77,7 @@ public class JsonNodeConverters implements InitializingBean {
      */
     @Component
     @ReadingConverter
-    public static class JsonToNodeReadConverter implements Converter<Json, JsonNode> {
+    public static class JsonToNodeReadConverter implements Converter<@NonNull Json, @NonNull JsonNode> {
         /**
          * Converts a custom {@link Json} object to a Jackson {@link JsonNode} for read operations.
          *
@@ -88,7 +89,7 @@ public class JsonNodeConverters implements InitializingBean {
         public JsonNode convert(@NonNull Json source) {
             try {
                 return ContextUtils.OBJECT_MAPPER.readTree(source.asArray());
-            } catch (IOException e) {
+            } catch (JacksonException e) {
                 throw JsonException.withError(e);
             }
         }
@@ -101,7 +102,7 @@ public class JsonNodeConverters implements InitializingBean {
      */
     @Component
     @ReadingConverter
-    public static class MethodTypeReadConverter implements Converter<String, MethodType> {
+    public static class MethodTypeReadConverter implements Converter<@NonNull String, @NonNull MethodType> {
         /**
          * Converts a String to a MethodType enum value.
          *
@@ -121,7 +122,7 @@ public class JsonNodeConverters implements InitializingBean {
      */
     @Component
     @WritingConverter
-    public static class MethodTypeWriteConverter implements Converter<MethodType, String> {
+    public static class MethodTypeWriteConverter implements Converter<@NonNull MethodType, @NonNull String> {
         /**
          * Converts a MethodType enum value to its String representation.
          *
