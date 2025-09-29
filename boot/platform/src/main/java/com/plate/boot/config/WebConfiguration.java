@@ -22,7 +22,7 @@ import java.util.List;
  * strategies for handler methods.
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties({WebfluxProperties.class})
+@EnableConfigurationProperties({WebfluxProperties.class, HttpCodecsProperties.class})
 @RequiredArgsConstructor
 public class WebConfiguration implements WebFluxConfigurer {
 
