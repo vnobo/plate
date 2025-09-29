@@ -2,9 +2,10 @@ package com.plate.boot.commons.utils;
 
 import com.plate.boot.commons.ProgressEvent;
 import com.plate.boot.commons.exception.RestServerException;
+import com.plate.boot.config.HttpCodecsProperties;
+import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.boot.autoconfigure.http.codec.HttpCodecsProperties;
 import org.springframework.data.r2dbc.convert.R2dbcConverter;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -58,7 +59,7 @@ public class DatabaseUtils implements InitializingBean {
      *
      * @see ReactiveRedisTemplate for caching implementation details
      */
-    public static ReactiveRedisTemplate<String, Object> REACTIVE_REDIS_TEMPLATE;
+    public static ReactiveRedisTemplate<@NonNull String, @NonNull Object> REACTIVE_REDIS_TEMPLATE;
 
     /**
      * The maximum size of data that can be held in memory.
@@ -94,13 +95,13 @@ public class DatabaseUtils implements InitializingBean {
     public static R2dbcConverter R2DBC_CONVERTER;
 
     private final R2dbcEntityTemplate entityTemplate;
-    private final ReactiveRedisTemplate<String, Object> redisTemplate;
+    private final ReactiveRedisTemplate<@NonNull String, @NonNull Object> redisTemplate;
     private final DatabaseClient databaseClient;
     private final R2dbcConverter r2dbcConverter;
     private final HttpCodecsProperties codecsProperties;
 
     public DatabaseUtils(R2dbcEntityTemplate entityTemplate,
-                         ReactiveRedisTemplate<String, Object> redisTemplate,
+                         ReactiveRedisTemplate<@NonNull String, @NonNull Object> redisTemplate,
                          HttpCodecsProperties codecsProperties) {
         this.entityTemplate = entityTemplate;
         this.redisTemplate = redisTemplate;
