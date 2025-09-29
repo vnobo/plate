@@ -1,8 +1,5 @@
 package com.plate.boot.commons.utils;
 
-import com.fasterxml.jackson.core.JsonPointer;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.plate.boot.commons.exception.JsonException;
@@ -18,6 +15,9 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonPointer;
+import tools.jackson.databind.JsonNode;
 
 import java.beans.PropertyDescriptor;
 import java.util.Map;
@@ -98,7 +98,7 @@ public final class BeanUtils implements InitializingBean {
     public static <T> byte[] objectToBytes(T object) {
         try {
             return ContextUtils.OBJECT_MAPPER.writeValueAsBytes(object);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw JsonException.withError("Json processing exception", e);
         }
     }
