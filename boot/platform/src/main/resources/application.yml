@@ -1,4 +1,4 @@
-logging.register-shutdown-hook: true
+logging.register-shutdown-hook: false
 
 server:
   port: "${port:8080}"
@@ -10,7 +10,9 @@ spring:
   lifecycle.timeout-per-shutdown-phase: 20s
   threads.virtual.enabled: true
   main.keep-alive: true
-  application.name: plate
+  application:
+    name: plate
+    group: platform
   webflux:
     format:
       time: "HH:mm:ss"

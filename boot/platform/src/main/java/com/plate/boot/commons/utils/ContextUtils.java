@@ -1,6 +1,5 @@
 package com.plate.boot.commons.utils;
 
-import com.github.f4b6a3.uuid.UuidCreator;
 import com.plate.boot.commons.base.AbstractEvent;
 import com.plate.boot.security.SecurityDetails;
 import lombok.extern.log4j.Log4j2;
@@ -120,20 +119,20 @@ public final class ContextUtils implements InitializingBean {
 
     private final ObjectMapper objectMapper;
     private final CacheManager cacheManager;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Initializes the ContextUtils class with necessary dependencies.
      *
-     * @param objectMapper              The ObjectMapper instance used for JSON serialization and deserialization.
-     * @param cacheManager              The CacheManager instance used for cache operations.
-     * @param applicationEventPublisher The ApplicationEventPublisher instance used for event publishing.
+     * @param objectMapper The ObjectMapper instance used for JSON serialization and deserialization.
+     * @param cacheManager The CacheManager instance used for cache operations.
+     * @param publisher    The ApplicationEventPublisher instance used for event publishing.
      */
     ContextUtils(ObjectMapper objectMapper, CacheManager cacheManager,
-                 ApplicationEventPublisher applicationEventPublisher) {
+                 ApplicationEventPublisher publisher) {
         this.objectMapper = objectMapper;
         this.cacheManager = cacheManager;
-        this.applicationEventPublisher = applicationEventPublisher;
+        this.eventPublisher = publisher;
     }
 
     /**
@@ -263,7 +262,8 @@ public final class ContextUtils implements InitializingBean {
      * @return A newly created {@link UUID} instance, providing a unique identifier.
      */
     public static UUID nextId() {
-        return UuidCreator.getTimeOrderedEpoch();
+        return DatabaseUtils.DATABASE_CLIENT.sql("select uuidv7()")
+                .mapValue(UUID.class).one().block();
     }
 
     /**
@@ -278,6 +278,6 @@ public final class ContextUtils implements InitializingBean {
         log.info("Initializing utils [ContextUtils]...");
         OBJECT_MAPPER = this.objectMapper;
         CACHE_MANAGER = this.cacheManager;
-        APPLICATION_EVENT_PUBLISHER = this.applicationEventPublisher;
+        APPLICATION_EVENT_PUBLISHER = this.eventPublisher;
     }
 }
