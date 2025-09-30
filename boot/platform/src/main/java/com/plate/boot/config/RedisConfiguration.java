@@ -44,12 +44,13 @@ public class RedisConfiguration {
     @Bean
     public ReactiveRedisTemplate<@NonNull String, @NonNull Object> reactiveObjectRedisTemplate(ReactiveRedisConnectionFactory factory,
                                                                                                ObjectMapper objectMapper) {
-        StringRedisSerializer keySerializer = new StringRedisSerializer();
-        Jackson3JsonRedisSerializer<@NonNull Object> serializer = new Jackson3JsonRedisSerializer<>(objectMapper, Object.class);
+        StringRedisSerializer keySerializer = StringRedisSerializer.UTF_8;
+        Jackson3JsonRedisSerializer<@NonNull Object> serializer =
+                new Jackson3JsonRedisSerializer<>(objectMapper, Object.class);
         RedisSerializationContext.RedisSerializationContextBuilder<@NonNull String, @NonNull Object> builder =
                 RedisSerializationContext.newSerializationContext(serializer);
-        RedisSerializationContext<@NonNull String, @NonNull Object> context = builder.key(keySerializer).value(serializer)
-                .hashKey(keySerializer).hashValue(serializer).build();
+        RedisSerializationContext<@NonNull String, @NonNull Object> context =
+                builder.key(keySerializer).value(serializer).hashKey(keySerializer).hashValue(serializer).build();
         return new ReactiveRedisTemplate<>(factory, context);
     }
 }

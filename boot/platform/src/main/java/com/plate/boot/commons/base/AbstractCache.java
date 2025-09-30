@@ -13,7 +13,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -127,9 +130,10 @@ public abstract class AbstractCache implements InitializingBean {
         String cacheKey = key + ":data";
         Collection<T> cacheData = this.cache.get(cacheKey, List::of);
         if (ObjectUtils.isEmpty(cacheData)) {
-            var sourceData = new ArrayList<T>();
+            var sourceData = new java.util.concurrent.CopyOnWriteArrayList<T>();
             return sourceFlux.doOnNext(sourceData::add)
-                    .doAfterTerminate(() -> this.cachePut(cacheKey, sourceData));
+                    .doOnComplete(() -> this.cachePut(cacheKey, sourceData))
+                    .doOnCancel(() -> this.cachePut(cacheKey, sourceData));
         }
         return Flux.fromIterable(cacheData);
     }

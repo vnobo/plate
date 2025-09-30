@@ -126,7 +126,7 @@ public final class BeanUtils implements InitializingBean {
                 setStr.forEach(keyJoiner::add);
             }
         }
-        return ContextUtils.encodeToSHA256(keyJoiner.toString());
+        return keyJoiner.toString();
     }
 
     /**

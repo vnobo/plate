@@ -1,5 +1,6 @@
 package com.plate.boot.commons.utils;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import com.plate.boot.commons.base.AbstractEvent;
 import com.plate.boot.security.SecurityDetails;
 import lombok.extern.log4j.Log4j2;
@@ -262,8 +263,7 @@ public final class ContextUtils implements InitializingBean {
      * @return A newly created {@link UUID} instance, providing a unique identifier.
      */
     public static UUID nextId() {
-        return DatabaseUtils.DATABASE_CLIENT.sql("select uuidv7()")
-                .mapValue(UUID.class).one().block();
+        return UuidCreator.getTimeOrderedEpoch();
     }
 
     /**
