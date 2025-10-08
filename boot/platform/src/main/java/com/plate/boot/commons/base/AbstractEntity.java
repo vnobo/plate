@@ -1,6 +1,6 @@
 package com.plate.boot.commons.base;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.plate.boot.security.core.UserAuditor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -38,73 +38,76 @@ import java.util.UUID;
 public abstract class AbstractEntity<T> implements BaseEntity<T> {
 
     @EqualsAndHashCode.Include
+    @JsonView(BaseView.Public.class)
     protected @Id T id;
 
     /**
      * Data entity version
      */
+    @JsonView(BaseView.Hidden.class)
     protected @Version Long version;
 
     /**
      * Data entity code
      */
+    @JsonView(BaseView.Public.class)
     protected UUID code;
 
     /**
      * Data tenant code
      */
+    @JsonView(BaseView.Public.class)
     protected UUID tenantCode;
 
     /**
      * Data entity extend,Json column
      */
+    @JsonView(BaseView.Detail.class)
     protected JsonNode extend;
 
     /**
      * Data entity create operator
      * use User. Class code property
      */
+    @JsonView(BaseView.Detail.class)
     protected @CreatedBy UserAuditor createdBy;
 
     /**
      * Data entity create time, timestamp column
      */
+    @JsonView(BaseView.Detail.class)
     protected @CreatedDate LocalDateTime createdAt;
 
     /**
      * Data entity update operator
      * use User.class code property
      */
+    @JsonView(BaseView.Detail.class)
     protected @LastModifiedBy UserAuditor updatedBy;
 
     /**
      * Data entity update time,timestamp column
      */
+    @JsonView(BaseView.Detail.class)
     protected @LastModifiedDate LocalDateTime updatedAt;
 
 
     /**
      * Support from for json column
      */
+    @JsonView(BaseView.Hidden.class)
     protected @Transient Map<String, Object> query;
 
     /**
      * Support full text search for tsvector column
      */
+    @JsonView(BaseView.Hidden.class)
     protected @Transient String search;
 
     /**
      * Support security code for sensitive data
      */
+    @JsonView(BaseView.Hidden.class)
     protected @Transient UUID securityCode;
 
-    /**
-     * Get the version of the entity.
-     *
-     * @return The version of the entity.
-     */
-    @JsonIgnore
-    public Long getVersion() {
-        return version;
-    }
 }
