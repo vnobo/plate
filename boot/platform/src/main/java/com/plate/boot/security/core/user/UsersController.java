@@ -111,4 +111,5 @@ public class UsersController {
         Assert.notNull(request.getCode(), "When deleting a user, the ID must not be null");
         return this.usersService.delete(request);
     }
+
 }

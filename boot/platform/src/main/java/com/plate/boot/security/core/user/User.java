@@ -1,7 +1,9 @@
 package com.plate.boot.security.core.user;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.plate.boot.commons.base.AbstractEntity;
 import com.plate.boot.commons.base.BaseEntity;
+import com.plate.boot.commons.base.BaseView;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -75,6 +77,7 @@ public class User extends AbstractEntity<Long> {
     @Pattern(regexp = "^.*(?=.{6,})(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).*$",
             message = "The login password [password] must be at least 6 characters," +
                     " including at least 1 uppercase letter, 1 lowercase letter, and 1 number.")
+    @JsonView(BaseView.Admin.class)
     private String password;
 
     /**

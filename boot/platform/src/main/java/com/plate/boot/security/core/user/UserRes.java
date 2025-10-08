@@ -59,12 +59,12 @@ public class UserRes extends User {
     /**
      * Overrides the getPassword method to be ignored during JSON serialization.
      *
-     * @return The password value.
+     * @return Always returns null to hide the password.
      */
     @JsonIgnore
     @Override
     public String getPassword() {
-        return super.getPassword();
+        return null; // Always return null to hide the password in UserRes
     }
 
 }
