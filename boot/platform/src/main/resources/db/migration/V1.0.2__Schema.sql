@@ -250,7 +250,7 @@ create index se_loggers_extend_gin_idx on se_loggers using gin (extend);
 create index se_loggers_text_search_gin_idx on se_loggers using gin (text_search);
 comment on table se_loggers is '操作日志表';
 
-create or replace function update_updated_at_column()
+create or replace function plate_update_updated_at_column()
     returns TRIGGER as
 $$
 begin
@@ -275,7 +275,7 @@ $$
                 execute format('CREATE TRIGGER %I_updated_at_trigger
                         BEFORE UPDATE ON %I
                         FOR EACH ROW
-                        EXECUTE FUNCTION update_updated_at_column()',
+                        EXECUTE FUNCTION plate_update_updated_at_column()',
                                table_name_var, table_name_var);
             end loop;
     end
