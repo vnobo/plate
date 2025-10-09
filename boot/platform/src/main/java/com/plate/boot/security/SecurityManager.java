@@ -180,7 +180,7 @@ public class SecurityManager extends AbstractCache
      * In case of failure, an AuthenticationServiceException is propagated with a relevant message.
      */
     @Override
-    public Mono<UserDetails> findByUsername(String username) {
+    public @NonNull Mono<UserDetails> findByUsername(@NonNull String username) {
         Mono<Tuple2<User, List<GrantedAuthority>>> userMono = this.loadByUsername(username)
                 .zipWhen(user -> this.authorities(user.getCode()));
         Mono<SecurityDetails> userDetailsMono = userMono
