@@ -10,6 +10,7 @@ import com.plate.boot.security.core.user.User;
 import com.plate.boot.security.core.user.UserReq;
 import com.plate.boot.security.core.user.UsersService;
 import com.plate.boot.security.core.user.authority.UserAuthority;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.relational.core.query.Criteria;
@@ -112,7 +113,7 @@ public class SecurityManager extends AbstractCache
      * @return A Mono emitting the updated UserDetails with the new password set.
      */
     @Override
-    public Mono<UserDetails> updatePassword(UserDetails userDetails, String newPassword) {
+    public @NonNull Mono<UserDetails> updatePassword(@NonNull UserDetails userDetails, String newPassword) {
         Query query = Query.query(Criteria.where("username").is(userDetails.getUsername()).ignoreCase(true));
         Update update = Update.update("password", newPassword);
         return DatabaseUtils.ENTITY_TEMPLATE.update(query, update, User.class)
