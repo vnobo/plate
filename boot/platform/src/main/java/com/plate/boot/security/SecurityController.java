@@ -16,6 +16,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
 
+import javax.naming.NameNotFoundException;
+
 /**
  * The SecurityController class is a REST controller responsible for handling security-related endpoints.
  * It manages OAuth2 operations, password changes, and CSRF token retrieval.
@@ -101,7 +103,7 @@ public class SecurityController {
         return this.clientRepository.loadAuthorizedClient(clientRegistrationId, authentication, exchange)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(RestServerException.withMsg("Client ["
                                 + clientRegistrationId + "] not found",
-                        new RuntimeException("Client [" + clientRegistrationId + "] not found")))))
+                        new NameNotFoundException("Client [" + clientRegistrationId + "] not found")))))
                 .flatMap(oAuth2AuthorizedClient -> Mono.just(oAuth2AuthorizedClient.getAccessToken()));
     }
 
