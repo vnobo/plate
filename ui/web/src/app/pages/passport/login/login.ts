@@ -7,6 +7,8 @@ import {
   inject,
   OnDestroy,
   signal,
+  OnInit, // 添加 OnInit
+  AfterViewInit, // 添加 AfterViewInit
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -21,7 +23,7 @@ import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } fr
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class Login implements OnDestroy {
+export class Login implements OnInit, AfterViewInit, OnDestroy {
   private readonly storageKey = 'credentials';
 
   private readonly _tokenSer = inject(TokenService);
@@ -58,6 +60,10 @@ export class Login implements OnDestroy {
     });
   }
 
+  ngOnInit(): void {}
+
+  ngAfterViewInit(): void {}
+
   onSubmit() {
     if (this.loginForm.invalid || this.isSubmitting()) {
       return;
@@ -89,7 +95,6 @@ export class Login implements OnDestroy {
     this.submitSubject.next();
   }
 
-  // 处理登录逻辑
   private processLogin() {
     this.isSubmitting.set(true);
     try {
