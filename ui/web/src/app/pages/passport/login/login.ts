@@ -1,21 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  OnDestroy,
-  signal,
-  OnInit, // 添加 OnInit
-  AfterViewInit, // 添加 AfterViewInit
-} from '@angular/core';
+import { afterNextRender, Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { BrowserStorage, TokenService } from '@app/core';
-import { MessageService, ModalsService } from '@app/plugins';
+import { TokenService } from '@app/core';
+import { MessageService } from '@app/plugins';
 import { Authentication, Credentials } from '@plate/types';
-import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  Observable,
+  retry,
+  Subject,
+  takeUntil,
+  tap,
+} from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -23,18 +22,14 @@ import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } fr
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class Login implements OnInit, AfterViewInit, OnDestroy {
-  private readonly storageKey = 'credentials';
-
+export class Login implements OnDestroy {
   private readonly _tokenSer = inject(TokenService);
-  private readonly _storage = inject(BrowserStorage);
   private readonly _message = inject(MessageService);
-  private readonly _modal = inject(ModalsService);
   private readonly _http = inject(HttpClient);
   private readonly _router = inject(Router);
   private readonly _route = inject(ActivatedRoute);
 
-  private submitSubject = new Subject<void>();
+  private submitSubject$ = new Subject<void>();
   private destroy$ = new Subject<void>();
 
   passwordFieldTextType = signal(false);
@@ -49,20 +44,22 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
       validators: [Validators.required, Validators.minLength(6), Validators.maxLength(32)],
       nonNullable: true,
     }),
-    remember: new FormControl(false),
   });
 
   constructor() {
     afterNextRender(() => {
-      this.submitSubject
+      this.submitSubject$
         .pipe(debounceTime(300), takeUntil(this.destroy$))
         .subscribe(() => this.processLogin());
+      var authentication = this._tokenSer.authenticationToken();
+      if (authentication != null) {
+        // 如果 token 未过期，直接跳转到系统主界面
+        if (!this.isTokenExpired(authentication)) {
+          this.handleLoginSuccess(authentication);
+        }
+      }
     });
   }
-
-  ngOnInit(): void {}
-
-  ngAfterViewInit(): void {}
 
   onSubmit() {
     if (this.loginForm.invalid || this.isSubmitting()) {
@@ -92,19 +89,15 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.submitSubject.next();
+    this.submitSubject$.next();
   }
 
   private processLogin() {
     this.isSubmitting.set(true);
     try {
       const credentials = this.loginForm.getRawValue();
-
-      if (credentials.remember) {
-        this.rememberMe(credentials);
-      }
-
       this.login(credentials).subscribe({
+        next: authentication => this.handleLoginSuccess(authentication),
         error: error => {
           this.handleLoginError(error);
           this.isSubmitting.set(false);
@@ -125,7 +118,7 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
     this.passwordFieldTextType.set(!this.passwordFieldTextType());
   }
 
-  private login(credentials: Credentials) {
+  private login(credentials: Credentials): Observable<Authentication> {
     const headers = new HttpHeaders({
       authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
     });
@@ -134,17 +127,8 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
       distinctUntilChanged(),
       retry({ count: 3, delay: 1000 }),
       takeUntil(this.destroy$),
-      tap(authentication => {
-        this._tokenSer.login(authentication);
-        this.handleLoginSuccess(authentication);
-      }),
+      tap(authentication => this._tokenSer.login(authentication)),
     );
-  }
-
-  private rememberMe(credentials: Credentials) {
-    let crstr = JSON.stringify(credentials);
-    crstr = btoa(crstr);
-    this._storage.setItem(this.storageKey, crstr);
   }
 
   private handleLoginSuccess(authentication: Authentication) {
@@ -166,6 +150,28 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
       animation: true,
       delay: 5000,
     });
+  }
+
+  private isTokenExpired(authentication: Authentication): boolean {
+    // 若无认证信息或无 token 则视为已过期（保守策略）
+    if (!authentication || !authentication.token) {
+      return true;
+    }
+
+    const expires = Number(authentication.expires);
+    const lastAccess = Number(authentication.lastAccessTime);
+
+    // 若无法解析为有效数字，则视为已过期
+    if (!isFinite(expires) || !isFinite(lastAccess) || expires <= 0) {
+      return true;
+    }
+
+    // 当前时间（秒）
+    const nowSec = Math.floor(Date.now() / 1000);
+    const expiryTime = lastAccess + expires;
+
+    // 已过期则返回 true，否则返回 false
+    return nowSec >= expiryTime;
   }
 
   ngOnDestroy() {

@@ -1,14 +1,14 @@
-import {HttpErrorResponse} from '@angular/common/http';
-import {afterNextRender, inject, Injectable} from '@angular/core';
-import {SessionStorageService} from '@app/core';
-import {Authentication} from '@plate/types';
+import { HttpErrorResponse } from '@angular/common/http';
+import { afterNextRender, inject, Injectable } from '@angular/core';
+import { Authentication } from '@plate/types';
+import { BrowserStorage } from '@app/core';
 import dayjs from 'dayjs';
 
 @Injectable({ providedIn: 'root' })
 export class TokenService {
   public readonly loginUrl = '/passport/login';
   private readonly authenticationKey = 'authentication';
-  private readonly _storage = inject(SessionStorageService);
+  private readonly _storage = inject(BrowserStorage);
 
   public redirectUrl = '';
   private isLoggedIn = false;
@@ -54,7 +54,9 @@ export class TokenService {
   login(authentication: Authentication): void {
     this.isLoggedIn = true;
     this.authentication = authentication;
-    this._storage.setItem(this.authenticationKey, JSON.stringify(authentication));
+    var jsonStr = JSON.stringify(authentication);
+    var enstr = btoa(encodeURIComponent(jsonStr));
+    this._storage.setItem(this.authenticationKey, enstr);
   }
 
   logout(): void {
@@ -66,7 +68,9 @@ export class TokenService {
   private authenticationLoadStorage(): Authentication | null {
     const authenticationJsonStr = this._storage.getItem(this.authenticationKey);
     if (authenticationJsonStr) {
-      const authentication: Authentication = JSON.parse(authenticationJsonStr);
+      const authentication: Authentication = JSON.parse(
+        decodeURIComponent(atob(authenticationJsonStr)),
+      );
       const lastAccessTime = dayjs.unix(authentication.lastAccessTime);
       const diffSec = dayjs().diff(lastAccessTime, 'second');
       if (diffSec < authentication.expires) {
