@@ -22,7 +22,6 @@ export function createLazyRoute(importFn: () => Promise<any>, routeName: string)
         })
         .catch(error => {
           console.error(`❌ ${routeName}路由加载失败:`, error);
-          // 返回空路由配置，避免应用崩溃
           return { default: [] };
         }),
   };

@@ -1,6 +1,6 @@
-import {Routes} from '@angular/router';
-import {BaseLayout} from '@app/layout';
-import {Users} from './users/users';
+import { Routes } from '@angular/router';
+import { BaseLayout } from '@app/layout';
+import { Users } from './users/users';
 
 export const HOME_ROUTES: Routes = [
   {

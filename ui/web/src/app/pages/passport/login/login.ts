@@ -51,13 +51,6 @@ export class Login implements OnDestroy {
       this.submitSubject$
         .pipe(debounceTime(300), takeUntil(this.destroy$))
         .subscribe(() => this.processLogin());
-      var authentication = this._tokenSer.authenticationToken();
-      if (authentication != null) {
-        // 如果 token 未过期，直接跳转到系统主界面
-        if (!this.isTokenExpired(authentication)) {
-          this.handleLoginSuccess(authentication);
-        }
-      }
     });
   }
 
@@ -108,7 +101,7 @@ export class Login implements OnDestroy {
       this._message.error('登录失败，请稍后再试! 错误: ' + (error || '未知错误'), {
         autohide: false,
         animation: false,
-        delay: 100000,
+        delay: 10000,
       });
       this.isSubmitting.set(false);
     }
@@ -125,7 +118,6 @@ export class Login implements OnDestroy {
     return this._http.get<Authentication>('/sec/v1/oauth2/login', { headers: headers }).pipe(
       debounceTime(300),
       distinctUntilChanged(),
-      retry({ count: 3, delay: 1000 }),
       takeUntil(this.destroy$),
       tap(authentication => this._tokenSer.login(authentication)),
     );
@@ -140,7 +132,7 @@ export class Login implements OnDestroy {
         animation: true,
       },
     );
-    this._router.navigate(['/home'], { relativeTo: this._route }).then();
+    this._router.navigate([this._tokenSer.redirectUrl], { relativeTo: this._route }).then();
   }
 
   private handleLoginError(error: any) {
@@ -150,28 +142,6 @@ export class Login implements OnDestroy {
       animation: true,
       delay: 5000,
     });
-  }
-
-  private isTokenExpired(authentication: Authentication): boolean {
-    // 若无认证信息或无 token 则视为已过期（保守策略）
-    if (!authentication || !authentication.token) {
-      return true;
-    }
-
-    const expires = Number(authentication.expires);
-    const lastAccess = Number(authentication.lastAccessTime);
-
-    // 若无法解析为有效数字，则视为已过期
-    if (!isFinite(expires) || !isFinite(lastAccess) || expires <= 0) {
-      return true;
-    }
-
-    // 当前时间（秒）
-    const nowSec = Math.floor(Date.now() / 1000);
-    const expiryTime = lastAccess + expires;
-
-    // 已过期则返回 true，否则返回 false
-    return nowSec >= expiryTime;
   }
 
   ngOnDestroy() {

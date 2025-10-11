@@ -10,7 +10,7 @@ export class TokenService {
   private readonly authenticationKey = 'authentication';
   private readonly _storage = inject(SessionStorage);
 
-  public redirectUrl = '';
+  public redirectUrl = '/home';
   private isLoggedIn = false;
   private authentication = {} as Authentication;
 

@@ -20,8 +20,8 @@ export const routes: Routes = [
   // 主应用路由 - 懒加载（需要认证）
   {
     path: 'home',
-    ...createLazyRoute(() => import('./pages/index').then(m => m.HOME_ROUTES), '主应用'),
-    title: '应用主页',
+    ...createLazyRoute(() => import('./pages/index').then(m => m.HOME_ROUTES), '平台管理后台'),
+    title: '平台管理后台',
   },
 
   // 认证路由 - 懒加载（无需认证）

@@ -48,9 +48,7 @@ export class Users {
     numberOfElements: 0,
     empty: true,
   });
-  search = signal<User>({
-    code: '0',
-  });
+  search = signal<User>({});
 
   // Expose Math to template
   Math = Math;
