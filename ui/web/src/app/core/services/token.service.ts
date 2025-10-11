@@ -1,14 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { afterNextRender, inject, Injectable } from '@angular/core';
 import { Authentication } from '@plate/types';
-import { BrowserStorage } from '@app/core';
+import { SessionStorage } from '@app/core';
 import dayjs from 'dayjs';
 
 @Injectable({ providedIn: 'root' })
 export class TokenService {
   public readonly loginUrl = '/passport/login';
   private readonly authenticationKey = 'authentication';
-  private readonly _storage = inject(BrowserStorage);
+  private readonly _storage = inject(SessionStorage);
 
   public redirectUrl = '';
   private isLoggedIn = false;

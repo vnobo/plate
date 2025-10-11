@@ -4,7 +4,7 @@ import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 @Injectable({
   providedIn: 'root',
 })
-export class SessionStorageService {
+export class SessionStorage {
   private isBrowser: boolean;
 
   constructor(@Inject(PLATFORM_ID) private _platformId: Object) {
