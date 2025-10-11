@@ -36,7 +36,6 @@ function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
         ) {
           return throwError(() => error.error);
         }
-        //_auth.logout();
         _route.navigate([_auth.loginUrl]).then();
       }
       console.error(`Backend returned code ${error.status}, body was: `, JSON.stringify(error));
@@ -45,18 +44,14 @@ function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
   );
 }
 
-function authTokenInterceptor(
+function apiVersionInterceptor(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> {
-  const _auth = inject(TokenService);
-  if (!_auth.isLogged()) {
-    return next(req);
-  }
   const newReq = req.clone({
-    headers: req.headers.set('Authorization', `Bearer ${_auth.authToken()}`),
+    headers: req.headers.append('x-api-version', `v1`),
   });
   return next(newReq);
 }
 
-export const indexInterceptor = [defaultInterceptor, handleErrorInterceptor];
+export const indexInterceptor = [defaultInterceptor, apiVersionInterceptor, handleErrorInterceptor];
