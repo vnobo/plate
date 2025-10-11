@@ -1,5 +1,5 @@
 export { indexInterceptor } from './net/http.Interceptor';
-export { SessionStorageService } from './storage/session-storage';
+export { SessionStorage } from './storage/session-storage';
 export { BrowserStorage } from './storage/browser-storage';
 
 export { TokenService } from './services/token.service';
