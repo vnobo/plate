@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.method.HandlerTypePredicate;
+import org.springframework.web.reactive.config.ApiVersionConfigurer;
 import org.springframework.web.reactive.config.PathMatchConfigurer;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
@@ -43,6 +44,14 @@ public class WebConfiguration implements WebFluxConfigurer {
         pageableResolver.setMaxPageSize(webfluxProperties.getMaxPageSize());
         pageableResolver.setFallbackPageable(Pageable.ofSize(webfluxProperties.getDefaultPageSize()));
         configurer.addCustomResolver(pageableResolver);
+    }
+
+    @Override
+    public void configureApiVersioning(@NonNull ApiVersionConfigurer configurer) {
+        configurer.setDefaultVersion(webfluxProperties.getDefaultApiVersion());
+        configurer.addSupportedVersions(webfluxProperties.getSupportedVersions());
+        configurer.useRequestHeader("x-api-version");
+        configurer.useQueryParam("apiVersion");
     }
 
     /**

@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.AuthenticationException;
@@ -136,8 +137,7 @@ public class SecurityConfiguration {
         http.securityContextRepository(securityContextRepository);
         http.httpBasic(httpBasicSpec -> httpBasicSpec
                 .authenticationEntryPoint(new CustomServerAuthenticationEntryPoint()));
-        http.formLogin(formLoginSpec -> formLoginSpec
-                .authenticationEntryPoint(new CustomServerAuthenticationEntryPoint()));
+        http.formLogin(Customizer.withDefaults());
         http.csrf(this::setCsrfSpec);
         http.logout(this::setLogout);
         http.oauth2Login(oAuth2LoginSpec ->
