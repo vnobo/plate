@@ -14,6 +14,7 @@ import { MessageService, ModalsService } from '@app/plugins';
 import { Page, Pageable } from '@plate/types';
 import { UserForm } from './user-form';
 import { User } from './user.types';
+import { environment } from '@envs/env';
 
 @Component({
   selector: 'app-users',
@@ -26,7 +27,6 @@ export class Users {
   private readonly _message = inject(MessageService);
   private readonly _modal = inject(ModalsService);
   private readonly _http = inject(HttpClient);
-  private readonly API_PREFIX = '/sec';
   pageable = signal<Pageable>({
     page: 1,
     size: 10,
@@ -164,7 +164,8 @@ export class Users {
     for (const sort in page.sorts) {
       params = params.appendAll({ sort: page.sorts[sort] });
     }
-    return this._http.get<Page<User>>(this.API_PREFIX + '/users/page', { params: params });
+    // 使用与其它方法一致的 API 前缀，避免未定义的 secApiPath
+    return this._http.get<Page<User>>(environment.secApiPath + '/users/page', { params: params });
   }
 
   private loadData(search: User, page: Pageable) {
@@ -172,14 +173,14 @@ export class Users {
   }
 
   private add(request: User) {
-    return this._http.post<User>(this.API_PREFIX + '/users/add', request);
+    return this._http.post<User>(environment.secApiPath + '/users/add', request);
   }
 
   private modify(request: User) {
-    return this._http.put<User>(this.API_PREFIX + '/users/modify', request);
+    return this._http.put<User>(environment.secApiPath + '/users/modify', request);
   }
 
   private delete(request: User) {
-    return this._http.delete<User>(this.API_PREFIX + '/users/delete', { body: request });
+    return this._http.delete<User>(environment.secApiPath + '/users/delete', { body: request });
   }
 }
