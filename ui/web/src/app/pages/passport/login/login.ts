@@ -50,7 +50,8 @@ export class Login implements OnDestroy {
     afterNextRender(() => {
       this.submitSubject$
         .pipe(debounceTime(300), takeUntil(this.destroy$))
-        .subscribe(() => this.processLogin());
+        .subscribe(() => this.formProcessLogin());
+      this.processLogin();
     });
   }
 
@@ -85,11 +86,14 @@ export class Login implements OnDestroy {
     this.submitSubject$.next();
   }
 
-  private processLogin() {
+  private formProcessLogin() {
     this.isSubmitting.set(true);
     try {
       const credentials = this.loginForm.getRawValue();
-      this.login(credentials).subscribe({
+      const headers = new HttpHeaders({
+        authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
+      });
+      this.login(headers).subscribe({
         next: authentication => this.handleLoginSuccess(authentication),
         error: error => {
           this.handleLoginError(error);
@@ -107,19 +111,27 @@ export class Login implements OnDestroy {
     }
   }
 
+  private processLogin() {
+    const headers = new HttpHeaders({ 'x-requested-token': 'none-token-auto-login' });
+    this.login(headers)
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe({
+        next: authentication => this.handleLoginSuccess(authentication),
+        error: error => this.handleLoginError(error),
+      });
+  }
+
   showPassword() {
     this.passwordFieldTextType.set(!this.passwordFieldTextType());
   }
 
-  private login(credentials: Credentials): Observable<Authentication> {
-    const headers = new HttpHeaders({
-      authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
-    });
-    return this._http.get<Authentication>('/sec/v1/oauth2/login', { headers: headers }).pipe(
+  private login(headers: HttpHeaders) {
+    return this._http.get<Authentication>('/sec/oauth2/login', { headers: headers }).pipe(
       debounceTime(300),
       distinctUntilChanged(),
       takeUntil(this.destroy$),
       tap(authentication => this._tokenSer.login(authentication)),
+      retry(3),
     );
   }
 
