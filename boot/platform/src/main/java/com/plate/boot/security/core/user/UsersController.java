@@ -3,6 +3,7 @@ package com.plate.boot.security.core.user;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.relational.core.sql.Update;
@@ -58,7 +59,7 @@ public class UsersController {
      * @return A Mono wrapping a PagedModel of UserRes objects representing the paged user data.
      */
     @GetMapping("page")
-    public Mono<PagedModel<UserRes>> page(UserReq request, Pageable pageable) {
+    public Mono<PagedModel<@NonNull UserRes>> page(UserReq request, Pageable pageable) {
         return ContextUtils.securityDetails().flatMap(details ->
                         this.usersService.page(request.securityCode(details.getTenantCode()), pageable))
                 .map(PagedModel::new);
