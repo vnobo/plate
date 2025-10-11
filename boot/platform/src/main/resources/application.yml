@@ -20,9 +20,9 @@ spring:
       date: "yyyy-MM-dd"
     properties:
       path-prefixes:
-        - path: rel/v1
+        - path: rel
           base-package: com.plate.boot.relational
-        - path: sec/v1
+        - path: sec
           base-package: com.plate.boot.security
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"

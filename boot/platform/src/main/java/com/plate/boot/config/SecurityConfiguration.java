@@ -3,6 +3,7 @@ package com.plate.boot.config;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.security.oauth2.Oauth2SuccessHandler;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.security.autoconfigure.reactive.PathRequest;
@@ -13,10 +14,8 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.r2dbc.core.DatabaseClient;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.AuthenticationException;
@@ -49,9 +48,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static com.plate.boot.config.SessionConfiguration.XML_HTTP_REQUEST;
-import static com.plate.boot.config.SessionConfiguration.X_REQUESTED_WITH;
 
 /**
  * SecurityConfiguration configures the application's security settings by defining beans and rules for authentication,
@@ -140,7 +136,8 @@ public class SecurityConfiguration {
         http.securityContextRepository(securityContextRepository);
         http.httpBasic(httpBasicSpec -> httpBasicSpec
                 .authenticationEntryPoint(new CustomServerAuthenticationEntryPoint()));
-        http.formLogin(Customizer.withDefaults());
+        http.formLogin(formLoginSpec -> formLoginSpec
+                .authenticationEntryPoint(new CustomServerAuthenticationEntryPoint()));
         http.csrf(this::setCsrfSpec);
         http.logout(this::setLogout);
         http.oauth2Login(oAuth2LoginSpec ->
@@ -212,7 +209,7 @@ public class SecurityConfiguration {
          * indicating standard CSRF protection should apply.
          */
         @Override
-        public Mono<MatchResult> matches(ServerWebExchange exchange) {
+        public @NonNull Mono<MatchResult> matches(@NonNull ServerWebExchange exchange) {
             Mono<MatchResult> ignoreMono = new OrServerWebExchangeMatcher(allowedMatchers)
                     .matches(exchange).filter(MatchResult::isMatch)
                     .flatMap(res -> MatchResult.notMatch())
@@ -237,7 +234,6 @@ public class SecurityConfiguration {
      * <p>Notable Methods:</p>
      * <ul>
      *   <li>{@link #commence(ServerWebExchange, AuthenticationException)}: Handles the commencement of the authentication failure handling.</li>
-     *   <li>{@link #isXmlHttpRequest(String)}: Determines if the request is an XMLHttpRequest.</li>
      *   <li>{@link #createErrorResponse(ServerWebExchange, AuthenticationException)}: Constructs an error response object for AJAX request failures.</li>
      * </ul>
      */
@@ -254,32 +250,15 @@ public class SecurityConfiguration {
          * value (Void).
          */
         @Override
-        public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException e) {
+        public @NonNull Mono<Void> commence(@NonNull ServerWebExchange exchange, @NonNull AuthenticationException e) {
             log.error("Authentication Failure: {}", e.getMessage(), e);
-
-            ServerHttpRequest request = exchange.getRequest();
-            String requestedWith = request.getHeaders().getFirst(X_REQUESTED_WITH);
-            if (!isXmlHttpRequest(requestedWith)) {
-                return super.commence(exchange, e);
-            }
             ErrorResponse errorResponse = createErrorResponse(exchange, e);
             ServerHttpResponse response = exchange.getResponse();
             response.setStatusCode(errorResponse.getStatusCode());
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             var bytes = BeanUtils.objectToBytes(errorResponse.getBody());
             var buffer = response.bufferFactory().wrap(bytes);
-            return response.writeWith(Mono.just(buffer)).doOnError((err) -> DataBufferUtils.release(buffer));
-        }
-
-        /**
-         * Determines whether the provided request header 'requestedWith' indicates an XMLHttpRequest. This is typically
-         * used to check if the request was made via AJAX.
-         *
-         * @param requestedWith The value of the 'X-Requested-With' header from the HTTP request.
-         * @return {@code true} if the 'requestedWith' header indicates an XMLHttpRequest, {@code false} otherwise.
-         */
-        private boolean isXmlHttpRequest(String requestedWith) {
-            return requestedWith != null && requestedWith.contains(XML_HTTP_REQUEST);
+            return response.writeWith(Mono.just(buffer)).doOnTerminate(() -> DataBufferUtils.release(buffer));
         }
 
         /**
