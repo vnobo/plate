@@ -1,11 +1,14 @@
 package com.plate.boot.security.core.user;
 
-import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.commons.utils.DatabaseUtils;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -17,8 +20,6 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
-
 /**
  * User service
  *
@@ -26,17 +27,10 @@ import java.time.Duration;
  */
 @Service
 @RequiredArgsConstructor
-public class UsersService extends AbstractCache {
+public class UsersService {
 
-    /**
-     * The PasswordEncoder interface provides methods for encoding and validating passwords.
-     */
     private final PasswordEncoder passwordEncoder;
-    /**
-     * The UsersRepository interface provides methods for interacting with the user data in the database.
-     */
     private final UsersRepository usersRepository;
-
 
     /**
      * Searches for users based on the provided user request and pagination details.
@@ -45,10 +39,10 @@ public class UsersService extends AbstractCache {
      * @param pageable The pagination information specifying the page number and size of each page.
      * @return A Flux object containing a stream of UserRes data.
      */
+    @Cacheable(cacheNames = "users", key = "T(com.plate.boot.commons.utils.BeanUtils).cacheKey(#request,#pageable)")
     public Flux<UserRes> search(UserReq request, Pageable pageable) {
         QueryFragment queryFragment = request.query().pageable(pageable);
-        String key = BeanUtils.cacheKey(request, pageable);
-        return super.queryWithCache(key, queryFragment.querySql(), queryFragment, UserRes.class);
+        return DatabaseUtils.query(queryFragment.querySql(), queryFragment, UserRes.class);
     }
 
     /**
@@ -62,12 +56,13 @@ public class UsersService extends AbstractCache {
      * @param pageable The {@link Pageable} object defining the pagination settings.
      * @return A {@link Mono} that emits a single {@link Page} object containing the paged list of users and the total count.
      */
-    public Mono<Page<UserRes>> page(UserReq request, Pageable pageable) {
+    @Cacheable(cacheNames = "users", key = "T(com.plate.boot.commons.utils.BeanUtils).cacheKey(#request,#pageable)")
+    public Mono<Page<@NonNull UserRes>> page(UserReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment queryFragment = request.query();
-        var countMono = super.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
-        return searchMono.zipWith(countMono)
-                .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
+        var countMono = DatabaseUtils.count(queryFragment.countSql(), queryFragment);
+        return Mono.zip(searchMono, countMono)
+                .map(tuple -> new PageImpl<>(tuple.getT1(), pageable, tuple.getT2()));
     }
 
     /**
@@ -82,6 +77,8 @@ public class UsersService extends AbstractCache {
      * @return A Mono that, when subscribed to, emits the newly created User entity upon successful addition,
      * or errors with a RestServerException if the user already exists.
      */
+    @CacheEvict(cacheNames = "users", allEntries = true)
+    @Transactional(rollbackFor = Exception.class)
     public Mono<User> add(UserReq request) {
         return this.usersRepository.existsByUsernameIgnoreCase(request.getUsername()).flatMap(exists -> {
             if (exists) {
@@ -104,9 +101,11 @@ public class UsersService extends AbstractCache {
      * @param request A UserReq object containing the updated information for the user, primarily identified by their username.
      * @return A Mono that, when subscribed to, emits the updated User entity after modification or throws an exception if the user was not found.
      */
+    @CacheEvict(cacheNames = "users", allEntries = true)
+    @Transactional(rollbackFor = Exception.class)
     public Mono<User> modify(UserReq request) {
         return this.usersRepository.findByUsername(request.getUsername())
-                .switchIfEmpty(Mono.error(RestServerException.withMsg("User already exists",
+                .switchIfEmpty(Mono.error(RestServerException.withMsg("User not found",
                         new UsernameNotFoundException("User by username [" + request.getUsername() + "] not found!"))))
                 .flatMap(user -> {
                     request.setId(user.getId());
@@ -129,8 +128,8 @@ public class UsersService extends AbstractCache {
      *                and the password that may require encoding upgrade.
      * @return A Mono emitting the updated or newly created User after the operation is completed.
      */
+    @Transactional(rollbackFor = Exception.class)
     public Mono<User> operate(UserReq request) {
-        // 只有当密码不为空时才考虑升级编码
         if (StringUtils.hasLength(request.getPassword())) {
             request.setPassword(this.upgradeEncodingIfPassword(request.getPassword()));
         }
@@ -141,7 +140,7 @@ public class UsersService extends AbstractCache {
                 .flatMap(user -> {
                     BeanUtils.copyProperties(request, user, true);
                     return this.save(user);
-                }).doAfterTerminate(() -> this.cache.clear());
+                });
     }
 
     /**
@@ -151,12 +150,12 @@ public class UsersService extends AbstractCache {
      * @return A Mono<Void> which upon subscription initiates the deletion process asynchronously.
      * The Mono will complete empty when the deletion is successful, or error if the operation fails.
      */
+    @CacheEvict(cacheNames = "users", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public Mono<Void> delete(UserReq request) {
         return this.usersRepository.findByCode(request.getCode())
                 .doOnNext(res -> ContextUtils.eventPublisher(UserEvent.delete(res)))
-                .delayElement(Duration.ofSeconds(2))
-                .flatMap(this.usersRepository::delete).doAfterTerminate(() -> this.cache.clear());
+                .flatMap(this.usersRepository::delete);
     }
 
     /**
@@ -168,16 +167,19 @@ public class UsersService extends AbstractCache {
      * @return A Mono emitting the saved User entity after the operation completes successfully.
      * If the user is not found during update, a Mono error with RestServerException is returned.
      */
+    @Transactional(rollbackFor = Exception.class)
     public Mono<User> save(User user) {
         if (user.isNew()) {
             return this.usersRepository.save(user)
                     .doOnNext(res -> ContextUtils.eventPublisher(UserEvent.insert(res)));
         } else {
             if (user.getId() == null) {
-                return Mono.error(new IllegalArgumentException("User ID must not be null for existing entities"));
+                return Mono.error(RestServerException.withMsg("Id must not be null!",
+                        new IllegalArgumentException("User ID must not be null for existing entities")));
             }
             return this.usersRepository.findById(user.getId()).switchIfEmpty(
-                            Mono.error(new IllegalArgumentException("User not found with ID: " + user.getId())))
+                            Mono.error(RestServerException.withMsg("Id must not be null!",
+                                    new IllegalArgumentException("User not found with ID: " + user.getId()))))
                     .flatMap(old -> {
                         user.setPassword(old.getPassword());
                         user.setAccountExpired(old.getAccountExpired());

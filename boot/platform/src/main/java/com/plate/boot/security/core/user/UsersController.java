@@ -1,5 +1,7 @@
 package com.plate.boot.security.core.user;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.plate.boot.commons.base.BaseView;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
@@ -24,12 +26,6 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UsersController {
 
-    /**
-     * Provides business logic operations for managing users, including search, pagination,
-     * addition, modification, deletion, and other user-related functionalities.
-     * This service interacts with the database through {@link UsersRepository} and utilizes
-     * security mechanisms such as tenant code checks to enforce authorization rules.
-     */
     private final UsersService usersService;
 
     /**
@@ -75,6 +71,7 @@ public class UsersController {
      * @throws IllegalArgumentException If the ID within the request is not null, indicating an attempt to add an existing user.
      */
     @PostMapping("add")
+    @JsonView(BaseView.Detail.class)
     public Mono<UserRes> add(@Valid @RequestBody UserReq request) {
         Assert.isNull(request.getCode(), () -> "When adding a new user, the ID must be null");
         return this.usersService.add(request).map(user -> BeanUtils.copyProperties(user, UserRes.class));
@@ -92,6 +89,7 @@ public class UsersController {
      * @throws IllegalArgumentException If the request's ID is null, indicating an attempt to update a non-existent user.
      */
     @PutMapping("modify")
+    @JsonView(BaseView.Detail.class)
     public Mono<UserRes> modify(@Validated(Update.class) @RequestBody UserReq request) {
         Assert.notNull(request.getCode(), () -> "When modifying an existing user, the ID must not be null");
         return this.usersService.modify(request).map(user -> BeanUtils.copyProperties(user, UserRes.class));

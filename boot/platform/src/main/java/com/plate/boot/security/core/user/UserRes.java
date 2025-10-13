@@ -1,6 +1,8 @@
 package com.plate.boot.security.core.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.plate.boot.commons.base.BaseView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -22,6 +24,7 @@ public class UserRes extends User {
      * Data full text search entity sort
      */
     @ReadOnlyProperty
+    @JsonView(BaseView.Detail.class)
     private Double rank;
 
     /**

@@ -1,5 +1,6 @@
 package com.plate.boot.security.core.user;
 
+import lombok.NonNull;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Mono;
 
@@ -10,7 +11,7 @@ import java.util.UUID;
  * This extends the R2dbcRepository, providing reactive CRUD operations for User
  * entities with a primary key of type Long.
  */
-public interface UsersRepository extends R2dbcRepository<User, Long> {
+public interface UsersRepository extends R2dbcRepository<@NonNull User, @NonNull Long> {
     /**
      * Retrieves a User entity based on the provided code.
      *

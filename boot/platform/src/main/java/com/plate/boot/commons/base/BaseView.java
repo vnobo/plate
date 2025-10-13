@@ -25,13 +25,13 @@ public interface BaseView {
      * Marker interface for detailed view.
      * Objects serialized with this view will include all available fields with full details.
      */
-    interface Detail {
+    interface Detail extends Public {
     }
 
     /**
      * Marker interface for admin view.
      * Objects serialized with this view will include sensitive fields like password.
      */
-    interface Admin {
+    interface Admin extends Detail {
     }
 }

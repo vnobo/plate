@@ -1,5 +1,6 @@
 package com.plate.boot.commons.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.plate.boot.security.core.UserAuditor;
 import lombok.Data;
@@ -110,4 +111,13 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
     @JsonView(BaseView.Hidden.class)
     protected @Transient UUID securityCode;
 
+    @JsonIgnore
+    public Map<String, Object> getQuery() {
+        return query;
+    }
+
+    @JsonIgnore
+    public Long getVersion() {
+        return version;
+    }
 }
