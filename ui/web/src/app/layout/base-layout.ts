@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { afterNextRender, Component, inject, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { TokenService } from '@app/core';
+import { User } from '@plate/types';
 
 @Component({
   selector: 'app-layout-base',
@@ -73,7 +75,7 @@ import { RouterModule } from '@angular/router';
                 class="avatar avatar-sm"
                 style="background-image: url(/static/avatars/044m.jpg)"></span>
               <div class="d-none d-xl-block ps-2">
-                <div>Paweł Kuna</div>
+                <div>{{ userDetails().nickname }}</div>
                 <div class="mt-1 small text-secondary">UI Designer</div>
               </div>
             </a>
@@ -163,4 +165,22 @@ import { RouterModule } from '@angular/router';
     `,
   ],
 })
-export class BaseLayout {}
+export class BaseLayout implements OnInit {
+  private readonly _tokenSer = inject(TokenService);
+
+  userDetails = signal({} as User);
+
+  constructor() {
+    afterNextRender(() => {
+      this._tokenSer.isLoggedIn$.subscribe(isLoggedIn => {
+        if (isLoggedIn) {
+          const authentication = this._tokenSer.authenticationToken();
+          if (authentication) {
+            this.userDetails.set(authentication.details);
+          }
+        }
+      });
+    });
+  }
+  ngOnInit(): void {}
+}

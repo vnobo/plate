@@ -5,3 +5,4 @@ export { BrowserStorage } from './storage/browser-storage';
 export { TokenService } from './services/token.service';
 export { ProgressBar } from './services/progress-bar';
 export { ThemeService } from './services/theme.service';
+export { authGuard } from './pages.guard';

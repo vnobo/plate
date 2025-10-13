@@ -178,14 +178,11 @@ export class Login implements OnDestroy {
   }
 
   private handleLoginSuccess(authentication: Authentication) {
-    this._message.success(
-      '登录成功, 欢迎 ' + (authentication.details?.['nickname'] as string) + '!',
-      {
-        autohide: true,
-        delay: 5000,
-        animation: true,
-      },
-    );
+    this._message.success('登录成功, 欢迎 ' + (authentication.details?.nickname as string) + '!', {
+      autohide: true,
+      delay: 5000,
+      animation: true,
+    });
     this._router.navigate([this._tokenSer.redirectUrl], { relativeTo: this._route }).then();
   }
 

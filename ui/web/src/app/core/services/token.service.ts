@@ -1,8 +1,9 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { afterNextRender, inject, Injectable } from '@angular/core';
+import { afterNextRender, inject, Injectable, signal } from '@angular/core';
 import { Authentication } from '@plate/types';
 import { SessionStorage } from '@app/core';
 import dayjs from 'dayjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @Injectable({ providedIn: 'root' })
 export class TokenService {
@@ -10,17 +11,21 @@ export class TokenService {
   private readonly authenticationKey = 'authentication';
   private readonly _storage = inject(SessionStorage);
 
+  private isLoggedIn = signal(false);
+  private authentication = signal({} as Authentication);
+
   public redirectUrl = '/home';
-  private isLoggedIn = false;
-  private authentication = {} as Authentication;
+
+  public isLoggedIn$ = toObservable(this.isLoggedIn);
+  public authentication$ = toObservable(this.authentication);
 
   constructor() {
     afterNextRender(() => {});
   }
 
   authenticationToken(): Authentication | null {
-    if (this.isLoggedIn) {
-      return this.authentication;
+    if (this.isLoggedIn()) {
+      return this.authentication();
     }
     const authentication = this.authenticationLoadStorage();
     if (authentication) {
@@ -32,12 +37,12 @@ export class TokenService {
   }
 
   isLogged(): boolean {
-    return this.isLoggedIn;
+    return this.isLoggedIn();
   }
 
   authToken(): string {
-    if (this.isLoggedIn) {
-      return this.authentication.token;
+    if (this.isLoggedIn()) {
+      return this.authentication().token;
     }
     const authentication = this.authenticationLoadStorage();
     if (authentication) {
@@ -52,16 +57,16 @@ export class TokenService {
   }
 
   login(authentication: Authentication): void {
-    this.isLoggedIn = true;
-    this.authentication = authentication;
+    this.isLoggedIn.set(true);
+    this.authentication.set(authentication);
     var jsonStr = JSON.stringify(authentication);
     var enstr = btoa(encodeURIComponent(jsonStr));
     this._storage.setItem(this.authenticationKey, enstr);
   }
 
   logout(): void {
-    this.isLoggedIn = false;
-    this.authentication = {} as Authentication;
+    this.isLoggedIn.set(false);
+    this.authentication.set({} as Authentication);
     this._storage.removeItem(this.authenticationKey);
   }
 

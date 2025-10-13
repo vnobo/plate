@@ -39,12 +39,36 @@ declare module '@plate/types' {
     token: string;
     expires: number;
     lastAccessTime: number;
-    details: Record<string, unknown>;
+    details: User;
   }
 
   export interface Credentials {
     password: string | null | undefined;
     username: string | null | undefined;
+  }
+
+  export interface User extends Search {
+    id?: number;
+    code?: string;
+    tenantCode?: string;
+    username?: string;
+    nickname?: string;
+    password?: string;
+    disabled?: boolean;
+    accountExpired?: boolean;
+    accountLocked?: boolean;
+    credentialsExpired?: boolean;
+    email?: string;
+    phone?: string;
+    name?: string;
+    avatar?: string;
+    bio?: string;
+    extend?: Record<string, unknown>;
+    loginTime?: Date;
+    creator?: UserAuditor;
+    updater?: UserAuditor;
+    updatedTime?: Date;
+    createdTime?: Date;
   }
 }
 
