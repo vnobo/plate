@@ -18,7 +18,7 @@ import { RouterModule } from '@angular/router';
           <span class="navbar-toggler-icon"></span>
         </button>
         <!-- BEGIN NAVBAR LOGO --><a
-          href="../../.."
+          href="/"
           aria-label="Tabler"
           class="navbar-brand navbar-brand-autodark me-3"
           ><svg
@@ -58,51 +58,7 @@ import { RouterModule } from '@angular/router';
                   <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
                 </svg>
               </span>
-              <span class="nav-link-title"> Home </span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <span class="nav-link-icon"
-                ><!-- Download SVG icon from http://tabler.io/icons/icon/checkbox -->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="icon icon-1">
-                  <path d="M9 11l3 3l8 -8" />
-                  <path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9" />
-                </svg>
-              </span>
-              <span class="nav-link-title"> Profile </span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <span class="nav-link-icon"
-                ><!-- Download SVG icon from http://tabler.io/icons/icon/checkbox -->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="icon icon-1">
-                  <path d="M9 11l3 3l8 -8" />
-                  <path d="M20 12v6a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h9" />
-                </svg>
-              </span>
-              <span class="nav-link-title"> Settings </span>
+              <span class="nav-link-title"> 管理平台 </span>
             </a>
           </li>
         </ul>
