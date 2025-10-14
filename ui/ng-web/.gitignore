@@ -29,6 +29,7 @@ yarn-error.log
 .history/*
 AGENTS.md
 .roo
+.qwen
 QWEN.md
 
 # Miscellaneous
