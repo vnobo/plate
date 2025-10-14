@@ -27,10 +27,6 @@ yarn-error.log
 !.vscode/launch.json
 !.vscode/extensions.json
 .history/*
-.roo
-.qwen
-QWEN.md
-AGENTS.md
 
 # Miscellaneous
 /.angular/cache
