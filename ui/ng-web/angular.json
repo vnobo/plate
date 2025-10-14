@@ -27,7 +27,29 @@
               }
             ],
             "styles": [
+              {
+                "input": "@tabler/core/dist/css/tabler.css",
+                "bundleName": "tabler-style"
+              },
+              {
+                "input": "@tabler/core/dist/css/tabler-themes.css",
+                "bundleName": "tabler-themes-style"
+              },
+              {
+                "input": "@tabler/core/dist/css/tabler-socials.css",
+                "bundleName": "tabler-socials-style"
+              },
               "src/styles.scss"
+            ],
+            "scripts": [
+              {
+                "input": "@tabler/core/dist/js/tabler.js",
+                "bundleName": "tabler-script"
+              },
+              {
+                "input": "@tabler/core/dist/js/tabler-theme.js",
+                "bundleName": "tabler-theme-script"
+              }
             ],
             "server": "src/main.server.ts",
             "outputMode": "server",
@@ -83,10 +105,37 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "@tabler/icons/icons/",
+                "output": "/assets/icons/"
               }
             ],
             "styles": [
+              {
+                "input": "@tabler/core/dist/css/tabler.css",
+                "bundleName": "tabler-style"
+              },
+              {
+                "input": "@tabler/core/dist/css/tabler-themes.css",
+                "bundleName": "tabler-themes-style"
+              },
+              {
+                "input": "@tabler/core/dist/css/tabler-socials.css",
+                "bundleName": "tabler-socials-style"
+              },
               "src/styles.scss"
+            ],
+            "scripts": [
+              {
+                "input": "@tabler/core/dist/js/tabler.js",
+                "bundleName": "tabler-script"
+              },
+              {
+                "input": "@tabler/core/dist/js/tabler-theme.js",
+                "bundleName": "tabler-theme-script"
+              }
             ]
           }
         }
