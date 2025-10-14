@@ -39,203 +39,96 @@ declare module '@plate/types' {
     token: string;
     expires: number;
     lastAccessTime: number;
-    details: User;
+    details: UserDetails;
+  }
+
+  export interface UserDetails {
+    authorities: Authority[];
+    attributes: UserAttributes;
+    accountNonExpired: boolean;
+    accountNonLocked: boolean;
+    avatar: string | null;
+    bio: string | null;
+    code: string;
+    credentialsNonExpired: boolean;
+    enabled: boolean;
+    name: string;
+    nickname: string;
+    tenantCode: string;
+    tenantName: string;
+  }
+
+  export interface Authority {
+    authority: string;
+  }
+
+  export interface UserAttributes {
+    username: string;
+    userCode: string;
   }
 
   export interface Credentials {
     password: string | null | undefined;
     username: string | null | undefined;
   }
-
-  export interface User extends Search {
-    id?: number;
-    code?: string;
-    tenantCode?: string;
-    username?: string;
-    nickname?: string;
-    password?: string;
-    disabled?: boolean;
-    accountExpired?: boolean;
-    accountLocked?: boolean;
-    credentialsExpired?: boolean;
-    email?: string;
-    phone?: string;
-    name?: string;
-    avatar?: string;
-    bio?: string;
-    extend?: Record<string, unknown>;
-    loginTime?: Date;
-    creator?: UserAuditor;
-    updater?: UserAuditor;
-    updatedTime?: Date;
-    createdTime?: Date;
-  }
 }
 
+// Type definitions for @tabler/core
+// These definitions provide type safety when using Tabler components
+
 declare module '@tabler/core' {
-  export { bootstrap as Bootstrap } from '@tabler/core/js/tabler';
+  // Import Bootstrap types (since Tabler extends Bootstrap)
+  import * as BootstrapNS from '@tabler/core';
 
-  // Bootstrap 组件选项接口
-  interface ToastOptions {
-    animation?: boolean;
-    autohide?: boolean;
-    delay?: number;
+  // Re-export all Bootstrap types and components
+  export namespace Bootstrap {
+    export type Alert = BootstrapNS.Alert;
+    export type AlertOptions = BootstrapNS.AlertOptions;
+    export type Button = BootstrapNS.Button;
+    export type ButtonOptions = BootstrapNS.ButtonOptions;
+    export type Carousel = BootstrapNS.Carousel;
+    export type CarouselOptions = BootstrapNS.CarouselOptions;
+    export type Collapse = BootstrapNS.Collapse;
+    export type CollapseOptions = BootstrapNS.CollapseOptions;
+    export type Dropdown = BootstrapNS.Dropdown;
+    export type DropdownOptions = BootstrapNS.DropdownOptions;
+    export type Modal = BootstrapNS.Modal;
+    export type ModalOptions = BootstrapNS.ModalOptions;
+    export type Offcanvas = BootstrapNS.Offcanvas;
+    export type OffcanvasOptions = BootstrapNS.OffcanvasOptions;
+    export type Popover = BootstrapNS.Popover;
+    export type PopoverOptions = BootstrapNS.PopoverOptions;
+    export type ScrollSpy = BootstrapNS.ScrollSpy;
+    export type ScrollSpyOptions = BootstrapNS.ScrollSpyOptions;
+    export type Tab = BootstrapNS.Tab;
+    export type TabOptions = BootstrapNS.TabOptions;
+    export type Toast = BootstrapNS.Toast;
+    export type ToastOptions = BootstrapNS.ToastOptions;
+    export type Tooltip = BootstrapNS.Tooltip;
+    export type TooltipOptions = BootstrapNS.TooltipOptions;
   }
 
-  interface ModalOptions {
-    backdrop?: boolean | 'static';
-    keyboard?: boolean;
-    focus?: boolean;
-  }
+  // Export Bootstrap components individually for direct usage
+  export { Alert } from 'bootstrap';
+  export { Button } from 'bootstrap';
+  export { Carousel } from 'bootstrap';
+  export { Collapse } from 'bootstrap';
+  export { Dropdown } from 'bootstrap';
+  export { Modal } from 'bootstrap';
+  export { Offcanvas } from 'bootstrap';
+  export { Popover } from 'bootstrap';
+  export { ScrollSpy } from 'bootstrap';
+  export { Tab } from 'bootstrap';
+  export { Toast } from 'bootstrap';
+  export { Tooltip } from 'bootstrap';
 
-  interface TooltipOptions {
-    placement?: 'top' | 'right' | 'bottom' | 'left';
-    trigger?: 'click' | 'hover' | 'focus' | 'manual';
-    delay?: number | { show: number; hide: number };
-  }
+  // Tabler-specific exports (if any exist)
+  // Note: Tabler may provide additional functionality beyond Bootstrap
+  export const tabler: any; // Placeholder for Tabler-specific exports
 
-  interface PopoverOptions extends TooltipOptions {
-    content?: string;
-    html?: boolean;
-  }
-
-  interface CarouselOptions {
-    interval?: number;
-    keyboard?: boolean;
-    pause?: 'hover' | false;
-    ride?: boolean;
-    wrap?: boolean;
-  }
-
-  interface CollapseOptions {
-    toggle?: boolean;
-    parent?: string | Element;
-  }
-
-  interface OffcanvasOptions {
-    backdrop?: boolean | 'static';
-    keyboard?: boolean;
-    scroll?: boolean;
-  }
-
-  // Bootstrap 组件类
-  export class Toast {
-    constructor(element: Element, options?: ToastOptions);
-    static getInstance(element: Element): Toast | null;
-    static getOrCreateInstance(element: Element, config?: ToastOptions): Toast;
-    show(): void;
-    hide(): void;
-    dispose(): void;
-  }
-
-  export class Modal {
-    constructor(element: Element | string, options?: ModalOptions);
-    static getInstance(element: Element): Modal | null;
-    static getOrCreateInstance(element: Element, config?: ModalOptions): Modal;
-    show(): void;
-    hide(): void;
-    toggle(): void;
-    handleUpdate(): void;
-    dispose(): void;
-  }
-
-  export class Tooltip {
-    constructor(element: Element, options?: TooltipOptions);
-    static getInstance(element: Element): Tooltip | null;
-    static getOrCreateInstance(element: Element, config?: TooltipOptions): Tooltip;
-    show(): void;
-    hide(): void;
-    toggle(): void;
-    dispose(): void;
-    enable(): void;
-    disable(): void;
-    toggleEnabled(): void;
-  }
-
-  export class Alert {
-    constructor(element: Element);
-    static getInstance(element: Element): Alert | null;
-    static getOrCreateInstance(element: Element): Alert;
-    close(): void;
-    dispose(): void;
-  }
-
-  export class Tab {
-    constructor(element: Element);
-    static getInstance(element: Element): Tab | null;
-    static getOrCreateInstance(element: Element): Tab;
-    show(): void;
-    dispose(): void;
-  }
-
-  export class Button {
-    constructor(element: Element);
-    static getInstance(element: Element): Button | null;
-    static getOrCreateInstance(element: Element): Button;
-    toggle(): void;
-    dispose(): void;
-  }
-
-  export class Carousel {
-    constructor(element: Element, options?: CarouselOptions);
-    static getInstance(element: Element): Carousel | null;
-    static getOrCreateInstance(element: Element, config?: CarouselOptions): Carousel;
-    cycle(): void;
-    pause(): void;
-    prev(): void;
-    next(): void;
-    dispose(): void;
-    to(index: number): void;
-  }
-
-  export class Collapse {
-    constructor(element: Element, options?: CollapseOptions);
-    static getInstance(element: Element): Collapse | null;
-    static getOrCreateInstance(element: Element, config?: CollapseOptions): Collapse;
-    toggle(): void;
-    show(): void;
-    hide(): void;
-    dispose(): void;
-  }
-
-  export class Dropdown {
-    constructor(element: Element);
-    static getInstance(element: Element): Dropdown | null;
-    static getOrCreateInstance(element: Element): Dropdown;
-    toggle(): void;
-    show(): void;
-    hide(): void;
-    dispose(): void;
-  }
-
-  export class Popover {
-    constructor(element: Element, options?: PopoverOptions);
-    static getInstance(element: Element): Popover | null;
-    static getOrCreateInstance(element: Element, config?: PopoverOptions): Popover;
-    show(): void;
-    hide(): void;
-    toggle(): void;
-    dispose(): void;
-    enable(): void;
-    disable(): void;
-    toggleEnabled(): void;
-  }
-
-  export class ScrollSpy {
-    constructor(element: Element, options?: { target?: string | Element });
-    static getInstance(element: Element): ScrollSpy | null;
-    static getOrCreateInstance(element: Element): ScrollSpy;
-    refresh(): void;
-    dispose(): void;
-  }
-
-  export class Offcanvas {
-    constructor(element: Element, options?: OffcanvasOptions);
-    static getInstance(element: Element): Offcanvas | null;
-    static getOrCreateInstance(element: Element, config?: OffcanvasOptions): Offcanvas;
-    toggle(relatedTarget?: Element): void;
-    show(relatedTarget?: Element): void;
-    hide(): void;
-    dispose(): void;
+  // Additional utility types that might be useful
+  export interface TablerConfig {
+    theme?: 'light' | 'dark';
+    components?: string[];
   }
 }

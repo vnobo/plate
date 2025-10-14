@@ -5,7 +5,7 @@ import {
   createWildcardRoute,
   validateRoutes,
 } from './core/routing/routing-utils';
-import { authGuard } from './core';
+import { canActivateGuard, roleChildGuard } from './core';
 
 /**
  * 应用路由配置
@@ -23,7 +23,7 @@ export const routes: Routes = [
     path: 'home',
     ...createLazyRoute(() => import('./pages/index').then(m => m.HOME_ROUTES), '平台管理后台'),
     title: '平台管理后台',
-    canActivate: [authGuard],
+    canActivate: [canActivateGuard, roleChildGuard],
   },
 
   // 认证路由 - 懒加载（无需认证）

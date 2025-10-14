@@ -1,5 +1,5 @@
-import {CommonModule} from '@angular/common';
-import {Component, OnDestroy, OnInit, signal} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 
 export type AlertType = 'success' | 'danger' | 'warning' | 'info';
 

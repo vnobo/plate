@@ -23,6 +23,93 @@ export class TokenService {
     afterNextRender(() => {});
   }
 
+  /**
+   * Checks if the current user has a specific role/authority
+   * @param role The role/authority to check for
+   * @returns boolean indicating whether the user has the specified role
+   */
+  hasRole(role: string): boolean {
+    // Check if authentication exists and has details
+    const auth = this.authentication();
+    if (!auth || !auth.details.authorities) {
+      return false;
+    }
+
+    // Check if the role exists in the user's authorities
+    // Authorities are stored as objects with an 'authority' property
+    return auth.details.authorities.some(authority =>
+      typeof authority === 'string'
+        ? authority === role
+        : authority.authority === role
+    );
+  }
+
+  /**
+   * Checks if the current user has any of the specified roles/authorities
+   * @param roles Array of roles/authorities to check for
+   * @returns boolean indicating whether the user has at least one of the specified roles
+   */
+  hasAnyRole(roles: string[]): boolean {
+    if (!roles || roles.length === 0) {
+      return false;
+    }
+    
+    const auth = this.authentication();
+    if (!auth || !auth.details.authorities) {
+      return false;
+    }
+
+    // Check if any of the provided roles exist in the user's authorities
+    return roles.some(role =>
+      auth.details.authorities.some(authority =>
+        typeof authority === 'string'
+          ? authority === role
+          : authority.authority === role
+      )
+    );
+  }
+
+  /**
+   * Checks if the current user has all of the specified roles/authorities
+   * @param roles Array of roles/authorities to check for
+   * @returns boolean indicating whether the user has all of the specified roles
+   */
+  hasAllRoles(roles: string[]): boolean {
+    if (!roles || roles.length === 0) {
+      return true; // If no roles specified, condition is satisfied
+    }
+    
+    const auth = this.authentication();
+    if (!auth || !auth.details.authorities) {
+      return false;
+    }
+
+    // Check if all of the provided roles exist in the user's authorities
+    return roles.every(role =>
+      auth.details.authorities.some(authority =>
+        typeof authority === 'string'
+          ? authority === role
+          : authority.authority === role
+      )
+    );
+  }
+
+  /**
+   * Gets all roles/authorities for the current user
+   * @returns Array of role strings
+   */
+  getUserRoles(): string[] {
+    const auth = this.authentication();
+    if (!auth || !auth.details.authorities) {
+      return [];
+    }
+
+    // Extract role strings from authority objects or return as-is if already strings
+    return auth.details.authorities.map(authority =>
+      typeof authority === 'string' ? authority : authority.authority
+    );
+  }
+
   authenticationToken(): Authentication | null {
     if (this.isLoggedIn()) {
       return this.authentication();

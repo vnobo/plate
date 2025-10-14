@@ -41,7 +41,7 @@ spring:
     timeout: 8H
     redis:
       repository-type: indexed
-      cleanup-cron: 0/5 * * * * ?
+      cleanup-cron: 0/1 * * * * ?
   flyway:
     baseline-on-migrate: true
     baseline-version: 1.0.0

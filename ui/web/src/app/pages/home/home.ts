@@ -1,18 +1,19 @@
 import { Routes } from '@angular/router';
 import { BaseLayout } from '@app/layout';
 import { Users } from './users/users';
-import { authGuard } from '@app/core';
+import { roleChildGuard } from '@app/core';
 
 export const HOME_ROUTES: Routes = [
   {
     path: '',
     component: BaseLayout,
-    canActivate: [authGuard],
+    data: { role: 'ROLE_SYSTEM_ADMINISTRATORS' },
+    canActivate: [roleChildGuard],
     children: [
       {
         path: 'users',
         component: Users,
-        canActivate: [authGuard],
+        title: '用户管理',
       },
       {
         path: '',
