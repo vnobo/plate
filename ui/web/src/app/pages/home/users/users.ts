@@ -55,7 +55,6 @@ export class Users {
 
   constructor() {
     afterNextRender(() => {
-      console.log('users service init');
       // Load initial data
       this.fetchUserData();
     });
