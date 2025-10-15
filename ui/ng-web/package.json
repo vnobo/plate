@@ -33,6 +33,7 @@
     "@angular/service-worker": "^20.3.0",
     "@angular/ssr": "^20.3.5",
     "@tabler/core": "^1.4.0",
+    "dayjs": "^1.11.18",
     "express": "^5.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"

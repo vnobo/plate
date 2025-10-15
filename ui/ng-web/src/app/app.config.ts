@@ -6,7 +6,6 @@ import {
   provideZonelessChangeDetection,
 } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-
 import {
   provideHttpClient,
   withFetch,
@@ -21,6 +20,7 @@ import {
 } from '@angular/platform-browser';
 import { provideServiceWorker } from '@angular/service-worker';
 import { routes } from './app.routes';
+import { indexInterceptor } from '@app/core';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -35,7 +35,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withFetch(),
       withInterceptorsFromDi(),
-      //withInterceptors(indexInterceptor),
+      withInterceptors(indexInterceptor),
       withXsrfConfiguration({
         cookieName: 'XSRF-TOKEN',
         headerName: 'X-XSRF-TOKEN',

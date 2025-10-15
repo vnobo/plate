@@ -50,14 +50,25 @@
     />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link
-      href="https://cdn.jsdelivr.net/npm/@callmebill/lxgw-wenkai-web@latest/style.css"
-      rel="stylesheet"
+      rel="preload"
+      as="style"
+      crossorigin
+      href="https://fontsapi.zeoseven.com/292/main/result.css"
+      onload="this.rel='stylesheet'"
+      onerror="this.href='https://fontsapi-storage.zeoseven.com/292/main/result.css'"
     />
+    <noscript>
+      <link rel="stylesheet" href="https://fontsapi.zeoseven.com/292/main/result.css" />
+    </noscript>
     <!-- PWD Manifest -->
     <link rel="manifest" href="manifest.webmanifest" />
   </head>
   <body>
-    <app-root></app-root>
+    <app-root>
+      <div class="d-flex justify-content-center align-items-center h-100 w-100">
+        <div class="d-block"><span class="fs-1">加载中...</span></div>
+      </div>
+    </app-root>
     <noscript>Please enable JavaScript to continue using this application.</noscript>
   </body>
 </html>

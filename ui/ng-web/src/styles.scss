@@ -2,4 +2,10 @@
 :root {
   --tblr-font-sans-serif: 'LXGW WenKai', 'Inter Var', Inter, '-apple-system', 'BlinkMacSystemFont',
     'San Francisco', 'Segoe UI', Roboto, 'Helvetica Neue', 'sans-serif';
+  --tblr-body-font-weight: normal;
+}
+html,
+body {
+  width: 100%;
+  height: 100%;
 }
