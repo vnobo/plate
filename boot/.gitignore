@@ -29,6 +29,7 @@ bin
 *.ipr
 out/
 .lingma
+AGENTS.md
 
 ### NetBeans ###
 /nbproject/private/
