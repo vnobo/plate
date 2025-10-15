@@ -12,7 +12,7 @@ import org.testcontainers.utility.DockerImageName;
  * Test Infrastructure Configuration
  *
  * <p>This configuration sets up the necessary infrastructure components for testing,
- * including Redis and PostgreSQL containers.</p>
+ * including Redis and PostgresSQL containers.</p>
  *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
