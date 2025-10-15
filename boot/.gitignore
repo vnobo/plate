@@ -21,15 +21,12 @@ bin
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.roo
-.claude
 .idea
 *.iws
 *.iml
 *.ipr
 out/
-.lingma
-AGENTS.md
+
 
 ### NetBeans ###
 /nbproject/private/
@@ -41,3 +38,7 @@ AGENTS.md
 ## End of https://www.toptal.com/developers/gitignore/api/java,gradle,sts,intellij idea,netbeans
 CLAUDE.md
 QWEN.md
+.lingma
+AGENTS.md
+.roo
+.claude
