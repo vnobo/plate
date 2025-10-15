@@ -75,10 +75,10 @@ Here is a link to the most recent Angular style guide https://angular.dev/style-
 ### Angular Best Practices
 
 - Always use standalone components over `NgModules`
-- Do NOT set `standalone: true` inside the `@Component`, `@Directive` and `@Pipe` decorators
+- Do NOT set `standalone: true` inside the `@Component`, `@Directive` and `@Pipe` decorators (it's the default)
 - Use signals for state management
 - Implement lazy loading for feature routes
-- Use `NgOptimizedImage` for all static images.
+- Use `NgOptimizedImage` for all static images (not base64 images)
 - Do NOT use the `@HostBinding` and `@HostListener` decorators. Put host bindings inside the `host` object of the `@Component` or `@Directive` decorator instead
 
 ### Components

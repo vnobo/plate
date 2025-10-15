@@ -9,3 +9,6 @@ This file provides guidance to agents when working with code in this repository.
 - SSR server runs on a separate process, requiring different debugging approach (check server.ts)
 - Angular Universal debugging requires checking both client and server logs (dual debugging context)
 - Browser-only APIs may cause silent failures during SSR - check for proper platform checks
+- When debugging SSR issues, check both client and server bundles for consistency
+- Use `isPlatformBrowser` and `isPlatformServer` checks to isolate platform-specific issues
+- Zoneless change detection may cause unexpected behavior with async operations - verify change detection strategy
