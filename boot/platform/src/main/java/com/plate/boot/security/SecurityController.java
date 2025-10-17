@@ -5,6 +5,7 @@ import com.plate.boot.commons.utils.ContextUtils;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +16,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
 
+import javax.naming.NameNotFoundException;
+
 /**
  * The SecurityController class is a REST controller responsible for handling security-related endpoints.
  * It manages OAuth2 operations, password changes, and CSRF token retrieval.
@@ -22,6 +25,7 @@ import reactor.core.publisher.Mono;
  */
 @RestController
 @RequestMapping("/oauth2")
+@RequiredArgsConstructor
 public class SecurityController {
 
     /**
@@ -47,21 +51,6 @@ public class SecurityController {
      * persistence of client details necessary for OAuth2 flows.
      */
     private final ServerOAuth2AuthorizedClientRepository clientRepository;
-
-    /**
-     * Constructs a new instance of SecurityController.
-     *
-     * @param securityManager  The SecurityManager instance responsible for security operations.
-     * @param passwordEncoder  The PasswordEncoder used for encoding and verifying passwords.
-     * @param clientRepository The ServerOAuth2AuthorizedClientRepository instance for managing OAuth2 authorized clients.
-     */
-    public SecurityController(SecurityManager securityManager, PasswordEncoder passwordEncoder,
-                              ServerOAuth2AuthorizedClientRepository clientRepository) {
-        this.securityManager = securityManager;
-        this.passwordEncoder = passwordEncoder;
-        this.clientRepository = clientRepository;
-    }
-
 
     /**
      * Generates authentication token information for the current session
@@ -114,7 +103,7 @@ public class SecurityController {
         return this.clientRepository.loadAuthorizedClient(clientRegistrationId, authentication, exchange)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(RestServerException.withMsg("Client ["
                                 + clientRegistrationId + "] not found",
-                        new RuntimeException("Client [" + clientRegistrationId + "] not found")))))
+                        new NameNotFoundException("Client [" + clientRegistrationId + "] not found")))))
                 .flatMap(oAuth2AuthorizedClient -> Mono.just(oAuth2AuthorizedClient.getAccessToken()));
     }
 
@@ -142,7 +131,11 @@ public class SecurityController {
                     new IllegalArgumentException("Current password verification failed"));
         }
         String newPassword = this.passwordEncoder.encode(request.getNewPassword());
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        Object principal = authentication.getPrincipal();
+        if (!(principal instanceof UserDetails userDetails)) {
+            throw RestServerException.withMsg("User details not found",
+                    new IllegalStateException("Principal is not an instance of UserDetails"));
+        }
         return this.securityManager.updatePassword(userDetails, newPassword);
     }
 

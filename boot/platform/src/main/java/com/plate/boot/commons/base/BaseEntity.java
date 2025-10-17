@@ -5,6 +5,7 @@ import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.query.QueryHelper;
 import com.plate.boot.commons.query.QueryJsonHelper;
 import com.plate.boot.commons.utils.ContextUtils;
+import lombok.NonNull;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
@@ -17,7 +18,7 @@ import java.util.*;
  * such as having a unique code, being serializable, and perishable with a generic type identifier.
  * Implementing classes should provide concrete behavior for these base operations.
  */
-public interface BaseEntity<T> extends Serializable, Persistable<T> {
+public interface BaseEntity<T> extends Serializable, Persistable<@NonNull T> {
     /**
      * Support from for json column
      */

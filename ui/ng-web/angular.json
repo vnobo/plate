@@ -1,0 +1,149 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "ng-web": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              {
+                "input": "@tabler/core/dist/css/tabler.css",
+                "bundleName": "tabler-style"
+              },
+              {
+                "input": "@tabler/core/dist/css/tabler-themes.css",
+                "bundleName": "tabler-themes-style"
+              },
+              {
+                "input": "@tabler/core/dist/css/tabler-socials.css",
+                "bundleName": "tabler-socials-style"
+              },
+              "src/styles.scss"
+            ],
+            "scripts": [
+              {
+                "input": "@tabler/core/dist/js/tabler.js",
+                "bundleName": "tabler-script"
+              },
+              {
+                "input": "@tabler/core/dist/js/tabler-theme.js",
+                "bundleName": "tabler-theme-script"
+              }
+            ],
+            "server": "src/main.server.ts",
+            "outputMode": "server",
+            "ssr": {
+              "entry": "src/server.ts"
+            }
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all",
+              "serviceWorker": "ngsw-config.json"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "ng-web:build:production"
+            },
+            "development": {
+              "buildTarget": "ng-web:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "@tabler/icons/icons/",
+                "output": "/assets/icons/"
+              }
+            ],
+            "styles": [
+              {
+                "input": "@tabler/core/dist/css/tabler.css",
+                "bundleName": "tabler-style"
+              },
+              {
+                "input": "@tabler/core/dist/css/tabler-themes.css",
+                "bundleName": "tabler-themes-style"
+              },
+              {
+                "input": "@tabler/core/dist/css/tabler-socials.css",
+                "bundleName": "tabler-socials-style"
+              },
+              "src/styles.scss"
+            ],
+            "scripts": [
+              {
+                "input": "@tabler/core/dist/js/tabler.js",
+                "bundleName": "tabler-script"
+              },
+              {
+                "input": "@tabler/core/dist/js/tabler-theme.js",
+                "bundleName": "tabler-theme-script"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": "6be048b1-6108-40c8-97a9-351768b847c8"
+  }
+}

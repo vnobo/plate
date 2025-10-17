@@ -1,8 +1,11 @@
 plugins {
-    id 'org.springframework.boot' version '3.5.6' apply false
-    id 'io.spring.dependency-management' version '1.1.7' apply false
-    id 'org.graalvm.buildtools.native' version '0.11.0' apply false
+    id 'org.springframework.boot' version '4.0.0-M3' apply false
+    id 'org.graalvm.buildtools.native' version '0.11.1' apply false
+    id 'io.spring.dependency-management' version '1.1.7'
 }
+
+ext['flyway.version'] = '11.13.2'
+ext['r2dbc-postgresql.version'] = '1.1.0.RELEASE'
 
 configure(allprojects) { project ->
 
@@ -11,13 +14,6 @@ configure(allprojects) { project ->
     repositories {
         mavenLocal()
         mavenCentral()
-    }
-
-    configurations.configureEach {
-        resolutionStrategy {
-            cacheChangingModulesFor 0, "minutes"
-            cacheDynamicVersionsFor 10, 'minutes'
-        }
     }
 }
 
@@ -60,13 +56,10 @@ configure(subprojects) { project ->
     }
 
     dependencies {
-        implementation("com.google.guava:guava:33+")
-        implementation("org.springframework.boot:spring-boot-starter-actuator")
-
-        implementation("org.springframework.boot:spring-boot-starter-log4j2") {
-            exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j2-impl'
-        }
-
+        implementation 'com.google.guava:guava:33+'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.boot:spring-boot-starter-jackson'
+        implementation 'org.springframework.boot:spring-boot-starter-log4j2'
         modules {
             module("org.springframework.boot:spring-boot-starter-logging") {
                 replacedBy("org.springframework.boot:spring-boot-starter-log4j2", "Use Log4j2 instead of Logback")
@@ -79,5 +72,12 @@ configure(subprojects) { project ->
 
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+
+}
+
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
     }
 }

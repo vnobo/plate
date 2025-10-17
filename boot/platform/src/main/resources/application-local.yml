@@ -3,7 +3,8 @@ logging:
   #structured.format:
   #  console: logstash
   level:
-    web: debug
+    root: "warn"
+    org.springframework.web: "debug"
     com.plate.boot.*: debug
     io.r2dbc.postgresql.QUERY: debug
     io.r2dbc.postgresql.PARAM: debug

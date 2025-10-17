@@ -1,9 +1,8 @@
 package com.plate.boot.relational;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.config.HttpCodecsProperties;
 import com.plate.boot.relational.logger.LoggerEvent;
 import com.plate.boot.relational.logger.LoggerReq;
 import com.plate.boot.security.SecurityDetails;
@@ -13,7 +12,6 @@ import io.netty.util.internal.EmptyArrays;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.reactivestreams.Publisher;
-import org.springframework.boot.autoconfigure.http.codec.HttpCodecsProperties;
 import org.springframework.core.io.buffer.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
@@ -30,8 +28,10 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -147,7 +147,9 @@ public class LoggerFilter implements WebFilter {
             public @NonNull Mono<Void> writeWith(@NonNull Publisher<? extends DataBuffer> body) {
                 var cachedDataBuffer = DataBufferUtils.join(body).doOnNext(data -> {
                     Object previousCachedBody = exchange.getAttributes().put(CACHED_RESPONSE_BODY_ATTR, data);
-                    exchange.getAttributes().put("cachedOriginalResponseBodyBackup", previousCachedBody);
+                    if (previousCachedBody != null) {
+                        exchange.getAttributes().put("cachedOriginalResponseBodyBackup", previousCachedBody);
+                    }
                 }).flatMap(data -> Mono.fromSupplier(() -> buildDataBuffer(data)));
                 return super.writeWith(cachedDataBuffer);
             }
@@ -218,7 +220,7 @@ public class LoggerFilter implements WebFilter {
         DataBuffer dataBodyBuff = exchange.getRequiredAttribute(CACHED_REQUEST_BODY_ATTR);
         try {
             return ContextUtils.OBJECT_MAPPER.readTree(dataBodyBuff.asInputStream());
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             log.warn("{}Logger filter request body is null, Abort processing.", exchange.getLogPrefix(), e);
             throw JsonException.withError(e);
         }
@@ -235,7 +237,7 @@ public class LoggerFilter implements WebFilter {
         DataBuffer dataBuffer = exchange.getRequiredAttribute(CACHED_RESPONSE_BODY_ATTR);
         try {
             return ContextUtils.OBJECT_MAPPER.readTree(dataBuffer.asInputStream());
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             log.warn("{}Logger filter response body is null, Abort processing.", exchange.getLogPrefix(), e);
             throw JsonException.withError(e);
         }

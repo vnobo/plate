@@ -13,8 +13,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -128,11 +128,12 @@ public abstract class AbstractCache implements InitializingBean {
      */
     protected <T> Flux<T> queryWithCache(Object key, Flux<T> sourceFlux) {
         String cacheKey = key + ":data";
-        Collection<T> cacheData = this.cache.get(cacheKey, () -> null);
+        Collection<T> cacheData = this.cache.get(cacheKey, List::of);
         if (ObjectUtils.isEmpty(cacheData)) {
-            var sourceData = new ArrayList<T>();
+            var sourceData = new java.util.concurrent.CopyOnWriteArrayList<T>();
             return sourceFlux.doOnNext(sourceData::add)
-                    .doAfterTerminate(() -> this.cachePut(cacheKey, sourceData));
+                    .doOnComplete(() -> this.cachePut(cacheKey, sourceData))
+                    .doOnCancel(() -> this.cachePut(cacheKey, sourceData));
         }
         return Flux.fromIterable(cacheData);
     }
@@ -182,7 +183,7 @@ public abstract class AbstractCache implements InitializingBean {
      */
     protected Mono<Long> countWithCache(Object key, Mono<Long> sourceMono) {
         String cacheKey = key + ":count";
-        Long cacheCount = this.cache.get(cacheKey, () -> null);
+        Long cacheCount = this.cache.get(cacheKey, () -> 0L);
         Mono<Long> source = sourceMono.doOnNext(count -> this.cachePut(cacheKey, count));
         return Mono.justOrEmpty(cacheCount).switchIfEmpty(Mono.defer(() -> source));
     }

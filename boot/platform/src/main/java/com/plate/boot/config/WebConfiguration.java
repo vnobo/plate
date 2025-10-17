@@ -6,8 +6,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.method.HandlerTypePredicate;
+import org.springframework.web.reactive.config.ApiVersionConfigurer;
 import org.springframework.web.reactive.config.PathMatchConfigurer;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
@@ -22,7 +22,7 @@ import java.util.List;
  * strategies for handler methods.
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties({WebfluxProperties.class})
+@EnableConfigurationProperties({WebfluxProperties.class, HttpCodecsProperties.class})
 @RequiredArgsConstructor
 public class WebConfiguration implements WebFluxConfigurer {
 
@@ -45,6 +45,14 @@ public class WebConfiguration implements WebFluxConfigurer {
         configurer.addCustomResolver(pageableResolver);
     }
 
+    @Override
+    public void configureApiVersioning(@NonNull ApiVersionConfigurer configurer) {
+        configurer.setDefaultVersion(webfluxProperties.getDefaultApiVersion());
+        configurer.addSupportedVersions(webfluxProperties.getSupportedVersions());
+        configurer.useRequestHeader("x-api-version");
+        configurer.useQueryParam("apiVersion");
+    }
+
     /**
      * Configures path matching options for the application.
      * This method uses the {@link PathMatchConfigurer} to add path prefixes for specific base packages.
@@ -56,9 +64,6 @@ public class WebConfiguration implements WebFluxConfigurer {
     @Override
     public void configurePathMatching(@NonNull PathMatchConfigurer configurer) {
         List<WebfluxProperties.RouteDefinition> pathPrefixes = this.webfluxProperties.getPathPrefixes();
-        if (ObjectUtils.isEmpty(pathPrefixes)) {
-            return;
-        }
         for (WebfluxProperties.RouteDefinition entry : pathPrefixes) {
             configurer.addPathPrefix(entry.getPath(), HandlerTypePredicate.forBasePackage(entry.getBasePackage()));
         }

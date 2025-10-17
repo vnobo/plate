@@ -1,0 +1,63 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "env": {
+        "DEFAULT_MINIMUM_TOKENS": "6000"
+      },
+      "disabled": true,
+      "alwaysAllow": []
+    },
+    "angular-cli": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@angular/cli",
+        "mcp"
+      ],
+      "alwaysAllow": [
+        "get_best_practices",
+        "search_documentation",
+        "list_projects"
+      ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ],
+      "alwaysAllow": [
+        "browser_close",
+        "browser_resize",
+        "browser_console_messages",
+        "browser_handle_dialog",
+        "browser_evaluate",
+        "browser_file_upload",
+        "browser_fill_form"
+      ],
+      "disabled": true
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "chrome-devtools-mcp@latest"
+      ],
+      "alwaysAllow": [
+        "new_page",
+        "take_snapshot",
+        "list_pages",
+        "click",
+        "close_page",
+        "drag",
+        "emulate_cpu",
+        "emulate_network",
+        "evaluate_script"
+      ],
+      "disabled": true
+    }
+  }
+}

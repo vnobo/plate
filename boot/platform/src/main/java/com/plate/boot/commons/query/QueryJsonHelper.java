@@ -108,23 +108,23 @@ public final class QueryJsonHelper {
             return Criteria.where(column).notIn(values);
         });
 
-        OPERATION_MAPPER.put("IsNull", (column, value) -> Criteria.where(column).isNull());
-        OPERATION_MAPPER.put("NotNull", (column, value) -> Criteria.where(column).isNotNull());
-        OPERATION_MAPPER.put("IsNotNull", (column, value) -> Criteria.where(column).isNotNull());
-        OPERATION_MAPPER.put("Null", (column, value) -> Criteria.where(column).isNull());
+        OPERATION_MAPPER.put("IsNull", (column, _) -> Criteria.where(column).isNull());
+        OPERATION_MAPPER.put("NotNull", (column, _) -> Criteria.where(column).isNotNull());
+        OPERATION_MAPPER.put("IsNotNull", (column, _) -> Criteria.where(column).isNotNull());
+        OPERATION_MAPPER.put("Null", (column, _) -> Criteria.where(column).isNull());
 
-        OPERATION_MAPPER.put("Like", (column, value) -> Criteria.where(column).like(value.toString()));
-        OPERATION_MAPPER.put("NotLike", (column, value) -> Criteria.where(column).notLike(value.toString()));
+        OPERATION_MAPPER.put("Like", (column, value) -> Criteria.where(column).like(value));
+        OPERATION_MAPPER.put("NotLike", (column, value) -> Criteria.where(column).notLike(value));
         OPERATION_MAPPER.put("StartingWith", (column, value) -> Criteria.where(column).like(value + "%"));
         OPERATION_MAPPER.put("EndingWith", (column, value) -> Criteria.where(column).like("%" + value));
         OPERATION_MAPPER.put("Containing", (column, value) -> Criteria.where(column).like("%" + value + "%"));
         OPERATION_MAPPER.put("NotContaining", (column, value) -> Criteria.where(column).notLike("%" + value + "%"));
 
         OPERATION_MAPPER.put("Not", (column, value) -> Criteria.where(column).not(value));
-        OPERATION_MAPPER.put("IsTrue", (column, value) -> Criteria.where(column).is(true));
-        OPERATION_MAPPER.put("True", (column, value) -> Criteria.where(column).is(true));
-        OPERATION_MAPPER.put("IsFalse", (column, value) -> Criteria.where(column).is(false));
-        OPERATION_MAPPER.put("False", (column, value) -> Criteria.where(column).is(false));
+        OPERATION_MAPPER.put("IsTrue", (column, _) -> Criteria.where(column).is(true));
+        OPERATION_MAPPER.put("True", (column, _) -> Criteria.where(column).is(true));
+        OPERATION_MAPPER.put("IsFalse", (column, _) -> Criteria.where(column).is(false));
+        OPERATION_MAPPER.put("False", (column, _) -> Criteria.where(column).is(false));
     }
 
     /**

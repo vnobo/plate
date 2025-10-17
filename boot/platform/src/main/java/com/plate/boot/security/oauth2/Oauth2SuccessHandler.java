@@ -3,6 +3,7 @@ package com.plate.boot.security.oauth2;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.security.AuthenticationToken;
+import lombok.NonNull;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -37,6 +38,7 @@ import static com.plate.boot.config.SessionConfiguration.X_REQUESTED_WITH;
  *     <li>Enforces OAuth2AuthenticationToken type-checking for incoming authentications.</li>
  *     <li>Utilizes the current session to construct a session-aware authentication token.</li>
  * </ul>
+ *
  * @see OAuth2AuthenticationToken For the type of authentication tokens expected by this handler.
  * @see AuthenticationToken For the structure representing serialized authentication details.
  * @see RedirectServerAuthenticationSuccessHandler For the base class functionality.
@@ -62,11 +64,13 @@ public class Oauth2SuccessHandler extends RedirectServerAuthenticationSuccessHan
      * @throws RestServerException if the authentication token is not an instance of OAuth2AuthenticationToken.
      */
     @Override
-    public Mono<Void> onAuthenticationSuccess(WebFilterExchange webFilterExchange, Authentication authentication) {
+    public @NonNull Mono<Void> onAuthenticationSuccess(@NonNull WebFilterExchange webFilterExchange,
+                                                       @NonNull Authentication authentication) {
         if (!(authentication instanceof OAuth2AuthenticationToken)) {
-            throw RestServerException.withMsg(
+            RestServerException ex = RestServerException.withMsg(
                     "Authentication token must be an instance of OAuth2AuthenticationToken",
                     new TypeNotPresentException("OAuth2AuthenticationToken", null));
+            return Mono.error(ex);
         }
 
         ServerWebExchange exchange = webFilterExchange.getExchange();
@@ -95,9 +99,9 @@ public class Oauth2SuccessHandler extends RedirectServerAuthenticationSuccessHan
      * utilizing ServerWebExchange and returning a Mono<Void> to signal completion.
      *
      * @param exchange The current ServerWebExchange which holds information about the HTTP request and response.
-     * @param token The OAuth2AuthenticationToken instance obtained after a successful authentication.
+     * @param token    The OAuth2AuthenticationToken instance obtained after a successful authentication.
      * @return A Mono<Void> that, when subscribed to, writes the authentication token to the response and completes,
-     *         or handles any potential errors related to session retrieval or token writing.
+     * or handles any potential errors related to session retrieval or token writing.
      */
     private Mono<Void> handleXmlHttpRequest(ServerWebExchange exchange, OAuth2AuthenticationToken token) {
         ServerHttpResponse response = exchange.getResponse();
@@ -118,7 +122,7 @@ public class Oauth2SuccessHandler extends RedirectServerAuthenticationSuccessHan
      * then writes this buffer to the response using a Flux that emits the single buffer and completes.
      * The response is flushed immediately after writing the buffer.
      *
-     * @param response The ServerHttpResponse to which the authentication token will be written.
+     * @param response            The ServerHttpResponse to which the authentication token will be written.
      * @param authenticationToken The authentication token to write to the response, containing details of the authentication.
      * @return A Mono<Void> that, when subscribed to, signals the completion of writing the authentication token to the response.
      */

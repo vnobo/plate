@@ -1,9 +1,9 @@
 package com.plate.boot.security.core.group.member;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Represents a response model for group member details, extending the {@link GroupMember} entity.

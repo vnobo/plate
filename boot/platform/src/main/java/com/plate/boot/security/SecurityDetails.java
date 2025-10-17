@@ -7,6 +7,7 @@ import com.plate.boot.security.core.group.member.GroupMemberRes;
 import com.plate.boot.security.core.tenant.member.TenantMemberRes;
 import com.plate.boot.security.core.user.User;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -180,7 +181,7 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
         var authorities = super.getAuthorities();
         return authorities.stream().map(a ->
                 new SimpleGrantedAuthority(a.getAuthority())).toList();

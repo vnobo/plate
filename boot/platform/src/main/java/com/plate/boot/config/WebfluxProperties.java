@@ -52,6 +52,17 @@ public class WebfluxProperties {
     private int defaultPageSize = 25;
 
     /**
+     * The default API version.
+     * Default value is "v1".
+     */
+    private String defaultApiVersion = "v1";
+
+    /**
+     * The supported API versions.
+     * Default value is "v1".
+     */
+    private String[] supportedVersions = {"v1"};
+    /**
      * Route definition list, used to configure the path prefix mapping for WebFlux.
      * <p>
      * Each route definition includes the mapping between a path prefix and the corresponding base package, used to route requests under a specific path to handlers in the specified package.

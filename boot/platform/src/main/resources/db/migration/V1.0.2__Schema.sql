@@ -13,7 +13,7 @@ drop table if exists
 create table if not exists se_menus
 (
     id          BIGSERIAL primary key,
-    code        uuid         not null unique default gen_random_uuid(),
+    code uuid not null unique default uuidv7(),
     version     int          not null        default 0,
     pcode       uuid         not null        default '00000000-0000-0000-0000-000000000000',
     tenant_code uuid         not null        default '00000000-0000-0000-0000-000000000000',
@@ -60,7 +60,7 @@ create table if not exists oauth2_authorized_client
 create table if not exists se_users
 (
     id                  BIGSERIAL primary key,
-    code                uuid        not null unique default gen_random_uuid(),
+    code                uuid        not null unique default uuidv7(),
     version             int         not null        default 0,
     tenant_code         uuid        not null        default '00000000-0000-0000-0000-000000000000',
     username            varchar(256) not null unique,
@@ -97,7 +97,7 @@ comment on table se_users is '用户表';
 create table if not exists se_authorities
 (
     id          BIGSERIAL primary key,
-    code        uuid        not null unique default gen_random_uuid(),
+    code        uuid        not null unique default uuidv7(),
     version     int         not null        default 0,
     tenant_code uuid        not null        default '00000000-0000-0000-0000-000000000000',
     user_code   uuid         not null,
@@ -116,7 +116,7 @@ comment on table se_authorities is '用户权限表';
 create table if not exists se_groups
 (
     id          BIGSERIAL primary key,
-    code        uuid        not null unique default gen_random_uuid(),
+    code        uuid        not null unique default uuidv7(),
     version     int         not null        default 0,
     pcode       uuid        not null        default '00000000-0000-0000-0000-000000000000',
     tenant_code uuid        not null        default '00000000-0000-0000-0000-000000000000',
@@ -140,7 +140,7 @@ comment on table se_groups is '角色表';
 create table if not exists se_group_authorities
 (
     id         BIGSERIAL primary key,
-    code       uuid         not null unique default gen_random_uuid(),
+    code uuid not null unique default uuidv7(),
     version    int          not null        default 0,
     group_code uuid         not null,
     authority  varchar(512) not null,
@@ -158,7 +158,7 @@ comment on table se_group_authorities is '角色权限表';
 create table if not exists se_group_members
 (
     id         BIGSERIAL primary key,
-    code       uuid        not null unique default gen_random_uuid(),
+    code uuid not null unique default uuidv7(),
     version    int         not null        default 0,
     group_code uuid        not null,
     user_code  uuid        not null,
@@ -177,7 +177,7 @@ comment on table se_group_members is '角色用户关系表';
 create table if not exists se_tenants
 (
     id          serial primary key,
-    code       uuid        not null unique default gen_random_uuid(),
+    code       uuid        not null unique default uuidv7(),
     version    int         not null        default 0,
     pcode      uuid        not null        default '00000000-0000-0000-0000-000000000000',
     name        varchar(512) not null,
@@ -200,8 +200,8 @@ comment on table se_tenants is '租户表';
 create table if not exists se_tenant_members
 (
     id          BIGSERIAL primary key,
-    code        uuid        not null unique default gen_random_uuid(),
-    version int not null default 0,
+    code    uuid not null unique default uuidv7(),
+    version int  not null        default 0,
     tenant_code uuid        not null        default '00000000-0000-0000-0000-000000000000',
     user_code   uuid        not null,
     enabled     boolean     not null        default true,
@@ -220,8 +220,8 @@ comment on table se_tenant_members is '租户用户关系表';
 create table if not exists se_loggers
 (
     id          BIGSERIAL primary key,
-    code        uuid        not null unique default gen_random_uuid(),
-    version int not null default 0,
+    code    uuid not null unique default uuidv7(),
+    version int  not null        default 0,
     tenant_code uuid        not null        default '00000000-0000-0000-0000-000000000000',
     prefix      varchar(64),
     operator    varchar(64),
@@ -250,7 +250,7 @@ create index se_loggers_extend_gin_idx on se_loggers using gin (extend);
 create index se_loggers_text_search_gin_idx on se_loggers using gin (text_search);
 comment on table se_loggers is '操作日志表';
 
-create or replace function update_updated_at_column()
+create or replace function plate_update_updated_at_column()
     returns TRIGGER as
 $$
 begin
@@ -275,7 +275,7 @@ $$
                 execute format('CREATE TRIGGER %I_updated_at_trigger
                         BEFORE UPDATE ON %I
                         FOR EACH ROW
-                        EXECUTE FUNCTION update_updated_at_column()',
+                        EXECUTE FUNCTION plate_update_updated_at_column()',
                                table_name_var, table_name_var);
             end loop;
     end
