@@ -57,3 +57,28 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Model Context Protocol (MCP) Services
+
+This project includes support for Model Context Protocol (MCP) services to enhance development capabilities. To start the MCP services, run:
+
+```bash
+npm run mcp
+```
+
+The following MCP servers are configured in `.roo/mcp.json`:
+
+- Context7: Provides up-to-date documentation and code examples for libraries
+- Angular CLI: Offers Angular best practices and documentation search
+- Playwright: Enables browser automation and testing capabilities
+- Chrome DevTools: Provides browser debugging and performance analysis tools
+
+## Development server
+
+To start a local development server, run:
+
+```bash
+ng serve
+```
+
+Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.

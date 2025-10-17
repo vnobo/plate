@@ -31,7 +31,7 @@
     "@angular/platform-server": "^20.3.0",
     "@angular/router": "^20.3.0",
     "@angular/service-worker": "^20.3.0",
-    "@angular/ssr": "^20.3.5",
+    "@angular/ssr": "^20.3.0",
     "@tabler/core": "^1.4.0",
     "dayjs": "^1.11.18",
     "express": "^5.1.0",
