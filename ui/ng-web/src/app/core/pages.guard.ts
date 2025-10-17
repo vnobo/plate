@@ -1,12 +1,11 @@
+import { inject } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   CanActivateChildFn,
   type CanActivateFn,
-  CanDeactivateFn,
   Router,
-  RouterStateSnapshot,
+  RouterStateSnapshot
 } from '@angular/router';
-import { inject } from '@angular/core';
 import { TokenService } from './services/token.service';
 
 export const canActivateGuard: CanActivateFn = (route, state) => {

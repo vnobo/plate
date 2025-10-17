@@ -8,7 +8,9 @@
       ],
       "env": {
         "DEFAULT_MINIMUM_TOKENS": "6000"
-      }
+      },
+      "disabled": true,
+      "alwaysAllow": []
     },
     "angular-cli": {
       "command": "npx",
@@ -16,6 +18,11 @@
         "-y",
         "@angular/cli",
         "mcp"
+      ],
+      "alwaysAllow": [
+        "get_best_practices",
+        "search_documentation",
+        "list_projects"
       ]
     },
     "playwright": {
@@ -31,7 +38,8 @@
         "browser_evaluate",
         "browser_file_upload",
         "browser_fill_form"
-      ]
+      ],
+      "disabled": true
     },
     "chrome-devtools": {
       "command": "npx",
@@ -48,7 +56,8 @@
         "emulate_cpu",
         "emulate_network",
         "evaluate_script"
-      ]
+      ],
+      "disabled": true
     }
   }
 }
