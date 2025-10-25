@@ -6,10 +6,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
-import org.springframework.data.redis.serializer.Jackson3JsonRedisSerializer;
+import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Configuration class for setting up Redis caching and reactive Redis operations within a Spring application context.
@@ -35,7 +35,7 @@ public class RedisConfiguration {
      *
      * @param factory      A {@link ReactiveRedisConnectionFactory} that provides the connection to the Redis server.
      *                     This factory should be capable of supporting reactive operations.
-     * @param objectMapper An {@link ObjectMapper} instance used for serializing and deserializing Java objects
+     * @param objectMapper An {@link JsonMapper} instance used for serializing and deserializing Java objects
      *                     to and from JSON. This is crucial for handling value serialization in a way that is
      *                     compatible with the application's object model.
      * @return A configured instance of {@link ReactiveRedisTemplate} ready to perform
@@ -43,10 +43,10 @@ public class RedisConfiguration {
      */
     @Bean
     public ReactiveRedisTemplate<@NonNull String, @NonNull Object> reactiveObjectRedisTemplate(ReactiveRedisConnectionFactory factory,
-                                                                                               ObjectMapper objectMapper) {
+                                                                                               JsonMapper objectMapper) {
         StringRedisSerializer keySerializer = StringRedisSerializer.UTF_8;
-        Jackson3JsonRedisSerializer<@NonNull Object> serializer =
-                new Jackson3JsonRedisSerializer<>(objectMapper, Object.class);
+        JacksonJsonRedisSerializer<@NonNull Object> serializer =
+                new JacksonJsonRedisSerializer<>(objectMapper, Object.class);
         RedisSerializationContext.RedisSerializationContextBuilder<@NonNull String, @NonNull Object> builder =
                 RedisSerializationContext.newSerializationContext(serializer);
         RedisSerializationContext<@NonNull String, @NonNull Object> context =
