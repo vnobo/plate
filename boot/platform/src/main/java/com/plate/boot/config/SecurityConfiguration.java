@@ -6,6 +6,7 @@ import com.plate.boot.security.oauth2.Oauth2SuccessHandler;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.boot.security.autoconfigure.web.StaticResourceLocation;
 import org.springframework.boot.security.autoconfigure.web.reactive.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -128,7 +129,7 @@ public class SecurityConfiguration {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http.authorizeExchange(exchanges -> exchanges
                 .pathMatchers("/captcha/code", "/oauth2/qr/code").permitAll()
-                .matchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                .matchers(PathRequest.toStaticResources().atCommonLocations().excluding(StaticResourceLocation.FONTS)).permitAll()
                 .anyExchange().authenticated());
         http.sessionManagement((sessions) -> sessions
                 .concurrentSessions((concurrency) -> concurrency
@@ -209,8 +210,8 @@ public class SecurityConfiguration {
          * indicating standard CSRF protection should apply.
          */
         @Override
-        public @NonNull Mono<MatchResult> matches(@NonNull ServerWebExchange exchange) {
-            Mono<MatchResult> ignoreMono = new OrServerWebExchangeMatcher(allowedMatchers)
+        public @NonNull Mono<@NonNull MatchResult> matches(@NonNull ServerWebExchange exchange) {
+            Mono<@NonNull MatchResult> ignoreMono = new OrServerWebExchangeMatcher(allowedMatchers)
                     .matches(exchange).filter(MatchResult::isMatch)
                     .flatMap(res -> MatchResult.notMatch())
                     .switchIfEmpty(Mono.defer(MatchResult::match));
@@ -250,7 +251,7 @@ public class SecurityConfiguration {
          * value (Void).
          */
         @Override
-        public @NonNull Mono<Void> commence(@NonNull ServerWebExchange exchange, @NonNull AuthenticationException e) {
+        public @NonNull Mono<@NonNull Void> commence(@NonNull ServerWebExchange exchange, @NonNull AuthenticationException e) {
             log.error("Authentication Failure: {}", e.getMessage(), e);
             ErrorResponse errorResponse = createErrorResponse(exchange, e);
             ServerHttpResponse response = exchange.getResponse();
