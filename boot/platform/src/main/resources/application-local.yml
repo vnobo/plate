@@ -1,5 +1,4 @@
 logging:
-  register-shutdown-hook: true
   #structured.format:
   #  console: logstash
   level:
