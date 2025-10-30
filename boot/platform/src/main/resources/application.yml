@@ -28,7 +28,6 @@ spring:
     date-format: "yyyy-MM-dd HH:mm:ss"
     time-zone: "GMT+8"
     locale: "zh_CN"
-    use-jackson2-defaults: true
   http.codecs:
     max-in-memory-size: 256KB
     log-request-details: false

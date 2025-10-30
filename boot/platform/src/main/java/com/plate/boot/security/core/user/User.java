@@ -1,9 +1,7 @@
 package com.plate.boot.security.core.user;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.plate.boot.commons.base.AbstractEntity;
 import com.plate.boot.commons.base.BaseEntity;
-import com.plate.boot.commons.base.BaseView;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -62,7 +60,6 @@ public class User extends AbstractEntity<Long> {
      */
     @NotBlank(message = "Username [username] cannot be empty!")
     @Size(min = 3, max = 64, message = "Username [username] must be between 3 and 64 characters!")
-    @JsonView(BaseView.Public.class)
     private String username;
 
     /**
@@ -78,7 +75,6 @@ public class User extends AbstractEntity<Long> {
     @Pattern(regexp = "^.*(?=.{6,})(?=.*\\d)(?=.*[A-Z])(?=.*[a-z]).*$",
             message = "The login password [password] must be at least 6 characters," +
                     " including at least 1 uppercase letter, 1 lowercase letter, and 1 number.")
-    @JsonView(BaseView.Admin.class)
     private String password;
 
     /**
@@ -86,7 +82,6 @@ public class User extends AbstractEntity<Long> {
      * A value of {@code true} signifies that the account is disabled, while {@code false} implies it is active.
      * This flag is instrumental in controlling user access and determining account availability.
      */
-    @JsonView(BaseView.Admin.class)
     private Boolean disabled;
 
     /**
@@ -95,7 +90,6 @@ public class User extends AbstractEntity<Long> {
      * A true value signifies that the account is expired and access should be denied until the account is renewed.
      */
     @ReadOnlyProperty
-    @JsonView(BaseView.Admin.class)
     private Boolean accountExpired;
 
     /**
@@ -105,7 +99,6 @@ public class User extends AbstractEntity<Long> {
      * A locked account prevents the user from logging in until it is unlocked by an administrator.
      */
     @ReadOnlyProperty
-    @JsonView(BaseView.Admin.class)
     private Boolean accountLocked;
 
     /**
@@ -114,14 +107,12 @@ public class User extends AbstractEntity<Long> {
      * (e.g., password) before they can proceed with accessing secure resources.
      */
     @ReadOnlyProperty
-    @JsonView(BaseView.Admin.class)
     private Boolean credentialsExpired;
 
     /**
      * The email address associated with the user.
      * This field holds the user's email which is used for communication and can be a primary contact point.
      */
-    @JsonView(BaseView.Detail.class)
     private String email;
 
     /**
@@ -129,21 +120,18 @@ public class User extends AbstractEntity<Long> {
      * This string field holds the phone number associated with a user's profile.
      * It is used for communication purposes, such as account verification, service notifications, or support contacts.
      */
-    @JsonView(BaseView.Detail.class)
     private String phone;
 
     /**
      * The private field representing the name of the user.
      * This string holds the personal name or full name of the user account.
      */
-    @JsonView(BaseView.Detail.class)
     private String name;
 
     /**
      * Represents the profile picture or graphical representation associated with a user.
      * This string field holds the reference or URL to the user's avatar image.
      */
-    @JsonView(BaseView.Detail.class)
     private String avatar;
 
     /**
@@ -151,7 +139,6 @@ public class User extends AbstractEntity<Long> {
      * This string field can include personal background, professional experience, or any other relevant long-form text
      * that provides more insight into the user's identity or profile.
      */
-    @JsonView(BaseView.Detail.class)
     private String bio;
 
     /**
@@ -161,7 +148,6 @@ public class User extends AbstractEntity<Long> {
      * for analytics, session management, or security auditing purposes.
      */
     @ReadOnlyProperty
-    @JsonView(BaseView.Admin.class)
     private LocalDateTime loginTime;
 
 }
