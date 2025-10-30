@@ -56,14 +56,13 @@ configure(subprojects) { project ->
         implementation "com.google.guava:guava:${guavaVersion}"
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
         implementation 'org.springframework.boot:spring-boot-starter-integration'
-        implementation 'org.springframework.boot:spring-boot-starter-jackson'
-        implementation 'org.springframework.boot:spring-boot-starter-jsonb'
-        //implementation 'org.springframework.boot:spring-boot-starter-log4j2'
-        //modules {
-        //    module("org.springframework.boot:spring-boot-starter-logging") {
-        //        replacedBy("org.springframework.boot:spring-boot-starter-log4j2", "Use Log4j2 instead of Logback")
-        //    }
-        //}
+        implementation 'org.springframework.boot:spring-boot-starter-json'
+        implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+        modules {
+            module("org.springframework.boot:spring-boot-starter-logging") {
+                replacedBy("org.springframework.boot:spring-boot-starter-log4j2", "Use Log4j2 instead of Logback")
+            }
+        }
 
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
