@@ -2,8 +2,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { afterNextRender, inject, Injectable, signal } from '@angular/core';
 import { Authentication } from '@plate/types';
 import { SessionStorage } from '@app/core';
-import dayjs from 'dayjs';
 import { toObservable } from '@angular/core/rxjs-interop';
+import dayjs from 'dayjs';
 
 @Injectable({ providedIn: 'root' })
 export class TokenService {
@@ -37,10 +37,8 @@ export class TokenService {
 
     // Check if the role exists in the user's authorities
     // Authorities are stored as objects with an 'authority' property
-    return auth.details.authorities.some(authority =>
-      typeof authority === 'string'
-        ? authority === role
-        : authority.authority === role
+    return auth.details.authorities.some((authority) =>
+      typeof authority === 'string' ? authority === role : authority.authority === role
     );
   }
 
@@ -53,18 +51,16 @@ export class TokenService {
     if (!roles || roles.length === 0) {
       return false;
     }
-    
+
     const auth = this.authentication();
     if (!auth || !auth.details.authorities) {
       return false;
     }
 
     // Check if any of the provided roles exist in the user's authorities
-    return roles.some(role =>
-      auth.details.authorities.some(authority =>
-        typeof authority === 'string'
-          ? authority === role
-          : authority.authority === role
+    return roles.some((role) =>
+      auth.details.authorities.some((authority) =>
+        typeof authority === 'string' ? authority === role : authority.authority === role
       )
     );
   }
@@ -78,18 +74,16 @@ export class TokenService {
     if (!roles || roles.length === 0) {
       return true; // If no roles specified, condition is satisfied
     }
-    
+
     const auth = this.authentication();
     if (!auth || !auth.details.authorities) {
       return false;
     }
 
     // Check if all of the provided roles exist in the user's authorities
-    return roles.every(role =>
-      auth.details.authorities.some(authority =>
-        typeof authority === 'string'
-          ? authority === role
-          : authority.authority === role
+    return roles.every((role) =>
+      auth.details.authorities.some((authority) =>
+        typeof authority === 'string' ? authority === role : authority.authority === role
       )
     );
   }
@@ -105,7 +99,7 @@ export class TokenService {
     }
 
     // Extract role strings from authority objects or return as-is if already strings
-    return auth.details.authorities.map(authority =>
+    return auth.details.authorities.map((authority) =>
       typeof authority === 'string' ? authority : authority.authority
     );
   }
@@ -161,7 +155,7 @@ export class TokenService {
     const authenticationJsonStr = this._storage.getItem(this.authenticationKey);
     if (authenticationJsonStr) {
       const authentication: Authentication = JSON.parse(
-        decodeURIComponent(atob(authenticationJsonStr)),
+        decodeURIComponent(atob(authenticationJsonStr))
       );
       const lastAccessTime = dayjs.unix(authentication.lastAccessTime);
       const diffSec = dayjs().diff(lastAccessTime, 'second');

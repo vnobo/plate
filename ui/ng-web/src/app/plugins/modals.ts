@@ -1,24 +1,24 @@
-import {CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
-    afterNextRender,
-    ApplicationRef,
-    Component,
-    ComponentRef,
-    createComponent,
-    Directive,
-    ElementRef,
-    EnvironmentInjector,
-    inject,
-    Injectable,
-    input,
-    inputBinding,
-    OnDestroy,
-    OnInit,
-    output,
-    signal,
-    Type,
+  afterNextRender,
+  ApplicationRef,
+  Component,
+  ComponentRef,
+  createComponent,
+  Directive,
+  ElementRef,
+  EnvironmentInjector,
+  inject,
+  Injectable,
+  input,
+  inputBinding,
+  OnDestroy,
+  OnInit,
+  output,
+  signal,
+  Type,
 } from '@angular/core';
-import {fromEvent} from 'rxjs';
+import { fromEvent } from 'rxjs';
 
 export interface ModalRef {
   title?: string;
@@ -49,7 +49,7 @@ export class ModalsService {
     if (modalRef.contentBindings) {
       bindings.push(...modalRef.contentBindings);
     }
-    
+
     this.modalRef = createComponent(Modals, {
       environmentInjector: this.injector,
       bindings: bindings,
@@ -73,7 +73,6 @@ export class TablerModalsInit {
 
   constructor() {
     afterNextRender(async () => {
-      const tabler = await import('@tabler/core');
       const ele = this.el.nativeElement;
       const toast = tabler.Modal.getOrCreateInstance(ele);
       ele.addEventListener('hidden.bs.toast', () => this.onHidden.emit(ele.id));
@@ -92,12 +91,15 @@ export class TablerModalsInit {
           <div class="modal-header">
             @if(modalRef().headerRef){
             <ng-container *ngComponentOutlet="modalRef().headerRef!" />
-            }@else{ <h5 class="modal-title">{{ modalRef().title }}</h5> }
+            }@else{
+            <h5 class="modal-title">{{ modalRef().title }}</h5>
+            }
             <button
               type="button"
               class="btn-close"
               data-bs-dismiss="modal"
-              aria-label="Close"></button>
+              aria-label="Close"
+            ></button>
           </div>
           @if(modalRef().contentRef){
           <div class="modal-body">
@@ -119,7 +121,6 @@ export class Modals implements OnInit, OnDestroy {
   dropped = output<any>();
   constructor(private _el: ElementRef) {
     afterNextRender(async () => {
-      const tabler = await import('@tabler/core');
       const options: ModalOptions = {
         backdrop: true,
         keyboard: true,

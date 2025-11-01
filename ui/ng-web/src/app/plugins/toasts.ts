@@ -180,7 +180,6 @@ export class TablerToastInit implements OnDestroy {
   constructor() {
     afterNextRender(async () => {
       try {
-        const tabler = await import('@tabler/core');
         const element = this.el.nativeElement;
         const toastInstance = tabler.Toast.getOrCreateInstance(element);
 
