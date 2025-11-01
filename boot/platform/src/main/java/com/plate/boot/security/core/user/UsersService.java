@@ -40,7 +40,7 @@ public class UsersService {
      * @return A Flux object containing a stream of UserRes data.
      */
     @Cacheable(cacheNames = "users", key = "T(com.plate.boot.commons.utils.BeanUtils).cacheKey(#request,#pageable)")
-    public Flux<UserRes> search(UserReq request, Pageable pageable) {
+    public Flux<@NonNull UserRes> search(UserReq request, Pageable pageable) {
         QueryFragment queryFragment = request.query().pageable(pageable);
         return DatabaseUtils.query(queryFragment.querySql(), queryFragment, UserRes.class);
     }
@@ -57,7 +57,7 @@ public class UsersService {
      * @return A {@link Mono} that emits a single {@link Page} object containing the paged list of users and the total count.
      */
     @Cacheable(cacheNames = "users", key = "T(com.plate.boot.commons.utils.BeanUtils).cacheKey(#request,#pageable)")
-    public Mono<Page<@NonNull UserRes>> page(UserReq request, Pageable pageable) {
+    public Mono<@NonNull Page<@NonNull UserRes>> page(UserReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment queryFragment = request.query();
         var countMono = DatabaseUtils.count(queryFragment.countSql(), queryFragment);
@@ -79,7 +79,7 @@ public class UsersService {
      */
     @CacheEvict(cacheNames = "users", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
-    public Mono<User> add(UserReq request) {
+    public Mono<@NonNull User> add(UserReq request) {
         return this.usersRepository.existsByUsernameIgnoreCase(request.getUsername()).flatMap(exists -> {
             if (exists) {
                 return Mono.error(RestServerException.withMsg("User already exists",
@@ -103,7 +103,7 @@ public class UsersService {
      */
     @CacheEvict(cacheNames = "users", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
-    public Mono<User> modify(UserReq request) {
+    public Mono<@NonNull User> modify(UserReq request) {
         return this.usersRepository.findByUsername(request.getUsername())
                 .switchIfEmpty(Mono.error(RestServerException.withMsg("User not found",
                         new UsernameNotFoundException("User by username [" + request.getUsername() + "] not found!"))))
@@ -128,8 +128,9 @@ public class UsersService {
      *                and the password that may require encoding upgrade.
      * @return A Mono emitting the updated or newly created User after the operation is completed.
      */
+    @CacheEvict(cacheNames = "users", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
-    public Mono<User> operate(UserReq request) {
+    public Mono<@NonNull User> operate(UserReq request) {
         if (StringUtils.hasLength(request.getPassword())) {
             request.setPassword(this.upgradeEncodingIfPassword(request.getPassword()));
         }
@@ -152,7 +153,7 @@ public class UsersService {
      */
     @CacheEvict(cacheNames = "users", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
-    public Mono<Void> delete(UserReq request) {
+    public Mono<@NonNull Void> delete(UserReq request) {
         return this.usersRepository.findByCode(request.getCode())
                 .doOnNext(res -> ContextUtils.eventPublisher(UserEvent.delete(res)))
                 .flatMap(this.usersRepository::delete);
@@ -167,8 +168,9 @@ public class UsersService {
      * @return A Mono emitting the saved User entity after the operation completes successfully.
      * If the user is not found during update, a Mono error with RestServerException is returned.
      */
+    @CacheEvict(cacheNames = "users", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
-    public Mono<User> save(User user) {
+    public Mono<@NonNull User> save(User user) {
         if (user.isNew()) {
             return this.usersRepository.save(user)
                     .doOnNext(res -> ContextUtils.eventPublisher(UserEvent.insert(res)));

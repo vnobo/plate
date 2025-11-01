@@ -1,10 +1,12 @@
 package com.plate.boot.security.core.tenant;
 
-import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.commons.utils.DatabaseUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +29,7 @@ import java.time.Duration;
  */
 @Service
 @RequiredArgsConstructor
-public class TenantsService extends AbstractCache {
+public class TenantsService {
 
     /**
      * Repository for managing tenants.
@@ -41,10 +43,10 @@ public class TenantsService extends AbstractCache {
      * @param pageable the pagination information
      * @return a Flux emitting the tenants that match the search criteria
      */
+    @Cacheable(cacheNames = "tenants", key = "T(com.plate.boot.commons.utils.BeanUtils).cacheKey(#request,#pageable)")
     public Flux<Tenant> search(TenantReq request, Pageable pageable) {
         QueryFragment queryFragment = request.query().pageable(pageable);
-        return super.queryWithCache(BeanUtils.cacheKey(request, pageable),
-                queryFragment.querySql(), queryFragment, Tenant.class);
+        return DatabaseUtils.query(queryFragment.querySql(), queryFragment, Tenant.class);
     }
 
     /**
@@ -54,11 +56,11 @@ public class TenantsService extends AbstractCache {
      * @param pageable the pagination information
      * @return a Mono emitting a Page of tenants that match the search criteria
      */
+    @Cacheable(cacheNames = "tenants", key = "T(com.plate.boot.commons.utils.BeanUtils).cacheKey(#request,#pageable)")
     public Mono<Page<Tenant>> page(TenantReq request, Pageable pageable) {
         var searchMono = this.search(request, pageable).collectList();
         QueryFragment queryFragment = request.query();
-        var countMono = this.countWithCache(BeanUtils.cacheKey(request), queryFragment.countSql(), queryFragment);
-
+        var countMono = DatabaseUtils.count(queryFragment.countSql(), queryFragment);
         return searchMono.zipWith(countMono)
                 .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
     }
@@ -70,13 +72,14 @@ public class TenantsService extends AbstractCache {
      * @param request the tenant request containing tenant information
      * @return a Mono emitting the operated tenant
      */
+    @CacheEvict(cacheNames = "tenants", allEntries = true)
     public Mono<Tenant> operate(TenantReq request) {
         var tenantMono = this.tenantsRepository.findByCode(request.getCode()).defaultIfEmpty(request.toTenant());
         tenantMono = tenantMono.flatMap(data -> {
             BeanUtils.copyProperties(request, data);
             return this.save(data);
         });
-        return tenantMono.doAfterTerminate(() -> this.cache.clear());
+        return tenantMono;
     }
 
     /**
@@ -86,12 +89,12 @@ public class TenantsService extends AbstractCache {
      * @param request the tenant request containing tenant information
      * @return a Mono indicating when the deletion is complete
      */
+    @CacheEvict(cacheNames = "tenants", allEntries = true)
     public Mono<Void> delete(TenantReq request) {
         return this.tenantsRepository.findByCode(request.getCode())
                 .doOnNext(res -> ContextUtils.eventPublisher(TenantEvent.delete(res)))
                 .delayElement(Duration.ofSeconds(2))
-                .flatMap(this.tenantsRepository::delete)
-                .doAfterTerminate(() -> this.cache.clear());
+                .flatMap(this.tenantsRepository::delete);
     }
 
     /**
@@ -101,6 +104,7 @@ public class TenantsService extends AbstractCache {
      * @param tenant the tenant to be saved
      * @return a Mono emitting the saved tenant
      */
+    @CacheEvict(cacheNames = "tenants", allEntries = true)
     public Mono<Tenant> save(Tenant tenant) {
         if (tenant.isNew()) {
             return this.tenantsRepository.save(tenant);
