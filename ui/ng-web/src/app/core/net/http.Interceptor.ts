@@ -3,14 +3,15 @@ import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { catchError, finalize, Observable, throwError, timeout } from 'rxjs';
 import { Router } from '@angular/router';
 
-import { ProgressBar, TokenService } from '@app/core';
+import { TokenService } from '@app/core';
+import { ProgressService } from '@app/plugins/progress';
 import { environment } from '@envs/env';
 
 function defaultInterceptor(
   req: HttpRequest<unknown>,
-  next: HttpHandlerFn,
+  next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> {
-  const _loading = inject(ProgressBar);
+  const _loading = inject(ProgressService);
   _loading.show();
   if (req.url.indexOf('assets/') > -1) {
     return next(req);
@@ -19,7 +20,7 @@ function defaultInterceptor(
   const xRequestedReq = req.clone({ url: originalUrl });
   return next(xRequestedReq).pipe(
     timeout({ first: 5_000, each: 10_000 }),
-    finalize(() => _loading.hide()),
+    finalize(() => _loading.hide())
   );
 }
 
@@ -27,7 +28,7 @@ function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
   const _auth = inject(TokenService);
   const _route = inject(Router);
   return next(req).pipe(
-    catchError(error => {
+    catchError((error) => {
       if (error.status === 401) {
         if (
           error.error &&
@@ -40,13 +41,13 @@ function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
       }
       console.error(`Backend returned code ${error.status}, body was: `, JSON.stringify(error));
       return throwError(() => error);
-    }),
+    })
   );
 }
 
 function apiVersionInterceptor(
   req: HttpRequest<unknown>,
-  next: HttpHandlerFn,
+  next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> {
   const newReq = req.clone({
     headers: req.headers.append('x-api-version', `v1`),
