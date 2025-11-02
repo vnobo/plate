@@ -39,7 +39,6 @@ function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
         }
         _route.navigate([_auth.loginUrl]).then();
       }
-      console.error(`Backend returned code ${error.status}, body was: `, JSON.stringify(error));
       return throwError(() => error);
     })
   );

@@ -4,7 +4,6 @@ import { Users } from './users/users';
 export const DASHBOARD_ROUTES: Routes = [
   {
     path: '',
-    data: { role: 'ROLE_SYSTEM_ADMINISTRATORS' },
     children: [
       {
         path: 'users',

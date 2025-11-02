@@ -6,6 +6,10 @@ export const routes: Routes = [
     loadChildren: () => import('@app/pages').then((m) => m.PASSPORT_ROUTES),
   },
   {
+    path: 'dashboard',
+    loadChildren: () => import('@app/pages').then((m) => m.DASHBOARD_ROUTES),
+  },
+  {
     path: 'error',
     loadChildren: () => import('@app/pages').then((m) => m.EXCEPTION_ROUTES),
   },

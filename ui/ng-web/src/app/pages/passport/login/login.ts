@@ -120,7 +120,10 @@ export class Login implements OnDestroy {
     const headers = new HttpHeaders({ 'x-requested-token': 'none-token-auto-login' });
     this.login(headers)
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe((authentication) => this.handleLoginSuccess(authentication));
+      .subscribe({
+        next: (authentication) => this.handleLoginSuccess(authentication),
+        error: (error) => console.error(error.message),
+      });
   }
 
   private loadRememberedCredentials() {
