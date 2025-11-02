@@ -9,4 +9,9 @@ export const EXCEPTION_ROUTES: Routes = [
   { path: '404', component: Ex404, data: { type: 404 } },
   { path: '500', component: Ex500, data: { type: 500 } },
   { path: 'trigger', component: Ex512 },
+  {
+    path: '',
+    redirectTo: '404',
+    pathMatch: 'full',
+  },
 ];

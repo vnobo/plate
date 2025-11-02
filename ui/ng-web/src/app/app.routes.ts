@@ -6,9 +6,13 @@ export const routes: Routes = [
     loadChildren: () => import('@app/pages').then((m) => m.PASSPORT_ROUTES),
   },
   {
+    path: 'error',
+    loadChildren: () => import('@app/pages').then((m) => m.EXCEPTION_ROUTES),
+  },
+  {
     path: '',
-    redirectTo: 'passport',
+    redirectTo: '/passport',
     pathMatch: 'full',
   },
-  { path: '**', redirectTo: '/passport' },
+  { path: '**', redirectTo: '/error' },
 ];
