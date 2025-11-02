@@ -65,8 +65,20 @@
   </head>
   <body>
     <app-root>
-      <div class="d-flex justify-content-center align-items-center h-100 w-100">
-        <div class="d-block"><span class="fs-1">加载中...</span></div>
+      <div class="page page-center">
+        <div class="container container-slim py-4">
+          <div class="text-center">
+            <div class="mb-3">
+              <a href="." class="navbar-brand navbar-brand-autodark"
+                ><img src="./static/logo-small.svg" height="36" alt=""
+              /></a>
+            </div>
+            <div class="text-secondary mb-3">Preparing application</div>
+            <div class="progress progress-sm">
+              <div class="progress-bar progress-bar-indeterminate"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </app-root>
     <noscript>Please enable JavaScript to continue using this application.</noscript>

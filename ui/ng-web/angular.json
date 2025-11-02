@@ -59,6 +59,14 @@
           },
           "configurations": {
             "production": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": true
+                },
+                "fonts": true
+              },
               "budgets": [
                 {
                   "type": "initial",
@@ -77,7 +85,13 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/envs/env.ts",
+                  "with": "src/envs/env.dev.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -89,7 +103,8 @@
               "buildTarget": "ng-web:build:production"
             },
             "development": {
-              "buildTarget": "ng-web:build:development"
+              "buildTarget": "ng-web:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

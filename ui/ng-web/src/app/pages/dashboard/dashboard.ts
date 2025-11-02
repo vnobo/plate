@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { Users } from './users/users';
 
-export const WELCOME_ROUTES: Routes = [
+export const DASHBOARD_ROUTES: Routes = [
   {
     path: '',
     data: { role: 'ROLE_SYSTEM_ADMINISTRATORS' },

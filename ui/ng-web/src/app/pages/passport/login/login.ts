@@ -3,18 +3,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { afterNextRender, Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { TokenService, BrowserStorage } from '@app/core';
+import { BrowserStorage, TokenService } from '@app/core';
 import { MessageService } from '@app/plugins';
-import { Authentication, Credentials } from '@plate/types';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  Observable,
-  retry,
-  Subject,
-  takeUntil,
-  tap,
-} from 'rxjs';
+import { Authentication } from '@plate/types';
+import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -99,7 +91,7 @@ export class Login implements OnDestroy {
         authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
       });
       this.login(headers).subscribe({
-        next: authentication => {
+        next: (authentication) => {
           // If "Remember Me" is checked, store credentials
           if (credentials.rememberMe) {
             this.storeCredentials(credentials);
@@ -108,7 +100,7 @@ export class Login implements OnDestroy {
           }
           this.handleLoginSuccess(authentication);
         },
-        error: error => {
+        error: (error) => {
           this.handleLoginError(error);
           this.isSubmitting.set(false);
         },
@@ -128,7 +120,7 @@ export class Login implements OnDestroy {
     const headers = new HttpHeaders({ 'x-requested-token': 'none-token-auto-login' });
     this.login(headers)
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe(authentication => this.handleLoginSuccess(authentication));
+      .subscribe((authentication) => this.handleLoginSuccess(authentication));
   }
 
   private loadRememberedCredentials() {
@@ -172,8 +164,8 @@ export class Login implements OnDestroy {
       debounceTime(300),
       distinctUntilChanged(),
       takeUntil(this.destroy$),
-      tap(authentication => this._tokenSer.login(authentication)),
-      retry(3),
+      tap((authentication) => this._tokenSer.login(authentication)),
+      retry(3)
     );
   }
 
