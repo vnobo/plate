@@ -27,25 +27,40 @@ NgWeb is an Angular application generated using Angular CLI version 20.3.5. The 
 D:\workspace\plate\ui\ng-web\
 ├── .editorconfig
 ├── .gitignore
+├── AGENTS.md
 ├── angular.json
 ├── ngsw-config.json
 ├── package-lock.json
 ├── package.json
+├── proxy.conf.json
+├── QWEN.md
 ├── README.md
 ├── tsconfig.app.json
 ├── tsconfig.json
 ├── tsconfig.spec.json
+├── .angular\...
+├── .github\...
 ├── .roo\...
+├── .vscode\...
 ├── node_modules\...
 ├── public\
 │   ├── favicon.ico
 │   ├── manifest.webmanifest
-│   └── icons\
+│   └── icons\...
 └── src\
     ├── index.html
     ├── main.server.ts
     ├── main.ts
-    ├── ...
+    ├── server.ts
+    ├── app\
+    │   ├── app.ts
+    │   ├── app.config.ts
+    │   ├── app.html
+    │   ├── app.scss
+    │   ├── app.routes.ts
+    │   └── core\...
+    ├── environments\
+    ├── styles.scss
     └── ...
 ```
 
@@ -78,6 +93,23 @@ Build artifacts are stored in the `dist/` directory with optimization for perfor
 - Run unit tests: `ng test` or `npm test`
 - Run end-to-end tests: `ng e2e`
 - Serve SSR build: `npm run serve:ssr:ng-web`
+- Start MCP services: `npm run mcp`
+
+### Development Server with Proxy
+The project uses a proxy configuration to redirect API requests to a backend server:
+```json
+{
+  "/api": {
+    "target": "http://localhost:8080/",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/api": ""
+    }
+  }
+}
+```
 
 ## Development Conventions
 
@@ -88,6 +120,9 @@ Build artifacts are stored in the `dist/` directory with optimization for perfor
 - Prettier configured with print width of 100, single quotes, and Angular parser for HTML files
 - Client-side routing with Angular Router
 - Server-side rendering enabled with hydration support
+- Includes internationalization support with Chinese locale as default ('zh_CN')
+- Uses Tabler CSS framework for UI components and styling
+- Includes service worker support for PWA capabilities
 
 ## Key Dependencies
 
@@ -97,6 +132,7 @@ Build artifacts are stored in the `dist/` directory with optimization for perfor
 - `@angular/service-worker`: PWA capabilities
 - `express`: Web server for SSR
 - `rxjs`: Reactive programming library
+- `dayjs`: Date/time utility library
 
 ## Configuration Files
 
@@ -104,6 +140,7 @@ Build artifacts are stored in the `dist/` directory with optimization for perfor
 - `package.json`: NPM dependencies and scripts
 - `tsconfig.json`: TypeScript compiler configuration
 - `ngsw-config.json`: Service worker configuration
+- `proxy.conf.json`: Development server proxy configuration
 
 ## Special Features
 
@@ -112,3 +149,27 @@ Build artifacts are stored in the `dist/` directory with optimization for perfor
 - Theme switching between light and dark modes
 - Responsive design using Tabler CSS framework
 - Preconfigured with Tabler's UI components and styles
+- Internationalization support with dayjs for date formatting
+- Zoneless change detection for improved performance
+- HTTP client with interceptors, CSRF protection, and fetch API support
+- MCP (Model Context Protocol) services for enhanced development
+
+## Application Architecture
+
+The application uses a modern Angular architecture with:
+- Component-based structure
+- Service-oriented architecture
+- Reactive state management
+- Client-side routing with lazy loading capability (though routes are currently empty)
+- Shared services for common functionality (MessageService, etc.)
+- Custom interceptors for HTTP requests
+- Environment-specific configurations
+
+## MCP Services
+
+This project includes support for Model Context Protocol (MCP) services to enhance development capabilities:
+
+- Context7: Provides up-to-date documentation and code examples for libraries
+- Angular CLI: Offers Angular best practices and documentation search
+- Playwright: Enables browser automation and testing capabilities
+- Chrome DevTools: Provides browser debugging and performance analysis tools
