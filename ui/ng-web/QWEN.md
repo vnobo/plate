@@ -75,7 +75,7 @@ or
 ```bash
 npm start
 ```
-The application will be available at `http://localhost:4200/` and will automatically reload when source files are modified.
+The application will be available at `http://localhost:4000/` and will automatically reload when source files are modified.
 
 ### Production Build
 To build the project for production:
