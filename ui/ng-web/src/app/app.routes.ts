@@ -14,6 +14,10 @@ export const routes: Routes = [
     loadChildren: () => import('@app/pages').then((m) => m.EXCEPTION_ROUTES),
   },
   {
+    path: 'examples',
+    loadChildren: () => import('./pages/examples/examples.routes').then((m) => m.EXAMPLES_ROUTES),
+  },
+  {
     path: '',
     redirectTo: '/passport',
     pathMatch: 'full',
