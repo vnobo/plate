@@ -2,10 +2,7 @@
   "mcpServers": {
     "context7": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp"
-      ],
+      "args": ["-y", "@upstash/context7-mcp"],
       "env": {
         "DEFAULT_MINIMUM_TOKENS": "6000"
       },
@@ -14,22 +11,12 @@
     },
     "angular-cli": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@angular/cli",
-        "mcp"
-      ],
-      "alwaysAllow": [
-        "get_best_practices",
-        "search_documentation",
-        "list_projects"
-      ]
+      "args": ["-y", "@angular/cli", "mcp"],
+      "alwaysAllow": ["get_best_practices", "search_documentation", "list_projects"]
     },
     "playwright": {
       "command": "npx",
-      "args": [
-        "@playwright/mcp@latest"
-      ],
+      "args": ["@playwright/mcp@latest"],
       "alwaysAllow": [
         "browser_close",
         "browser_resize",
@@ -43,9 +30,7 @@
     },
     "chrome-devtools": {
       "command": "npx",
-      "args": [
-        "chrome-devtools-mcp@latest"
-      ],
+      "args": ["chrome-devtools-mcp@latest"],
       "alwaysAllow": [
         "new_page",
         "take_snapshot",
@@ -58,6 +43,21 @@
         "evaluate_script"
       ],
       "disabled": true
+    },
+    "oraios/serena": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "serena==latest",
+        "--context",
+        "ide-assistant"
+      ],
+      "gallery": "https://api.mcp.github.com/2025-09-15/v0/servers/0658e342-7ae7-493a-b378-a324363ee322",
+      "version": "1.0.0"
     }
   }
 }
