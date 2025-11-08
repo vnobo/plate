@@ -4,13 +4,13 @@ This file provides guidance to agents when working with code in this repository.
 
 ## Project Architecture Rules (Non-Obvious Only)
 
-- Authentication tokens use base64 + URI encoding pattern (non-standard security approach)
-- Progress bar service implements 500ms debounce for perceived performance optimization
-- Toast component architecture uses dynamic creation with manual cleanup lifecycle
-- Modal service architecture uses `inputBinding()` pattern for component data passing
-- Theme service architecture involves dynamic CSS loading with DOM class management
-- User pagination architecture hides 1-based to 0-based conversion complexity
-- Session storage architecture includes platform abstraction for SSR compatibility
-- API interceptor architecture automatically injects version headers system-wide
-- Tabler CSS integration architecture requires specific bundle naming conventions
-- Route guard architecture uses functional injection pattern over class-based guards
+- HTTP interceptor architecture uses different timeouts: 5s first request, 10s subsequent requests
+- Environment config architecture: Development uses `/api` proxy, production uses empty host with path rewriting
+- API path architecture differs between environments: `/rela` (dev) vs `/rel` (prod) for rela API
+- Internationalization architecture: Chinese locale (`zh_CN`) configured with dayjs for date handling
+- Component input binding architecture enabled globally via `withComponentInputBinding()` in router config
+- Change detection architecture: Zoneless enabled via `provideZonelessChangeDetection()` in app config
+- Client hydration architecture uses `withIncrementalHydration()` and `withI18nSupport()` (not `withEventReplay()`)
+- CSS integration architecture: Tabler bundles require specific bundleName properties: tabler-style, tabler-themes-style, tabler-socials-style
+- Storage architecture: Session storage includes platform checks for SSR compatibility
+- Route guard architecture uses functional `inject()` pattern instead of constructor injection

@@ -4,13 +4,13 @@ This file provides guidance to agents when working with code in this repository.
 
 ## Project Documentation Rules (Non-Obvious Only)
 
-- Authentication system uses base64 + URI encoding for token storage (non-standard approach)
-- Progress bar debounce timing (500ms) affects perceived performance, not actual performance
-- Toast component requires manual cleanup to prevent memory leaks (non-obvious lifecycle management)
-- Modal service uses `inputBinding()` pattern instead of standard input properties
-- Theme switching involves dynamic CSS loading and manual DOM class management
-- User pagination has hidden 1-based to 0-based conversion logic in API calls
-- Session storage service includes SSR platform checks that may hide browser API usage
-- API interceptor automatically adds version header - not documented in API specs
-- Tabler CSS integration requires specific bundleName properties in angular.json
-- Route guards use functional injection pattern instead of class-based approach
+- HTTP interceptor uses different timeouts: 5s first request, 10s subsequent requests
+- Environment config: Development uses `/api` proxy, production uses empty host with path rewriting
+- API paths differ between environments: `/rela` (dev) vs `/rel` (prod) for rela API
+- Chinese locale (`zh_CN`) configured with dayjs for date handling throughout the app
+- Component input binding enabled globally via `withComponentInputBinding()` in router config
+- Zoneless change detection enabled via `provideZonelessChangeDetection()` in app config
+- Client hydration uses `withIncrementalHydration()` and `withI18nSupport()` (not `withEventReplay()`)
+- Tabler CSS bundles require specific bundleName properties: tabler-style, tabler-themes-style, tabler-socials-style
+- Session storage service includes platform checks for SSR compatibility
+- Route guards use functional `inject()` pattern instead of constructor injection
