@@ -10,6 +10,10 @@ export const routes: Routes = [
     loadChildren: () => import('@app/pages').then((m) => m.DASHBOARD_ROUTES),
   },
   {
+    path: 'examples',
+    loadChildren: () => import('@app/pages').then((m) => m.EXAMPLES_ROUTES),
+  },
+  {
     path: 'error',
     loadChildren: () => import('@app/pages').then((m) => m.EXCEPTION_ROUTES),
   },

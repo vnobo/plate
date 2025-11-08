@@ -10,7 +10,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-progress',
+  selector: 'tabler-progress',
   template: `
     <div
       class="progress-container"
