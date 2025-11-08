@@ -72,7 +72,6 @@ export interface TransferData {
           </div>
         </div>
       </div>
-
       <div class="col-2">
         <div
           class="p-3 w-full d-flex flex-fill flex-wrap gap-2 justify-content-center justify-content-center"
@@ -126,49 +125,52 @@ export interface TransferData {
         </div>
       </div>
       <div class="col-5">
-        <div class="transfer-panel-header">
-          <label class="form-check">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              [checked]="targetChecked()"
-              (change)="toggleAllTarget($any($event.target).checked)"
-              [disabled]="targetData().length === 0 || disabled()"
-            />
-            <span class="form-check-label">
-              {{ rightTitle() || 'Target' }} ({{ targetData().length }})
-            </span>
-          </label>
-        </div>
-        <div class="transfer-panel-body">
-          <div class="transfer-list">
-            @for (item of targetData(); track item.key) {
-            <label
-              class="form-check transfer-item"
-              [class.transfer-item-disabled]="item.disabled || disabled()"
-            >
+        <div class="card">
+          <div class="card-header">
+            <label class="form-check m-0">
               <input
                 class="form-check-input"
                 type="checkbox"
-                [checked]="itemChecked(item.key)"
-                (change)="toggleItem(item.key, $any($event.target).checked)"
-                [disabled]="item.disabled || disabled()"
+                [checked]="targetChecked()"
+                (change)="toggleAllTarget($any($event.target).checked)"
+                [disabled]="targetData().length === 0 || disabled()"
               />
-              <div class="transfer-item-content">
-                <div class="transfer-item-title">{{ item.title }}</div>
-                @if (item.description) {
-                <div class="transfer-item-description">{{ item.description }}</div>
-                }
-              </div>
+              <span class="form-check-label">
+                {{ rightTitle() || 'Target' }} ({{ targetData().length }})
+              </span>
             </label>
-            }
+          </div>
+          <div class="card-body">
+            <ol class="list-group list-group-flush">
+              @for (item of targetData(); track item.key) {
+              <div class="list-group-item p-2 m-0">
+                <label
+                  class="form-check m-0"
+                  [class.transfer-item-disabled]="item.disabled || disabled()"
+                >
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    [checked]="itemChecked(item.key)"
+                    (change)="toggleItem(item.key, $any($event.target).checked)"
+                    [disabled]="item.disabled || disabled()"
+                  />
+                  <div class="form-check-label">
+                    {{ item.title }}
+                    @if (item.description) {
+                    {{ item.description }}
+                    }
+                  </div>
+                </label>
+              </div>
+              }
+            </ol>
           </div>
         </div>
       </div>
     </div>
   `,
   styles: `
-    
   `,
 })
 export class TransferComponent {
