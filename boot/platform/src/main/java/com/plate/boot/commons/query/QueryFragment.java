@@ -4,13 +4,13 @@ import com.google.common.base.CaseFormat;
 import com.plate.boot.commons.exception.QueryException;
 import com.plate.boot.commons.utils.DatabaseUtils;
 import lombok.Getter;
+import org.springframework.data.core.TypeInformation;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.CriteriaDefinition;
 import org.springframework.data.relational.core.sql.IdentifierProcessing;
 import org.springframework.data.util.Pair;
-import org.springframework.data.util.TypeInformation;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
