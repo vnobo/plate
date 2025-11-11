@@ -2,6 +2,10 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   {
+    path: 'system',
+    loadChildren: () => import('@app/pages').then((m) => m.SYSTEM_ROUTES),
+  },
+  {
     path: 'passport',
     loadChildren: () => import('@app/pages').then((m) => m.PASSPORT_ROUTES),
   },
