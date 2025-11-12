@@ -1,19 +1,26 @@
-import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
-import { Tenant } from './tenant.types';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { NgOptimizedImage } from '@angular/common';
+import { Component, computed, inject, signal } from '@angular/core';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
+export interface Tenant {
+  id: string;
+  name: string;
+  description?: string;
+  status: 'active' | 'inactive' | 'suspended';
+  createdAt: Date;
+  updatedAt: Date;
+  subscriptionType?: string;
+  expirationDate?: Date;
+}
+
 @Component({
-  selector: 'app-tenant-management',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgOptimizedImage],
+  selector: 'app-tenant',
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './tenant.html',
   styleUrl: './tenant.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TenantManagementComponent {
+export class Tenants {
   // 模拟租户数据
   protected readonly tenants = signal<Tenant[]>([
     {

@@ -20,6 +20,7 @@ import {
 } from '@angular/platform-browser';
 import { provideServiceWorker } from '@angular/service-worker';
 import { routes } from './app.routes';
+
 import { indexInterceptor } from '@app/core';
 
 import dayjs from 'dayjs';
@@ -48,6 +49,6 @@ export const appConfig: ApplicationConfig = {
         headerName: 'X-XSRF-TOKEN',
       })
     ),
-    { provide: LOCALE_ID, useValue: 'zh_CN' },
+    { provide: LOCALE_ID, useValue: 'zh-Hans' },
   ],
 };

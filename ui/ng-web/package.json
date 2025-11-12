@@ -42,6 +42,8 @@
     "@angular/build": "^20.3.5",
     "@angular/cli": "^20.3.5",
     "@angular/compiler-cli": "^20.3.0",
+    "@angular/localize": "^20.3.4",
+    "@playwright/test": "~1.56.1",
     "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.17.19",
@@ -51,7 +53,6 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.2",
-    "@playwright/test": "~1.56.1"
+    "typescript": "~5.9.2"
   }
 }

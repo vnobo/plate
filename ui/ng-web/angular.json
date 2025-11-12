@@ -10,6 +10,9 @@
           "style": "scss"
         }
       },
+      "i18n": {
+        "sourceLocale": "zh-Hans"
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -55,7 +58,8 @@
             "outputMode": "server",
             "ssr": {
               "entry": "src/server.ts"
-            }
+            },
+            "polyfills": ["@angular/localize/init"]
           },
           "configurations": {
             "production": {
@@ -152,7 +156,8 @@
                 "input": "@tabler/core/dist/js/tabler-theme.js",
                 "bundleName": "tabler-theme-script"
               }
-            ]
+            ],
+            "polyfills": ["@angular/localize/init"]
           }
         }
       }

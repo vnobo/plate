@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 import { BaseLayout } from '@app/layout';
-import { TenantManagementComponent } from './tenant/tenant';
+import { Tenants } from './tenant/tenant';
 
-export const SYSTEM_ROUTES: Routes = [
+export const PLATFORM_ROUTES: Routes = [
   {
     path: '',
     component: BaseLayout,
@@ -10,7 +10,7 @@ export const SYSTEM_ROUTES: Routes = [
     children: [
       {
         path: 'tenant',
-        component: TenantManagementComponent,
+        component: Tenants,
         title: '租户管理',
       },
       {
