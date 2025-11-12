@@ -14,6 +14,11 @@ spring:
     name: plate
     group: platform
   webflux:
+    apiversion:
+      default: v1
+      use:
+        header: x-api-version
+        query-parameter: apiVersion
     format:
       time: "HH:mm:ss"
       date-time: "yyyy-MM-dd HH:mm:ss"
