@@ -1,18 +1,18 @@
-import { afterNextRender, Component, inject, OnInit, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { TokenService } from '@app/core';
-import { UserDetails } from '@plate/types';
 import { LayoutHeader } from './layout-header';
+import { LayoutAside } from './layout-aside';
 
 @Component({
   selector: 'app-layout-base',
-  imports: [RouterModule, LayoutHeader],
+  imports: [RouterModule, LayoutHeader, LayoutAside],
   template: `
     <div class="page">
+      <app-layout-aside></app-layout-aside>
       <app-layout-header></app-layout-header>
-      <div class="page-wrapper">
+      <main class="page-wrapper">
         <router-outlet></router-outlet>
-      </div>
+      </main>
     </div>
   `,
 })

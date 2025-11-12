@@ -1,12 +1,11 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-layout-aside',
-  standalone: true,
   imports: [RouterModule],
   template: `
-    <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
+    <aside class="navbar navbar-vertical navbar-expand-lg position-absolute" data-bs-theme="dark">
       <div class="container-fluid">
         <!-- BEGIN NAVBAR TOGGLER -->
         <button
@@ -2055,6 +2054,13 @@ import { RouterModule } from '@angular/router';
       </div>
     </aside>
   `,
-  styles: [],
+  styles: [
+    `
+      :host {
+        display: contents;
+      }
+    `,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LayoutAside {}
