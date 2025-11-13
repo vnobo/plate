@@ -1,11 +1,18 @@
-import { afterNextRender, ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+  effect,
+} from '@angular/core';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
-  selector: '[app-layout-header]',
+  selector: 'app-layout-header',
   imports: [RouterLink, RouterLinkActive],
   template: `
-    
+    <header class="navbar navbar-expand-md d-print-none">
       <div class="container-fluid">
         <!-- BEGIN NAVBAR TOGGLER -->
         <button
@@ -109,7 +116,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
           <div class="d-none d-md-flex">
             <div class="nav-item">
               <a
-                routerLink="./?theme=dark"
+                routerLink="?theme=dark"
                 class="nav-link px-0 hide-theme-dark"
                 data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
@@ -1539,6 +1546,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
           </div>
         </div>
       </div>
+    </header>
   `,
   styles: [
     `
@@ -1550,6 +1558,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LayoutHeader {
+  private readonly router = inject(Router);
   constructor() {
     afterNextRender(() => {});
   }

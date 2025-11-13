@@ -11,11 +11,11 @@ import { LayoutAside } from './layout-aside';
 import { LayoutHeader } from './layout-header';
 
 @Component({
-  selector: '[app-layout-base]',
+  selector: 'app-layout-base',
   imports: [RouterModule, LayoutHeader, LayoutAside],
   template: `
-    <header class="navbar navbar-expand-md d-print-none" app-layout-header></header>
-    <header class="navbar-expand-md" app-layout-aside></header>
+    <app-layout-header></app-layout-header>
+    <app-layout-aside></app-layout-aside>
     <div class="page-wrapper">
       <div class="container-fluid">
         <router-outlet></router-outlet>
