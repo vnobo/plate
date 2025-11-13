@@ -1,12 +1,15 @@
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-  effect,
-} from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+  ActivatedRoute,
+  Event,
+  NavigationEnd,
+  NavigationStart,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+} from '@angular/router';
+import { SettingsService } from '@app/core';
 
 @Component({
   selector: 'app-layout-header',
@@ -116,7 +119,8 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
           <div class="d-none d-md-flex">
             <div class="nav-item">
               <a
-                routerLink="?theme=dark"
+                routerLink="./"
+                [queryParams]="{ theme: 'dark' }"
                 class="nav-link px-0 hide-theme-dark"
                 data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
@@ -142,7 +146,8 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
                 </svg>
               </a>
               <a
-                href="?theme=light"
+                routerLink="./"
+                [queryParams]="{ theme: 'light' }"
                 class="nav-link px-0 hide-theme-light"
                 data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
@@ -1558,8 +1563,15 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LayoutHeader {
-  private readonly router = inject(Router);
+  private readonly router = inject(ActivatedRoute);
+  private readonly settings = inject(SettingsService);
   constructor() {
-    afterNextRender(() => {});
+    // Subscribe to router events and react to events
+    this.router.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      const theme = params.get('theme');
+      if (theme) {
+        this.settings.setting(params);
+      }
+    });
   }
 }
