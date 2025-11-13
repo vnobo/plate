@@ -1,19 +1,48 @@
-import { Component } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  inject,
+  OnDestroy,
+} from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { LayoutHeader } from './layout-header';
 import { LayoutAside } from './layout-aside';
+import { LayoutHeader } from './layout-header';
 
 @Component({
-  selector: 'app-layout-base',
+  selector: '[app-layout-base]',
   imports: [RouterModule, LayoutHeader, LayoutAside],
   template: `
-    <div class="page">
-      <app-layout-aside></app-layout-aside>
-      <app-layout-header></app-layout-header>
-      <main class="page-wrapper">
+    <header class="navbar navbar-expand-md d-print-none" app-layout-header></header>
+    <header class="navbar-expand-md" app-layout-aside></header>
+    <div class="page-wrapper">
+      <div class="container-fluid">
         <router-outlet></router-outlet>
-      </main>
+      </div>
     </div>
   `,
+  styles: [
+    `
+      :host {
+        display: contents;
+      }
+    `,
+  ],
+  host: {
+    width: '100%',
+    height: '100%',
+    class: 'page',
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BaseLayout {}
+export class BaseLayout implements OnDestroy {
+  constructor() {
+    afterNextRender(() => {
+      document.body.classList.add('layout-fluid');
+    });
+  }
+  ngOnDestroy(): void {
+    document.body.classList.remove('layout-fluid');
+  }
+}

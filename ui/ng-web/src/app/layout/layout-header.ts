@@ -2,17 +2,114 @@ import { afterNextRender, ChangeDetectionStrategy, Component } from '@angular/co
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
-  selector: 'app-layout-header',
+  selector: '[app-layout-header]',
   imports: [RouterLink, RouterLinkActive],
   template: `
-    <header class="navbar navbar-expand-md d-none d-lg-flex d-print-none">
-      <div class="container-xxl">
+    
+      <div class="container-fluid">
+        <!-- BEGIN NAVBAR TOGGLER -->
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbar-menu"
+          aria-controls="navbar-menu"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
         <!-- END NAVBAR TOGGLER -->
+        <!-- BEGIN NAVBAR LOGO -->
+        <div class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+          <a routerLink="/" aria-label="Plate">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="110"
+              height="32"
+              viewBox="0 0 120 32"
+              class="navbar-brand-image"
+            >
+              <!-- PLATE 字母图标 - 现代简约风格 -->
+              <g fill="var(--tblr-primary, #066fd1)">
+                <!-- P -->
+                <path
+                  d="M8 6h4c2.2 0 4 1.8 4 4v8c0 2.2-1.8 4-4 4H8V6zm4 2h-2v8h2c1.1 0 2-0.9 2-2V10c0-1.1-0.9-2-2-2z"
+                />
+
+                <!-- L -->
+                <path d="M20 6h2v12h-2V6z" />
+
+                <!-- A -->
+                <path d="M26 18l3-12h2l3 12h-2l-0.5-2h-3l-0.5 2h-2zm3.5-4l1-4h0.5l1 4h-2.5z" />
+
+                <!-- T -->
+                <path d="M36 6h6v2h-6v3h4v2h-4v3h6v2h-8V6z" />
+
+                <!-- E -->
+                <path d="M46 6h8v2h-6v3h5v2h-5v3h6v2h-8V6z" />
+              </g>
+
+              <!-- 下划线装饰 -->
+              <rect
+                x="8"
+                y="22"
+                width="46"
+                height="2"
+                fill="var(--tblr-primary, #066fd1)"
+                opacity="0.3"
+              />
+              <rect
+                x="8"
+                y="25"
+                width="46"
+                height="1"
+                fill="var(--tblr-primary, #066fd1)"
+                opacity="0.6"
+              />
+            </svg>
+          </a>
+        </div>
+        <!-- END NAVBAR LOGO -->
         <div class="navbar-nav flex-row order-md-last">
+          <div class="nav-item d-none d-md-flex me-3">
+            <div class="btn-list">
+              <a
+                routerLink="/platform"
+                routerLinkActive="active"
+                class="btn btn-5"
+                rel="noreferrer"
+              >
+                <!-- Download SVG icon from http://tabler.io/icons/icon/brand-github -->
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="icon icon-tabler icons-tabler-outline icon-tabler-building-community"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path
+                    d="M8 9l5 5v7h-5v-4m0 4h-5v-7l5 -5m1 1v-6a1 1 0 0 1 1 -1h10a1 1 0 0 1 1 1v17h-8"
+                  />
+                  <path d="M13 7l0 .01" />
+                  <path d="M17 7l0 .01" />
+                  <path d="M17 11l0 .01" />
+                  <path d="M17 15l0 .01" />
+                </svg>
+                平台管理
+              </a>
+            </div>
+          </div>
           <div class="d-none d-md-flex">
             <div class="nav-item">
               <a
-                href="?theme=dark"
+                routerLink="./?theme=dark"
                 class="nav-link px-0 hide-theme-dark"
                 data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
@@ -1423,12 +1520,12 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             >
               <span
                 class="avatar avatar-sm"
-                style="background-image: url(./static/avatars/003m.jpg)"
+                style="background-image: url(./static/avatars/000m.jpg)"
               >
               </span>
               <div class="d-none d-xl-block ps-2">
-                <div>Dunn Slane</div>
-                <div class="mt-1 small text-secondary">Research Nurse</div>
+                <div>Paweł Kuna</div>
+                <div class="mt-1 small text-secondary">UI Designer</div>
               </div>
             </a>
             <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
@@ -1441,42 +1538,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             </div>
           </div>
         </div>
-        <div class="collapse navbar-collapse">
-          <div
-            class="d-flex flex-column flex-md-row flex-fill align-items-stretch align-items-md-center"
-          >
-            <!-- BEGIN NAVBAR MENU -->
-            <ul class="navbar-nav">
-              <li class="nav-item active">
-                <a class="nav-link" routerLink="/platform" routerLinkActive="active">
-                  <span class="nav-link-icon d-md-none d-lg-inline-block"
-                    ><!-- Download SVG icon from http://tabler.io/icons/icon/star -->
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      class="icon icon-1"
-                    >
-                      <path
-                        d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"
-                      ></path>
-                    </svg>
-                  </span>
-                  <span class="nav-link-title">平台管理</span>
-                </a>
-              </li>
-            </ul>
-            <!-- END NAVBAR MENU -->
-          </div>
-        </div>
       </div>
-    </header>
   `,
   styles: [
     `
