@@ -15,10 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.plate.boot.commons.utils.ContextUtils.DEFAULT_UUID_CODE;
 
@@ -180,11 +177,12 @@ public final class SecurityDetails extends DefaultOAuth2User implements UserDeta
                 .map(TenantMemberRes::getName).orElse(defaultTenantName);
     }
 
+    @JsonGetter
     @Override
     public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
         var authorities = super.getAuthorities();
         return authorities.stream().map(a ->
-                new SimpleGrantedAuthority(a.getAuthority())).toList();
+                new SimpleGrantedAuthority(Objects.requireNonNull(a.getAuthority()))).toList();
     }
 
     /**
