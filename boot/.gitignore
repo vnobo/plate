@@ -26,6 +26,7 @@ bin
 *.iml
 *.ipr
 out/
+.trae
 
 
 ### NetBeans ###
