@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import {
   Component,
   input,
@@ -31,7 +31,7 @@ export interface DataTablePageEvent {
 
 @Component({
   selector: 'tabler-data-table',
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="card">
       <div class="card-header">

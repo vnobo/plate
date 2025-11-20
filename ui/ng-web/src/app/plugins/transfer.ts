@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, computed, input, model, output, signal } from '@angular/core';
 
 export interface TransferItem {
@@ -15,7 +15,7 @@ export interface TransferData {
 
 @Component({
   selector: 'tabler-transfer',
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="transfer-container">
       <div class="transfer-panel">

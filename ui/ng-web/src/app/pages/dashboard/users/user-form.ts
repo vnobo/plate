@@ -1,11 +1,11 @@
-import {CommonModule} from '@angular/common';
+
 import {Component, computed, effect, inject, input, OnInit, output, signal} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {User} from './user.types';
 
 @Component({
   selector: 'app-user-form',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   template: `
     <div class="container-fluid">
       <form (ngSubmit)="onSubmit()" [formGroup]="userForm" class="form-wrapper">
