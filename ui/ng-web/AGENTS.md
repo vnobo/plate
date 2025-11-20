@@ -5,12 +5,12 @@ This file provides guidance to agents when working with code in this repository.
 ## Build/Lint/Test Commands
 
 - Run single test (no watch): `ng test --watch=false`
-- Serve SSR app (after build): `npm run serve:ssr:ng-web`
+- Serve SSR app: `npm run serve:ssr:ng-web`
 
 ## Critical Patterns
 
-- Zoneless change detection: `provideZonelessChangeDetection()` in app config (not tests)
-- Client hydration: Uses `withIncrementalHydration()` and `withI18nSupport()` (not `withEventReplay()`)
+- Zoneless change detection: `provideZonelessChangeDetection()` in app config
+- Client hydration: `withIncrementalHydration()` + `withI18nSupport()` (avoid `withEventReplay()`)
 - Tabler CSS: Bundle names must be preserved in angular.json (tabler-style, tabler-themes-style, tabler-socials-style)
 - Auth tokens: Base64 URI encoded in session storage using `btoa(encodeURIComponent(json))` and `decodeURIComponent(atob(str))`
 - API: Auto-add 'x-api-version: v1' header via interceptor in `src/app/core/net/http.Interceptor.ts`
