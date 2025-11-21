@@ -1,12 +1,4 @@
 import {
-  ApplicationConfig,
-  isDevMode,
-  LOCALE_ID,
-  provideBrowserGlobalErrorListeners,
-  provideZonelessChangeDetection,
-} from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
-import {
   provideHttpClient,
   withFetch,
   withInterceptors,
@@ -14,18 +6,26 @@ import {
   withXsrfConfiguration,
 } from '@angular/common/http';
 import {
+  ApplicationConfig,
+  isDevMode,
+  LOCALE_ID,
+  provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection,
+} from '@angular/core';
+import {
   provideClientHydration,
   withI18nSupport,
   withIncrementalHydration,
 } from '@angular/platform-browser';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
 import { routes } from './app.routes';
 
 import { indexInterceptor } from '@app/core';
 
 import dayjs from 'dayjs';
-import isLeapYear from 'dayjs/plugin/isLeapYear';
 import 'dayjs/locale/zh-cn';
+import isLeapYear from 'dayjs/plugin/isLeapYear';
 
 dayjs.extend(isLeapYear);
 dayjs.locale('zh-cn');
