@@ -1,6 +1,5 @@
 package com.plate.boot.security.oauth2;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.security.SecurityDetails;
 import com.plate.boot.security.SecurityManager;
@@ -13,6 +12,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.security.SecureRandom;
 import java.util.Base64;

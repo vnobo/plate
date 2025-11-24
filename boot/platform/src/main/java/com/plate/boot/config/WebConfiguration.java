@@ -6,7 +6,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.reactive.config.PathMatchConfigurer;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
@@ -22,7 +21,7 @@ import java.util.List;
  * strategies for handler methods.
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties({WebfluxProperties.class})
+@EnableConfigurationProperties({WebfluxProperties.class, HttpCodecsProperties.class})
 @RequiredArgsConstructor
 public class WebConfiguration implements WebFluxConfigurer {
 
@@ -56,9 +55,6 @@ public class WebConfiguration implements WebFluxConfigurer {
     @Override
     public void configurePathMatching(@NonNull PathMatchConfigurer configurer) {
         List<WebfluxProperties.RouteDefinition> pathPrefixes = this.webfluxProperties.getPathPrefixes();
-        if (ObjectUtils.isEmpty(pathPrefixes)) {
-            return;
-        }
         for (WebfluxProperties.RouteDefinition entry : pathPrefixes) {
             configurer.addPathPrefix(entry.getPath(), HandlerTypePredicate.forBasePackage(entry.getBasePackage()));
         }

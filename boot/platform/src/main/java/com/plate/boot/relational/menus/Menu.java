@@ -1,8 +1,6 @@
 package com.plate.boot.relational.menus;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.CaseFormat;
 import com.plate.boot.commons.base.AbstractEntity;
 import com.plate.boot.commons.utils.ContextUtils;
@@ -13,6 +11,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.util.StringUtils;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
 
 import java.security.Permission;
 import java.util.Optional;
@@ -142,7 +142,7 @@ public class Menu extends AbstractEntity<Integer> {
     @JsonGetter
     public String getIcons() {
         return Optional.ofNullable(this.getExtend()).map(node -> node.get("icons"))
-                .map(JsonNode::asText).orElse(null);
+                .map(JsonNode::asString).orElse(null);
     }
 
     /**

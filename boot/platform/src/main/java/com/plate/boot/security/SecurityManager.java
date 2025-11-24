@@ -10,6 +10,7 @@ import com.plate.boot.security.core.user.User;
 import com.plate.boot.security.core.user.UserReq;
 import com.plate.boot.security.core.user.UsersService;
 import com.plate.boot.security.core.user.authority.UserAuthority;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.relational.core.query.Criteria;
@@ -112,7 +113,7 @@ public class SecurityManager extends AbstractCache
      * @return A Mono emitting the updated UserDetails with the new password set.
      */
     @Override
-    public Mono<UserDetails> updatePassword(UserDetails userDetails, String newPassword) {
+    public @NonNull Mono<UserDetails> updatePassword(@NonNull UserDetails userDetails, String newPassword) {
         Query query = Query.query(Criteria.where("username").is(userDetails.getUsername()).ignoreCase(true));
         Update update = Update.update("password", newPassword);
         return DatabaseUtils.ENTITY_TEMPLATE.update(query, update, User.class)
@@ -145,6 +146,10 @@ public class SecurityManager extends AbstractCache
      * @return A Mono emitting the User if found, or an empty Mono if no user matches the given OAuth2 binding data.
      */
     public Mono<User> loadByOauth2(String bindType, String openid) {
+        if (bindType == null || !bindType.matches("^[a-zA-Z0-9_]+$")) {
+            return Mono.error(new IllegalArgumentException("Invalid bindType parameter"));
+        }
+
         QueryFragment queryFragment = QueryFragment.from("se_users").column("*")
                 .where("extend->'oauth2'->:bindType->>'openid'::varchar = :openid");
         queryFragment.put("bindType", bindType);
@@ -179,17 +184,19 @@ public class SecurityManager extends AbstractCache
      * In case of failure, an AuthenticationServiceException is propagated with a relevant message.
      */
     @Override
-    public Mono<UserDetails> findByUsername(String username) {
+    public @NonNull Mono<UserDetails> findByUsername(@NonNull String username) {
         Mono<Tuple2<User, List<GrantedAuthority>>> userMono = this.loadByUsername(username)
                 .zipWhen(user -> this.authorities(user.getCode()));
         Mono<SecurityDetails> userDetailsMono = userMono
                 .flatMap(tuple2 -> buildUserDetails(tuple2.getT1(), new HashSet<>(tuple2.getT2())));
         return userDetailsMono.cast(UserDetails.class)
+                .onErrorResume(UsernameNotFoundException.class, Mono::error)
                 .onErrorResume(throwable -> Mono.defer(() ->
                         Mono.error(new BadCredentialsException(throwable.getMessage(), throwable))))
                 .publishOn(Schedulers.boundedElastic())
                 .doOnSuccess(details -> this.loginSuccess(details.getUsername())
-                        .subscribe(res -> log.debug("登录成功! 登录信息修改: {}", res)));
+                        .subscribe(res -> log.debug("登录成功! 登录信息修改: {}", res)))
+                .doOnError(throwable -> log.warn("用户 {} 登录失败: {}", username, throwable.getMessage()));
     }
 
     /**
@@ -289,7 +296,9 @@ public class SecurityManager extends AbstractCache
     private Mono<Long> loginSuccess(String username) {
         Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
         Update update = Update.update("loginTime", LocalDateTime.now());
-        return DatabaseUtils.ENTITY_TEMPLATE.update(User.class).matching(query).apply(update);
+        return DatabaseUtils.ENTITY_TEMPLATE.update(User.class).matching(query).apply(update)
+                .doOnSuccess(res -> log.info("用户 {} 登录成功，更新登录时间", username))
+                .doOnError(error -> log.warn("用户 {} 登录时间更新失败: {}", username, error.getMessage()));
     }
 
 }

@@ -1,15 +1,12 @@
 package com.plate.boot.security.core.tenant;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.plate.boot.commons.base.BaseEntity;
-import com.plate.boot.security.core.UserAuditor;
+import com.plate.boot.commons.base.AbstractEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import org.springframework.data.annotation.*;
+import lombok.EqualsAndHashCode;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -21,17 +18,10 @@ import java.util.UUID;
  * <p>
  * \@author <a href="https://github.com/vnobo">Alex bob</a>
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Table("se_tenants")
-public class Tenant implements BaseEntity<Integer> {
-
-    @Id
-    private Integer id;
-
-    /**
-     * Data entity code
-     */
-    private UUID code;
+public class Tenant extends AbstractEntity<Integer> {
 
     /**
      * The parent code of the tenant.
@@ -51,36 +41,5 @@ public class Tenant implements BaseEntity<Integer> {
      * The description of the tenant.
      */
     private String description;
-
-    /**
-     * Data entity extend,Json column
-     */
-    protected JsonNode extend;
-
-    /**
-     * Data entity create operator
-     * use User. Class code property
-     */
-    @CreatedBy
-    protected UserAuditor createdBy;
-
-    /**
-     * Data entity create time, timestamp column
-     */
-    @CreatedDate
-    protected LocalDateTime createdAt;
-
-    /**
-     * Data entity update operator
-     * use User.class code property
-     */
-    @LastModifiedBy
-    protected UserAuditor updatedBy;
-
-    /**
-     * Data entity update time,timestamp column
-     */
-    @LastModifiedDate
-    protected LocalDateTime updatedAt;
 
 }

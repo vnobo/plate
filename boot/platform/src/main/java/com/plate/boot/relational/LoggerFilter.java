@@ -1,9 +1,8 @@
 package com.plate.boot.relational;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.config.HttpCodecsProperties;
 import com.plate.boot.relational.logger.LoggerEvent;
 import com.plate.boot.relational.logger.LoggerReq;
 import com.plate.boot.security.SecurityDetails;
@@ -13,7 +12,6 @@ import io.netty.util.internal.EmptyArrays;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.reactivestreams.Publisher;
-import org.springframework.boot.autoconfigure.http.codec.HttpCodecsProperties;
 import org.springframework.core.io.buffer.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
@@ -30,8 +28,10 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -115,8 +115,8 @@ public class LoggerFilter implements WebFilter {
      * @param function A function that takes a ServerHttpRequest with a cached body and returns a Mono of T.
      * @return A Mono emitting the result of applying the function to the request with the cached body.
      */
-    public static <T> Mono<T> cacheRequestBody(ServerWebExchange exchange,
-                                               Function<ServerHttpRequest, Mono<T>> function) {
+    public static <T> Mono<@NonNull T> cacheRequestBody(ServerWebExchange exchange,
+                                                        Function<ServerHttpRequest, Mono<@NonNull T>> function) {
         ServerHttpResponse response = exchange.getResponse();
         DataBufferFactory factory = response.bufferFactory();
         var requestBody = DataBufferUtils.join(exchange.getRequest().getBody());
@@ -144,10 +144,12 @@ public class LoggerFilter implements WebFilter {
 
         ServerHttpResponseDecorator decorator = new ServerHttpResponseDecorator(exchange.getResponse()) {
             @Override
-            public @NonNull Mono<Void> writeWith(@NonNull Publisher<? extends DataBuffer> body) {
+            public @NonNull Mono<@NonNull Void> writeWith(@NonNull Publisher<? extends DataBuffer> body) {
                 var cachedDataBuffer = DataBufferUtils.join(body).doOnNext(data -> {
                     Object previousCachedBody = exchange.getAttributes().put(CACHED_RESPONSE_BODY_ATTR, data);
-                    exchange.getAttributes().put("cachedOriginalResponseBodyBackup", previousCachedBody);
+                    if (previousCachedBody != null) {
+                        exchange.getAttributes().put("cachedOriginalResponseBodyBackup", previousCachedBody);
+                    }
                 }).flatMap(data -> Mono.fromSupplier(() -> buildDataBuffer(data)));
                 return super.writeWith(cachedDataBuffer);
             }
@@ -176,7 +178,7 @@ public class LoggerFilter implements WebFilter {
         }
         var decorator = new ServerHttpRequestDecorator(exchange.getRequest()) {
             @Override
-            public @NonNull Flux<DataBuffer> getBody() {
+            public @NonNull Flux<@NonNull DataBuffer> getBody() {
                 log.debug("{}Request Decorator getBody.", exchange.getLogPrefix());
                 return Mono.fromSupplier(() -> buildDataBuffer(dataBuffer)).flux();
             }
@@ -218,7 +220,7 @@ public class LoggerFilter implements WebFilter {
         DataBuffer dataBodyBuff = exchange.getRequiredAttribute(CACHED_REQUEST_BODY_ATTR);
         try {
             return ContextUtils.OBJECT_MAPPER.readTree(dataBodyBuff.asInputStream());
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             log.warn("{}Logger filter request body is null, Abort processing.", exchange.getLogPrefix(), e);
             throw JsonException.withError(e);
         }
@@ -235,7 +237,7 @@ public class LoggerFilter implements WebFilter {
         DataBuffer dataBuffer = exchange.getRequiredAttribute(CACHED_RESPONSE_BODY_ATTR);
         try {
             return ContextUtils.OBJECT_MAPPER.readTree(dataBuffer.asInputStream());
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             log.warn("{}Logger filter response body is null, Abort processing.", exchange.getLogPrefix(), e);
             throw JsonException.withError(e);
         }
@@ -252,7 +254,7 @@ public class LoggerFilter implements WebFilter {
      * @return A Mono that completes void when the filtering and optional caching/logging are finished.
      */
     @Override
-    public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
+    public @NonNull Mono<@NonNull Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         var filterMono = defaultLoggerMatcher.matches(exchange);
         filterMono = filterMono.filter(ServerWebExchangeMatcher.MatchResult::isMatch);
         filterMono = filterMono.switchIfEmpty(Mono.defer(() ->
@@ -275,7 +277,7 @@ public class LoggerFilter implements WebFilter {
      * The completion signifies that the request has been processed by the next filter
      * in line, or an error indicates that the processing failed at some point in the chain.
      */
-    private Mono<Void> continueFilterChain(ServerWebExchange exchange, WebFilterChain chain) {
+    private Mono<@NonNull Void> continueFilterChain(ServerWebExchange exchange, WebFilterChain chain) {
         log.debug("{}Logger filter chain [continueFilterChain] next.", exchange.getLogPrefix());
         return Mono.defer(() -> chain.filter(exchange));
     }
@@ -288,7 +290,7 @@ public class LoggerFilter implements WebFilter {
      * @param chain    The next filter chain to be executed after caching the request body.
      * @return A Mono that completes when the filter chain execution is finished, or signals an error if any occurs.
      */
-    private Mono<Void> cacheFilterChain(ServerWebExchange exchange, WebFilterChain chain) {
+    private Mono<@NonNull Void> cacheFilterChain(ServerWebExchange exchange, WebFilterChain chain) {
         log.debug("{}Logger filter chain [cacheRequestBody] next.", exchange.getLogPrefix());
         return cacheRequestBody(exchange, serverHttpRequest -> {
             ServerHttpResponse cachedResponse = responseDecorate(exchange);
@@ -306,7 +308,7 @@ public class LoggerFilter implements WebFilter {
      * @param chain    The filter chain to continue processing.
      * @return A Mono that completes when the processing is done or empty if caching attributes are null.
      */
-    private Mono<Void> processFilter(ServerWebExchange exchange, WebFilterChain chain) {
+    private Mono<@NonNull Void> processFilter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest cachedRequest = exchange.getAttribute(CACHED_SERVER_HTTP_REQUEST_DECORATOR_ATTR);
         ServerHttpResponse cachedResponse = exchange.getAttribute(CACHED_SERVER_HTTP_RESPONSE_DECORATOR_ATTR);
 

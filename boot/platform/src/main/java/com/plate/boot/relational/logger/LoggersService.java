@@ -125,8 +125,8 @@ public class LoggersService extends AbstractCache {
         if (event.getKind() == LoggerEvent.Kind.INSERT) {
             var logger = event.getEntity();
             this.operate(logger).subscribe(res ->
-                    log.debug("{}Client request log save result. log code: {}",
-                            res.getPrefix(), res.getCode()));
+                    log.debug("{}Client request log save result. log code: {}, id: {}",
+                            res.getPrefix(), res.getCode(), res.getId()));
         }
     }
 }

@@ -1,19 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  OnDestroy,
-  signal,
-} from '@angular/core';
+import { afterNextRender, Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { BrowserStorage, TokenService } from '@app/core';
-import { MessageService, ModalsService } from '@app/plugins';
+import { TokenService, BrowserStorage } from '@app/core';
+import { MessageService } from '@app/plugins';
 import { Authentication, Credentials } from '@plate/types';
-import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  Observable,
+  retry,
+  Subject,
+  takeUntil,
+  tap,
+} from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -22,17 +23,14 @@ import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } fr
   styleUrl: './login.scss',
 })
 export class Login implements OnDestroy {
-  private readonly storageKey = 'credentials';
-
   private readonly _tokenSer = inject(TokenService);
-  private readonly _storage = inject(BrowserStorage);
   private readonly _message = inject(MessageService);
-  private readonly _modal = inject(ModalsService);
   private readonly _http = inject(HttpClient);
   private readonly _router = inject(Router);
   private readonly _route = inject(ActivatedRoute);
+  private readonly _storage = inject(BrowserStorage);
 
-  private submitSubject = new Subject<void>();
+  private submitSubject$ = new Subject<void>();
   private destroy$ = new Subject<void>();
 
   passwordFieldTextType = signal(false);
@@ -47,14 +45,18 @@ export class Login implements OnDestroy {
       validators: [Validators.required, Validators.minLength(6), Validators.maxLength(32)],
       nonNullable: true,
     }),
-    remember: new FormControl(false),
+    rememberMe: new FormControl(false, {
+      nonNullable: true,
+    }),
   });
 
   constructor() {
     afterNextRender(() => {
-      this.submitSubject
+      this.submitSubject$
         .pipe(debounceTime(300), takeUntil(this.destroy$))
-        .subscribe(() => this.processLogin());
+        .subscribe(() => this.formProcessLogin());
+      this.processLogin();
+      this.loadRememberedCredentials();
     });
   }
 
@@ -86,20 +88,26 @@ export class Login implements OnDestroy {
       return;
     }
 
-    this.submitSubject.next();
+    this.submitSubject$.next();
   }
 
-  // 处理登录逻辑
-  private processLogin() {
+  private formProcessLogin() {
     this.isSubmitting.set(true);
     try {
       const credentials = this.loginForm.getRawValue();
-
-      if (credentials.remember) {
-        this.rememberMe(credentials);
-      }
-
-      this.login(credentials).subscribe({
+      const headers = new HttpHeaders({
+        authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
+      });
+      this.login(headers).subscribe({
+        next: authentication => {
+          // If "Remember Me" is checked, store credentials
+          if (credentials.rememberMe) {
+            this.storeCredentials(credentials);
+          } else {
+            this.clearStoredCredentials();
+          }
+          this.handleLoginSuccess(authentication);
+        },
         error: error => {
           this.handleLoginError(error);
           this.isSubmitting.set(false);
@@ -110,48 +118,72 @@ export class Login implements OnDestroy {
       this._message.error('登录失败，请稍后再试! 错误: ' + (error || '未知错误'), {
         autohide: false,
         animation: false,
-        delay: 100000,
+        delay: 1000,
       });
       this.isSubmitting.set(false);
     }
+  }
+
+  private processLogin() {
+    const headers = new HttpHeaders({ 'x-requested-token': 'none-token-auto-login' });
+    this.login(headers)
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(authentication => this.handleLoginSuccess(authentication));
+  }
+
+  private loadRememberedCredentials() {
+    const storedCredentials = this._storage.getItem('credentials');
+    if (storedCredentials) {
+      try {
+        const credentials = JSON.parse(atob(storedCredentials));
+        this.loginForm.patchValue({
+          username: credentials.username,
+          password: credentials.password,
+          rememberMe: false,
+        });
+      } catch (e) {
+        // If parsing fails, clear the stored credentials
+        this.clearStoredCredentials();
+      }
+    }
+  }
+
+  private storeCredentials(credentials: any) {
+    // Store credentials in localStorage with base64 encoding for security
+    const credentialsToStore = {
+      username: credentials.username,
+      password: credentials.password,
+      remember: true,
+    };
+    const encodedCredentials = btoa(JSON.stringify(credentialsToStore));
+    this._storage.setItem('credentials', encodedCredentials);
+  }
+
+  private clearStoredCredentials() {
+    this._storage.removeItem('credentials');
   }
 
   showPassword() {
     this.passwordFieldTextType.set(!this.passwordFieldTextType());
   }
 
-  private login(credentials: Credentials) {
-    const headers = new HttpHeaders({
-      authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
-    });
-    return this._http.get<Authentication>('/sec/v1/oauth2/login', { headers: headers }).pipe(
+  private login(headers: HttpHeaders) {
+    return this._http.get<Authentication>('/sec/oauth2/login', { headers: headers }).pipe(
       debounceTime(300),
       distinctUntilChanged(),
-      retry({ count: 3, delay: 1000 }),
       takeUntil(this.destroy$),
-      tap(authentication => {
-        this._tokenSer.login(authentication);
-        this.handleLoginSuccess(authentication);
-      }),
+      tap(authentication => this._tokenSer.login(authentication)),
+      retry(3),
     );
-  }
-
-  private rememberMe(credentials: Credentials) {
-    let crstr = JSON.stringify(credentials);
-    crstr = btoa(crstr);
-    this._storage.setItem(this.storageKey, crstr);
   }
 
   private handleLoginSuccess(authentication: Authentication) {
-    this._message.success(
-      '登录成功, 欢迎 ' + (authentication.details?.['nickname'] as string) + '!',
-      {
-        autohide: true,
-        delay: 5000,
-        animation: true,
-      },
-    );
-    this._router.navigate(['/home'], { relativeTo: this._route }).then();
+    this._message.success('登录成功, 欢迎 ' + (authentication.details?.nickname as string) + '!', {
+      autohide: true,
+      delay: 5000,
+      animation: true,
+    });
+    this._router.navigate([this._tokenSer.redirectUrl], { relativeTo: this._route }).then();
   }
 
   private handleLoginError(error: any) {

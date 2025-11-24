@@ -2,12 +2,12 @@ package com.plate.boot.config;
 
 import com.nimbusds.oauth2.sdk.dpop.verifiers.AccessTokenValidationException;
 import com.plate.boot.commons.exception.RestServerException;
+import lombok.NonNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.lang.NonNull;
 import org.springframework.session.data.redis.config.annotation.web.server.EnableRedisIndexedWebSession;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -141,7 +141,7 @@ public class SessionConfiguration {
          */
         @Override
         public void setSessionId(@NonNull ServerWebExchange exchange, @NonNull String id) {
-            if (exchange.getRequest().getHeaders().containsKey(X_REQUESTED_WITH)) {
+            if (exchange.getRequest().getHeaders().containsHeader(X_REQUESTED_WITH)) {
                 super.setSessionId(exchange, id);
             } else {
                 cookieWebSessionIdResolver.setSessionId(exchange, id);

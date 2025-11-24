@@ -1,12 +1,13 @@
 package com.plate.boot.security.core.user.authority;
 
-import com.plate.boot.commons.base.AbstractCache;
 import com.plate.boot.commons.exception.RestServerException;
-import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.DatabaseUtils;
 import com.plate.boot.relational.menus.MenuEvent;
 import com.plate.boot.security.core.user.UserEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Query;
@@ -30,7 +31,7 @@ import java.util.Set;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class UserAuthoritiesService extends AbstractCache {
+public class UserAuthoritiesService {
 
     private final UserAuthoritiesRepository authoritiesRepository;
 
@@ -40,9 +41,10 @@ public class UserAuthoritiesService extends AbstractCache {
      * @param request the user authority request containing search criteria
      * @return a Flux emitting the user authorities that match the search criteria
      */
+    @Cacheable(cacheNames = "user-authorities", key = "T(com.plate.boot.commons.utils.BeanUtils).cacheKey(#request)")
     public Flux<UserAuthority> search(UserAuthorityReq request) {
         Query query = Query.query(request.toCriteria()).sort(Sort.by("id").descending());
-        return super.queryWithCache(BeanUtils.cacheKey(request), query, UserAuthority.class);
+        return DatabaseUtils.query(query, UserAuthority.class);
     }
 
     /**
@@ -52,11 +54,11 @@ public class UserAuthoritiesService extends AbstractCache {
      * @param request the user authority request containing user authority information
      * @return a Mono emitting the operated user authority
      */
+    @CacheEvict(cacheNames = "user-authorities", allEntries = true)
     public Mono<UserAuthority> operate(UserAuthorityReq request) {
         return this.authoritiesRepository
                 .findByUserCodeAndAuthority(request.getUserCode(), request.getAuthority())
-                .switchIfEmpty(Mono.defer(() -> this.save(request.toAuthority())))
-                .doAfterTerminate(() -> this.cache.clear());
+                .switchIfEmpty(Mono.defer(() -> this.save(request.toAuthority())));
     }
 
     /**
@@ -65,9 +67,10 @@ public class UserAuthoritiesService extends AbstractCache {
      * @param request the user authority request containing user authority information
      * @return a Mono indicating when the deletion is complete
      */
+    @CacheEvict(cacheNames = "user-authorities", allEntries = true)
     public Mono<Void> delete(UserAuthorityReq request) {
-        return this.authoritiesRepository.delete(request.toAuthority())
-                .doAfterTerminate(() -> this.cache.clear());
+        return this.authoritiesRepository.findByCode(request.getCode())
+                .flatMap(this.authoritiesRepository::delete);
     }
 
     /**
@@ -77,6 +80,7 @@ public class UserAuthoritiesService extends AbstractCache {
      * @param userAuthority the user authority to be saved
      * @return a Mono emitting the saved user authority
      */
+    @CacheEvict(cacheNames = "user-authorities", allEntries = true)
     public Mono<UserAuthority> save(UserAuthority userAuthority) {
         if (userAuthority.isNew()) {
             return this.authoritiesRepository.save(userAuthority);
@@ -86,10 +90,12 @@ public class UserAuthoritiesService extends AbstractCache {
                         new IllegalArgumentException("User authority ID must not be null for existing entities")));
             }
             return this.authoritiesRepository.findById(userAuthority.getId())
-                    .switchIfEmpty(Mono.error(RestServerException.withMsg("Id must not be null!",
-                            new IllegalArgumentException("User authority not found with ID: "
-                                    + userAuthority.getId()))))
-                    .flatMap(old -> this.authoritiesRepository.save(userAuthority));
+                    .flatMap(old -> {
+                        userAuthority.setCode(old.getCode());
+                        userAuthority.setCreatedAt(old.getCreatedAt());
+                        userAuthority.setCreatedBy(old.getCreatedBy());
+                        return this.authoritiesRepository.save(userAuthority);
+                    });
         }
     }
 
@@ -100,9 +106,9 @@ public class UserAuthoritiesService extends AbstractCache {
      * @param event the user event containing information about the deleted user
      */
     @EventListener(value = UserEvent.class, condition = "#event.kind.name() == 'DELETE'")
+    @CacheEvict(cacheNames = "user-authorities", allEntries = true)
     public void onUserDeletedEvent(UserEvent event) {
         this.authoritiesRepository.deleteByUserCode(event.getEntity().getCode())
-                .doAfterTerminate(() -> this.cache.clear())
                 .subscribe(result -> log.info("Deleted user authorities for user code: {}," +
                                 "result count: {}.", event.getEntity().getCode(), result),
                         throwable -> log.error("Failed to delete user authorities for user code: {}",
@@ -110,9 +116,9 @@ public class UserAuthoritiesService extends AbstractCache {
     }
 
     @EventListener(value = MenuEvent.class, condition = "#event.kind.name() == 'DELETE'")
+    @CacheEvict(cacheNames = "user-authorities", allEntries = true)
     public void onMenuDeletedEvent(MenuEvent event) {
         this.authoritiesRepository.deleteByAuthorityIn(Set.of(event.getEntity().getAuthority()))
-                .doAfterTerminate(() -> this.cache.clear())
                 .subscribe(res -> log.debug("Deleted user authorities by authority [{}], " +
                         "result count [{}].", event.getEntity().getCode(), res));
     }

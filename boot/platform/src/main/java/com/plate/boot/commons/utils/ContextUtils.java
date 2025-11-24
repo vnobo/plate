@@ -1,9 +1,9 @@
 package com.plate.boot.commons.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.plate.boot.commons.base.AbstractEvent;
 import com.plate.boot.security.SecurityDetails;
+import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.CacheManager;
@@ -23,6 +23,7 @@ import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.*;
 
@@ -79,7 +80,7 @@ public final class ContextUtils implements InitializingBean {
     };
 
     /**
-     * A shared static instance of Jackson's {@link ObjectMapper}, which is utilized for
+     * A shared static instance of Jackson's {@link JsonMapper}, which is utilized for
      * serializing and deserializing Java objects to and from JSON format. This singleton pattern
      * helps in ensuring consistent JSON processing across the application and reduces the
      * overhead of creating multiple ObjectMapper instances.
@@ -92,7 +93,7 @@ public final class ContextUtils implements InitializingBean {
      * made to this instance will affect all parts of the application using it. Therefore, caution must
      * be exercised when modifying its settings.
      */
-    public static ObjectMapper OBJECT_MAPPER;
+    public static JsonMapper OBJECT_MAPPER;
     /**
      * Global cache manager instance
      * <p>
@@ -118,22 +119,22 @@ public final class ContextUtils implements InitializingBean {
      */
     public static ApplicationEventPublisher APPLICATION_EVENT_PUBLISHER;
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper objectMapper;
     private final CacheManager cacheManager;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Initializes the ContextUtils class with necessary dependencies.
      *
-     * @param objectMapper              The ObjectMapper instance used for JSON serialization and deserialization.
-     * @param cacheManager              The CacheManager instance used for cache operations.
-     * @param applicationEventPublisher The ApplicationEventPublisher instance used for event publishing.
+     * @param objectMapper The ObjectMapper instance used for JSON serialization and deserialization.
+     * @param cacheManager The CacheManager instance used for cache operations.
+     * @param publisher    The ApplicationEventPublisher instance used for event publishing.
      */
-    ContextUtils(ObjectMapper objectMapper, CacheManager cacheManager,
-                 ApplicationEventPublisher applicationEventPublisher) {
+    ContextUtils(JsonMapper objectMapper, CacheManager cacheManager,
+                 ApplicationEventPublisher publisher) {
         this.objectMapper = objectMapper;
         this.cacheManager = cacheManager;
-        this.applicationEventPublisher = applicationEventPublisher;
+        this.eventPublisher = publisher;
     }
 
     /**
@@ -246,7 +247,7 @@ public final class ContextUtils implements InitializingBean {
      * @return A {@link Mono} emitting the {@link SecurityDetails} associated with the
      * current authentication context, or an empty Mono if no authentication is present.
      */
-    public static Mono<SecurityDetails> securityDetails() {
+    public static Mono<@NonNull SecurityDetails> securityDetails() {
         return ReactiveSecurityContextHolder.getContext().flatMap(securityContext -> {
             Authentication authentication = securityContext.getAuthentication();
             if (authentication == null) {
@@ -278,6 +279,6 @@ public final class ContextUtils implements InitializingBean {
         log.info("Initializing utils [ContextUtils]...");
         OBJECT_MAPPER = this.objectMapper;
         CACHE_MANAGER = this.cacheManager;
-        APPLICATION_EVENT_PUBLISHER = this.applicationEventPublisher;
+        APPLICATION_EVENT_PUBLISHER = this.eventPublisher;
     }
 }

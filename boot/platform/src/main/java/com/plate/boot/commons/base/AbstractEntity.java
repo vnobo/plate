@@ -1,11 +1,11 @@
 package com.plate.boot.commons.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.plate.boot.security.core.UserAuditor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.*;
+import tools.jackson.databind.JsonNode;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -98,11 +98,11 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
      */
     protected @Transient UUID securityCode;
 
-    /**
-     * Get the version of the entity.
-     *
-     * @return The version of the entity.
-     */
+    @JsonIgnore
+    public Map<String, Object> getQuery() {
+        return query;
+    }
+
     @JsonIgnore
     public Long getVersion() {
         return version;

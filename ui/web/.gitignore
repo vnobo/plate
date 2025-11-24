@@ -13,7 +13,6 @@ npm-debug.log
 yarn-error.log
 
 # IDEs and editors
-.roo/
 .idea/
 .project
 .classpath
@@ -30,6 +29,8 @@ yarn-error.log
 !.vscode/extensions.json
 .history/*
 .rules/
+.lingma/
+.roo/
 
 # Miscellaneous
 /.angular/cache

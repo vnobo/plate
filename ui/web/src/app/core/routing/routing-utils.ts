@@ -17,12 +17,11 @@ export function createLazyRoute(importFn: () => Promise<any>, routeName: string)
     loadChildren: () =>
       importFn()
         .then(module => {
-          console.debug(`✅ ${routeName}路由加载成功`);
+          //console.debug(`✅ ${routeName}路由加载成功`);
           return module;
         })
         .catch(error => {
-          console.error(`❌ ${routeName}路由加载失败:`, error);
-          // 返回空路由配置，避免应用崩溃
+          //console.error(`❌ ${routeName}路由加载失败:`, error);
           return { default: [] };
         }),
   };

@@ -19,7 +19,7 @@ export const serverRoutes: ServerRoute[] = [
   },
   {
     path: 'passport/login',
-    renderMode: RenderMode.Server,
+    renderMode: RenderMode.Client,
   },
   {
     path: '',
