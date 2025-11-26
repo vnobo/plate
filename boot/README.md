@@ -2,7 +2,7 @@ README.md
 
 # Plate Platform
 
-Plate Platform is a modern, Spring Boot 4.0.0-M3-based full-stack web application platform designed with reactive
+Plate Platform is a modern, Spring Boot 4.0.0-based full-stack web application platform designed with reactive
 programming model and microservices architecture. The platform provides complete user management, security
 authentication, logging, menu management, multi-tenancy support, and other functionalities.
 
@@ -36,7 +36,7 @@ The application includes the following key features:
 
 ### Core Technologies
 
-- **Spring Boot**: 4.0-M3
+- **Spring Boot**: 4.0.0
 - **Spring WebFlux**: Reactive web framework
 - **Spring Data R2DBC**: Reactive database access
 - **Spring Security**: Security framework
@@ -87,7 +87,7 @@ The application includes the following key features:
 
 ### Utility Libraries
 
-- Google Guava: 33+
+- Google Guava: 33.5.0
 - UUID Creator: 6+
 - Lombok
 
@@ -107,7 +107,7 @@ The application includes the following key features:
 ### Development Environment
 
 - **Java**: 25 or higher
-- **Gradle**: 8.0 or higher
+- **Gradle**: 9.1 or higher
 - **PostgreSQL**: 14 or higher (with UUIDv7 and Chinese full-text search support)
 - **Redis**: 6.0 or higher
 
@@ -129,12 +129,14 @@ The application includes the following key features:
 ### Setup Steps
 
 1. Clone the repository
+
    ```bash
    git clone <repository-url>
    cd plate-platform
    ```
 
 2. Set up PostgreSQL database (ensure UUID and Chinese full-text search extensions are enabled)
+
    ```sql
    create extension if not exists "uuid-ossp";
    create extension if not exists pg_trgm;
@@ -166,6 +168,12 @@ For local development, use the local configuration file:
 ./gradlew :platform:bootRun --args='--spring.profiles.active=local'
 ```
 
+Or use the provided PowerShell script for convenience (Windows):
+
+```powershell
+.\run_local.ps1
+```
+
 The application will be accessible at `http://localhost:8080`.
 
 ### Docker Execution
@@ -179,8 +187,19 @@ Build Docker image:
 Run Docker container:
 
 ```bash
-docker run -p 8080:8080 localhost:5000/plate-platform:latest
+docker run -p 8080:8080 alexbob/plate-platform:latest
 ```
+
+## Testing Infrastructure
+
+The project uses [Testcontainers](https://testcontainers.com/) to provide a reliable and consistent testing environment. The `InfrastructureConfiguration` class sets up the following containers:
+
+- **Redis**: Uses `redis:latest` image.
+- **PostgreSQL**: Uses `alexbob/postgres` (compatible with standard Postgres) with specific wait strategies to ensure the database is ready.
+
+These containers are automatically started when running integration tests, ensuring that tests run against real database and cache instances rather than mocks.
+
+````
 
 ## Configuration Options
 
@@ -304,7 +323,7 @@ put("age",18);
 
 // Generate SQL query
 String sqlQuery = queryFragment.querySql();
-```
+````
 
 ### Using QueryHelper to Build Queries
 
