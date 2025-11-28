@@ -38,9 +38,15 @@ export interface ModalOptions {
 
 @Injectable({ providedIn: 'root' })
 export class ModalsService {
+  private appRef = inject(ApplicationRef);
+  private injector = inject(EnvironmentInjector);
+
   private modalRef: ComponentRef<Modals> | null = null;
 
-  constructor(private appRef: ApplicationRef, private injector: EnvironmentInjector) {}
+  /** Inserted by Angular inject() migration for backwards compatibility */
+  constructor(...args: unknown[]);
+
+  constructor() {}
 
   create(modalRef: ModalRef) {
     const modalRefSignal = signal(modalRef);
@@ -117,9 +123,14 @@ export class TablerModalsInit {
   styles: [],
 })
 export class Modals implements OnInit, OnDestroy {
+  private _el = inject(ElementRef);
+
   modalRef = input.required<ModalRef>();
   dropped = output<any>();
-  constructor(private _el: ElementRef) {
+
+  /** Inserted by Angular inject() migration for backwards compatibility */
+  constructor(...args: unknown[]);
+  constructor() {
     afterNextRender(async () => {
       const options: ModalOptions = {
         backdrop: true,
