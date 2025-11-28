@@ -31,7 +31,29 @@
               }
             ],
             "styles": [
+              {
+                "input": "@tabler/core/dist/css/tabler.css",
+                "bundleName": "tabler-style"
+              },
+              {
+                "input": "@tabler/core/dist/css/tabler-themes.css",
+                "bundleName": "tabler-themes-style"
+              },
+              {
+                "input": "@tabler/core/dist/css/tabler-socials.css",
+                "bundleName": "tabler-socials-style"
+              },
               "src/styles.scss"
+            ],
+            "scripts": [
+              {
+                "input": "@tabler/core/dist/js/tabler.js",
+                "bundleName": "tabler-script"
+              },
+              {
+                "input": "@tabler/core/dist/js/tabler-theme.js",
+                "bundleName": "tabler-theme-script"
+              }
             ],
             "server": "src/main.server.ts",
             "outputMode": "server",
@@ -41,6 +63,14 @@
           },
           "configurations": {
             "production": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": true
+                },
+                "fonts": true
+              },
               "budgets": [
                 {
                   "type": "initial",
@@ -53,12 +83,19 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "serviceWorker": "ngsw-config.json"
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/envs/env.ts",
+                  "with": "src/envs/env.dev.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -70,7 +107,8 @@
               "buildTarget": "ng-plate:build:production"
             },
             "development": {
-              "buildTarget": "ng-plate:build:development"
+              "buildTarget": "ng-plate:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

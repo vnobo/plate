@@ -3,8 +3,13 @@ import { RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.scss',
+  template: ` <router-outlet></router-outlet> `,
+  styles: `
+    :host {
+      height: 100%;
+      width: 100%;
+    }
+  `,
 })
 export class App {
   protected readonly title = signal('ng-plate');
