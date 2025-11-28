@@ -4,7 +4,13 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": ["node"]
+    "baseUrl": "src",
+    "types": ["node"],
+    "paths": {
+      "@app/*": ["app/*"],
+      "@envs/*": ["envs/*"],
+      "@styles/*": ["styles/*"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.spec.ts"]
