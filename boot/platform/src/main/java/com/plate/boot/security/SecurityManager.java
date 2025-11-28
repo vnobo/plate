@@ -113,7 +113,7 @@ public class SecurityManager extends AbstractCache
      * @return A Mono emitting the updated UserDetails with the new password set.
      */
     @Override
-    public @NonNull Mono<UserDetails> updatePassword(@NonNull UserDetails userDetails, String newPassword) {
+    public @NonNull Mono<@NonNull UserDetails> updatePassword(@NonNull UserDetails userDetails, String newPassword) {
         Query query = Query.query(Criteria.where("username").is(userDetails.getUsername()).ignoreCase(true));
         Update update = Update.update("password", newPassword);
         return DatabaseUtils.ENTITY_TEMPLATE.update(query, update, User.class)
