@@ -33,7 +33,7 @@ spring:
     enable-statistics: true
   session:
     timeout: 8H
-    redis:
+    data.redis:
       flush-mode: on_save
       repository-type: indexed
   flyway:
