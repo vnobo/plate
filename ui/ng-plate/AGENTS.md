@@ -1,57 +1,46 @@
-You are an expert in TypeScript, Angular, and scalable web application development. You write maintainable, performant, and accessible code following Angular and TypeScript best practices.
+# AGENTS.md
 
-## TypeScript Best Practices
+This file provides guidance to agents when working with code in this repository.
 
-- Use strict type checking
-- Prefer type inference when the type is obvious
-- Avoid the `any` type; use `unknown` when type is uncertain
+## Build/Lint/Test Commands
 
-## Angular Best Practices
+- Run single test: `ng test` (uses Vitest as seen in devDependencies)
+- SSR server start: `npm run serve:ssr:ng-plate` (after build, uses Node to serve server.mjs)
 
-- Always use standalone components over NgModules
-- Must NOT set `standalone: true` inside Angular decorators. It's the default.
-- Use signals for state management
-- Implement lazy loading for feature routes
-- Do NOT use the `@HostBinding` and `@HostListener` decorators. Put host bindings inside the `host` object of the `@Component` or `@Directive` decorator instead
-- Use `NgOptimizedImage` for all static images.
-  - `NgOptimizedImage` does not work for inline base64 images.
+## Code Style Guidelines
 
-## Components
+- [https://angular.dev/style-guide](https://angular.dev/style-guide)
+- Zoneless change detection is enabled: `provideZonelessChangeDetection()` in app.config.ts
+- HTTP interceptors are chained: `indexInterceptor` combines multiple interceptors (defaultInterceptor, apiVersionInterceptor, handleErrorInterceptor)
+- Custom environment files in src/envs/ (env.ts and env.dev.ts)
 
-- Keep components small and focused on a single responsibility
-- Use `input()` and `output()` functions instead of decorators
-- Use `computed()` for derived state
-- Set `changeDetection: ChangeDetectionStrategy.OnPush` in `@Component` decorator
-- Prefer inline templates for small components
-- Prefer Reactive forms instead of Template-driven ones
-- Do NOT use `ngClass`, use `class` bindings instead
-- Do NOT use `ngStyle`, use `style` bindings instead
+## Import Conventions
 
-## State Management
+- Use `inject()` function instead of constructor injection for services
+- Import from `@app/core`, `@app/plugins`, `@plate/types` for internal modules
+- Import from `@envs/env` for environment configuration
+- Use signal-based state management with `signal()` and `computed()`
+- Prefer standalone components over NgModules
 
-- Use signals for local component state
-- Use `computed()` for derived state
-- Keep state transformations pure and predictable
-- Do NOT use `mutate` on signals, use `update` or `set` instead
+## Type & Naming Conventions
 
-## Templates
+- Use `ChangeDetectionStrategy.OnPush` for all components
+- Private service properties use underscore prefix: `_message`, `_modal`, `_http`
+- Chinese locale is set to 'zh-Hans' via LOCALE_ID provider
+- API timeout: 5s first request, 10s subsequent requests
+- Custom Page/Pageable types for backend pagination integration
 
-- Keep templates simple and avoid complex logic
-- Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
-- Use the async pipe to handle observables
+## Error Handling Patterns
 
-## Services
+- 401 errors trigger navigation to login URL via TokenService
+- API requests use ProgressService for loading indicators
+- XSRF protection configured with custom cookie/header names
+- Service Worker enabled only in production builds
 
-- Design services around a single responsibility
-- Use the `providedIn: 'root'` option for singleton services
-- Use the `inject()` function instead of constructor injection
+## Critical Patterns
 
-## use context7
-
-- Use `use context7` for dependency injection in functions and hooks
-- Avoid using `inject()` outside of Angular's DI context
-
-## Accessibility
-
-- Follow WCAG guidelines for accessibility
-- Use semantic HTML elements for better accessibility
+- Multiple HTTP interceptors are used in sequence: defaultInterceptor adds base URL and loading indicator, apiVersionInterceptor adds x-api-version header, handleErrorInterceptor handles 401 redirects
+- Environment files are aliased as @envs/env (not standard Angular pattern)
+- Custom inputBinding('inputData', userSignal) pattern for modal data passing
+- Tabler CSS framework is used for styling (not Material or Bootstrap)
+- Day.js with Chinese locale for date/time handling
