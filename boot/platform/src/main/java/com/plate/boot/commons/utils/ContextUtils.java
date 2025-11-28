@@ -25,7 +25,10 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 import tools.jackson.databind.json.JsonMapper;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Utility class providing context-related operations and services for the application.
@@ -119,9 +122,7 @@ public final class ContextUtils implements InitializingBean {
      */
     public static ApplicationEventPublisher APPLICATION_EVENT_PUBLISHER;
 
-    private final JsonMapper objectMapper;
-    private final CacheManager cacheManager;
-    private final ApplicationEventPublisher eventPublisher;
+    private final Dependencies dependencies;
 
     /**
      * Initializes the ContextUtils class with necessary dependencies.
@@ -132,9 +133,7 @@ public final class ContextUtils implements InitializingBean {
      */
     ContextUtils(JsonMapper objectMapper, CacheManager cacheManager,
                  ApplicationEventPublisher publisher) {
-        this.objectMapper = objectMapper;
-        this.cacheManager = cacheManager;
-        this.eventPublisher = publisher;
+        this.dependencies = new Dependencies(objectMapper, cacheManager, publisher);
     }
 
     /**
@@ -186,21 +185,46 @@ public final class ContextUtils implements InitializingBean {
             encodingId = "bcrypt";
         }
         Map<String, PasswordEncoder> encoders = new HashMap<>();
+        // 推荐的密码编码器
         encoders.put("bcrypt", new BCryptPasswordEncoder());
-        encoders.put("ldap", new org.springframework.security.crypto.password.LdapShaPasswordEncoder());
-        encoders.put("MD4", new org.springframework.security.crypto.password.Md4PasswordEncoder());
-        encoders.put("MD5", new org.springframework.security.crypto.password.MessageDigestPasswordEncoder("MD5"));
-        encoders.put("noop", org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance());
-        encoders.put("pbkdf2", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_5());
         encoders.put("pbkdf2@SpringSecurity_v5_8", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8());
-        encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v4_1());
         encoders.put("scrypt@SpringSecurity_v5_8", SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8());
-        encoders.put("SHA-1", new org.springframework.security.crypto.password.MessageDigestPasswordEncoder("SHA-1"));
-        encoders.put("SHA-256",
-                new org.springframework.security.crypto.password.MessageDigestPasswordEncoder("SHA-256"));
-        encoders.put("sha256", new org.springframework.security.crypto.password.StandardPasswordEncoder());
-        encoders.put("argon2", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_2());
         encoders.put("argon2@SpringSecurity_v5_8", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8());
+
+        // 向后兼容的密码编码器，但不推荐用于新密码
+        encoders.put("pbkdf2", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_5());
+        encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v4_1());
+        encoders.put("argon2", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_2());
+
+        // 保留但标记为过时的密码编码器，仅用于验证旧密码
+        @Deprecated(since = "5.7", forRemoval = true)
+        PasswordEncoder ldapEncoder = new org.springframework.security.crypto.password.LdapShaPasswordEncoder();
+        encoders.put("ldap", ldapEncoder);
+
+        @Deprecated(since = "5.7", forRemoval = true)
+        PasswordEncoder md4Encoder = new org.springframework.security.crypto.password.Md4PasswordEncoder();
+        encoders.put("MD4", md4Encoder);
+
+        @Deprecated(since = "5.7", forRemoval = true)
+        PasswordEncoder md5Encoder = new org.springframework.security.crypto.password.MessageDigestPasswordEncoder("MD5");
+        encoders.put("MD5", md5Encoder);
+
+        @Deprecated(since = "5.7", forRemoval = true)
+        PasswordEncoder sha1Encoder = new org.springframework.security.crypto.password.MessageDigestPasswordEncoder("SHA-1");
+        encoders.put("SHA-1", sha1Encoder);
+
+        @Deprecated(since = "5.7", forRemoval = true)
+        PasswordEncoder sha256Encoder = new org.springframework.security.crypto.password.MessageDigestPasswordEncoder("SHA-256");
+        encoders.put("SHA-256", sha256Encoder);
+
+        @Deprecated(since = "5.7", forRemoval = true)
+        PasswordEncoder standardEncoder = new org.springframework.security.crypto.password.StandardPasswordEncoder();
+        encoders.put("sha256", standardEncoder);
+
+        @Deprecated(since = "5.7", forRemoval = true)
+        PasswordEncoder noOpEncoder = org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
+        encoders.put("noop", noOpEncoder);
+
         return new DelegatingPasswordEncoder(encodingId, encoders);
     }
 
@@ -212,13 +236,24 @@ public final class ContextUtils implements InitializingBean {
      * @return A base64 encoded string representing the SHA-256 hash of the input string.
      */
     public static String encodeToSHA256(String input) {
-        return createDelegatingPasswordEncoder("SHA-256").encode(input);
+        if (input == null) {
+            return null;
+        }
+        try {
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            return java.util.Base64.getEncoder().encodeToString(hash);
+        } catch (java.security.NoSuchAlgorithmException e) {
+            log.error("SHA-256 algorithm not found", e);
+            return null;
+        }
     }
 
     /**
      * Retrieves the client's IP address from the given server HTTP request.
      * This method iterates over a set of common headers used to carry the client's IP address
-     * and returns the first non-empty value found. If none of these headers yield an IP,
+     * and returns the first valid, non-private IP address found. For X-Forwarded-For header,
+     * it extracts the first IP from the comma-separated list. If none of these headers yield a valid IP,
      * it falls back to extracting the IP from the remote address of the request.
      *
      * @param httpRequest The server HTTP request from which to extract the client's IP address.
@@ -226,14 +261,49 @@ public final class ContextUtils implements InitializingBean {
      * explicit IP is found in the headers.
      */
     public static String getClientIpAddress(ServerHttpRequest httpRequest) {
+        if (httpRequest == null) {
+            return null;
+        }
+
         HttpHeaders headers = httpRequest.getHeaders();
         for (String header : IP_HEADER_CANDIDATES) {
             List<String> ipList = headers.get(header);
             if (ipList != null && !ipList.isEmpty()) {
-                return ipList.getFirst();
+                String ip = ipList.getFirst();
+                // 处理X-Forwarded-For可能包含多个IP地址的情况
+                if ("X-Forwarded-For".equalsIgnoreCase(header) && ip.contains(",")) {
+                    ip = ip.split(",")[0].trim();
+                }
+                // 验证IP地址是否有效且不是私有地址
+                if (isValidPublicIp(ip)) {
+                    return ip;
+                }
             }
         }
-        return Objects.requireNonNull(httpRequest.getRemoteAddress()).getAddress().getHostAddress();
+        // 回退到远程地址
+        if (httpRequest.getRemoteAddress() != null && httpRequest.getRemoteAddress().getAddress() != null) {
+            return httpRequest.getRemoteAddress().getAddress().getHostAddress();
+        }
+        return null;
+    }
+
+    /**
+     * 检查IP地址是否有效且不是私有地址
+     */
+    private static boolean isValidPublicIp(String ip) {
+        if (ip == null || ip.trim().isEmpty()) {
+            return false;
+        }
+
+        try {
+            java.net.InetAddress address = java.net.InetAddress.getByName(ip);
+            // 检查是否是私有地址、本地地址或回环地址
+            return !(address.isLoopbackAddress() || address.isLinkLocalAddress() || address.isSiteLocalAddress()
+                    || "0.0.0.0".equals(ip) || "::".equals(ip) || ip.startsWith("127.")
+                    || ip.startsWith("10.") || ip.startsWith("172.16.") || ip.startsWith("192.168."));
+        } catch (java.net.UnknownHostException e) {
+            return false;
+        }
     }
 
     /**
@@ -259,9 +329,11 @@ public final class ContextUtils implements InitializingBean {
     }
 
     /**
-     * Generates a new random UUID (Universally Unique Identifier) as the next identifier.
+     * Generates a new time-ordered UUID (Universally Unique Identifier) as the next identifier.
+     * This method uses UuidCreator.getTimeOrderedEpoch() which generates time-based UUIDs
+     * that are sequentially ordered and suitable for database primary keys.
      *
-     * @return A newly created {@link UUID} instance, providing a unique identifier.
+     * @return A newly created {@link UUID} instance, providing a unique and time-ordered identifier.
      */
     public static UUID nextId() {
         return UuidCreator.getTimeOrderedEpoch();
@@ -277,8 +349,12 @@ public final class ContextUtils implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         log.info("Initializing utils [ContextUtils]...");
-        OBJECT_MAPPER = this.objectMapper;
-        CACHE_MANAGER = this.cacheManager;
-        APPLICATION_EVENT_PUBLISHER = this.eventPublisher;
+        OBJECT_MAPPER = this.dependencies.objectMapper;
+        CACHE_MANAGER = this.dependencies.cacheManager;
+        APPLICATION_EVENT_PUBLISHER = this.dependencies.eventPublisher;
+    }
+
+    private record Dependencies(JsonMapper objectMapper, CacheManager cacheManager,
+                                ApplicationEventPublisher eventPublisher) {
     }
 }
