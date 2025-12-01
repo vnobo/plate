@@ -3,7 +3,6 @@ package com.plate.boot.commons.utils;
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.plate.boot.commons.base.AbstractEvent;
 import com.plate.boot.security.SecurityDetails;
-import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.CacheManager;
@@ -317,7 +316,7 @@ public final class ContextUtils implements InitializingBean {
      * @return A {@link Mono} emitting the {@link SecurityDetails} associated with the
      * current authentication context, or an empty Mono if no authentication is present.
      */
-    public static Mono<@NonNull SecurityDetails> securityDetails() {
+    public static Mono<SecurityDetails> securityDetails() {
         return ReactiveSecurityContextHolder.getContext().flatMap(securityContext -> {
             Authentication authentication = securityContext.getAuthentication();
             if (authentication == null) {
