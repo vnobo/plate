@@ -3,8 +3,8 @@ package com.plate.boot.config;
 import com.redis.testcontainers.RedisContainer;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 /**
@@ -21,17 +21,17 @@ import org.testcontainers.utility.DockerImageName;
 @TestConfiguration(proxyBeanMethods = false)
 public class InfrastructureConfiguration {
 
-    @Bean(initMethod = "start", destroyMethod = "stop")
+    @Bean
     public RedisContainer redisContainer() {
         return new RedisContainer("redis:latest");
     }
 
-    @Bean(initMethod = "start", destroyMethod = "stop")
+    @Bean
     @SuppressWarnings("resource")
-    public PostgreSQLContainer<?> postgresContainer() {
+    public PostgreSQLContainer postgresContainer() {
         var postgresImage = DockerImageName.parse("alexbob/postgres")
                 .asCompatibleSubstituteFor("postgres");
-        return new PostgreSQLContainer<>(postgresImage)
+        return new PostgreSQLContainer(postgresImage)
                 .waitingFor(Wait.forLogMessage("^.*数据库系统准备接受连接.*$", 2));
     }
 }
