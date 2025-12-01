@@ -67,3 +67,18 @@ spring:
   security.oauth2.client.registration:
     github:
       client-id: "${github.client-id:Iv1.14a97a700a228437}"
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+  show-actuator: true
+  group-configs:
+    - group: security
+      paths-to-match: /sec/**
+      display-name: Security APIs
+    - group: relational
+      paths-to-match: /rel/**
+      display-name: Relational APIs
