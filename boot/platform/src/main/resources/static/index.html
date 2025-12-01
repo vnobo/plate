@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plate Boot - Backend API Platform</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .api-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .api-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-section {
+            padding: 60px 0;
+            color: white;
+        }
+
+        .endpoint-badge {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-server"></i> Plate Boot
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#apis">API Endpoints</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#docs">Documentation</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#status">Status</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<div class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-4">
+            <i class="bi bi-gear-fill"></i> Plate Boot Backend API
+        </h1>
+        <p class="lead mb-4">Spring Boot WebFlux Reactive Backend Platform</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="#apis" class="btn btn-light btn-lg">
+                <i class="bi bi-play-fill"></i> Explore APIs
+            </a>
+            <button class="btn btn-outline-light btn-lg" onclick="checkHealth()">
+                <i class="bi bi-heart-pulse"></i> Health Check
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- API Endpoints Section -->
+<div class="container py-5" id="apis">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h2 class="text-white"><i class="bi bi-box-seam"></i> Available API Modules</h2>
+        </div>
+
+        <!-- Security Module -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card api-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-shield-lock text-primary"></i> Security
+                    </h5>
+                    <p class="card-text text-muted">Authentication and authorization services</p>
+                    <span class="badge bg-primary endpoint-badge">/sec/*</span>
+                    <hr>
+                    <ul class="list-unstyled small">
+                        <li><i class="bi bi-arrow-right"></i> Users Management</li>
+                        <li><i class="bi bi-arrow-right"></i> Groups & Authorities</li>
+                        <li><i class="bi bi-arrow-right"></i> Tenants</li>
+                        <li><i class="bi bi-arrow-right"></i> OAuth2 Integration</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Relational Module -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card api-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-database text-success"></i> Relational
+                    </h5>
+                    <p class="card-text text-muted">Data management and operations</p>
+                    <span class="badge bg-success endpoint-badge">/rel/*</span>
+                    <hr>
+                    <ul class="list-unstyled small">
+                        <li><i class="bi bi-arrow-right"></i> Dictionaries</li>
+                        <li><i class="bi bi-arrow-right"></i> Menus</li>
+                        <li><i class="bi bi-arrow-right"></i> Logging</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Module -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card api-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-gear text-warning"></i> System
+                    </h5>
+                    <p class="card-text text-muted">System utilities and monitoring</p>
+                    <span class="badge bg-warning text-dark endpoint-badge">/api/*</span>
+                    <hr>
+                    <ul class="list-unstyled small">
+                        <li><i class="bi bi-arrow-right"></i> Health Check</li>
+                        <li><i class="bi bi-arrow-right"></i> Metrics</li>
+                        <li><i class="bi bi-arrow-right"></i> Captcha</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Links Section -->
+<div class="container py-5" id="docs">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h2 class="text-white"><i class="bi bi-book"></i> Documentation & Resources</h2>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-file-earmark-text display-4 text-info"></i>
+                    <h5 class="card-title mt-3">Swagger UI</h5>
+                    <p class="card-text text-muted">Interactive OpenAPI documentation interface</p>
+                    <a href="/webjars/swagger-ui/index.html" class="btn btn-outline-info" target="_blank">
+                        <i class="bi bi-box-arrow-up-right"></i> Open Swagger UI
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-code-square display-4 text-primary"></i>
+                    <h5 class="card-title mt-3">OpenAPI Spec</h5>
+                    <p class="card-text text-muted">Download OpenAPI specification files</p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="/v3/api-docs" class="btn btn-outline-primary btn-sm" target="_blank">
+                            <i class="bi bi-filetype-json"></i> JSON
+                        </a>
+                        <a href="/v3/api-docs.yaml" class="btn btn-outline-primary btn-sm" target="_blank">
+                            <i class="bi bi-filetype-yml"></i> YAML
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-github display-4 text-dark"></i>
+                    <h5 class="card-title mt-3">SpringDoc GitHub</h5>
+                    <p class="card-text text-muted">SpringDoc OpenAPI project source</p>
+                    <a href="https://github.com/springdoc/springdoc-openapi" class="btn btn-outline-dark" target="_blank">
+                        <i class="bi bi-github"></i> GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Groups Section -->
+    <div class="row mt-4">
+        <div class="col-12 mb-4">
+            <h3 class="text-white"><i class="bi bi-layers"></i> API Groups</h3>
+            <p class="text-white-50">Browse APIs by functional groups using SpringDoc OpenAPI</p>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-shield-check display-5 text-success"></i>
+                    <h6 class="card-title mt-2">Security APIs</h6>
+                    <p class="small text-muted mb-2">Users, Groups, Tenants</p>
+                    <a href="/webjars/swagger-ui/index.html?urls.primaryName=Security+APIs" class="btn btn-sm btn-outline-success mt-2" target="_blank">
+                        <i class="bi bi-book"></i> View Docs
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-database display-5 text-info"></i>
+                    <h6 class="card-title mt-2">Relational APIs</h6>
+                    <p class="small text-muted mb-2">Dictionaries, Menus</p>
+                    <a href="/webjars/swagger-ui/index.html?urls.primaryName=Relational+APIs" class="btn btn-sm btn-outline-info mt-2" target="_blank">
+                        <i class="bi bi-book"></i> View Docs
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-grid display-5 text-warning"></i>
+                    <h6 class="card-title mt-2">All APIs</h6>
+                    <p class="small text-muted mb-2">Complete API reference</p>
+                    <a href="/webjars/swagger-ui/index.html?urls.primaryName=All+APIs" class="btn btn-sm btn-outline-warning mt-2" target="_blank">
+                        <i class="bi bi-book"></i> View Docs
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-terminal display-5 text-danger"></i>
+                    <h6 class="card-title mt-2">Actuator</h6>
+                    <p class="small text-muted mb-2">Health & Metrics</p>
+                    <a href="/actuator" class="btn btn-sm btn-outline-danger mt-2" target="_blank">
+                        <i class="bi bi-speedometer2"></i> View Endpoints
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Section -->
+<div class="container py-5 mb-5" id="status">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h2 class="text-white"><i class="bi bi-activity"></i> System Status</h2>
+        </div>
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div id="statusContent">
+                        <div class="text-center text-muted">
+                            <i class="bi bi-hourglass-split"></i> Click "Health Check" button to check system status
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-4 mt-5">
+    <div class="container text-center">
+        <p class="mb-0">
+            <i class="bi bi-server"></i> Plate Boot Platform &copy; 2024 |
+            Powered by Spring Boot WebFlux, R2DBC & SpringDoc OpenAPI
+        </p>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+
+<!-- Custom JavaScript -->
+<script>
+    async function checkHealth() {
+        const statusContent = document.getElementById('statusContent');
+        statusContent.innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Checking system health...</p>
+                </div>
+            `;
+
+        try {
+            const response = await fetch('/actuator/health');
+            const data = await response.json();
+
+            const status = data.status || 'UNKNOWN';
+            const isHealthy = status === 'UP';
+            const badgeClass = isHealthy ? 'success' : 'danger';
+            const iconClass = isHealthy ? 'check-circle-fill' : 'x-circle-fill';
+
+            statusContent.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <h4>
+                                <i class="bi bi-${iconClass} text-${badgeClass}"></i> 
+                                System Status: <span class="badge bg-${badgeClass}">${status}</span>
+                            </h4>
+                        </div>
+                        <div class="col-md-12">
+                            <pre class="bg-light p-3 rounded"><code>${JSON.stringify(data, null, 2)}</code></pre>
+                        </div>
+                    </div>
+                `;
+        } catch (error) {
+            statusContent.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <strong>Error!</strong> Failed to check system health: ${error.message}
+                    </div>
+                `;
+        }
+    }
+
+    // Optional: Auto-check health on load
+    // window.addEventListener('load', checkHealth);
+</script>
+</body>
+</html>
