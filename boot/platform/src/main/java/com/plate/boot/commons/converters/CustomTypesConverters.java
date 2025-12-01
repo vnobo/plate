@@ -1,7 +1,6 @@
 package com.plate.boot.commons.converters;
 
 import com.plate.boot.relational.MethodType;
-import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +39,7 @@ public class CustomTypesConverters implements InitializingBean {
      */
     @Component
     @ReadingConverter
-    public static class MethodTypeReadConverter implements Converter<@NonNull String, @NonNull MethodType> {
+    public static class MethodTypeReadConverter implements Converter<String, MethodType> {
         /**
          * Converts a String source value to a MethodType enum value
          *
@@ -48,7 +47,7 @@ public class CustomTypesConverters implements InitializingBean {
          * @return the corresponding MethodType enum value
          */
         @Override
-        public MethodType convert(@NonNull String source) {
+        public MethodType convert(String source) {
             return MethodType.valueOf(source);
         }
     }
@@ -60,7 +59,7 @@ public class CustomTypesConverters implements InitializingBean {
      */
     @Component
     @WritingConverter
-    public static class MethodTypeWriteConverter implements Converter<@NonNull MethodType, @NonNull String> {
+    public static class MethodTypeWriteConverter implements Converter<MethodType, String> {
         /**
          * Converts a MethodType source value to a String representation
          *
@@ -68,7 +67,7 @@ public class CustomTypesConverters implements InitializingBean {
          * @return the String representation of the MethodType
          */
         @Override
-        public String convert(@NonNull MethodType source) {
+        public String convert(MethodType source) {
             return source.name();
         }
     }
