@@ -1,7 +1,6 @@
 package com.plate.boot.commons.converters;
 
 import com.plate.boot.security.core.UserAuditor;
-import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
@@ -57,7 +56,7 @@ public class UserAuditorConverters implements InitializingBean {
          * @throws NullPointerException if the source {@link UserAuditor} is null.
          */
         @Override
-        public UUID convert(@NonNull UserAuditor source) {
+        public UUID convert(UserAuditor source) {
             return source.code();
         }
     }
@@ -96,7 +95,7 @@ public class UserAuditorConverters implements InitializingBean {
          * @throws NullPointerException if the source is null.
          */
         @Override
-        public UserAuditor convert(@NonNull UUID source) {
+        public UserAuditor convert(UUID source) {
             return UserAuditor.withCode(source);
         }
     }

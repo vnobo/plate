@@ -1,17 +1,19 @@
 package com.plate.boot;
 
-import com.plate.boot.config.InfrastructureConfiguration;
 import com.plate.boot.security.AuthenticationToken;
+import com.redis.testcontainers.RedisContainer;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.time.Duration;
 import java.util.Base64;
@@ -45,12 +47,47 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(InfrastructureConfiguration.class)
+@TestClassOrder(ClassOrderer.OrderAnnotation.class)
 public class ApplicationTests {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationTests.class);
 
     private final ApplicationContext applicationContext;
+
+    private static RedisContainer redisContainer;
+    private static PostgreSQLContainer<?> postgresContainer;
+
+    static {
+        redisContainer = new RedisContainer("redis:latest");
+        redisContainer.start();
+
+        var postgresImage = org.testcontainers.utility.DockerImageName.parse("alexbob/postgres")
+                .asCompatibleSubstituteFor("postgres");
+        postgresContainer = new PostgreSQLContainer<>(postgresImage)
+                .waitingFor(org.testcontainers.containers.wait.strategy.Wait
+                        .forLogMessage("^.*数据库系统准备接受连接.*$", 2));
+        postgresContainer.start();
+    }
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        // Configure R2DBC connection
+        registry.add("spring.r2dbc.url", () -> String.format("r2dbc:postgresql://%s:%d/%s",
+                postgresContainer.getHost(),
+                postgresContainer.getFirstMappedPort(),
+                postgresContainer.getDatabaseName()));
+        registry.add("spring.r2dbc.username", postgresContainer::getUsername);
+        registry.add("spring.r2dbc.password", postgresContainer::getPassword);
+
+        // Configure Flyway (JDBC) connection
+        registry.add("spring.flyway.url", postgresContainer::getJdbcUrl);
+        registry.add("spring.flyway.user", postgresContainer::getUsername);
+        registry.add("spring.flyway.password", postgresContainer::getPassword);
+
+        // Configure Redis connection
+        registry.add("spring.data.redis.host", redisContainer::getHost);
+        registry.add("spring.data.redis.port", redisContainer::getFirstMappedPort);
+    }
 
     @LocalServerPort
     private int port;
@@ -113,6 +150,7 @@ public class ApplicationTests {
     @Nested
     @DisplayName("Application Context Tests")
     @Order(1)
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class ApplicationContextTests {
 
         @Test
@@ -145,6 +183,7 @@ public class ApplicationTests {
     @Nested
     @DisplayName("CSRF Token Tests")
     @Order(2)
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class CsrfTokenTests {
 
         @Test
@@ -176,6 +215,7 @@ public class ApplicationTests {
     @Nested
     @DisplayName("Administrator Authentication Process Tests")
     @Order(3)
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class AdminAuthenticationTests {
 
         @Test
@@ -235,6 +275,7 @@ public class ApplicationTests {
     @Nested
     @DisplayName("Regular User Authentication Process Tests")
     @Order(4)
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class UserAuthenticationTests {
 
         @Test
@@ -293,6 +334,7 @@ public class ApplicationTests {
     @Nested
     @DisplayName("Unauthorized Access Interception Tests")
     @Order(5)
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class UnauthorizedAccessTests {
 
         @Test
@@ -344,6 +386,7 @@ public class ApplicationTests {
     @Nested
     @DisplayName("Exception Flow Tests")
     @Order(6)
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class ExceptionFlowTests {
 
         @Test
@@ -412,6 +455,7 @@ public class ApplicationTests {
     @Nested
     @DisplayName("Logout and Session Tests")
     @Order(7)
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class LogoutSessionTests {
 
         @Test
@@ -448,6 +492,7 @@ public class ApplicationTests {
     @Nested
     @DisplayName("OAuth2 Binding Tests")
     @Order(8)
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class OAuth2BindingTests {
 
         @Test

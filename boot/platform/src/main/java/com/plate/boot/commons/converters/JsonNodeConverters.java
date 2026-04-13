@@ -4,7 +4,6 @@ import com.plate.boot.commons.exception.JsonException;
 import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.relational.MethodType;
 import io.r2dbc.postgresql.codec.Json;
-import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
@@ -51,7 +50,7 @@ public class JsonNodeConverters implements InitializingBean {
      */
     @Component
     @WritingConverter
-    public static class JsonToNodeWriteConverter implements Converter<@NonNull JsonNode, @NonNull Json> {
+    public static class JsonToNodeWriteConverter implements Converter<JsonNode, Json> {
         /**
          * Converts a Jackson {@link JsonNode} to a custom {@link Json} object.
          *
@@ -60,7 +59,7 @@ public class JsonNodeConverters implements InitializingBean {
          * @throws NullPointerException if the source argument is null.
          */
         @Override
-        public Json convert(@NonNull JsonNode source) {
+        public Json convert(JsonNode source) {
             return Json.of(source.toString());
         }
     }
@@ -77,7 +76,7 @@ public class JsonNodeConverters implements InitializingBean {
      */
     @Component
     @ReadingConverter
-    public static class JsonToNodeReadConverter implements Converter<@NonNull Json, @NonNull JsonNode> {
+    public static class JsonToNodeReadConverter implements Converter<Json, JsonNode> {
         /**
          * Converts a custom {@link Json} object to a Jackson {@link JsonNode} for read operations.
          *
@@ -86,7 +85,7 @@ public class JsonNodeConverters implements InitializingBean {
          * @throws JsonException If an {@link IOException} occurs during the conversion process.
          */
         @Override
-        public JsonNode convert(@NonNull Json source) {
+        public JsonNode convert(Json source) {
             try {
                 return ContextUtils.OBJECT_MAPPER.readTree(source.asArray());
             } catch (JacksonException e) {
@@ -102,7 +101,7 @@ public class JsonNodeConverters implements InitializingBean {
      */
     @Component
     @ReadingConverter
-    public static class MethodTypeReadConverter implements Converter<@NonNull String, @NonNull MethodType> {
+    public static class MethodTypeReadConverter implements Converter<String, MethodType> {
         /**
          * Converts a String to a MethodType enum value.
          *
@@ -110,7 +109,7 @@ public class JsonNodeConverters implements InitializingBean {
          * @return The corresponding MethodType enum value.
          */
         @Override
-        public MethodType convert(@NonNull String source) {
+        public MethodType convert(String source) {
             return MethodType.value(source);
         }
     }
@@ -122,7 +121,7 @@ public class JsonNodeConverters implements InitializingBean {
      */
     @Component
     @WritingConverter
-    public static class MethodTypeWriteConverter implements Converter<@NonNull MethodType, @NonNull String> {
+    public static class MethodTypeWriteConverter implements Converter<MethodType, String> {
         /**
          * Converts a MethodType enum value to its String representation.
          *
@@ -130,7 +129,7 @@ public class JsonNodeConverters implements InitializingBean {
          * @return The String representation of the MethodType.
          */
         @Override
-        public String convert(@NonNull MethodType source) {
+        public String convert(MethodType source) {
             return source.name();
         }
     }

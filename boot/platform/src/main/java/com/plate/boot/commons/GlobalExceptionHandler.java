@@ -2,7 +2,6 @@ package com.plate.boot.commons;
 
 import com.plate.boot.commons.exception.RestServerException;
 import io.r2dbc.spi.R2dbcException;
-import lombok.NonNull;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.*;
@@ -49,7 +48,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * The error response includes the request URI, the error message, and a custom title.
      */
     @ExceptionHandler(DataAccessException.class)
-    public Mono<ResponseEntity<@NonNull Object>> handleDataAccessException(DataAccessException ex, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Object>> handleDataAccessException(DataAccessException ex, ServerWebExchange exchange) {
         if (logger.isDebugEnabled()) {
             logger.error(ex.getLocalizedMessage(), ex);
         }
@@ -76,7 +75,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * The error response includes the request URI, the error message, and a custom title.
      */
     @ExceptionHandler(RuntimeException.class)
-    public Mono<ResponseEntity<@NonNull Object>> handleRuntimeException(RuntimeException ex, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Object>> handleRuntimeException(RuntimeException ex, ServerWebExchange exchange) {
         if (logger.isDebugEnabled()) {
             logger.error(ex.getMessage(), ex);
         }
@@ -99,10 +98,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @return a {@code Mono} with the {@code ResponseEntity} for the response
      */
     @Override
-    protected @NonNull Mono<ResponseEntity<@NonNull Object>> handleWebExchangeBindException(@NonNull WebExchangeBindException ex,
-                                                                                            @NonNull HttpHeaders headers,
-                                                                                            @NonNull HttpStatusCode status,
-                                                                                            @NonNull ServerWebExchange exchange) {
+    protected Mono<ResponseEntity<Object>> handleWebExchangeBindException(WebExchangeBindException ex,
+                                                                          HttpHeaders headers,
+                                                                          HttpStatusCode status,
+                                                                          ServerWebExchange exchange) {
         if (logger.isDebugEnabled()) {
             for (var err : ex.getAllErrors()) {
                 logger.error("Bind Request Error! Field: " + err.getObjectName() + ",Error: " + err.getDefaultMessage());
@@ -119,9 +118,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected @NonNull Mono<ResponseEntity<@NonNull Object>> handleServerWebInputException(
-            @NonNull ServerWebInputException ex, @NonNull HttpHeaders headers, @NonNull HttpStatusCode status,
-            @NonNull ServerWebExchange exchange) {
+    protected Mono<ResponseEntity<Object>> handleServerWebInputException(
+            ServerWebInputException ex, HttpHeaders headers, HttpStatusCode status,
+            ServerWebExchange exchange) {
 
         if (logger.isDebugEnabled()) {
             logger.error(ex.getCause().getMessage(), ex);

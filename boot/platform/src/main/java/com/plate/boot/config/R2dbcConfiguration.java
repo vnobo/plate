@@ -2,7 +2,6 @@ package com.plate.boot.config;
 
 import com.google.common.collect.Lists;
 import io.r2dbc.spi.ConnectionFactory;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.InitializingBean;
@@ -37,7 +36,7 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration implements In
      * @return A non-null instance of {@link ConnectionFactory} configured for R2DBC connectivity.
      */
     @Override
-    public @NonNull ConnectionFactory connectionFactory() {
+    public ConnectionFactory connectionFactory() {
         return factory;
     }
 
@@ -50,7 +49,7 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration implements In
      * and modifications to it will not affect the original configuration.
      */
     @Override
-    public @NonNull List<Object> getCustomConverters() {
+    public List<Object> getCustomConverters() {
         return Lists.newArrayList(customConverters);
     }
 

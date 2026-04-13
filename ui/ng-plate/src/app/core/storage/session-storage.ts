@@ -1,13 +1,20 @@
 import { isPlatformBrowser } from '@angular/common';
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SessionStorage {
+  private _platformId = inject<Object>(PLATFORM_ID);
+
   private isBrowser: boolean;
 
-  constructor(@Inject(PLATFORM_ID) private _platformId: Object) {
+  /** Inserted by Angular inject() migration for backwards compatibility */
+  constructor(...args: unknown[]);
+
+  constructor() {
+    const _platformId = this._platformId;
+
     this.isBrowser = isPlatformBrowser(_platformId);
   }
 

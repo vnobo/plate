@@ -3,8 +3,8 @@ package com.plate.boot.config;
 import com.redis.testcontainers.RedisContainer;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 /**
@@ -13,7 +13,7 @@ import org.testcontainers.utility.DockerImageName;
  * <p>
  * This configuration sets up the necessary infrastructure components for
  * testing,
- * including Redis and PostgresSQL containers.
+ * including Redis and PostgreSQL containers.
  * </p>
  *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>

@@ -5,7 +5,7 @@ import com.plate.boot.commons.query.QueryFragment;
 import com.plate.boot.commons.query.QueryHelper;
 import com.plate.boot.commons.query.QueryJsonHelper;
 import com.plate.boot.commons.utils.ContextUtils;
-import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.ObjectUtils;
@@ -18,12 +18,12 @@ import java.util.*;
  * such as having a unique code, being serializable, and perishable with a generic type identifier.
  * Implementing classes should provide concrete behavior for these base operations.
  */
-public interface BaseEntity<T> extends Serializable, Persistable<@NonNull T> {
+public interface BaseEntity<T> extends Serializable, Persistable<T> {
     /**
      * Support from for json column
      */
     @JsonIgnore
-    default Map<String, Object> getQuery() {
+    default @Nullable Map<String, Object> getQuery() {
         return null;
     }
 
@@ -31,7 +31,7 @@ public interface BaseEntity<T> extends Serializable, Persistable<@NonNull T> {
      * Support full text search for tsvector column
      */
     @JsonIgnore
-    default String getSearch() {
+    default @Nullable String getSearch() {
         return null;
     }
 
@@ -39,7 +39,7 @@ public interface BaseEntity<T> extends Serializable, Persistable<@NonNull T> {
      * Support security code for sensitive data
      */
     @JsonIgnore
-    default UUID getSecurityCode() {
+    default @Nullable UUID getSecurityCode() {
         return null;
     }
 
@@ -49,7 +49,7 @@ public interface BaseEntity<T> extends Serializable, Persistable<@NonNull T> {
      *
      * @return The unique identifier (UUID) of the entity.
      */
-    default <E> E getCode() {
+    default <E> @Nullable E getCode() {
         return null;
     }
 

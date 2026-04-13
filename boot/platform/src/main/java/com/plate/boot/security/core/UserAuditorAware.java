@@ -5,10 +5,10 @@ import com.plate.boot.security.SecurityDetails;
 import com.plate.boot.security.core.user.User;
 import com.plate.boot.security.core.user.UsersRepository;
 import lombok.extern.log4j.Log4j2;
+import org.jspecify.annotations.Nullable;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.ReactiveAuditorAware;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -33,7 +33,7 @@ public class UserAuditorAware implements ReactiveAuditorAware<UserAuditor> {
     /**
      * Cache instance used to store and retrieve user auditor information.
      */
-    private final Cache cache;
+    private final @Nullable Cache cache;
 
     /**
      * Repository for accessing user data.
@@ -67,7 +67,7 @@ public class UserAuditorAware implements ReactiveAuditorAware<UserAuditor> {
      * or an empty Mono if the auditor cannot be determined.
      */
     @Override
-    public @NonNull Mono<UserAuditor> getCurrentAuditor() {
+    public Mono<UserAuditor> getCurrentAuditor() {
         return ContextUtils.securityDetails().map(UserAuditor::withDetails);
     }
 
@@ -84,6 +84,12 @@ public class UserAuditorAware implements ReactiveAuditorAware<UserAuditor> {
      * @return A {@link Mono} that emits a single {@link User} object if found, or an empty {@link Mono} if no user matches the code.
      */
     public Mono<UserAuditor> loadByCode(UUID code) {
+        if (code == null) {
+            return Mono.empty();
+        }
+        if (this.cache == null) {
+            return this.usersRepository.findByCode(code).map(UserAuditor::withUser);
+        }
         UserAuditor userAuditor = this.cache.get(code, () -> null);
         return Mono.justOrEmpty(userAuditor).switchIfEmpty(this.usersRepository.findByCode(code).map(UserAuditor::withUser)
                 .doOnNext(sourceData -> this.cache.put(code, sourceData)));

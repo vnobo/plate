@@ -33,6 +33,8 @@ export interface Message {
   providedIn: 'root',
 })
 export class MessageService {
+  private appRef = inject(ApplicationRef);
+
   private readonly document = inject(DOCUMENT);
   private toastRef: ComponentRef<Toasts> | null = null;
   private readonly DEFAULT_TOAST_OPTIONS: Required<
@@ -43,7 +45,10 @@ export class MessageService {
     delay: 100000,
   };
 
-  constructor(private appRef: ApplicationRef) {}
+  /** Inserted by Angular inject() migration for backwards compatibility */
+  constructor(...args: unknown[]);
+
+  constructor() {}
 
   /**
    * Creates a toast component and attaches it to the DOM

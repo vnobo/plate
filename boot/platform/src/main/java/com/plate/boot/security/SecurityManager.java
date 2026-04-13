@@ -28,7 +28,6 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -61,8 +60,7 @@ import java.util.regex.Pattern;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class SecurityManager extends AbstractCache
-        implements ReactiveUserDetailsService, ReactiveUserDetailsPasswordService {
+public class SecurityManager extends AbstractCache implements ReactiveUserDetailsService, ReactiveUserDetailsPasswordService {
 
     /**
      * OAuth2 bind type pattern for validation
@@ -87,29 +85,23 @@ public class SecurityManager extends AbstractCache
      * Creates a new QueryFragment for querying group members
      */
     private QueryFragment createGroupMembersFragment() {
-        return QueryFragment
-                .from("se_group_members a", "join se_groups b on a.group_code=b.code")
-                .column("a.*", "b.name", "b.extend")
-                .where("a.user_code = :userCode");
+        return QueryFragment.from("se_group_members a", "join se_groups b on a.group_code=b.code")
+                .column("a.*", "b.name", "b.extend").where("a.user_code = :userCode");
     }
 
     /**
      * Creates a new QueryFragment for querying tenant members
      */
     private QueryFragment createTenantMembersFragment() {
-        return QueryFragment
-                .from("se_tenant_members a", "join se_tenants b on a.tenant_code=b.code")
-                .column("a.*", "b.name", "b.ddyextend")
-                .where("a.user_code = :userCode");
+        return QueryFragment.from("se_tenant_members a", "join se_tenants b on a.tenant_code=b.code")
+                .column("a.*", "b.name", "b.extend").where("a.user_code = :userCode");
     }
 
     /**
      * Creates a new QueryFragment for querying user authorities
      */
     private QueryFragment createUserAuthorityFragment() {
-        return QueryFragment
-                .from("se_authorities")
-                .column("*")
+        return QueryFragment.from("se_authorities").column("*")
                 .where("user_code = :userCode");
     }
 
@@ -117,13 +109,11 @@ public class SecurityManager extends AbstractCache
      * Creates a new QueryFragment for querying group authorities
      */
     private QueryFragment createGroupAuthorityFragment() {
-        return QueryFragment
-                .from("se_group_authorities ga",
+        return QueryFragment.from("se_group_authorities ga",
                         "join se_group_members gm on ga.group_code = gm.group_code",
                         "join se_users su on gm.user_code = su.code",
                         "join se_groups sg on gm.group_code = sg.code and sg.tenant_code = su.tenant_code")
-                .column("ga.*")
-                .where("gm.user_code = :userCode");
+                .column("ga.*").where("gm.user_code = :userCode");
     }
 
     /**
@@ -141,12 +131,11 @@ public class SecurityManager extends AbstractCache
      * @return A Mono emitting the updated UserDetails with the new password set.
      */
     @Override
-    public @NonNull Mono<@NonNull UserDetails> updatePassword(@NonNull UserDetails userDetails, String newPassword) {
+    public @NonNull Mono<@NonNull UserDetails> updatePassword(UserDetails userDetails, String newPassword) {
         Query query = Query.query(Criteria.where("username").is(userDetails.getUsername()).ignoreCase(true));
         Update update = Update.update("password", newPassword);
         return DatabaseUtils.ENTITY_TEMPLATE.update(query, update, User.class)
-                .flatMap(_ -> Mono.just(userDetails))
-                .doAfterTerminate(() -> this.cache.clear());
+                .flatMap(_ -> Mono.just(userDetails)).doAfterTerminate(() -> this.cache.clear());
     }
 
     /**
@@ -156,11 +145,8 @@ public class SecurityManager extends AbstractCache
      *                If the request contains a non-empty 'code', it will be treated as a modification request.
      * @return A Mono emitting the updated or newly registered User instance upon successful operation.
      */
-    public Mono<User> registerOrModifyUser(UserReq request) {
-        if (request == null || ObjectUtils.isEmpty(request.getCode())) {
-            if (request == null) {
-                return Mono.error(new IllegalArgumentException("User request cannot be null"));
-            }
+    public Mono<@NonNull User> registerOrModifyUser(UserReq request) {
+        if (ObjectUtils.isEmpty(request.getCode())) {
             return this.usersService.add(request);
         }
         return this.usersService.operate(request);
@@ -176,12 +162,11 @@ public class SecurityManager extends AbstractCache
      * @param openid   The unique identifier provided by the OAuth2 provider for the user.
      * @return A Mono emitting the User if found, or an empty Mono if no user matches the given OAuth2 binding data.
      */
-    public Mono<User> loadByOauth2(String bindType, String openid) {
-        if (!StringUtils.hasText(bindType) || !OAUTH2_BIND_TYPE_PATTERN.matcher(bindType).matches() ||
-                !StringUtils.hasText(openid)) {
+    public Mono<@NonNull User> loadByOauth2(String bindType, String openid) {
+        if (!StringUtils.hasText(bindType) || !OAUTH2_BIND_TYPE_PATTERN.matcher(bindType).matches()
+                || !StringUtils.hasText(openid)) {
             return Mono.error(new IllegalArgumentException("Invalid bindType or openid parameter"));
         }
-
         QueryFragment queryFragment = QueryFragment.from("se_users").column("*")
                 .where("extend->'oauth2'->:bindType->>'openid'::varchar = :openid");
         queryFragment.put("bindType", bindType);
@@ -198,12 +183,11 @@ public class SecurityManager extends AbstractCache
      * @param username The username of the user to be loaded.
      * @return A Mono emitting the User object if found, or an empty Mono otherwise.
      */
-    public Mono<User> loadByUsername(String username) {
+    public Mono<@NonNull User> loadByUsername(String username) {
         Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
         var userFlux = DatabaseUtils.query(query, User.class);
-        return this.queryWithCache(username, userFlux).singleOrEmpty()
-                .switchIfEmpty(Mono.defer(() ->
-                        Mono.error(new UsernameNotFoundException("登录用户不存在,用户名: " + username))));
+        return this.queryWithCache(username, userFlux).singleOrEmpty().switchIfEmpty(Mono.defer(() ->
+                Mono.error(new UsernameNotFoundException("登录用户不存在,用户名: " + username))));
     }
 
     /**
@@ -217,23 +201,17 @@ public class SecurityManager extends AbstractCache
      * In case of failure, an AuthenticationServiceException is propagated with a relevant message.
      */
     @Override
-    public @NonNull Mono<UserDetails> findByUsername(@NonNull String username) {
-        if (!StringUtils.hasText(username)) {
-            return Mono.error(new IllegalArgumentException("Username cannot be null or empty"));
-        }
-        
-        Mono<Tuple2<User, List<GrantedAuthority>>> userMono = this.loadByUsername(username)
-                .zipWhen(user -> this.authorities(user.getCode()));
-        Mono<SecurityDetails> userDetailsMono = userMono
-                .flatMap(tuple2 -> buildUserDetails(tuple2.getT1(), new HashSet<>(tuple2.getT2())));
-        return userDetailsMono.cast(UserDetails.class)
-                .onErrorResume(UsernameNotFoundException.class, Mono::error)
+    public @NonNull Mono<@NonNull UserDetails> findByUsername(@NonNull String username) {
+        var userMono = this.loadByUsername(username).zipWhen(user -> this.authorities(user.getCode()));
+        var userDetailsMono = userMono.flatMap(tuple2 ->
+                buildUserDetails(tuple2.getT1(), new HashSet<>(tuple2.getT2())));
+        return userDetailsMono.cast(UserDetails.class).onErrorResume(UsernameNotFoundException.class, Mono::error)
                 .onErrorResume(throwable -> Mono.defer(() ->
                         Mono.error(new BadCredentialsException(throwable.getMessage(), throwable))))
                 .publishOn(Schedulers.boundedElastic())
                 .doOnSuccess(details -> this.loginSuccess(details.getUsername())
                         .subscribe(res -> log.debug("登录成功! 登录信息修改: {}", res)))
-                .doOnError(throwable -> log.warn("用户 {} 登录失败: {}", username, throwable.getMessage()));
+                .doOnError(throwable -> log.error("用户 {} 登录失败: {}", username, throwable.getMessage()));
     }
 
     /**
@@ -244,18 +222,13 @@ public class SecurityManager extends AbstractCache
      * @param authorities A set of GrantedAuthority representing the user's permissions.
      * @return A Mono emitting the fully constructed SecurityDetails object, including group and tenant memberships.
      */
-    private Mono<SecurityDetails> buildUserDetails(User user, Set<GrantedAuthority> authorities) {
-        if (user == null) {
-            return Mono.error(new IllegalArgumentException("User cannot be null"));
+    private Mono<@NonNull SecurityDetails> buildUserDetails(User user, Set<GrantedAuthority> authorities) {
+        if (ObjectUtils.isEmpty(user.getCode())) {
+            return Mono.error(new BadCredentialsException("Invalid user code!"));
         }
-        if (authorities == null) {
-            return Mono.error(new IllegalArgumentException("Authorities cannot be null"));
-        }
-        
-        SecurityDetails userDetails = SecurityDetails.of(user, authorities,
-                Map.of("username", user.getUsername(), "userCode", user.getCode()));
-        Mono<Tuple2<List<GroupMemberRes>, List<TenantMemberRes>>> groupsAndTenantsMono =
-                Mono.zipDelayError(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
+        SecurityDetails userDetails = SecurityDetails.of(user, authorities, Map.of("username", user.getUsername(),
+                "userCode", user.getCode()));
+        var groupsAndTenantsMono = Mono.zipDelayError(this.loadGroups(user.getCode()), this.loadTenants(user.getCode()));
         return groupsAndTenantsMono.doOnNext(tuple2 -> {
             userDetails.setGroups(new HashSet<>(tuple2.getT1()));
             userDetails.setTenants(new HashSet<>(tuple2.getT2()));
@@ -272,16 +245,11 @@ public class SecurityManager extends AbstractCache
      * @return A Mono emitting a sorted list of {@link GroupMemberRes} representing the user's group memberships,
      * once the asynchronous operation completes successfully.
      */
-    private Mono<List<GroupMemberRes>> loadGroups(UUID userCode) {
-        if (userCode == null) {
-            return Mono.error(new IllegalArgumentException("User code cannot be null"));
-        }
-
+    private Mono<@NonNull List<GroupMemberRes>> loadGroups(UUID userCode) {
         QueryFragment fragment = createGroupMembersFragment();
         fragment.put("userCode", userCode);
         String cacheKey = CACHE_KEY_USER_GROUPS_PREFIX + userCode;
-        return this.queryWithCache(cacheKey, fragment.querySql(),
-                fragment, GroupMemberRes.class).collectSortedList();
+        return this.queryWithCache(cacheKey, fragment.querySql(), fragment, GroupMemberRes.class).collectSortedList();
     }
 
     /**
@@ -292,16 +260,11 @@ public class SecurityManager extends AbstractCache
      * @param userCode The unique code identifying the user whose tenant members are to be loaded.
      * @return A Mono that, when subscribed to, emits a sorted list of {@link TenantMemberRes} objects representing the tenant members.
      */
-    private Mono<List<TenantMemberRes>> loadTenants(UUID userCode) {
-        if (userCode == null) {
-            return Mono.error(new IllegalArgumentException("User code cannot be null"));
-        }
-
+    private Mono<@NonNull List<TenantMemberRes>> loadTenants(UUID userCode) {
         QueryFragment fragment = createTenantMembersFragment();
         fragment.put("userCode", userCode);
         String cacheKey = CACHE_KEY_USER_TENANTS_PREFIX + userCode;
-        return this.queryWithCache(cacheKey, fragment.querySql(),
-                fragment, TenantMemberRes.class).collectSortedList();
+        return this.queryWithCache(cacheKey, fragment.querySql(), fragment, TenantMemberRes.class).collectSortedList();
     }
 
     /**
@@ -313,13 +276,8 @@ public class SecurityManager extends AbstractCache
      * @return A Mono that, when subscribed to, emits a List containing all distinct GrantedAuthority
      * instances granted to the user, including both individual and group authorities.
      */
-    private Mono<List<GrantedAuthority>> authorities(UUID userCode) {
-        if (userCode == null) {
-            return Mono.error(new IllegalArgumentException("User code cannot be null"));
-        }
-        
-        return this.getAuthorities(userCode)
-                .concatWith(this.getGroupAuthorities(userCode)).distinct().collectList();
+    private Mono<@NonNull List<GrantedAuthority>> authorities(UUID userCode) {
+        return this.getAuthorities(userCode).concatWith(this.getGroupAuthorities(userCode)).distinct().collectList();
     }
 
     /**
@@ -328,16 +286,11 @@ public class SecurityManager extends AbstractCache
      * @param userCode The unique identifier for the user whose authorities are to be fetched.
      * @return A Flux emitting GrantedAuthority instances representing the authorities assigned to the user.
      */
-    private Flux<GrantedAuthority> getAuthorities(UUID userCode) {
-        if (userCode == null) {
-            return Flux.error(new IllegalArgumentException("User code cannot be null"));
-        }
-
+    private Flux<@NonNull GrantedAuthority> getAuthorities(UUID userCode) {
         QueryFragment fragment = createUserAuthorityFragment();
         fragment.put("userCode", userCode);
         String cacheKey = CACHE_KEY_USER_AUTHORITIES_PREFIX + userCode;
-        return this.queryWithCache(cacheKey, fragment.querySql(),
-                fragment, UserAuthority.class).cast(GrantedAuthority.class);
+        return this.queryWithCache(cacheKey, fragment.querySql(), fragment, UserAuthority.class).cast(GrantedAuthority.class);
     }
 
     /**
@@ -346,16 +299,11 @@ public class SecurityManager extends AbstractCache
      * @param userCode The unique code identifying the user's group.
      * @return A {@link Flux} emitting {@link GrantedAuthority} instances representing the authorities granted to the group.
      */
-    private Flux<GrantedAuthority> getGroupAuthorities(UUID userCode) {
-        if (userCode == null) {
-            return Flux.error(new IllegalArgumentException("User code cannot be null"));
-        }
-
+    private Flux<@NonNull GrantedAuthority> getGroupAuthorities(@NonNull UUID userCode) {
         QueryFragment fragment = createGroupAuthorityFragment();
         fragment.put("userCode", userCode);
         String cacheKey = CACHE_KEY_GROUP_AUTHORITIES_PREFIX + userCode;
-        return this.queryWithCache(cacheKey, fragment.querySql(),
-                fragment, GroupAuthority.class).cast(GrantedAuthority.class);
+        return this.queryWithCache(cacheKey, fragment.querySql(), fragment, GroupAuthority.class).cast(GrantedAuthority.class);
     }
 
     /**
@@ -364,15 +312,11 @@ public class SecurityManager extends AbstractCache
      * @param username The username of the user who successfully logged in.
      * @return A Mono emitting the count of documents updated, which should be 1 if the update was successful.
      */
-    private Mono<Long> loginSuccess(String username) {
-        if (!StringUtils.hasText(username)) {
-            return Mono.error(new IllegalArgumentException("Username cannot be null or empty"));
-        }
-        
+    private Mono<@NonNull Long> loginSuccess(String username) {
         Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
         Update update = Update.update("loginTime", LocalDateTime.now());
         return DatabaseUtils.ENTITY_TEMPLATE.update(query, update, User.class)
-                .doOnSuccess(res -> log.info("用户 {} 登录成功，更新登录时间", username))
+                .doOnSuccess(_ -> log.info("用户 {} 登录成功，更新登录时间", username))
                 .doOnError(error -> log.warn("用户 {} 登录时间更新失败: {}", username, error.getMessage()));
     }
 

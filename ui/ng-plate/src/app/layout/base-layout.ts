@@ -1,11 +1,4 @@
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  inject,
-  OnDestroy,
-} from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { LayoutAside } from './layout-aside';
 import { LayoutHeader } from './layout-header';

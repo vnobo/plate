@@ -2,8 +2,8 @@ package com.plate.boot.commons.exception;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
 import org.springframework.web.server.ServerErrorException;
 
 import java.io.Serializable;

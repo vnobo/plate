@@ -2,7 +2,6 @@ package com.plate.boot.commons.base;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NonNull;
 import org.springframework.core.ResolvableType;
 import org.springframework.data.relational.core.mapping.event.AbstractRelationalEvent;
 
@@ -34,7 +33,7 @@ public abstract class AbstractEvent<E> extends AbstractRelationalEvent<E> {
      * @param entity the entity associated with the event, must not be null
      * @param kind   the kind of event, must not be null
      */
-    protected AbstractEvent(@NonNull E entity, @NonNull Kind kind) {
+    protected AbstractEvent(E entity, Kind kind) {
         super(entity);
         this.entity = entity;
         this.kind = kind;
@@ -46,7 +45,7 @@ public abstract class AbstractEvent<E> extends AbstractRelationalEvent<E> {
      * @return the resolvable type
      */
     @Override
-    public @NonNull ResolvableType getResolvableType() {
+    public ResolvableType getResolvableType() {
         return ResolvableType.forType(getType());
     }
 
@@ -56,7 +55,7 @@ public abstract class AbstractEvent<E> extends AbstractRelationalEvent<E> {
      * @return the entity
      */
     @Override
-    public @NonNull E getEntity() {
+    public E getEntity() {
         return this.entity;
     }
 
@@ -67,7 +66,7 @@ public abstract class AbstractEvent<E> extends AbstractRelationalEvent<E> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public @NonNull Class<E> getType() {
+    public Class<E> getType() {
         return (Class<E>) this.getClass();
     }
 

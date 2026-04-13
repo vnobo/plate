@@ -3,7 +3,6 @@ package com.plate.boot.config;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.security.oauth2.Oauth2SuccessHandler;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.security.autoconfigure.web.StaticResourceLocation;
@@ -210,8 +209,8 @@ public class SecurityConfiguration {
          * indicating standard CSRF protection should apply.
          */
         @Override
-        public @NonNull Mono<@NonNull MatchResult> matches(@NonNull ServerWebExchange exchange) {
-            Mono<@NonNull MatchResult> ignoreMono = new OrServerWebExchangeMatcher(allowedMatchers)
+        public Mono<MatchResult> matches(ServerWebExchange exchange) {
+            Mono<MatchResult> ignoreMono = new OrServerWebExchangeMatcher(allowedMatchers)
                     .matches(exchange).filter(MatchResult::isMatch)
                     .flatMap(res -> MatchResult.notMatch())
                     .switchIfEmpty(Mono.defer(MatchResult::match));
@@ -251,7 +250,7 @@ public class SecurityConfiguration {
          * value (Void).
          */
         @Override
-        public @NonNull Mono<@NonNull Void> commence(@NonNull ServerWebExchange exchange, @NonNull AuthenticationException e) {
+        public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException e) {
             log.error("Authentication Failure: {}", e.getMessage(), e);
             ErrorResponse errorResponse = createErrorResponse(exchange, e);
             ServerHttpResponse response = exchange.getResponse();
