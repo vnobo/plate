@@ -52,3 +52,69 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Design services around a single responsibility
 - Use the `providedIn: 'root'` option for singleton services
 - Use the `inject()` function instead of constructor injection
+
+# ng-web — Agent Guide
+
+Angular 21 SSR app. Minimal scaffold, not the production app (that's `ui/ng-plate/`).
+
+## Commands (from this directory)
+
+- Dev server: `pnpm start` (port 4200)
+- Build: `pnpm build`
+- Test: `pnpm test` (Vitest via `@angular/build:unit-test`, NOT Jasmine/Karma)
+- SSR serve: `pnpm serve:ssr:ng-web` (port 4000)
+- Lint/format: Prettier only — no ESLint configured. Run `npx prettier --check .`
+
+## Angular 21 specifics
+
+- Standalone components are the default. Do NOT add `standalone: true`.
+- Use `input()` / `output()` signal functions, not `@Input` / `@Output` decorators.
+- Use `computed()` for derived state.
+- Use native control flow (`@if`, `@for`, `@switch`) — no `*ngIf` / `*ngFor`.
+- Host bindings go in the `host` object inside `@Component` — no `@HostBinding` / `@HostListener`.
+- Use `inject()` instead of constructor injection.
+- Use `class` / `style` bindings directly — no `ngClass` / `ngStyle`.
+- `NgOptimizedImage` for static images (not inline base64).
+- Always set `changeDetection: ChangeDetectionStrategy.OnPush`.
+
+## Prettier / EditorConfig
+
+- 100 char print width, single quotes, 2-space indent.
+- HTML uses `angular` parser (set in `.prettierrc` overrides).
+
+## SSR
+
+- Entry: `src/server.ts` — Express 5 serving Angular via `@angular/ssr/node`.
+- Default SSR port: 4000 (overridable via `PORT` env var).
+- Browser build output: `dist/ng-web/browser/`.
+- Server build output: `dist/ng-web/server/`.
+
+## Testing
+
+- Only test file currently: `src/app/app.spec.ts`.
+- Tests use `TestBed.configureTestingModule({ imports: [App] })` — import standalone components directly.
+- Expect Vitest globals (`describe` / `it` / `expect`) — no Jasmine needed.
+
+## Project structure
+
+```
+src/
+├── main.ts              # Browser bootstrap
+├── main.server.ts       # Server bootstrap
+├── server.ts            # Express SSR server
+├── index.html
+├── styles.scss          # Global styles
+└── app/
+    ├── app.ts           # Root component (selector: app-root)
+    ├── app.config.ts    # Browser providers (router, hydration)
+    ├── app.config.server.ts
+    ├── app.routes.ts    # Route definitions (currently empty)
+    ├── app.routes.server.ts
+    └── app.spec.ts      # Root component test
+```
+
+## Monorepo context
+
+- This repo (`E:\workspace\plate`) is a monorepo: `boot/` (Spring Boot 4 + Java 25), `ui/ng-plate/` (production Angular), `ui/ng-web/` (this scaffold).
+- Package manager: pnpm 10.x. Never use npm or yarn.
+- Root `AGENTS.md` has backend commands and monorepo structure.
