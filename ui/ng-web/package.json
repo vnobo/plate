@@ -10,7 +10,7 @@
     "serve:ssr:ng-web": "node dist/ng-web/server/server.mjs"
   },
   "private": true,
-  "packageManager": "pnpm@10.33.2",
+  "packageManager": "pnpm@11.0.9",
   "dependencies": {
     "@angular/common": "^21.2.0",
     "@angular/compiler": "^21.2.0",
