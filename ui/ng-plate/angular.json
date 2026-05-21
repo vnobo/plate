@@ -2,7 +2,7 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm",
+    "packageManager": "pnpm",
     "analytics": "ab5cf261-b54f-487a-9834-6dfe24cba00e"
   },
   "newProjectRoot": "projects",
@@ -24,6 +24,11 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "allowedCommonJsDependencies": [
+              "dayjs",
+              "dayjs/locale/zh-cn",
+              "dayjs/plugin/isLeapYear"
+            ],
             "assets": [
               {
                 "glob": "**/*",
