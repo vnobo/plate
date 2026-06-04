@@ -2,7 +2,7 @@
 
 ## Monorepo Structure
 
-- `boot/` — Spring Boot 4.0.0-M3 backend (Java 25, Gradle, PostgreSQL, Redis)
+- `boot/` — Spring Boot 4.0.6 backend (Java 25, Gradle, PostgreSQL, Redis)
 - `ui/ng-plate/` — production Angular app (Tabler UI, SSR, PWA, auth services)
 - `ui/ng-web/` — fresh Angular 21 scaffold (minimal, placeholder)
 
