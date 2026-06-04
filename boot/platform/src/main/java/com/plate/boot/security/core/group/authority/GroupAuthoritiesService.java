@@ -1,0 +1,103 @@
+package com.plate.boot.security.core.group.authority;
+
+
+import com.plate.boot.commons.base.AbstractCache;
+import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.relational.menus.MenuEvent;
+import com.plate.boot.security.core.group.GroupEvent;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.relational.core.query.Query;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.Set;
+
+/**
+ * Group Authorities Service
+ * Provides core business functions for managing group authorities including search, operate (create or update),
+ * save, and delete operations with reactive support. This service utilizes caching mechanisms to improve
+ * performance on frequently accessed data.
+ *
+ * @author <a href="https://github.com/vnobo">Alex bob</a>
+ */
+@Log4j2
+@Service
+@RequiredArgsConstructor
+public class GroupAuthoritiesService extends AbstractCache {
+
+    private final GroupAuthoritiesRepository authoritiesRepository;
+
+    /**
+     * Search for group authorities based on the provided request criteria and pagination information
+     *
+     * @param request  The search criteria for group authorities
+     * @param pageable Pagination information
+     * @return A Flux of GroupAuthority objects matching the search criteria
+     */
+    public Flux<GroupAuthority> search(GroupAuthorityReq request, Pageable pageable) {
+        Query query = Query.query(request.toCriteria()).with(pageable);
+        return super.queryWithCache(BeanUtils.cacheKey(request, pageable), query, GroupAuthority.class);
+    }
+
+    /**
+     * Operate on a group authority (create or update based on existence)
+     *
+     * @param request The group authority operation request
+     * @return A Mono containing the operated GroupAuthority
+     */
+    public Mono<GroupAuthority> operate(GroupAuthorityReq request) {
+        return this.authoritiesRepository
+                .findByGroupCodeAndAuthority(request.getGroupCode(), request.getAuthority())
+                .switchIfEmpty(Mono.defer(() -> this.save(request.toGroupAuthority())))
+                .doAfterTerminate(() -> this.cache.clear());
+    }
+
+    /**
+     * Save a group authority, handling both creation and update scenarios
+     *
+     * @param groupAuthority The group authority to save
+     * @return A Mono containing the saved GroupAuthority
+     */
+    public Mono<GroupAuthority> save(GroupAuthority groupAuthority) {
+        // Create new group authority
+        if (groupAuthority.isNew()) {
+            return this.authoritiesRepository.save(groupAuthority);
+        } else {
+            // Update existing group authority
+            assert groupAuthority.getId() != null;
+            return this.authoritiesRepository.findById(groupAuthority.getId())
+                    .flatMap(old -> this.authoritiesRepository.save(groupAuthority));
+        }
+    }
+
+    /**
+     * Delete a group authority based on the provided request
+     *
+     * @param request The group authority deletion request
+     * @return A Mono representing completion of the deletion operation
+     */
+    public Mono<Void> delete(GroupAuthorityReq request) {
+        return this.authoritiesRepository.delete(request.toGroupAuthority())
+                .doAfterTerminate(() -> this.cache.clear());
+    }
+
+    @EventListener(value = GroupEvent.class, condition = "#event.kind.name() == 'DELETE'")
+    public void onUserDeletedEvent(GroupEvent event) {
+        this.authoritiesRepository.deleteByGroupCode(event.getEntity().getCode())
+                .doAfterTerminate(() -> this.cache.clear())
+                .subscribe(res -> log.debug("Deleted group authorities by code [{}], " +
+                        "result count [{}].", event.getEntity().getCode(), res));
+    }
+
+    @EventListener(value = MenuEvent.class, condition = "#event.kind.name() == 'DELETE'")
+    public void onMenuDeletedEvent(MenuEvent event) {
+        this.authoritiesRepository.deleteByAuthorityIn(Set.of(event.getEntity().getAuthority()))
+                .doAfterTerminate(() -> this.cache.clear())
+                .subscribe(res -> log.debug("Deleted group authorities by authority [{}], " +
+                        "result count [{}].", event.getEntity().getCode(), res));
+    }
+}

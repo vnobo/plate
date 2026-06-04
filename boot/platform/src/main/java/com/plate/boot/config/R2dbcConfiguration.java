@@ -1,0 +1,60 @@
+package com.plate.boot.config;
+
+import com.google.common.collect.Lists;
+import io.r2dbc.spi.ConnectionFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
+import org.springframework.data.r2dbc.config.EnableR2dbcAuditing;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import java.util.List;
+
+/**
+ * Configures R2DBC (Reactive Relational Database Connectivity) settings, converters, and auditing for the application.
+ * This class sets up the R2DBC connection factory, custom converters, enables transaction management,
+ * and provides an auditor aware component for reactive auditing purposes.
+ */
+@Log4j2
+@Configuration(proxyBeanMethods = false)
+@EnableTransactionManagement
+@EnableR2dbcAuditing
+@RequiredArgsConstructor
+public class R2dbcConfiguration extends AbstractR2dbcConfiguration implements InitializingBean {
+
+    private final List<Converter<?, ?>> customConverters;
+    private final ConnectionFactory factory;
+
+    /**
+     * Establishes and returns the configured R2DBC Connection Factory instance.
+     * This method is part of the configuration setup for R2DBC within the application,
+     * providing the necessary connection details to interact with the database in a reactive manner.
+     *
+     * @return A non-null instance of {@link ConnectionFactory} configured for R2DBC connectivity.
+     */
+    @Override
+    public ConnectionFactory connectionFactory() {
+        return factory;
+    }
+
+    /**
+     * Retrieves a list of custom converters that have been configured for the application.
+     * These converters are typically used to customize data binding between Java objects and
+     * the database, enabling the application to handle specific data types or transformations.
+     *
+     * @return A non-null list containing instances of custom converters. The list is a fresh copy
+     * and modifications to it will not affect the original configuration.
+     */
+    @Override
+    public List<Object> getCustomConverters() {
+        return Lists.newArrayList(customConverters);
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        log.debug("R2DBC configuration initialized!");
+    }
+}

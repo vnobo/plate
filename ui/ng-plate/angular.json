@@ -1,0 +1,127 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "pnpm",
+    "analytics": "ab5cf261-b54f-487a-9834-6dfe24cba00e"
+  },
+  "newProjectRoot": "projects",
+  "projects": {
+    "ng-plate": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/main.ts",
+            "tsConfig": "tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "allowedCommonJsDependencies": [
+              "dayjs",
+              "dayjs/locale/zh-cn",
+              "dayjs/plugin/isLeapYear"
+            ],
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              {
+                "input": "@tabler/core/dist/css/tabler.css",
+                "bundleName": "tabler-style"
+              },
+              {
+                "input": "@tabler/core/dist/css/tabler-themes.css",
+                "bundleName": "tabler-themes-style"
+              },
+              {
+                "input": "@tabler/core/dist/css/tabler-socials.css",
+                "bundleName": "tabler-socials-style"
+              },
+              "src/styles.scss"
+            ],
+            "scripts": [
+              {
+                "input": "@tabler/core/dist/js/tabler.js",
+                "bundleName": "tabler-script"
+              },
+              {
+                "input": "@tabler/core/dist/js/tabler-theme.js",
+                "bundleName": "tabler-theme-script"
+              }
+            ],
+            "server": "src/main.server.ts",
+            "outputMode": "server",
+            "ssr": {
+              "entry": "src/server.ts"
+            }
+          },
+          "configurations": {
+            "production": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": true
+                },
+                "fonts": true
+              },
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all",
+              "serviceWorker": "ngsw-config.json"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/envs/env.ts",
+                  "with": "src/envs/env.dev.ts"
+                }
+              ]
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "ng-plate:build:production"
+            },
+            "development": {
+              "buildTarget": "ng-plate:build:development",
+              "proxyConfig": "proxy.conf.json"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test"
+        }
+      }
+    }
+  }
+}

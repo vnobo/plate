@@ -1,0 +1,119 @@
+package com.plate.boot.security.core.tenant;
+
+import com.plate.boot.commons.query.QueryFragment;
+import com.plate.boot.commons.utils.BeanUtils;
+import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.commons.utils.DatabaseUtils;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.time.Duration;
+
+/**
+ * Service class for managing tenants.
+ * This class provides methods for searching, paginating, operating, deleting, and saving tenants.
+ * It uses reactive programming with Project Reactor.
+ * <p>
+ * The class is annotated with \@Service to indicate that it's a service component in the Spring context.
+ * It is also annotated with \@RequiredArgsConstructor to generate a constructor with required arguments.
+ * <p>
+ * \@author
+ * <a href="https://github.com/vnobo">Alex bob</a>
+ */
+@Service
+@RequiredArgsConstructor
+public class TenantsService {
+
+    /**
+     * Repository for managing tenants.
+     */
+    private final TenantsRepository tenantsRepository;
+
+    /**
+     * Searches for tenants based on the given request and pageable parameters.
+     *
+     * @param request  the tenant request containing search criteria
+     * @param pageable the pagination information
+     * @return a Flux emitting the tenants that match the search criteria
+     */
+    @Cacheable(cacheNames = "tenants", key = "T(com.plate.boot.commons.utils.BeanUtils).cacheKey(#request,#pageable)")
+    public Flux<Tenant> search(TenantReq request, Pageable pageable) {
+        QueryFragment queryFragment = request.query().pageable(pageable);
+        return DatabaseUtils.query(queryFragment.querySql(), queryFragment, Tenant.class);
+    }
+
+    /**
+     * Paginates the tenants based on the given request and pageable parameters.
+     *
+     * @param request  the tenant request containing search criteria
+     * @param pageable the pagination information
+     * @return a Mono emitting a Page of tenants that match the search criteria
+     */
+    @Cacheable(cacheNames = "tenants", key = "T(com.plate.boot.commons.utils.BeanUtils).cacheKey(#request,#pageable)")
+    public Mono<Page<Tenant>> page(TenantReq request, Pageable pageable) {
+        var searchMono = this.search(request, pageable).collectList();
+        QueryFragment queryFragment = request.query();
+        var countMono = DatabaseUtils.count(queryFragment.countSql(), queryFragment);
+        return searchMono.zipWith(countMono)
+                .map(tuple2 -> new PageImpl<>(tuple2.getT1(), pageable, tuple2.getT2()));
+    }
+
+    /**
+     * Operates on a tenant based on the given request.
+     * If the tenant exists, it updates the tenant; otherwise, it creates a new tenant.
+     *
+     * @param request the tenant request containing tenant information
+     * @return a Mono emitting the operated tenant
+     */
+    @CacheEvict(cacheNames = "tenants", allEntries = true)
+    public Mono<Tenant> operate(TenantReq request) {
+        var tenantMono = this.tenantsRepository.findByCode(request.getCode()).defaultIfEmpty(request.toTenant());
+        tenantMono = tenantMono.flatMap(data -> {
+            BeanUtils.copyProperties(request, data);
+            return this.save(data);
+        });
+        return tenantMono;
+    }
+
+    /**
+     * Deletes a tenant based on the given request.
+     * It deletes the tenant and its associated members.
+     *
+     * @param request the tenant request containing tenant information
+     * @return a Mono indicating when the deletion is complete
+     */
+    @CacheEvict(cacheNames = "tenants", allEntries = true)
+    public Mono<Void> delete(TenantReq request) {
+        return this.tenantsRepository.findByCode(request.getCode())
+                .doOnNext(res -> ContextUtils.eventPublisher(TenantEvent.delete(res)))
+                .delayElement(Duration.ofSeconds(2))
+                .flatMap(this.tenantsRepository::delete);
+    }
+
+    /**
+     * Saves a tenant.
+     * If the tenant is new, it creates a new tenant; otherwise, it updates the existing tenant.
+     *
+     * @param tenant the tenant to be saved
+     * @return a Mono emitting the saved tenant
+     */
+    @CacheEvict(cacheNames = "tenants", allEntries = true)
+    public Mono<Tenant> save(Tenant tenant) {
+        if (tenant.isNew()) {
+            return this.tenantsRepository.save(tenant);
+        } else {
+            assert tenant.getId() != null;
+            return this.tenantsRepository.findById(tenant.getId()).flatMap(old -> {
+                tenant.setCreatedAt(old.getCreatedAt());
+                return this.tenantsRepository.save(tenant);
+            });
+        }
+    }
+}

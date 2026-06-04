@@ -1,0 +1,45 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# AI Tools
+.claude/
+.agents/
+.roo/
+.trae/
+.lingma/
+CLAUDE.md
+AGENTS.md
+QWEN.md
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+build/
+out/
+target/
+.gradle/
+
+# Node
+node_modules/
+.angular/
+dist/
+.pnpm-store/
+
+# Environment
+.env
+.env.*
+*.p12
+*.jks
+*.pem
+*.key
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
