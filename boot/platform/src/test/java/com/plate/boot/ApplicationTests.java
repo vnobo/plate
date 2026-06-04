@@ -13,7 +13,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.time.Duration;
 import java.util.Base64;
@@ -54,8 +54,8 @@ public class ApplicationTests {
 
     private final ApplicationContext applicationContext;
 
-    private static RedisContainer redisContainer;
-    private static PostgreSQLContainer<?> postgresContainer;
+    private static final RedisContainer redisContainer;
+    private static final PostgreSQLContainer postgresContainer;
 
     static {
         redisContainer = new RedisContainer("redis:latest");
@@ -63,7 +63,7 @@ public class ApplicationTests {
 
         var postgresImage = org.testcontainers.utility.DockerImageName.parse("alexbob/postgres")
                 .asCompatibleSubstituteFor("postgres");
-        postgresContainer = new PostgreSQLContainer<>(postgresImage)
+        postgresContainer = new PostgreSQLContainer(postgresImage)
                 .waitingFor(org.testcontainers.containers.wait.strategy.Wait
                         .forLogMessage("^.*数据库系统准备接受连接.*$", 2));
         postgresContainer.start();
