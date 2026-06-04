@@ -256,9 +256,14 @@ public class SecurityConfiguration {
             ServerHttpResponse response = exchange.getResponse();
             response.setStatusCode(errorResponse.getStatusCode());
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-            var bytes = BeanUtils.objectToBytes(errorResponse.getBody());
-            var buffer = response.bufferFactory().wrap(bytes);
-            return response.writeWith(Mono.just(buffer)).doOnTerminate(() -> DataBufferUtils.release(buffer));
+            var body = errorResponse.getBody();
+            if (body != null) {
+                var bytes = BeanUtils.objectToBytes(body);
+                var buffer = response.bufferFactory().wrap(bytes);
+                return response.writeAndFlushWith(Mono.just(Mono.just(buffer)))
+                        .doFinally(signalType -> DataBufferUtils.release(buffer));
+            }
+            return response.setComplete();
         }
 
         /**

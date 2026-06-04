@@ -187,9 +187,9 @@ public class ApplicationTests {
     class CsrfTokenTests {
 
         @Test
-        @DisplayName("Obtain CSRF Token - Unauthenticated User Redirect")
+        @DisplayName("Obtain CSRF Token - Unauthenticated User Rejected")
         @Order(1)
-        void shouldRedirectUnauthenticatedUserForCsrfToken() {
+        void shouldRejectUnauthenticatedUserForCsrfToken() {
             webTestClient.get()
                     .uri("/sec/v1/oauth2/csrf")
                     .exchange()
@@ -348,14 +348,15 @@ public class ApplicationTests {
         }
 
         @Test
-        @DisplayName("Unauthenticated Password Change - 401")
+        @DisplayName("Unauthenticated Password Change - 403 (CSRF)")
         @Order(2)
         void shouldRejectChangePasswordWithoutAuthentication() {
             webTestClient.post()
                     .uri("/sec/v1/oauth2/change/password")
-                    .bodyValue("{\"password\":\"oldPass\",\"newPassword\":\"newPass\"}")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(Map.of("password", "oldPass", "newPassword", "newPass"))
                     .exchange()
-                    .expectStatus().is4xxClientError();
+                    .expectStatus().isForbidden();
         }
 
         @Test
