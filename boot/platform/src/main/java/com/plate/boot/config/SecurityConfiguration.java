@@ -5,6 +5,7 @@ import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.security.oauth2.Oauth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.security.autoconfigure.web.StaticResourceLocation;
 import org.springframework.boot.security.autoconfigure.web.reactive.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -209,7 +210,7 @@ public class SecurityConfiguration {
          * indicating standard CSRF protection should apply.
          */
         @Override
-        public Mono<MatchResult> matches(ServerWebExchange exchange) {
+        public Mono<MatchResult> matches(@NonNull ServerWebExchange exchange) {
             Mono<MatchResult> ignoreMono = new OrServerWebExchangeMatcher(allowedMatchers)
                     .matches(exchange).filter(MatchResult::isMatch)
                     .flatMap(res -> MatchResult.notMatch())
@@ -250,20 +251,17 @@ public class SecurityConfiguration {
          * value (Void).
          */
         @Override
-        public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException e) {
+        public Mono<Void> commence(@NonNull ServerWebExchange exchange, @NonNull AuthenticationException e) {
             log.error("Authentication Failure: {}", e.getMessage(), e);
             ErrorResponse errorResponse = createErrorResponse(exchange, e);
             ServerHttpResponse response = exchange.getResponse();
             response.setStatusCode(errorResponse.getStatusCode());
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             var body = errorResponse.getBody();
-            if (body != null) {
-                var bytes = BeanUtils.objectToBytes(body);
-                var buffer = response.bufferFactory().wrap(bytes);
-                return response.writeAndFlushWith(Mono.just(Mono.just(buffer)))
-                        .doFinally(signalType -> DataBufferUtils.release(buffer));
-            }
-            return response.setComplete();
+            var bytes = BeanUtils.objectToBytes(body);
+            var buffer = response.bufferFactory().wrap(bytes);
+            return response.writeAndFlushWith(Mono.just(Mono.just(buffer)))
+                    .doFinally(signalType -> DataBufferUtils.release(buffer));
         }
 
         /**
