@@ -16,20 +16,18 @@ spring:
   #      location: "classpath:plate.p12"
   #      password: "123456"
   #      type: "PKCS12"
-  application.name: plate
   r2dbc:
-    url: r2dbc:postgres://127.0.0.1:5432/plate?fetchSize=5000
+    url: r2dbc:postgres://127.0.0.1:5432/plate?fetchSize=5000&applicationName=${spring.application.name}
     username: farmer
     password: 123456
-    pool:
-      max-idle-time: 10m
-      validation-query: select 1
   flyway:
     url: jdbc:postgresql://127.0.0.1:5432/plate
     user: ${spring.r2dbc.username}
     password: ${spring.r2dbc.password}
   data.redis:
     host: 127.0.0.1
-    timeout: 30s
-    connect-timeout: 10s
-    repositories.enabled: false
+  security.oauth2.client.registration:
+    github:
+      client-id: Iv1.14a97a700a228437
+      client-secret: 9b6f9bb19d59c309e5f566525789e01a6f8f9644
+      scope: user
