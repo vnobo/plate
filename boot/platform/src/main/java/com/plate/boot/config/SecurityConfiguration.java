@@ -213,11 +213,11 @@ public class SecurityConfiguration {
         public Mono<MatchResult> matches(@NonNull ServerWebExchange exchange) {
             Mono<MatchResult> ignoreMono = new OrServerWebExchangeMatcher(allowedMatchers)
                     .matches(exchange).filter(MatchResult::isMatch)
-                    .flatMap(res -> MatchResult.notMatch())
+                    .flatMap(_ -> MatchResult.notMatch())
                     .switchIfEmpty(Mono.defer(MatchResult::match));
             var request = exchange.getRequest();
             return Mono.justOrEmpty(request.getMethod()).filter(allowedMethods::contains)
-                    .flatMap((m) -> MatchResult.notMatch()).switchIfEmpty(Mono.defer(() -> ignoreMono));
+                    .flatMap((_) -> MatchResult.notMatch()).switchIfEmpty(Mono.defer(() -> ignoreMono));
         }
     }
 
@@ -261,7 +261,7 @@ public class SecurityConfiguration {
             var bytes = BeanUtils.objectToBytes(body);
             var buffer = response.bufferFactory().wrap(bytes);
             return response.writeAndFlushWith(Mono.just(Mono.just(buffer)))
-                    .doFinally(signalType -> DataBufferUtils.release(buffer));
+                    .doFinally(_ -> DataBufferUtils.release(buffer));
         }
 
         /**
