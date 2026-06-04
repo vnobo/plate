@@ -1,59 +1,73 @@
-# NgPlate
+# ng-plate
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.0.
+Production Angular 21 application with Tabler UI, SSR, and PWA support.
 
-## Development server
+## Tech Stack
 
-To start a local development server, run:
+- **Angular** 21.2.x
+- **TypeScript** 5.9
+- **RxJS** 7.8
+- **Tabler Core** 1.4.0
+- **Express** 5.1.0 (SSR server)
+- **Vitest** 4.x (testing)
+- **dayjs** (date handling)
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Development
 
 ```bash
-ng generate component component-name
+pnpm install
+pnpm start              # dev server at http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Build
 
 ```bash
-ng generate --help
+pnpm build              # production build
+pnpm build:ssr          # SSR build
 ```
 
-## Building
-
-To build the project run:
+## Testing
 
 ```bash
-ng build
+pnpm test               # Vitest
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Project Structure
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+```
+src/app/
+├── core/                  # Core services
+│   ├── net/               # HTTP interceptor
+│   ├── storage/           # Browser & session storage
+│   ├── services/          # Token, settings services
+│   └── pages.guard.ts     # Auth guard
+├── layout/                # Layout components
+│   ├── base-layout.ts     # Main layout with sidebar + header
+│   ├── blank-layout.ts    # Minimal layout (login, errors)
+│   ├── layout-aside.ts    # Sidebar navigation
+│   └── layout-header.ts   # Top header bar
+├── pages/
+│   ├── dashboard/         # Main dashboard, users, welcome
+│   ├── passport/          # Login, auth lock
+│   ├── platform/          # Tenant management
+│   ├── examples/          # Component demos (data-table, transfer)
+│   └── error/             # 404, 500, 512 pages
+├── plugins/               # Reusable UI plugins
+│   ├── modals.ts          # Modal service
+│   ├── toasts.ts          # Toast notifications
+│   ├── data-table.ts      # Data table component
+│   ├── transfer.ts        # Transfer list component
+│   └── progress.ts        # Progress bar
+└── envs/                  # Environment configs
 ```
 
-## Running end-to-end tests
+## Environment
 
-For end-to-end (e2e) testing, run:
+- `src/envs/env.dev.ts` — Development (`http://localhost:8080`)
+- `src/envs/env.ts` — Production
 
-```bash
-ng e2e
-```
+## Proxy
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Development proxy configured in `proxy.conf.json`:
+- `/sec/*` → `http://localhost:8080`
+- `/rel/*` → `http://localhost:8080`

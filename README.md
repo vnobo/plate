@@ -4,13 +4,13 @@
 
 [![Build](https://img.shields.io/github/actions/workflow/status/vnobo/plate/gradle-build.yml?branch=main)](https://github.com/vnobo/plate/actions)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.0--M3-green.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.6-green.svg)](https://spring.io/projects/spring-boot)
 [![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/)
-[![Angular](https://img.shields.io/badge/Angular-20-red.svg)](https://angular.io/)
+[![Angular](https://img.shields.io/badge/Angular-21-red.svg)](https://angular.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17+-blue.svg)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7.0+-red.svg)](https://redis.io/)
 
-A reactive enterprise management platform built with **Spring Boot 4** and **Angular 20**.
+A reactive enterprise management platform built with **Spring Boot 4** and **Angular 21**.
 
 </div>
 
@@ -31,13 +31,14 @@ A reactive enterprise management platform built with **Spring Boot 4** and **Ang
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Spring Boot 4.0.0-M3, WebFlux, R2DBC, Spring Security |
-| Frontend | Angular 20, Tabler UI, ng-zorro-antd, RxJS |
+| Backend | Spring Boot 4.0.6, WebFlux, R2DBC, Spring Security, Lombok |
+| Frontend | Angular 21 (ng-plate) / 22 (ng-web), Tabler UI, ng-zorro-antd |
 | Database | PostgreSQL 17+ (reactive), Flyway |
 | Cache | Redis 7.0+ (sessions, caching) |
 | Build | Gradle (Kotlin DSL), pnpm |
 | CI/CD | GitHub Actions |
-| Native | GraalVM native image support |
+| Testing | JUnit 5, Testcontainers, Vitest |
+| Native | GraalVM native image (0.11.5) |
 
 ## Prerequisites
 
@@ -77,7 +78,7 @@ pnpm install
 pnpm start         # dev server at http://localhost:4200
 pnpm build          # production build
 
-# ng-web (standalone Angular 21 scaffold)
+# ng-web (standalone Angular 22 scaffold)
 cd ui/ng-web
 pnpm install
 pnpm start
@@ -100,13 +101,13 @@ plate/
 │   ├── build.gradle                  # Root build configuration
 │   └── settings.gradle               # Module settings
 ├── ui/
-│   ├── ng-plate/                     # Production Angular app (Tabler UI, SSR, PWA)
+│   ├── ng-plate/                     # Production Angular 21 app (Tabler UI, SSR, PWA)
 │   │   └── src/app/
 │   │       ├── core/                 # HTTP interceptor, auth guard, storage services
 │   │       ├── layout/               # Sidebar, header, base layout components
 │   │       ├── pages/                # Dashboard, users, tenants, login, errors
 │   │       └── plugins/              # Modals, toasts, data table, transfer components
-│   └── ng-web/                       # Standalone Angular 21 scaffold (minimal)
+│   └── ng-web/                       # Standalone Angular 22 scaffold (minimal)
 ├── .github/workflows/                # CI: Gradle build, tests, cache cleanup
 └── LICENSE                           # Apache 2.0
 ```
@@ -146,14 +147,12 @@ API docs available at `/swagger-ui.html` when running (via springdoc).
 ## Testing
 
 ```bash
-# Backend
+# Backend (JUnit 5 + Testcontainers)
 cd boot && ./gradlew test
 
-# Frontend
+# Frontend (Vitest)
 cd ui/ng-plate && pnpm test
 ```
-
-Integration tests use Testcontainers (PostgreSQL + Redis).
 
 ## Deployment
 
