@@ -1,11 +1,12 @@
 
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-welcome',
   imports: [ReactiveFormsModule],
   templateUrl: './welcome.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./welcome.scss'],
 })
 export class Welcome implements OnInit {

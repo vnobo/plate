@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -18,6 +18,7 @@ export interface Tenant {
   selector: 'app-tenant',
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './tenant.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './tenant.scss',
 })
 export class Tenants {

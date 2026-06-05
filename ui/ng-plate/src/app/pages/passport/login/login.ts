@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { afterNextRender, Component, inject, OnDestroy, signal } from '@angular/core';
+import { afterNextRender, Component, inject, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
 import { BrowserStorage, TokenService } from '@app/core';
@@ -11,6 +11,7 @@ import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } fr
   selector: 'app-login',
   imports: [ReactiveFormsModule, RouterModule, RouterLink],
   templateUrl: './login.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './login.scss',
 })
 export class Login implements OnDestroy {

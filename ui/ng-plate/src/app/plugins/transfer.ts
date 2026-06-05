@@ -1,5 +1,5 @@
 
-import { Component, computed, input, model, output, signal } from '@angular/core';
+import { Component, computed, input, model, output, signal, ChangeDetectionStrategy, linkedSignal } from '@angular/core';
 
 export interface TransferItem {
   key: string;
@@ -156,6 +156,7 @@ export interface TransferData {
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     .transfer-container {
       display: flex;
@@ -292,7 +293,8 @@ export interface TransferData {
 export class TransferComponent {
   // Inputs
   data = input.required<TransferItem[]>();
-  modelValue = model<string[]>([]);
+  modelValueInput = input<string[]>([], {alias: 'modelValue'});
+  modelValue = linkedSignal(this.modelValueInput);
   titles = input<[string, string]>(['Move to right', 'Move to left']);
   leftTitle = input<string>();
   rightTitle = input<string>();

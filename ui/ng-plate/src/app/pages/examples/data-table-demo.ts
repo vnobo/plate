@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { DataTableComponent, DataTableColumn, DataTableRow } from '../../plugins/data-table';
 
 @Component({
   selector: 'app-data-table-demo',
   imports: [DataTableComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="page-header d-print-none">
       <div class="row align-items-center">
