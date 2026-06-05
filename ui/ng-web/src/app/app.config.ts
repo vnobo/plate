@@ -7,7 +7,11 @@ import {
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideClientHydration } from '@angular/platform-browser';
+import {
+  provideClientHydration,
+  withEventReplay,
+  withI18nSupport,
+} from '@angular/platform-browser';
 import { provideServiceWorker } from '@angular/service-worker';
 
 export const appConfig: ApplicationConfig = {
@@ -15,7 +19,7 @@ export const appConfig: ApplicationConfig = {
     { provide: LOCALE_ID, useValue: 'zh-Hans' },
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideClientHydration(),
+    provideClientHydration(withEventReplay(), withI18nSupport()),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
