@@ -38,7 +38,18 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"],
+            "styles": [
+              "node_modules/@tabler/core/dist/css/tabler.min.css",
+              "node_modules/@tabler/core/dist/css/tabler-themes.min.css",
+              "node_modules/@tabler/core/dist/css/tabler-vendors.min.css",
+              "node_modules/@tabler/core/dist/css/tabler-flags.min.css",
+              "node_modules/@tabler/core/dist/css/tabler-marketing.min.css",
+              "src/styles.scss"
+            ],
+            "scripts": [
+              "node_modules/@tabler/core/dist/js/tabler.min.js",
+              "node_modules/@tabler/core/dist/js/tabler-theme.min.js"
+            ],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "security": {

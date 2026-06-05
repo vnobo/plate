@@ -31,4 +31,71 @@
   </div>
 </section>
 
+<!-- Tabler UI 验证区域 -->
+<section class="tabler-test" aria-label="Tabler UI 测试">
+  <h2>Tabler UI 测试</h2>
+
+  <div class="row row-cards">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">按钮组件</h3>
+        </div>
+        <div class="card-body">
+          <div class="btn-list">
+            <button class="btn btn-primary" (click)="toggleBtn()">
+              {{ btnClicked() ? '已点击 ✓' : '主按钮' }}
+            </button>
+            <button class="btn btn-success">成功</button>
+            <button class="btn btn-warning">警告</button>
+            <button class="btn btn-danger">危险</button>
+            <button class="btn btn-ghost-secondary">幽灵</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">表单组件</h3>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label" for="test-input">用户名</label>
+            <input id="test-input" class="form-control" type="text" placeholder="请输入用户名" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="test-select">选择</label>
+            <select id="test-select" class="form-select">
+              <option>选项一</option>
+              <option>选项二</option>
+              <option>选项三</option>
+            </select>
+          </div>
+          <label class="form-check">
+            <input class="form-check-input" type="checkbox" checked />
+            <span class="form-check-label">记住我</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">状态徽章</h3>
+        </div>
+        <div class="card-body">
+          <span class="badge bg-primary-lt me-1">主要</span>
+          <span class="badge bg-success-lt me-1">成功</span>
+          <span class="badge bg-warning-lt me-1">警告</span>
+          <span class="badge bg-danger-lt me-1">危险</span>
+          <span class="badge bg-info-lt me-1">信息</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <router-outlet />
