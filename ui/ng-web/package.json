@@ -12,6 +12,7 @@
   "private": true,
   "packageManager": "pnpm@11.5.1",
   "dependencies": {
+    "@angular/aria": "^22.0.0",
     "@angular/common": "^22.0.0",
     "@angular/compiler": "^22.0.0",
     "@angular/core": "^22.0.0",
@@ -19,7 +20,10 @@
     "@angular/platform-browser": "^22.0.0",
     "@angular/platform-server": "^22.0.0",
     "@angular/router": "^22.0.0",
+    "@angular/service-worker": "^22.0.0",
     "@angular/ssr": "^22.0.0",
+    "@tabler/core": "^1.4.0",
+    "dayjs": "^1.11.21",
     "express": "^5.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
