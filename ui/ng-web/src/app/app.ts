@@ -11,6 +11,11 @@ import dayjs from './core/dayjs.locale';
 })
 export class App {
   protected readonly title = signal('ng-web');
+  protected readonly btnClicked = signal(false);
+
+  protected toggleBtn(): void {
+    this.btnClicked.update(v => !v);
+  }
 
   // i18n test data
   protected readonly currentDate = new Date();
