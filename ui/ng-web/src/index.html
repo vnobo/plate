@@ -1,15 +1,41 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-Hans">
   <head>
     <meta charset="utf-8" />
     <title>NgWeb</title>
     <base href="/" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- 视口 & 移动端优化 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- SEO -->
+    <meta name="description" content="NgWeb - 企业级 Angular 应用" />
+    <meta name="theme-color" content="#206bc4" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="NgWeb" />
+    <meta property="og:description" content="NgWeb - 企业级 Angular 应用" />
+    <meta property="og:site_name" content="NgWeb" />
+
+    <!-- PWA & Icons -->
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png" />
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png" />
     <link rel="manifest" href="manifest.webmanifest" />
+
+    <!-- DNS 预解析（按需调整） -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
   </head>
   <body>
     <app-root></app-root>
-    <noscript>Please enable JavaScript to continue using this application.</noscript>
+    <noscript>
+      <div style="padding: 2rem; text-align: center; font-family: sans-serif">
+        <h2>JavaScript 已禁用</h2>
+        <p>请启用 JavaScript 以继续使用本应用。</p>
+      </div>
+    </noscript>
   </body>
 </html>
