@@ -36,30 +36,12 @@
               }
             ],
             "styles": [
-              {
-                "input": "@tabler/core/dist/css/tabler.css",
-                "bundleName": "tabler-style"
-              },
-              {
-                "input": "@tabler/core/dist/css/tabler-themes.css",
-                "bundleName": "tabler-themes-style"
-              },
-              {
-                "input": "@tabler/core/dist/css/tabler-socials.css",
-                "bundleName": "tabler-socials-style"
-              },
+              "@tabler/core/dist/css/tabler.css",
+              "@tabler/core/dist/css/tabler-themes.css",
+              "@tabler/core/dist/css/tabler-socials.css",
               "src/styles.scss"
             ],
-            "scripts": [
-              {
-                "input": "@tabler/core/dist/js/tabler.js",
-                "bundleName": "tabler-script"
-              },
-              {
-                "input": "@tabler/core/dist/js/tabler-theme.js",
-                "bundleName": "tabler-theme-script"
-              }
-            ],
+            "scripts": ["@tabler/core/dist/js/tabler.js", "@tabler/core/dist/js/tabler-theme.js"],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {
