@@ -41,9 +41,6 @@
             "styles": [
               "node_modules/@tabler/core/dist/css/tabler.min.css",
               "node_modules/@tabler/core/dist/css/tabler-themes.min.css",
-              "node_modules/@tabler/core/dist/css/tabler-vendors.min.css",
-              "node_modules/@tabler/core/dist/css/tabler-flags.min.css",
-              "node_modules/@tabler/core/dist/css/tabler-marketing.min.css",
               "src/styles.scss"
             ],
             "scripts": [
