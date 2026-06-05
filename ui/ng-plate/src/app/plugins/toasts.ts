@@ -15,6 +15,7 @@ import {
   OnDestroy,
   output,
   signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 
@@ -298,6 +299,7 @@ export class TablerToastInit implements OnDestroy {
       }
     `,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
 })
 export class Toasts implements OnDestroy {

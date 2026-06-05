@@ -17,6 +17,7 @@ import {
   output,
   signal,
   Type,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { fromEvent } from 'rxjs';
 
@@ -120,6 +121,7 @@ export class TablerModalsInit {
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [],
 })
 export class Modals implements OnInit, OnDestroy {

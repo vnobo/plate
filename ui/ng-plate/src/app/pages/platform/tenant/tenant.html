@@ -129,7 +129,7 @@
                 type="text"
                 id="createdAt"
                 class="form-control"
-                [value]="currentTenant()?.createdAt | date : 'yyyy-MM-dd HH:mm'"
+                [value]="$safeNavigationMigration(currentTenant()?.createdAt) | date : 'yyyy-MM-dd HH:mm'"
                 disabled
               />
             </div>
@@ -142,7 +142,7 @@
                 type="text"
                 id="updatedAt"
                 class="form-control"
-                [value]="currentTenant()?.updatedAt | date : 'yyyy-MM-dd HH:mm'"
+                [value]="$safeNavigationMigration(currentTenant()?.updatedAt) | date : 'yyyy-MM-dd HH:mm'"
                 disabled
               />
             </div>

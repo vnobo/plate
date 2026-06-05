@@ -158,6 +158,7 @@ export interface DataTablePageEvent {
       }
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     .cursor-pointer {
       cursor: pointer;

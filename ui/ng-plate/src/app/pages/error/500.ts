@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-500-error',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div class="page page-center">
     <div class="container-tight py-4">
       <div class="empty">

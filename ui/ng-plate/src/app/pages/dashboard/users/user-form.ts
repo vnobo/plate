@@ -1,5 +1,5 @@
 
-import {Component, computed, effect, inject, input, OnInit, output, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, OnInit, output, signal, ChangeDetectionStrategy} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {User} from './user.types';
 
@@ -102,6 +102,7 @@ import {User} from './user.types';
       </form>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host {
