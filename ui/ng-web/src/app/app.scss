@@ -1,0 +1,37 @@
+.i18n-test {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 2rem auto;
+  background: var(--gray-900);
+  border-radius: 12px;
+
+  h2 {
+    color: var(--vivid-pink);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .test-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .test-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 8px;
+
+    h3 {
+      color: var(--bright-blue);
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    p {
+      color: var(--gray-400);
+      margin: 0.5rem 0;
+      font-size: 0.85rem;
+    }
+  }
+}

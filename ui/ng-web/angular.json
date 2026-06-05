@@ -8,6 +8,9 @@
   "newProjectRoot": "projects",
   "projects": {
     "ng-web": {
+      "i18n": {
+        "sourceLocale": "zh-Hans"
+      },
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -21,6 +24,11 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
+            "allowedCommonJsDependencies": [
+              "dayjs",
+              "dayjs/locale/zh-cn",
+              "dayjs/plugin/isLeapYear"
+            ],
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
