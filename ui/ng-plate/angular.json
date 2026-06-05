@@ -8,6 +8,9 @@
   "newProjectRoot": "projects",
   "projects": {
     "ng-plate": {
+      "i18n": {
+        "sourceLocale": "zh-Hans"
+      },
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -36,17 +39,21 @@
               }
             ],
             "styles": [
-              "@tabler/core/dist/css/tabler.css",
-              "@tabler/core/dist/css/tabler-themes.css",
-              "@tabler/core/dist/css/tabler-socials.css",
+              "node_modules/@tabler/core/dist/css/tabler.css",
+              "node_modules/@tabler/core/dist/css/tabler-themes.css",
+              "node_modules/@tabler/core/dist/css/tabler-socials.css",
               "src/styles.scss"
             ],
-            "scripts": ["@tabler/core/dist/js/tabler.js", "@tabler/core/dist/js/tabler-theme.js"],
+            "scripts": [
+              "node_modules/@tabler/core/dist/js/tabler.js",
+              "node_modules/@tabler/core/dist/js/tabler-theme.js"
+            ],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {
               "entry": "src/server.ts"
-            }
+            },
+            "polyfills": ["@angular/localize/init"]
           },
           "configurations": {
             "production": {
