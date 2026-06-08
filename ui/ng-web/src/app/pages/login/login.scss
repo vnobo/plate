@@ -1,0 +1,132 @@
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+
+  .login-brand-name {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--tblr-primary, #206bc4);
+    margin: 0;
+  }
+}
+
+.card-login {
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--tblr-border-color, #dadcde);
+
+  .card-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+}
+
+.input-icon {
+  position: relative;
+
+  .input-icon-addon {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    padding: 0 0.75rem;
+    color: var(--tblr-secondary, #656d77);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-icon-addon-end {
+    left: auto;
+    right: 0;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .form-control {
+    padding-left: 2.5rem;
+
+    &.is-invalid {
+      padding-right: 2.5rem;
+    }
+  }
+
+  .input-icon-addon-end + .form-control {
+    padding-right: 2.5rem;
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.invalid-feedback {
+  display: block;
+  font-size: 0.8125rem;
+  margin-top: 0.25rem;
+}
+
+.form-footer {
+  margin-top: 1rem;
+}
+
+// 背景装饰
+.bg-decoration {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+
+  span {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--tblr-primary, #206bc4);
+    opacity: 0.04;
+
+    &:nth-child(1) {
+      width: 400px;
+      height: 400px;
+      top: -100px;
+      right: -100px;
+    }
+
+    &:nth-child(2) {
+      width: 200px;
+      height: 200px;
+      bottom: 10%;
+      left: -50px;
+    }
+
+    &:nth-child(3) {
+      width: 300px;
+      height: 300px;
+      top: 40%;
+      right: -80px;
+      opacity: 0.03;
+    }
+
+    &:nth-child(4) {
+      width: 150px;
+      height: 150px;
+      top: 15%;
+      left: 10%;
+    }
+
+    &:nth-child(5) {
+      width: 250px;
+      height: 250px;
+      bottom: -80px;
+      right: 20%;
+      opacity: 0.05;
+    }
+  }
+}
