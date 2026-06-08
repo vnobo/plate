@@ -5,7 +5,7 @@ build/
 !**/src/main/**
 !**/src/test/**
 *.log
-!application-local.yml
+application-local.yml
 
 ### vscode ###
 bin
