@@ -5,7 +5,7 @@ build/
 !**/src/main/**
 !**/src/test/**
 *.log
-CODEBUDDY.md
+application-local.yml
 
 ### vscode ###
 bin
