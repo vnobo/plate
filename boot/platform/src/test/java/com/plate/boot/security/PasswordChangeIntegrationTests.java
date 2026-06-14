@@ -19,8 +19,10 @@ import java.util.Map;
  *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
-@DisplayName("Password Change Integration Tests")
+@DisplayName("Password Change")
 class PasswordChangeIntegrationTests extends AbstractIntegrationTests {
+
+    private static final String CHANGE_PASSWORD_URI = "/change/password";
 
     @Nested
     @DisplayName("Validation Errors")
@@ -34,45 +36,37 @@ class PasswordChangeIntegrationTests extends AbstractIntegrationTests {
         }
 
         @Test
-        @DisplayName("Should reject empty password fields - 4xx")
+        @DisplayName("should reject empty password fields with 4xx")
         void shouldRejectEmptyPasswordFields() {
+            // Given
             var request = """
-                    {
-                        "password": "",
-                        "newPassword": ""
-                    }
+                    {"password": "", "newPassword": ""}
                     """;
 
-            webTestClient.post().uri(paths.getOauth2Base() + "/change/password")
-                    .headers(headers -> headers.setBearerAuth(adminToken))
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(BodyInserters.fromValue(request))
-                    .exchange().expectStatus().is4xxClientError();
+            // When & Then
+            postChangePasswordAndExpect4xx(adminToken, request);
         }
 
         @Test
-        @DisplayName("Should reject wrong current password - 4xx")
+        @DisplayName("should reject wrong current password with 4xx")
         void shouldRejectWrongCurrentPassword() {
+            // Given
             var request = """
-                    {
-                        "password": "wrongPassword",
-                        "newPassword": "newPassword123"
-                    }
+                    {"password": "wrongPassword", "newPassword": "newPassword123"}
                     """;
 
-            webTestClient.post().uri(paths.getOauth2Base() + "/change/password")
-                    .headers(headers -> headers.setBearerAuth(adminToken))
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(BodyInserters.fromValue(request))
-                    .exchange().expectStatus().is4xxClientError();
+            // When & Then
+            postChangePasswordAndExpect4xx(adminToken, request);
         }
 
         @Test
-        @DisplayName("Should reject same old and new password - 4xx")
+        @DisplayName("should reject same old and new password with 4xx")
         void shouldRejectSameOldAndNewPassword() {
+            // Given
             var request = Map.of("password", "123456", "newPassword", "123456");
 
-            webTestClient.post().uri(paths.getOauth2Base() + "/change/password")
+            // When & Then
+            webTestClient.post().uri(oauth2Base() + CHANGE_PASSWORD_URI)
                     .headers(headers -> headers.setBearerAuth(adminToken))
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(request))
@@ -85,14 +79,26 @@ class PasswordChangeIntegrationTests extends AbstractIntegrationTests {
     class AuthenticationTests {
 
         @Test
-        @DisplayName("Should reject password change without authentication - 403")
+        @DisplayName("should reject password change without authentication with 403")
         void shouldRejectWithoutAuthentication() {
+            // Given
             var request = Map.of("password", "oldPass", "newPassword", "newPass");
 
-            webTestClient.post().uri(paths.getOauth2Base() + "/change/password")
+            // When & Then
+            webTestClient.post().uri(oauth2Base() + CHANGE_PASSWORD_URI)
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(request)
                     .exchange().expectStatus().isForbidden();
         }
+    }
+
+    // ---- Helper ----
+
+    private void postChangePasswordAndExpect4xx(String token, String jsonBody) {
+        webTestClient.post().uri(oauth2Base() + CHANGE_PASSWORD_URI)
+                .headers(headers -> headers.setBearerAuth(token))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(jsonBody))
+                .exchange().expectStatus().is4xxClientError();
     }
 }

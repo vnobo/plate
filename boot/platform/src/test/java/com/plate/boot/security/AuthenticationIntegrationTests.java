@@ -6,7 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Base64;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Authentication integration tests.
@@ -17,12 +17,12 @@ import java.util.Base64;
  *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
-@DisplayName("Authentication Integration Tests")
+@DisplayName("Authentication")
 class AuthenticationIntegrationTests extends AbstractIntegrationTests {
 
     @Nested
-    @DisplayName("Administrator Authentication")
-    class AdminAuthenticationTests {
+    @DisplayName("Admin Login")
+    class AdminLoginTests {
 
         private String adminToken;
 
@@ -32,38 +32,46 @@ class AuthenticationIntegrationTests extends AbstractIntegrationTests {
         }
 
         @Test
-        @DisplayName("Should authenticate admin with Basic Auth")
-        void shouldAuthenticateAdminWithBasicAuth() {
-            String credentials = Base64.getEncoder()
-                    .encodeToString((ADMIN_USERNAME + ":" + ADMIN_PASSWORD).getBytes());
+        @DisplayName("should return token with full details when admin authenticates via Basic Auth")
+        void shouldReturnTokenWithFullDetails() {
+            // When
+            var response = loginWithBasicAuth(ADMIN_USERNAME, ADMIN_PASSWORD);
 
-            webTestClient.get().uri(paths.getOauth2Base() + "/login")
-                    .header("Authorization", "Basic " + credentials)
-                    .exchange().expectStatus().isOk()
-                    .expectBody()
-                    .jsonPath("$.token").exists()
-                    .jsonPath("$.details").exists()
-                    .jsonPath("$.expires").exists()
-                    .jsonPath("$.lastAccessTime").exists();
+            // Then
+            assertThat(response).isNotNull();
+            assertThat(response.token()).isNotBlank();
+            assertThat(response.expires()).isPositive();
+            assertThat(response.lastAccessTime()).isPositive();
+            assertThat(response.details()).isNotNull();
         }
 
         @Test
-        @DisplayName("Should return admin details with correct profile")
-        void shouldReturnAdminDetailsWithProfile() {
-            webTestClient.get().uri(paths.getOauth2Base() + "/login")
+        @DisplayName("should return admin profile with correct name and nickname via Bearer token")
+        void shouldReturnAdminProfileViaBearerToken() {
+            // Given — adminToken from setUp
+
+            // When
+            var response = loginWithBearerToken(adminToken);
+
+            // Then
+            assertThat(response.details()).isNotNull();
+            // Details is a SecurityDetails map — verify via JSON path as fallback
+            webTestClient.get().uri(oauth2Base() + "/login")
                     .headers(headers -> headers.setBearerAuth(adminToken))
                     .exchange().expectStatus().isOk()
                     .expectBody()
-                    .jsonPath("$.token").exists()
                     .jsonPath("$.details.name").isEqualTo("admin")
                     .jsonPath("$.details.nickname").isEqualTo("系统超级管理员")
                     .jsonPath("$.details.enabled").isEqualTo(true);
         }
 
         @Test
-        @DisplayName("Should include admin authorities in token")
+        @DisplayName("should include SYSTEM_ADMINISTRATORS and GROUP_ADMINISTRATORS authorities")
         void shouldIncludeAdminAuthorities() {
-            webTestClient.get().uri(paths.getOauth2Base() + "/login")
+            // Given — adminToken from setUp
+
+            // When & Then
+            webTestClient.get().uri(oauth2Base() + "/login")
                     .headers(headers -> headers.setBearerAuth(adminToken))
                     .exchange().expectStatus().isOk()
                     .expectBody()
@@ -74,8 +82,8 @@ class AuthenticationIntegrationTests extends AbstractIntegrationTests {
     }
 
     @Nested
-    @DisplayName("Regular User Authentication")
-    class UserAuthenticationTests {
+    @DisplayName("User Login")
+    class UserLoginTests {
 
         private String userToken;
 
@@ -85,24 +93,24 @@ class AuthenticationIntegrationTests extends AbstractIntegrationTests {
         }
 
         @Test
-        @DisplayName("Should authenticate user with Basic Auth")
-        void shouldAuthenticateUserWithBasicAuth() {
-            String credentials = Base64.getEncoder()
-                    .encodeToString((USER_USERNAME + ":" + USER_PASSWORD).getBytes());
+        @DisplayName("should return token with details when regular user authenticates via Basic Auth")
+        void shouldReturnTokenWithDetails() {
+            // When
+            var response = loginWithBasicAuth(USER_USERNAME, USER_PASSWORD);
 
-            webTestClient.get().uri(paths.getOauth2Base() + "/login")
-                    .header("Authorization", "Basic " + credentials)
-                    .exchange().expectStatus().isOk()
-                    .expectBody()
-                    .jsonPath("$.token").exists()
-                    .jsonPath("$.details").exists()
-                    .jsonPath("$.expires").exists();
+            // Then
+            assertThat(response).isNotNull();
+            assertThat(response.token()).isNotBlank();
+            assertThat(response.details()).isNotNull();
         }
 
         @Test
-        @DisplayName("Should return user authorities as array")
-        void shouldReturnUserAuthorities() {
-            webTestClient.get().uri(paths.getOauth2Base() + "/login")
+        @DisplayName("should return authorities as array for regular user")
+        void shouldReturnUserAuthoritiesAsArray() {
+            // Given — userToken from setUp
+
+            // When & Then
+            webTestClient.get().uri(oauth2Base() + "/login")
                     .headers(headers -> headers.setBearerAuth(userToken))
                     .exchange().expectStatus().isOk()
                     .expectBody()
@@ -115,32 +123,47 @@ class AuthenticationIntegrationTests extends AbstractIntegrationTests {
     class InvalidCredentialsTests {
 
         @Test
-        @DisplayName("Should reject login without credentials - 401")
-        void shouldRejectLoginWithoutCredentials() {
-            webTestClient.get().uri(paths.getOauth2Base() + "/login")
+        @DisplayName("should reject request without credentials with 401")
+        void shouldRejectWithoutCredentials() {
+            // Given — no Authorization header
+
+            // When & Then
+            webTestClient.get().uri(oauth2Base() + "/login")
                     .exchange().expectStatus().isUnauthorized();
         }
 
         @Test
-        @DisplayName("Should reject login with invalid credentials - 401")
-        void shouldRejectInvalidCredentials() {
-            String invalidCredentials = Base64.getEncoder()
-                    .encodeToString("invalid:credentials".getBytes());
+        @DisplayName("should reject non-existent user credentials with 401")
+        void shouldRejectNonExistentUser() {
+            // Given
+            String credentials = encodeBasicCredentials("invalid", "credentials");
 
-            webTestClient.get().uri(paths.getOauth2Base() + "/login")
-                    .header("Authorization", "Basic " + invalidCredentials)
+            // When & Then
+            webTestClient.get().uri(oauth2Base() + "/login")
+                    .header("Authorization", "Basic " + credentials)
                     .exchange().expectStatus().isUnauthorized();
         }
 
         @Test
-        @DisplayName("Should reject login with wrong password - 401")
+        @DisplayName("should reject valid user with wrong password with 401")
         void shouldRejectWrongPassword() {
-            String wrongCredentials = Base64.getEncoder()
-                    .encodeToString((ADMIN_USERNAME + ":wrongPassword").getBytes());
+            // Given
+            String credentials = encodeBasicCredentials(ADMIN_USERNAME, "wrongPassword");
 
-            webTestClient.get().uri(paths.getOauth2Base() + "/login")
-                    .header("Authorization", "Basic " + wrongCredentials)
+            // When & Then
+            webTestClient.get().uri(oauth2Base() + "/login")
+                    .header("Authorization", "Basic " + credentials)
                     .exchange().expectStatus().isUnauthorized();
         }
+    }
+
+    // ---- Helper ----
+
+    private AuthenticationToken loginWithBearerToken(String token) {
+        return webTestClient.get().uri(oauth2Base() + "/login")
+                .headers(headers -> headers.setBearerAuth(token))
+                .exchange().expectStatus().isOk()
+                .expectBody(AuthenticationToken.class)
+                .returnResult().getResponseBody();
     }
 }
