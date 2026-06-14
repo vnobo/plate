@@ -1,20 +1,20 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { afterNextRender, Component, inject, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BrowserStorage, TokenService } from '@app/core';
 import { MessageService } from '@app/plugins';
 import { Authentication } from '@plate/types';
-import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, retry, Subject, tap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './login.scss',
 })
-export class Login implements OnDestroy {
+export class Login {
   private readonly _tokenSer = inject(TokenService);
   private readonly _message = inject(MessageService);
   private readonly _http = inject(HttpClient);
@@ -22,8 +22,7 @@ export class Login implements OnDestroy {
   private readonly _route = inject(ActivatedRoute);
   private readonly _storage = inject(BrowserStorage);
 
-  private submitSubject$ = new Subject<void>();
-  private destroy$ = new Subject<void>();
+  private readonly submitSubject$ = new Subject<void>();
 
   passwordFieldTextType = signal(false);
   isSubmitting = signal(false);
@@ -43,13 +42,11 @@ export class Login implements OnDestroy {
   });
 
   constructor() {
-    afterNextRender(() => {
-      this.submitSubject$
-        .pipe(debounceTime(300), takeUntil(this.destroy$))
-        .subscribe(() => this.formProcessLogin());
-      this.processLogin();
-      this.loadRememberedCredentials();
-    });
+    this.submitSubject$
+      .pipe(debounceTime(300), takeUntilDestroyed())
+      .subscribe(() => this.formProcessLogin());
+    this.processLogin();
+    this.loadRememberedCredentials();
   }
 
   onSubmit() {
@@ -83,6 +80,10 @@ export class Login implements OnDestroy {
     this.submitSubject$.next();
   }
 
+  showPassword() {
+    this.passwordFieldTextType.update((v) => !v);
+  }
+
   private formProcessLogin() {
     this.isSubmitting.set(true);
     try {
@@ -91,8 +92,7 @@ export class Login implements OnDestroy {
         authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
       });
       this.login(headers).subscribe({
-        next: (authentication) => {
-          // If "Remember Me" is checked, store credentials
+        next: (authentication: Authentication) => {
           if (credentials.rememberMe) {
             this.storeCredentials(credentials);
           } else {
@@ -119,9 +119,9 @@ export class Login implements OnDestroy {
   private processLogin() {
     const headers = new HttpHeaders({ 'x-requested-token': 'none-token-auto-login' });
     this.login(headers)
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
       .subscribe({
-        next: (authentication) => this.handleLoginSuccess(authentication),
+        next: (authentication: Authentication) => this.handleLoginSuccess(authentication),
         error: (error) => console.error(error.message),
       });
   }
@@ -136,15 +136,13 @@ export class Login implements OnDestroy {
           password: credentials.password,
           rememberMe: false,
         });
-      } catch (e) {
-        // If parsing fails, clear the stored credentials
+      } catch {
         this.clearStoredCredentials();
       }
     }
   }
 
-  private storeCredentials(credentials: any) {
-    // Store credentials in localStorage with base64 encoding for security
+  private storeCredentials(credentials: { username: string; password: string }) {
     const credentialsToStore = {
       username: credentials.username,
       password: credentials.password,
@@ -158,17 +156,12 @@ export class Login implements OnDestroy {
     this._storage.removeItem('credentials');
   }
 
-  showPassword() {
-    this.passwordFieldTextType.set(!this.passwordFieldTextType());
-  }
-
   private login(headers: HttpHeaders) {
-    return this._http.get<Authentication>('/sec/oauth2/login', { headers: headers }).pipe(
+    return this._http.get<Authentication>('/sec/oauth2/login', { headers }).pipe(
       debounceTime(300),
       distinctUntilChanged(),
-      takeUntil(this.destroy$),
-      tap((authentication) => this._tokenSer.login(authentication)),
-      retry(3)
+      tap((authentication: Authentication) => this._tokenSer.login(authentication)),
+      retry(3),
     );
   }
 
@@ -178,7 +171,7 @@ export class Login implements OnDestroy {
       delay: 5000,
       animation: true,
     });
-    this._router.navigate([this._tokenSer.redirectUrl], { relativeTo: this._route }).then();
+    void this._router.navigate([this._tokenSer.redirectUrl], { relativeTo: this._route });
   }
 
   private handleLoginError(error: any) {
@@ -188,10 +181,5 @@ export class Login implements OnDestroy {
       animation: true,
       delay: 5000,
     });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

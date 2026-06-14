@@ -1,7 +1,12 @@
-
-import {Component, computed, effect, inject, input, OnInit, output, signal, ChangeDetectionStrategy} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {User} from './user.types';
+import { Component, computed, effect, inject, input, linkedSignal, output } from '@angular/core';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { User } from './user.types';
 
 @Component({
   selector: 'app-user-form',
@@ -17,7 +22,8 @@ import {User} from './user.types';
               type="text"
               formControlName="username"
               id="username"
-              autocomplete="off" />
+              autocomplete="off"
+            />
           </div>
           <div class="col-lg-6">
             <label class="form-label" for="name">
@@ -28,42 +34,40 @@ import {User} from './user.types';
               type="text"
               formControlName="name"
               id="name"
-              autocomplete="off" />
+              autocomplete="off"
+            />
           </div>
         </div>
         @if (created()) {
-        <div class="row mb-3">
-          <div class="col-lg-6">
-            <label class="form-label" for="password">
-              密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码
-            </label>
-            <input
-              class="form-control"
-              type="password"
-              formControlName="password"
-              id="password"
-              autocomplete="off" />
+          <div class="row mb-3">
+            <div class="col-lg-6">
+              <label class="form-label" for="password">
+                密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码
+              </label>
+              <input
+                class="form-control"
+                type="password"
+                formControlName="password"
+                id="password"
+                autocomplete="off"
+              />
+            </div>
+            <div class="col-lg-6">
+              <label class="form-label" for="confirmPassword">确认密码</label>
+              <input
+                class="form-control"
+                type="password"
+                formControlName="confirmPassword"
+                id="confirmPassword"
+                autocomplete="off"
+              />
+            </div>
           </div>
-          <div class="col-lg-6">
-            <label class="form-label" for="confirmPassword">确认密码</label>
-            <input
-              class="form-control"
-              type="password"
-              formControlName="confirmPassword"
-              id="confirmPassword"
-              autocomplete="off" />
-          </div>
-        </div>
         }
         <div class="row mb-3">
           <div class="col-lg-6">
             <label class="form-label" for="email">电子邮件</label>
-            <input
-              class="form-control"
-              type="email"
-              formControlName="email"
-              id="email"
-              type="email" />
+            <input class="form-control" type="email" formControlName="email" id="email" />
           </div>
           <div class="col-lg-6">
             <label class="form-label" for="phone">
@@ -81,7 +85,8 @@ import {User} from './user.types';
           <button
             class="btn btn-primary ms-auto"
             [disabled]="userForm.invalid || (!userForm.touched && !userForm.dirty)"
-            type="submit">
+            type="submit"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -92,7 +97,8 @@ import {User} from './user.types';
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
-              class="icon icon-1">
+              class="icon icon-1"
+            >
               <path d="M12 5l0 14" />
               <path d="M5 12l14 0" />
             </svg>
@@ -102,7 +108,6 @@ import {User} from './user.types';
       </form>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host {
@@ -112,14 +117,15 @@ import {User} from './user.types';
     `,
   ],
 })
-export class UserForm implements OnInit {
-  // Add input property to receive user data
+export class UserForm {
   inputData = input<User | null>(null);
-  
-  userData = signal<User>({} as User);
-  created = computed(() => this.userData().code == undefined);
+
+  private readonly userData = linkedSignal(this.inputData);
+  readonly created = computed(() => this.userData()?.code == undefined);
   formSubmit = output<User>();
+
   private readonly fb = inject(FormBuilder);
+
   userForm: FormGroup = this.fb.group({
     id: [null],
     code: [''],
@@ -140,8 +146,7 @@ export class UserForm implements OnInit {
 
   constructor() {
     effect(() => {
-      // Use input data if provided, otherwise use signal data
-      const data = this.inputData() || this.userData();
+      const data = this.userData();
       if (this.created()) {
         this.userForm.controls['password'].addValidators([
           Validators.required,
@@ -152,20 +157,13 @@ export class UserForm implements OnInit {
           Validators.minLength(6),
         ]);
         this.userForm.patchValue({} as User);
-      } else {
+      } else if (data) {
         this.userForm.controls['password'].clearValidators();
         this.userForm.controls['confirmPassword'].clearValidators();
         this.userForm.controls['username'].disable({ onlySelf: true });
         this.userForm.patchValue(data);
       }
     });
-  }
-
-  ngOnInit(): void {
-    // Set userData signal from input data if provided
-    if (this.inputData()) {
-      this.userData.set(this.inputData()!);
-    }
   }
 
   onSubmit(): void {

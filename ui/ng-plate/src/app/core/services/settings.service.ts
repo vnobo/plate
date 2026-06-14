@@ -1,4 +1,4 @@
-import { Injectable, Service } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { ParamMap } from '@angular/router';
 
 const themeConfig: Record<string, string> = {
@@ -9,19 +9,19 @@ const themeConfig: Record<string, string> = {
   'theme-radius': '1',
 };
 
-@Service()
+@Injectable({ providedIn: 'root' })
 export class SettingsService {
   setting(params: ParamMap) {
     for (const key in themeConfig) {
       const param = params.get(key);
       let selectedValue;
 
-      if (!!param) {
+      if (param) {
         localStorage.setItem('tabler-' + key, param);
         selectedValue = param;
       } else {
         const storedTheme = localStorage.getItem('tabler-' + key);
-        selectedValue = storedTheme ? storedTheme : themeConfig[key];
+        selectedValue = storedTheme ?? themeConfig[key];
       }
 
       if (selectedValue !== themeConfig[key]) {
