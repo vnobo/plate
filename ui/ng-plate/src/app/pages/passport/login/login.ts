@@ -1,16 +1,16 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormField, form, maxLength, minLength, required, submit } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BrowserStorage, TokenService } from '@app/core';
 import { MessageService } from '@app/plugins';
 import { Authentication } from '@plate/types';
-import { debounceTime, distinctUntilChanged, retry, Subject, tap } from 'rxjs';
+import { retry, tap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [FormField, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -22,72 +22,49 @@ export class Login {
   private readonly _route = inject(ActivatedRoute);
   private readonly _storage = inject(BrowserStorage);
 
-  private readonly submitSubject$ = new Subject<void>();
-
   passwordFieldTextType = signal(false);
   isSubmitting = signal(false);
 
-  loginForm = new FormGroup({
-    username: new FormControl('', {
-      validators: [Validators.required, Validators.minLength(5), Validators.maxLength(64)],
-      nonNullable: true,
-    }),
-    password: new FormControl('', {
-      validators: [Validators.required, Validators.minLength(6), Validators.maxLength(32)],
-      nonNullable: true,
-    }),
-    rememberMe: new FormControl(false, {
-      nonNullable: true,
-    }),
+  protected readonly loginModel = signal({
+    username: '',
+    password: '',
+    rememberMe: false,
+  });
+
+  protected readonly loginForm = form(this.loginModel, (p) => {
+    required(p.username, { message: '请输入用户名' });
+    minLength(p.username, 5, { message: '用户名至少5个字符' });
+    maxLength(p.username, 64, { message: '用户名不能超过64个字符' });
+    required(p.password, { message: '请输入密码' });
+    minLength(p.password, 6, { message: '密码至少6个字符' });
+    maxLength(p.password, 32, { message: '密码不能超过32个字符' });
   });
 
   constructor() {
-    this.submitSubject$
-      .pipe(debounceTime(300), takeUntilDestroyed())
-      .subscribe(() => this.formProcessLogin());
     this.processLogin();
     this.loadRememberedCredentials();
   }
 
-  onSubmit() {
-    if (this.loginForm.invalid || this.isSubmitting()) {
-      return;
-    }
-    if (
-      this.loginForm.get('username')?.hasError('required') ||
-      this.loginForm.get('password')?.hasError('required')
-    ) {
-      this.isSubmitting.set(false);
+  async onSubmit() {
+    if (this.isSubmitting()) {
       return;
     }
 
-    if (
-      this.loginForm.get('username')?.hasError('minlength') ||
-      this.loginForm.get('username')?.hasError('maxlength')
-    ) {
-      this.isSubmitting.set(false);
-      return;
-    }
-
-    if (
-      this.loginForm.get('password')?.hasError('minlength') ||
-      this.loginForm.get('password')?.hasError('maxlength')
-    ) {
-      this.isSubmitting.set(false);
-      return;
-    }
-
-    this.submitSubject$.next();
+    await submit(this.loginForm, {
+      action: async () => {
+        await this.formProcessLogin();
+      },
+    });
   }
 
   showPassword() {
     this.passwordFieldTextType.update((v) => !v);
   }
 
-  private formProcessLogin() {
+  private async formProcessLogin() {
     this.isSubmitting.set(true);
     try {
-      const credentials = this.loginForm.getRawValue();
+      const credentials = this.loginModel();
       const headers = new HttpHeaders({
         authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
       });
@@ -119,7 +96,7 @@ export class Login {
   private processLogin() {
     const headers = new HttpHeaders({ 'x-requested-token': 'none-token-auto-login' });
     this.login(headers)
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
+      .pipe(takeUntilDestroyed())
       .subscribe({
         next: (authentication: Authentication) => this.handleLoginSuccess(authentication),
         error: (error) => console.error(error.message),
@@ -131,11 +108,12 @@ export class Login {
     if (storedCredentials) {
       try {
         const credentials = JSON.parse(atob(storedCredentials));
-        this.loginForm.patchValue({
+        this.loginModel.update((m) => ({
+          ...m,
           username: credentials.username,
           password: credentials.password,
           rememberMe: false,
-        });
+        }));
       } catch {
         this.clearStoredCredentials();
       }
@@ -158,8 +136,6 @@ export class Login {
 
   private login(headers: HttpHeaders) {
     return this._http.get<Authentication>('/sec/oauth2/login', { headers }).pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
       tap((authentication: Authentication) => this._tokenSer.login(authentication)),
       retry(3),
     );

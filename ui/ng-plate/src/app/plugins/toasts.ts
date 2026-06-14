@@ -56,7 +56,6 @@ export class MessageService {
 
     this.document.body.appendChild(this.toastRef.location.nativeElement);
     this.appRef.attachView(this.toastRef.hostView);
-    this.toastRef.changeDetectorRef.detectChanges();
 
     outputToObservable(this.toastRef.instance.toastsDropped)
       .pipe(takeUntilDestroyed())

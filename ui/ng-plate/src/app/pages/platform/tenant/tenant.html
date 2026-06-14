@@ -42,7 +42,7 @@
         </h3>
       </div>
       <div class="card-body">
-        <form [formGroup]="tenantForm" (ngSubmit)="saveTenant()">
+        <form (ngSubmit)="saveTenant()">
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
@@ -51,12 +51,12 @@
                   type="text"
                   id="name"
                   class="form-control"
-                  [class.is-invalid]="hasError('name')"
-                  formControlName="name"
+                  [class.is-invalid]="isFieldInvalid('name')"
+                  [formField]="tenantForm.name"
                 />
-                @if (hasError('name')) {
+                @if (isFieldInvalid('name')) {
                   <div class="invalid-feedback">
-                    {{ getErrorMessage('name') }}
+                    {{ getFieldError('name') }}
                   </div>
                 }
               </div>
@@ -68,16 +68,16 @@
                 <select
                   id="status"
                   class="form-select"
-                  [class.is-invalid]="hasError('status')"
-                  formControlName="status"
+                  [class.is-invalid]="isFieldInvalid('status')"
+                  [formField]="tenantForm.status"
                 >
                   <option value="active">活跃</option>
                   <option value="inactive">非活跃</option>
                   <option value="suspended">已暂停</option>
                 </select>
-                @if (hasError('status')) {
+                @if (isFieldInvalid('status')) {
                   <div class="invalid-feedback">
-                    {{ getErrorMessage('status') }}
+                    {{ getFieldError('status') }}
                   </div>
                 }
               </div>
@@ -89,13 +89,13 @@
             <textarea
               id="description"
               class="form-control"
-              [class.is-invalid]="hasError('description')"
-              formControlName="description"
+              [class.is-invalid]="isFieldInvalid('description')"
+              [formField]="tenantForm.description"
               rows="3"
             ></textarea>
-            @if (hasError('description')) {
+            @if (isFieldInvalid('description')) {
               <div class="invalid-feedback">
-                {{ getErrorMessage('description') }}
+                {{ getFieldError('description') }}
               </div>
             }
           </div>
@@ -107,7 +107,7 @@
                 <select
                   id="subscriptionType"
                   class="form-select"
-                  formControlName="subscriptionType"
+                  [formField]="tenantForm.subscriptionType"
                 >
                   <option value="basic">基础版</option>
                   <option value="standard">标准版</option>
@@ -123,7 +123,7 @@
                   type="date"
                   id="expirationDate"
                   class="form-control"
-                  formControlName="expirationDate"
+                  [formField]="tenantForm.expirationDate"
                 />
               </div>
             </div>
@@ -163,7 +163,7 @@
             <button type="button" class="btn btn-secondary me-2" (click)="cancelEdit()">
               取消
             </button>
-            <button type="submit" class="btn btn-primary" [disabled]="tenantForm.invalid">
+            <button type="submit" class="btn btn-primary" [disabled]="!tenantForm().valid()">
               保存
             </button>
           </div>

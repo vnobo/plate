@@ -1,6 +1,14 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
-import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FieldState,
+  FormField,
+  form,
+  maxLength,
+  minLength,
+  required,
+  submit,
+} from '@angular/forms/signals';
 import { Router } from '@angular/router';
 
 export interface Tenant {
@@ -16,7 +24,7 @@ export interface Tenant {
 
 @Component({
   selector: 'app-tenant',
-  imports: [DatePipe, ReactiveFormsModule],
+  imports: [DatePipe, FormField],
   templateUrl: './tenant.html',
   styleUrl: './tenant.scss',
 })
@@ -81,57 +89,56 @@ export class Tenants {
 
   protected readonly isEditing = signal(false);
 
-  private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
-  protected readonly tenantForm = this.fb.group({
-    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-    description: ['', [Validators.maxLength(500)]],
-    status: ['active', [Validators.required]],
-    subscriptionType: ['standard', [Validators.required]],
-    expirationDate: [null as Date | null, []],
+  private readonly initialFormModel = {
+    name: '',
+    description: '',
+    status: 'active' as 'active' | 'inactive' | 'suspended',
+    subscriptionType: 'standard' as 'basic' | 'standard' | 'premium',
+    expirationDate: null as Date | null,
+  };
+
+  protected readonly tenantModel = signal({ ...this.initialFormModel });
+
+  protected readonly tenantForm = form(this.tenantModel, (p) => {
+    required(p.name, { message: '租户名称 是必填项' });
+    minLength(p.name, 2, { message: '租户名称 至少需要 2 个字符' });
+    maxLength(p.name, 50, { message: '租户名称 不能超过 50 个字符' });
+    maxLength(p.description, 500, { message: '描述 不能超过 500 个字符' });
+    required(p.status, { message: '状态 是必填项' });
+    required(p.subscriptionType, { message: '订阅类型 是必填项' });
   });
 
-  protected getFormControl(name: string): FormControl {
-    return this.tenantForm.get(name) as FormControl;
-  }
-
-  protected hasError(fieldName: string, errorType?: string): boolean {
-    const control = this.tenantForm.get(fieldName);
-    if (!control) return false;
-
-    if (errorType) {
-      return control.hasError(errorType) && control.touched;
+  protected getFieldError(fieldName: string): string {
+    const fieldState = (this.tenantForm as unknown as Record<string, () => FieldState<unknown>>)[
+      fieldName
+    ]?.();
+    if (!fieldState) return '';
+    if (!fieldState.invalid() || !fieldState.touched()) return '';
+    const errors = fieldState.errors();
+    if (!errors) return '';
+    for (const error of errors) {
+      if (error.message) return error.message;
     }
-    return control.invalid && control.touched;
-  }
-
-  protected getErrorMessage(fieldName: string): string {
-    const control = this.tenantForm.get(fieldName);
-    if (!control || !control.errors || !control.touched) return '';
-
-    const errors = control.errors;
-
-    if (errors['required']) {
-      return `${fieldName} 是必填项`;
-    }
-    if (errors['minlength']) {
-      return `${fieldName} 至少需要 ${errors['minlength'].requiredLength} 个字符`;
-    }
-    if (errors['maxlength']) {
-      return `${fieldName} 不能超过 ${errors['maxlength'].requiredLength} 个字符`;
-    }
-
     return '输入有误';
+  }
+
+  protected isFieldInvalid(fieldName: string): boolean {
+    const fieldState = (this.tenantForm as unknown as Record<string, () => FieldState<unknown>>)[
+      fieldName
+    ]?.();
+    if (!fieldState) return false;
+    return fieldState.invalid() && fieldState.touched();
   }
 
   editTenant(tenant: Tenant) {
     this.currentTenant.set(tenant);
-    this.tenantForm.patchValue({
+    this.tenantModel.set({
       name: tenant.name,
       description: tenant.description || '',
       status: tenant.status,
-      subscriptionType: tenant.subscriptionType || 'standard',
+      subscriptionType: (tenant.subscriptionType ?? 'standard') as 'basic' | 'standard' | 'premium',
       expirationDate: tenant.expirationDate || null,
     });
     this.isEditing.set(true);
@@ -139,55 +146,51 @@ export class Tenants {
 
   createTenant() {
     this.currentTenant.set(null);
-    this.tenantForm.reset();
-    this.tenantForm.patchValue({
-      status: 'active',
-      subscriptionType: 'standard',
-    });
+    this.tenantModel.set({ ...this.initialFormModel });
     this.isEditing.set(true);
   }
 
-  saveTenant() {
-    if (this.tenantForm.invalid) {
-      this.markFormGroupTouched();
-      return;
-    }
+  async saveTenant() {
+    await submit(this.tenantForm, {
+      action: async () => {
+        const formData = this.tenantModel();
 
-    const formData = this.tenantForm.value;
+        if (this.currentTenant()) {
+          this.tenants.update((tenants) =>
+            tenants.map((tenant) =>
+              tenant.id === this.currentTenant()?.id
+                ? ({
+                    ...tenant,
+                    name: formData.name ?? tenant.name,
+                    description: formData.description ?? tenant.description,
+                    status:
+                      (formData.status as 'active' | 'inactive' | 'suspended') ?? tenant.status,
+                    subscriptionType: formData.subscriptionType ?? tenant.subscriptionType,
+                    expirationDate: formData.expirationDate ?? tenant.expirationDate,
+                    updatedAt: new Date(),
+                  } as Tenant)
+                : tenant,
+            ),
+          );
+        } else {
+          const newTenant: Tenant = {
+            id: (Math.max(...this.tenants().map((t) => parseInt(t.id) || 0), 0) + 1).toString(),
+            name: formData.name ?? '',
+            description: formData.description ?? '',
+            status: (formData.status as 'active' | 'inactive' | 'suspended') ?? 'active',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            subscriptionType: formData.subscriptionType ?? undefined,
+            expirationDate: formData.expirationDate ?? undefined,
+          };
+          this.tenants.update((tenants) => [...tenants, newTenant]);
+        }
 
-    if (this.currentTenant()) {
-      this.tenants.update((tenants) =>
-        tenants.map((tenant) =>
-          tenant.id === this.currentTenant()?.id
-            ? ({
-                ...tenant,
-                name: formData.name ?? tenant.name,
-                description: formData.description ?? tenant.description,
-                status: (formData.status as 'active' | 'inactive' | 'suspended') ?? tenant.status,
-                subscriptionType: formData.subscriptionType ?? tenant.subscriptionType,
-                expirationDate: formData.expirationDate ?? tenant.expirationDate,
-                updatedAt: new Date(),
-              } as Tenant)
-            : tenant,
-        ),
-      );
-    } else {
-      const newTenant: Tenant = {
-        id: (Math.max(...this.tenants().map((t) => parseInt(t.id) || 0), 0) + 1).toString(),
-        name: formData.name ?? '',
-        description: formData.description ?? '',
-        status: (formData.status as 'active' | 'inactive' | 'suspended') ?? 'active',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        subscriptionType: formData.subscriptionType ?? undefined,
-        expirationDate: formData.expirationDate ?? undefined,
-      };
-      this.tenants.update((tenants) => [...tenants, newTenant]);
-    }
-
-    this.isEditing.set(false);
-    this.currentTenant.set(null);
-    this.tenantForm.reset();
+        this.isEditing.set(false);
+        this.currentTenant.set(null);
+        this.tenantModel.set({ ...this.initialFormModel });
+      },
+    });
   }
 
   deleteTenant(id: string) {
@@ -202,7 +205,7 @@ export class Tenants {
   cancelEdit() {
     this.isEditing.set(false);
     this.currentTenant.set(null);
-    this.tenantForm.reset();
+    this.tenantModel.set({ ...this.initialFormModel });
   }
 
   onSearchChange(value: string) {
@@ -266,12 +269,6 @@ export class Tenants {
     }
 
     return items;
-  }
-
-  private markFormGroupTouched() {
-    Object.values(this.tenantForm.controls).forEach((control) => {
-      control.markAsTouched();
-    });
   }
 
   getMinDate(value1: number, value2: number): number {
