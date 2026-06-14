@@ -1,22 +1,10 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class BrowserStorage {
-  private _platformId = inject<Object>(PLATFORM_ID);
-
-  private isBrowser: boolean;
-
-  /** Inserted by Angular inject() migration for backwards compatibility */
-  constructor(...args: unknown[]);
-
-  constructor() {
-    const _platformId = this._platformId;
-
-    this.isBrowser = isPlatformBrowser(_platformId);
-  }
+  private readonly _platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this._platformId);
 
   setItem(key: string, value: string): void {
     if (this.isBrowser) {

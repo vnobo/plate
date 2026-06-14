@@ -8,9 +8,8 @@ describe('AuthLock', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AuthLock]
-    })
-    .compileComponents();
+      imports: [AuthLock],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(AuthLock);
     component = fixture.componentInstance;

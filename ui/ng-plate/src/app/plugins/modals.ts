@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { NgComponentOutlet } from '@angular/common';
 import {
   afterNextRender,
   ApplicationRef,
@@ -17,8 +17,8 @@ import {
   output,
   signal,
   Type,
-  ChangeDetectionStrategy
 } from '@angular/core';
+import { outputToObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { fromEvent } from 'rxjs';
 
 export interface ModalRef {
@@ -26,7 +26,6 @@ export interface ModalRef {
   headerRef?: Type<any> | null;
   contentRef?: Type<any> | null;
   footerRef?: Type<any> | null;
-  // Optional bindings for content component
   contentBindings?: any[];
 }
 
@@ -44,14 +43,8 @@ export class ModalsService {
 
   private modalRef: ComponentRef<Modals> | null = null;
 
-  /** Inserted by Angular inject() migration for backwards compatibility */
-  constructor(...args: unknown[]);
-
-  constructor() {}
-
   create(modalRef: ModalRef) {
     const modalRefSignal = signal(modalRef);
-    // Combine default bindings with content bindings if provided
     const bindings = [inputBinding('modalRef', modalRefSignal)];
     if (modalRef.contentBindings) {
       bindings.push(...modalRef.contentBindings);
@@ -63,10 +56,12 @@ export class ModalsService {
     });
     document.body.appendChild(this.modalRef.location.nativeElement);
     this.appRef.attachView(this.modalRef.hostView);
-    this.modalRef.instance.dropped.subscribe(() => {
-      this.modalRef?.destroy();
-      this.modalRef = null;
-    });
+    outputToObservable(this.modalRef.instance.dropped)
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.modalRef?.destroy();
+        this.modalRef = null;
+      });
     return this.modalRef;
   }
 }
@@ -90,16 +85,16 @@ export class TablerModalsInit {
 
 @Component({
   selector: 'tabler-modals',
-  imports: [CommonModule],
+  imports: [NgComponentOutlet],
   template: `
     <div class="modal" id="exampleModal" tabindex="-1">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            @if(modalRef().headerRef){
-            <ng-container *ngComponentOutlet="modalRef().headerRef!" />
-            }@else{
-            <h5 class="modal-title">{{ modalRef().title }}</h5>
+            @if (modalRef().headerRef) {
+              <ng-container *ngComponentOutlet="modalRef().headerRef!" />
+            } @else {
+              <h5 class="modal-title">{{ modalRef().title }}</h5>
             }
             <button
               type="button"
@@ -108,20 +103,20 @@ export class TablerModalsInit {
               aria-label="Close"
             ></button>
           </div>
-          @if(modalRef().contentRef){
-          <div class="modal-body">
-            <ng-container *ngComponentOutlet="modalRef().contentRef!" />
-          </div>
-          } @if(modalRef().footerRef){
-          <div class="modal-footer">
-            <ng-container *ngComponentOutlet="modalRef().footerRef!" />
-          </div>
+          @if (modalRef().contentRef) {
+            <div class="modal-body">
+              <ng-container *ngComponentOutlet="modalRef().contentRef!" />
+            </div>
+          }
+          @if (modalRef().footerRef) {
+            <div class="modal-footer">
+              <ng-container *ngComponentOutlet="modalRef().footerRef!" />
+            </div>
           }
         </div>
       </div>
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [],
 })
 export class Modals implements OnInit, OnDestroy {
@@ -130,8 +125,6 @@ export class Modals implements OnInit, OnDestroy {
   modalRef = input.required<ModalRef>();
   dropped = output<any>();
 
-  /** Inserted by Angular inject() migration for backwards compatibility */
-  constructor(...args: unknown[]);
   constructor() {
     afterNextRender(async () => {
       const options: ModalOptions = {
@@ -143,10 +136,11 @@ export class Modals implements OnInit, OnDestroy {
       const modalEl = this._el.nativeElement.querySelector('#exampleModal');
       const myModalAlternative = tabler.Modal.getOrCreateInstance(modalEl, options);
 
-      fromEvent(modalEl, 'hidden.bs.modal').subscribe(($event: any) => {
-        console.log('modal closed', $event);
-        this.dropped.emit($event);
-      });
+      fromEvent(modalEl, 'hidden.bs.modal')
+        .pipe(takeUntilDestroyed())
+        .subscribe(($event: any) => {
+          this.dropped.emit($event);
+        });
       myModalAlternative.show();
     });
   }

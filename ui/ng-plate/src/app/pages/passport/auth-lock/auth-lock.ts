@@ -1,12 +1,9 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-auth-lock',
   imports: [],
   templateUrl: './auth-lock.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  styleUrl: './auth-lock.scss'
+  styleUrl: './auth-lock.scss',
 })
-export class AuthLock {
-
-}
+export class AuthLock {}
