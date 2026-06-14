@@ -40,7 +40,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-session-data-redis-test'
 
-    testImplementation 'org.testcontainers:testcontainers'
     testImplementation 'org.testcontainers:testcontainers-r2dbc'
     testImplementation 'org.testcontainers:testcontainers-postgresql'
     testImplementation 'com.redis:testcontainers-redis'

@@ -1,19 +1,19 @@
 package com.plate.boot;
 
+import com.plate.boot.config.InfrastructureConfiguration;
 import com.plate.boot.security.AuthenticationToken;
-import com.redis.testcontainers.RedisContainer;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.time.Duration;
 import java.util.Base64;
@@ -55,42 +55,33 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
+@Import(InfrastructureConfiguration.class)
 public class ApplicationTests {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationTests.class);
 
     private final ApplicationContext applicationContext;
 
-    private static final RedisContainer redisContainer;
-    private static final PostgreSQLContainer postgresContainer;
-
-    static {
-        redisContainer = new RedisContainer("redis:latest");
-        redisContainer.start();
-
-        var postgresImage = org.testcontainers.utility.DockerImageName.parse("alexbob/postgres")
-                .asCompatibleSubstituteFor("postgres");
-        postgresContainer = new PostgreSQLContainer(postgresImage)
-                .waitingFor(org.testcontainers.containers.wait.strategy.Wait.forLogMessage("^.*数据库系统准备接受连接.*$", 2));
-        postgresContainer.start();
-    }
-
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
+        InfrastructureConfiguration.POSTGRES_CONTAINER.start();
+        var postgres = InfrastructureConfiguration.POSTGRES_CONTAINER;
         // Configure R2DBC connection
-        registry.add("spring.r2dbc.url", () -> String.format("r2dbc:postgresql://%s:%d/%s", postgresContainer.getHost(),
-                postgresContainer.getFirstMappedPort(), postgresContainer.getDatabaseName()));
-        registry.add("spring.r2dbc.username", postgresContainer::getUsername);
-        registry.add("spring.r2dbc.password", postgresContainer::getPassword);
+        registry.add("spring.r2dbc.url", () -> String.format("r2dbc:postgresql://%s:%d/%s", postgres.getHost(),
+                postgres.getFirstMappedPort(), postgres.getDatabaseName()));
+        registry.add("spring.r2dbc.username", postgres::getUsername);
+        registry.add("spring.r2dbc.password", postgres::getPassword);
 
         // Configure Flyway (JDBC) connection
-        registry.add("spring.flyway.url", postgresContainer::getJdbcUrl);
-        registry.add("spring.flyway.user", postgresContainer::getUsername);
-        registry.add("spring.flyway.password", postgresContainer::getPassword);
+        registry.add("spring.flyway.url", postgres::getJdbcUrl);
+        registry.add("spring.flyway.user", postgres::getUsername);
+        registry.add("spring.flyway.password", postgres::getPassword);
 
+        InfrastructureConfiguration.REDIS_CONTAINER.start();
+        var redis = InfrastructureConfiguration.REDIS_CONTAINER;
         // Configure Redis connection
-        registry.add("spring.data.redis.host", redisContainer::getHost);
-        registry.add("spring.data.redis.port", redisContainer::getFirstMappedPort);
+        registry.add("spring.data.redis.host", redis::getHost);
+        registry.add("spring.data.redis.port", redis::getFirstMappedPort);
     }
 
     @LocalServerPort
@@ -113,8 +104,8 @@ public class ApplicationTests {
     @AfterAll
     static void tearDownAll() {
         log.info("All SecurityController integration tests completed");
-        postgresContainer.stop();
-        redisContainer.stop();
+        InfrastructureConfiguration.POSTGRES_CONTAINER.stop();
+        InfrastructureConfiguration.REDIS_CONTAINER.stop();
     }
 
     @BeforeEach
