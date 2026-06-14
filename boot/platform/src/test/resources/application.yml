@@ -16,10 +16,24 @@ spring:
   threads.virtual.enabled: true
   main.keep-alive: true
   application.name: plate
-  webflux.format:
-    time: "HH:mm:ss"
-    date-time: "yyyy-MM-dd HH:mm:ss"
-    date: "yyyy-MM-dd"
+  webflux:
+    apiversion:
+      default: v1
+      use:
+        header: x-api-version
+        query-parameter: apiVersion
+    format:
+      time: "HH:mm:ss"
+      date-time: "yyyy-MM-dd HH:mm:ss"
+      date: "yyyy-MM-dd"
+    properties:
+      max-page-size: 100
+      default-page-size: 25
+      path-prefixes:
+        - path: /sec/v1
+          base-package: com.plate.boot.security
+        - path: /rel/v1
+          base-package: com.plate.boot.relational
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
     time-zone: "GMT+8"
@@ -40,14 +54,16 @@ spring:
     baseline-on-migrate: true
     baseline-version: 1.0.0
     baseline-description: "Baseline version V1.0.0,See https://github.com/plate/plate"
-  webflux.properties:
-    max-page-size: 100
-    default-page-size: 25
-    path-prefixes:
-      - path: "/sec/v1"
-        base-package: "com.plate.boot.security"
-      - path: "/rel/v1"
-        base-package: "com.plate.boot.relational"
   security.oauth2.client.registration:
     github:
       client-id: Iv1.14a97a700a228437
+
+# Test endpoint paths — single source of truth for integration test URIs.
+# These values must stay consistent with spring.webflux.apiversion.default
+# and spring.webflux.properties.path-prefixes above.
+test:
+  paths:
+    sec-prefix: "/sec/v1"
+    oauth2-base: "/sec/v1/oauth2"
+    captcha-base: "/sec/v1/captcha"
+    rel-prefix: "/rel/v1"
