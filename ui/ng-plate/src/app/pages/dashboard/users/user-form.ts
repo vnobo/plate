@@ -1,28 +1,30 @@
-import { Component, computed, effect, inject, input, linkedSignal, output } from '@angular/core';
 import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+  Component,
+  computed,
+  effect,
+  input,
+  linkedSignal,
+  output,
+  signal,
+} from '@angular/core';
+import { FormField, form, email, required, submit, disabled } from '@angular/forms/signals';
 import { User } from './user.types';
 
 @Component({
   selector: 'app-user-form',
-  imports: [ReactiveFormsModule],
+  imports: [FormField],
   template: `
     <div class="container-fluid">
-      <form (ngSubmit)="onSubmit()" [formGroup]="userForm" class="form-wrapper">
+      <form (ngSubmit)="onSubmit()" class="form-wrapper">
         <div class="row mb-3">
           <div class="col-lg-6">
             <label class="form-label" for="username">用&nbsp;&nbsp;户&nbsp;&nbsp;名</label>
             <input
               class="form-control"
               type="text"
-              formControlName="username"
               id="username"
               autocomplete="off"
+              [formField]="userForm.username"
             />
           </div>
           <div class="col-lg-6">
@@ -32,9 +34,9 @@ import { User } from './user.types';
             <input
               class="form-control"
               type="text"
-              formControlName="name"
               id="name"
               autocomplete="off"
+              [formField]="userForm.name"
             />
           </div>
         </div>
@@ -47,44 +49,52 @@ import { User } from './user.types';
               <input
                 class="form-control"
                 type="password"
-                formControlName="password"
                 id="password"
                 autocomplete="off"
+                [formField]="userForm.password"
+                [class.is-invalid]="passwordError()"
               />
+              @if (passwordError()) {
+                <div class="invalid-feedback">{{ passwordError() }}</div>
+              }
             </div>
             <div class="col-lg-6">
               <label class="form-label" for="confirmPassword">确认密码</label>
               <input
                 class="form-control"
                 type="password"
-                formControlName="confirmPassword"
                 id="confirmPassword"
                 autocomplete="off"
+                [formField]="userForm.confirmPassword"
+                [class.is-invalid]="confirmPasswordError()"
               />
+              @if (confirmPasswordError()) {
+                <div class="invalid-feedback">{{ confirmPasswordError() }}</div>
+              }
             </div>
           </div>
         }
         <div class="row mb-3">
           <div class="col-lg-6">
             <label class="form-label" for="email">电子邮件</label>
-            <input class="form-control" type="email" formControlName="email" id="email" />
+            <input class="form-control" type="email" id="email" [formField]="userForm.email" />
           </div>
           <div class="col-lg-6">
             <label class="form-label" for="phone">
               手&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;机
             </label>
-            <input class="form-control" type="text" formControlName="phone" id="phone" />
+            <input class="form-control" type="text" id="phone" [formField]="userForm.phone" />
           </div>
         </div>
         <div class="mb-3">
           <label class="form-label" for="bio">个人简介</label>
-          <textarea class="form-control" type="text" formControlName="bio" id="bio"></textarea>
+          <textarea class="form-control" type="text" id="bio" [formField]="userForm.bio"></textarea>
         </div>
         <div class="mb-3 d-flex">
-          <button class="btn btn-danger" type="reset">重置表单</button>
+          <button class="btn btn-danger" type="button" (click)="resetForm()">重置表单</button>
           <button
             class="btn btn-primary ms-auto"
-            [disabled]="userForm.invalid || (!userForm.touched && !userForm.dirty)"
+            [disabled]="!userForm().valid() || isSubmitting()"
             type="submit"
           >
             <svg
@@ -124,57 +134,91 @@ export class UserForm {
   readonly created = computed(() => this.userData()?.code == undefined);
   formSubmit = output<User>();
 
-  private readonly fb = inject(FormBuilder);
+  isSubmitting = signal(false);
+  passwordError = signal('');
+  confirmPasswordError = signal('');
 
-  userForm: FormGroup = this.fb.group({
-    id: [null],
-    code: [''],
-    tenantCode: [''],
-    username: ['', [Validators.required]],
-    password: [''],
-    confirmPassword: [''],
-    disabled: [false],
-    accountExpired: [false],
-    accountLocked: [false],
-    credentialsExpired: [false],
-    email: ['', [Validators.email]],
-    phone: [''],
-    name: ['', Validators.required],
-    avatar: [''],
-    bio: [''],
+  private readonly initialModel = {
+    id: undefined as number | undefined,
+    code: '',
+    tenantCode: '',
+    username: '',
+    password: '',
+    confirmPassword: '',
+    disabled: false,
+    accountExpired: false,
+    accountLocked: false,
+    credentialsExpired: false,
+    email: '',
+    phone: '',
+    name: '',
+    avatar: '',
+    bio: '',
+  };
+
+  protected readonly userModel = signal({ ...this.initialModel });
+
+  protected readonly userForm = form(this.userModel, (p) => {
+    required(p.username, { message: '用户名 是必填项' });
+    disabled(p.username, () => !this.created());
+    required(p.name, { message: '昵称 是必填项' });
+    email(p.email, { message: '电子邮件 格式不正确' });
   });
 
   constructor() {
     effect(() => {
       const data = this.userData();
       if (this.created()) {
-        this.userForm.controls['password'].addValidators([
-          Validators.required,
-          Validators.minLength(6),
-        ]);
-        this.userForm.controls['confirmPassword'].addValidators([
-          Validators.required,
-          Validators.minLength(6),
-        ]);
-        this.userForm.patchValue({} as User);
+        this.userModel.set({ ...this.initialModel });
       } else if (data) {
-        this.userForm.controls['password'].clearValidators();
-        this.userForm.controls['confirmPassword'].clearValidators();
-        this.userForm.controls['username'].disable({ onlySelf: true });
-        this.userForm.patchValue(data);
+        this.userModel.set({
+          ...this.initialModel,
+          ...data,
+          password: '',
+          confirmPassword: '',
+        });
       }
     });
   }
 
-  onSubmit(): void {
-    if (this.userForm.valid) {
-      if (
-        this.userForm.controls['password'].value != this.userForm.controls['confirmPassword'].value
-      ) {
-        this.userForm.controls['confirmPassword'].setErrors({ confirm: true });
+  async onSubmit() {
+    this.passwordError.set('');
+    this.confirmPasswordError.set('');
+
+    if (this.created()) {
+      const model = this.userModel();
+      if (!model.password || model.password.length < 6) {
+        this.passwordError.set(model.password ? '密码至少6个字符' : '密码 是必填项');
         return;
       }
-      this.formSubmit.emit(this.userForm.getRawValue());
+      if (!model.confirmPassword || model.confirmPassword.length < 6) {
+        this.confirmPasswordError.set(
+          model.confirmPassword ? '确认密码至少6个字符' : '确认密码 是必填项',
+        );
+        return;
+      }
+      if (model.password !== model.confirmPassword) {
+        this.confirmPasswordError.set('两次输入的密码不一致');
+        return;
+      }
     }
+
+    this.isSubmitting.set(true);
+    await submit(this.userForm, {
+      action: async () => {
+        const model = this.userModel();
+        const result: User = {
+          ...model,
+        } as User;
+        this.formSubmit.emit(result);
+      },
+    });
+    this.isSubmitting.set(false);
+  }
+
+  resetForm() {
+    this.userModel.set({ ...this.initialModel });
+    this.passwordError.set('');
+    this.confirmPasswordError.set('');
   }
 }

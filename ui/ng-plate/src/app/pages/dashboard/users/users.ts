@@ -1,8 +1,8 @@
-import { Component, inject, inputBinding, signal } from '@angular/core';
+import { Component, computed, inject, inputBinding, signal } from '@angular/core';
 import { delay, tap } from 'rxjs';
 
 import { DatePipe } from '@angular/common';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { MessageService, ModalsService } from '@app/plugins';
 import { Page, Pageable } from '@plate/types';
 import { UserForm } from './user-form';
@@ -27,7 +27,9 @@ export class Users {
     sorts: ['id,desc'],
   });
 
-  userData = signal<Page<User>>({
+  search = signal<User>({});
+
+  private readonly emptyPage: Page<User> = {
     content: [],
     pageable: {
       page: 0,
@@ -42,15 +44,46 @@ export class Users {
     last: true,
     numberOfElements: 0,
     empty: true,
-  });
+  };
 
-  search = signal<User>({});
+  protected readonly userResource = httpResource<Page<User>>(
+    () => {
+      const search = this.search();
+      const page = this.pageable();
+      const params: Record<
+        string,
+        string | number | boolean | ReadonlyArray<string | number | boolean>
+      > = {
+        ...(search as Record<
+          string,
+          string | number | boolean | ReadonlyArray<string | number | boolean>
+        >),
+        page: page.page - 1,
+        size: page.size,
+      };
+      for (const sort of page.sorts) {
+        if (!params['sort']) {
+          params['sort'] = [sort];
+        } else if (Array.isArray(params['sort'])) {
+          (params['sort'] as string[]).push(sort);
+        }
+      }
+      return {
+        url: environment.secApiPath + '/users/page',
+        params,
+      };
+    },
+    {
+      defaultValue: this.emptyPage,
+      debugName: 'users-page',
+    },
+  );
+
+  userData = computed(() => this.userResource.value());
+
+  isLoading = computed(() => this.userResource.isLoading());
 
   Math = Math;
-
-  constructor() {
-    this.fetchUserData();
-  }
 
   openModal() {
     this._modal.create({
@@ -60,9 +93,7 @@ export class Users {
   }
 
   fetchUserData() {
-    this.loadData(this.search(), this.pageable()).subscribe(() =>
-      this._message.success('数据加载成功!'),
-    );
+    this.userResource.reload();
   }
 
   onTableQueryChange($event: Pageable) {}
@@ -96,8 +127,6 @@ export class Users {
       ...p,
       page: page,
     }));
-
-    this.fetchUserData();
   }
 
   getPageNumbers(): number[] {
@@ -138,22 +167,6 @@ export class Users {
     const totalElements = this.userData().totalElements || 0;
     const size = this.pageable().size;
     return Math.ceil(totalElements / size);
-  }
-
-  page(request: User, page: Pageable) {
-    let params = new HttpParams({ fromObject: request as never });
-    params = params.appendAll({ page: page.page - 1, size: page.size });
-    for (const sort in page.sorts) {
-      params = params.appendAll({ sort: page.sorts[sort] });
-    }
-    return this._http.get<Page<User>>(environment.secApiPath + '/users/page', { params: params });
-  }
-
-  private loadData(search: User, page: Pageable) {
-    return this.page(search, page).pipe(
-      tap((result) => this.userData.set(result)),
-      takeUntilDestroyed(),
-    );
   }
 
   private add(request: User) {
