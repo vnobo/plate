@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Service } from '@angular/core';
 import { ParamMap } from '@angular/router';
 
 const themeConfig: Record<string, string> = {
@@ -9,7 +9,7 @@ const themeConfig: Record<string, string> = {
   'theme-radius': '1',
 };
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class SettingsService {
   setting(params: ParamMap) {
     for (const key in themeConfig) {

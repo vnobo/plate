@@ -10,7 +10,7 @@ import {
   ElementRef,
   EnvironmentInjector,
   inject,
-  Injectable,
+  Service,
   input,
   inputBinding,
   OnDestroy,
@@ -37,7 +37,7 @@ export interface ModalOptions {
   show?: boolean;
 }
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class ModalsService {
   private appRef = inject(ApplicationRef);
   private injector = inject(EnvironmentInjector);
