@@ -26,22 +26,29 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 /**
  * SecurityController Integration Test
  *
- * <p>This test class provides comprehensive integration test cases for SecurityController, covering the entire request chain.
- * Test scenarios include:</p>
+ * <p>
+ * This test class provides comprehensive integration test cases for
+ * SecurityController, covering the entire request chain. Test scenarios
+ * include:
+ * </p>
  * <ul>
- *   <li>1) Administrator login authentication process, using account admin/123456 to verify access control</li>
- *   <li>2) Regular user login process, using account user/123456 to verify basic functionality</li>
- *   <li>3) Interception of unauthorized access</li>
+ * <li>1) Administrator login authentication process, using account admin/123456
+ * to verify access control</li>
+ * <li>2) Regular user login process, using account user/123456 to verify basic
+ * functionality</li>
+ * <li>3) Interception of unauthorized access</li>
  * </ul>
  *
- * <p>Test requirements:</p>
+ * <p>
+ * Test requirements:
+ * </p>
  * <ul>
- *   <li>a) Use Spring Boot Test framework</li>
- *   <li>b) Include HTTP request simulation</li>
- *   <li>c) Verify endpoint return status codes and response content</li>
- *   <li>d) Initialize test data using @Sql annotation</li>
- *   <li>e) Include exception flow test cases</li>
- *   <li>Ensure test coverage reaches above 90%</li>
+ * <li>a) Use Spring Boot Test framework</li>
+ * <li>b) Include HTTP request simulation</li>
+ * <li>c) Verify endpoint return status codes and response content</li>
+ * <li>d) Initialize test data using @Sql annotation</li>
+ * <li>e) Include exception flow test cases</li>
+ * <li>Ensure test coverage reaches above 90%</li>
  * </ul>
  *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
@@ -64,18 +71,15 @@ public class ApplicationTests {
         var postgresImage = org.testcontainers.utility.DockerImageName.parse("alexbob/postgres")
                 .asCompatibleSubstituteFor("postgres");
         postgresContainer = new PostgreSQLContainer(postgresImage)
-                .waitingFor(org.testcontainers.containers.wait.strategy.Wait
-                        .forLogMessage("^.*数据库系统准备接受连接.*$", 2));
+                .waitingFor(org.testcontainers.containers.wait.strategy.Wait.forLogMessage("^.*数据库系统准备接受连接.*$", 2));
         postgresContainer.start();
     }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         // Configure R2DBC connection
-        registry.add("spring.r2dbc.url", () -> String.format("r2dbc:postgresql://%s:%d/%s",
-                postgresContainer.getHost(),
-                postgresContainer.getFirstMappedPort(),
-                postgresContainer.getDatabaseName()));
+        registry.add("spring.r2dbc.url", () -> String.format("r2dbc:postgresql://%s:%d/%s", postgresContainer.getHost(),
+                postgresContainer.getFirstMappedPort(), postgresContainer.getDatabaseName()));
         registry.add("spring.r2dbc.username", postgresContainer::getUsername);
         registry.add("spring.r2dbc.password", postgresContainer::getPassword);
 
@@ -109,16 +113,15 @@ public class ApplicationTests {
     @AfterAll
     static void tearDownAll() {
         log.info("All SecurityController integration tests completed");
+        postgresContainer.stop();
+        redisContainer.stop();
     }
 
     @BeforeEach
     void setUp() {
         log.info("Setting up test environment, port: {}", port);
-        this.webTestClient = WebTestClient.bindToServer()
-                .baseUrl("http://localhost:" + port)
-                .defaultHeader("X-Requested-With", "XMLHttpRequest")
-                .responseTimeout(Duration.ofSeconds(30))
-                .build();
+        this.webTestClient = WebTestClient.bindToServer().baseUrl("http://localhost:" + port)
+                .defaultHeader("X-Requested-With", "XMLHttpRequest").responseTimeout(Duration.ofSeconds(30)).build();
         // For test classes requiring administrator privileges
         this.adminToken = loginAndGetToken(ADMIN_USERNAME, ADMIN_PASSWORD);
         // For test classes requiring regular user privileges
@@ -133,16 +136,11 @@ public class ApplicationTests {
 
     // Helper method to log in and get token
     private String loginAndGetToken(String username, String password) {
-        String credentials = Base64.getEncoder()
-                .encodeToString((username + ":" + password).getBytes());
+        String credentials = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
 
-        var responseBody = webTestClient.get()
-                .uri("/sec/v1/oauth2/login")
-                .header("Authorization", "Basic " + credentials)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(AuthenticationToken.class)
-                .returnResult().getResponseBody();
+        var responseBody = webTestClient.get().uri("/sec/v1/oauth2/login")
+                .header("Authorization", "Basic " + credentials).exchange().expectStatus().isOk()
+                .expectBody(AuthenticationToken.class).returnResult().getResponseBody();
         assertNotNull(responseBody);
         return responseBody.token();
     }
@@ -165,8 +163,7 @@ public class ApplicationTests {
                     () -> assertThat(applicationContext.containsBean("reactiveRedisTemplate")).isTrue(),
                     () -> assertThat(applicationContext.containsBean("r2dbcEntityTemplate")).isTrue(),
                     () -> assertThat(applicationContext.containsBean("springSecurityFilterChain")).isTrue(),
-                    () -> assertThat(applicationContext.containsBean("securityManager")).isTrue()
-            );
+                    () -> assertThat(applicationContext.containsBean("securityManager")).isTrue());
         }
 
         @Test
@@ -175,8 +172,7 @@ public class ApplicationTests {
         void shouldVerifySecurityConfiguration() {
             assertAll("Security-related bean verification",
                     () -> assertThat(applicationContext.containsBean("passwordEncoder")).isTrue(),
-                    () -> assertThat(applicationContext.containsBean("securityManager")).isTrue()
-            );
+                    () -> assertThat(applicationContext.containsBean("securityManager")).isTrue());
         }
     }
 
@@ -190,25 +186,16 @@ public class ApplicationTests {
         @DisplayName("Obtain CSRF Token - Unauthenticated User Rejected")
         @Order(1)
         void shouldRejectUnauthenticatedUserForCsrfToken() {
-            webTestClient.get()
-                    .uri("/sec/v1/oauth2/csrf")
-                    .exchange()
-                    .expectStatus().isUnauthorized();
+            webTestClient.get().uri("/sec/v1/oauth2/csrf").exchange().expectStatus().isUnauthorized();
         }
 
         @Test
         @DisplayName("CSRF Token Format Validation")
         @Order(2)
         void shouldValidateCsrfTokenFormat() {
-            webTestClient.get()
-                    .uri("/sec/v1/oauth2/csrf")
-                    .headers(headers -> headers.setBearerAuth(adminToken))
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectBody()
-                    .jsonPath("$.token").isNotEmpty()
-                    .jsonPath("$.headerName").isEqualTo("X-XSRF-TOKEN")
-                    .jsonPath("$.parameterName").isEqualTo("_csrf");
+            webTestClient.get().uri("/sec/v1/oauth2/csrf").headers(headers -> headers.setBearerAuth(adminToken))
+                    .exchange().expectStatus().isOk().expectBody().jsonPath("$.token").isNotEmpty()
+                    .jsonPath("$.headerName").isEqualTo("X-XSRF-TOKEN").jsonPath("$.parameterName").isEqualTo("_csrf");
         }
     }
 
@@ -222,53 +209,35 @@ public class ApplicationTests {
         @DisplayName("Administrator Login Authentication - Success")
         @Order(1)
         void shouldAuthenticateAdminSuccessfully() {
-            webTestClient.get()
-                    .uri("/sec/v1/oauth2/login")
-                    .headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken))
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectBody()
-                    .jsonPath("$.token").exists()
-                    .jsonPath("$.details").exists()
-                    .jsonPath("$.expires").exists()
-                    .jsonPath("$.lastAccessTime").exists()
-                    .jsonPath("$.details.name").isEqualTo("admin")
-                    .jsonPath("$.details.nickname").isEqualTo("系统超级管理员")
-                    .jsonPath("$.details.enabled").isEqualTo(true);
+            webTestClient.get().uri("/sec/v1/oauth2/login")
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken)).exchange().expectStatus().isOk()
+                    .expectBody().jsonPath("$.token").exists().jsonPath("$.details").exists().jsonPath("$.expires")
+                    .exists().jsonPath("$.lastAccessTime").exists().jsonPath("$.details.name").isEqualTo("admin")
+                    .jsonPath("$.details.nickname").isEqualTo("系统超级管理员").jsonPath("$.details.enabled").isEqualTo(true);
         }
 
         @Test
         @DisplayName("Administrator Authority Verification")
         @Order(2)
         void shouldVerifyAdminAuthorities() {
-            webTestClient.get()
-                    .uri("/sec/v1/oauth2/login")
-                    .headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken))
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectBody()
-                    .jsonPath("$.details.authorities").isArray()
+            webTestClient.get().uri("/sec/v1/oauth2/login")
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken)).exchange().expectStatus().isOk()
+                    .expectBody().jsonPath("$.details.authorities").isArray()
                     .jsonPath("$.details.authorities[?(@.authority == 'ROLE_SYSTEM_ADMINISTRATORS')]").exists()
                     .jsonPath("$.details.authorities[?(@.authority == 'ROLE_GROUP_ADMINISTRATORS')]").exists()
-                    .jsonPath("$.details.authorities").value(authorities ->
-                            assertThat((Iterable<?>) authorities).isNotEmpty());
+                    .jsonPath("$.details.authorities")
+                    .value(authorities -> assertThat((Iterable<?>) authorities).isNotEmpty());
         }
 
         @Test
         @DisplayName("Administrator Password Change - Success")
         @Order(3)
         void shouldChangeAdminPasswordSuccessfully() {
-            var changePasswordRequest = Map.of(
-                    "password", "123456",
-                    "newPassword", "newPassword123"
-            );
-            webTestClient.post()
-                    .uri("/sec/v1/oauth2/change/password")
+            var changePasswordRequest = Map.of("password", "123456", "newPassword", "newPassword123");
+            webTestClient.post().uri("/sec/v1/oauth2/change/password")
                     .headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken))
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(BodyInserters.fromValue(changePasswordRequest))
-                    .exchange()
-                    .expectStatus().isForbidden();
+                    .contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(changePasswordRequest))
+                    .exchange().expectStatus().isForbidden();
         }
     }
 
@@ -282,17 +251,10 @@ public class ApplicationTests {
         @DisplayName("Regular User Login Authentication - Success")
         @Order(1)
         void shouldAuthenticateUserSuccessfully() {
-            String credentials = Base64.getEncoder()
-                    .encodeToString((USER_USERNAME + ":" + USER_PASSWORD).getBytes());
+            String credentials = Base64.getEncoder().encodeToString((USER_USERNAME + ":" + USER_PASSWORD).getBytes());
 
-            webTestClient.get()
-                    .uri("/sec/v1/oauth2/login")
-                    .header("Authorization", "Basic " + credentials)
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectBody()
-                    .jsonPath("$.token").exists()
-                    .jsonPath("$.details").exists()
+            webTestClient.get().uri("/sec/v1/oauth2/login").header("Authorization", "Basic " + credentials).exchange()
+                    .expectStatus().isOk().expectBody().jsonPath("$.token").exists().jsonPath("$.details").exists()
                     .jsonPath("$.expires").exists();
         }
 
@@ -300,34 +262,22 @@ public class ApplicationTests {
         @DisplayName("Regular User Authority Verification")
         @Order(2)
         void shouldVerifyUserAuthorities() {
-            String credentials = Base64.getEncoder()
-                    .encodeToString((USER_USERNAME + ":" + USER_PASSWORD).getBytes());
+            String credentials = Base64.getEncoder().encodeToString((USER_USERNAME + ":" + USER_PASSWORD).getBytes());
 
-            webTestClient.get()
-                    .uri("/sec/v1/oauth2/login")
-                    .header("Authorization", "Basic " + credentials)
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectBody()
-                    .jsonPath("$.details.authorities").isArray();
+            webTestClient.get().uri("/sec/v1/oauth2/login").header("Authorization", "Basic " + credentials).exchange()
+                    .expectStatus().isOk().expectBody().jsonPath("$.details.authorities").isArray();
         }
 
         @Test
         @DisplayName("Regular User Password Change - Success")
         @Order(3)
         void shouldChangeUserPasswordSuccessfully() {
-            var changePasswordRequest = Map.of(
-                    "password", "123456",
-                    "newPassword", "userNewPassword123"
-            );
+            var changePasswordRequest = Map.of("password", "123456", "newPassword", "userNewPassword123");
 
-            webTestClient.post()
-                    .uri("/sec/v1/oauth2/change/password")
+            webTestClient.post().uri("/sec/v1/oauth2/change/password")
                     .headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(BodyInserters.fromValue(changePasswordRequest))
-                    .exchange()
-                    .expectStatus().isForbidden(); // Changed to expect 403 status code
+                    .contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(changePasswordRequest))
+                    .exchange().expectStatus().isForbidden(); // Changed to expect 403 status code
         }
     }
 
@@ -341,46 +291,34 @@ public class ApplicationTests {
         @DisplayName("Unauthenticated Access to Login Token - 401")
         @Order(1)
         void shouldRejectLoginTokenWithoutAuthentication() {
-            webTestClient.get()
-                    .uri("/sec/v1/oauth2/login")
-                    .exchange()
-                    .expectStatus().isUnauthorized();
+            webTestClient.get().uri("/sec/v1/oauth2/login").exchange().expectStatus().isUnauthorized();
         }
 
         @Test
         @DisplayName("Unauthenticated Password Change - 403 (CSRF)")
         @Order(2)
         void shouldRejectChangePasswordWithoutAuthentication() {
-            webTestClient.post()
-                    .uri("/sec/v1/oauth2/change/password")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(Map.of("password", "oldPass", "newPassword", "newPass"))
-                    .exchange()
-                    .expectStatus().isForbidden();
+            webTestClient.post().uri("/sec/v1/oauth2/change/password").contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(Map.of("password", "oldPass", "newPassword", "newPass")).exchange().expectStatus()
+                    .isForbidden();
         }
 
         @Test
         @DisplayName("Unauthenticated OAuth2 Binding - 401")
         @Order(3)
         void shouldRejectBindOauth2WithoutAuthentication() {
-            webTestClient.get()
-                    .uri("/sec/v1/oauth2/bind?clientRegistrationId=github")
-                    .exchange()
-                    .expectStatus().isUnauthorized();
+            webTestClient.get().uri("/sec/v1/oauth2/bind?clientRegistrationId=github").exchange().expectStatus()
+                    .isUnauthorized();
         }
 
         @Test
         @DisplayName("Invalid Credentials Access - 401")
         @Order(4)
         void shouldRejectInvalidCredentials() {
-            String invalidCredentials = Base64.getEncoder()
-                    .encodeToString("invalid:credentials".getBytes());
+            String invalidCredentials = Base64.getEncoder().encodeToString("invalid:credentials".getBytes());
 
-            webTestClient.get()
-                    .uri("/sec/v1/oauth2/login")
-                    .header("Authorization", "Basic " + invalidCredentials)
-                    .exchange()
-                    .expectStatus().isUnauthorized();
+            webTestClient.get().uri("/sec/v1/oauth2/login").header("Authorization", "Basic " + invalidCredentials)
+                    .exchange().expectStatus().isUnauthorized();
         }
     }
 
@@ -401,14 +339,10 @@ public class ApplicationTests {
                     }
                     """;
 
-            webTestClient.post()
-                    .uri("/sec/v1/oauth2/change/password")
+            webTestClient.post().uri("/sec/v1/oauth2/change/password")
                     .headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(BodyInserters.fromValue(changePasswordRequest))
-                    .exchange()
-                    .expectStatus().is4xxClientError()
-                    .expectBody();
+                    .contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(changePasswordRequest))
+                    .exchange().expectStatus().is4xxClientError().expectBody();
         }
 
         @Test
@@ -422,14 +356,10 @@ public class ApplicationTests {
                     }
                     """;
 
-            webTestClient.post()
-                    .uri("/sec/v1/oauth2/change/password")
+            webTestClient.post().uri("/sec/v1/oauth2/change/password")
                     .headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken))
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(BodyInserters.fromValue(changePasswordRequest))
-                    .exchange()
-                    .expectStatus().is4xxClientError()
-                    .expectBody();
+                    .contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(changePasswordRequest))
+                    .exchange().expectStatus().is4xxClientError().expectBody();
         }
 
         @Test
@@ -443,13 +373,10 @@ public class ApplicationTests {
                     }
                     """;
 
-            webTestClient.post()
-                    .uri("/sec/v1/oauth2/change/password")
+            webTestClient.post().uri("/sec/v1/oauth2/change/password")
                     .headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken))
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(BodyInserters.fromValue(changePasswordRequest))
-                    .exchange()
-                    .expectStatus().is4xxClientError();
+                    .contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(changePasswordRequest))
+                    .exchange().expectStatus().is4xxClientError();
         }
     }
 
@@ -464,12 +391,8 @@ public class ApplicationTests {
         @Order(1)
         void shouldLogoutAdminSuccessfully() {
             // Login to get session
-            webTestClient.get()
-                    .uri("/oauth2/logout")
-                    .headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken))
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectBody().isEmpty();
+            webTestClient.get().uri("/oauth2/logout").headers(httpHeaders -> httpHeaders.setBearerAuth(adminToken))
+                    .exchange().expectStatus().isOk().expectBody().isEmpty();
         }
 
         @Test
@@ -477,16 +400,10 @@ public class ApplicationTests {
         @Order(2)
         void shouldVerifySessionInfo() {
             // Use token to access protected resources
-            webTestClient.get()
-                    .uri("/sec/v1/oauth2/login")
-                    .headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectBody()
-                    .jsonPath("$.token").isEqualTo(userToken)
-                    .jsonPath("$.details").exists()
-                    .jsonPath("$.expires").exists()
-                    .jsonPath("$.lastAccessTime").exists();
+            webTestClient.get().uri("/sec/v1/oauth2/login").headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
+                    .exchange().expectStatus().isOk().expectBody().jsonPath("$.token").isEqualTo(userToken)
+                    .jsonPath("$.details").exists().jsonPath("$.expires").exists().jsonPath("$.lastAccessTime")
+                    .exists();
         }
     }
 
@@ -500,11 +417,9 @@ public class ApplicationTests {
         @DisplayName("OAuth2 Binding - Success")
         @Order(1)
         void shouldBindOAuth2Successfully() {
-            webTestClient.get()
-                    .uri("/sec/v1/oauth2/bind?clientRegistrationId=github")
-                    .headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
-                    .exchange()
-                    .expectStatus().is5xxServerError();
+            webTestClient.get().uri("/sec/v1/oauth2/bind?clientRegistrationId=github")
+                    .headers(httpHeaders -> httpHeaders.setBearerAuth(userToken)).exchange().expectStatus()
+                    .is5xxServerError();
         }
 
         @Test
@@ -512,11 +427,8 @@ public class ApplicationTests {
         @Order(2)
         void shouldHandleMissingClientRegistrationId() {
 
-            webTestClient.get()
-                    .uri("/sec/v1/oauth2/bind")
-                    .headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
-                    .exchange()
-                    .expectStatus().isBadRequest();
+            webTestClient.get().uri("/sec/v1/oauth2/bind").headers(httpHeaders -> httpHeaders.setBearerAuth(userToken))
+                    .exchange().expectStatus().isBadRequest();
         }
     }
 
