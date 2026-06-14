@@ -21,17 +21,24 @@ import org.testcontainers.utility.DockerImageName;
 @TestConfiguration(proxyBeanMethods = false)
 public class InfrastructureConfiguration {
 
-    @Bean
-    public RedisContainer redisContainer() {
-        return new RedisContainer("redis:latest");
+    public static final RedisContainer REDIS_CONTAINER;
+    public static final PostgreSQLContainer POSTGRES_CONTAINER;
+
+    static {
+        REDIS_CONTAINER = new RedisContainer("redis:latest");
+        var postgresImage = DockerImageName.parse("alexbob/postgres")
+                .asCompatibleSubstituteFor("postgres");
+        POSTGRES_CONTAINER = new PostgreSQLContainer(postgresImage)
+                .waitingFor(Wait.forLogMessage("^.*数据库系统准备接受连接.*$", 2));
     }
 
     @Bean
-    @SuppressWarnings("resource")
+    public RedisContainer redisContainer() {
+        return REDIS_CONTAINER;
+    }
+
+    @Bean
     public PostgreSQLContainer postgresContainer() {
-        var postgresImage = DockerImageName.parse("alexbob/postgres")
-                .asCompatibleSubstituteFor("postgres");
-        return new PostgreSQLContainer(postgresImage)
-                .waitingFor(Wait.forLogMessage("^.*数据库系统准备接受连接.*$", 2));
+        return POSTGRES_CONTAINER;
     }
 }
