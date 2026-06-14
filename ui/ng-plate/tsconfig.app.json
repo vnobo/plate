@@ -4,12 +4,12 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "baseUrl": "src",
-    "types": ["node"],
+    "rootDir": "./src",
+    "types": ["node", "@angular/localize"],
     "paths": {
-      "@app/*": ["app/*"],
-      "@envs/*": ["envs/*"],
-      "@styles/*": ["styles/*"]
+      "@app/*": ["./src/app/*"],
+      "@envs/*": ["./src/envs/*"],
+      "@styles/*": ["./src/styles/*"]
     }
   },
   "include": ["src/**/*.ts"],

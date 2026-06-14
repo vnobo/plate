@@ -1,19 +1,19 @@
-
-import {Component, OnInit} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import { Component, signal } from '@angular/core';
+import { form } from '@angular/forms/signals';
 
 @Component({
   selector: 'app-welcome',
-  imports: [ReactiveFormsModule],
+  imports: [],
   templateUrl: './welcome.html',
-  styleUrls: ['./welcome.scss'],
+  styleUrl: './welcome.scss',
 })
-export class Welcome implements OnInit {
-  perfileForm = new FormGroup({
-    name: new FormControl(''),
-    email: new FormControl(''),
-    password: new FormControl(''),
-    confirmPassword: new FormControl(''),
+export class Welcome {
+  protected readonly profileModel = signal({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   });
-  ngOnInit() {}
+
+  protected readonly profileForm = form(this.profileModel);
 }

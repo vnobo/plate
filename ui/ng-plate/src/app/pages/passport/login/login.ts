@@ -1,19 +1,20 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { afterNextRender, Component, inject, OnDestroy, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { FormField, form, maxLength, minLength, required, submit } from '@angular/forms/signals';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BrowserStorage, TokenService } from '@app/core';
 import { MessageService } from '@app/plugins';
 import { Authentication } from '@plate/types';
-import { debounceTime, distinctUntilChanged, retry, Subject, takeUntil, tap } from 'rxjs';
+import { retry, tap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterModule, RouterLink],
+  imports: [FormField, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class Login implements OnDestroy {
+export class Login {
   private readonly _tokenSer = inject(TokenService);
   private readonly _message = inject(MessageService);
   private readonly _http = inject(HttpClient);
@@ -21,77 +22,54 @@ export class Login implements OnDestroy {
   private readonly _route = inject(ActivatedRoute);
   private readonly _storage = inject(BrowserStorage);
 
-  private submitSubject$ = new Subject<void>();
-  private destroy$ = new Subject<void>();
-
   passwordFieldTextType = signal(false);
   isSubmitting = signal(false);
 
-  loginForm = new FormGroup({
-    username: new FormControl('', {
-      validators: [Validators.required, Validators.minLength(5), Validators.maxLength(64)],
-      nonNullable: true,
-    }),
-    password: new FormControl('', {
-      validators: [Validators.required, Validators.minLength(6), Validators.maxLength(32)],
-      nonNullable: true,
-    }),
-    rememberMe: new FormControl(false, {
-      nonNullable: true,
-    }),
+  protected readonly loginModel = signal({
+    username: '',
+    password: '',
+    rememberMe: false,
+  });
+
+  protected readonly loginForm = form(this.loginModel, (p) => {
+    required(p.username, { message: '请输入用户名' });
+    minLength(p.username, 5, { message: '用户名至少5个字符' });
+    maxLength(p.username, 64, { message: '用户名不能超过64个字符' });
+    required(p.password, { message: '请输入密码' });
+    minLength(p.password, 6, { message: '密码至少6个字符' });
+    maxLength(p.password, 32, { message: '密码不能超过32个字符' });
   });
 
   constructor() {
-    afterNextRender(() => {
-      this.submitSubject$
-        .pipe(debounceTime(300), takeUntil(this.destroy$))
-        .subscribe(() => this.formProcessLogin());
-      this.processLogin();
-      this.loadRememberedCredentials();
+    this.processLogin();
+    this.loadRememberedCredentials();
+  }
+
+  async onSubmit() {
+    if (this.isSubmitting()) {
+      return;
+    }
+
+    await submit(this.loginForm, {
+      action: async () => {
+        await this.formProcessLogin();
+      },
     });
   }
 
-  onSubmit() {
-    if (this.loginForm.invalid || this.isSubmitting()) {
-      return;
-    }
-    if (
-      this.loginForm.get('username')?.hasError('required') ||
-      this.loginForm.get('password')?.hasError('required')
-    ) {
-      this.isSubmitting.set(false);
-      return;
-    }
-
-    if (
-      this.loginForm.get('username')?.hasError('minlength') ||
-      this.loginForm.get('username')?.hasError('maxlength')
-    ) {
-      this.isSubmitting.set(false);
-      return;
-    }
-
-    if (
-      this.loginForm.get('password')?.hasError('minlength') ||
-      this.loginForm.get('password')?.hasError('maxlength')
-    ) {
-      this.isSubmitting.set(false);
-      return;
-    }
-
-    this.submitSubject$.next();
+  showPassword() {
+    this.passwordFieldTextType.update((v) => !v);
   }
 
-  private formProcessLogin() {
+  private async formProcessLogin() {
     this.isSubmitting.set(true);
     try {
-      const credentials = this.loginForm.getRawValue();
+      const credentials = this.loginModel();
       const headers = new HttpHeaders({
         authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
       });
       this.login(headers).subscribe({
-        next: (authentication) => {
-          // If "Remember Me" is checked, store credentials
+        next: (authentication: Authentication) => {
           if (credentials.rememberMe) {
             this.storeCredentials(credentials);
           } else {
@@ -118,9 +96,9 @@ export class Login implements OnDestroy {
   private processLogin() {
     const headers = new HttpHeaders({ 'x-requested-token': 'none-token-auto-login' });
     this.login(headers)
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed())
       .subscribe({
-        next: (authentication) => this.handleLoginSuccess(authentication),
+        next: (authentication: Authentication) => this.handleLoginSuccess(authentication),
         error: (error) => console.error(error.message),
       });
   }
@@ -130,20 +108,19 @@ export class Login implements OnDestroy {
     if (storedCredentials) {
       try {
         const credentials = JSON.parse(atob(storedCredentials));
-        this.loginForm.patchValue({
+        this.loginModel.update((m) => ({
+          ...m,
           username: credentials.username,
           password: credentials.password,
           rememberMe: false,
-        });
-      } catch (e) {
-        // If parsing fails, clear the stored credentials
+        }));
+      } catch {
         this.clearStoredCredentials();
       }
     }
   }
 
-  private storeCredentials(credentials: any) {
-    // Store credentials in localStorage with base64 encoding for security
+  private storeCredentials(credentials: { username: string; password: string }) {
     const credentialsToStore = {
       username: credentials.username,
       password: credentials.password,
@@ -157,17 +134,10 @@ export class Login implements OnDestroy {
     this._storage.removeItem('credentials');
   }
 
-  showPassword() {
-    this.passwordFieldTextType.set(!this.passwordFieldTextType());
-  }
-
   private login(headers: HttpHeaders) {
-    return this._http.get<Authentication>('/sec/oauth2/login', { headers: headers }).pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      takeUntil(this.destroy$),
-      tap((authentication) => this._tokenSer.login(authentication)),
-      retry(3)
+    return this._http.get<Authentication>('/sec/oauth2/login', { headers }).pipe(
+      tap((authentication: Authentication) => this._tokenSer.login(authentication)),
+      retry(3),
     );
   }
 
@@ -177,20 +147,19 @@ export class Login implements OnDestroy {
       delay: 5000,
       animation: true,
     });
-    this._router.navigate([this._tokenSer.redirectUrl], { relativeTo: this._route }).then();
+    void this._router.navigate([this._tokenSer.redirectUrl], { relativeTo: this._route });
   }
 
-  private handleLoginError(error: any) {
-    const errorMessage = error.errors || error.message || '登录系统失败，请检查您的用户名和密码';
+  private handleLoginError(error: unknown) {
+    const errorRecord = error as Record<string, string>;
+    const errorMessage =
+      errorRecord?.['errors'] ||
+      (error as Error)?.message ||
+      '登录系统失败，请检查您的用户名和密码';
     this._message.error(errorMessage, {
       autohide: true,
       animation: true,
       delay: 5000,
     });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

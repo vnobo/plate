@@ -4,8 +4,6 @@ import { Component } from '@angular/core';
   selector: 'app-auth-lock',
   imports: [],
   templateUrl: './auth-lock.html',
-  styleUrl: './auth-lock.scss'
+  styleUrl: './auth-lock.scss',
 })
-export class AuthLock {
-
-}
+export class AuthLock {}

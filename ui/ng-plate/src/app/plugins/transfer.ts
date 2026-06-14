@@ -1,5 +1,4 @@
-
-import { Component, computed, input, model, output, signal } from '@angular/core';
+import { Component, computed, input, linkedSignal, output, signal } from '@angular/core';
 
 export interface TransferItem {
   key: string;
@@ -38,26 +37,26 @@ export interface TransferData {
         <div class="transfer-body">
           <div class="transfer-list">
             @for (item of sourceData(); track item.key) {
-            <div
-              class="transfer-list-item"
-              [class.transfer-item-disabled]="item.disabled || disabled()"
-            >
-              <label class="form-check m-0 w-100">
-                <input
-                  class="form-check-input m-0"
-                  type="checkbox"
-                  [checked]="itemChecked(item.key)"
-                  (change)="toggleItem(item.key, $any($event.target).checked)"
-                  [disabled]="item.disabled || disabled()"
-                />
-                <div class="form-check-label ms-2 flex-fill">
-                  <div class="transfer-item-title">{{ item.title }}</div>
-                  @if (item.description) {
-                  <div class="transfer-item-desc text-secondary">{{ item.description }}</div>
-                  }
-                </div>
-              </label>
-            </div>
+              <div
+                class="transfer-list-item"
+                [class.transfer-item-disabled]="item.disabled || disabled()"
+              >
+                <label class="form-check m-0 w-100">
+                  <input
+                    class="form-check-input m-0"
+                    type="checkbox"
+                    [checked]="itemChecked(item.key)"
+                    (change)="toggleItem(item.key, $any($event.target).checked)"
+                    [disabled]="item.disabled || disabled()"
+                  />
+                  <div class="form-check-label ms-2 flex-fill">
+                    <div class="transfer-item-title">{{ item.title }}</div>
+                    @if (item.description) {
+                      <div class="transfer-item-desc text-secondary">{{ item.description }}</div>
+                    }
+                  </div>
+                </label>
+              </div>
             }
           </div>
         </div>
@@ -130,26 +129,26 @@ export interface TransferData {
         <div class="transfer-body">
           <div class="transfer-list">
             @for (item of targetData(); track item.key) {
-            <div
-              class="transfer-list-item"
-              [class.transfer-item-disabled]="item.disabled || disabled()"
-            >
-              <label class="form-check m-0 w-100">
-                <input
-                  class="form-check-input m-0"
-                  type="checkbox"
-                  [checked]="itemChecked(item.key)"
-                  (change)="toggleItem(item.key, $any($event.target).checked)"
-                  [disabled]="item.disabled || disabled()"
-                />
-                <div class="form-check-label ms-2 flex-fill">
-                  <div class="transfer-item-title">{{ item.title }}</div>
-                  @if (item.description) {
-                  <div class="transfer-item-desc text-secondary">{{ item.description }}</div>
-                  }
-                </div>
-              </label>
-            </div>
+              <div
+                class="transfer-list-item"
+                [class.transfer-item-disabled]="item.disabled || disabled()"
+              >
+                <label class="form-check m-0 w-100">
+                  <input
+                    class="form-check-input m-0"
+                    type="checkbox"
+                    [checked]="itemChecked(item.key)"
+                    (change)="toggleItem(item.key, $any($event.target).checked)"
+                    [disabled]="item.disabled || disabled()"
+                  />
+                  <div class="form-check-label ms-2 flex-fill">
+                    <div class="transfer-item-title">{{ item.title }}</div>
+                    @if (item.description) {
+                      <div class="transfer-item-desc text-secondary">{{ item.description }}</div>
+                    }
+                  </div>
+                </label>
+              </div>
             }
           </div>
         </div>
@@ -162,7 +161,7 @@ export interface TransferData {
       gap: 1.5rem;
       align-items: stretch;
     }
-    
+
     .transfer-panel {
       flex: 1;
       display: flex;
@@ -172,7 +171,7 @@ export interface TransferData {
       background: var(--tblr-bg-surface);
       box-shadow: var(--tblr-shadow-card);
     }
-    
+
     .transfer-header {
       padding: 0.75rem 1rem;
       border-bottom: 1px solid var(--tblr-border-color);
@@ -182,20 +181,20 @@ export interface TransferData {
       border-top-left-radius: calc(var(--tblr-border-radius) - 1px);
       border-top-right-radius: calc(var(--tblr-border-radius) - 1px);
     }
-    
+
     .transfer-body {
       flex: 1;
       overflow: auto;
       max-height: 300px;
       padding: 0.5rem;
     }
-    
+
     .transfer-list {
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
     }
-    
+
     .transfer-list-item {
       display: flex;
       align-items: center;
@@ -203,26 +202,26 @@ export interface TransferData {
       border-radius: var(--tblr-border-radius);
       transition: all 0.15s ease;
     }
-    
+
     .transfer-list-item:hover {
       background-color: var(--tblr-bg-surface-light);
     }
-    
+
     .transfer-item-disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
-    
+
     .transfer-item-title {
       font-weight: 500;
       font-size: 0.875rem;
     }
-    
+
     .transfer-item-desc {
       font-size: 0.75rem;
       margin-top: 0.125rem;
     }
-    
+
     .transfer-operation {
       display: flex;
       flex-direction: column;
@@ -230,7 +229,7 @@ export interface TransferData {
       align-items: center;
       padding: 1rem 0.5rem;
     }
-    
+
     .btn.btn-icon {
       width: 2.5rem;
       height: 2.5rem;
@@ -244,43 +243,43 @@ export interface TransferData {
       color: var(--tblr-text-secondary);
       transition: all 0.2s ease;
     }
-    
+
     .btn.btn-icon:hover:not(.btn-disabled) {
       background: var(--tblr-primary);
       color: var(--tblr-white);
       border-color: var(--tblr-primary);
     }
-    
+
     .btn.btn-icon.btn-disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
-    
+
     .form-check-input.m-0 {
       margin: 0 !important;
     }
-    
+
     .ms-2 {
       margin-left: 0.5rem !important;
     }
-    
+
     .text-secondary {
       color: var(--tblr-text-secondary) !important;
     }
-    
+
     .w-100 {
       width: 100%;
     }
-    
+
     .flex-fill {
       flex: 1;
     }
-    
+
     @media (max-width: 767.98px) {
       .transfer-container {
         flex-direction: column;
       }
-      
+
       .transfer-operation {
         flex-direction: row;
         gap: 0.5rem;
@@ -290,35 +289,32 @@ export interface TransferData {
   `,
 })
 export class TransferComponent {
-  // Inputs
   data = input.required<TransferItem[]>();
-  modelValue = model<string[]>([]);
+  modelValueInput = input<string[]>([], { alias: 'modelValue' });
+  modelValue = linkedSignal(this.modelValueInput);
   titles = input<[string, string]>(['Move to right', 'Move to left']);
   leftTitle = input<string>();
   rightTitle = input<string>();
   disabled = input<boolean>(false);
 
-  // Outputs
   modelValueChange = output<string[]>();
   change = output<TransferData>();
 
-  // Internal state
-  private selectedKeys = signal<string[]>([]);
+  private readonly selectedKeys = signal<string[]>([]);
 
-  // Computed properties
-  sourceData = computed(() => {
+  readonly sourceData = computed(() => {
     const currentData = this.data();
     const selected = this.modelValue();
     return currentData.filter((item) => !selected.includes(item.key));
   });
 
-  targetData = computed(() => {
+  readonly targetData = computed(() => {
     const currentData = this.data();
     const selected = this.modelValue();
     return currentData.filter((item) => selected.includes(item.key));
   });
 
-  sourceChecked = computed(() => {
+  readonly sourceChecked = computed(() => {
     const source = this.sourceData();
     if (source.length === 0) return false;
 
@@ -329,7 +325,7 @@ export class TransferComponent {
     return selectedSourceKeys.length > 0 && selectedSourceKeys.length === source.length;
   });
 
-  targetChecked = computed(() => {
+  readonly targetChecked = computed(() => {
     const target = this.targetData();
     if (target.length === 0) return false;
 
@@ -340,15 +336,14 @@ export class TransferComponent {
     return selectedTargetKeys.length > 0 && selectedTargetKeys.length === target.length;
   });
 
-  hasUnselectedSourceItems = computed(() => {
+  readonly hasUnselectedSourceItems = computed(() => {
     return this.sourceData().some((item) => !this.selectedKeys().includes(item.key));
   });
 
-  hasTargetItems = computed(() => {
+  readonly hasTargetItems = computed(() => {
     return this.targetData().length > 0;
   });
 
-  // Helper methods
   itemChecked(key: string): boolean {
     return this.selectedKeys().includes(key);
   }
@@ -387,7 +382,7 @@ export class TransferComponent {
 
   moveToTarget() {
     const keysToMove = this.selectedKeys().filter((key) =>
-      this.sourceData().some((item) => item.key === key)
+      this.sourceData().some((item) => item.key === key),
     );
 
     if (keysToMove.length > 0) {
@@ -400,7 +395,7 @@ export class TransferComponent {
 
   moveToSource() {
     const keysToMove = this.selectedKeys().filter((key) =>
-      this.targetData().some((item) => item.key === key)
+      this.targetData().some((item) => item.key === key),
     );
 
     if (keysToMove.length > 0) {

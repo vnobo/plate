@@ -1,10 +1,8 @@
 import { Component } from '@angular/core';
 import { TransferComponent, TransferItem } from '@app/plugins';
-import { ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-transfer-demo',
-  standalone: true,
   imports: [TransferComponent],
   template: `
     <div class="page">
@@ -84,15 +82,13 @@ import { ChangeDetectionStrategy } from '@angular/core';
     .page {
       padding: 1.5rem;
     }
-    
+
     .card {
       margin-bottom: 1.5rem;
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TransferDemoComponent {
-  // Basic transfer data
   transferData: TransferItem[] = [
     { key: '1', title: 'Option 1' },
     { key: '2', title: 'Option 2' },
@@ -103,7 +99,6 @@ export class TransferDemoComponent {
 
   selectedKeys: string[] = ['2', '4'];
 
-  // Transfer data with descriptions
   transferDataWithDescriptions: TransferItem[] = [
     { key: '1', title: 'Email Notification', description: 'Receive notifications via email' },
     { key: '2', title: 'SMS Notification', description: 'Receive notifications via SMS' },
@@ -114,7 +109,6 @@ export class TransferDemoComponent {
 
   selectedKeys2: string[] = ['1', '3'];
 
-  // Transfer data with disabled items
   transferDataWithDisabled: TransferItem[] = [
     { key: '1', title: 'Available Item 1', disabled: false },
     { key: '2', title: 'Available Item 2', disabled: false },

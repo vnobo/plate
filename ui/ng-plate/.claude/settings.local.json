@@ -1,9 +1,7 @@
 {
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": ["angular-cli"],
   "permissions": {
-    "allow": [
-      "Bash(powershell.exe *)",
-      "Bash(cmd.exe *)",
-      "Bash(dir *)"
-    ]
+    "allow": ["mcp__angular-cli__ai_tutor"]
   }
 }

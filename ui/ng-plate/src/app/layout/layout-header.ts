@@ -1,14 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  ActivatedRoute,
-  Event,
-  NavigationEnd,
-  NavigationStart,
-  Router,
-  RouterLink,
-  RouterLinkActive,
-} from '@angular/router';
+import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 import { SettingsService } from '@app/core';
 
 @Component({
@@ -1553,23 +1545,19 @@ import { SettingsService } from '@app/core';
       </div>
     </header>
   `,
-  styles: [
-    `
-      :host {
-        display: contents;
-      }
-    `,
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: `
+    :host {
+      display: contents;
+    }
+  `,
 })
 export class LayoutHeader {
   private readonly router = inject(ActivatedRoute);
   private readonly settings = inject(SettingsService);
+
   constructor() {
-    // Subscribe to router events and react to events
     this.router.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
-      const theme = params.get('theme');
-      if (theme) {
+      if (params.get('theme')) {
         this.settings.setting(params);
       }
     });

@@ -8,6 +8,9 @@
   "newProjectRoot": "projects",
   "projects": {
     "ng-plate": {
+      "i18n": {
+        "sourceLocale": "zh-Hans"
+      },
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -36,35 +39,21 @@
               }
             ],
             "styles": [
-              {
-                "input": "@tabler/core/dist/css/tabler.css",
-                "bundleName": "tabler-style"
-              },
-              {
-                "input": "@tabler/core/dist/css/tabler-themes.css",
-                "bundleName": "tabler-themes-style"
-              },
-              {
-                "input": "@tabler/core/dist/css/tabler-socials.css",
-                "bundleName": "tabler-socials-style"
-              },
+              "node_modules/@tabler/core/dist/css/tabler.css",
+              "node_modules/@tabler/core/dist/css/tabler-themes.css",
+              "node_modules/@tabler/core/dist/css/tabler-socials.css",
               "src/styles.scss"
             ],
             "scripts": [
-              {
-                "input": "@tabler/core/dist/js/tabler.js",
-                "bundleName": "tabler-script"
-              },
-              {
-                "input": "@tabler/core/dist/js/tabler-theme.js",
-                "bundleName": "tabler-theme-script"
-              }
+              "node_modules/@tabler/core/dist/js/tabler.js",
+              "node_modules/@tabler/core/dist/js/tabler-theme.js"
             ],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {
               "entry": "src/server.ts"
-            }
+            },
+            "polyfills": ["@angular/localize/init"]
           },
           "configurations": {
             "production": {

@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-layout-aside',
-  imports: [RouterModule],
+  imports: [RouterLink, RouterLinkActive],
   template: `
     <header class="navbar-expand-md">
       <div class="collapse navbar-collapse" id="navbar-menu">
@@ -11,12 +11,10 @@ import { RouterModule } from '@angular/router';
           <div class="container-fluid">
             <div class="row flex-column flex-md-row flex-fill align-items-center">
               <div class="col">
-                <!-- BEGIN NAVBAR MENU -->
                 <ul class="navbar-nav">
                   <li class="nav-item">
                     <a class="nav-link" routerLink="./tenant" routerLinkActive="active">
-                      <span class="nav-link-icon d-md-none d-lg-inline-block"
-                        ><!-- Download SVG icon from http://tabler.io/icons/icon/home -->
+                      <span class="nav-link-icon d-md-none d-lg-inline-block">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="24"
@@ -38,24 +36,18 @@ import { RouterModule } from '@angular/router';
                     </a>
                   </li>
                 </ul>
-                <!-- END NAVBAR MENU -->
               </div>
-              <div class="col col-md-auto">
-                <!-- 右侧内容-->
-              </div>
+              <div class="col col-md-auto"></div>
             </div>
           </div>
         </div>
       </div>
     </header>
   `,
-  styles: [
-    `
-      :host {
-        display: contents;
-      }
-    `,
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: `
+    :host {
+      display: contents;
+    }
+  `,
 })
 export class LayoutAside {}
