@@ -1,16 +1,16 @@
 import { Component, computed, effect, input, output, signal } from '@angular/core';
 
-export interface DataTableColumn<T = any> {
+export interface DataTableColumn<T = Record<string, unknown>> {
   key: string;
   title: string;
   sortable?: boolean;
   width?: string;
-  cellTemplate?: (value: any, row: T) => string;
+  cellTemplate?: (value: unknown, row: T) => string;
   headerTemplate?: (column: DataTableColumn<T>) => string;
 }
 
 export interface DataTableRow {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface DataTablePageEvent {

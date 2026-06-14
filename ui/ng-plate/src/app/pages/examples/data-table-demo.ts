@@ -104,14 +104,16 @@ export class DataTableDemoComponent {
       key: 'status',
       title: '状态',
       sortable: true,
-      cellTemplate: (value: string) =>
-        `<span class="badge ${value === '活跃' ? 'bg-success' : 'bg-secondary'}">${value}</span>`,
+      cellTemplate: (value: unknown) => {
+        const v = value as string;
+        return `<span class="badge ${v === '活跃' ? 'bg-success' : 'bg-secondary'}">${v}</span>`;
+      },
     },
     {
       key: 'createdAt',
       title: '创建日期',
       sortable: true,
-      cellTemplate: (value: Date) => value.toLocaleDateString('zh-CN'),
+      cellTemplate: (value: unknown) => (value as Date).toLocaleDateString('zh-CN'),
     },
   ];
 
@@ -166,15 +168,17 @@ export class DataTableDemoComponent {
       key: 'price',
       title: '价格',
       sortable: true,
-      cellTemplate: (value: number) => `¥${value.toFixed(2)}`,
+      cellTemplate: (value: unknown) => `¥${(value as number).toFixed(2)}`,
     },
     { key: 'stock', title: '库存', sortable: true },
     {
       key: 'status',
       title: '状态',
       sortable: true,
-      cellTemplate: (value: string) =>
-        `<span class="badge ${value === '在售' ? 'bg-success' : 'bg-danger'}">${value}</span>`,
+      cellTemplate: (value: unknown) => {
+        const v = value as string;
+        return `<span class="badge ${v === '在售' ? 'bg-success' : 'bg-danger'}">${v}</span>`;
+      },
     },
   ];
 }

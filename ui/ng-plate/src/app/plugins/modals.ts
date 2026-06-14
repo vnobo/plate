@@ -2,6 +2,7 @@ import { NgComponentOutlet } from '@angular/common';
 import {
   afterNextRender,
   ApplicationRef,
+  Binding,
   Component,
   ComponentRef,
   createComponent,
@@ -23,10 +24,10 @@ import { fromEvent } from 'rxjs';
 
 export interface ModalRef {
   title?: string;
-  headerRef?: Type<any> | null;
-  contentRef?: Type<any> | null;
-  footerRef?: Type<any> | null;
-  contentBindings?: any[];
+  headerRef?: Type<unknown> | null;
+  contentRef?: Type<unknown> | null;
+  footerRef?: Type<unknown> | null;
+  contentBindings?: Binding[];
 }
 
 export interface ModalOptions {
@@ -87,7 +88,7 @@ export class TablerModalsInit {
   selector: 'tabler-modals',
   imports: [NgComponentOutlet],
   template: `
-    <div class="modal" id="exampleModal" tabindex="-1">
+    <div class="modal" id="exampleModal" tabindex="-1" role="dialog" aria-modal="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -123,7 +124,7 @@ export class Modals implements OnInit, OnDestroy {
   private _el = inject(ElementRef);
 
   modalRef = input.required<ModalRef>();
-  dropped = output<any>();
+  dropped = output<void>();
 
   constructor() {
     afterNextRender(async () => {
@@ -138,8 +139,8 @@ export class Modals implements OnInit, OnDestroy {
 
       fromEvent(modalEl, 'hidden.bs.modal')
         .pipe(takeUntilDestroyed())
-        .subscribe(($event: any) => {
-          this.dropped.emit($event);
+        .subscribe(() => {
+          this.dropped.emit();
         });
       myModalAlternative.show();
     });
