@@ -1,12 +1,12 @@
 package com.plate.boot;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * Application context integration tests.
@@ -17,39 +17,52 @@ import static org.junit.jupiter.api.Assertions.assertAll;
  *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
-@DisplayName("Application Context Integration Tests")
+@DisplayName("Application Context")
 class ApplicationContextTests extends AbstractIntegrationTests {
 
     @Autowired
     private ApplicationContext applicationContext;
 
-    @Test
-    @DisplayName("Application context should load successfully")
-    void contextLoads() {
-        assertAll("Core infrastructure beans should exist",
-                () -> assertThat(applicationContext.containsBean("connectionFactory")).isTrue(),
-                () -> assertThat(applicationContext.containsBean("reactiveRedisTemplate")).isTrue(),
-                () -> assertThat(applicationContext.containsBean("r2dbcEntityTemplate")).isTrue(),
-                () -> assertThat(applicationContext.containsBean("springSecurityFilterChain")).isTrue(),
-                () -> assertThat(applicationContext.containsBean("securityManager")).isTrue()
-        );
+    @Nested
+    @DisplayName("Core Infrastructure Beans")
+    class CoreInfrastructureTests {
+
+        @Test
+        @DisplayName("should load R2DBC and Redis infrastructure beans")
+        void shouldLoadInfrastructureBeans() {
+            assertThat(applicationContext.containsBean("connectionFactory")).isTrue();
+            assertThat(applicationContext.containsBean("reactiveRedisTemplate")).isTrue();
+            assertThat(applicationContext.containsBean("r2dbcEntityTemplate")).isTrue();
+        }
+
+        @Test
+        @DisplayName("should load Spring Security filter chain")
+        void shouldLoadSecurityFilterChain() {
+            assertThat(applicationContext.containsBean("springSecurityFilterChain")).isTrue();
+        }
     }
 
-    @Test
-    @DisplayName("Security-related beans should be configured")
-    void shouldVerifySecurityBeans() {
-        assertAll("Security bean verification",
-                () -> assertThat(applicationContext.containsBean("passwordEncoder")).isTrue(),
-                () -> assertThat(applicationContext.containsBean("securityManager")).isTrue()
-        );
+    @Nested
+    @DisplayName("Security Beans")
+    class SecurityBeansTests {
+
+        @Test
+        @DisplayName("should configure password encoder and security manager")
+        void shouldConfigureSecurityBeans() {
+            assertThat(applicationContext.containsBean("passwordEncoder")).isTrue();
+            assertThat(applicationContext.containsBean("securityManager")).isTrue();
+        }
     }
 
-    @Test
-    @DisplayName("Infrastructure container beans should be available")
-    void shouldVerifyInfrastructureBeans() {
-        assertAll("Infrastructure bean verification",
-                () -> assertThat(applicationContext.containsBean("redisContainer")).isTrue(),
-                () -> assertThat(applicationContext.containsBean("postgresContainer")).isTrue()
-        );
+    @Nested
+    @DisplayName("Testcontainers Beans")
+    class ContainerBeansTests {
+
+        @Test
+        @DisplayName("should register Redis and PostgreSQL container beans")
+        void shouldRegisterContainerBeans() {
+            assertThat(applicationContext.containsBean("redisContainer")).isTrue();
+            assertThat(applicationContext.containsBean("postgresContainer")).isTrue();
+        }
     }
 }

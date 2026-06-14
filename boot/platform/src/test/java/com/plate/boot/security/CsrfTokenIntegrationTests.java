@@ -8,13 +8,13 @@ import org.junit.jupiter.api.Test;
 /**
  * CSRF token integration tests.
  * <p>
- * Verifies CSRF token retrieval and format validation,
- * including authentication requirements and token structure.
+ * Verifies CSRF token retrieval, authentication requirements,
+ * and token response structure (headerName, parameterName, token).
  * </p>
  *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
-@DisplayName("CSRF Token Integration Tests")
+@DisplayName("CSRF Token")
 class CsrfTokenIntegrationTests extends AbstractIntegrationTests {
 
     private String adminToken;
@@ -25,33 +25,27 @@ class CsrfTokenIntegrationTests extends AbstractIntegrationTests {
     }
 
     @Test
-    @DisplayName("Should reject unauthenticated CSRF token request - 401")
-    void shouldRejectUnauthenticatedCsrfRequest() {
-        webTestClient.get().uri(paths.getOauth2Base() + "/csrf")
+    @DisplayName("should reject unauthenticated CSRF token request with 401")
+    void shouldRejectUnauthenticatedRequest() {
+        // Given — no Authorization header
+
+        // When & Then
+        webTestClient.get().uri(oauth2Base() + "/csrf")
                 .exchange().expectStatus().isUnauthorized();
     }
 
     @Test
-    @DisplayName("Should return valid CSRF token for authenticated user")
-    void shouldReturnCsrfTokenForAuthenticatedUser() {
-        webTestClient.get().uri(paths.getOauth2Base() + "/csrf")
+    @DisplayName("should return CSRF token with correct header and parameter names for authenticated user")
+    void shouldReturnCsrfTokenWithMetadata() {
+        // Given — adminToken from setUp
+
+        // When & Then
+        webTestClient.get().uri(oauth2Base() + "/csrf")
                 .headers(headers -> headers.setBearerAuth(adminToken))
                 .exchange().expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.token").isNotEmpty()
                 .jsonPath("$.headerName").isEqualTo("X-XSRF-TOKEN")
                 .jsonPath("$.parameterName").isEqualTo("_csrf");
-    }
-
-    @Test
-    @DisplayName("Should return CSRF token with non-empty header and parameter names")
-    void shouldReturnCsrfTokenWithMetadata() {
-        webTestClient.get().uri(paths.getOauth2Base() + "/csrf")
-                .headers(headers -> headers.setBearerAuth(adminToken))
-                .exchange().expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.token").isNotEmpty()
-                .jsonPath("$.headerName").isNotEmpty()
-                .jsonPath("$.parameterName").isNotEmpty();
     }
 }

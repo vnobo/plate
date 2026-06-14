@@ -5,19 +5,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Captcha integration tests.
  * <p>
- * Covers captcha code generation endpoint,
- * including response format and authentication behavior.
- * Note: The captcha endpoint is in the security package, so it gets the
- * "sec" path prefix from WebConfiguration, making the actual path
- * /sec/v1/captcha/code (requires authentication).
+ * Covers captcha code generation endpoint, including response format
+ * and authentication behavior.
+ * The actual path is {@code /sec/v1/captcha/code} (requires authentication).
  * </p>
  *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
-@DisplayName("Captcha Integration Tests")
+@DisplayName("Captcha")
 class CaptchaIntegrationTests extends AbstractIntegrationTests {
 
     private String adminToken;
@@ -28,19 +28,17 @@ class CaptchaIntegrationTests extends AbstractIntegrationTests {
     }
 
     @Test
-    @DisplayName("Should generate captcha code with authentication")
-    void shouldGenerateCaptchaCodeWithAuthentication() {
-        webTestClient.get().uri(paths.getCaptchaBase() + "/code")
-                .headers(headers -> headers.setBearerAuth(adminToken))
-                .exchange().expectStatus().isOk();
-    }
+    @DisplayName("should return 200 and PNG image when authenticated user requests captcha code")
+    void shouldReturnPngImageForAuthenticatedUser() {
+        // Given — adminToken from setUp
 
-    @Test
-    @DisplayName("Should return captcha image with correct content type")
-    void shouldReturnCaptchaImageWithContentType() {
-        webTestClient.get().uri(paths.getCaptchaBase() + "/code")
+        // When & Then
+        var response = webTestClient.get().uri(captchaBase() + "/code")
                 .headers(headers -> headers.setBearerAuth(adminToken))
                 .exchange().expectStatus().isOk()
-                .expectHeader().contentType("image/png");
+                .expectHeader().contentType("image/png")
+                .expectBody().returnResult();
+
+        assertThat(response.getResponseBody()).isNotNull();
     }
 }
