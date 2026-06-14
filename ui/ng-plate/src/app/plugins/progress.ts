@@ -1,4 +1,4 @@
-import { Component, computed, Injectable, input, signal } from '@angular/core';
+import { Component, computed, Service, input, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -55,7 +55,7 @@ export class Progress {
   });
 }
 
-@Injectable({ providedIn: 'root' })
+@Service()
 export class ProgressService {
   private readonly isShow = signal(false);
 

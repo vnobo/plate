@@ -10,7 +10,7 @@ import {
   ElementRef,
   EnvironmentInjector,
   inject,
-  Injectable,
+  Service,
   OnDestroy,
   output,
   signal,
@@ -29,9 +29,7 @@ export interface Message {
   delay?: number;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class MessageService {
   private appRef = inject(ApplicationRef);
   private readonly document = inject(DOCUMENT);
