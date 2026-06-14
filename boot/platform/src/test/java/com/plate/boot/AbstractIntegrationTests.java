@@ -12,8 +12,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.Duration;
@@ -40,8 +38,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(InfrastructureConfiguration.class)
 @EnableConfigurationProperties(TestPathProperties.class)
 public abstract class AbstractIntegrationTests {
-
-    private static final Logger log = LoggerFactory.getLogger(AbstractIntegrationTests.class);
 
     // ---- Test credentials ----
     protected static final String ADMIN_USERNAME = "admin";
@@ -85,25 +81,10 @@ public abstract class AbstractIntegrationTests {
 
     // ---- Infrastructure setup ----
 
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        InfrastructureConfiguration.POSTGRES_CONTAINER.start();
-        var postgres = InfrastructureConfiguration.POSTGRES_CONTAINER;
-        registry.add("spring.r2dbc.url", () -> String.format("r2dbc:postgresql://%s:%d/%s",
-                postgres.getHost(), postgres.getFirstMappedPort(), postgres.getDatabaseName()));
-        registry.add("spring.r2dbc.username", postgres::getUsername);
-        registry.add("spring.r2dbc.password", postgres::getPassword);
-        registry.add("spring.flyway.url", postgres::getJdbcUrl);
-        registry.add("spring.flyway.user", postgres::getUsername);
-        registry.add("spring.flyway.password", postgres::getPassword);
-
-        InfrastructureConfiguration.REDIS_CONTAINER.start();
-        var redis = InfrastructureConfiguration.REDIS_CONTAINER;
-        registry.add("spring.data.redis.host", redis::getHost);
-        registry.add("spring.data.redis.port", redis::getFirstMappedPort);
-
-        log.info("Test infrastructure containers started");
-    }
+    /**
+     * Container infrastructure is managed by {@link InfrastructureConfiguration}
+     * via {@code @ServiceConnection} — no manual property registration needed.
+     */
 
     @BeforeEach
     void setUpWebTestClient() {
