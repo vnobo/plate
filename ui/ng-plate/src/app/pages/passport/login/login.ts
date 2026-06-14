@@ -174,8 +174,12 @@ export class Login {
     void this._router.navigate([this._tokenSer.redirectUrl], { relativeTo: this._route });
   }
 
-  private handleLoginError(error: any) {
-    const errorMessage = error.errors || error.message || '登录系统失败，请检查您的用户名和密码';
+  private handleLoginError(error: unknown) {
+    const errorRecord = error as Record<string, string>;
+    const errorMessage =
+      errorRecord?.['errors'] ||
+      (error as Error)?.message ||
+      '登录系统失败，请检查您的用户名和密码';
     this._message.error(errorMessage, {
       autohide: true,
       animation: true,

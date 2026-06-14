@@ -1,4 +1,3 @@
-import { NgClass } from '@angular/common';
 import {
   afterNextRender,
   ApplicationRef,
@@ -171,20 +170,29 @@ export class TablerToastInit implements OnDestroy {
 
 @Component({
   selector: 'tabler-toasts',
-  imports: [NgClass, TablerToastInit],
+  imports: [TablerToastInit],
   template: `
     <div class="toast-container bottom-0 end-0 p-3">
       @for (toast of msgs(); track toast.id) {
         <div
           id="{{ toast.id }}"
           class="toast align-items-center border-0"
+          [class.text-bg-success]="toast.type === 'success'"
+          [class.text-bg-danger]="toast.type === 'danger'"
+          [class.text-bg-warning]="toast.type === 'warning'"
+          [class.text-bg-info]="toast.type === 'info'"
+          [class.text-bg-primary]="
+            toast.type !== 'success' &&
+            toast.type !== 'danger' &&
+            toast.type !== 'warning' &&
+            toast.type !== 'info'
+          "
           data-bs-toggle="toast"
           role="alert"
           aria-live="assertive"
           [attr.aria-atomic]="toast.animation"
           [attr.data-bs-autohide]="toast.autohide"
           [attr.data-bs-delay]="toast.delay"
-          [ngClass]="getToastClass(toast.type)"
           tablerToastInit
         >
           <div class="d-flex">
@@ -201,6 +209,7 @@ export class TablerToastInit implements OnDestroy {
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   class="icon icon-2"
+                  aria-hidden="true"
                 >
                   @switch (toast.type) {
                     @case ('success') {
@@ -285,18 +294,6 @@ export class Toasts implements OnDestroy {
 
   clear(): void {
     this.msgs.set([]);
-  }
-
-  getToastClass(type: ToastType | undefined): string {
-    const classMap: Record<ToastType | 'default', string> = {
-      success: 'text-bg-success',
-      danger: 'text-bg-danger',
-      warning: 'text-bg-warning',
-      info: 'text-bg-info',
-      default: 'text-bg-primary',
-    };
-
-    return classMap[type || 'default'];
   }
 
   ngOnDestroy(): void {
