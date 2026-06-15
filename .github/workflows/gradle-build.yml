@@ -112,18 +112,22 @@ jobs:
       # ---- Create Multi-Arch Manifest for GHCR ----
       - name: Create and Push GHCR Multi-Arch Manifest
         run: |
-          # 将 metadata-action 输出的换行符标签和注解转换为 docker buildx 需要的格式
-
-          # 将每行 tag 前面加上 --tag
+          # 将 metadata-action 输出的换行符标签转换为 --tag 参数
           GHCR_TAGS=$(echo "${{ steps.meta.outputs.tags }}" | grep 'ghcr.io/' | sed 's/^/--tag /' | tr '\n' ' ')
 
-          # 将每行 annotation 前面加上 --annotation，并去掉开头的 manifest:
-          ANNOTATIONS=$(echo "${{ steps.meta.outputs.annotations }}" | sed 's/^manifest://' | sed 's/^/--annotation /' | tr '\n' ' ')
+          # 将每行 annotation 去掉 manifest: 前缀，转换为 --annotation 参数
+          ANNOTATIONS=$(echo "${{ steps.meta.outputs.annotations }}" | sed 's/^manifest:/' | sed 's/^/--annotation /' | tr '\n' ' ')
 
-          # 执行创建
-          docker buildx imagetools create $ANNOTATIONS $GHCR_TAGS \
+          # 拼接完整命令
+          CMD="docker buildx imagetools create ${ANNOTATIONS} ${GHCR_TAGS} \
             ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
-            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
+            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64"
+
+          # 打印命令（便于调试）
+          echo ">>> $CMD"
+
+          # 执行
+          eval "$CMD"
 
       # ---- Copy Single-Arch Images to Docker Hub ----
       - name: Copy single-arch images to Docker Hub
@@ -141,21 +145,23 @@ jobs:
       - name: Create and Push Docker Hub Multi-Arch Manifest
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin docker.io
-          DOCKERHUB_TAGS=""
-          while IFS= read -r tag; do
-            [[ -n "$tag" && "$tag" == docker.io/* ]] && DOCKERHUB_TAGS="$DOCKERHUB_TAGS --tag $tag"
-          done <<< "${{ steps.meta.outputs.tags }}"
 
-          ANNOTATIONS=""
-          while IFS= read -r ann; do
-            [[ -n "$ann" ]] && ANNOTATIONS="$ANNOTATIONS --annotation ${ann#manifest:}"
-          done <<< "${{ steps.meta.outputs.annotations }}"
+          # 将 metadata-action 输出的换行符标签转换为 --tag 参数
+          DOCKERHUB_TAGS=$(echo "${{ steps.meta.outputs.tags }}" | grep 'docker.io/' | sed 's/^/--tag /' | tr '\n' ' ')
 
-          docker buildx imagetools create \
-            $ANNOTATIONS \
-            $DOCKERHUB_TAGS \
+          # 将每行 annotation 去掉 manifest: 前缀，转换为 --annotation 参数
+          ANNOTATIONS=$(echo "${{ steps.meta.outputs.annotations }}" | sed 's/^manifest:/' | sed 's/^/--annotation /' | tr '\n' ' ')
+
+          # 拼接完整命令
+          CMD="docker buildx imagetools create ${ANNOTATIONS} ${DOCKERHUB_TAGS} \
             ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
-            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
+            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64"
+
+          # 打印命令（便于调试）
+          echo ">>> $CMD"
+
+          # 执行
+          eval "$CMD"
 
       # ---- Verification ----
 
