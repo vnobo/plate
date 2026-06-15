@@ -91,23 +91,23 @@ jobs:
 
       # ---- Build & Push Single-Arch Images to GHCR ----
 
-      - name: Build and Push amd64 Image
-        run: |
-          cd boot && chmod +x ./gradlew
-          ./gradlew bootBuildImage \
-            --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
-            --imagePlatform=linux/amd64 \
-            --network=host \
-            --publishImage --scan
-
-      - name: Build and Push arm64 Image
-        run: |
-          cd boot
-          ./gradlew bootBuildImage \
-            --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64 \
-            --imagePlatform=linux/arm64 \
-            --network=host \
-            --publishImage --scan
+      #- name: Build and Push amd64 Image
+      #  run: |
+      #    cd boot && chmod +x ./gradlew
+      #    ./gradlew bootBuildImage \
+      #      --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
+      #      --imagePlatform=linux/amd64 \
+      #      --network=host \
+      #      --publishImage --scan
+      #
+      #- name: Build and Push arm64 Image
+      #  run: |
+      #    cd boot
+      #    ./gradlew bootBuildImage \
+      #      --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64 \
+      #      --imagePlatform=linux/arm64 \
+      #      --network=host \
+      #      --publishImage --scan
 
       # ---- Create Multi-Arch Manifest for GHCR ----
       - name: Create and Push GHCR Multi-Arch Manifest
