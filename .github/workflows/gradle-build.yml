@@ -1,114 +1,174 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 name: Gradle Build Image
-run-name: ${{ github.actor }} is Build Boot Image Actions
+
+run-name: ${{ github.actor }} is building boot image
+
 on:
   push:
-    branches:
-      - "main"
-      - "dev"
-    tags:
-      - "v*"
+    branches: [ main, dev ]
+    tags: [ "v*" ]
   release:
     types: [ created ]
+
 env:
-  GITHUB_REGISTRY: ghcr.io/${{ github.actor }}
-  DOCKER_REGISTRY: docker.io/alexbob
+  GHCR_REGISTRY: ghcr.io/${{ github.actor }}
+  DOCKERHUB_REGISTRY: docker.io/alexbob
+  IMAGE_NAME: plate-platform
+
 jobs:
-  boot-build-image:
+  build-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+
     steps:
+      # ---- Checkout & Toolchain ----
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: gradle/actions/wrapper-validation@v4
-      - name: Set up java 25 for x64
+
+      - name: Set up Java 25
         uses: actions/setup-java@v4
         with:
           java-version: "25"
           distribution: "liberica"
           cache: "gradle"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # ---- Docker Cross-Platform Prerequisites ----
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
           platforms: linux/amd64,linux/arm64
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ---- Version Extraction ----
+
       - name: Extract project version from Gradle
         id: version
         run: |
           VERSION=$(grep '^version=' boot/gradle.properties | cut -d'=' -f2)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Extracted version: $VERSION"
-      - name: Log into registry ${{ env.GITHUB_REGISTRY }}
-        if: github.event_name != 'pull_request'
+
+      # ---- Registry Authentication ----
+
+      - name: Log into GitHub Container Registry
         uses: docker/login-action@v4
         with:
-          registry: ${{ env.GITHUB_REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.PAGK_TOKEN }}
-      - name: Build and Push amd64 Image
-        run: |
-          cd boot
-          chmod +x ./gradlew
-          ./gradlew bootBuildImage \
-            --imageName=${{ env.GITHUB_REGISTRY }}/plate-platform:amd64 \
-            --imagePlatform=linux/amd64 \
-            --network=host \
-            --publishImage --scan
-      - name: Build and Push arm64 Image
-        run: |
-          cd boot
-          ./gradlew bootBuildImage \
-            --imageName=${{ env.GITHUB_REGISTRY }}/plate-platform:arm64 \
-            --imagePlatform=linux/arm64 \
-            --network=host \
-            --publishImage --scan
-      - name: Log into registry ${{ env.DOCKER_REGISTRY }}
-        if: github.event_name != 'pull_request'
+
+      - name: Log into Docker Hub
         uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Extract platform metadata (tags, labels) for Docker
+
+      # ---- Docker Metadata (tags, labels, annotations) ----
+
+      - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v6
         with:
           flavor: |
-            latest=true
+            latest=false
           images: |
-            ${{ env.GITHUB_REGISTRY }}/plate-platform
-            ${{ env.DOCKER_REGISTRY }}/plate-platform
+            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
+            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=semver,pattern={{version}},value=${{ steps.version.outputs.version }}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
-            type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
             type=ref,event=tag
-      - name: Create and Push Multi-Arch Manifest
-        if: github.event_name != 'pull_request'
+            type=sha,prefix=,format=short
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+
+      # ---- Build & Push Single-Arch Images to GHCR ----
+
+      - name: Build and Push amd64 Image
         run: |
-          TAGS=""
+          cd boot && chmod +x ./gradlew
+          ./gradlew bootBuildImage \
+            --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-amd64 \
+            --imagePlatform=linux/amd64 \
+            --network=host \
+            --publishImage --scan
+
+      - name: Build and Push arm64 Image
+        run: |
+          cd boot
+          ./gradlew bootBuildImage \
+            --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-arm64 \
+            --imagePlatform=linux/arm64 \
+            --network=host \
+            --publishImage --scan
+
+      # ---- Create Multi-Arch Manifest for GHCR ----
+
+      - name: Create and Push GHCR Multi-Arch Manifest
+        run: |
+          GHCR_TAGS=""
           while IFS= read -r tag; do
-            [ -n "$tag" ] && TAGS="$TAGS --tag $tag"
+            [[ -n "$tag" && "$tag" == ghcr.io/* ]] && GHCR_TAGS="$GHCR_TAGS --tag $tag"
           done <<< "${{ steps.meta.outputs.tags }}"
+
           ANNOTATIONS=""
           while IFS= read -r ann; do
-            [ -n "$ann" ] && ANNOTATIONS="$ANNOTATIONS --annotation ${ann#manifest:}"
+            [[ -n "$ann" ]] && ANNOTATIONS="$ANNOTATIONS --annotation ${ann#manifest:}"
           done <<< "${{ steps.meta.outputs.annotations }}"
+
           docker buildx imagetools create \
             $ANNOTATIONS \
-            $TAGS \
-            ${{ env.DOCKER_REGISTRY }}/plate-platform:amd64 \
-            ${{ env.DOCKER_REGISTRY }}/plate-platform:arm64
-      - name: Verify multi-arch manifest
+            $GHCR_TAGS \
+            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-amd64 \
+            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-arm64
+
+      # ---- Copy Single-Arch Images to Docker Hub ----
+
+      - name: Copy single-arch images to Docker Hub
+        run: |
+          docker buildx imagetools create \
+            --tag ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-amd64 \
+            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:amd64
+          docker buildx imagetools create \
+            --tag ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-arm64 \
+            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:arm64
+
+      # ---- Create Multi-Arch Manifest for Docker Hub ----
+
+      - name: Create and Push Docker Hub Multi-Arch Manifest
+        run: |
+          DOCKERHUB_TAGS=""
+          while IFS= read -r tag; do
+            [[ -n "$tag" && "$tag" == docker.io/* ]] && DOCKERHUB_TAGS="$DOCKERHUB_TAGS --tag $tag"
+          done <<< "${{ steps.meta.outputs.tags }}"
+
+          ANNOTATIONS=""
+          while IFS= read -r ann; do
+            [[ -n "$ann" ]] && ANNOTATIONS="$ANNOTATIONS --annotation ${ann#manifest:}"
+          done <<< "${{ steps.meta.outputs.annotations }}"
+
+          docker buildx imagetools create \
+            $ANNOTATIONS \
+            $DOCKERHUB_TAGS \
+            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-amd64 \
+            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-arm64
+
+      # ---- Verification ----
+
+      - name: Verify multi-arch manifests
         if: always()
         run: |
-          docker buildx imagetools inspect ${{ env.DOCKER_REGISTRY }}/plate-platform:latest 2>/dev/null || true
+          echo "=== GHCR Manifest ==="
+          docker buildx imagetools inspect ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:latest 2>/dev/null || true
+          echo ""
+          echo "=== Docker Hub Manifest ==="
+          docker buildx imagetools inspect ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:latest 2>/dev/null || true
