@@ -123,7 +123,10 @@ jobs:
           done <<< "${{ steps.meta.outputs.annotations }}"
 
           echo "${{ secrets.PAGK_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin ghcr.io
-
+          echo $ANNOTATIONS
+          echo $GHCR_TAGS
+          echo ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64  
+          echo ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
           docker buildx imagetools create \
             $ANNOTATIONS \
             $GHCR_TAGS \
