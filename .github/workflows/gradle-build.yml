@@ -74,7 +74,7 @@ jobs:
 
       # ---- Build & Push Single-Arch Images to GHCR ----
 
-      - name: Build amd64 Image
+      - name: Build And Push amd64 Image
         run: |
           cd boot && chmod +x ./gradlew
           ./gradlew bootBuildImage \
@@ -83,11 +83,7 @@ jobs:
             --network=host \
             --scan
 
-      - name: Push amd64 Image to GHCR
-        run: |
-          docker push ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64
-
-      - name: Build arm64 Image
+      - name: Build And Push arm64 Image
         run: |
           cd boot
           ./gradlew bootBuildImage \
@@ -95,10 +91,6 @@ jobs:
             --imagePlatform=linux/arm64 \
             --network=host \
             --scan
-
-      - name: Push arm64 Image to GHCR
-        run: |
-          docker push ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
 
       # ---- Docker Metadata (tags, labels, annotations) ----
       - name: Extract Docker metadata
