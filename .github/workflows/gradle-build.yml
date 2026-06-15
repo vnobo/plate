@@ -72,8 +72,35 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # ---- Docker Metadata (tags, labels, annotations) ----
+      # ---- Build & Push Single-Arch Images to GHCR ----
 
+      - name: Build amd64 Image
+        run: |
+          cd boot && chmod +x ./gradlew
+          ./gradlew bootBuildImage \
+            --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
+            --imagePlatform=linux/amd64 \
+            --network=host \
+            --scan
+
+      - name: Push amd64 Image to GHCR
+        run: |
+          docker push ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64
+
+      - name: Build arm64 Image
+        run: |
+          cd boot
+          ./gradlew bootBuildImage \
+            --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64 \
+            --imagePlatform=linux/arm64 \
+            --network=host \
+            --scan
+
+      - name: Push arm64 Image to GHCR
+        run: |
+          docker push ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
+
+      # ---- Docker Metadata (tags, labels, annotations) ----
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v6
@@ -89,26 +116,6 @@ jobs:
             type=sha,prefix=,format=short
             type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
 
-      # ---- Build & Push Single-Arch Images to GHCR ----
-
-      #- name: Build and Push amd64 Image
-      #  run: |
-      #    cd boot && chmod +x ./gradlew
-      #    ./gradlew bootBuildImage \
-      #      --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
-      #      --imagePlatform=linux/amd64 \
-      #      --network=host \
-      #      --publishImage --scan
-      #
-      #- name: Build and Push arm64 Image
-      #  run: |
-      #    cd boot
-      #    ./gradlew bootBuildImage \
-      #      --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64 \
-      #      --imagePlatform=linux/arm64 \
-      #      --network=host \
-      #      --publishImage --scan
-
       # ---- Create Multi-Arch Manifest for GHCR ----
       - name: Create and Push GHCR Multi-Arch Manifest
         run: |
@@ -116,7 +123,7 @@ jobs:
           GHCR_TAGS=$(echo "${{ steps.meta.outputs.tags }}" | grep 'ghcr.io/' | sed 's/^/--tag /' | tr '\n' ' ')
 
           # 将每行 annotation 去掉 manifest: 前缀，转换为 --annotation 参数
-          ANNOTATIONS=$(echo "${{ steps.meta.outputs.annotations }}" | sed 's/^manifest:/' | sed 's/^/--annotation /' | tr '\n' ' ')
+          ANNOTATIONS=$(echo "${{ steps.meta.outputs.annotations }}" | sed 's/^manifest://' | sed 's/^/--annotation /' | tr '\n' ' ')
 
           # 拼接完整命令
           CMD="docker buildx imagetools create ${ANNOTATIONS} ${GHCR_TAGS} \
@@ -150,7 +157,7 @@ jobs:
           DOCKERHUB_TAGS=$(echo "${{ steps.meta.outputs.tags }}" | grep 'docker.io/' | sed 's/^/--tag /' | tr '\n' ' ')
 
           # 将每行 annotation 去掉 manifest: 前缀，转换为 --annotation 参数
-          ANNOTATIONS=$(echo "${{ steps.meta.outputs.annotations }}" | sed 's/^manifest:/' | sed 's/^/--annotation /' | tr '\n' ' ')
+          ANNOTATIONS=$(echo "${{ steps.meta.outputs.annotations }}" | sed 's/^manifest://' | sed 's/^/--annotation /' | tr '\n' ' ')
 
           # 拼接完整命令
           CMD="docker buildx imagetools create ${ANNOTATIONS} ${DOCKERHUB_TAGS} \
