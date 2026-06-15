@@ -121,6 +121,12 @@ jobs:
           while IFS= read -r ann; do
             [[ -n "$ann" ]] && ANNOTATIONS="$ANNOTATIONS --annotation ${ann#manifest:}"
           done <<< "${{ steps.meta.outputs.annotations }}"
+          docker buildx imagetools create \
+            $ANNOTATIONS \
+            $GHCR_TAGS \
+            --progress=plain \
+            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
+            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
 
       # ---- Copy Single-Arch Images to Docker Hub ----
       - name: Copy single-arch images to Docker Hub
