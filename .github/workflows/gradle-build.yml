@@ -121,10 +121,12 @@ jobs:
           while IFS= read -r ann; do
             [[ -n "$ann" ]] && ANNOTATIONS="$ANNOTATIONS --annotation ${ann#manifest:}"
           done <<< "${{ steps.meta.outputs.annotations }}"
+
+          echo "${{ secrets.PAGK_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin ghcr.io
+
           docker buildx imagetools create \
-            $ANNOTATIONS \
-            $GHCR_TAGS \
-            --progress=plain \
+            --annotation $ANNOTATIONS \
+            --tag $GHCR_TAGS \
             ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
             ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
 
