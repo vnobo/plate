@@ -101,10 +101,9 @@ jobs:
           done <<< "${{ steps.meta.outputs.tags }}"
           ANNOTATIONS=""
           while IFS= read -r ann; do
-            [ -n "$ann" ] && ANNOTATIONS="$ANNOTATIONS --annotation $ann"
+            [ -n "$ann" ] && ANNOTATIONS="$ANNOTATIONS --annotation ${ann#manifest:}"
           done <<< "${{ steps.meta.outputs.annotations }}"
           docker buildx imagetools create \
-            --provenance=false \
             $ANNOTATIONS \
             $TAGS \
             ${{ env.GITHUB_REGISTRY }}/plate-platform:staging-amd64 \
