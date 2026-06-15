@@ -97,7 +97,7 @@ jobs:
         run: |
           cd boot && chmod +x ./gradlew
           ./gradlew bootBuildImage \
-            --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-amd64 \
+            --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
             --imagePlatform=linux/amd64 \
             --network=host \
             --publishImage --scan
@@ -106,7 +106,7 @@ jobs:
         run: |
           cd boot
           ./gradlew bootBuildImage \
-            --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-arm64 \
+            --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64 \
             --imagePlatform=linux/arm64 \
             --network=host \
             --publishImage --scan
@@ -128,19 +128,19 @@ jobs:
           docker buildx imagetools create \
             $ANNOTATIONS \
             $GHCR_TAGS \
-            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-amd64 \
-            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-arm64
+            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
+            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
 
       # ---- Copy Single-Arch Images to Docker Hub ----
 
       - name: Copy single-arch images to Docker Hub
         run: |
           docker buildx imagetools create \
-            --tag ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-amd64 \
-            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:amd64
+            --tag ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
+            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64
           docker buildx imagetools create \
-            --tag ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-arm64 \
-            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:arm64
+            --tag ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64 \
+            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
 
       # ---- Create Multi-Arch Manifest for Docker Hub ----
 
@@ -159,8 +159,8 @@ jobs:
           docker buildx imagetools create \
             $ANNOTATIONS \
             $DOCKERHUB_TAGS \
-            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-amd64 \
-            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:{{version}}-arm64
+            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
+            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
 
       # ---- Verification ----
 
