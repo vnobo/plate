@@ -106,9 +106,9 @@ jobs:
           docker buildx imagetools create \
             $ANNOTATIONS \
             $TAGS \
-            ghcr.io/${{ github.actor }}/plate-platform:amd64 \
-            ghcr.io/${{ github.actor }}/plate-platform:arm64
+            ${{ env.DOCKER_REGISTRY }}/plate-platform:amd64 \
+            ${{ env.DOCKER_REGISTRY }}/plate-platform:arm64
       - name: Verify multi-arch manifest
         if: always()
         run: |
-          docker buildx imagetools inspect ${{ env.GITHUB_REGISTRY }}/plate-platform:latest 2>/dev/null || true
+          docker buildx imagetools inspect ${{ env.DOCKER_REGISTRY }}/plate-platform:latest 2>/dev/null || true
