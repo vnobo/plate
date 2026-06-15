@@ -125,8 +125,8 @@ jobs:
           echo "${{ secrets.PAGK_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin ghcr.io
 
           docker buildx imagetools create \
-            --annotation $ANNOTATIONS \
-            --tag $GHCR_TAGS \
+            $ANNOTATIONS \
+            $GHCR_TAGS \
             ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
             ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
 
