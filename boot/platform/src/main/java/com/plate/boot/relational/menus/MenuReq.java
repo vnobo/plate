@@ -46,8 +46,7 @@ public class MenuReq extends Menu {
     /**
      * Set of nested MenuReq objects.
      */
-    @Valid
-    private Set<MenuReq> menus;
+    private Set<@Valid MenuReq> menus;
 
     /**
      * Creates a new MenuReq object with the specified tenant code and authority.

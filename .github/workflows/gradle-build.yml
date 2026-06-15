@@ -1,6 +1,6 @@
 name: Gradle Build Image
 
-run-name: ${{ github.actor }} is building boot image
+run-name: ${{ github.repository_owner }} is building boot image
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
     types: [ created ]
 
 env:
-  GHCR_REGISTRY: ghcr.io/${{ github.actor }}
+  GHCR_REGISTRY: ghcr.io/${{ github.repository_owner }}
   DOCKERHUB_REGISTRY: docker.io/alexbob
   IMAGE_NAME: plate-platform
 
@@ -115,6 +115,7 @@ jobs:
 
       - name: Create and Push GHCR Multi-Arch Manifest
         run: |
+          echo "${{ secrets.PAGK_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin ghcr.io
           GHCR_TAGS=""
           while IFS= read -r tag; do
             [[ -n "$tag" && "$tag" == ghcr.io/* ]] && GHCR_TAGS="$GHCR_TAGS --tag $tag"
@@ -135,6 +136,7 @@ jobs:
 
       - name: Copy single-arch images to Docker Hub
         run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin docker.io
           docker buildx imagetools create \
             --tag ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
             ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64
@@ -146,6 +148,7 @@ jobs:
 
       - name: Create and Push Docker Hub Multi-Arch Manifest
         run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin docker.io
           DOCKERHUB_TAGS=""
           while IFS= read -r tag; do
             [[ -n "$tag" && "$tag" == docker.io/* ]] && DOCKERHUB_TAGS="$DOCKERHUB_TAGS --tag $tag"
