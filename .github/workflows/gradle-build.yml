@@ -64,7 +64,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.PAGK_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log into Docker Hub
         uses: docker/login-action@v4
@@ -112,7 +112,7 @@ jobs:
       # ---- Create Multi-Arch Manifest for GHCR ----
       - name: Create and Push GHCR Multi-Arch Manifest
         run: |
-          echo "${{ secrets.PAGK_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin ghcr.io
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin ghcr.io
           docker pull ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64
           docker pull ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
           GHCR_TAGS=""
