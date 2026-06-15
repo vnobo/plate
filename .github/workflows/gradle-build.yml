@@ -60,7 +60,7 @@ jobs:
           cd boot
           chmod +x ./gradlew
           ./gradlew bootBuildImage \
-            --imageName=${{ env.GITHUB_REGISTRY }}/plate-platform:staging-amd64 \
+            --imageName=${{ env.GITHUB_REGISTRY }}/plate-platform:amd64 \
             --imagePlatform=linux/amd64 \
             --network=host \
             --publishImage --scan
@@ -68,7 +68,7 @@ jobs:
         run: |
           cd boot
           ./gradlew bootBuildImage \
-            --imageName=${{ env.GITHUB_REGISTRY }}/plate-platform:staging-arm64 \
+            --imageName=${{ env.GITHUB_REGISTRY }}/plate-platform:arm64 \
             --imagePlatform=linux/arm64 \
             --network=host \
             --publishImage --scan
@@ -111,8 +111,8 @@ jobs:
           docker buildx imagetools create \
             $ANNOTATIONS \
             $TAGS \
-            ${{ env.GITHUB_REGISTRY }}/plate-platform:staging-amd64 \
-            ${{ env.GITHUB_REGISTRY }}/plate-platform:staging-arm64
+            ${{ env.GITHUB_REGISTRY }}/plate-platform:amd64 \
+            ${{ env.GITHUB_REGISTRY }}/plate-platform:arm64
       - name: Verify multi-arch manifest
         if: always()
         run: |
