@@ -112,23 +112,18 @@ jobs:
       # ---- Create Multi-Arch Manifest for GHCR ----
       - name: Create and Push GHCR Multi-Arch Manifest
         run: |
-          GHCR_TAGS=""
-          while IFS= read -r tag; do
-            [[ -n "$tag" && "$tag" == ghcr.io/* ]] && GHCR_TAGS="$GHCR_TAGS --tag $tag"
-          done <<< "${{ steps.meta.outputs.tags }}"
+          # 将 metadata-action 输出的换行符标签和注解转换为 docker buildx 需要的格式
 
-          ANNOTATIONS=""
-          while IFS= read -r ann; do
-            [[ -n "$ann" ]] && ANNOTATIONS="$ANNOTATIONS --annotation ${ann#manifest:}"
-          done <<< "${{ steps.meta.outputs.annotations }}"
+          # 将每行 tag 前面加上 --tag
+          GHCR_TAGS=$(echo "${{ steps.meta.outputs.tags }}" | grep 'ghcr.io/' | sed 's/^/--tag /' | tr '\n' ' ')
 
-          echo "${{ secrets.PAGK_TOKEN }}" | docker login -u ${{ github.repository_owner }} --password-stdin ${{ env.GHCR_REGISTRY }}
-          echo $ANNOTATIONS
-          echo $GHCR_TAGS
-          echo ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64  
-          echo ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
+          # 将每行 annotation 前面加上 --annotation，并去掉开头的 manifest:
+          ANNOTATIONS=$(echo "${{ steps.meta.outputs.annotations }}" | sed 's/^manifest://' | sed 's/^/--annotation /' | tr '\n' ' ')
 
-          docker buildx imagetools create $ANNOTATIONS $GHCR_TAGS ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
+          # 执行创建
+          docker buildx imagetools create $ANNOTATIONS $GHCR_TAGS \
+            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
+            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
 
       # ---- Copy Single-Arch Images to Docker Hub ----
       - name: Copy single-arch images to Docker Hub
