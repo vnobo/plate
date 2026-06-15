@@ -112,9 +112,6 @@ jobs:
       # ---- Create Multi-Arch Manifest for GHCR ----
       - name: Create and Push GHCR Multi-Arch Manifest
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin ghcr.io
-          docker pull ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64
-          docker pull ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
           GHCR_TAGS=""
           while IFS= read -r tag; do
             [[ -n "$tag" && "$tag" == ghcr.io/* ]] && GHCR_TAGS="$GHCR_TAGS --tag $tag"
@@ -124,12 +121,6 @@ jobs:
           while IFS= read -r ann; do
             [[ -n "$ann" ]] && ANNOTATIONS="$ANNOTATIONS --annotation ${ann#manifest:}"
           done <<< "${{ steps.meta.outputs.annotations }}"
-
-          docker buildx imagetools create \
-            $ANNOTATIONS \
-            $GHCR_TAGS \
-            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-amd64 \
-            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
 
       # ---- Copy Single-Arch Images to Docker Hub ----
       - name: Copy single-arch images to Docker Hub
