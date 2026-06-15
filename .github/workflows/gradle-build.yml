@@ -4,10 +4,10 @@ run-name: ${{ github.repository_owner }} is building boot image
 
 on:
   push:
-    branches: [ main, dev ]
-    tags: [ "v*" ]
+    branches: [main, dev]
+    tags: ["v*"]
   release:
-    types: [ created ]
+    types: [created]
 
 env:
   GHCR_REGISTRY: ghcr.io/${{ github.repository_owner }}
@@ -51,7 +51,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       # ---- Version Extraction ----
-
       - name: Extract project version from Gradle
         id: version
         run: |
@@ -60,7 +59,6 @@ jobs:
           echo "Extracted version: $VERSION"
 
       # ---- Registry Authentication ----
-
       - name: Log into GitHub Container Registry
         uses: docker/login-action@v4
         with:
@@ -112,10 +110,10 @@ jobs:
             --publishImage --scan
 
       # ---- Create Multi-Arch Manifest for GHCR ----
-
       - name: Create and Push GHCR Multi-Arch Manifest
         run: |
           echo "${{ secrets.PAGK_TOKEN }}" | docker login -u ${{ github.actor }} --password-stdin ghcr.io
+          docker pull ghcr.io/vnobo/plate-platform:4.1.0-amd64
           GHCR_TAGS=""
           while IFS= read -r tag; do
             [[ -n "$tag" && "$tag" == ghcr.io/* ]] && GHCR_TAGS="$GHCR_TAGS --tag $tag"
@@ -133,7 +131,6 @@ jobs:
             ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-arm64
 
       # ---- Copy Single-Arch Images to Docker Hub ----
-
       - name: Copy single-arch images to Docker Hub
         run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin docker.io
