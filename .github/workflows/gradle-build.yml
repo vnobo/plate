@@ -50,15 +50,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      # ---- Docker Cross-Platform Prerequisites ----
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
-        with:
-          platforms: linux/amd64,linux/arm64
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
       # ---- Version Extraction ----
       - name: Extract project version from Gradle
         id: version
@@ -108,9 +99,6 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
@@ -121,7 +109,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Log into Docker Hub
+      - name: Log into Docker Hub Container Registry
         uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -161,6 +149,10 @@ jobs:
       # ---- Create Multi-Arch Manifest for GHCR ----
       - name: Create and Push GHCR Multi-Arch Manifest
         run: |
+          
+          docker pull ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-arm64
+          docker pull ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-amd64
+          
           VERSION="${{ needs.build-and-push.outputs.version }}"
 
           echo "Creating GHCR multi-arch manifest for version $VERSION..."
