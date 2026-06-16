@@ -1,225 +1,65 @@
-name: Gradle Build Image
+﻿name: Gradle Build Code
 
-run-name: ${{ github.repository_owner }} is building boot image
+run-name: ${{ github.repository_owner }} is building boot code
 
 on:
   push:
     branches: [main, dev]
-    tags: ["v*"]
-  release:
-    types: [created]
+  pull_request:
+    branches: [main, dev]
+
+concurrency:
+  group: gradle-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
 
 env:
-  GHCR_REGISTRY: ghcr.io/${{ github.repository_owner }}
-  DOCKERHUB_REGISTRY: docker.io/alexbob
-  IMAGE_NAME: plate-platform
+  GRADLE_OPTS: >-
+    -Dorg.gradle.parallel=true
+    -Dorg.gradle.caching=true
+    -Dorg.gradle.jvmargs="-Dfile.encoding=UTF-8 -Xmx2g"
 
 jobs:
-  build-and-push:
+  build:
+    name: Build & Compile
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
-    strategy:
-      matrix:
-        platform:
-          - linux/amd64
-          - linux/arm64
-      fail-fast: false
-
-    outputs:
-      version: ${{ steps.version.outputs.version }}
 
     steps:
-      # ---- Checkout & Toolchain ----
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
 
-      - uses: gradle/actions/wrapper-validation@v6
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v6
 
-      - name: Set up Java 25
+      - name: Set up JDK 25
         uses: actions/setup-java@v5
         with:
           java-version: "25"
           distribution: "liberica"
-          cache: "gradle"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      # ---- Version Extraction ----
-      - name: Extract project version from Gradle
-        id: version
-        run: |
-          VERSION=$(grep '^version=' boot/gradle.properties | cut -d'=' -f2)
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Extracted version: $VERSION"
-
-      # ---- Registry Authentication ----
-      - name: Log into GitHub Container Registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Log into Docker Hub Container Registry
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      # ---- Build & Push Single-Arch Images ----
-      - name: Build and Push ${{ matrix.platform }} Image
+      - name: Build Boot Code
         run: |
           cd boot && chmod +x ./gradlew
+          ./gradlew build -x test --scan
 
-          # Extract architecture from platform
-          ARCH=$(echo "${{ matrix.platform }}" | cut -d'/' -f2)
-
-          echo "Building ${{ matrix.platform }} image..."
-
-          ./gradlew bootBuildImage \
-            --imageName=${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-${ARCH} \
-            --imagePlatform=${{ matrix.platform }} \
-            --network=host \
-            --scan
-
-          echo "✓ Successfully built and pushed ${{ matrix.platform }} image"
-
-  # Separate job for manifest creation to ensure both images are built first
-  create-manifests:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Log into GitHub Container Registry
-        uses: docker/login-action@v4
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v6
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          name: plate-platform-jars
+          path: boot/platform/build/libs/*.jar
+          retention-days: 5
+          if-no-files-found: error
 
-      - name: Log into Docker Hub Container Registry
-        uses: docker/login-action@v4
+      - name: Upload build report on failure
+        if: failure()
+        uses: actions/upload-artifact@v6
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      # ---- Docker Metadata ----
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          flavor: |
-            latest=false
-          images: |
-            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
-            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=semver,pattern={{version}},value=${{ needs.build-and-push.outputs.version }}
-            type=ref,event=tag
-            type=sha,prefix=,format=short
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-
-      # ---- Parse metadata for GHCR ----
-      - name: Parse GHCR metadata
-        id: ghcr-meta
-        run: |
-          # Extract GHCR tags
-          GHCR_TAGS=$(echo "${{ steps.meta.outputs.tags }}" | grep 'ghcr.io/' | while read tag; do echo "--tag $tag"; done | tr '\n' ' ')
-          echo "ghcr_tags=$GHCR_TAGS" >> "$GITHUB_OUTPUT"
-
-          # Extract and format annotations (remove manifest: prefix)
-          ANNOTATIONS=$(echo "${{ steps.meta.outputs.annotations }}" | sed 's/^manifest://' | while read ann; do echo "--annotation $ann"; done | tr '\n' ' ')
-          echo "annotations=$ANNOTATIONS" >> "$GITHUB_OUTPUT"
-
-          echo "GHCR Tags: $GHCR_TAGS"
-          echo "Annotations: $ANNOTATIONS"
-
-      # ---- Create Multi-Arch Manifest for GHCR ----
-      - name: Create and Push GHCR Multi-Arch Manifest
-        run: |
-          
-          docker pull ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-arm64
-          docker pull ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-amd64
-          
-          VERSION="${{ needs.build-and-push.outputs.version }}"
-
-          echo "Creating GHCR multi-arch manifest for version $VERSION..."
-
-          docker buildx imagetools create \
-            ${{ steps.ghcr-meta.outputs.annotations }} \
-            ${{ steps.ghcr-meta.outputs.ghcr_tags }} \
-            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-amd64 \
-            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-arm64
-
-          echo "✓ GHCR manifest created successfully"
-
-      # ---- Copy Single-Arch Images to Docker Hub ----
-      - name: Copy single-arch images to Docker Hub
-        run: |
-          VERSION="${{ needs.build-and-push.outputs.version }}"
-
-          echo "Copying amd64 image to Docker Hub..."
-          docker buildx imagetools create \
-            --tag ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-amd64 \
-            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-amd64
-
-          echo "Copying arm64 image to Docker Hub..."
-          docker buildx imagetools create \
-            --tag ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-arm64 \
-            ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-arm64
-
-          echo "✓ Single-arch images copied to Docker Hub"
-
-      # ---- Parse metadata for Docker Hub ----
-      - name: Parse Docker Hub metadata
-        id: dockerhub-meta
-        run: |
-          # Extract Docker Hub tags
-          DOCKERHUB_TAGS=$(echo "${{ steps.meta.outputs.tags }}" | grep 'docker.io/' | while read tag; do echo "--tag $tag"; done | tr '\n' ' ')
-          echo "dockerhub_tags=$DOCKERHUB_TAGS" >> "$GITHUB_OUTPUT"
-
-          echo "Docker Hub Tags: $DOCKERHUB_TAGS"
-
-      # ---- Create Multi-Arch Manifest for Docker Hub ----
-      - name: Create and Push Docker Hub Multi-Arch Manifest
-        run: |
-          VERSION="${{ needs.build-and-push.outputs.version }}"
-
-          echo "Creating Docker Hub multi-arch manifest for version $VERSION..."
-
-          docker buildx imagetools create \
-            ${{ steps.ghcr-meta.outputs.annotations }} \
-            ${{ steps.dockerhub-meta.outputs.dockerhub_tags }} \
-            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-amd64 \
-            ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-arm64
-
-          echo "✓ Docker Hub manifest created successfully"
-
-      # ---- Verification ----
-      - name: Verify multi-arch manifests
-        if: always()
-        run: |
-          echo "=== GHCR Manifest ==="
-          docker buildx imagetools inspect ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:latest 2>/dev/null || echo "❌ GHCR manifest not found"
-
-          echo ""
-          echo "=== Docker Hub Manifest ==="
-          docker buildx imagetools inspect ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:latest 2>/dev/null || echo "❌ Docker Hub manifest not found"
-
-          echo ""
-          echo "=== Build Summary ==="
-          echo "Version: ${{ needs.build-and-push.outputs.version }}"
-          echo "GHCR Registry: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}"
-          echo "Docker Hub Registry: ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}"
+          name: build-failure-reports
+          path: boot/platform/build/reports/
+          retention-days: 7
