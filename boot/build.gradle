@@ -28,16 +28,6 @@ configure(subprojects) { project ->
                 "BPE_APPEND_JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError" +
                         "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
         ]
-        buildCache {
-            volume {
-                name = "cache-${rootProject.name}-${project.name}.build"
-            }
-        }
-        launchCache {
-            volume {
-                name = "cache-${rootProject.name}-${project.name}.launch"
-            }
-        }
     }
 
     java {
@@ -74,10 +64,4 @@ configure(subprojects) { project ->
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }
 
-}
-
-dependencyManagement {
-    imports {
-        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
-    }
 }
