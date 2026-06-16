@@ -23,7 +23,7 @@ env:
     -Dorg.gradle.jvmargs="-Dfile.encoding=UTF-8 -Xmx2g"
 
 jobs:
-  build-boot-code:
+  build:
     name: Build & Compile
     runs-on: ubuntu-latest
 
