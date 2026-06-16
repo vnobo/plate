@@ -1,105 +1,65 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
-name: Gradle Build Image
-run-name: ${{ github.actor }} is Build Boot Image Actions
+﻿name: Gradle Build Code
+
+run-name: ${{ github.repository_owner }} is building boot code
+
 on:
   push:
-    branches:
-      - 'main'
-      - 'dev'
-    tags:
-      - 'v*'
-  release:
-    types: [ created ]
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+concurrency:
+  group: gradle-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+
 env:
-  GITHUB_REGISTRY: ghcr.io/${{ github.actor }}
-  DOCKER_REGISTRY: docker.io/alexbob
-  tags: |
-    type=semver,pattern={{version}},value=v0.0.4
-    type=semver,pattern={{major}}.{{minor}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
-    type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
-    type=ref,event=tag
+  GRADLE_OPTS: >-
+    -Dorg.gradle.parallel=true
+    -Dorg.gradle.caching=true
+    -Dorg.gradle.jvmargs="-Dfile.encoding=UTF-8 -Xmx2g"
+
 jobs:
-  boot-build-image:
+  build-boot-code:
+    name: Build & Compile
     runs-on: ubuntu-latest
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - 5000:5000
-    permissions:
-      contents: read
-      packages: write
-    env:
-      SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-      - uses: gradle/actions/wrapper-validation@v4
-      - name: Set up java 25 for x64
-        uses: actions/setup-java@v4
+        uses: actions/checkout@v6
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v6
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
         with:
-          java-version: '25'
-          distribution: 'liberica'
-          cache: 'gradle'
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: linux/amd64,linux/arm64
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          driver-opts: network=host
+          java-version: "25"
+          distribution: "liberica"
+
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-      - name: Execute Gradle Plate bootBuildImage
-        run: |
-          cd boot
-          chmod +x ./gradlew
-          ./gradlew bootBuildImage --imagePlatform=linux/amd64 --network=host --publishImage --scan
-          ./gradlew bootBuildImage --imagePlatform=linux/arm64 --network=host --publishImage --scan
-      - name: Inspect
-        run: |
-          docker buildx imagetools inspect localhost:5000/plate-platform:latest
+        uses: gradle/actions/setup-gradle@v6
 
-      - name: Log into registry ${{ env.GITHUB_REGISTRY }}
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.GITHUB_REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.PAGK_TOKEN }}
-      - name: Log into registry ${{ env.DOCKER_REGISTRY }}
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Extract platform metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          flavor: |
-            latest=true
-          images: |
-            ${{ env.GITHUB_REGISTRY }}/plate-platform
-            ${{ env.DOCKER_REGISTRY }}/plate-platform
-          tags: ${{ env.tags }}
-
-      - name: Build and Push Platform
-        uses: docker/build-push-action@v6
-        with:
-          platforms: linux/amd64,linux/arm64
-          context: ./boot/platform
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-      - name: Upload Platform Image to Registry
+      - name: Build Boot Code
         run: |
-          echo "Upload images ${{ steps.meta.outputs.tags }} to registry."
-          echo "Upload labels ${{ steps.meta.outputs.labels }} to registry"
+          cd boot && chmod +x ./gradlew
+          ./gradlew build -x test --scan
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: plate-platform-jars
+          path: boot/platform/build/libs/*.jar
+          retention-days: 5
+          if-no-files-found: error
+
+      - name: Upload build report on failure
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: build-failure-reports
+          path: boot/platform/build/reports/
+          retention-days: 7
