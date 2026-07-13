@@ -22,7 +22,7 @@
     ]
   },
   "private": true,
-  "packageManager": "pnpm@11.6.0",
+  "packageManager": "pnpm@11.12.0",
   "dependencies": {
     "@angular/aria": "^22.0.0",
     "@angular/common": "^22.0.0",
