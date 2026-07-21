@@ -27,6 +27,8 @@ export interface ModalRef {
   headerRef?: Type<unknown> | null;
   contentRef?: Type<unknown> | null;
   footerRef?: Type<unknown> | null;
+  /** Static inputs forwarded to the content component via NgComponentOutletInputs. */
+  contentInputs?: Record<string, unknown>;
   contentBindings?: Binding[];
 }
 
@@ -47,9 +49,6 @@ export class ModalsService {
   create(modalRef: ModalRef) {
     const modalRefSignal = signal(modalRef);
     const bindings = [inputBinding('modalRef', modalRefSignal)];
-    if (modalRef.contentBindings) {
-      bindings.push(...modalRef.contentBindings);
-    }
 
     this.modalRef = createComponent(Modals, {
       environmentInjector: this.injector,
@@ -106,7 +105,9 @@ export class TablerModalsInit {
           </div>
           @if (modalRef().contentRef) {
             <div class="modal-body">
-              <ng-container *ngComponentOutlet="modalRef().contentRef!" />
+              <ng-container
+                *ngComponentOutlet="modalRef().contentRef!; inputs: modalRef().contentInputs || {}"
+              />
             </div>
           }
           @if (modalRef().footerRef) {
