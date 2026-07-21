@@ -34,7 +34,7 @@ All commands run from `boot/` directory:
 - **Java**: 25 with virtual threads (`spring.threads.virtual.enabled: true`)
 - **Logging**: Log4j2 (Logback excluded), `@Log4j2` annotation
 - **JSON**: Jackson 3.x (`tools.jackson.databind`), use `ContextUtils.OBJECT_MAPPER` — never `new ObjectMapper()`
-- **UUIDs**: UUIDv7 via `UuidCreator.getTimeOrderedEpoch()`, use `ContextUtils.nextId()`
+- **UUIDs**: UUIDv7 via local `Uuid7` generator (RFC 9562, no third-party dependency), use `ContextUtils.nextId()`
 
 ### Package Structure
 
