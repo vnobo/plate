@@ -34,7 +34,7 @@ All commands run from `boot/` directory:
 - **Java**: 25 with virtual threads (`spring.threads.virtual.enabled: true`)
 - **Logging**: Log4j2 (Logback excluded), `@Log4j2` annotation
 - **JSON**: Jackson 3.x (`tools.jackson.databind`), use `ContextUtils.OBJECT_MAPPER` — never `new ObjectMapper()`
-- **UUIDs**: UUIDv7 via `UuidCreator.getTimeOrderedEpoch()`, use `ContextUtils.nextId()`
+- **UUIDs**: UUIDv7 via local `Uuid7` generator (RFC 9562, no third-party dependency), use `ContextUtils.nextId()`
 
 ### Package Structure
 
@@ -115,6 +115,6 @@ Test frameworks: JUnit 5, `StepVerifier` (reactive), `WebTestClient` (WebFlux), 
 ## Environment
 
 - Java 25+, Gradle 9.5+ (wrapper included)
-- PostgreSQL 14+ (with `uuid-ossp`, `pg_trgm`, `zhparser` extensions)
-- Redis 6.0+
+- PostgreSQL 17+ (with `uuid-ossp`, `pg_trgm`, `zhparser` extensions)
+- Redis 7.0+
 - Local profile connects to `127.0.0.1:5432/plate` (PostgreSQL, user `farmer`, password `123456`) and `127.0.0.1` (Redis)

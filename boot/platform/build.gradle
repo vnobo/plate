@@ -15,8 +15,6 @@ graalvmNative {
 
 dependencies {
 
-    implementation 'com.github.f4b6a3:uuid-creator:6.+'
-
     implementation 'org.springframework.boot:spring-boot-starter-aspectj'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-security'

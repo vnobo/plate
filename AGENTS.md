@@ -4,7 +4,7 @@
 > 本文档为 AI Agent 提供高信号量的项目上下文，帮助快速上手、避免踩坑。
 >
 > - **后端** (`boot/`): Spring Boot 4.1 / WebFlux / R2DBC / Redis — Java 25, Gradle 9.5.x
-> - **前端** (`ui/ng-plate/`): Angular 22 SSR — TypeScript 6, pnpm 11.5.2, Tabler UI
+> - **前端** (`ui/ng-plate/`): Angular 22 SSR — TypeScript 6, pnpm 11.12.0, Tabler UI
 
 ---
 
@@ -89,9 +89,9 @@ plate/
 | **前端构建** | pnpm | 11.5.2 |
 | **Web 框架** | Spring Boot WebFlux | 4.1.0（响应式非阻塞, Netty HTTP/2） |
 | **前端框架** | Angular | 22.x（SSR + Signals + Zoneless） |
-| **数据库** | PostgreSQL | 14+（uuid-ossp, pg_trgm, zhparser 扩展） |
+| **数据库** | PostgreSQL | 17+（uuid-ossp, pg_trgm, zhparser 扩展） |
 | **数据访问** | Spring Data R2DBC | 响应式关系数据库 |
-| **缓存/会话** | Redis | 6.0+（缓存 + WebSession） |
+| **缓存/会话** | Redis | 7.0+（缓存 + WebSession） |
 | **安全** | Spring Security | Session-based + OAuth2 + CSRF Cookie |
 | **迁移** | Flyway | baseline-on-migrate, V1.0.0–V1.0.6 |
 | **JSON** | Jackson 3.x (tools.jackson) | 使用 `ContextUtils.OBJECT_MAPPER` |
@@ -172,8 +172,8 @@ HTTP Request (Netty, port 8080, HTTP/2)
         │
         ▼
   WebConfiguration 路径前缀路由:
-    /rel/v1/** → com.plate.boot.relational
-    /sec/v1/** → com.plate.boot.security
+    /rel/** → com.plate.boot.relational
+    /sec/** → com.plate.boot.security
     /oauth2/** → SecurityController
         │
         ▼
@@ -293,30 +293,30 @@ Security   Relational   （相互独立，无交叉依赖）
 | `POST` | `/oauth2/change/password` | Session | 改密 `{password, newPassword}` |
 | `POST` | `/oauth2/logout` | Session | 登出 + Clear-Site-Data |
 
-### 安全业务 API (`/sec/v1/**`)
+### 安全业务 API (`/sec/**`)
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| `GET` | `/sec/v1/users/search` | 搜索用户 |
-| `GET` | `/sec/v1/users/page` | 分页查询 |
-| `POST` | `/sec/v1/users` | 创建用户 |
-| `PUT` | `/sec/v1/users` | 更新用户 |
-| `DELETE` | `/sec/v1/users/{code}` | 删除用户 |
-| `*` | `/sec/v1/users/authorities/**` | 用户权限 |
-| `*` | `/sec/v1/groups/**` | 用户组 CRUD |
-| `*` | `/sec/v1/groups/authorities/**` | 组权限 |
-| `*` | `/sec/v1/groups/members/**` | 组成员 |
-| `*` | `/sec/v1/tenants/**` | 租户 CRUD |
-| `*` | `/sec/v1/tenants/members/**` | 租户成员 |
-| `GET` | `/sec/v1/captcha/code` | 验证码（免认证） |
+| `GET` | `/sec/users/search` | 搜索用户 |
+| `GET` | `/sec/users/page` | 分页查询 |
+| `POST` | `/sec/users` | 创建用户 |
+| `PUT` | `/sec/users` | 更新用户 |
+| `DELETE` | `/sec/users/{code}` | 删除用户 |
+| `*` | `/sec/users/authorities/**` | 用户权限 |
+| `*` | `/sec/groups/**` | 用户组 CRUD |
+| `*` | `/sec/groups/authorities/**` | 组权限 |
+| `*` | `/sec/groups/members/**` | 组成员 |
+| `*` | `/sec/tenants/**` | 租户 CRUD |
+| `*` | `/sec/tenants/members/**` | 租户成员 |
+| `GET` | `/sec/captcha/code` | 验证码（免认证） |
 
-### 关系业务 API (`/rel/v1/**`)
+### 关系业务 API (`/rel/**`)
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| `*` | `/rel/v1/dictionaries/**` | 字典管理 |
-| `GET` | `/rel/v1/loggers/**` | 审计日志查询 |
-| `*` | `/rel/v1/menus/**` | 菜单管理 |
+| `*` | `/rel/dictionaries/**` | 字典管理 |
+| `GET` | `/rel/loggers/**` | 审计日志查询 |
+| `*` | `/rel/menus/**` | 菜单管理 |
 
 **请求要求**: POST/PUT/DELETE 必须携带 Cookie `SESSION` + Header `X-XSRF-TOKEN`。API 版本通过 `x-api-version` Header 或 `apiVersion` Query 参数控制（默认 `v1`）。
 
@@ -337,7 +337,7 @@ Security   Relational   （相互独立，无交叉依赖）
 | **响应式** | Controller 必须返回 `Mono<T>`/`Flux<T>`，**禁止**阻塞 IO |
 | **DTO** | `*Req` 请求 DTO，`*Res` 响应 DTO（**禁止**暴露 password；`UserRes` 脱敏 phone/email） |
 | **层级结构** | Group/Tenant/Dictionary/Menu 均使用 `pcode`（父节点 code） |
-| **路径前缀** | `/rel/v1/` → relational 包, `/sec/v1/` → security 包（由 `WebConfiguration` 自动绑定） |
+| **路径前缀** | `/rel/` → relational 包, `/sec/` → security 包（由 `WebConfiguration` 自动绑定） |
 | **权限** | `@PreAuthorize("hasRole('...')")`；管理员角色常量 `ContextUtils.RULE_ADMINISTRATORS` |
 | **DI** | Lombok `@RequiredArgsConstructor` + `final` 字段 |
 | **日志** | `@Log4j2` 注解，**禁止** `System.out` 或 Logback |
@@ -443,8 +443,8 @@ GitHub Actions 工作流 (`.github/workflows/`)：
 |------|------|------|
 | Java | 25+ | Liberica JDK 推荐 |
 | Gradle | 9.5+ | Wrapper 已包含 |
-| PostgreSQL | 14+ | uuid-ossp, pg_trgm, zhparser 扩展 |
-| Redis | 6.0+ | 缓存 + WebSession |
+| PostgreSQL | 17+ | uuid-ossp, pg_trgm, zhparser 扩展 |
+| Redis | 7.0+ | 缓存 + WebSession |
 | Docker | 最新 | Testcontainers 测试 |
 | Node.js | LTS | 前端开发 |
 | pnpm | 11.5.2 | 前端包管理 |

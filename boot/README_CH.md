@@ -101,9 +101,9 @@ Plate Platform 是一个现代化的、基于 Spring Boot
 ### 开发环境
 
 - **Java**: 25 或更高版本
-- **Gradle**: 9.1 或更高版本
-- **PostgreSQL**: 14 或更高版本（支持 UUIDv7 和中文全文搜索）
-- **Redis**: 6.0 或更高版本
+- **Gradle**: 9.5.1 或更高版本
+- **PostgreSQL**: 17 或更高版本（支持 UUIDv7 和中文全文搜索）
+- **Redis**: 7.0 或更高版本
 
 ### 运行环境
 
