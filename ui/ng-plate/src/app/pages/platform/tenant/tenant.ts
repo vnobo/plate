@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import {
   FieldState,
   FormField,
@@ -9,18 +10,14 @@ import {
   required,
   submit,
 } from '@angular/forms/signals';
-import { Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { delay, tap } from 'rxjs';
 
-export interface Tenant {
-  id: string;
-  name: string;
-  description?: string;
-  status: 'active' | 'inactive' | 'suspended';
-  createdAt: Date;
-  updatedAt: Date;
-  subscriptionType?: string;
-  expirationDate?: Date;
-}
+import { MessageService } from '@app/plugins';
+import { Page, Pageable } from '@plate/types';
+import { environment } from '@envs/env';
+
+import { ROOT_PCODE, Tenant } from './tenant.types';
 
 @Component({
   selector: 'app-tenant',
@@ -29,85 +26,117 @@ export interface Tenant {
   styleUrl: './tenant.scss',
 })
 export class Tenants {
-  protected readonly tenants = signal<Tenant[]>([
-    {
-      id: '1',
-      name: '示例租户1',
-      description: '这是一个示例租户1',
-      status: 'active',
-      createdAt: new Date('2023-01-15'),
-      updatedAt: new Date('2023-10-20'),
-      subscriptionType: 'premium',
-      expirationDate: new Date('2024-01-15'),
-    },
-    {
-      id: '2',
-      name: '示例租户2',
-      description: '这是一个示例租户2',
-      status: 'inactive',
-      createdAt: new Date('2023-03-02'),
-      updatedAt: new Date('2023-09-10'),
-      subscriptionType: 'standard',
-      expirationDate: new Date('2023-12-31'),
-    },
-    {
-      id: '3',
-      name: '示例租户3',
-      description: '这是一个示例租户3',
-      status: 'suspended',
-      createdAt: new Date('2023-05-30'),
-      updatedAt: new Date('2023-11-05'),
-      subscriptionType: 'premium',
-      expirationDate: new Date('2024-02-28'),
-    },
-  ]);
+  private readonly _message = inject(MessageService);
+  private readonly _http = inject(HttpClient);
+  private readonly _destroyRef = inject(DestroyRef);
 
-  protected readonly currentPage = signal(1);
-  protected readonly itemsPerPage = signal(5);
-  protected readonly totalPages = computed(() =>
-    Math.ceil(this.filteredTenants().length / this.itemsPerPage()),
-  );
+  protected readonly ROOT_PCODE = ROOT_PCODE;
 
-  protected readonly paginatedTenants = computed(() => {
-    const start = (this.currentPage() - 1) * this.itemsPerPage();
-    const end = start + this.itemsPerPage();
-    return this.filteredTenants().slice(start, end);
+  pageable = signal<Pageable>({
+    page: 1,
+    size: 10,
+    sorts: ['id,desc'],
   });
 
+  /** 名称关键字（后端按 name 模糊匹配） */
   protected readonly searchKeyword = signal('');
 
-  protected readonly filteredTenants = computed(() => {
-    const keyword = this.searchKeyword().toLowerCase();
-    return this.tenants().filter(
-      (tenant) =>
-        tenant.name.toLowerCase().includes(keyword) ||
-        (tenant.description && tenant.description.toLowerCase().includes(keyword)),
-    );
-  });
-
-  protected readonly currentTenant = signal<Tenant | null>(null);
-
-  protected readonly isEditing = signal(false);
-
-  private readonly router = inject(Router);
-
-  private readonly initialFormModel = {
-    name: '',
-    description: '',
-    status: 'active' as 'active' | 'inactive' | 'suspended',
-    subscriptionType: 'standard' as 'basic' | 'standard' | 'premium',
-    expirationDate: null as Date | null,
+  private readonly emptyPage: Page<Tenant> = {
+    content: [],
+    pageable: { page: 0, size: 0, sorts: [] },
+    totalElements: 0,
+    totalPages: 0,
+    size: 0,
+    number: 0,
+    first: true,
+    last: true,
+    numberOfElements: 0,
+    empty: true,
   };
 
-  protected readonly tenantModel = signal({ ...this.initialFormModel });
+  protected readonly tenantResource = httpResource<Page<Tenant>>(
+    () => {
+      const page = this.pageable();
+      const keyword = this.searchKeyword().trim();
+      const params: Record<
+        string,
+        string | number | boolean | ReadonlyArray<string | number | boolean>
+      > = {
+        page: page.page - 1,
+        size: page.size,
+      };
+      if (keyword) {
+        params['name'] = keyword;
+      }
+      for (const sort of page.sorts) {
+        if (!params['sort']) {
+          params['sort'] = [sort];
+        } else if (Array.isArray(params['sort'])) {
+          (params['sort'] as string[]).push(sort);
+        }
+      }
+      return {
+        url: environment.secApiPath + '/tenants/page',
+        params,
+      };
+    },
+    {
+      defaultValue: this.emptyPage,
+      debugName: 'tenants-page',
+    },
+  );
+
+  /** 全部租户（用于父级下拉与名称解析） */
+  protected readonly parentResource = httpResource<Tenant[]>(
+    () => ({
+      url: environment.secApiPath + '/tenants/search',
+      params: { size: 1000 },
+    }),
+    {
+      defaultValue: [],
+      debugName: 'tenants-parent',
+    },
+  );
+
+  protected readonly tenantData = computed(() => this.tenantResource.value());
+  protected readonly isLoading = computed(() => this.tenantResource.isLoading());
+  protected readonly parents = computed(() => this.parentResource.value() ?? []);
+
+  protected readonly parentNameMap = computed(() => {
+    const map = new Map<string, string>();
+    for (const t of this.parents()) {
+      if (t.code) {
+        map.set(t.code, t.name ?? t.code);
+      }
+    }
+    return map;
+  });
+
+  protected parentName(code?: string): string {
+    if (!code) return '-';
+    if (code === ROOT_PCODE) return '根租户';
+    return this.parentNameMap().get(code) ?? code;
+  }
+
+  protected readonly Math = Math;
+
+  protected readonly isEditing = signal(false);
+  protected readonly currentTenant = signal<Tenant | null>(null);
+
+  private readonly initialModel = {
+    name: '',
+    description: '',
+    pcode: ROOT_PCODE,
+  };
+
+  protected readonly tenantModel = signal({ ...this.initialModel });
 
   protected readonly tenantForm = form(this.tenantModel, (p) => {
     required(p.name, { message: '租户名称 是必填项' });
     minLength(p.name, 2, { message: '租户名称 至少需要 2 个字符' });
     maxLength(p.name, 50, { message: '租户名称 不能超过 50 个字符' });
     maxLength(p.description, 500, { message: '描述 不能超过 500 个字符' });
-    required(p.status, { message: '状态 是必填项' });
-    required(p.subscriptionType, { message: '订阅类型 是必填项' });
+    required(p.pcode, { message: '父级租户 是必填项' });
   });
 
   protected getFieldError(fieldName: string): string {
@@ -132,146 +161,127 @@ export class Tenants {
     return fieldState.invalid() && fieldState.touched();
   }
 
-  editTenant(tenant: Tenant) {
+  protected createTenant(): void {
+    this.currentTenant.set(null);
+    this.tenantModel.set({ ...this.initialModel });
+    this.isEditing.set(true);
+  }
+
+  protected editTenant(tenant: Tenant): void {
     this.currentTenant.set(tenant);
     this.tenantModel.set({
-      name: tenant.name,
-      description: tenant.description || '',
-      status: tenant.status,
-      subscriptionType: (tenant.subscriptionType ?? 'standard') as 'basic' | 'standard' | 'premium',
-      expirationDate: tenant.expirationDate || null,
+      name: tenant.name ?? '',
+      description: tenant.description ?? '',
+      pcode: tenant.pcode ?? ROOT_PCODE,
     });
     this.isEditing.set(true);
   }
 
-  createTenant() {
+  protected cancelEdit(): void {
+    this.isEditing.set(false);
     this.currentTenant.set(null);
-    this.tenantModel.set({ ...this.initialFormModel });
-    this.isEditing.set(true);
+    this.tenantModel.set({ ...this.initialModel });
   }
 
-  async saveTenant() {
+  protected async saveTenant(): Promise<void> {
     await submit(this.tenantForm, {
       action: async () => {
-        const formData = this.tenantModel();
-
-        if (this.currentTenant()) {
-          this.tenants.update((tenants) =>
-            tenants.map((tenant) =>
-              tenant.id === this.currentTenant()?.id
-                ? ({
-                    ...tenant,
-                    name: formData.name ?? tenant.name,
-                    description: formData.description ?? tenant.description,
-                    status:
-                      (formData.status as 'active' | 'inactive' | 'suspended') ?? tenant.status,
-                    subscriptionType: formData.subscriptionType ?? tenant.subscriptionType,
-                    expirationDate: formData.expirationDate ?? tenant.expirationDate,
-                    updatedAt: new Date(),
-                  } as Tenant)
-                : tenant,
-            ),
-          );
-        } else {
-          const newTenant: Tenant = {
-            id: (Math.max(...this.tenants().map((t) => parseInt(t.id) || 0), 0) + 1).toString(),
-            name: formData.name ?? '',
-            description: formData.description ?? '',
-            status: (formData.status as 'active' | 'inactive' | 'suspended') ?? 'active',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            subscriptionType: formData.subscriptionType ?? undefined,
-            expirationDate: formData.expirationDate ?? undefined,
-          };
-          this.tenants.update((tenants) => [...tenants, newTenant]);
+        const model = this.tenantModel();
+        const current = this.currentTenant();
+        const payload: Tenant = {
+          name: model.name,
+          description: model.description,
+          pcode: model.pcode,
+        };
+        if (current?.code) {
+          payload.id = current.id;
+          payload.code = current.code;
         }
 
-        this.isEditing.set(false);
-        this.currentTenant.set(null);
-        this.tenantModel.set({ ...this.initialFormModel });
+        const request = current?.code
+          ? this._http.put<Tenant>(environment.secApiPath + '/tenants/save', payload)
+          : this._http.post<Tenant>(environment.secApiPath + '/tenants/save', payload);
+
+        request
+          .pipe(
+            tap(() => this._message.success(current?.code ? '租户已更新' : '租户已创建')),
+            delay(800),
+            takeUntilDestroyed(this._destroyRef),
+          )
+          .subscribe(() => {
+            this.cancelEdit();
+            this.tenantResource.reload();
+            this.parentResource.reload();
+          });
       },
     });
   }
 
-  deleteTenant(id: string) {
-    if (confirm('确定要删除这个租户吗？此操作不可撤销。')) {
-      this.tenants.update((tenants) => tenants.filter((tenant) => tenant.id !== id));
-      if (this.paginatedTenants().length === 0 && this.currentPage() > 1) {
-        this.currentPage.update((page) => page - 1);
-      }
+  protected onDelete(tenant: Tenant): void {
+    if (!tenant.code || tenant.id == null) {
+      return;
     }
+    if (!confirm(`确定要删除租户「${tenant.name ?? tenant.code}」吗？此操作不可撤销。`)) {
+      return;
+    }
+    this._http
+      .delete<void>(environment.secApiPath + '/tenants/delete', {
+        body: { id: tenant.id, code: tenant.code },
+      })
+      .pipe(
+        tap(() => this._message.success('租户已删除')),
+        delay(800),
+        takeUntilDestroyed(this._destroyRef),
+      )
+      .subscribe(() => {
+        this.tenantResource.reload();
+        this.parentResource.reload();
+      });
   }
 
-  cancelEdit() {
-    this.isEditing.set(false);
-    this.currentTenant.set(null);
-    this.tenantModel.set({ ...this.initialFormModel });
-  }
-
-  onSearchChange(value: string) {
+  protected onSearchChange(value: string): void {
     this.searchKeyword.set(value);
-    this.currentPage.set(1);
+    this.pageable.update((p) => ({ ...p, page: 1 }));
   }
 
-  getStatusText(status: 'active' | 'inactive' | 'suspended'): string {
-    switch (status) {
-      case 'active':
-        return '活跃';
-      case 'inactive':
-        return '非活跃';
-      case 'suspended':
-        return '已暂停';
-      default:
-        return status;
+  protected changePage(page: number): void {
+    if (page < 1 || page > this.getTotalPages()) {
+      return;
     }
+    this.pageable.update((p) => ({ ...p, page }));
   }
 
-  getStatusClass(status: 'active' | 'inactive' | 'suspended'): string {
-    switch (status) {
-      case 'active':
-        return 'badge bg-success';
-      case 'inactive':
-        return 'badge bg-secondary';
-      case 'suspended':
-        return 'badge bg-warning';
-      default:
-        return 'badge bg-secondary';
+  protected getTotalPages(): number {
+    const totalElements = this.tenantData().totalElements || 0;
+    return Math.ceil(totalElements / this.pageable().size);
+  }
+
+  protected getPageNumbers(): number[] {
+    const totalPages = this.getTotalPages();
+    const currentPage = this.pageable().page;
+    const pages: number[] = [];
+
+    if (totalPages >= 1) {
+      pages.push(1);
     }
-  }
-
-  changePage(page: number): void {
-    if (page >= 1 && page <= this.totalPages()) {
-      this.currentPage.set(page);
+    if (currentPage > 3) {
+      pages.push(-1);
     }
-  }
-
-  getPaginationItems(): number[] {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    const items: number[] = [];
-
-    if (total <= 7) {
-      for (let i = 1; i <= total; i++) {
-        items.push(i);
+    for (
+      let i = Math.max(2, currentPage - 1);
+      i <= Math.min(totalPages - 1, currentPage + 1);
+      i++
+    ) {
+      if (i > 1 && i < totalPages) {
+        pages.push(i);
       }
-    } else {
-      items.push(1);
-      if (current > 4) {
-        items.push(-1);
-      }
-      for (let i = Math.max(2, current - 2); i <= Math.min(total - 1, current + 2); i++) {
-        items.push(i);
-      }
-      if (current < total - 3) {
-        items.push(-1);
-      }
-      items.push(total);
     }
-
-    return items;
-  }
-
-  getMinDate(value1: number, value2: number): number {
-    return Math.min(value1, value2);
+    if (currentPage < totalPages - 2) {
+      pages.push(-1);
+    }
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+    return pages;
   }
 }
