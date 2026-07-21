@@ -1,6 +1,5 @@
 package com.plate.boot.commons.utils;
 
-import com.github.f4b6a3.uuid.UuidCreator;
 import com.plate.boot.commons.base.AbstractEvent;
 import com.plate.boot.security.SecurityDetails;
 import lombok.extern.log4j.Log4j2;
@@ -329,13 +328,13 @@ public final class ContextUtils implements InitializingBean {
 
     /**
      * Generates a new time-ordered UUID (Universally Unique Identifier) as the next identifier.
-     * This method uses UuidCreator.getTimeOrderedEpoch() which generates time-based UUIDs
-     * that are sequentially ordered and suitable for database primary keys.
+     * This method uses the local {@link Uuid7} generator (RFC 9562 UUIDv7) which produces
+     * time-based UUIDs that are sequentially ordered and suitable for database primary keys.
      *
      * @return A newly created {@link UUID} instance, providing a unique and time-ordered identifier.
      */
     public static UUID nextId() {
-        return UuidCreator.getTimeOrderedEpoch();
+        return Uuid7.next();
     }
 
     /**
