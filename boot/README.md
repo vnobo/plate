@@ -108,8 +108,8 @@ The application includes the following key features:
 
 - **Java**: 25 or higher
 - **Gradle**: 9.1 or higher
-- **PostgreSQL**: 14 or higher (with UUIDv7 and Chinese full-text search support)
-- **Redis**: 6.0 or higher
+- **PostgreSQL**: 17 or higher (with UUIDv7 and Chinese full-text search support)
+- **Redis**: 7.0 or higher
 
 ### Runtime Environment
 
