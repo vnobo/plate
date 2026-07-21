@@ -7,8 +7,8 @@
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-green.svg)](https://spring.io/projects/spring-boot)
 [![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/)
 [![Angular](https://img.shields.io/badge/Angular-v22.0.0-red.svg)](https://angular.io/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-blue.svg)](https://www.postgresql.org/)
-[![Redis](https://img.shields.io/badge/Redis-6.0+-red.svg)](https://redis.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17+-blue.svg)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-7.0+-red.svg)](https://redis.io/)
 
 A modern enterprise management platform built with **Spring Boot 4.1.0** and **Angular 22**, featuring reactive architecture, comprehensive user management, role-based access control, and advanced security features.
 
@@ -68,8 +68,8 @@ A modern enterprise management platform built with **Spring Boot 4.1.0** and **A
 ### Backend Requirements
 
 - **Java**: OpenJDK 25 or later (required for Spring Boot 4.1.0)
-- **Database**: PostgreSQL 14+ with SSL support
-- **Cache**: Redis 6.0+ for session storage, caching, and pub/sub
+- **Database**: PostgreSQL 17+ with SSL support
+- **Cache**: Redis 7.0+ for session storage, caching, and pub/sub
 - **Build Tool**: Gradle 9.5.1 (wrapper) with Kotlin DSL
 - **Note**: Spring Boot 4.1.0 requires Java 25 (toolchain) and includes breaking changes from Spring Boot 3.x
 
@@ -578,8 +578,8 @@ Plate Platform is under active development with the latest technology stack and 
 **Technology Stack**:
 - ✅ **Backend**: Spring Boot 4.1.0 with Java 25
 - ✅ **Frontend**: Angular 22 with SSR support
-- ✅ **Database**: PostgreSQL 14+ with R2DBC reactive driver
-- ✅ **Cache**: Redis 6.0+ for distributed sessions
+- ✅ **Database**: PostgreSQL 17+ with R2DBC reactive driver
+- ✅ **Cache**: Redis 7.0+ for distributed sessions
 
 **Implemented Features**:
 - ✅ Multi-tenant architecture with user/group management

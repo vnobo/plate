@@ -138,8 +138,8 @@ Frontend tests use Vitest via `@angular/build:unit-test` builder (`pnpm test` fr
 ## Environment
 
 - Java 25+ (Liberica JDK recommended), Gradle 9.5+ (wrapper included)
-- PostgreSQL 14+ with extensions: `uuid-ossp`, `pg_trgm`, `zhparser`
-- Redis 6.0+
+- PostgreSQL 17+ with extensions: `uuid-ossp`, `pg_trgm`, `zhparser`
+- Redis 7.0+
 - Docker (required for Testcontainers)
 - Node.js + pnpm 11.12.0 (frontend)
 - Local backend: `127.0.0.1:5432/plate` (user `farmer`, password `123456`), Redis at `127.0.0.1`

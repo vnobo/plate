@@ -115,6 +115,6 @@ Test frameworks: JUnit 5, `StepVerifier` (reactive), `WebTestClient` (WebFlux), 
 ## Environment
 
 - Java 25+, Gradle 9.5+ (wrapper included)
-- PostgreSQL 14+ (with `uuid-ossp`, `pg_trgm`, `zhparser` extensions)
-- Redis 6.0+
+- PostgreSQL 17+ (with `uuid-ossp`, `pg_trgm`, `zhparser` extensions)
+- Redis 7.0+
 - Local profile connects to `127.0.0.1:5432/plate` (PostgreSQL, user `farmer`, password `123456`) and `127.0.0.1` (Redis)
