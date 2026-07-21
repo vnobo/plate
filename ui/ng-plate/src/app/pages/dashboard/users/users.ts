@@ -1,14 +1,15 @@
-import { Component, computed, inject, inputBinding, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { delay, tap } from 'rxjs';
 
 import { DatePipe } from '@angular/common';
 import { HttpClient, httpResource } from '@angular/common/http';
+import { DestroyRef } from '@angular/core';
+import { outputToObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageService, ModalsService } from '@app/plugins';
 import { Page, Pageable } from '@plate/types';
 import { UserForm } from './user-form';
 import { User } from './user.types';
 import { environment } from '@envs/env';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-users',
@@ -20,6 +21,7 @@ export class Users {
   private readonly _message = inject(MessageService);
   private readonly _modal = inject(ModalsService);
   private readonly _http = inject(HttpClient);
+  private readonly _destroyRef = inject(DestroyRef);
 
   pageable = signal<Pageable>({
     page: 1,
@@ -86,10 +88,7 @@ export class Users {
   Math = Math;
 
   openModal() {
-    this._modal.create({
-      title: '用户表单',
-      contentRef: UserForm,
-    });
+    this.openUserForm({} as User);
   }
 
   fetchUserData() {
@@ -99,13 +98,14 @@ export class Users {
   onTableQueryChange($event: Pageable) {}
 
   openUserForm(user: User) {
-    const userSignal = signal(user);
-
-    this._modal.create({
+    const ref = this._modal.create({
       title: user.id ? '编辑用户' : '添加用户',
       contentRef: UserForm,
-      contentBindings: [inputBinding('inputData', userSignal)],
+      contentInputs: { inputData: user },
     });
+    outputToObservable(ref.instance.dropped)
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe(() => this.fetchUserData());
   }
 
   onDelete(user: User) {
@@ -113,7 +113,7 @@ export class Users {
       .pipe(
         tap(() => this._message.success('删除成功!')),
         delay(1500),
-        takeUntilDestroyed(),
+        takeUntilDestroyed(this._destroyRef),
       )
       .subscribe(() => this.fetchUserData());
   }
