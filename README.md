@@ -4,13 +4,13 @@
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/vnobo/plate)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.0--M3-green.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-green.svg)](https://spring.io/projects/spring-boot)
 [![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/)
-[![Angular](https://img.shields.io/badge/Angular-v20.0.0-red.svg)](https://angular.io/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17+-blue.svg)](https://www.postgresql.org/)
-[![Redis](https://img.shields.io/badge/Redis-7.0+-red.svg)](https://redis.io/)
+[![Angular](https://img.shields.io/badge/Angular-v22.0.0-red.svg)](https://angular.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-blue.svg)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-6.0+-red.svg)](https://redis.io/)
 
-A modern enterprise management platform built with **Spring Boot 4.0.0-M3** and **Angular 20**, featuring reactive architecture, comprehensive user management, role-based access control, and advanced security features.
+A modern enterprise management platform built with **Spring Boot 4.1.0** and **Angular 22**, featuring reactive architecture, comprehensive user management, role-based access control, and advanced security features.
 
 </div>
 
@@ -67,16 +67,16 @@ A modern enterprise management platform built with **Spring Boot 4.0.0-M3** and 
 
 ### Backend Requirements
 
-- **Java**: OpenJDK 25 or later (required for Spring Boot 4.0.0-M3)
-- **Database**: PostgreSQL 17+ with SSL support
-- **Cache**: Redis 7.0+ for session storage, caching, and pub/sub
-- **Build Tool**: Gradle 8.14+ with Kotlin DSL
-- **Note**: Spring Boot 4.0.0-M3 requires Java 21+ and includes breaking changes from Spring Boot 3.x
+- **Java**: OpenJDK 25 or later (required for Spring Boot 4.1.0)
+- **Database**: PostgreSQL 14+ with SSL support
+- **Cache**: Redis 6.0+ for session storage, caching, and pub/sub
+- **Build Tool**: Gradle 9.5.1 (wrapper) with Kotlin DSL
+- **Note**: Spring Boot 4.1.0 requires Java 25 (toolchain) and includes breaking changes from Spring Boot 3.x
 
 ### Frontend Requirements
 
-- **Node.js**: 22.0+ (LTS recommended)
-- **Package Manager**: npm 9.0+ or yarn 1.22+ or pnpm 8.0+
+- **Node.js**: 20.19+, 22.12+, or 24+ (LTS recommended: 22)
+- **Package Manager**: pnpm 11.12.0
 - **Browser Support**: Modern browsers (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+)
 
 ### DevOps Requirements
@@ -142,7 +142,7 @@ A modern enterprise management platform built with **Spring Boot 4.0.0-M3** and 
    nvm use 22.0.0
    ```
 
-### 📦 Backend Setup (Spring Boot 4.0.0-M3)
+### 📦 Backend Setup (Spring Boot 4.1.0)
 
 1. **Clone and Setup**
 
@@ -199,51 +199,44 @@ A modern enterprise management platform built with **Spring Boot 4.0.0-M3** and 
 5. **Access the Application**
    - **HTTP**: http://localhost:8080
    - **HTTPS**: https://localhost:8443 (with SSL)
-   - **Note**: Spring Boot 4.0.0-M3 includes enhanced reactive capabilities and improved native image support
+   - **Note**: Spring Boot 4.1.0 includes enhanced reactive capabilities and improved native image support
 
-### 🎨 Frontend Setup (Angular 20)
+### 🎨 Frontend Setup (Angular 22)
 
 1. **Install Dependencies**
 
    ```bash
    # Navigate to frontend directory
-   cd ui/web
+   cd ui/ng-plate
    
-   # Install dependencies (Angular 20 compatible)
-   npm install
-
-   # Alternative package managers (optional)
-   # npm install -g pnpm && pnpm install
-   # npm install -g yarn && yarn install
+   # Install dependencies (Angular 22, pnpm is required)
+   pnpm install
    ```
 
 2. **Development Server**
 
    ```bash
-   # Start development server (Angular 20)
-   npm run start
+   # Start development server (Angular 22)
+   pnpm start
 
-   # Build for production
-   npm run build
+   # Build for production (SSR output included)
+   pnpm build
 
-   # Build for production with SSR
-   npm run build:ssr
+   # Serve the SSR build
+   pnpm serve:ssr:ng-plate
 
-   # Serve SSR application
-   npm run serve:ssr:web
-
-   # Run tests
-   npm run test
+   # Run unit tests (Vitest)
+   pnpm test
 
    # Run tests with coverage
-   npm run test -- --code-coverage
+   pnpm test -- --coverage
    ```
 
 3. **Access the Frontend**
    - **Development**: http://localhost:4200
-   - **Production (SSR)**: http://localhost:4000 (after running `npm run serve:ssr:web`)
+   - **Production (SSR)**: http://localhost:4000 (after running `pnpm serve:ssr:ng-plate`)
    - **Production**: http://localhost:8080 (served by Spring Boot)
-   - **Note**: Angular 20 includes improved SSR performance and enhanced developer experience
+   - **Note**: Angular 22 includes improved SSR performance and enhanced developer experience
 
 ## 📁 Project Structure
 
@@ -263,7 +256,7 @@ plate/
 │   │   │   └── db/migration/         # Flyway database migrations
 │   │   └── build.gradle             # Gradle build configuration
 ├── ui/                           # Frontend modules
-│   └── web/                      # Angular 20 frontend with SSR
+│   └── ng-plate/                 # Angular 22 frontend with SSR
 │       ├── src/
 │       │   ├── app/              # Main application
 │       │   │   ├── core/         # Core services (HTTP interceptor, token, theme)
@@ -309,19 +302,23 @@ spring:
 
 ### Frontend Configuration
 
-#### Environment Variables (`ui/web/src/envs/`)
+#### Environment Variables (`ui/ng-plate/src/envs/`)
 
 ```typescript
-// env.dev.ts
-export const env = {
-  production: false,
-  apiUrl: "http://localhost:8080"
+// env.ts (production)
+export const environment = {
+  production: true,
+  host: '',
+  relaApiPath: '/rel',
+  secApiPath: '/sec',
 };
 
-// env.ts (production)
-export const env = {
-  production: true,
-  apiUrl: "http://localhost:8080"
+// env.dev.ts (development)
+export const environment = {
+  production: false,
+  host: '/api',
+  relaApiPath: '/rel',
+  secApiPath: '/sec',
 };
 ```
 
@@ -329,13 +326,14 @@ export const env = {
 
 ```json
 {
-  "/sec": {
-    "target": "http://localhost:8080",
-    "secure": false
-  },
-  "/rel": {
-    "target": "http://localhost:8080",
-    "secure": false
+  "/api": {
+    "target": "http://localhost:8080/",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/api": ""
+    }
   }
 }
 ```
@@ -347,11 +345,11 @@ export const env = {
 1. **Build Docker Images**
 
    ```bash
-   # Build backend (Spring Boot 4.0.0-M3)
+   # Build backend (Spring Boot 4.1.0)
    docker build -t plate-backend ./boot/platform
 
-   # Build frontend (Angular 20)
-   docker build -t plate-frontend ./ui/web
+   # Build frontend (Angular 22)
+   docker build -t plate-frontend ./ui/ng-plate
    ```
 
 2. **Docker Compose**
@@ -401,7 +399,7 @@ export const env = {
 
 ## 🧪 Testing
 
-### Backend Testing (Spring Boot 4.0.0-M3)
+### Backend Testing (Spring Boot 4.1.0)
 
 ```bash
 # Run all tests
@@ -417,17 +415,17 @@ export const env = {
 ./gradlew nativeTest
 ```
 
-### Frontend Testing (Angular 20)
+### Frontend Testing (Angular 22)
 
 ```bash
-# Run unit tests
-npm run test
+# Run unit tests (Vitest)
+pnpm test
 
 # Run tests with coverage
-npm run test -- --code-coverage
+pnpm test -- --coverage
 
 # Run end-to-end tests (if configured)
-npm run e2e
+# pnpm e2e  (not enabled by default)
 ```
 
 ## 🔍 API Documentation
@@ -436,8 +434,8 @@ The Plate Platform provides RESTful APIs with reactive endpoints. API documentat
 
 ### API Path Prefixes
 
-- **Security APIs**: `/sec/*` - User, group, tenant management and authentication
-- **Relational APIs**: `/rel/*` - Business data and logging operations
+- **Security APIs**: `/sec` - User, group, tenant management and authentication
+- **Relational APIs**: `/rel` - Business data and logging operations
 
 ### Key API Endpoints
 
@@ -484,7 +482,7 @@ The Plate Platform provides RESTful APIs with reactive endpoints. API documentat
 
 ### Backend Technologies
 
-- **Spring Boot 4.0.0-M3** - Main application framework (latest milestone release)
+- **Spring Boot 4.1.0** - Main application framework
 - **Spring Security** - Authentication and authorization
 - **Spring WebFlux** - Reactive web framework
 - **Spring Data R2DBC** - Reactive database access
@@ -498,11 +496,11 @@ The Plate Platform provides RESTful APIs with reactive endpoints. API documentat
 
 ### Frontend Technologies
 
-- **Angular 20** - Main frontend framework
-- **Angular Material** - UI component library
+- **Angular 22** - Main frontend framework
+- **Tabler UI (@tabler/core)** - Component & styling framework
 - **Angular SSR** - Server-side rendering
 - **RxJS 7.8.0** - Reactive programming library
-- **TypeScript 5.8.2** - Programming language
+- **TypeScript 6.0.3** - Programming language
 - **Tabler Icons** - Icon library
 - **Tabler Core** - UI component framework
 - **Express.js 5.1.0** - Server for SSR
@@ -554,18 +552,18 @@ The Apache License 2.0 is a permissive free software license that allows users t
 
 ## 🚀 Migration Notes
 
-### Spring Boot 4.0.0-M3 Upgrade
+### Spring Boot 4.1.0 Upgrade
 
-This project has been upgraded to Spring Boot 4.0.0-M3, which includes several important changes:
+This project has been upgraded to Spring Boot 4.1.0, which includes several important changes:
 
-- **Java 25 Requirement**: Spring Boot 4.x requires Java 21 or later
+- **Java 25 Requirement**: Spring Boot 4.1.0 requires Java 25 (toolchain)
 - **Enhanced Reactive Support**: Improved WebFlux and R2DBC integration
 - **Native Image Improvements**: Better GraalVM native compilation support
 - **Breaking Changes**: Some configuration properties and APIs may have changed from Spring Boot 3.x
 
-### Angular 20 Upgrade
+### Angular 22 Upgrade
 
-The frontend has been upgraded to Angular 20, featuring:
+The frontend has been upgraded to Angular 22, featuring:
 
 - **Improved SSR Performance**: Enhanced server-side rendering capabilities
 - **Modern Development Experience**: Updated tooling and build optimizations
@@ -578,15 +576,15 @@ Plate Platform is under active development with the latest technology stack and 
 **Current version**: 0.0.1 (Development)
 
 **Technology Stack**:
-- ✅ **Backend**: Spring Boot 4.0.0-M3 with Java 25
-- ✅ **Frontend**: Angular 20 with SSR support
-- ✅ **Database**: PostgreSQL 17+ with R2DBC reactive driver
-- ✅ **Cache**: Redis 7.0+ for distributed sessions
+- ✅ **Backend**: Spring Boot 4.1.0 with Java 25
+- ✅ **Frontend**: Angular 22 with SSR support
+- ✅ **Database**: PostgreSQL 14+ with R2DBC reactive driver
+- ✅ **Cache**: Redis 6.0+ for distributed sessions
 
 **Implemented Features**:
 - ✅ Multi-tenant architecture with user/group management
 - ✅ Reactive backend with Spring WebFlux and R2DBC
-- ✅ Angular 20 frontend with SSR support
+- ✅ Angular 22 frontend with SSR support
 - ✅ OAuth2 authentication with GitHub integration
 - ✅ Role-based access control (RBAC)
 - ✅ Menu and permission management

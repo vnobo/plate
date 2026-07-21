@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Plate is a monorepo containing a reactive multi-tenant backend management platform and its Angular frontend.
 
 - **Backend** (`boot/`): Spring Boot 4.1 / WebFlux / R2DBC / Redis — Java 25, Gradle 9.5.x
-- **Frontend** (`ui/ng-plate/`): Angular 22 SSR — TypeScript 6, pnpm 11.5.2, Tabler UI
+- **Frontend** (`ui/ng-plate/`): Angular 22 SSR — TypeScript 6, pnpm 11.12.0, Tabler UI
 
 ## Build & Run Commands
 
@@ -118,7 +118,7 @@ Netty (HTTP/2) → `LoggerFilter` (audit log for non-safe methods) → Spring Se
 - Use `@RequiredArgsConstructor` with `final` fields for DI (Lombok)
 - Use `@Log4j2` for logging — Logback is excluded
 - All reactive: controllers return `Mono<T>`/`Flux<T>`, never block IO
-- Path prefixes: `/rel/v1` for relational, `/sec/v1` for security (auto-bound by `WebConfiguration`)
+- Path prefixes: `/rel` for relational, `/sec` for security (auto-bound by `WebConfiguration`)
 - API versioning: `x-api-version` header or `apiVersion` query param, default `v1`
 - CSRF: POST/PUT/DELETE require `X-XSRF-TOKEN` header or `XSRF-TOKEN` cookie
 - Response DTOs must omit passwords; `UserRes` masks phone/email
@@ -141,7 +141,7 @@ Frontend tests use Vitest via `@angular/build:unit-test` builder (`pnpm test` fr
 - PostgreSQL 14+ with extensions: `uuid-ossp`, `pg_trgm`, `zhparser`
 - Redis 6.0+
 - Docker (required for Testcontainers)
-- Node.js + pnpm 11.5.2 (frontend)
+- Node.js + pnpm 11.12.0 (frontend)
 - Local backend: `127.0.0.1:5432/plate` (user `farmer`, password `123456`), Redis at `127.0.0.1`
 - Default admin: `admin` / `123456`
 - Swagger UI: `http://127.0.0.1:8080/swagger-ui.html`
