@@ -89,9 +89,9 @@ plate/
 | **前端构建** | pnpm | 11.5.2 |
 | **Web 框架** | Spring Boot WebFlux | 4.1.0（响应式非阻塞, Netty HTTP/2） |
 | **前端框架** | Angular | 22.x（SSR + Signals + Zoneless） |
-| **数据库** | PostgreSQL | 14+（uuid-ossp, pg_trgm, zhparser 扩展） |
+| **数据库** | PostgreSQL | 17+（uuid-ossp, pg_trgm, zhparser 扩展） |
 | **数据访问** | Spring Data R2DBC | 响应式关系数据库 |
-| **缓存/会话** | Redis | 6.0+（缓存 + WebSession） |
+| **缓存/会话** | Redis | 7.0+（缓存 + WebSession） |
 | **安全** | Spring Security | Session-based + OAuth2 + CSRF Cookie |
 | **迁移** | Flyway | baseline-on-migrate, V1.0.0–V1.0.6 |
 | **JSON** | Jackson 3.x (tools.jackson) | 使用 `ContextUtils.OBJECT_MAPPER` |
@@ -443,8 +443,8 @@ GitHub Actions 工作流 (`.github/workflows/`)：
 |------|------|------|
 | Java | 25+ | Liberica JDK 推荐 |
 | Gradle | 9.5+ | Wrapper 已包含 |
-| PostgreSQL | 14+ | uuid-ossp, pg_trgm, zhparser 扩展 |
-| Redis | 6.0+ | 缓存 + WebSession |
+| PostgreSQL | 17+ | uuid-ossp, pg_trgm, zhparser 扩展 |
+| Redis | 7.0+ | 缓存 + WebSession |
 | Docker | 最新 | Testcontainers 测试 |
 | Node.js | LTS | 前端开发 |
 | pnpm | 11.5.2 | 前端包管理 |
