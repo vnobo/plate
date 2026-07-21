@@ -1,14 +1,20 @@
 import {
   Component,
   computed,
+  DestroyRef,
   effect,
+  inject,
   input,
   linkedSignal,
-  output,
   signal,
 } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { FormField, form, email, required, submit, disabled } from '@angular/forms/signals';
+import { MessageService } from '@app/plugins';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { delay, tap } from 'rxjs';
 import { User } from './user.types';
+import { environment } from '@envs/env';
 
 @Component({
   selector: 'app-user-form',
@@ -132,7 +138,10 @@ export class UserForm {
 
   private readonly userData = linkedSignal(this.inputData);
   readonly created = computed(() => this.userData()?.code == undefined);
-  formSubmit = output<User>();
+
+  private readonly _http = inject(HttpClient);
+  private readonly _message = inject(MessageService);
+  private readonly _destroyRef = inject(DestroyRef);
 
   isSubmitting = signal(false);
   passwordError = signal('');
@@ -207,13 +216,35 @@ export class UserForm {
     await submit(this.userForm, {
       action: async () => {
         const model = this.userModel();
-        const result: User = {
-          ...model,
-        } as User;
-        this.formSubmit.emit(result);
+        const result: User = { ...model } as User;
+        // 编辑时不提交密码，避免误改密码
+        if (!this.created()) {
+          delete (result as Record<string, unknown>)['password'];
+          delete (result as Record<string, unknown>)['confirmPassword'];
+        }
+        const request = this.created()
+          ? this._http.post<User>(environment.secApiPath + '/users/add', result)
+          : this._http.put<User>(environment.secApiPath + '/users/modify', result);
+        request
+          .pipe(
+            tap(() =>
+              this._message.success(this.created() ? '用户创建成功' : '用户更新成功'),
+            ),
+            delay(800),
+            takeUntilDestroyed(this._destroyRef),
+          )
+          .subscribe(() => this.closeModal());
       },
     });
     this.isSubmitting.set(false);
+  }
+
+  private closeModal() {
+    const el = document.getElementById('exampleModal');
+    if (el) {
+      const instance = tabler?.Modal?.getOrCreateInstance(el);
+      instance?.hide();
+    }
   }
 
   resetForm() {
