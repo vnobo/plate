@@ -1,7 +1,7 @@
 <div class="page-header d-print-none">
   <div class="row align-items-center">
     <div class="col">
-      <div class="page-pretitle">概览</div>
+      <div class="page-pretitle">系统管理</div>
       <h2 class="page-title">租户管理</h2>
     </div>
     <div class="col-auto ms-auto">
@@ -29,6 +29,7 @@
     </div>
   </div>
 </div>
+
 <div class="page-body">
   @if (isEditing()) {
     <div class="card mb-4">
@@ -64,20 +65,21 @@
 
             <div class="col-md-6">
               <div class="mb-3">
-                <label for="status" class="form-label">状态</label>
+                <label for="pcode" class="form-label">父级租户 *</label>
                 <select
-                  id="status"
+                  id="pcode"
                   class="form-select"
-                  [class.is-invalid]="isFieldInvalid('status')"
-                  [formField]="tenantForm.status"
+                  [class.is-invalid]="isFieldInvalid('pcode')"
+                  [formField]="tenantForm.pcode"
                 >
-                  <option value="active">活跃</option>
-                  <option value="inactive">非活跃</option>
-                  <option value="suspended">已暂停</option>
+                  <option [value]="ROOT_PCODE">根租户（顶级）</option>
+                  @for (p of parents(); track p.code) {
+                    <option [value]="p.code">{{ p.name }}</option>
+                  }
                 </select>
-                @if (isFieldInvalid('status')) {
+                @if (isFieldInvalid('pcode')) {
                   <div class="invalid-feedback">
-                    {{ getFieldError('status') }}
+                    {{ getFieldError('pcode') }}
                   </div>
                 }
               </div>
@@ -100,65 +102,6 @@
             }
           </div>
 
-          <div class="row">
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label for="subscriptionType" class="form-label">订阅类型</label>
-                <select
-                  id="subscriptionType"
-                  class="form-select"
-                  [formField]="tenantForm.subscriptionType"
-                >
-                  <option value="basic">基础版</option>
-                  <option value="standard">标准版</option>
-                  <option value="premium">高级版</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label for="expirationDate" class="form-label">过期日期</label>
-                <input
-                  type="date"
-                  id="expirationDate"
-                  class="form-control"
-                  [formField]="tenantForm.expirationDate"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div class="hr-text mb-3">其他信息</div>
-
-          <div class="row">
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label for="createdAt" class="form-label">创建日期</label>
-                <input
-                  type="text"
-                  id="createdAt"
-                  class="form-control"
-                  [value]="currentTenant()?.createdAt | date: 'yyyy-MM-dd HH:mm'"
-                  disabled
-                />
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label for="updatedAt" class="form-label">更新日期</label>
-                <input
-                  type="text"
-                  id="updatedAt"
-                  class="form-control"
-                  [value]="currentTenant()?.updatedAt | date: 'yyyy-MM-dd HH:mm'"
-                  disabled
-                />
-              </div>
-            </div>
-          </div>
-
           <div class="form-footer">
             <button type="button" class="btn btn-secondary me-2" (click)="cancelEdit()">
               取消
@@ -171,181 +114,115 @@
       </div>
     </div>
   }
-  <div class="row row-deck">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">租户列表</h3>
-          <div class="card-actions">
-            <div class="input-icon">
-              <input
-                type="text"
-                placeholder="搜索租户..."
-                [value]="searchKeyword()"
-                (input)="onSearchChange($any($event).target.value)"
-                class="form-control"
-              />
-              <span class="input-icon-addon">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="icon"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  stroke-width="2"
-                  stroke="currentColor"
-                  fill="none"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                  <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
-                  <path d="M21 21l-6 -6"></path>
-                </svg>
-              </span>
-            </div>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table class="table card-table table-vcenter text-nowrap datatable">
-            <thead>
-              <tr>
-                <th>租户名称</th>
-                <th>描述</th>
-                <th>状态</th>
-                <th>创建日期</th>
-                <th>订阅类型</th>
-                <th>过期日期</th>
-                <th class="w-1">操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (tenant of paginatedTenants(); track tenant.id) {
-                <tr>
-                  <td>{{ tenant.name }}</td>
-                  <td>{{ tenant.description || '-' }}</td>
-                  <td>
-                    <span class="badge" [class]="getStatusClass(tenant.status)">
-                      {{ getStatusText(tenant.status) }}
-                    </span>
-                  </td>
-                  <td>{{ tenant.createdAt | date: 'yyyy-MM-dd' }}</td>
-                  <td>{{ tenant.subscriptionType || '-' }}</td>
-                  <td>
-                    {{ tenant.expirationDate ? (tenant.expirationDate | date: 'yyyy-MM-dd') : '-' }}
-                  </td>
-                  <td>
-                    <button
-                      class="btn btn-icon btn-outline-primary me-2"
-                      (click)="editTenant(tenant)"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="icon"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        stroke-width="2"
-                        stroke="currentColor"
-                        fill="none"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                        <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4"></path>
-                        <path d="M13.5 6.5l4 4"></path>
-                      </svg>
-                    </button>
-                    <button
-                      class="btn btn-icon btn-outline-danger"
-                      (click)="deleteTenant(tenant.id)"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="icon"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        stroke-width="2"
-                        stroke="currentColor"
-                        fill="none"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                        <path d="M4 7l16 0"></path>
-                        <path d="M10 11l0 6"></path>
-                        <path d="M14 11l0 6"></path>
-                        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path>
-                        <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path>
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="7" class="text-center text-muted py-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="icon mb-2"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      stroke-width="2"
-                      stroke="currentColor"
-                      fill="none"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                      <path d="M12 9v2m0 4v.01"></path>
-                      <path
-                        d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"
-                      ></path>
-                    </svg>
-                    <div>暂无租户数据</div>
-                    <small class="text-muted">点击上方按钮创建第一个租户</small>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
 
-        <!-- 分页组件 -->
-        <div class="card-footer d-flex align-items-center">
-          <p class="m-0 text-secondary">
-            显示 {{ (currentPage() - 1) * itemsPerPage() + 1 }} -
-            {{ getMinDate(currentPage() * itemsPerPage(), filteredTenants().length) }} 条，共
-            {{ filteredTenants().length }} 条
-          </p>
-          <ul class="pagination m-0 ms-auto">
-            <li class="page-item" [class.disabled]="currentPage() === 1">
-              <a
-                class="page-link"
-                (click)="changePage(currentPage() - 1)"
-                [class.disabled]="currentPage() === 1"
-                >上一页</a
-              >
-            </li>
-
-            @for (page of getPaginationItems(); track page) {
-              <li class="page-item" [class.active]="page === currentPage()">
-                <a class="page-link" (click)="changePage(page)">{{ page }}</a>
-              </li>
-            }
-
-            <li class="page-item" [class.disabled]="currentPage() === totalPages()">
-              <a
-                class="page-link"
-                (click)="changePage(currentPage() + 1)"
-                [class.disabled]="currentPage() === totalPages()"
-                >下一页</a
-              >
-            </li>
-          </ul>
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">租户列表</h3>
+      <div class="card-actions">
+        <div class="input-icon">
+          <input
+            type="text"
+            placeholder="搜索租户名称..."
+            [value]="searchKeyword()"
+            (input)="onSearchChange($any($event).target.value)"
+            class="form-control"
+          />
+          <span class="input-icon-addon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="icon"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
+              <path d="M21 21l-6 -6"></path>
+            </svg>
+          </span>
         </div>
       </div>
+    </div>
+
+    <div class="table-responsive">
+      @if (isLoading()) {
+        <div class="text-center py-4">
+          <div class="spinner-border spinner-border-sm text-muted" role="status">
+            <span class="visually-hidden">加载中...</span>
+          </div>
+          <span class="ms-2 text-muted">加载中...</span>
+        </div>
+      } @else {
+        <table class="table card-table table-vcenter text-nowrap datatable">
+          <thead>
+            <tr>
+              <th>租户名称</th>
+              <th>描述</th>
+              <th>父级租户</th>
+              <th>创建时间</th>
+              <th class="w-1">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (tenant of tenantData().content; track tenant.code) {
+              <tr>
+                <td>{{ tenant.name }}</td>
+                <td>{{ tenant.description || '-' }}</td>
+                <td>{{ parentName(tenant.pcode) }}</td>
+                <td>{{ tenant.createdAt | date: 'yyyy-MM-dd HH:mm' }}</td>
+                <td>
+                  <div class="btn-list flex-nowrap">
+                    <button class="btn btn-outline-primary btn-sm" (click)="editTenant(tenant)">
+                      编辑
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" (click)="onDelete(tenant)">
+                      删除
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">暂无租户数据</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <div class="card-footer d-flex align-items-center">
+      <p class="m-0 text-secondary">
+        显示 {{ (pageable().page - 1) * pageable().size + 1 }} -
+        {{ Math.min(pageable().page * pageable().size, tenantData().totalElements || 0) }} 条，共
+        {{ tenantData().totalElements || 0 }} 条
+      </p>
+      <ul class="pagination m-0 ms-auto">
+        <li class="page-item" [class.disabled]="pageable().page <= 1">
+          <a class="page-link" (click)="changePage(pageable().page - 1)">上一页</a>
+        </li>
+
+        @for (page of getPageNumbers(); track $index) {
+          @if (page === -1) {
+            <li class="page-item disabled">
+              <span class="page-link">…</span>
+            </li>
+          } @else {
+            <li class="page-item" [class.active]="page === pageable().page">
+              <a class="page-link" (click)="changePage(page)">{{ page }}</a>
+            </li>
+          }
+        }
+
+        <li class="page-item" [class.disabled]="pageable().page >= getTotalPages()">
+          <a class="page-link" (click)="changePage(pageable().page + 1)">下一页</a>
+        </li>
+      </ul>
     </div>
   </div>
 </div>
