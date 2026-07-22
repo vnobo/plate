@@ -1,0 +1,251 @@
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col">
+      <div class="page-pretitle">系统管理</div>
+      <h2 class="page-title">角色管理</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <div class="btn-list">
+        <button class="btn btn-primary d-flex align-items-center" (click)="openRoleForm(null)">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon icon-tabler icon-tabler-plus me-2"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M12 5l0 14"></path>
+            <path d="M5 12l14 0"></path>
+          </svg>
+          新建角色
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="row align-items-stretch g-3">
+    <!-- 左侧：角色树形结构 -->
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <h3 class="card-title">角色</h3>
+          <div class="card-actions">
+            <span class="badge bg-primary-lt">{{ groups().length }}</span>
+          </div>
+        </div>
+        <div class="card-body p-0 d-flex flex-column">
+          @if (isLoading()) {
+            <div class="text-center py-4">
+              <div class="spinner-border spinner-border-sm text-muted" role="status">
+                <span class="visually-hidden">加载中...</span>
+              </div>
+              <span class="ms-2 text-muted">加载中...</span>
+            </div>
+          } @else if (groups().length === 0) {
+            <div class="text-center text-muted py-5">
+              暂无角色，点击右上角「新建角色」开始创建
+            </div>
+          } @else {
+            <div class="role-tree">
+              @for (node of treeNodes(); track node.group.code) {
+                <div
+                  class="role-tree-node"
+                  [class.active]="selectedGroup()?.code === node.group.code"
+                  [style.padding-left.rem]="node.depth * 1.1 + 0.75"
+                  (click)="selectGroup(node.group)"
+                >
+                  @if (node.hasChildren) {
+                    <button
+                      type="button"
+                      class="role-tree-caret"
+                      (click)="toggleExpand(node.group.code!, $event)"
+                      [attr.aria-label]="node.expanded ? '收起' : '展开'"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="icon"
+                        [class.rotate]="!node.expanded"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        fill="none"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M9 6l6 6l-6 6"></path>
+                      </svg>
+                    </button>
+                  } @else {
+                    <span class="role-tree-caret-placeholder"></span>
+                  }
+                  <span class="role-tree-label">
+                    <span class="role-tree-name">{{ node.group.name }}</span>
+                    @if (node.group.description) {
+                      <span class="role-tree-desc">{{ node.group.description }}</span>
+                    }
+                  </span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧：权限 / 用户 -->
+    <div class="col-lg-8">
+      <div class="card h-100">
+        @if (!selectedGroup()) {
+          <div class="card-body d-flex align-items-center justify-content-center text-muted">
+            <div class="text-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="icon icon-lg"
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path
+                  d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"
+                ></path>
+              </svg>
+              <p class="mt-3 mb-0">请从左侧选择一个角色，查看其权限与关联用户</p>
+            </div>
+          </div>
+        } @else {
+          <div class="card-header">
+            <div>
+              <h3 class="card-title mb-1">{{ selectedGroup()!.name }}</h3>
+              @if (selectedGroup()!.description) {
+                <div class="text-secondary small">{{ selectedGroup()!.description }}</div>
+              }
+            </div>
+            <div class="card-actions btn-list">
+              <button class="btn btn-outline-primary btn-sm" (click)="openRoleForm(selectedGroup())">
+                编辑
+              </button>
+              <button
+                class="btn btn-outline-danger btn-sm"
+                (click)="onDeleteGroup(selectedGroup()!)"
+              >
+                删除
+              </button>
+            </div>
+          </div>
+          <div class="card-body d-flex flex-column">
+            <ul class="nav nav-tabs mb-3">
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  [class.active]="activeTab() === 'authority'"
+                  (click)="activeTab.set('authority')"
+                >
+                  权限 <span class="badge bg-primary-lt ms-1">{{ authorities().length }}</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link"
+                  [class.active]="activeTab() === 'member'"
+                  (click)="activeTab.set('member')"
+                >
+                  用户 <span class="badge bg-primary-lt ms-1">{{ members().length }}</span>
+                </a>
+              </li>
+              <li class="nav-item ms-auto">
+                @if (activeTab() === 'authority') {
+                  <button class="btn btn-primary btn-sm" (click)="openAuthorityForm()">
+                    添加权限
+                  </button>
+                } @else {
+                  <button class="btn btn-primary btn-sm" (click)="openMemberForm()">
+                    添加用户
+                  </button>
+                }
+              </li>
+            </ul>
+
+            @if (activeTab() === 'authority') {
+              <div class="tab-pane active flex-fill">
+                @if (authorities().length === 0) {
+                  <div class="empty bg-transparent">
+                    <p class="empty-title">该角色尚未分配权限</p>
+                    <div class="empty-action">
+                      <button class="btn btn-primary" (click)="openAuthorityForm()">添加权限</button>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="row g-2">
+                    @for (item of authorities(); track item.code) {
+                      <div class="col-md-6">
+                        <div class="authority-chip">
+                          <code>{{ item.authority }}</code>
+                          <button
+                            type="button"
+                            class="btn btn-ghost-danger btn-sm"
+                            (click)="onDeleteAuthority(item)"
+                            aria-label="移除权限"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="tab-pane active flex-fill">
+                @if (members().length === 0) {
+                  <div class="empty bg-transparent">
+                    <p class="empty-title">该角色尚未关联用户</p>
+                    <div class="empty-action">
+                      <button class="btn btn-primary" (click)="openMemberForm()">添加用户</button>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="list-group list-group-flush">
+                    @for (item of members(); track item.code) {
+                      <div class="list-group-item d-flex align-items-center px-0">
+                        <span class="avatar bg-primary-lt me-2">{{ (item.name || '?').slice(0, 1) }}</span>
+                        <div class="flex-fill min-w-0">
+                          <div class="fw-5 text-truncate">{{ item.name }}</div>
+                          <div class="text-secondary small text-truncate">
+                            用户编码：{{ item.userCode }}
+                          </div>
+                        </div>
+                        <button
+                          class="btn btn-outline-danger btn-sm"
+                          (click)="onDeleteMember(item)"
+                        >
+                          移除
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
