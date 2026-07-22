@@ -35,6 +35,29 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
                       <span class="nav-link-title">租户管理</span>
                     </a>
                   </li>
+                  <li class="nav-item">
+                    <a class="nav-link" routerLink="./role" routerLinkActive="active">
+                      <span class="nav-link-icon d-md-none d-lg-inline-block">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          class="icon icon-1"
+                        >
+                          <path
+                            d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"
+                          ></path>
+                        </svg>
+                      </span>
+                      <span class="nav-link-title">角色管理</span>
+                    </a>
+                  </li>
                 </ul>
               </div>
               <div class="col col-md-auto"></div>

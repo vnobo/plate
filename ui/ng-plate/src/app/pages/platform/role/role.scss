@@ -1,0 +1,104 @@
+:host {
+  display: block;
+}
+
+.role-tree {
+  overflow-y: auto;
+  max-height: calc(100vh - 220px);
+  padding: 0.5rem 0;
+}
+
+.role-tree-node {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-right: 0.75rem;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.role-tree-node:hover {
+  background-color: rgba(var(--tblr-primary-rgb), 0.06);
+}
+
+.role-tree-node.active {
+  background-color: var(--tblr-primary);
+  color: #fff;
+  border-left-color: rgba(255, 255, 255, 0.65);
+}
+
+.role-tree-node.active .role-tree-desc {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.role-tree-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  flex: none;
+}
+
+.role-tree-caret .icon {
+  transition: transform 0.15s ease;
+}
+
+.role-tree-caret .icon.rotate {
+  transform: rotate(-90deg);
+}
+
+.role-tree-caret-placeholder {
+  display: inline-block;
+  width: 1.25rem;
+  flex: none;
+}
+
+.role-tree-label {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.role-tree-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.role-tree-desc {
+  font-size: 0.75rem;
+  color: var(--tblr-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.authority-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--tblr-bg-surface-secondary, #f1f5f9);
+  border: 1px solid var(--tblr-border-color);
+  border-radius: 0.5rem;
+}
+
+.authority-chip code {
+  font-size: 0.8125rem;
+  color: var(--tblr-primary);
+  word-break: break-all;
+}
