@@ -1,6 +1,6 @@
-# CLAUDE.md — Backend (boot/)
+# AGENTS.md — Backend (boot/)
 
-This file provides backend-specific guidance to Claude Code. See the root `CLAUDE.md` for monorepo overview, frontend, and CI/CD.
+This file provides backend (Java) guidance for AI agents (Claude Code and others). See the root `AGENTS.md` / `CLAUDE.md` for monorepo overview, frontend, and CI/CD. The mandatory Java coding standards are in the Coding Standards section below.
 
 ## Project Overview
 
@@ -56,7 +56,7 @@ com.plate.boot/
 
 1. Netty (HTTP/2, port 8080) → `LoggerFilter` (audit logging for non-safe methods)
 2. Spring Security: session from Redis-backed WebSession, CSRF cookie validation, `@PreAuthorize`
-3. `WebConfiguration` routes by path prefix: `/rel/v1/**` → `com.plate.boot.relational`, `/sec/v1/**` → `com.plate.boot.security`
+3. `WebConfiguration` routes by path prefix: `/rel/**` → `com.plate.boot.relational`, `/sec/**` → `com.plate.boot.security` (prefixes defined in `application.yml` `spring.webflux.properties.path-prefixes`, no `/v1` in the path; API version goes via `x-api-version` header)
 4. Controller → Service (extends `AbstractCache`, Redis caching, event publishing) → Repository (R2DBC `ReactiveCrudRepository` or `DatabaseClient`)
 
 ### Entity Pattern
@@ -103,8 +103,45 @@ Common columns: UUIDv7 `code` (PK), `tenant_code`, `extend` JSONB, `text_search`
 - Use `@RequiredArgsConstructor` with `final` fields for dependency injection (Lombok)
 - Use `@Log4j2` for logging — Logback is excluded
 - Response DTOs (e.g., `UserRes`) must omit sensitive fields like passwords
-- Path prefixes: `/rel/v1` for relational, `/sec/v1` for security endpoints
+- Path prefixes: `/rel` for relational, `/sec` for security endpoints (config-driven via `WebfluxProperties`; no `/v1` path segment)
 - Use `QueryFragment`/`QueryHelper`/`QueryJsonHelper` for all dynamic SQL — never string concatenation
+
+## Coding Standards (MANDATORY — Java: Alibaba Java Coding Guidelines)
+
+All Java produced or modified in this backend MUST follow **Alibaba Java Coding Guidelines** (https://github.com/alibaba/Alibaba-Java-Coding-Guidelines). These are **advisory only** — there is intentionally **no Checkstyle/PMD/SpotBugs/ErrorProne config and no `-Pquality` gate** in this repo; do not add them. Follow them by discipline when writing and reviewing.
+
+- **Naming**
+  - Packages: all-lowercase, single word, no underscore (`com.plate.boot.security`).
+  - Classes/interfaces/enums: `UpperCamelCase` (e.g., `SecurityManager`, `UserRes`, `SeUser`).
+  - Methods/variables: `lowerCamelCase`.
+  - Constants: `UPPER_CASE_WITH_UNDERSCORES` (`MAX_RETRY_COUNT`); `long` literals use uppercase `L` (`600000L`); no magic numbers — extract to named constants.
+  - Array declaration: `String[] args` (not `String args[]`).
+- **OOP**
+  - Always annotate overrides with `@Override`.
+  - Prefer `java.util.Objects.equals(a, b)` over `a.equals(b)`; put constants / known-non-null on the left of `equals`/`compareTo`.
+  - Avoid raw types; POJOs/entities implement `equals`/`hashCode` together and provide `toString` (or Lombok `@Data`/`@ToString`).
+  - Lombok: use `@RequiredArgsConstructor` + `final` fields for DI (see Key Conventions).
+- **Formatting (Java)**: **4-space** indent (no tabs); opening brace `{` on same line as the declaration, closing `}` on its own line; braces required even for single-statement `if/for/while`; one blank line between methods; space after keywords (`if (`), no space inside call parentheses (`method(arg)`).
+- **Concurrency (virtual threads — be careful)**
+  - Even with Java 25 virtual threads, do not share mutable state across requests via `synchronized`; prefer `java.util.concurrent` utilities.
+  - Never `Executors.newFixedThreadPool`/`newCachedThreadPool` — use `ThreadPoolExecutor` with a bounded queue.
+  - `java.text.SimpleDateFormat` is not thread-safe → use `java.time.format.DateTimeFormatter`.
+  - Guard shared state with `volatile` + double-checked locking or locks; prefer `Lock.tryLock()`.
+- **Collections / Maps**
+  - Iterate maps with `entrySet()`; use `ConcurrentHashMap` (not `Hashtable`/`Collections.synchronizedMap`).
+  - Size `ArrayList`/`HashMap` with expected capacity when known.
+  - `subList` reflects the backing list (careful with structural modifications); `toArray(new Type[0])` for typed arrays.
+- **Reactive discipline (WebFlux)**
+  - Controllers/services return `Mono<T>`/`Flux<T>`; never block the event loop (no `.block()` in the request path; no synchronous IO).
+  - Chain with `.map`/`.flatMap`/`.filter`; use `.subscribe()` only at well-defined boundaries.
+  - Propagate errors via reactive error operators (`onErrorResume`, `onErrorReturn`), not swallowed `try/catch` around publishers.
+- **Exceptions & Logging**
+  - Never `e.printStackTrace()`; log via `@Log4j2` (Logback excluded).
+  - Catch the most specific exception; never use exceptions for normal control flow.
+  - Parameterized logging (`log.error("fail id={}", id, ex)`), never string concatenation.
+- **Comments**: Javadoc on public types/members; no commented-out dead code left in the repo.
+
+> **Boundary**: standards are for AI code generation/review only. Do **not** add Checkstyle/PMD/SpotBugs/ErrorProne/JaCoCo config or a `-Pquality` build gate to this repo.
 
 ## Testing
 

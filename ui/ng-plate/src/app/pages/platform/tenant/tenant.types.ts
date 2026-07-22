@@ -15,5 +15,5 @@ export interface Tenant extends Search {
   extend?: Record<string, unknown>;
 }
 
-/** 顶级（根）租户的父级编码，对应数据库 se_tenants.pcode 列的默认值 */
+/** Parent code for top-level (root) tenants; matches the se_tenants.pcode column default */
 export const ROOT_PCODE = '00000000-0000-0000-0000-000000000000';
