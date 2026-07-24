@@ -165,7 +165,7 @@ jobs:
             ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-amd64 \
             ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-arm64
 
-          echo "鉁?GHCR manifest created successfully"
+          echo "[OK]GHCR manifest created successfully"
 
       # ---- Copy Single-Arch Images to Docker Hub ----
       - name: Copy single-arch images to Docker Hub
@@ -182,7 +182,7 @@ jobs:
             --tag ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-arm64 \
             ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-arm64
 
-          echo "鉁?Single-arch images copied to Docker Hub"
+          echo "[OK]Single-arch images copied to Docker Hub"
 
       # ---- Parse metadata for Docker Hub ----
       - name: Parse Docker Hub metadata
@@ -207,18 +207,18 @@ jobs:
             ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-amd64 \
             ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}-arm64
 
-          echo "鉁?Docker Hub manifest created successfully"
+          echo "[OK]Docker Hub manifest created successfully"
 
       # ---- Verification ----
       - name: Verify multi-arch manifests
         if: always()
         run: |
           echo "=== GHCR Manifest ==="
-          docker buildx imagetools inspect ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:latest 2>/dev/null || echo "鉂?GHCR manifest not found"
+          docker buildx imagetools inspect ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:latest 2>/dev/null || echo "[FAIL]GHCR manifest not found"
 
           echo ""
           echo "=== Docker Hub Manifest ==="
-          docker buildx imagetools inspect ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:latest 2>/dev/null || echo "鉂?Docker Hub manifest not found"
+          docker buildx imagetools inspect ${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:latest 2>/dev/null || echo "[FAIL]Docker Hub manifest not found"
 
           echo ""
           echo "=== Build Summary ==="

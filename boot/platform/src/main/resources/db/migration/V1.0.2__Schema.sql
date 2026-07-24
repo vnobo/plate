@@ -39,7 +39,7 @@ create table if not exists se_menus
 );
 create index se_menus_pttn_idx on se_menus (tenant_code, authority);
 create index se_menus_extend_gin_idx on se_menus using gin (extend);
-comment on table se_menus is '菜单权限表';
+comment on table se_menus is 'Menu permission table';
 
 
 create table if not exists oauth2_authorized_client
@@ -92,7 +92,7 @@ create table if not exists se_users
 create index se_users_text_full_search_gist_idx on se_users using gin (text_search);
 create index se_users_tu_idx on se_users (tenant_code, username);
 create index se_users_extend_gin_idx on se_users using gin (extend);
-comment on table se_users is '用户表';
+comment on table se_users is 'User table';
 
 create table if not exists se_authorities
 (
@@ -111,7 +111,7 @@ create table if not exists se_authorities
     foreign key (user_code) references se_users (code) on delete cascade
 );
 create index se_authorities_extend_gin_idx on se_authorities using gin (extend);
-comment on table se_authorities is '用户权限表';
+comment on table se_authorities is 'User authority table';
 
 create table if not exists se_groups
 (
@@ -135,7 +135,7 @@ create table if not exists se_groups
 );
 create index se_groups_tn_idx on se_groups (tenant_code, name);
 create index se_groups_extend_gin_idx on se_groups using gin (extend);
-comment on table se_groups is '角色表';
+comment on table se_groups is 'Role table';
 
 create table if not exists se_group_authorities
 (
@@ -153,7 +153,7 @@ create table if not exists se_group_authorities
     foreign key (group_code) references se_groups (code) on delete cascade
 );
 create index se_group_authorities_extend_gin_idx on se_group_authorities using gin (extend);
-comment on table se_group_authorities is '角色权限表';
+comment on table se_group_authorities is 'Role authority table';
 
 create table if not exists se_group_members
 (
@@ -172,7 +172,7 @@ create table if not exists se_group_members
     foreign key (user_code) references se_users (code) on delete cascade
 );
 create index se_group_members_extend_gin_idx on se_group_members using gin (extend);
-comment on table se_group_members is '角色用户关系表';
+comment on table se_group_members is 'Role-user relationship table';
 
 create table if not exists se_tenants
 (
@@ -195,7 +195,7 @@ create table if not exists se_tenants
         ) stored
 );
 create index se_tenants_extend_gin_idx on se_tenants using gin (extend);
-comment on table se_tenants is '租户表';
+comment on table se_tenants is 'Tenant table';
 
 create table if not exists se_tenant_members
 (
@@ -215,7 +215,7 @@ create table if not exists se_tenant_members
     foreign key (user_code) references se_users (code) on delete cascade
 );
 create index se_tenant_members_extend_gin_idx on se_tenant_members using gin (extend);
-comment on table se_tenant_members is '租户用户关系表';
+comment on table se_tenant_members is 'Tenant-user relationship table';
 
 create table if not exists se_loggers
 (
@@ -248,7 +248,7 @@ create table if not exists se_loggers
 create index se_loggers_context_gin_idx on se_loggers using gin (context);
 create index se_loggers_extend_gin_idx on se_loggers using gin (extend);
 create index se_loggers_text_search_gin_idx on se_loggers using gin (text_search);
-comment on table se_loggers is '操作日志表';
+comment on table se_loggers is 'Operation log table';
 
 create or replace function plate_update_updated_at_column()
     returns TRIGGER as

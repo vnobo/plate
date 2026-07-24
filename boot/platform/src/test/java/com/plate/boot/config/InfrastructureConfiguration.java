@@ -35,7 +35,7 @@ public class InfrastructureConfiguration {
     PostgreSQLContainer postgresContainer() {
         return new PostgreSQLContainer(
                 DockerImageName.parse("alexbob/postgres").asCompatibleSubstituteFor("postgres"))
-                .waitingFor(Wait.forLogMessage("^.*数据库系统准备接受连接.*$", 2));
+                .waitingFor(Wait.forLogMessage("^.*database system is ready to accept connections.*$", 2));
     }
 
     @Bean(destroyMethod = "close")
