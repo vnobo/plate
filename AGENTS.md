@@ -11,9 +11,9 @@
 
 ---
 
-## 0. Coding Standards (MANDATORY for AI-generated code)
+## 0. Coding Standards (AI agents MUST follow — discipline-based, not build-enforced)
 
-All code produced or modified by AI agents in this repository MUST follow the standards below. These are **guidance/advisory only** — they are NOT enforced by any build tooling (there is intentionally no ESLint/PMD/Checkstyle/JaCoCo config or `lint`/`coverage` scripts in the repo; do not add them). Follow them by discipline when writing and reviewing code.
+All code produced or modified by AI agents in this repository MUST follow the standards below. They are enforced by agent discipline only — there is intentionally no ESLint/PMD/Checkstyle/JaCoCo config or `lint`/`coverage` scripts in the repo; do not add them. Follow them rigorously when writing and reviewing code.
 
 ### Java — Alibaba Java Coding Guidelines
 Authority: https://github.com/alibaba/Alibaba-Java-Coding-Guidelines
@@ -39,6 +39,10 @@ Authority: https://github.com/alibaba/Alibaba-Java-Coding-Guidelines
   - `java.text.SimpleDateFormat` is not thread-safe → use `java.time.format.DateTimeFormatter`.
   - Guard shared state with `volatile` + double-checked locking or `java.util.concurrent` utilities; prefer `Lock.tryLock()`.
   - Use `CountDownLatch`/`CyclicBarrier`/`Semaphore`/`BlockingQueue` for coordination.
+- **Reactive discipline (WebFlux)**
+  - Controllers/services return `Mono<T>`/`Flux<T>`; never block the event loop (no `.block()` in the request path; no synchronous IO).
+  - Chain with `.map`/`.flatMap`/`.filter`; use `.subscribe()` only at well-defined boundaries.
+  - Propagate errors via reactive error operators (`onErrorResume`, `onErrorReturn`), not swallowed `try/catch` around publishers.
 - **Collections / Maps**
   - Iterate maps with `entrySet()`; use `ConcurrentHashMap` (not `Hashtable`).
   - Size `ArrayList`/`HashMap` with expected capacity when known.

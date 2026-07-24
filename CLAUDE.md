@@ -124,31 +124,9 @@ Netty (HTTP/2) → `LoggerFilter` (audit log for non-safe methods) → Spring Se
 - Response DTOs must omit passwords; `UserRes` masks phone/email
 - Angular: standalone components (no NgModules), signals for state, `inject()` for DI, native control flow (`@if`/`@for`/`@switch`), zoneless change detection, SSR with incremental hydration, `@tabler/core` UI framework, SCSS for styles, `zh-Hans` locale, path aliases (`@app/` → `src/app/`)
 
-## Coding Standards (MANDATORY for AI-generated code)
+## Coding Standards (see root `AGENTS.md` §0)
 
-All code produced or modified by AI agents in this repository MUST follow the standards below. These are **guidance/advisory only** — NOT enforced by any build tooling (there is intentionally no ESLint/PMD/Checkstyle/JaCoCo config or `lint`/`coverage` scripts in the repo; do not add them). Follow them by discipline when writing and reviewing code.
-
-### Java — Alibaba Java Coding Guidelines
-Authority: https://github.com/alibaba/Alibaba-Java-Coding-Guidelines
-
-- **Naming**: packages all-lowercase single word (`com.plate.boot.security`); classes/interfaces/enums `UpperCamelCase`; methods/variables `lowerCamelCase`; constants `UPPER_CASE_WITH_UNDERSCORES` (no magic numbers); `long` literals use uppercase `L` (`600000L`); arrays `String[] args`.
-- **OOP**: always `@Override`; prefer `Objects.equals(a, b)`; put constants/known-non-null on the left of `equals`; implement `equals`/`hashCode` together; provide `toString`.
-- **Formatting (Java)**: **4-space** indent (no tabs); opening brace on same line, closing on its own line; braces required even for single statements; one blank line between methods; space after keywords (`if (`), no space inside call parentheses.
-- **Concurrency**: thread pools via `ThreadPoolExecutor` (never `Executors.newFixedThreadPool`/`newCachedThreadPool`); `DateTimeFormatter` instead of thread-unsafe `SimpleDateFormat`; prefer `volatile` + double-checked locking or `java.util.concurrent`; use `Lock.tryLock()`.
-- **Collections/Maps**: iterate with `entrySet()`; `ConcurrentHashMap` over `Hashtable`; size collections with expected capacity; `toArray(new Type[0])`.
-- **Exceptions/Logging**: never `e.printStackTrace()`; use project logger (`@Log4j2`, `Logback` excluded); catch specific exceptions; parameterized logging (no string concat).
-- **Comments**: Javadoc on public types/members; no commented-out dead code.
-
-### Angular / TypeScript — Angular Style Guide + Google TypeScript Style
-Authorities: Angular Style Guide (https://angular.dev/style-guide) + Google TypeScript Style (https://google.github.io/styleguide/tsguide.html).
-
-- **Naming**: files `kebab-case.feature.type.ts`; classes/types `UpperCamelCase`; variables/functions `camelCase`; constants `UPPER_SNAKE_CASE`; selectors prefixed `kebab-case` (`app-*`).
-- **Formatting (TypeScript)** (AI discipline; project formatter is Prettier, any future linter should be `@angular-eslint` + Google TS Style): **2-space** indent; **single quotes**; **semicolons**; **max 100 cols**; `no-var` (prefer `const`); `===`/`!==` only.
-- **Type discipline**: `prefer-const`/`let`, avoid `any` (use `unknown` + narrowing), `interface` for shapes, `readonly`/`as const`.
-- **Angular idioms**: standalone components; signals for state; `inject()` for DI; native control flow; `OnPush`; `providedIn: 'root'` services; lazy `loadChildren`; `NgOptimizedImage`; one responsibility per file.
-- **Accessibility**: WCAG 2.1 AA; alt text, labels, keyboard support (AXE-clean).
-
-> **Boundary**: These rules are for AI code generation and review only. Do **not** add ESLint/PMD/Checkstyle/JaCoCo config, `lint`/`coverage` scripts, or CI quality gates to this repo.
+All AI-generated code in this repo MUST follow the mandatory AI coding standards: **Alibaba Java Coding Guidelines** (backend) and **Angular Style Guide + Google TypeScript Style** (frontend), including the WebFlux reactive-discipline rules (no `.block()` in the request path; propagate errors via `onErrorResume`/`onErrorReturn`). The authoritative, full text — with the "do-not-add-lint" boundary — lives in the root [`AGENTS.md` §0](./AGENTS.md). These rules are enforced by agent discipline only, not by any build tooling, so follow them rigorously when writing and reviewing.
 
 ## Testing
 
