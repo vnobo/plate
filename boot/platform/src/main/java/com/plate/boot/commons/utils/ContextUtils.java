@@ -183,18 +183,18 @@ public final class ContextUtils implements InitializingBean {
             encodingId = "bcrypt";
         }
         Map<String, PasswordEncoder> encoders = new HashMap<>();
-        // 推荐的密码编码器
+        // Recommended password encoder
         encoders.put("bcrypt", new BCryptPasswordEncoder());
         encoders.put("pbkdf2@SpringSecurity_v5_8", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8());
         encoders.put("scrypt@SpringSecurity_v5_8", SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8());
         encoders.put("argon2@SpringSecurity_v5_8", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8());
 
-        // 向后兼容的密码编码器，但不推荐用于新密码
+        // Backward-compatible password encoders, but not recommended for new passwords
         encoders.put("pbkdf2", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_5());
         encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v4_1());
         encoders.put("argon2", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_2());
 
-        // 保留但标记为过时的密码编码器，仅用于验证旧密码
+        // Retained but deprecated encoders, kept only for verifying legacy passwords
         @Deprecated(since = "5.7", forRemoval = true)
         PasswordEncoder ldapEncoder = new org.springframework.security.crypto.password.LdapShaPasswordEncoder();
         encoders.put("ldap", ldapEncoder);
@@ -268,17 +268,17 @@ public final class ContextUtils implements InitializingBean {
             List<String> ipList = headers.get(header);
             if (ipList != null && !ipList.isEmpty()) {
                 String ip = ipList.getFirst();
-                // 处理X-Forwarded-For可能包含多个IP地址的情况
+                // Handle the case where X-Forwarded-For may contain multiple IP addresses
                 if ("X-Forwarded-For".equalsIgnoreCase(header) && ip.contains(",")) {
                     ip = ip.split(",")[0].trim();
                 }
-                // 验证IP地址是否有效且不是私有地址
+                // Validate that the IP address is valid and not private
                 if (isValidPublicIp(ip)) {
                     return ip;
                 }
             }
         }
-        // 回退到远程地址
+        // Fall back to the remote address
         if (httpRequest.getRemoteAddress() != null && httpRequest.getRemoteAddress().getAddress() != null) {
             return httpRequest.getRemoteAddress().getAddress().getHostAddress();
         }
@@ -286,7 +286,7 @@ public final class ContextUtils implements InitializingBean {
     }
 
     /**
-     * 检查IP地址是否有效且不是私有地址
+     * Checks whether the IP address is valid and not private.
      */
     private static boolean isValidPublicIp(String ip) {
         if (ip == null || ip.trim().isEmpty()) {
@@ -295,7 +295,7 @@ public final class ContextUtils implements InitializingBean {
 
         try {
             java.net.InetAddress address = java.net.InetAddress.getByName(ip);
-            // 检查是否是私有地址、本地地址或回环地址
+            // Check whether the address is private, link-local, or loopback
             return !(address.isLoopbackAddress() || address.isLinkLocalAddress() || address.isSiteLocalAddress()
                     || "0.0.0.0".equals(ip) || "::".equals(ip) || ip.startsWith("127.")
                     || ip.startsWith("10.") || ip.startsWith("172.16.") || ip.startsWith("192.168."));

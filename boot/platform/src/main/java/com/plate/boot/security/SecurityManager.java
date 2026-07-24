@@ -187,7 +187,7 @@ public class SecurityManager extends AbstractCache implements ReactiveUserDetail
         Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
         var userFlux = DatabaseUtils.query(query, User.class);
         return this.queryWithCache(username, userFlux).singleOrEmpty().switchIfEmpty(Mono.defer(() ->
-                Mono.error(new UsernameNotFoundException("登录用户不存在,用户名: " + username))));
+                Mono.error(new UsernameNotFoundException("Login user does not exist, username: " + username))));
     }
 
     /**
@@ -210,8 +210,8 @@ public class SecurityManager extends AbstractCache implements ReactiveUserDetail
                         Mono.error(new BadCredentialsException(throwable.getMessage(), throwable))))
                 .publishOn(Schedulers.boundedElastic())
                 .doOnSuccess(details -> this.loginSuccess(details.getUsername())
-                        .subscribe(res -> log.debug("登录成功! 登录信息修改: {}", res)))
-                .doOnError(throwable -> log.error("用户 {} 登录失败: {}", username, throwable.getMessage()));
+                        .subscribe(res -> log.debug("Login successful! Login info modified: {}", res)))
+                .doOnError(throwable -> log.error("User {} login failed: {}", username, throwable.getMessage()));
     }
 
     /**
@@ -316,8 +316,8 @@ public class SecurityManager extends AbstractCache implements ReactiveUserDetail
         Query query = Query.query(Criteria.where("username").is(username).ignoreCase(true));
         Update update = Update.update("loginTime", LocalDateTime.now());
         return DatabaseUtils.ENTITY_TEMPLATE.update(query, update, User.class)
-                .doOnSuccess(_ -> log.info("用户 {} 登录成功，更新登录时间", username))
-                .doOnError(error -> log.warn("用户 {} 登录时间更新失败: {}", username, error.getMessage()));
+                .doOnSuccess(_ -> log.info("User {} logged in successfully, updating login time", username))
+                .doOnError(error -> log.warn("Failed to update login time for user {}: {}", username, error.getMessage()));
     }
 
 }

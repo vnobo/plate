@@ -167,7 +167,7 @@ public class CaptchaFilter implements WebFilter, Ordered {
                 response.setStatusCode(this.httpStatus);
                 response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
                 var body = """
-                        {"captcha":"/captcha/code","code":403,"msg":"验证码认证失败,请重试!","errors":"%s"}
+                        {"captcha":"/captcha/code","code":403,"msg":"Captcha authentication failed, please retry!","errors":"%s"}
                         """.formatted(ex.getMessage());
                 DataBufferFactory dataBufferFactory = response.bufferFactory();
                 DataBuffer buffer = dataBufferFactory.wrap(body.getBytes());

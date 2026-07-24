@@ -8,12 +8,12 @@ $do$
     begin
         for i in 1..100
             loop
-                -- 生成用户代码
+                -- Generate user code
                 v_code := gen_random_uuid();
-                -- 生成手机号码
+                -- Generate phone number
                 v_phone := '1708911826' || lpad(i::text, 2, '0');
 
-                -- 插入用户数据
+                -- Insert user data
                 insert into se_users(code, username, password, name, phone, email, bio, created_by, updated_by)
                 values (v_code, 'user' || i,
                         '{pbkdf2}7d8a68bc5d507bd19bc153ff10bcdef66f5a5f3d0c1ab2438630e50b5c65894bccc2c7e4404c5afa',

@@ -32,7 +32,7 @@ import { SettingsService } from '@app/core';
               viewBox="0 0 120 32"
               class="navbar-brand-image"
             >
-              <!-- PLATE 字母图标 - 现代简约风格 -->
+              <!-- PLATE letter icon - modern minimalist style -->
               <g fill="var(--tblr-primary, #066fd1)">
                 <!-- P -->
                 <path
@@ -52,7 +52,7 @@ import { SettingsService } from '@app/core';
                 <path d="M46 6h8v2h-6v3h5v2h-5v3h6v2h-8V6z" />
               </g>
 
-              <!-- 下划线装饰 -->
+              <!-- Underline decoration -->
               <rect
                 x="8"
                 y="22"
