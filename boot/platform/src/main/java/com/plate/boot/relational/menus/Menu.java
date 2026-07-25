@@ -22,7 +22,7 @@ import java.util.UUID;
 /**
  * Represents a menu entity within an application, encapsulating details about menu items including
  * their type, associated permissions, hierarchy, and metadata for display and management purposes.
- * This class integrates with JPA annotations for database persistence and utilizes Logbook's {@link Data}
+ * This class is persisted via Spring Data R2DBC ({@code @Table}) and utilizes Lombok's {@link Data}
  * annotation for boilerplate code reduction related to getters, setters, equals, hash, and toString methods.
  * It also features custom methods to handle specific business logic such as authority formatting and
  * extraction of additional properties stored as JSON.

@@ -18,12 +18,12 @@ import java.util.UUID;
  *
  * <p>Notably, it includes:</p>
  * <ul>
- *   <li>{@link # deleteByCreatedTimeBefore(LocalDateTime)}: A method to remove outdated log entries
+ *   <li>{@link #deleteByCreatedAtBefore(LocalDateTime)}: A method to remove outdated log entries
  *       based on the specified creation time threshold.</li>
  * </ul>
  *
  * <p>Usage of this repository promotes scalable and responsive logging systems, particularly in
- * scenarios toSql high throughput and low latency are critical.</p>
+ * scenarios where high throughput and low latency are critical.</p>
  *
  * @see R2dbcRepository for the base repository functionality provided.
  * @see Logger for the entity this repository manages.

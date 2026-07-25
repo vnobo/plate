@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 /**
- * REST controller responsible for handling CRUD and pagination operations on loggers.
+ * REST controller responsible for handling read and pagination operations on loggers.
  * This controller interacts with the {@link LoggersService} to process requests
- * related to fetching, creating, updating log records, and managing their pagination.
+ * related to fetching log records and managing their pagination.
  */
 @RestController
 @RequestMapping("/loggers")
@@ -34,8 +34,8 @@ public class LoggersController {
      *                 such as filters, prefixes, or additional metadata.
      * @param pageable A Spring {@link Pageable} instance defining the pagination parameters like page number,
      *                 size, sorting instructions, etc.
-     * @return A {@link Mono} emitting a {@link Page} containing a page of {@link Logger} objects that
-     * match the specified criteria and pagination settings. The {@link Page} includes metadata about
+     * @return A {@link Mono} emitting a {@link PagedModel} containing a page of {@link LoggerRes} objects that
+     * match the specified criteria and pagination settings. The {@link PagedModel} includes metadata about
      * the current page and provides access to the actual log records.
      */
     @GetMapping("page")
