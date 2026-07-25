@@ -110,6 +110,12 @@ public class TenantMembersService extends AbstractCache {
         return this.tenantMembersRepository.delete(request.toMemberTenant());
     }
 
+    /**
+     * Handles tenant deletion events to clean up tenant member data.
+     * Deletes all tenant members associated with the deleted tenant.
+     *
+     * @param event the tenant deletion event
+     */
     @EventListener(value = TenantEvent.class, condition = "#event.kind.name() == 'DELETE'")
     public void onUserDeletedEvent(TenantEvent event) {
         this.tenantMembersRepository.deleteByTenantCode(event.getEntity().getCode())

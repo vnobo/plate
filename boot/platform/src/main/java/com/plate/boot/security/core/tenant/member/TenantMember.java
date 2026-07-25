@@ -23,12 +23,10 @@ import java.util.UUID;
 public class TenantMember extends AbstractEntity<Long> {
 
     /**
-     * Unique identifier for the associated user in UUID format.
+     * Unique identifier of the associated user in UUID format.
      * <p>
-     * This field establishes a reference to the system user and must be non-blank.
+     * This field establishes a reference to the system user and must not be null.
      * The UUID format ensures global uniqueness across the system.
-     *
-     * @see UUID &#064;NotBlank  Validation constraint ensuring the value cannot be empty
      */
     @NotNull(message = "The user code [userCode] cannot be empty!")
     private UUID userCode;
@@ -36,12 +34,8 @@ public class TenantMember extends AbstractEntity<Long> {
     /**
      * Activation status flag for the tenant membership.
      * <p>
-     * Uses Boolean wrapper type to allow for three-state representation:
-     * - {@code true}: Membership is active
-     * - {@code false}: Membership is inactive
-     * <p>
-     * Default database mapping will typically interpret null as equivalent to false,
-     * but this should be explicitly handled in the application logic.
+     * {@code true} means the membership is active, {@code false} means it is inactive.
+     * The value must not be null.
      */
     @NotNull(message = "The enabled flag [enabled] cannot be null!")
     private Boolean enabled;
