@@ -7,6 +7,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Captcha Repository service class, used to generate, save, load and clear captcha tokens
@@ -30,6 +31,11 @@ public class CaptchaRepository {
      * Default captcha header name
      */
     static final String DEFAULT_CAPTCHA_HEADER_NAME = "X-CAPTCHA-TOKEN";
+
+    /**
+     * Number of digits contained in a generated captcha code.
+     */
+    private static final int CAPTCHA_CODE_LENGTH = 5;
 
     protected String parameterName = DEFAULT_CAPTCHA_PARAMETER_NAME;
     protected String headerName = DEFAULT_CAPTCHA_HEADER_NAME;
@@ -101,7 +107,11 @@ public class CaptchaRepository {
      * @return Newly created captcha token
      */
     protected CaptchaToken createCaptchaToken() {
-        return CaptchaToken.of(this.headerName, this.parameterName, "54321");
+        StringBuilder captchaCode = new StringBuilder(CAPTCHA_CODE_LENGTH);
+        for (int i = 0; i < CAPTCHA_CODE_LENGTH; i++) {
+            captchaCode.append(ThreadLocalRandom.current().nextInt(10));
+        }
+        return CaptchaToken.of(this.headerName, this.parameterName, captchaCode.toString());
     }
 
 }
