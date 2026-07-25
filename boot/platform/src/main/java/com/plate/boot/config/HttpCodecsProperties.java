@@ -6,6 +6,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.unit.DataSize;
 
 /**
+ * Configuration properties bound from the {@code spring.http.codecs} prefix, controlling WebFlux
+ * HTTP codec behaviour such as request detail logging and the in-memory aggregation buffer size.
+ *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
 @Data

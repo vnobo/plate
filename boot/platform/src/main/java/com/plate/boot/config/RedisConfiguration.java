@@ -12,17 +12,12 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Configuration class for setting up Redis caching and reactive Redis operations within a Spring application context.
- * This configuration enables caching annotations and provides customizations for RedisCacheManager and a
- * ReactiveRedisTemplate.
+ * Redis configuration that enables Spring's caching annotations and provides a reactive Redis template
+ * for non-blocking JSON object storage and retrieval.
  *
- * <p>The `myRedisCacheManagerBuilderCustomizer` bean configures the default cache settings to use
- * a StringRedisSerializer for keys and a Jackson2JsonRedisSerializer for values, allowing seamless
- * serialization/deserialization of objects into/from Redis.
- * <p>The `reactiveObjectRedisTemplate` bean sets up a ReactiveRedisTemplate suitable for interacting
- * with Redis in a non-blocking manner. It uses a combination of StringRedisSerializer for keys and
- * a Jackson2JsonRedisSerializer for values, ensuring compatibility with JSON data and enabling efficient
- * object storage and retrieval.
+ * <p>The {@link #reactiveObjectRedisTemplate(ReactiveRedisConnectionFactory, JsonMapper)} bean builds a
+ * {@link ReactiveRedisTemplate} with {@link StringRedisSerializer} keys and Jackson JSON
+ * ({@code JacksonJsonRedisSerializer}) values, using the application's shared {@link JsonMapper}.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableCaching
