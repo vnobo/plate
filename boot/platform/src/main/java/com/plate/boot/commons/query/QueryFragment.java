@@ -19,34 +19,33 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 /**
- * Represents a SQL parameter structure consisting of a conditional SQL fragment and a map of parameters
+ * Represents a SQL fragment structure consisting of a conditional SQL fragment and a map of parameters
  * to be bound to a PreparedStatement. This class facilitates the construction of dynamic SQL queries
- * with placeholders for improved performance and security against SQL injection.
+ * with named placeholders for improved performance and security against SQL injection.
  * <p>The QueryFragment class is designed to be flexible and modular, allowing users to build complex
- * SQL queries by chaining method calls. It manages the SQL from structure, including the SELECT
- * column, FROM clause, WHERE conditions, ORDER BY clause, and LIMIT/OFFSET for pagination.
+ * SQL queries by chaining method calls. It manages the SQL query structure, including the SELECT
+ * column list, FROM clause, WHERE conditions, ORDER BY clause, GROUP BY clause, and LIMIT/OFFSET for pagination.
  *
  * <p>Example usage:
  * <pre>
  * {@code
- * QueryFragment queryFragment = QueryFragment.withNew()
+ * QueryFragment queryFragment = QueryFragment.from("users")
  *     .column("id", "name", "email")
- *     .from("users")
- *     .toSql("age > :age", 18)
+ *     .where("age > :age")
  *     .orderBy("name ASC")
  *     .orderBy("email DESC");
  *
  * // Bind parameters
  * queryFragment.put("age", 18);
  *
- * // Generate SQL from
- * String sql = queryFragment.query();
+ * // Generate the SQL query string
+ * String sql = queryFragment.querySql();
  * System.out.println(sql);
  * }
  * </pre>
- * In this example, a QueryFragment instance is created and configured with column, a table name,
- * a WHERE condition, and ORDER BY clauses. Parameters are added to the form fragment, and finally,
- * the SQL from string is generated using the query() method.
+ * In this example, a QueryFragment instance is created and configured with a table name, a column list,
+ * a WHERE condition, and ORDER BY clauses. Parameters are added to the query fragment, and finally,
+ * the SQL query string is generated using the {@link #querySql()} method.
  *
  * @see QueryHelper for utility methods to construct QueryFragment instances from objects.
  */
@@ -65,7 +64,7 @@ public final class QueryFragment extends HashMap<String, Object> {
     private final StringJoiner columns = new StringJoiner(",").setEmptyValue("");
 
     /**
-     * A StringJoiner to accumulate the main SQL from parts (e.g., table names).
+     * A StringJoiner to accumulate the main SQL query parts (e.g., table names for the FROM clause).
      * Example usage:
      * <pre>
      * {@code
@@ -80,7 +79,7 @@ public final class QueryFragment extends HashMap<String, Object> {
      * Example usage:
      * <pre>
      * {@code
-     * queryFragment.toSql("age > :age");
+     * queryFragment.where("age > :age");
      * }
      * </pre>
      */
@@ -139,38 +138,34 @@ public final class QueryFragment extends HashMap<String, Object> {
     }
 
     /**
-     * Adds the specified queries to the FROM clause.
-     *
-     * <p>This method allows adding multiple queries to the FROM clause of the SQL statement.
+     * Creates a new {@code QueryFragment} rooted at the given table name(s) for the FROM clause.
      *
      * <p>Example usage:
      * <pre>
      * {@code
-     * queryFragment.from("users", "orders");
+     * QueryFragment queryFragment = QueryFragment.from("users", "orders");
      * }
      * </pre>
      *
-     * @param queries the queries to be added to the FROM clause
-     * @return the QueryFragment instance with the added queries
+     * @param queries the table names to be used in the FROM clause
+     * @return a new QueryFragment instance rooted at the given tables
      */
     public static QueryFragment from(CharSequence... queries) {
         return new QueryFragment(queries);
     }
 
     /**
-     * Adds the specified queries to the FROM clause.
-     *
-     * <p>This method allows adding multiple queries to the FROM clause of the SQL statement.
+     * Creates a new {@code QueryFragment} and applies the given {@link Condition}s to its WHERE clause.
      *
      * <p>Example usage:
      * <pre>
      * {@code
-     * queryFragment.conditional(c,c,c);
+     * QueryFragment fragment = QueryFragment.conditional(Condition.of(Criteria.where("age").gt(18)));
      * }
      * </pre>
      *
-     * @param queries the queries to be added to the FROM clause
-     * @return the QueryFragment instance with the added queries
+     * @param queries the conditions to be added to the WHERE clause
+     * @return a new QueryFragment instance with the added conditions
      */
     public static QueryFragment conditional(Condition... queries) {
         var fragment = new QueryFragment();
@@ -303,7 +298,7 @@ public final class QueryFragment extends HashMap<String, Object> {
     /**
      * Adds the specified column to the QueryFragment.
      *
-     * <p>This method allows adding multiple column to the QueryFragment's SELECT clause.
+     * <p>This method allows adding multiple columns to the QueryFragment's SELECT clause.
      *
      * <p>Example usage:
      * <pre>
@@ -331,7 +326,7 @@ public final class QueryFragment extends HashMap<String, Object> {
      * <p>Example usage:
      * <pre>
      * {@code
-     * queryFragment.toSql("age > :age");
+     * queryFragment.where("age > :age");
      * }
      * </pre>
      *
@@ -654,6 +649,13 @@ public final class QueryFragment extends HashMap<String, Object> {
         return this;
     }
 
+    /**
+     * Adds an equality ({@code =}) condition to the WHERE clause.
+     *
+     * @param column the column to compare
+     * @param value  the value to compare against
+     * @return the QueryFragment instance with the added equality condition
+     */
     public QueryFragment isEq(String column, Object value) {
         return addCondition(column, value, "=");
     }
@@ -722,15 +724,15 @@ public final class QueryFragment extends HashMap<String, Object> {
     }
 
     /**
-     * Generates the complete SQL from string based on the configured column, table, conditions, and pagination.
+     * Generates the complete SQL query string based on the configured column, table, conditions, and pagination.
      *
-     * <p>The generated SQL from follows this structure:
+     * <p>The generated SQL query follows this structure:
      * <code>SELECT column FROM table WHERE conditions ORDER BY order LIMIT size OFFSET offset</code>
      *
-     * <p>If no table or column are specified, an exception is thrown to prevent generating an invalid from.
+     * <p>If no table is specified, an exception is thrown to prevent generating an invalid query.
      *
-     * @return A String representing the complete SQL from.
-     * @throws QueryException if the query is null, indicating that the form structure is incomplete.
+     * @return A String representing the complete SQL query.
+     * @throws QueryException if no table has been specified, indicating that the query structure is incomplete.
      */
     public String querySql() {
         if (this.froms.length() == 0) {
@@ -743,15 +745,15 @@ public final class QueryFragment extends HashMap<String, Object> {
     }
 
     /**
-     * Generates the COUNT SQL from string based on the configured conditions.
+     * Generates the COUNT SQL query string based on the configured conditions.
      *
-     * <p>The generated COUNT SQL from follows this structure:
+     * <p>The generated COUNT SQL query follows this structure:
      * <code>SELECT COUNT(*) FROM (SELECT column FROM table WHERE conditions) t</code>
      *
-     * <p>If no table or column are specified, an exception is thrown to prevent generating an invalid from.
+     * <p>If no table is specified, an exception is thrown to prevent generating an invalid query.
      *
-     * @return A String representing the COUNT SQL from.
-     * @throws QueryException if the countSql is null, indicating that the form structure is incomplete.
+     * @return A String representing the COUNT SQL query.
+     * @throws QueryException if no table has been specified, indicating that the query structure is incomplete.
      */
     public String countSql() {
         if (this.froms.length() == 0) {
@@ -801,7 +803,7 @@ public final class QueryFragment extends HashMap<String, Object> {
          *
          * @param criteria Base Criteria object for condition construction
          * @return Condition instance containing basic conditions
-         * @throws IllegalArgumentException if criteria is null
+         * @throws NullPointerException if criteria is null
          * @see Criteria#where(String) for creating criteria objects
          * @see QueryFragment#condition(Condition...) for integrating with query fragments
          * @since 1.0
@@ -828,15 +830,14 @@ public final class QueryFragment extends HashMap<String, Object> {
          * This generates SQL: "SELECT ... FROM staff WHERE employee.status = 'active'"
          *
          * @param criteria Base Criteria object for condition construction
-         * @param prefix   Condition prefix identifier (e.g., SQL table/column prefix)
-         * @return Condition instance containing prefix identifier
-         * @throws IllegalArgumentException if criteria is null
-         * @throws IllegalArgumentException if prefix contains special characters
-         * @see Criteria#where(String) for creating criteria objects
-         * @see QueryFragment#condition(Condition...) for integrating with query fragments
-         * @since 1.0
-         */
-        public static Condition of(Criteria criteria, String prefix) {
+     * @param prefix   Condition prefix identifier (e.g., SQL table/column prefix)
+     * @return Condition instance containing prefix identifier
+     * @throws NullPointerException if criteria is null
+     * @see Criteria#where(String) for creating criteria objects
+     * @see QueryFragment#condition(Condition...) for integrating with query fragments
+     * @since 1.0
+     */
+    public static Condition of(Criteria criteria, String prefix) {
             return new Condition(criteria, prefix);
         }
 

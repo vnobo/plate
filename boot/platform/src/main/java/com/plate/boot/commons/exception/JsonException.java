@@ -35,15 +35,23 @@ public class JsonException extends RestServerException {
      * which is indicative of a JSON processing error. This method is a convenience factory for creating
      * {@code JsonException} objects without needing to explicitly reference the constructor arguments.
      *
-     * @param error The {@link IOException} that occurred during JSON processing,
+     * @param error The {@link Throwable} that occurred during JSON processing,
      *              providing details about the processing error.
-     * @return A new instance of {@code JsonException} initialized with the given {@code IOException}
+     * @return A new instance of {@code JsonException} initialized with the given {@code Throwable}
      * as the cause, carrying a default status code and message indicative of a JSON processing failure.
      */
     public static JsonException withError(Throwable error) {
         return new JsonException(error);
     }
 
+    /**
+     * Constructs and returns a new {@link JsonPointerException} wrapping the provided error message and cause.
+     * Convenience factory for creating a pointer-specific JSON exception without referencing the constructor directly.
+     *
+     * @param message   a descriptive message explaining the JSON pointer error
+     * @param throwable the underlying {@link Throwable} cause of the error
+     * @return a new {@link JsonPointerException} instance carrying the given message and cause
+     */
     public static JsonPointerException withError(String message, Throwable throwable) {
         return new JsonPointerException(message, throwable);
     }

@@ -17,26 +17,26 @@ import java.io.IOException;
 public class JsonPointerException extends JsonException {
 
     /**
-     * Constructs a new {@code JsonPointerException} with a specified error message and an {@link IOException} cause.
+     * Constructs a new {@code JsonPointerException} with a specified error message and a {@link Throwable} cause.
      * This exception is thrown when attempting to access a non-existent path within a JSON structure using a JSON pointer,
      * indicating that the referenced location could not be found or accessed due to structural issues within the JSON data.
      *
      * @param message   A human-readable description of the error, explaining the context of the JSON pointer operation that failed.
-     * @param exception The {@link IOException} that triggered this exception, providing additional context or details about the failure.
+     * @param exception The {@link Throwable} that triggered this exception, providing additional context or details about the failure.
      */
     public JsonPointerException(String message, Throwable exception) {
         super(message, exception);
     }
 
     /**
-     * Creates a new instance of {@code JsonPointerException} with a specified error message and an {@link IOException}.
+     * Creates a new instance of {@code JsonPointerException} with a specified error message and a {@link Throwable}.
      * This static method serves as a convenience factory for initializing {@code JsonPointerException} instances,
-     * encapsulating both a descriptive error message and the original {@linkplain IOException} that caused the failure.
+     * encapsulating both a descriptive error message and the original {@linkplain Throwable} that caused the failure.
      * It is particularly useful when the exception is due to an issue encountered while accessing a JSON structure,
      * such as a malformed JSON pointer or inaccessible data.
      *
      * @param message   A human-readable message describing the error context. This should explain the problem encountered with the JSON pointer operation.
-     * @param exception The {@link IOException} that represents the underlying cause of the JSON pointer error. It provides deeper insight into why the operation failed.
+     * @param exception The {@link Throwable} that represents the underlying cause of the JSON pointer error. It provides deeper insight into why the operation failed.
      * @return A new {@code JsonPointerException} instance initialized with the given message and {@code IOException}.
      */
     public static JsonPointerException withError(String message, Throwable exception) {

@@ -33,9 +33,10 @@ import java.util.UUID;
  * This class is designed as a Spring Component and implements InitializingBean to ensure
  * proper setup during application initialization.
  * <p>
- * It offers functionalities such as encoding strings to MD5, retrieving client IP addresses,
- * handling security details within reactive context, serializing UserAuditor objects,
- * generating unique IDs, and initializing utility setup with logging.
+ * It offers functionalities such as retrieving the client IP address, accessing the current
+ * {@link com.plate.boot.security.SecurityDetails} within the reactive security context,
+ * generating time-ordered UUIDv7 identifiers, building password encoders, publishing domain
+ * events, and exposing shared JSON/cache/event-publisher instances used across the application.
  */
 @Log4j2
 @Component
@@ -51,14 +52,14 @@ public final class ContextUtils implements InitializingBean {
     /**
      * Constants for the context key used to store CSRF token information.
      * This string represents the identifier used to retrieve or store CSRF tokens in a context such as a thread local,
-     * request attribute, or any other data structure toSql keys are strings.
+     * request attribute, or any other data structure where keys are strings.
      */
     public final static String CSRF_TOKEN_CONTEXT = "CSRF_TOKEN_CONTEXT";
 
     /**
      * An array of strings representing the possible header names that could contain
      * the client's IP address in HTTP requests. This is typically used when working
-     * behind proxies or load balancers toSql the original client IP is not directly
+     * behind proxies or load balancers where the original client IP is not directly
      * available in the standard {@code REMOTE_ADDR} header.
      * <p>
      * The list includes common headers like {@code X-Forwarded-For}, {@code X-Real-IP},
@@ -309,7 +310,7 @@ public final class ContextUtils implements InitializingBean {
      * <p>
      * This method accesses the security context asynchronously and extracts the principal,
      * which is then cast to a {@link SecurityDetails} object. It is designed to be used
-     * within a reactive environment toSql security information is required for further processing.
+     * within a reactive environment where security information is required for further processing.
      * </p>
      *
      * @return A {@link Mono} emitting the {@link SecurityDetails} associated with the

@@ -46,6 +46,11 @@ import java.util.stream.Collectors;
  */
 public final class QueryHelper {
 
+    /**
+     * Property names that are always excluded when building a {@link Criteria} from an entity,
+     * in addition to any caller-supplied skip keys. These are metadata/JSON/audit columns that
+     * should never participate in equality conditions.
+     */
     public static final Set<String> SKIP_CRITERIA_KEYS = Set.of("extend", "query", "search",
             "createdTime", "updatedTime", "securityCode");
 
@@ -73,7 +78,7 @@ public final class QueryHelper {
      *
      * @param object The object to resolve table name for
      * @return The resolved table name
-     * @throws IllegalArgumentException if object is null or has no table annotation
+     * @throws QueryException if object is null or has no table annotation
      * @see Table for annotation specification
      * @since 1.0
      */
@@ -114,7 +119,7 @@ public final class QueryHelper {
      * @param object   The object to be converted into a map for criteria construction
      * @param skipKeys A collection of keys to be excluded from the object map
      * @return A Criteria instance representing the constructed criteria
-     * @throws IllegalArgumentException if object is null
+     * @throws NullPointerException if object is null
      * @see BeanUtils#beanToMap(Object, boolean) for object-to-map conversion details
      * @see Criteria#where(String) for criteria construction
      * @since 1.0
@@ -159,7 +164,6 @@ public final class QueryHelper {
      *
      * @param objectMap The map containing criteria key-value pairs
      * @return A Criteria instance representing the constructed criteria
-     * @throws IllegalArgumentException if objectMap is null
      * @see Criteria #where(String) for criteria construction
      * @see Criteria #in(Iterable) for collection handling
      * @since 1.0

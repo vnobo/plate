@@ -17,10 +17,11 @@ import tools.jackson.databind.JsonNode;
 import java.io.IOException;
 
 /**
- * Configuration class for registering custom converters between JSON and Jackson's JsonNode.
- * This class ensures the converters are properly initialized within a Spring context.
- * It includes two inner classes: {@link JsonToNodeWriteConverter} for writing JSON to JsonNode,
- * and {@link JsonToNodeReadConverter} for reading JsonNode back to JSON.
+ * Configuration class that registers custom R2DBC/Spring Data converters within the Spring context.
+ * It registers converters between Jackson's {@link JsonNode} and the R2DBC {@link Json} type
+ * ({@link JsonToNodeWriteConverter} for the write direction, {@link JsonToNodeReadConverter} for the
+ * read direction), as well as converters between {@link com.plate.boot.relational.MethodType} and its
+ * {@code String} representation ({@link MethodTypeReadConverter}, {@link MethodTypeWriteConverter}).
  */
 @Log4j2
 @Configuration(proxyBeanMethods = false)
@@ -71,7 +72,7 @@ public class JsonNodeConverters implements InitializingBean {
      * <p>
      * The conversion process involves parsing the Json object into a JSON array and then
      * using Jackson's ObjectMapper to read this array into a JsonNode structure.
-     * If an {@link IOException} occurs during the conversion, it is rethrown as a {@link JsonException}
+     * If a {@link JacksonException} occurs during the conversion, it is rethrown as a {@link JsonException}
      * to propagate the error appropriately.
      */
     @Component
@@ -82,7 +83,7 @@ public class JsonNodeConverters implements InitializingBean {
          *
          * @param source The {@link Json} object to be converted. Must not be null.
          * @return The converted {@link JsonNode} instance ready for read operations.
-         * @throws JsonException If an {@link IOException} occurs during the conversion process.
+         * @throws JsonException If a {@link JacksonException} occurs during the conversion process.
          */
         @Override
         public JsonNode convert(Json source) {

@@ -26,26 +26,29 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
- * Retrieves a list of property names from the source object that have null values.
- * This method is particularly useful when needing to filter out null properties during a copy operation.
+ * Utility methods for bean/map conversion, JSON-path extraction, and serialization of
+ * {@link com.plate.boot.security.core.UserAuditor} fields on entities.
+ * <p>
+ * Provides helpers to copy properties between objects, convert a bean into a {@link Map}, serialize
+ * a bean to bytes, and resolve a value from a JSON structure by path. It is a Spring {@code @Component}
+ * that also exposes a static {@link #USER_AUDITOR_AWARE} hook used to load auditor details by code.
  */
 @Log4j2
 @Component
 public final class BeanUtils implements InitializingBean {
 
     /**
-     * Static reference to the UsersService instance.
-     * This service provides functionalities related to user management such as
-     * user retrieval, creation, update, and deletion.
+     * Static reference to the {@link UserAuditorAware} instance.
+     * Used by {@link #serializeUserAuditor(Object)} to resolve auditor details by code.
      */
     public static UserAuditorAware USER_AUDITOR_AWARE;
 
     private final UserAuditorAware auditorAware;
 
     /**
-     * Constructs a new BeanUtils instance with the provided UsersService.
+     * Constructs a new BeanUtils instance with the provided {@link UserAuditorAware}.
      *
-     * @param usersService The UsersService instance to be used for user-related operations.
+     * @param usersService the {@link UserAuditorAware} instance used to resolve auditor details by code
      */
     public BeanUtils(UserAuditorAware usersService) {
         this.auditorAware = usersService;
@@ -149,7 +152,7 @@ public final class BeanUtils implements InitializingBean {
      * Copies the properties from the source object to the target object.
      *
      * @param source The source object whose properties are to be copied.
-     * @param target The target object toSql the properties from the source will be set.
+     * @param target The target object where the properties from the source will be set.
      */
     public static void copyProperties(Object source, Object target) {
         BeanUtils.copyProperties(source, target, false);
@@ -197,7 +200,7 @@ public final class BeanUtils implements InitializingBean {
      * @param <T>             The type of the bean to convert.
      * @param bean            The JavaBean object to be converted into a Map.
      * @param ignoreNullValue If true, properties with null values will not be included in the Map.
-     * @return A Map toSql each key-value pair corresponds to a property name and its value from the input bean.
+     * @return A Map where each key-value pair corresponds to a property name and its value from the input bean.
      * If ignoreNullValue is true, properties with null values are excluded.
      */
     public static <T> Map<String, Object> beanToMap(T bean, final boolean ignoreNullValue) {

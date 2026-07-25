@@ -15,12 +15,12 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 /**
- * QueryJsonHelper is a utility class designed to facilitate the transformation of from parameters into
+ * QueryJsonHelper is a utility class designed to facilitate the transformation of query parameters into
  * SQL-compatible formats, particularly focusing on handling JSON-based queries. It provides methods to
- * convert sort orders into camelCase for JSON serialization, construct conditional SQL clauses for querying
+ * convert sort orders into snake_case for JSON serialization, construct conditional SQL clauses for querying
  * nested JSON properties, and manage special operations like 'Between', 'In', and others within a SQL context.
  *
- * <p>This class is essential for applications that need to from JSON data stored in SQL databases, as it
+ * <p>This class is essential for applications that need to query JSON data stored in SQL databases, as it
  * helps in constructing SQL queries that can understand and manipulate JSON structures.
  *
  * <p>Example usage:
@@ -29,44 +29,19 @@ import java.util.stream.Collectors;
  * Map<String, Object> jsonParams = new HashMap<>();
  * jsonParams.put("extend.usernameLike", "Test User");
  * jsonParams.put("extend.emailEq", "testuser@example.com");
- * QueryFragment queryFragment = QueryJsonHelper.queryJson(jsonParams, "a");
- * String sqlQuery = queryFragment.query();
+ * QueryFragment.Condition condition = QueryJsonHelper.queryJson(jsonParams, "a");
+ * String sqlQuery = condition.toSql();
  * System.out.println(sqlQuery);
  * }
  * </pre>
- * In this example, a JSON-based from is constructed using the QueryJsonHelper class. The form searches
- * for a user with a username like "Test User" and an email equal to "testuser@example.com". The form is
- * then converted into an SQL from string that can be executed against a database.
+ * In this example, a JSON-based query is constructed using the QueryJsonHelper class. The query searches
+ * for a user with a username like "Test User" and an email equal to "testuser@example.com". The query is
+ * then converted into an SQL condition string that can be executed against a database.
  *
- * <p>For a JSON object with nested fields, such as:
- * <pre>
- * {@code
- * {
- *   "extend": {
- *     "requestBody": {
- *       "bio": "This is a brief introduction of the user.",
- *       "name": "Test User",
- *       "email": "testuser@example.com",
- *       "phone": "123-456-7890",
- *       "avatar": "http://example.com/avatar.jpg"
- *     },
- *     "additionalField1": "value1",
- *     "additionalField2": "value2"
- *   },
- *   "disabled": false,
- *   "username": "17089118266"
- * }
- * }
- * </pre>
- * The QueryJsonHelper class can be used to construct SQL queries that target these nested fields, such as:
- * <pre>
- * {@code
- * QueryFragment queryFragment = QueryJsonHelper.queryJson(jsonParams, "a");
- * }
- * </pre>
- * This will generate an SQL from that can search for users based on the provided JSON parameters.
+ * <p>For a JSON object with nested fields, such as the one shown above, the QueryJsonHelper class can be used
+ * to construct SQL queries that target these nested fields.
  *
- * @see QueryFragment for the class representing the SQL from structure.
+ * @see QueryFragment for the class representing the SQL query structure.
  */
 public final class QueryJsonHelper {
 
@@ -129,13 +104,13 @@ public final class QueryJsonHelper {
 
     /**
      * Transforms a given Spring Framework Sort object into a new Sort object with properties
-     * converted to camelCase format, which is beneficial when sorting involves JSON fields in SQL queries.
+     * converted to snake_case (lower_underscore) format, which is beneficial when sorting involves JSON fields in SQL queries.
      * Nested JSON paths within sort properties are also adjusted to be compatible with SQL syntax.
      * If the input Sort is null or empty, the method returns an unsorted Sort instance.
      *
-     * @param sort The Sort object to be transformed. Its properties may require conversion to camelCase
+     * @param sort The Sort object to be transformed. Its properties may require conversion to snake_case
      *             and adjustment for SQL-JSON compatibility.
-     * @return A new Sort object with properties converted into camelCase format and formatted
+     * @return A new Sort object with properties converted into snake_case format and formatted
      * for proper handling of nested JSON paths in SQL queries. Returns an unsorted Sort if
      * the input is null or empty.
      */
@@ -149,13 +124,13 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Converts the property of a Sort.Order into camelCase format and adjusts nested JSON paths
-     * to be compatible with SQL syntax, particularly useful when sorting JSON fields within SQL queries.
-     * The first part of the property is converted to lower_camel_case, and the remaining parts,
+     * Converts the property of a Sort.Order into snake_case (lower_underscore) format and adjusts nested JSON
+     * paths to be compatible with SQL syntax, particularly useful when sorting JSON fields within SQL queries.
+     * The first part of the property is converted to lower_underscore, and the remaining parts,
      * if any, are appended with appropriate '->>' operators to form a valid SQL-JSON path expression.
      *
      * @param order The Sort.Order whose property needs conversion and adjustment for SQL-JSON sorting.
-     * @return A new Sort.Order instance with the property formatted in camelCase and SQL-JSON compatible
+     * @return A new Sort.Order instance with the property formatted in snake_case and SQL-JSON compatible
      * for sorting purposes, maintaining the original direction of sorting.
      */
     private static Sort.Order convertSortOrderToCamelCase(Sort.Order order) {
@@ -193,17 +168,17 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Constructs a QueryFragment representing a set of JSON-based from conditions.
+     * Constructs a {@link QueryFragment.Condition} representing a set of JSON-based query conditions.
      *
-     * <p>This method takes a map of JSON parameters and a prefix, and constructs a QueryFragment that can be
-     * used to build an SQL from targeting JSON data. The method iterates over the provided parameters,
+     * <p>This method takes a map of JSON parameters and a prefix, and constructs a condition that can be
+     * used to build an SQL query targeting JSON data. The method iterates over the provided parameters,
      * converting each into a properly formatted SQL condition using the provided prefix to namespace JSON keys.
      *
-     * @param params A map toSql each key represents a JSON path (possibly prefixed) and the value is the
+     * @param params A map where each key represents a JSON path (possibly prefixed) and the value is the
      *               condition's value or further criteria for complex operations like 'Between', 'In', etc.
      * @param prefix A string prefix to prepend to each JSON key to form the full column name in SQL queries.
-     * @return A QueryFragment containing the constructed SQL conditions for querying JSON data.
-     * @throws IllegalArgumentException If any processing error occurs due to invalid input structure or content.
+     * @return A {@link QueryFragment.Condition} containing the constructed SQL conditions for querying JSON data.
+     * @throws QueryException If any processing error occurs due to invalid input structure or content.
      */
     public static QueryFragment.Condition queryJson(Map<String, Object> params, String prefix) {
         Criteria criteria = Criteria.empty();
@@ -214,34 +189,34 @@ public final class QueryJsonHelper {
     }
 
     /**
-     * Constructs a {@link QueryFragment} based on the provided map entry and a prefix.
+     * Constructs a {@link Criteria} based on the provided map entry and a prefix.
      * The entry's key represents a JSON path, and the value is the condition's operand.
      * The method supports nested JSON paths and translates them into equivalent SQL expressions
-     * compatible with JSON column in SQL databases. It validates the path, processes the keys,
-     * and delegates the construction of the final condition part to .
+     * compatible with JSON columns in SQL databases. It validates the path, processes the keys,
+     * and builds the final SQL condition using the operation mapper.
      * <pre>
      * {@code
-     * // Create a map of JSON-based from parameters
+     * // Create a map of JSON-based query parameters
      * Map<String, Object> jsonParams = new HashMap<>();
      * jsonParams.put("extend.requestBody.nameEq", "Test User"); // EQ stands for Equal
      * jsonParams.put("extend.additionalField1Eq", "value1"); // EQ stands for Equal
      *
-     * // Use the QueryJsonHelper to construct the SQL from for the given JSON parameters
-     * QueryFragment queryFragment = QueryJsonHelper.queryJson(jsonParams, "a");
+     * // Use the QueryJsonHelper to construct the SQL query for the given JSON parameters
+     * QueryFragment.Condition condition = QueryJsonHelper.queryJson(jsonParams, "a");
      *
-     * // Get the SQL from string
-     * String sqlQuery = queryFragment.query();
+     * // Get the SQL condition string
+     * String sqlQuery = condition.toSql();
      *
      * // Now you can execute the sqlQuery against your database using a JDBC template or similar
      * }
      * </pre>
      *
-     * @param entry A map entry toSql the key is a dot-delimited string indicating a JSON path
+     * @param entry A map entry where the key is a dot-delimited string indicating a JSON path
      *              (e.g., "extend.usernameLike"), and the value is the target value for the condition.
-     * @return A {@link QueryFragment} object representing the constructed SQL condition
+     * @return A {@link Criteria} object representing the constructed SQL condition
      * for querying JSON data, including the SQL fragment, parameters, and the operation detail.
-     * @throws RestServerException If the provided JSON path does not meet the minimum requirement of specifying
-     *                             at least one level of nesting after the prefix (if provided).
+     * @throws QueryException If the provided JSON path does not meet the minimum requirement of specifying
+     *                        at least one level of nesting after the prefix (if provided).
      */
     private static Criteria buildJsonCondition(Map.Entry<String, Object> entry) {
         String[] keys = StringUtils.delimitedListToStringArray(entry.getKey(), ".");

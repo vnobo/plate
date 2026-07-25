@@ -53,8 +53,8 @@ import java.util.function.Function;
 public class DatabaseUtils implements InitializingBean {
 
     /**
-     * The maximum number of elements that can be stored in the Redis cache.
-     * This value is used to determine when the cache should be cleared to avoid memory overflow.
+     * Reactive Redis template used for caching query/count results.
+     * Populated from the injected {@link ReactiveRedisTemplate} during {@link #afterPropertiesSet()}.
      *
      * @see ReactiveRedisTemplate for caching implementation details
      */
@@ -219,8 +219,7 @@ public class DatabaseUtils implements InitializingBean {
      * This returns the serialized size of the user object
      *
      * @param obj The Java bean object to calculate size for
-     * @return The size of the bean as a DataSize object
-     * @throws IllegalArgumentException if obj is null
+     * @return The size of the bean as a DataSize object (zero if the object is null or empty)
      * @see DataSize for size representation
      * @since 1.0
      */
@@ -255,7 +254,7 @@ public class DatabaseUtils implements InitializingBean {
      * @param requests     The flux of request items to process
      * @param saveFunction The function to apply to each request item
      * @return A flux of ProgressEvent instances tracking batch processing
-     * @throws IllegalArgumentException if requests or saveFunction is null
+     * @throws NullPointerException if {@code requests} or {@code saveFunction} is null
      * @see ProgressEvent for event structure
      * @see Flux#delayElements(Duration) for controlled processing
      * @since 1.0

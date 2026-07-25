@@ -20,30 +20,25 @@ import java.util.Optional;
 
 
 /**
- * AbstractDatabase is an abstract class that serves as a foundation for database interactions
- * in a reactive application context. It encapsulates the common functionality required for
- * executing database queries, managing transactions, and handling entity mappings, providing
- * a robust and flexible framework for database operations.
- *
- * <p>This class is designed to work with R2DBC (Reactive Relational Database Connectivity),
- * a non-blocking, asynchronous API for database access in reactive applications. It leverages
- * the R2dbcEntityTemplate for executing reactive database operations, the DatabaseClient for
- * direct database interactions, and the R2dbcConverter for converting between R2DBC data types
- * and domain-specific objects.
- *
- * <p>AbstractDatabase provides methods for executing queries with caching, counting entities
- * with caching, and setting up the R2dbcEntityTemplate. It also overrides the afterPropertiesSet
- * method to perform initialization tasks, such as setting up the databaseClient and r2dbcConverter.
- *
- * <p>Subclasses of AbstractDatabase can extend this functionality to provide specific database
- * interactions tailored to their application's needs.
+ * Reactive cache-aside base class for service beans that query or count entities.
+ * <p>
+ * Subclasses obtain a {@link org.springframework.cache.Cache} named after the concrete class
+ * (e.g. {@code com.example.UsersService.cache}) and use the {@code queryWithCache}/{@code countWithCache}
+ * helpers to serve results from the cache while delegating misses to
+ * {@link com.plate.boot.commons.utils.DatabaseUtils}. Entries larger than
+ * {@link com.plate.boot.commons.utils.DatabaseUtils#MAX_IN_MEMORY_SIZE} are skipped to avoid
+ * exhausting memory.
+ * <p>
+ * Intended to be extended by Spring {@code @Service} beans; the cache is initialized in
+ * {@link #afterPropertiesSet()}.
  */
 @Log4j2
 public abstract class AbstractCache implements InitializingBean {
     /**
      * Cache instance used to store and retrieve data within the service.
-     * Initialized through the  method with a cache name defaulting to the class name concatenated with ".cache".
-     * This cache is cleared upon initialization and is essential for providing temporary storage that accelerates data access.
+     * Initialized through the {@code initializingCache} method with a cache name defaulting to the class name
+     * concatenated with ".cache". This cache is cleared upon initialization and is essential for providing
+     * temporary storage that accelerates data access.
      */
     protected Cache cache;
 
@@ -81,15 +76,15 @@ public abstract class AbstractCache implements InitializingBean {
     }
 
     /**
-     * Executes a database from with caching functionality.
-     * It takes a cache key, a from object, and an entity class type to perform the operation.
+     * Executes a database query with caching functionality.
+     * It takes a cache key, a query object, and an entity class type to perform the operation.
      * The results are cached for future queries with the same key.
      *
-     * @param <T>         The type of entities expected as from results.
+     * @param <T>         The type of entities expected as query results.
      * @param key         The unique identifier used as a cache key. Determines the cache entry for storing/retrieving results.
-     * @param query       The form object defining the SQL from and its potential parameters.
+     * @param query       The query object defining the SQL query and its potential parameters.
      * @param entityClass The class of the entity that each row in the result set will be mapped to.
-     * @return A {@link Flux} emitting the form results, potentially from cache if previously stored.
+     * @return A {@link Flux} emitting the query results, potentially from cache if previously stored.
      */
     protected <T> Flux<T> queryWithCache(Object key, Query query, Class<T> entityClass) {
         return queryWithCache(key, DatabaseUtils.query(query, entityClass))
@@ -97,17 +92,17 @@ public abstract class AbstractCache implements InitializingBean {
     }
 
     /**
-     * Executes a SQL from with caching capability. It binds provided parameters to the SQL from,
+     * Executes a SQL query with caching capability. It binds provided parameters to the SQL query,
      * maps the result set to entities of the specified class, applies user auditor serialization,
-     * and utilizes a cache to store from results for subsequent identical queries.
+     * and utilizes a cache to store query results for subsequent identical queries.
      *
-     * @param <T>         The type of entities the SQL from results will be mapped to.
+     * @param <T>         The type of entities the SQL query results will be mapped to.
      * @param key         The cache key used to identify the cached data. This should uniquely represent
-     *                    the form and its parameters.
-     * @param sql         The SQL from string to be executed.
-     * @param bindParams  A map containing named parameter bindings for the SQL from.
+     *                    the query and its parameters.
+     * @param sql         The SQL query string to be executed.
+     * @param bindParams  A map containing named parameter bindings for the SQL query.
      * @param entityClass The class of the entity that each row in the result set will be converted into.
-     * @return A {@link Flux} emitting the entities resulting from the from, potentially from the cache.
+     * @return A {@link Flux} emitting the entities resulting from the query, potentially from the cache.
      */
     protected <T> Flux<T> queryWithCache(Object key, String sql,
                                          Map<String, Object> bindParams, Class<T> entityClass) {
@@ -116,7 +111,7 @@ public abstract class AbstractCache implements InitializingBean {
     }
 
     /**
-     * Executes a Flux-based database from with caching functionality.
+     * Executes a Flux-based database query with caching functionality.
      * It enhances the source Flux by caching its emissions under a specified key.
      * If the cache contains data for the key, it returns the cached data immediately.
      * Otherwise, it executes the source Flux, caches the results, and then emits them.
@@ -139,14 +134,14 @@ public abstract class AbstractCache implements InitializingBean {
     }
 
     /**
-     * Counts entities with caching support based on the provided key, from, and entity class.
+     * Counts entities with caching support based on the provided key, query, and entity class.
      * This method enhances entity counting by storing the count result in a cache,
      * allowing subsequent calls with the same key to retrieve the count directly from the cache
-     * rather than executing the form again.
+     * rather than executing the query again.
      *
      * @param <T>         The type of entities for which the count is to be performed.
      * @param key         A unique identifier used as a cache key. Determines the cached count's retrieval.
-     * @param query       The form object defining the criteria for counting entities.
+     * @param query       The query object defining the criteria for counting entities.
      * @param entityClass The class of the entities being counted.
      * @return A {@link Mono} emitting the count of entities as a {@link Long}, potentially from cache.
      */
@@ -155,12 +150,12 @@ public abstract class AbstractCache implements InitializingBean {
     }
 
     /**
-     * Executes a SQL count from with caching capabilities. It prepares the SQL from with provided bind parameters,
+     * Executes a SQL count query with caching capabilities. It prepares the SQL query with provided bind parameters,
      * creates a Mono source to fetch the count, and then delegates to another method to handle caching logic.
      *
-     * @param key        The unique cache key associated with the count from. Used for caching and retrieving results.
-     * @param sql        The SQL count from string to be executed.
-     * @param bindParams A map containing named parameter placeholders and their respective values for the SQL from.
+     * @param key        The unique cache key associated with the count query. Used for caching and retrieving results.
+     * @param sql        The SQL count query string to be executed.
+     * @param bindParams A map containing named parameter placeholders and their respective values for the SQL query.
      * @return A Mono emitting the count result, potentially fetched from cache or computed from the database.
      */
     protected Mono<Long> countWithCache(Object key, String sql, Map<String, Object> bindParams) {

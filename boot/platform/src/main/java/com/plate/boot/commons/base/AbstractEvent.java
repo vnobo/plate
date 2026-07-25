@@ -22,7 +22,7 @@ public abstract class AbstractEvent<E> extends AbstractRelationalEvent<E> {
     public final E entity;
 
     /**
-     * The kind of event (INSERT, MODIFY, DELETE).
+     * The kind of event (INSERT, UPDATE, DELETE).
      */
     @Getter
     public final Kind kind;
