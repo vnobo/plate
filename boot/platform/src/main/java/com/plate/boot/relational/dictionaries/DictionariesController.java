@@ -38,7 +38,7 @@ import java.util.UUID;
  */
 @Log4j2
 @RestController
-@RequestMapping("/rel/dictionaries")
+@RequestMapping("/dictionaries")
 @RequiredArgsConstructor
 @Tag(name = "Dictionaries", description = "Dictionary management APIs for managing system data dictionaries and configurations")
 public class DictionariesController {
