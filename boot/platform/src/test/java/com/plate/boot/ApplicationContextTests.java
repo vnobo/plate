@@ -52,6 +52,12 @@ class ApplicationContextTests extends AbstractIntegrationTests {
             assertThat(applicationContext.containsBean("passwordEncoder")).isTrue();
             assertThat(applicationContext.containsBean("securityManager")).isTrue();
         }
+
+        @Test
+        @DisplayName("should register the captcha filter as a Spring bean")
+        void shouldRegisterCaptchaFilter() {
+            assertThat(applicationContext.containsBean("captchaFilter")).isTrue();
+        }
     }
 
     @Nested
