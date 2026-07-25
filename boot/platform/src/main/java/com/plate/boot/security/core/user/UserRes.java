@@ -57,14 +57,17 @@ public class UserRes extends User {
     }
 
     /**
-     * Overrides the getPassword method to be ignored during JSON serialization.
+     * Overrides the getPassword method so it is excluded from JSON serialization.
      *
-     * @return Always returns null to hide the password.
+     * <p>The underlying password value is still returned by this getter, but the {@link JsonIgnore}
+     * annotation ensures Jackson never serializes it, so the password is never exposed in API responses.</p>
+     *
+     * @return The password value (suppressed from JSON output by {@link JsonIgnore}).
      */
     @JsonIgnore
     @Override
     public String getPassword() {
-        return super.getPassword(); // Always return null to hide the password in UserRes
+        return super.getPassword(); // excluded from JSON via @JsonIgnore to hide the password in UserRes
     }
 
 }
