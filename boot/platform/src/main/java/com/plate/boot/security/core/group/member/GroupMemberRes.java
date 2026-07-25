@@ -20,8 +20,8 @@ import tools.jackson.databind.JsonNode;
  * relevant to group configurations or permissions.
  *
  * <p>
- * This class is particularly useful in API responses toSql a more descriptive representation of a
- * group member is required beyond just their identifiers, facilitating a richer understanding of
+ * This class is particularly useful in API responses to supply a more descriptive representation of a
+ * group member when required beyond just their identifiers, facilitating a richer understanding of
  * group membership contexts.
  *
  * @see GroupMember

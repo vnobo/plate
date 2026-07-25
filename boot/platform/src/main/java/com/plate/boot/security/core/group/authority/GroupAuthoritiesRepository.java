@@ -7,49 +7,36 @@ import java.util.Collection;
 import java.util.UUID;
 
 /**
+ * Repository for {@link GroupAuthority} entities, providing reactive data-access operations
+ * for managing permissions (authorities) assigned to user groups.
+ *
  * @author <a href="https://github.com/vnobo">Alex bob</a>
+ * @see GroupAuthority
  */
 public interface GroupAuthoritiesRepository extends R2dbcRepository<GroupAuthority, Integer> {
 
     /**
-     * Deletes users based on a set of permissions.
-     * <p>
-     * This function encapsulates an asynchronous deletion operation using Mono. It takes a set of permissions as a parameter and aims to delete all users who possess these permissions.
-     * The use of the Reactive programming model enhances the efficiency of concurrent processing and elegantly handles asynchronous data streams.
+     * Deletes all group authorities whose {@code authority} is contained in the given collection.
      *
-     * @param authorities The set of permissions of the users to be deleted. Users are located via their permission sets, as permissions are often an effective way to identify users.
-     * @return Mono<Integer> Represents the result of the asynchronous operation, returning the number of users deleted. Mono is a Reactive Streams type used to represent a sequence of 0 or 1 elements.
+     * @param authorities the set of authorities whose group-authority records should be deleted
+     * @return a Mono emitting the number of group authorities deleted
      */
     Mono<Integer> deleteByAuthorityIn(Collection<String> authorities);
 
     /**
-     * Finds users based on a specific group code and permission.
-     * <p>
-     * This function encapsulates an asynchronous search operation using Flux. It takes a group code and a permission as parameters and aims to find all users who belong to the specified group and have the specified permission.
-     * The use of the Reactive programming model enhances the efficiency of concurrent processing and elegantly handles asynchronous data streams.
+     * Finds the group authority for the given group code and authority.
      *
-     * @param groupCode The group code of the users to be searched. Users are located via their group membership, as group codes are often an effective way to identify users.
-     * @param authority The permission of the users to be searched. Users are located via their permission sets, as permissions are often an effective way to identify users.
-     * @return Flux<GroupAuthority> Represents the result of the asynchronous operation, returning a sequence of users that meet the search criteria. Flux is a Reactive Streams type used to represent a
-     * sequence of 0 or more elements.
-     * @see Mono
-     * @see GroupAuthority
-     * @see UUID
+     * @param groupCode the group code to look up
+     * @param authority the authority (permission) to look up
+     * @return a Mono emitting the matching {@link GroupAuthority}, or empty if none exists
      */
     Mono<GroupAuthority> findByGroupCodeAndAuthority(UUID groupCode, String authority);
 
     /**
-     * Deletes users based on a specific group code.
-     * <p>
-     * This function encapsulates an asynchronous deletion operation using Mono. It takes a group code as a parameter and aims to delete all users who belong to the specified group.
-     * The use of the Reactive programming model enhances the efficiency of concurrent processing and elegantly handles asynchronous data streams.
+     * Deletes all group authorities for the given group code.
      *
-     * @param groupCode The group code of the users to be deleted. Users are located via their group membership, as group codes are often an effective way to identify users.
-     * @return Mono<Integer> Represents the result of the asynchronous operation, returning the number of users deleted. Mono is a Reactive Streams type used to represent a sequence of 0 or 1 elements.
-     * @see Mono
-     * @see GroupAuthority
-     * @see UUID
-     * @see Integer
+     * @param groupCode the group code whose authorities should be deleted
+     * @return a Mono emitting the number of group authorities deleted
      */
     Mono<Integer> deleteByGroupCode(UUID groupCode);
 }
