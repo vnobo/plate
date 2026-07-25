@@ -4,6 +4,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.server.WebSession;
 
 import java.io.Serializable;
+import java.time.Duration;
+import java.time.Instant;
 
 /**
  * Represents an immutable data structure for holding authentication token details, including the token string, expiration timestamp,
@@ -42,7 +44,10 @@ public record AuthenticationToken(String token, Long expires, Long lastAccessTim
      * @return A newly built {@link AuthenticationToken} representing the authenticated user's session with relevant metadata.
      */
     public static AuthenticationToken build(WebSession session, Object principal) {
-        return of(session.getId(), session.getMaxIdleTime().getSeconds(),
-                session.getLastAccessTime().getEpochSecond(), principal);
+        Instant lastAccessTime = session.getLastAccessTime();
+        long lastAccessSeconds = (lastAccessTime != null ? lastAccessTime : Instant.now()).getEpochSecond();
+        Duration maxIdleTime = session.getMaxIdleTime();
+        long maxIdleSeconds = (maxIdleTime != null ? maxIdleTime : Duration.ofSeconds(1800)).getSeconds();
+        return of(session.getId(), maxIdleSeconds, lastAccessSeconds, principal);
     }
 }
