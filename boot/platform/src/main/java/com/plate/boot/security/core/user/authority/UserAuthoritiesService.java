@@ -70,7 +70,7 @@ public class UserAuthoritiesService {
      */
     @CacheEvict(cacheNames = "user-authorities", allEntries = true)
     public Mono<Void> delete(UserAuthorityReq request) {
-        return this.authoritiesRepository.findByCode(request.getCode())
+        return this.authoritiesRepository.findById(request.getId())
                 .flatMap(this.authoritiesRepository::delete);
     }
 
