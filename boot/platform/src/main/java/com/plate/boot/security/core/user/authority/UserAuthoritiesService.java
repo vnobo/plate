@@ -49,10 +49,11 @@ public class UserAuthoritiesService {
 
     /**
      * Operates on a user authority based on the given request.
-     * If the user authority exists, it updates the user authority; otherwise, it creates a new user authority.
+     * If an authority with the same {@code userCode} and {@code authority} already exists,
+     * it is returned unchanged; otherwise a new user authority is created via {@link #save(UserAuthority)}.
      *
      * @param request the user authority request containing user authority information
-     * @return a Mono emitting the operated user authority
+     * @return a Mono emitting the existing or newly created user authority
      */
     @CacheEvict(cacheNames = "user-authorities", allEntries = true)
     public Mono<UserAuthority> operate(UserAuthorityReq request) {
@@ -115,6 +116,13 @@ public class UserAuthoritiesService {
                                 event.getEntity().getCode(), throwable));
     }
 
+    /**
+     * Event listener triggered when a menu is deleted.
+     * It removes every user authority whose {@code authority} matches the deleted menu's authority,
+     * and clears the {@code user-authorities} cache.
+     *
+     * @param event the menu event carrying the deleted menu's authority
+     */
     @EventListener(value = MenuEvent.class, condition = "#event.kind.name() == 'DELETE'")
     @CacheEvict(cacheNames = "user-authorities", allEntries = true)
     public void onMenuDeletedEvent(MenuEvent event) {

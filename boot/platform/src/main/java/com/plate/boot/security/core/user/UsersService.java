@@ -21,8 +21,17 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * User service
+ * User domain service, responsible for querying, creating, modifying, deleting and persisting users.
  *
+ * <p>Key responsibilities: dynamic conditional search and pagination based on {@link UserReq}
+ * (cached under the {@code users} cache); global case-insensitive username uniqueness check on creation;
+ * shared write logic through {@link #operate(UserReq)}, which upgrades the password encoding via
+ * {@link org.springframework.security.crypto.password.PasswordEncoder} only when a password is supplied,
+ * and preserves the password and account-status flags (expired/locked/credentials-expired) when
+ * updating an existing user. All write operations evict the {@code users} cache for consistency.</p>
+ *
+ * @see UserReq
+ * @see UsersRepository
  * @author <a href="https://github.com/vnobo">Alex bob</a>
  */
 @Service

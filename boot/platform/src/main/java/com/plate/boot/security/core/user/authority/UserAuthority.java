@@ -29,8 +29,8 @@ import java.util.UUID;
 public class UserAuthority extends AbstractEntity<Integer> implements GrantedAuthority, BaseEntity<Integer> {
 
     /**
-     * The unique code of the user.
-     * It is annotated with \@NotBlank to ensure it is not null or empty.
+     * The code of the user this authority belongs to (foreign key to {@code se_users.code}).
+     * It is annotated with \@NotNull to ensure it is not null.
      */
     @NotNull(message = "User entity [userCode] cannot be empty!")
     private UUID userCode;
