@@ -26,12 +26,12 @@ import java.util.UUID;
 public class TenantMemberReq extends TenantMember {
 
     /**
-     * A set of user codes associated with the tenant member request.
+     * A set of user codes used to filter tenant member queries by {@code userCode}.
      */
     private Set<UUID> users;
 
     /**
-     * The username associated with the tenant member request.
+     * The username used to filter tenant member queries by joining {@code se_users}.
      */
     private String username;
 
