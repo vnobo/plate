@@ -1,0 +1,72 @@
+# =============================================================================
+# .gitattributes — cross-platform line-ending and file-type normalization
+# Goal: every developer gets the same checkout regardless of OS (Windows/macOS/Linux)
+#       and the Gradle wrapper stays executable and LF-only.
+# =============================================================================
+
+# Default: auto-detect text vs binary, and normalize line endings to LF on commit.
+# On checkout, text files become LF on macOS/Linux and CRLF on Windows (Git's default
+# for `text=auto`). If you want strictly LF everywhere, switch to `* text=auto eol=lf`.
+* text=auto
+
+# -----------------------------------------------------------------------------
+# Gradle wrapper — MUST remain executable and LF-only, or `./gradlew` breaks on clone
+# -----------------------------------------------------------------------------
+boot/gradlew    text eol=lf
+boot/gradlew.bat text eol=crlf
+gradlew         text eol=lf
+gradlew.bat     text eol=crlf
+
+# -----------------------------------------------------------------------------
+# Shell scripts (force LF so they don't get CRLF'd and break under bash)
+# -----------------------------------------------------------------------------
+*.sh            text eol=lf
+
+# Windows batch / cmd files (CRLF is expected on Windows)
+*.bat           text eol=crlf
+*.cmd           text eol=crlf
+
+# -----------------------------------------------------------------------------
+# Backend: Java / Gradle / Kotlin
+# -----------------------------------------------------------------------------
+*.java          text
+*.gradle        text
+*.gradle.kts    text
+gradle.properties text
+*.kt            text
+*.kts           text
+
+# -----------------------------------------------------------------------------
+# Frontend: Angular / TypeScript / pnpm
+# -----------------------------------------------------------------------------
+*.ts            text
+*.tsx           text
+*.js            text
+*.mjs           text
+*.json          text
+*.html          text
+*.css           text
+*.scss          text
+*.md            text
+
+# Lockfiles must stay LF and must never be merged as "binary"
+pnpm-lock.yaml  text eol=lf
+package-lock.json text eol=lf
+yarn.lock       text eol=lf
+
+# -----------------------------------------------------------------------------
+# Binary assets — do not diff or normalize (keep stored bytes intact)
+# -----------------------------------------------------------------------------
+*.jar           binary
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.ico           binary
+*.webp          binary
+*.woff          binary
+*.woff2         binary
+*.ttf           binary
+*.eot           binary
+*.pdf           binary
+*.zip           binary
