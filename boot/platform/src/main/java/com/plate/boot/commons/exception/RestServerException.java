@@ -11,16 +11,16 @@ import java.lang.reflect.Method;
 
 /**
  * Represents a custom exception class for handling REST server errors, which includes an error message, a status code,
- * and additional details. This exception extends {@link RuntimeException} and implements {@link Serializable} to support
- * serialization when transmitted across networks or persisted.
+ * and a problem detail. This exception extends {@link ServerErrorException} (a {@link RuntimeException} subtype) and
+ * implements {@link Serializable} to support serialization when transmitted across networks or persisted.
  * <p>
- * It provides factory methods to conveniently create instances with predefined or custom error messages and codes,
+ * It provides factory methods to conveniently create instances with predefined or custom error messages,
  * facilitating standardization of error responses in a RESTful API context.
  *
  * <h3>Features:</h3>
  * <ul>
- *     <li>Custom error code to supplement HTTP status codes.</li>
- *     <li>Holds an arbitrary object ({@code msg}) for detailed error information.</li>
+ *     <li>Custom error message carried as the problem detail title.</li>
+ *     <li>Holds a problem detail (title/message) for detailed error information.</li>
  *     <li>Convenience static factory methods for instantiation.</li>
  * </ul>
  */

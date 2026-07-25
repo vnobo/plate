@@ -15,12 +15,12 @@ import java.util.*;
 
 /**
  * Represents the base entity contract for entities that require common functionality
- * such as having a unique code, being serializable, and perishable with a generic type identifier.
+ * such as having a unique code, being serializable, and persistable with a generic type identifier.
  * Implementing classes should provide concrete behavior for these base operations.
  */
 public interface BaseEntity<T> extends Serializable, Persistable<T> {
     /**
-     * Support from for json column
+     * Support querying the JSON {@code extend} column via dynamic SQL conditions.
      */
     @JsonIgnore
     default @Nullable Map<String, Object> getQuery() {
@@ -96,16 +96,14 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
     }
 
     /**
-     * Constructs a QueryFragment based on the current entity's properties and conditions,
-     * allowing for customization of the SQL from by specifying properties to exclude.
+     * Constructs a {@link QueryFragment} based on the current entity's properties and conditions,
+     * allowing for customization of the generated SQL query by specifying properties to exclude.
      *
-     * @param skipKeys A collection of String property names indicating which properties
-     *                 should not be included in the generated SQL from. This can be useful
-     *                 for skipping sensitive or unnecessary fields.
-     * @return A QueryFragment object containing the SQL fragment and parameters necessary
-     * to form a part of an SQL from. The SQL fragment represents a conditional
-     * part of the from (e.g., WHERE clause), and the parameters are mapped to
-     * prevent SQL injection, ensuring secure from execution.
+     * @param skipKeys a collection of property names that should be skipped when building the query.
+     *                 Useful for omitting sensitive or unnecessary fields.
+     * @return a {@link QueryFragment} containing the SQL fragment and named parameters necessary
+     * to form a conditional part of a SQL query (e.g., the WHERE clause). Parameters are bound
+     * by name to prevent SQL injection, ensuring secure query execution.
      */
     default QueryFragment query(Collection<String> skipKeys) {
         var criteria = criteria(skipKeys);
@@ -123,6 +121,11 @@ public interface BaseEntity<T> extends Serializable, Persistable<T> {
         return fragment;
     }
 
+    /**
+     * Constructs a {@link QueryFragment} for this entity, excluding no properties.
+     *
+     * @return a {@link QueryFragment} built from all non-skipped properties of the entity
+     */
     default QueryFragment query() {
         return query(List.of());
     }

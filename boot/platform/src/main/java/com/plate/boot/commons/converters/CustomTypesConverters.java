@@ -45,6 +45,7 @@ public class CustomTypesConverters implements InitializingBean {
          *
          * @param source the String value to convert, must not be null
          * @return the corresponding MethodType enum value
+         * @throws IllegalArgumentException if the source does not match any MethodType
          */
         @Override
         public MethodType convert(String source) {

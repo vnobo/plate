@@ -14,7 +14,7 @@ import java.util.UUID;
 /**
  * This class, AbstractEntity, is a base class for all data entities in the system.
  * It provides common fields and methods for all data entities, such as id, code, tenantCode,
- * extend, creator, updater, updatedTime, createdTime, from, search, and securityCode.
+ * extend, creator, updater, updatedTime, createdTime, query, search, and securityCode.
  * <p>
  * The id field is the unique identifier of the data entity. The code field is the data entity code,
  * and the tenantCode field is the data tenant code.
@@ -84,7 +84,7 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
 
 
     /**
-     * Support from for json column
+     * Support querying the JSON {@code extend} column via dynamic SQL conditions.
      */
     protected @Transient Map<String, Object> query;
 
@@ -98,11 +98,21 @@ public abstract class AbstractEntity<T> implements BaseEntity<T> {
      */
     protected @Transient UUID securityCode;
 
+    /**
+     * Returns the transient {@code query} map used to build dynamic JSON-column conditions.
+     *
+     * @return the query parameter map (never triggers persistence)
+     */
     @JsonIgnore
     public Map<String, Object> getQuery() {
         return query;
     }
 
+    /**
+     * Returns the optimistic-lock version of this entity.
+     *
+     * @return the current version, or {@code null} if not yet persisted
+     */
     @JsonIgnore
     public Long getVersion() {
         return version;

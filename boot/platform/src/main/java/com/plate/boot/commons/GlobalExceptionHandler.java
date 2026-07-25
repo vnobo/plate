@@ -16,36 +16,29 @@ import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
 
 /**
- * GlobalExceptionHandler is a centralized exception handler that intercepts and processes
- * various exceptions thrown during the execution of REST endpoints within an application.
- * It provides tailored responses for different types of exceptions, ensuring consistent
- * and informative error messages are returned to the client.
+ * Centralized, reactive exception handler that translates exceptions thrown by REST endpoints
+ * into a consistent {@link org.springframework.http.ProblemDetail} response body.
  * <p>
- * Key Features:
- * - Handles {@link ResponseEntityExceptionHandler} to manage binding errors, including validation failures.
- * - Manages data access exceptions such as {@link DataAccessException} and {@link R2dbcException}.
- * - Custom exception handling for {@link RestServerException}, designed for application-specific errors.
- * - Generic exception handling for uncaught {@link Exception}s to maintain robustness.
- * <p>
- * Each exception handler method transforms the exception into a standardized {@link ErrorResponse}
- * format before returning it in the body of a {@link ResponseEntity} with the appropriate HTTP status code.
+ * Handled exception types:
+ * <ul>
+ *   <li>Binding/validation failures ({@link WebExchangeBindException}, via {@link ResponseEntityExceptionHandler}).</li>
+ *   <li>Malformed request input ({@code ServerWebInputException}).</li>
+ *   <li>Data access failures ({@link DataAccessException}).</li>
+ *   <li>Any other uncaught {@link RuntimeException}.</li>
+ * </ul>
+ * Each handler returns a {@link ResponseEntity} whose body is a {@link ProblemDetail} carrying the
+ * request URI, an error title, and the underlying message.
  */
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
-     * Handles exceptions of type {@link DataAccessException} by creating an appropriate error response.
-     * This method is designed to be used within a Spring MVC controller advice context to manage
-     * exceptions that occur during the execution of RESTful server operations.
+     * Handles {@link DataAccessException} by building a standardized {@link ProblemDetail} error response.
      *
-     * @param ex       The {@link DataAccessException} instance that was thrown, encapsulating
-     *                 error details such as error code, message, and any additional info.
-     * @param exchange The current server web exchange containing request and response information.
-     *                 This is used to extract details necessary for constructing the error response.
-     * @return A {@link Mono} containing a {@link ResponseEntity} with status {@link HttpStatus#INSUFFICIENT_STORAGE},
-     * content type set to {@link MediaType#APPLICATION_JSON}, and body containing
-     * a {@link ProblemDetail} object representing the details of the exception.
-     * The error response includes the request URI, the error message, and a custom title.
+     * @param ex       the {@link DataAccessException} that was thrown
+     * @param exchange the current server web exchange, used to extract the request URI
+     * @return a {@link Mono} with a {@link ResponseEntity} whose body is a {@link ProblemDetail}
+     * describing the error (status {@link HttpStatus#INSUFFICIENT_STORAGE})
      */
     @ExceptionHandler(DataAccessException.class)
     public Mono<ResponseEntity<Object>> handleDataAccessException(DataAccessException ex, ServerWebExchange exchange) {
@@ -61,18 +54,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Handles exceptions of type {@link RuntimeException} by creating an appropriate error response.
-     * This method is designed to be used within a Spring MVC controller advice context to manage
-     * uncaught runtime exceptions that occur during the execution of RESTful server operations.
+     * Handles any uncaught {@link RuntimeException} by building a standardized {@link ProblemDetail} error response.
      *
-     * @param ex       The {@link RuntimeException} instance that was thrown, encapsulating
-     *                 error details such as error code, message, and any additional info.
-     * @param exchange The current server web exchange containing request and response information.
-     *                 This is used to extract details necessary for constructing the error response.
-     * @return A {@link Mono} containing a {@link ResponseEntity} with status {@link HttpStatus#INSUFFICIENT_STORAGE},
-     * content type set to {@link MediaType#APPLICATION_JSON}, and body containing
-     * a {@link ProblemDetail} object representing the details of the exception.
-     * The error response includes the request URI, the error message, and a custom title.
+     * @param ex       the {@link RuntimeException} that was thrown
+     * @param exchange the current server web exchange, used to extract the request URI
+     * @return a {@link Mono} with a {@link ResponseEntity} whose body is a {@link ProblemDetail}
+     * describing the error (status {@link HttpStatus#INSUFFICIENT_STORAGE})
      */
     @ExceptionHandler(RuntimeException.class)
     public Mono<ResponseEntity<Object>> handleRuntimeException(RuntimeException ex, ServerWebExchange exchange) {
@@ -117,6 +104,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, problemDetail, headers, status, exchange);
     }
 
+    /**
+     * Handles {@link ServerWebInputException} (malformed request input) by building a
+     * standardized {@link ProblemDetail} error response.
+     *
+     * @param ex       the {@link ServerWebInputException} that was thrown
+     * @param headers  the headers to use for the response
+     * @param status   the status code to use for the response
+     * @param exchange the current server web exchange, used to extract the request URI
+     * @return a {@link Mono} with a {@link ResponseEntity} whose body is a {@link ProblemDetail}
+     * describing the malformed-input error (status {@link HttpStatus#BAD_REQUEST})
+     */
     @Override
     protected Mono<ResponseEntity<Object>> handleServerWebInputException(
             ServerWebInputException ex, HttpHeaders headers, HttpStatusCode status,
