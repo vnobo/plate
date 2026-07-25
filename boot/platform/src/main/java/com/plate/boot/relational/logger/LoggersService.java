@@ -100,8 +100,8 @@ public class LoggersService extends AbstractCache {
     /**
      * Scheduled task to clear outdated log records.
      * <p>
-     * This method is scheduled to run daily at 1 AM. It deletes log records that are older than three years
-     * from the current date. The result of the deletion operation is logged.
+     * This method is scheduled to run daily at 1 AM. It deletes log records whose creation time is older
+     * than one year from the current date. The result of the deletion operation is logged.
      * </p>
      */
     @Scheduled(cron = "0 0 1 * * ?")

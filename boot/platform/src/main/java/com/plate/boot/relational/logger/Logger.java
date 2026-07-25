@@ -13,8 +13,8 @@ import tools.jackson.databind.JsonNode;
  * This class maps directly to the "se_loggers" table and captures essential details
  * about each logging event, including metadata like tenant, operator, and request specifics.
  *
- * <p>The {@code Logger} class integrates with Spring Data JPA annotations for ORM operations
- * and utilizes Lombok's {@code @Data} annotation for automatic getter/setter generation.
+ * <p>The {@code Logger} class is persisted via Spring Data R2DBC ({@code @Table}) and utilizes
+ * Lombok's {@code @Data} annotation for automatic getter/setter generation.
  * It also includes timestamp fields annotated with Spring's auditing annotations to track
  * when log entries are created and last modified.</p>
  *
@@ -23,7 +23,7 @@ import tools.jackson.databind.JsonNode;
  * stored as a {@link JsonNode}, allows for flexible storage of additional structured data
  * related to the logged event.</p>
  *
- * @see BaseEntity for the base entity contract this class extends, providing common entity behaviors.
+ * @see AbstractEntity for the base entity contract this class extends, providing common entity behaviors.
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

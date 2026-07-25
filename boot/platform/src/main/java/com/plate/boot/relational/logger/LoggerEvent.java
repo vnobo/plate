@@ -3,7 +3,7 @@ package com.plate.boot.relational.logger;
 import com.plate.boot.commons.base.AbstractEvent;
 
 /**
- * LoggerEvent class that extends the BaseEvent class to handle logging events.
+ * LoggerEvent class that extends the {@link AbstractEvent} class to handle logging events.
  * This class is used to create and manage events related to logging requests.
  *
  * @see AbstractEvent

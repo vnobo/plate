@@ -21,7 +21,7 @@ import static com.plate.boot.commons.utils.ContextUtils.RULE_ADMINISTRATORS;
  * Handles HTTP requests related to menu management within an application.
  * This controller serves as an intermediary between the client and the {@link MenusService},
  * facilitating operations such as searching, paging, loading personalized menus, saving, and deleting menu items.
- * It integrates with Spring Security to enforce authorization rules toSql applicable.
+ * It integrates with Spring Security to enforce authorization rules where they apply.
  *
  * <p>
  * The endpoints provided include:
@@ -64,7 +64,7 @@ public class MenusController {
      *
      * @param request  The menu request containing search criteria.
      * @param pageable The pagination information.
-     * @return A Mono of Page containing Menu entities.
+     * @return A Mono of {@link PagedModel} containing {@link Menu} entities.
      */
     @GetMapping("page")
     public Mono<PagedModel<Menu>> page(MenuReq request, Pageable pageable) {
@@ -111,7 +111,8 @@ public class MenusController {
 
     /**
      * Handles HTTP DELETE requests to delete a menu identified by the request parameters.
-     * Ensures that the request contains valid ID and code before proceeding with the deletion.
+     * Ensures that the request is not new (i.e. already carries an id) and has a non-null code
+     * before proceeding with the deletion.
      *
      * @param request The menu request containing the details of the menu to be deleted.
      * @return A Mono indicating completion of the delete operation.
