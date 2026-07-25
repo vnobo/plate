@@ -113,8 +113,8 @@ public class SecurityController {
      * @param request        A {@link ChangePasswordRequest} containing the current password and the new password.
      * @param authentication The authentication object representing the currently authenticated user.
      * @return A {@link Mono} emitting the updated {@link UserDetails} after the password change.
-     * @throws RestServerException if the provided password does not match the new password,
-     *                             or if the presented password does not match the current stored password.
+     * @throws RestServerException if the new password equals the current password,
+     *                             or if the presented current password does not match the stored credential.
      */
     @PostMapping("/change/password")
     public Mono<UserDetails> changePassword(@Valid @RequestBody ChangePasswordRequest request,

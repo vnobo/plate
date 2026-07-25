@@ -101,8 +101,6 @@ public class CaptchaRepository {
      * @return Newly created captcha token
      */
     protected CaptchaToken createCaptchaToken() {
-        //LineCaptcha captcha = CaptchaUtil.createLineCaptcha(200, 100, 4, 10);
-        //captcha.setGenerator(new RandomGenerator("0123456789", 4));
         return CaptchaToken.of(this.headerName, this.parameterName, "54321");
     }
 

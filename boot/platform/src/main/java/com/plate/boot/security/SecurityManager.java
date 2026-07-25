@@ -35,7 +35,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 /**
- * SecurityManager is a service class that extends the functionality of AbstractDatabase
+ * SecurityManager is a service class that extends {@link AbstractCache}
  * to provide security-related operations, such as user details management, password updates,
  * and authority handling for reactive applications. It integrates with database operations
  * asynchronously and supports caching mechanisms for improved performance.
@@ -46,14 +46,14 @@ import java.util.regex.Pattern;
  * - Manage user registration and modification through integration with UsersService.
  * - Retrieve user information based on OAuth2 bindings for authentication purposes.
  * - Load user details by username, including associated roles and permissions.
- * - Cache from results to minimize direct database hits for frequently accessed data.
+ * - Cache query results to minimize direct database hits for frequently accessed data.
  * - Handle password updates in a secure manner, clearing related caches post-update.
  * - Populate SecurityDetails objects with comprehensive user and authorization data.
  * <p>
  * Dependencies:
  * - UsersService: For CRUD operations on user entities.
  * - R2DBC (reactive database access): To execute SQL queries asynchronously.
- * - Cache: Utilized for storing from results to improve response times on subsequent requests.
+ * - Cache: Utilized for storing query results to improve response times on subsequent requests.
  * <p>
  * Note: The class uses reactive types (Mono, Flux) to facilitate non-blocking, asynchronous processing.
  */
@@ -198,7 +198,7 @@ public class SecurityManager extends AbstractCache implements ReactiveUserDetail
      * @param username The unique username of the user to be located.
      * @return A Mono emitting the UserDetails object representing the found user, or an error signal if not found.
      * The emitted object includes user information along with their granted authorities.
-     * In case of failure, an AuthenticationServiceException is propagated with a relevant message.
+     * In case of failure, a {@link BadCredentialsException} is propagated with a relevant message.
      */
     @Override
     public @NonNull Mono<@NonNull UserDetails> findByUsername(@NonNull String username) {

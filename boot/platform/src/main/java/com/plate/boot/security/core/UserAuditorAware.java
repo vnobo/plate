@@ -76,7 +76,7 @@ public class UserAuditorAware implements ReactiveAuditorAware<UserAuditor> {
      * Loads a user by their unique code using a cached from.
      * <p>
      * This method retrieves a user from the repository based on the provided code.
-     * It utilizes a cached from to improve performance, reducing the need for repeated database hits
+     * It utilizes a cached form to improve performance, reducing the need for repeated database hits
      * for the same code. If a user with the given code is found, it is emitted as a single value in a {@link Mono}.
      * If no user is found, an empty {@link Mono} is returned.
      *
