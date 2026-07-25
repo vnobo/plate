@@ -2,13 +2,13 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
-// 扩展 dayjs 插件
+// Extend dayjs with plugins
 dayjs.extend(relativeTime);
 
-// 设置中文 locale
+// Set the Chinese locale
 dayjs.locale('zh-cn');
 
-// 导出配置好的 dayjs 实例
+// Export the configured dayjs instance
 export default dayjs;
 
 export { dayjs as Dayjs };

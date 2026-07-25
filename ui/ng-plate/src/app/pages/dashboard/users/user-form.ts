@@ -217,7 +217,7 @@ export class UserForm {
       action: async () => {
         const model = this.userModel();
         const result: User = { ...model } as User;
-        // 编辑时不提交密码，避免误改密码
+        // Do not submit the password on edit, to avoid accidentally changing it
         if (!this.created()) {
           delete (result as Record<string, unknown>)['password'];
           delete (result as Record<string, unknown>)['confirmPassword'];

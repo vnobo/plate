@@ -50,7 +50,7 @@ import { environment } from '@envs/env';
   ],
 })
 export class MemberForm {
-  /** 当前所属角色编码 */
+  /** Code of the owning role */
   groupCode = input.required<string>();
 
   private readonly _http = inject(HttpClient);
@@ -59,7 +59,7 @@ export class MemberForm {
 
   isSubmitting = signal(false);
 
-  /** 可选用户列表（用于下拉选择） */
+  /** Candidate users (for the dropdown) */
   protected readonly usersResource = httpResource<User[]>(
     () => ({
       url: environment.secApiPath + '/users/search',

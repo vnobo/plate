@@ -30,7 +30,7 @@ export class Role {
 
   protected readonly ROOT_PCODE = ROOT_PCODE;
 
-  /** 全部角色（用于树形结构与父级选择） */
+  /** All roles (used for the tree structure and parent selection) */
   protected readonly groupsResource = httpResource<Group[]>(
     () => ({
       url: environment.secApiPath + '/groups/search',
@@ -39,11 +39,11 @@ export class Role {
     { defaultValue: [], debugName: 'role-groups' },
   );
 
-  /** 当前选中的角色 */
+  /** Currently selected role */
   protected readonly selectedGroup = signal<Group | null>(null);
   protected readonly selectedCode = computed(() => this.selectedGroup()?.code ?? null);
 
-  /** 选中角色的权限列表 */
+  /** Authorities of the selected role */
   protected readonly authoritiesResource = httpResource<GroupAuthority[]>(
     () => {
       const code = this.selectedCode();
@@ -56,7 +56,7 @@ export class Role {
     { defaultValue: [], debugName: 'role-authorities' },
   );
 
-  /** 选中角色的成员列表 */
+  /** Members of the selected role */
   protected readonly membersResource = httpResource<GroupMember[]>(
     () => {
       const code = this.selectedCode();
@@ -76,10 +76,10 @@ export class Role {
 
   protected readonly activeTab = signal<'authority' | 'member'>('authority');
 
-  /** 已收起的角色编码集合（默认全部展开） */
+  /** Set of collapsed role codes (all expanded by default) */
   private readonly collapsedCodes = signal<Set<string>>(new Set<string>());
 
-  /** 由扁平角色列表计算出的可见树节点（含缩进层级） */
+  /** Visible tree nodes derived from the flat role list (with indentation depth) */
   protected readonly treeNodes = computed<RoleTreeNode[]>(() => {
     const groups = this.groups();
     const codeSet = new Set<string>(

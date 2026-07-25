@@ -1,238 +1,319 @@
 # AGENTS.md
 
-> Plate Platform — 响应式多租户后台管理系统（Polyglot Monorepo）。
-> 本文档为 AI Agent 提供高信号量的项目上下文，帮助快速上手、避免踩坑。
+> Plate Platform — reactive, multi-tenant administration system (Polyglot Monorepo).
+> This document provides high-signal project context for AI Agents to onboard quickly and avoid pitfalls.
 >
-> - **后端** (`boot/`): Spring Boot 4.1 / WebFlux / R2DBC / Redis — Java 25, Gradle 9.5.x
-> - **前端** (`ui/ng-plate/`): Angular 22 SSR — TypeScript 6, pnpm 11.12.0, Tabler UI
+> - **Backend** (`boot/`): Spring Boot 4.1 / WebFlux / R2DBC / Redis — Java 25, Gradle 9.5.x
+> - **Frontend** (`ui/ng-plate/`): Angular 22 SSR — TypeScript 6, pnpm 11.12.0, Tabler UI
+>
+> Module-ownership note: the backend/frontend context below is maintained per-module by the agent files
+> `boot/AGENTS.md` (backend) and `ui/ng-plate/AGENTS.md` (frontend). This root file is the consolidated entry point.
 
 ---
 
-## 1. 开发命令速查
+## 0. Coding Standards (AI agents MUST follow — discipline-based, not build-enforced)
 
-### 后端（在 `boot/` 目录执行）
+All code produced or modified by AI agents in this repository MUST follow the standards below. They are enforced by agent discipline only — there is intentionally no ESLint/PMD/Checkstyle/JaCoCo config or `lint`/`coverage` scripts in the repo; do not add them. Follow them rigorously when writing and reviewing code.
+
+### Java — Alibaba Java Coding Guidelines
+Authority: https://github.com/alibaba/Alibaba-Java-Coding-Guidelines
+
+- **Naming**
+  - Packages: all-lowercase, single word, no underscore (`com.plate.boot.security`).
+  - Classes/interfaces/enums: `UpperCamelCase` (e.g., `SecurityManager`, `UserRes`).
+  - Methods/variables: `lowerCamelCase`.
+  - Constants: `UPPER_CASE_WITH_UNDERSCORES` (`MAX_RETRY_COUNT`); `long` literals use uppercase `L` (`600000L`); no magic numbers.
+  - Array declaration: `String[] args` (not `String args[]`).
+- **OOP**
+  - Always annotate overrides with `@Override`.
+  - Prefer `java.util.Objects.equals(a, b)` over `a.equals(b)`; put constants/known-non-null on the left of `equals`/`compareTo`.
+  - Avoid raw types; POJOs/entities implement `equals`/`hashCode` together and provide `toString`.
+- **Formatting (Java)**
+  - Indent with **4 spaces** (no tabs).
+  - Opening brace `{` on the same line as the declaration; closing brace `}` on its own line.
+  - Always use braces for `if/for/while`, even single statements.
+  - One blank line between methods; no blank line immediately after `{`.
+  - Space after keywords (`if (` `for (` `while (`); no space inside method-call parentheses.
+- **Concurrency**
+  - Create thread pools via `ThreadPoolExecutor`, never `Executors.newFixedThreadPool`/`newCachedThreadPool` (OOM / unbounded-queue risk).
+  - `java.text.SimpleDateFormat` is not thread-safe → use `java.time.format.DateTimeFormatter`.
+  - Guard shared state with `volatile` + double-checked locking or `java.util.concurrent` utilities; prefer `Lock.tryLock()`.
+  - Use `CountDownLatch`/`CyclicBarrier`/`Semaphore`/`BlockingQueue` for coordination.
+- **Reactive discipline (WebFlux)**
+  - Controllers/services return `Mono<T>`/`Flux<T>`; never block the event loop (no `.block()` in the request path; no synchronous IO).
+  - Chain with `.map`/`.flatMap`/`.filter`; use `.subscribe()` only at well-defined boundaries.
+  - Propagate errors via reactive error operators (`onErrorResume`, `onErrorReturn`), not swallowed `try/catch` around publishers.
+- **Collections / Maps**
+  - Iterate maps with `entrySet()`; use `ConcurrentHashMap` (not `Hashtable`).
+  - Size `ArrayList`/`HashMap` with expected capacity when known.
+  - `subList` reflects the backing list; use `toArray(new Type[0])` for typed arrays.
+- **Exceptions & Logging**
+  - Never `e.printStackTrace()`; log via the project logger (`@Log4j2`; `Logback` excluded).
+  - Catch the most specific exception; never use exceptions for normal control flow.
+  - Parameterized logging (`log.error("fail id={}", id, ex)`), not string concatenation.
+- **Comments**
+  - Public classes/methods/interfaces get Javadoc; no commented-out dead code left in the repo.
+
+### Angular / TypeScript — Angular Style Guide + Google TypeScript Style
+Authorities: Angular Style Guide (https://angular.dev/style-guide) + Google TypeScript Style (https://google.github.io/styleguide/tsguide.html).
+
+- **Naming**
+  - Files: `kebab-case.feature.type.ts` (e.g., `user-list.component.ts`).
+  - Classes/types/enums/interfaces: `UpperCamelCase` (`UserListComponent`, `UserRes`).
+  - Variables/functions/methods: `camelCase`; constants: `UPPER_SNAKE_CASE`.
+  - Component selectors: prefixed (`app-*` or feature prefix), `kebab-case`.
+- **Formatting (TypeScript)** (AI discipline; project formatter uses Prettier; if a linter is ever introduced it should be `@angular-eslint` + Google TS Style)
+  - **2-space** indentation (no tabs).
+  - **Single quotes** for strings (double quotes only to avoid escaping).
+  - **Semicolons** required at end of statements.
+  - **Max line width 100** characters.
+  - `no-var`: use `let`/`const`; prefer `const`. Use `===`/`!==` (never `==`/`!=`).
+- **Type discipline**
+  - Avoid `any`; prefer `unknown` + narrowing, or precise types.
+  - Prefer `interface` for object shapes; `type` for unions/mapped types.
+  - Use `readonly` / `as const` where appropriate; prefer immutable data.
+- **Angular idioms (follow repo patterns)**
+  - **Standalone components** (no `NgModule` where avoidable).
+  - State via **signals**; DI via **`inject()`**; native control flow (`@if`/`@for`/`@switch`).
+  - `OnPush` change detection; services use `providedIn: 'root'`.
+  - Lazy-load routes via `loadChildren`; use `NgOptimizedImage` for `<img>`.
+  - One responsibility per file; keep functions < ~75 lines; keep files focused.
+  - Prefer `for...of` over indexed `for`; use arrow functions / `bind` to preserve `this`.
+- **Accessibility**: meet WCAG 2.1 AA; provide alt text, labels, keyboard support (AXE-clean).
+
+> **Boundary (do not violate)**: These rules are for AI code generation and review only. Do **not** add ESLint/PMD/Checkstyle/JaCoCo config files, `lint`/`coverage` scripts, or CI quality gates to this repo. Keep the project structure clean.
+
+---
+
+## 1. Development Commands Cheat-Sheet
+
+### Backend (run from `boot/`)
 
 ```bash
-./gradlew :platform:bootRun --args='--spring.profiles.active=local'  # 本地启动 (port 8080)
-./gradlew :platform:test                                              # Platform 测试（需 Docker）
-./gradlew :platform:test --tests "com.plate.boot.security.SecurityManagerTest"  # 单个测试类
-./gradlew :platform:test --tests "*MethodName*"                       # 单个测试方法
-./gradlew :platform:compileJava                                       # 仅编译，跳过测试
-./gradlew build                                                        # 完整构建 + 测试
-./gradlew bootBuildImage                                              # Buildpacks 构建 OCI 镜像
+./gradlew :platform:bootRun --args='--spring.profiles.active=local'  # Local start (port 8080)
+./gradlew :platform:test                                              # Platform tests (requires Docker)
+./gradlew :platform:test --tests "com.plate.boot.security.SecurityManagerTest"  # Single test class
+./gradlew :platform:test --tests "*MethodName*"                       # Single test method
+./gradlew :platform:compileJava                                       # Compile only, skip tests
+./gradlew build                                                        # Full build + tests
+./gradlew bootBuildImage                                              # Buildpacks OCI image build
+./gradlew nativeCompile                                                 # GraalVM native image (see boot/AGENTS.md)
 ```
 
-### 前端（在 `ui/ng-plate/` 目录执行）
+### Frontend (run from `ui/ng-plate/`)
 
 ```bash
-pnpm install          # 安装依赖
-pnpm start            # 开发服务器 → http://localhost:4200（代理 /api → localhost:8080）
-pnpm build            # 生产构建（SSR + CSR，输出 dist/）
-pnpm test             # Vitest 单元测试
+pnpm install          # Install dependencies
+pnpm start            # Dev server → http://localhost:4200 (proxy /api → localhost:8080)
+pnpm build            # Production build (SSR + CSR, outputs dist/)
+pnpm test             # Vitest unit tests
+pnpm serve:ssr:ng-plate  # Serve the SSR build (Express, http://localhost:4000)
 ```
 
-### 开发环境默认凭据
+### Default dev credentials
 
-- 后端 Swagger UI: `http://127.0.0.1:8080/swagger-ui.html`
-- 管理员: `admin` / `123456`，普通用户: `user` / `123456`
-- PostgreSQL: `127.0.0.1:5432/plate`，用户 `farmer` / `123456`
+- Backend Swagger UI: `http://127.0.0.1:8080/swagger-ui.html`
+- Admin: `admin` / `123456`, regular user: `user` / `123456`
+- PostgreSQL: `127.0.0.1:5432/plate`, user `farmer` / `123456`
 - Redis: `127.0.0.1`
 
 ---
 
-## 2. Monorepo 结构
+## 2. Monorepo Structure
 
 ```
 plate/
-├── AGENTS.md                    # 本文件
-├── CLAUDE.md                    # 项目总览指引（英文）
-├── boot/                        # 后端（Gradle 单模块构建）
-│   ├── CLAUDE.md                # 后端专属指引（英文）
-│   ├── build.gradle             # 根构建脚本（插件/依赖/Java 25 toolchain）
+├── AGENTS.md                    # This file
+├── CLAUDE.md                    # Project overview guide (English)
+├── boot/                        # Backend (Gradle single-module build)
+│   ├── AGENTS.md                # Backend-specific guide (English)
+│   ├── build.gradle             # Root build script (plugins/deps/Java 25 toolchain)
 │   ├── settings.gradle          # rootProject "plate", include :platform
-│   ├── gradle.properties        # version=4.1.0, graalvm, guava, springdoc 版本
-│   └── platform/                # 唯一子模块 — 全部后端代码
+│   ├── gradle.properties        # version=4.1.0, graalvm, guava, springdoc versions
+│   └── platform/                # The only submodule — all backend code
 │       └── src/
 │           ├── main/java/com/plate/boot/
-│           │   ├── BootApplication.java       # Spring Boot 入口 (@SpringBootApplication)
-│           │   ├── commons/                   # 公共基础层
-│           │   ├── config/                    # 基础设施配置层
-│           │   ├── relational/                # 业务域（字典/日志/菜单）
-│           │   └── security/                  # 安全域（用户/组/租户/认证）
+│           │   ├── BootApplication.java       # Spring Boot entry (@SpringBootApplication)
+│           │   ├── commons/                   # Common base layer
+│           │   ├── config/                    # Infrastructure config layer
+│           │   ├── relational/                # Business domains (dictionary/log/menu)
+│           │   └── security/                  # Security domain (user/group/tenant/auth)
 │           ├── main/resources/
-│           │   ├── application.yml            # 生产/默认配置
-│           │   ├── application-local.yml      # 本地开发覆盖（git-ignored）
-│           │   └── db/migration/              # Flyway 迁移脚本 (V1.0.0–V1.0.6)
-│           └── test/                          # 测试（Testcontainers 集成测试 + 单元测试）
-└── ui/ng-plate/                 # 前端（Angular 22 SSR 独立项目）
-    ├── AGENTS.md                # 前端编码规范（Angular/TypeScript 最佳实践）
-    ├── angular.json             # 构建配置（pnpm, SCSS, Tabler CSS/JS, SSR）
-    ├── proxy.conf.json          # 开发代理：/api → http://localhost:8080/（去除 /api 前缀）
+│           │   ├── application.yml            # Production/default config
+│           │   ├── application-local.yml      # Local dev override (git-ignored)
+│           │   └── db/migration/              # Flyway migration scripts (V1.0.0–V1.0.6)
+│           └── test/                          # Tests (Testcontainers integration + unit)
+└── ui/ng-plate/                 # Frontend (Angular 22 SSR, standalone project)
+    ├── AGENTS.md                # Frontend coding standards (Angular/TypeScript best practices)
+    ├── angular.json             # Build config (pnpm, SCSS, Tabler CSS/JS, SSR)
+    ├── proxy.conf.json          # Dev proxy: /api → http://localhost:8080/ (strips /api prefix)
     └── src/app/
-        ├── core/                # HTTP 拦截器、路由守卫、Token 服务、存储封装
-        ├── layout/              # BaseLayout（侧边栏+头部）、BlankLayout（登录页）
-        ├── pages/               # 懒加载页面模块
-        └── plugins/             # 可复用 UI 组件（DataTable, Modals, Toasts, Transfer）
+        ├── core/                # HTTP interceptor, route guards, Token service, storage wrapper
+        ├── layout/              # BaseLayout (sidebar+header), BlankLayout (login page)
+        ├── pages/               # Lazy-loaded page modules
+        └── plugins/             # Reusable UI components (DataTable, Modals, Toasts, Transfer)
 ```
 
-**关键事实**: 后端和前端是完全独立的构建系统（Gradle vs pnpm/Angular CLI），无共享 workspace 配置。无 pre-commit hooks、无 ESLint 配置。
+**Key fact**: Backend and frontend are completely independent build systems (Gradle vs pnpm/Angular CLI) with no shared workspace config and no pre-commit hooks. There is **intentionally no quality-gate tooling in the repo** (no ESLint/Checkstyle/PMD/JaCoCo config, no `lint`/`coverage` scripts). Coding standards (see §0) are **advisory for AI agents only**, not enforced by the build.
 
 ---
 
-## 3. 技术栈
+## 3. Tech Stack
 
-| 类别 | 技术 | 版本/说明 |
-|------|------|-----------|
-| **后端语言** | Java | 25（虚拟线程、GraalVM 支持） |
-| **前端语言** | TypeScript | 6.x |
-| **后端构建** | Gradle | 9.5.x（Wrapper） |
-| **前端构建** | pnpm | 11.5.2 |
-| **Web 框架** | Spring Boot WebFlux | 4.1.0（响应式非阻塞, Netty HTTP/2） |
-| **前端框架** | Angular | 22.x（SSR + Signals + Zoneless） |
-| **数据库** | PostgreSQL | 17+（uuid-ossp, pg_trgm, zhparser 扩展） |
-| **数据访问** | Spring Data R2DBC | 响应式关系数据库 |
-| **缓存/会话** | Redis | 7.0+（缓存 + WebSession） |
-| **安全** | Spring Security | Session-based + OAuth2 + CSRF Cookie |
-| **迁移** | Flyway | baseline-on-migrate, V1.0.0–V1.0.6 |
-| **JSON** | Jackson 3.x (tools.jackson) | 使用 `ContextUtils.OBJECT_MAPPER` |
+| Category | Technology | Version / Notes |
+|----------|-------------|-----------------|
+| **Backend language** | Java | 25 (virtual threads, GraalVM support) |
+| **Frontend language** | TypeScript | 6.x |
+| **Backend build** | Gradle | 9.5.x (Wrapper) |
+| **Frontend build** | pnpm | 11.12.0 |
+| **Web framework** | Spring Boot WebFlux | 4.1.0 (reactive non-blocking, Netty HTTP/2) |
+| **Frontend framework** | Angular | 22.x (SSR + Signals + Zoneless) |
+| **Database** | PostgreSQL | 17+ (uuid-ossp, pg_trgm, zhparser extensions) |
+| **Data access** | Spring Data R2DBC | Reactive relational database |
+| **Cache / Session** | Redis | 7.0+ (cache + WebSession) |
+| **Security** | Spring Security | Session-based + OAuth2 + CSRF Cookie |
+| **Migrations** | Flyway | baseline-on-migrate, V1.0.0–V1.0.6 |
+| **JSON** | Jackson 3.x (tools.jackson) | Use `ContextUtils.OBJECT_MAPPER` |
 | **UI** | Tabler UI | @tabler/core CSS/JS |
-| **日志** | Log4j2 | `@Log4j2` 注解（Logback 已排除） |
-| **测试** | JUnit 5 + Testcontainers | 真实 PostgreSQL + Redis 容器 |
-| **前端测试** | Vitest | @angular/build:unit-test |
-| **SSR** | Angular SSR + Express 5.1.0 | 增量水合 (Incremental Hydration) |
+| **Logging** | Log4j2 | `@Log4j2` annotation (Logback excluded) |
+| **Testing** | JUnit 5 + Testcontainers | Real PostgreSQL + Redis containers |
+| **Frontend testing** | Vitest | @angular/build:unit-test |
+| **SSR** | Angular SSR + Express 5.1.0 | Incremental Hydration |
 
 ---
 
-## 4. 后端架构
+## 4. Backend Architecture
 
-### 4.1 模块职责
+### 4.1 Module responsibilities
 
-| 模块 | 路径 | 职责 |
-|------|------|------|
-| **commons/** | `com.plate.boot.commons` | 公共基类、动态 SQL 构建器、工具类、类型转换器、异常定义 |
-| **config/** | `com.plate.boot.config` | R2DBC/Redis/Session/Security/Web 基础设施配置 |
-| **security/** | `com.plate.boot.security` | 用户/组/租户 CRUD、认证、权限、验证码、OAuth2 |
-| **relational/** | `com.plate.boot.relational` | 字典管理、菜单管理、审计日志记录 |
+| Module | Path | Responsibility |
+|--------|------|----------------|
+| **commons/** | `com.plate.boot.commons` | Common base classes, dynamic SQL builder, utilities, type converters, exception definitions |
+| **config/** | `com.plate.boot.config` | R2DBC/Redis/Session/Security/Web infrastructure config |
+| **security/** | `com.plate.boot.security` | User/group/tenant CRUD, auth, permissions, captcha, OAuth2 |
+| **relational/** | `com.plate.boot.relational` | Dictionary management, menu management, audit logging |
 
-### 4.2 commons/ 子模块
+### 4.2 commons/ submodules
 
-| 子包 | 核心类 | 职责 |
-|------|--------|------|
-| `base/` | `AbstractEntity`, `AbstractCache`, `AbstractEvent`, `BaseEntity`, `BaseView` | 实体基类（`code` UUIDv7 PK, `tenantCode`, `extend` JSONB, `version` 乐观锁, 审计字段） |
-| `query/` | `QueryFragment`, `QueryHelper`, `QueryJsonHelper` | 动态 SQL 构建器（`from()`, `where()`, `in()`, `like()`, `ts()` 全文搜索） |
-| `utils/` | `ContextUtils`, `DatabaseUtils`, `BeanUtils` | 全局工具：`securityDetails()` 当前用户, `nextId()` UUIDv7, `eventPublisher()` 事件发布, `OBJECT_MAPPER` |
-| `converters/` | `JsonNodeConverters`, `UserAuditorConverters` | R2DBC 类型转换（JSONB ↔ JsonNode） |
-| `exception/` | `RestServerException`, `QueryException`, `JsonException` | 异常体系，由 `GlobalExceptionHandler` 统一处理 |
+| Sub-package | Core classes | Responsibility |
+|-------------|--------------|----------------|
+| `base/` | `AbstractEntity`, `AbstractCache`, `AbstractEvent`, `BaseEntity`, `BaseView` | Entity base classes (`code` UUIDv7 PK, `tenantCode`, `extend` JSONB, `version` optimistic lock, audit fields) |
+| `query/` | `QueryFragment`, `QueryHelper`, `QueryJsonHelper` | Dynamic SQL builder (`from()`, `where()`, `in()`, `like()`, `between()`, `orderBy()`, `groupBy()`, `limit()`, `pageable()`, `ts()` full-text search) |
+| `utils/` | `ContextUtils`, `DatabaseUtils`, `BeanUtils` | Global utilities: `securityDetails()` current user, `nextId()` UUIDv7, `eventPublisher()` event publish, `OBJECT_MAPPER` |
+| `converters/` | `JsonNodeConverters`, `UserAuditorConverters` | R2DBC type converters (JSONB ↔ JsonNode) |
+| `exception/` | `RestServerException`, `QueryException`, `JsonException` | Exception hierarchy, unified by `GlobalExceptionHandler` |
 
-### 4.3 config/ 子模块
+### 4.3 config/ submodules
 
-| 类 | 职责 |
-|----|------|
-| `SecurityConfiguration` | SecurityWebFilterChain: CSRF → 认证 → 并发会话控制 → Logout |
-| `WebConfiguration` | 路径前缀映射：`/rel` → relational 包, `/sec` → security 包 |
-| `R2dbcConfiguration` | R2DBC 连接配置，注册类型转换器 |
-| `RedisConfiguration` | Redis 连接与缓存配置 |
-| `SessionConfiguration` | Redis WebSession（8h TTL，单用户单会话 SessionLimit.of(1)） |
-| `WebfluxProperties` | 路径前缀、API 版本、分页参数 |
-| `HttpCodecsProperties` | maxInMemorySize（默认 256KB） |
+| Class | Responsibility |
+|-------|----------------|
+| `SecurityConfiguration` | SecurityWebFilterChain: CSRF → Authentication → Concurrent Session Control → Logout |
+| `WebConfiguration` | Path-prefix routing: `/rel` → relational package, `/sec` → security package |
+| `R2dbcConfiguration` | R2DBC connection config, registers type converters |
+| `RedisConfiguration` | Redis connection & cache config |
+| `SessionConfiguration` | Redis WebSession (8h TTL, single-user single-session `SessionLimit.of(1)`) |
+| `WebfluxProperties` | Path prefixes, API version, pagination params |
+| `HttpCodecsProperties` | maxInMemorySize (default 256KB) |
 
-### 4.4 security/ 子模块
+### 4.4 security/ submodules
 
-| 子包 | 核心类 | 职责 |
-|------|--------|------|
-| 根 | `SecurityManager`, `SecurityController`, `SecurityDetails`, `CsrfWebFilter` | 认证核心：`findByUsername()`（大小写不敏感）, 缓存用户权限/组/租户信息 |
-| `core/user/` | `User`, `UsersService`, `UsersController` | 用户 CRUD + `authority/` 子包管理用户权限 |
-| `core/group/` | `Group`, `GroupsService`, `GroupsController` | 用户组 CRUD（`pcode` 层级结构）+ `authority/` + `member/` |
-| `core/tenant/` | `Tenant`, `TenantsService`, `TenantsController` | 租户 CRUD（`pcode` 层级结构）+ `member/` |
-| `captcha/` | `CaptchaController`, `CaptchaRepository` | 验证码（Redis 存储，免认证 `permitAll`） |
-| `oauth2/` | `Oauth2UserService`, `Oauth2SuccessHandler` | GitHub OAuth2 自动注册/绑定，XHR-aware 响应 |
+| Sub-package | Core classes | Responsibility |
+|-------------|--------------|----------------|
+| root | `SecurityManager`, `SecurityController`, `SecurityDetails`, `CsrfWebFilter` | Auth core: `findByUsername()` (case-insensitive), caches user permissions/group/tenant info |
+| `core/user/` | `User`, `UsersService`, `UsersController` | User CRUD + `authority/` sub-package for user permissions |
+| `core/group/` | `Group`, `GroupsService`, `GroupsController` | User group CRUD (`code` hierarchical) + `authority/` + `member/` |
+| `core/tenant/` | `Tenant`, `TenantsService`, `TenantsController` | Tenant CRUD (`code` hierarchical) + `member/` |
+| `captcha/` | `CaptchaController`, `CaptchaRepository` | Captcha (Redis-backed, permitAll) |
+| `oauth2/` | `Oauth2UserService`, `Oauth2SuccessHandler` | GitHub OAuth2 auto-register/bind, XHR-aware responses |
 
-**每个特性包的标准结构**: Entity → `*Req`（请求 DTO）→ `*Res`（响应 DTO）→ `*Event`（领域事件）→ `*Service`（继承 AbstractCache）→ `*Repository`（R2DBC）→ `*Controller`（返回 Mono/Flux）
+**Standard structure per feature package**: Entity → `*Req` (request DTO) → `*Res` (response DTO) → `*Event` (domain event) → `*Service` (extends `AbstractCache`) → `*Repository` (R2DBC) → `*Controller` (returns `Mono`/`Flux`).
 
-### 4.5 relational/ 子模块
+### 4.5 relational/ submodules
 
-| 子包 | 核心类 | 职责 |
-|------|--------|------|
-| 根 | `LoggerFilter`, `MethodType` | 审计日志拦截器：匹配非安全 HTTP 方法，缓存 req/resp DataBuffer，异步发布 LoggerEvent |
-| `dictionaries/` | `Dictionary`, `DictionariesService/Controller` | 字典 CRUD（`pcode` 层级, `dict_type` 分类） |
-| `logger/` | `Logger`, `LoggersService/Controller` | 审计日志查询（由 LoggerFilter 事件驱动写入） |
-| `menus/` | `Menu`, `MenusService/Controller` | 菜单管理（`type`: FOLDER/MENU/LINK/API） |
+| Sub-package | Core classes | Responsibility |
+|-------------|--------------|----------------|
+| root | `LoggerFilter`, `MethodType` | Audit-log interceptor: matches non-safe HTTP methods, buffers req/resp DataBuffer, async-publishes `LoggerEvent` |
+| `dictionaries/` | `Dictionary`, `DictionariesService/Controller` | Dictionary CRUD (`code` hierarchy, `dict_type` category) |
+| `logger/` | `Logger`, `LoggersService/Controller` | Audit-log query (written by `LoggerFilter` event) |
+| `menus/` | `Menu`, `MenusService/Controller` | Menu management (`type`: FOLDER/MENU/LINK/API) |
 
-### 4.6 请求处理管道
+### 4.6 Request processing pipeline
 
 ```
 HTTP Request (Netty, port 8080, HTTP/2)
-        │
-        ▼
-  LoggerFilter ── 匹配非安全方法 → 缓存 req/resp → 异步发布 LoggerEvent
-        │
-        ▼
-  Spring Security Chain:
+       │
+       ▼
+ LoggerFilter ── matches non-safe methods → buffers req/resp → async-publishes LoggerEvent
+       │
+       ▼
+ Spring Security Chain:
     CsrfWebFilter → AuthenticationWebFilter → ConcurrentSessionControl(1) → Logout
-        │
-        ▼
-  WebConfiguration 路径前缀路由:
-    /rel/** → com.plate.boot.relational
-    /sec/** → com.plate.boot.security
+       │
+       ▼
+ WebConfiguration path-prefix routing:
+    /rel/**   → com.plate.boot.relational
+    /sec/**   → com.plate.boot.security
     /oauth2/** → SecurityController
-        │
-        ▼
-  Controller → Service (AbstractCache, Redis 缓存, 事件发布) → Repository (R2DBC) → PostgreSQL
+       │
+       ▼
+ Controller → Service (AbstractCache, Redis cache, event publish) → Repository (R2DBC) → PostgreSQL
 ```
 
-### 4.7 认证流程
+### 4.7 Authentication flow
 
-1. `GET /oauth2/csrf` → CsrfWebFilter 写入 Reactor Context → Cookie `XSRF-TOKEN`
-2. `GET /oauth2/login` → Basic Auth 或已认证 Session → `SecurityManager.findByUsername()`
-3. SecurityManager: 加载用户（忽略大小写）→ 合并用户直接权限 + 组继承权限 → 加载组/租户 → 组装 SecurityDetails
-4. 响应 → `Set-Cookie: SESSION=...`（Redis-backed WebSession）
-5. 后续请求携带 SESSION cookie 自动恢复 SecurityContext
-6. `POST /oauth2/logout` → Clear-Site-Data 响应头
+1. `GET /oauth2/csrf` → CsrfWebFilter writes to Reactor Context → Cookie `XSRF-TOKEN`
+2. `GET /oauth2/login` → Basic Auth or existing Session → `SecurityManager.findByUsername()`
+3. SecurityManager: loads user (case-insensitive) → merges direct user authorities + inherited group authorities → loads group/tenant → assembles `SecurityDetails`
+4. Response → `Set-Cookie: SESSION=...` (Redis-backed WebSession)
+5. Subsequent requests carry the SESSION cookie to auto-restore `SecurityContext`
+6. `POST /oauth2/logout` → `Clear-Site-Data` response header
 
-**SecurityManager 缓存键**（TTL 10min）: `OAUTH2_{bindType}_{openid}`, `USER_GROUPS-{userCode}`, `USER_TENANTS-{userCode}`, `USER_AUTHORITIES-{userCode}`, `GROUP_AUTHORITIES-{userCode}`
+**SecurityManager cache keys** (TTL 10min): `OAUTH2_{bindType}_{openid}`, `USER_GROUPS-{userCode}`, `USER_TENANTS-{userCode}`, `USER_AUTHORITIES-{userCode}`, `GROUP_AUTHORITIES-{userCode}`
 
 ---
 
-## 5. 前端架构
+## 5. Frontend Architecture
 
-### 5.1 关键配置
+### 5.1 Key configuration
 
-- **Zoneless** 变更检测（Signals 驱动，无 Zone.js）
-- **SSR** + 增量水合（`withIncrementalHydration`）
-- **XSRF** 保护: cookie `XSRF-TOKEN` → header `X-XSRF-TOKEN`
-- **PWA**: Service Worker 仅生产环境启用
-- **路径别名**: `@app/` → `src/app/`, `@envs/` → `src/envs/`, `@styles/` → `src/styles/`
-- **环境文件**: `env.ts`（生产: `host: ''`, 直接调用 `/rel`/`/sec`）vs `env.dev.ts`（开发: `host: '/api'`, 走代理）
-- **样式**: SCSS，`@tabler/core` 全局 CSS/JS
-- **国际化**: `zh-Hans` 区域，dayjs 中文 locale
+- **Zoneless** change detection (Signals-driven, no Zone.js)
+- **SSR** + Incremental Hydration (`withIncrementalHydration`)
+- **XSRF** protection: cookie `XSRF-TOKEN` → header `X-XSRF-TOKEN`
+- **PWA**: Service Worker enabled in production only
+- **Path aliases**: `@app/` → `src/app/`, `@envs/` → `src/envs/`, `@styles/` → `src/styles/`
+- **Env files**: `env.ts` (prod: `host: ''`, calls `/rel`/`/sec` directly) vs `env.dev.ts` (dev: `host: '/api'`, goes through proxy)
+- **Styling**: SCSS, `@tabler/core` global CSS/JS
+- **i18n**: `zh-Hans` locale, dayjs Chinese locale
 
-### 5.2 路由结构
+### 5.2 Route structure
 
-| 路由 | 页面 | 布局 |
-|------|------|------|
-| `/passport` | 登录、锁屏 | BlankLayout |
-| `/dashboard` | 欢迎页、用户管理（列表+表单） | BaseLayout |
-| `/platform` | 租户管理 | BaseLayout |
-| `/examples` | 数据表格示例、穿梭框示例 | BaseLayout |
+| Route | Page | Layout |
+|-------|------|--------|
+| `/passport` | Login, lock screen | BlankLayout |
+| `/dashboard` | Welcome, user management (list+form) | BaseLayout |
+| `/platform` | Tenant management | BaseLayout |
+| `/examples` | DataTable example, Transfer example | BaseLayout |
 | `/error` | 404, 500, 512 | — |
-| `/` → `/passport` | 重定向 | — |
-| `/**` → `/error` | 兜底 | — |
+| `/` → `/passport` | redirect | — |
+| `/**` → `/error` | fallback | — |
 
-### 5.3 前端编码约定
+### 5.3 Frontend coding conventions
 
-- 独立组件（standalone），**不要**设置 `standalone: true`（Angular 22 默认值）
-- 使用 `inject()` 注入服务，不要用构造器注入
-- Signals 管理状态：`signal()`, `computed()`, `input()`, `output()`
-- **不要** `mutate` signals，用 `update` 或 `set`
-- 原生控制流 `@if`/`@for`/`@switch`，不要用 `*ngIf`/`*ngFor`
-- **不要** `@HostBinding`/`@HostListener`，用 `host` 对象
-- **不要** `ngClass`/`ngStyle`，用 `class`/`style` 绑定
-- 外部模板/样式路径相对于组件 TS 文件
-- Reactive forms，不要 Template-driven forms
+- Standalone components — **do NOT** set `standalone: true` (Angular 22 default)
+- Use `inject()` for service injection, not constructor injection
+- Manage state with Signals: `signal()`, `computed()`, `input()`, `output()`
+- **Do NOT** `mutate` signals; use `update` or `set`
+- Native control flow `@if`/`@for`/`@switch`, not `*ngIf`/`*ngFor`
+- **Do NOT** use `@HostBinding`/`@HostListener`; use the `host` object
+- **Do NOT** use `ngClass`/`ngStyle`; use `class`/`style` bindings
+- External template/style paths are relative to the component TS file
+- Reactive forms, not Template-driven forms
+- **Accessibility (mandatory)**: must pass all AXE checks; must meet WCAG 2.1 AA minimums (focus management, color contrast, ARIA attributes)
+- Use `NgOptimizedImage` for all static images (note: does NOT work for inline base64 images)
 
 ---
 
-## 6. 模块依赖规则
+## 6. Module Dependency Rules
 
 ```
 Config Agent ──┐
@@ -241,222 +322,230 @@ Commons Agent ──┘  (base/query/utils/converters/exception)
        │
   ┌────┴────┐
   ▼         ▼
-Security   Relational   （相互独立，无交叉依赖）
+Security   Relational   (mutually independent, no cross-dependency)
   │         │
   └────┬────┘
        ▼
    Frontend Agent (Angular UI)
 ```
 
-| 规则 | 状态 |
-|------|------|
-| `commons/` → `security/` 或 `relational/` | ❌ **禁止** |
-| `config/` → 业务 Controller/Service 方法调用 | ❌ **禁止** |
-| `security/` ↔ `relational/` | ❌ **禁止交叉依赖** |
-| `security/` → `commons/` | ✅ 允许 |
-| `relational/` → `commons/` | ✅ 允许 |
-| 所有模块 → `ContextUtils` | ✅ 允许 |
+| Rule | Status |
+|------|--------|
+| `commons/` → `security/` or `relational/` | ❌ **Forbidden** |
+| `config/` → business Controller/Service method calls | ❌ **Forbidden** |
+| `security/` ↔ `relational/` | ❌ **Forbidden cross-dependency** |
+| `security/` → `commons/` | ✅ Allowed |
+| `relational/` → `commons/` | ✅ Allowed |
+| Any module → `ContextUtils` | ✅ Allowed |
 
 ---
 
-## 7. 数据模型
+## 7. Data Model
 
-所有表前缀 `se_`。通用列：`code` (UUIDv7 PK), `version` (乐观锁), `tenant_code` (多租户隔离), `extend` (JSONB 扩展), `created_by/updated_by` (UUID), `created_at/updated_at` (TIMESTAMPTZ), `text_search` (tsvector GIN 索引, zhparser 中文分词)。
+All tables prefixed `se_`. Common columns: `code` (UUIDv7 PK), `version` (optimistic lock), `tenant_code` (multi-tenant isolation), `extend` (JSONB extension), `created_by/updated_by` (UUID), `created_at/updated_at` (TIMESTAMPTZ), `text_search` (tsvector GIN index, zhparser Chinese tokenizer).
 
-| 表 | 关键列 | 说明 |
-|----|--------|------|
-| `se_users` | `username`, `password`, `phone`, `email`, `name`, `disabled`, `account_expired/locked`, `credentials_expired`, `login_time` | 用户表 |
-| `se_authorities` | `user_code` (FK), `authority` | 用户直接权限 |
-| `se_groups` | `pcode` (父组), `name`, `description` | 用户组（层级结构） |
-| `se_group_authorities` | `group_code` (FK), `authority` | 组权限 |
-| `se_group_members` | `group_code` (FK), `user_code` (FK) | 组成员 |
-| `se_tenants` | `pcode` (父租户), `name`, `description` | 租户（层级结构, id 为 serial 非 BIGSERIAL） |
-| `se_tenant_members` | `tenant_code` (FK), `user_code` (FK), `enabled` | 租户成员 |
-| `se_menus` | `pcode`, `type` (FOLDER/MENU/LINK/API), `authority`, `name`, `path` | 菜单（层级 + 类型枚举） |
-| `se_loggers` | `prefix`, `operator`, `status`, `method`, `url`, `context` (JSONB) | 审计日志（由 LoggerFilter 事件驱动写入） |
-| `se_dictionaries` | `pcode`, `dict_type`, `dict_key`, `dict_value`, `dict_label`, `description`, `sort_no`, `enabled` | 数据字典（`tenant_code + dict_type + dict_key` 唯一约束） |
-| `oauth2_authorized_client` | `client_registration_id`, `principal_name`, `access_token_*` | OAuth2 令牌存储 |
+| Table | Key columns | Notes |
+|-------|--------------|-------|
+| `se_users` | `username`, `password`, `phone`, `email`, `name`, `disabled`, `account_expired/locked`, `credentials_expired`, `login_time` | User table |
+| `se_authorities` | `user_code` (FK), `authority` | Direct user authorities |
+| `se_groups` | `code` (parent group), `name`, `description` | User groups (hierarchy) |
+| `se_group_authorities` | `group_code` (FK), `authority` | Group authorities |
+| `se_group_members` | `group_code` (FK), `user_code` (FK) | Group members |
+| `se_tenants` | `code` (parent tenant), `name`, `description` | Tenants (hierarchy; id is `serial` not `BIGSERIAL`) |
+| `se_tenant_members` | `tenant_code` (FK), `user_code` (FK), `enabled` | Tenant members |
+| `se_menus` | `code`, `type` (FOLDER/MENU/LINK/API), `authority`, `name`, `path` | Menus (hierarchy + type enum) |
+| `se_loggers` | `prefix`, `operator`, `status`, `method`, `url`, `context` (JSONB) | Audit logs (written by `LoggerFilter` event) |
+| `se_dictionaries` | `code`, `dict_type`, `dict_key`, `dict_value`, `dict_label`, `description`, `sort_no`, `enabled` | Data dictionary (`tenant_code + dict_type + dict_key` unique constraint) |
+| `oauth2_authorized_client` | `client_registration_id`, `principal_name`, `access_token_*` | OAuth2 token storage |
 
-**注意**: `se_tenants.id` 使用 `serial`（非 BIGSERIAL），与其他表不同。
-
----
-
-## 8. API 合约
-
-### 认证 API (`/oauth2/**`)
-
-| 方法 | 路径 | 认证 | 说明 |
-|------|------|------|------|
-| `GET` | `/oauth2/login` | Basic Auth / Session | 登录，返回 `AuthenticationToken` |
-| `GET` | `/oauth2/csrf` | Session | 获取 CSRF Token |
-| `GET` | `/oauth2/bind` | Session | OAuth2 绑定查询 |
-| `POST` | `/oauth2/change/password` | Session | 改密 `{password, newPassword}` |
-| `POST` | `/oauth2/logout` | Session | 登出 + Clear-Site-Data |
-
-### 安全业务 API (`/sec/**`)
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `GET` | `/sec/users/search` | 搜索用户 |
-| `GET` | `/sec/users/page` | 分页查询 |
-| `POST` | `/sec/users` | 创建用户 |
-| `PUT` | `/sec/users` | 更新用户 |
-| `DELETE` | `/sec/users/{code}` | 删除用户 |
-| `*` | `/sec/users/authorities/**` | 用户权限 |
-| `*` | `/sec/groups/**` | 用户组 CRUD |
-| `*` | `/sec/groups/authorities/**` | 组权限 |
-| `*` | `/sec/groups/members/**` | 组成员 |
-| `*` | `/sec/tenants/**` | 租户 CRUD |
-| `*` | `/sec/tenants/members/**` | 租户成员 |
-| `GET` | `/sec/captcha/code` | 验证码（免认证） |
-
-### 关系业务 API (`/rel/**`)
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `*` | `/rel/dictionaries/**` | 字典管理 |
-| `GET` | `/rel/loggers/**` | 审计日志查询 |
-| `*` | `/rel/menus/**` | 菜单管理 |
-
-**请求要求**: POST/PUT/DELETE 必须携带 Cookie `SESSION` + Header `X-XSRF-TOKEN`。API 版本通过 `x-api-version` Header 或 `apiVersion` Query 参数控制（默认 `v1`）。
+**Note**: `se_tenants.id` uses `serial` (not `BIGSERIAL`), unlike other tables.
 
 ---
 
-## 9. 代码约定
+## 8. API Contract
 
-### 后端
+### Auth API (`/oauth2/**`)
 
-| 规则 | 说明 |
-|------|------|
-| **JSON** | 始终使用 `ContextUtils.OBJECT_MAPPER`，**禁止** `new ObjectMapper()` |
-| **主键** | `ContextUtils.nextId()`（UUIDv7） |
-| **当前用户** | `ContextUtils.securityDetails()` → `Mono<SecurityDetails>`，**禁止** `SecurityContextHolder` |
-| **事件发布** | `ContextUtils.eventPublisher(AbstractEvent)` |
-| **动态 SQL** | 使用 `QueryFragment`/`QueryHelper`/`QueryJsonHelper`，**禁止**字符串拼接 |
-| **Service 基类** | 继承 `AbstractCache` 获得 `queryWithCache()`/`countWithCache()`（Redis 前缀 `plate:caches:`, TTL 10min） |
-| **响应式** | Controller 必须返回 `Mono<T>`/`Flux<T>`，**禁止**阻塞 IO |
-| **DTO** | `*Req` 请求 DTO，`*Res` 响应 DTO（**禁止**暴露 password；`UserRes` 脱敏 phone/email） |
-| **层级结构** | Group/Tenant/Dictionary/Menu 均使用 `pcode`（父节点 code） |
-| **路径前缀** | `/rel/` → relational 包, `/sec/` → security 包（由 `WebConfiguration` 自动绑定） |
-| **权限** | `@PreAuthorize("hasRole('...')")`；管理员角色常量 `ContextUtils.RULE_ADMINISTRATORS` |
-| **DI** | Lombok `@RequiredArgsConstructor` + `final` 字段 |
-| **日志** | `@Log4j2` 注解，**禁止** `System.out` 或 Logback |
-| **密码** | `DelegatingPasswordEncoder`（默认 bcrypt） |
-| **缓存阈值** | 对象超过 `HttpCodecsProperties.maxInMemorySize`（256KB）不缓存 |
-| **并发会话** | 单用户单会话（`SessionLimit.of(1)`），后登录踢前者 |
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| `GET` | `/oauth2/login` | Basic Auth / Session | Login, returns `AuthenticationToken` |
+| `GET` | `/oauth2/csrf` | Session | Get CSRF Token |
+| `GET` | `/oauth2/bind` | Session | OAuth2 bind query |
+| `POST` | `/oauth2/change/password` | Session | Change password `{password, newPassword}` |
+| `POST` | `/oauth2/logout` | Session | Logout + Clear-Site-Data |
 
-### 前端
+### Security business API (`/sec/**`)
 
-| 规则 | 说明 |
-|------|------|
-| **组件** | 独立组件（standalone），不要设 `standalone: true` |
-| **DI** | `inject()` 函数，不要构造器注入 |
-| **状态** | Signals（`signal()`, `computed()`, `input()`, `output()`） |
-| **模板** | 原生控制流 `@if`/`@for`/`@switch`，不要结构型指令 |
-| **HTTP** | Angular HttpClient，拦截器自动处理 XSRF + 认证 |
-| **路由** | 懒加载（`loadChildren`），组件输入绑定 |
-| **样式** | SCSS + @tabler/core |
-| **测试** | Vitest（`@angular/build:unit-test`），文件 `*.spec.ts` |
-| **host 绑定** | 用 `host` 对象，不要 `@HostBinding`/`@HostListener` |
-| **信号操作** | 用 `update`/`set`，不要 `mutate` |
+| Method | Path | Notes |
+|--------|------|-------|
+| `GET` | `/sec/users/search` | Search users |
+| `GET` | `/sec/users/page` | Paginated query |
+| `POST` | `/sec/users` | Create user |
+| `PUT` | `/sec/users` | Update user |
+| `DELETE` | `/sec/users/{code}` | Delete user |
+| `*` | `/sec/users/authorities/**` | User authorities |
+| `*` | `/sec/groups/**` | User group CRUD |
+| `*` | `/sec/groups/authorities/**` | Group authorities |
+| `*` | `/sec/groups/members/**` | Group members |
+| `*` | `/sec/tenants/**` | Tenant CRUD |
+| `*` | `/sec/tenants/members/**` | Tenant members |
+| `GET` | `/sec/captcha/code` | Captcha (unauthenticated) |
 
----
+### Relational business API (`/rel/**`)
 
-## 10. Flyway 迁移
+| Method | Path | Notes |
+|--------|------|-------|
+| `*` | `/rel/dictionaries/**` | Dictionary management |
+| `GET` | `/rel/loggers/**` | Audit-log query |
+| `*` | `/rel/menus/**` | Menu management |
 
-脚本位置：`boot/platform/src/main/resources/db/migration/`
+**Request requirements**: POST/PUT/DELETE must carry Cookie `SESSION` + Header `X-XSRF-TOKEN`. API version is controlled via `x-api-version` Header or `apiVersion` Query param (default `v1`).
 
-| 脚本 | 内容 |
-|------|------|
-| `V1.0.0__Baseline.sql` | 基线 |
-| `V1.0.1__Extension.sql` | PostgreSQL 扩展（uuid-ossp, pg_trgm, zhparser） |
-| `V1.0.2__Schema.sql` | 创建所有 se_* 表 + updated_at 触发器函数 |
-| `V1.0.3__Data.sql` | 初始化数据 |
-| `V1.0.4__InitTestData.sql` | 测试数据 + `.conf` 配置文件 |
-| `V1.0.5__Dictionary.sql` | 字典表结构 |
-| `V1.0.6__DictionaryData.sql` | 字典初始数据 |
-
-**规则**: `baseline-on-migrate: true`, `baseline-version: 1.0.0`。新表必须写新的 `V1.x.y__*.sql`。**严禁**修改已有迁移文件（Flyway checksum 校验）。
+> ✅ **Verified** (from `application.yml` + `WebConfiguration.configurePathMatching`): path prefixes are `rel → com.plate.boot.relational` and `sec → com.plate.boot.security` — i.e. `/rel/**` and `/sec/**`, **no `/v1` in the path**. Prefixes are data-driven via `WebfluxProperties.pathPrefixes` (`application.yml` → `spring.webflux.properties.path-prefixes`), not hard-coded. Any `/rel/v1`//`/sec/v1` reference in `boot/AGENTS.md` is outdated.
 
 ---
 
-## 11. 测试
+## 9. Code Conventions
 
-### 后端
+### Backend
 
-- **集成测试**: `ApplicationTests.java`（21 个测试, `@SpringBootTest(webEnvironment = RANDOM_PORT)`, `WebTestClient`）
-- **单元测试**: `SecurityManagerTest.java`, `SecurityControllerTest.java`（Mockito + StepVerifier）
-- **基础设施**: `InfrastructureConfiguration.java`（Testcontainers: `alexbob/postgres` + zhparser, Redis）
-- **测试配置**: `src/test/resources/application.yml`（缓存 TTL 5min, maxInMemorySize 10MB, debug 日志）
-- **前提**: Docker daemon 必须运行
+| Rule | Notes |
+|------|-------|
+| **JSON** | Always use `ContextUtils.OBJECT_MAPPER`; **forbidden** `new ObjectMapper()` |
+| **Primary key** | `ContextUtils.nextId()` (UUIDv7) |
+| **Current user** | `ContextUtils.securityDetails()` → `Mono<SecurityDetails>`; **forbidden** `SecurityContextHolder` |
+| **Event publish** | `ContextUtils.eventPublisher(AbstractEvent)` |
+| **Dynamic SQL** | Use `QueryFragment`/`QueryHelper`/`QueryJsonHelper`; **forbidden** string concatenation |
+| **Service base** | Extend `AbstractCache` for `queryWithCache()`/`countWithCache()` (Redis prefix `plate:caches:`, TTL 10min) |
+| **Reactive** | Controllers must return `Mono<T>`/`Flux<T>`; **forbidden** blocking IO |
+| **DTO** | `*Req` request DTO, `*Res` response DTO (**forbidden** to expose password; `UserRes` masks phone/email) |
+| **Hierarchy** | Group/Tenant/Dictionary/Menu all use `code` (parent node code) |
+| **Path prefix** | `/rel/` → relational package, `/sec/` → security package (auto-bound by `WebConfiguration`) |
+| **Authorization** | `@PreAuthorize("hasRole('...')")`; admin role constant `ContextUtils.RULE_ADMINISTRATORS` (see note below) |
+| **DI** | Lombok `@RequiredArgsConstructor` + `final` fields |
+| **Logging** | `@Log4j2` annotation; **forbidden** `System.out` or Logback |
+| **Password** | `DelegatingPasswordEncoder` (default bcrypt) |
+| **Cache threshold** | Objects over `HttpCodecsProperties.maxInMemorySize` (256KB) are not cached |
+| **Concurrent session** | Single user single session (`SessionLimit.of(1)`); later login evicts earlier |
+
+> ✅ **Verified** (from `ContextUtils.java:50`): the constant is `public final static String RULE_ADMINISTRATORS = "ROLE_SYSTEM_ADMINISTRATORS";` — the **field name** is `RULE_ADMINISTRATORS` (historical typo, kept for compatibility; do not rename), and its **value** is `ROLE_SYSTEM_ADMINISTRATORS`. Reference it as `ContextUtils.RULE_ADMINISTRATORS` in code.
+
+### Frontend
+
+| Rule | Notes |
+|------|-------|
+| **Components** | Standalone components; do NOT set `standalone: true` |
+| **DI** | `inject()` function, not constructor injection |
+| **State** | Signals (`signal()`, `computed()`, `input()`, `output()`) |
+| **Templates** | Native control flow `@if`/`@for`/`@switch`, not structural directives |
+| **HTTP** | Angular HttpClient; interceptor auto-handles XSRF + auth |
+| **Routing** | Lazy loading (`loadChildren`), component input bindings |
+| **Styling** | SCSS + @tabler/core |
+| **Testing** | Vitest (`@angular/build:unit-test`), files `*.spec.ts` |
+| **Host bindings** | Use `host` object, not `@HostBinding`/`@HostListener` |
+| **Signal ops** | Use `update`/`set`, not `mutate` |
+| **Accessibility** | Must pass AXE; meet WCAG 2.1 AA (focus, contrast, ARIA) |
+| **Images** | Use `NgOptimizedImage` (not for inline base64) |
+
+---
+
+## 10. Flyway Migrations
+
+Script location: `boot/platform/src/main/resources/db/migration/`
+
+| Script | Content |
+|--------|---------|
+| `V1.0.0__Baseline.sql` | Baseline |
+| `V1.0.1__Extension.sql` | PostgreSQL extensions (uuid-ossp, pg_trgm, zhparser) |
+| `V1.0.2__Schema.sql` | Create all `se_*` tables + `updated_at` trigger function |
+| `V1.0.3__Data.sql` | Initial data |
+| `V1.0.4__InitTestData.sql` | Test data + `.conf` config files |
+| `V1.0.5__Dictionary.sql` | Dictionary table structure |
+| `V1.0.6__DictionaryData.sql` | Dictionary initial data |
+
+**Rules**: `baseline-on-migrate: true`, `baseline-version: 1.0.0`. New tables require a new `V1.x.y__*.sql`. **Strictly forbidden** to modify existing migration files (Flyway checksum validation).
+
+---
+
+## 11. Testing
+
+### Backend
+
+- **Integration tests**: `ApplicationTests.java` (21 tests, `@SpringBootTest(webEnvironment = RANDOM_PORT)`, `WebTestClient`)
+- **Unit tests**: `SecurityManagerTest.java`, `SecurityControllerTest.java` (Mockito + StepVerifier)
+- **Infrastructure**: `InfrastructureConfiguration.java` (Testcontainers: `alexbob/postgres` + zhparser, Redis)
+- **Test config**: `src/test/resources/application.yml` (cache TTL 5min, maxInMemorySize 10MB, debug logging)
+- **Prerequisite**: Docker daemon must be running
 
 ```bash
 cd boot
-./gradlew :platform:test                            # 全部测试
-./gradlew :platform:test --tests "*ClassName*"       # 单个类
-./gradlew :platform:test --tests "*MethodName*"      # 单个方法
+./gradlew :platform:test                            # All tests
+./gradlew :platform:test --tests "*ClassName*"       # Single class
+./gradlew :platform:test --tests "*MethodName*"      # Single method
 ```
 
-### 前端
+### Frontend
 
 ```bash
 cd ui/ng-plate
-pnpm test                                            # Vitest 单元测试
+pnpm test            # Vitest unit tests
 ```
 
 ---
 
-## 12. 配置属性速查
+## 12. Configuration Properties Cheat-Sheet
 
-| 属性 | 值 | 说明 |
-|------|-----|------|
-| `server.port` | `8080` | HTTP 端口 |
+| Property | Value | Notes |
+|----------|-------|-------|
+| `server.port` | `8080` | HTTP port |
 | `server.http2.enabled` | `true` | HTTP/2 |
-| `spring.threads.virtual.enabled` | `true` | Java 虚拟线程 |
-| `spring.session.timeout` | `8H` | 会话有效期 |
-| `spring.cache.redis.key-prefix` | `plate:caches:` | 缓存前缀 |
-| `spring.cache.redis.time-to-live` | `10m` | 缓存 TTL（测试 5min） |
-| `spring.http.codecs.max-in-memory-size` | `256KB` | 内存缓冲上限（测试 10MB） |
-| `spring.r2dbc.pool.max-size` | `64` | 连接池上限 |
-| `spring.jackson.time-zone` | `GMT+8` | 时区 |
-| `spring.jackson.locale` | `zh_CN` | 区域 |
+| `spring.threads.virtual.enabled` | `true` | Java virtual threads |
+| `spring.session.timeout` | `8H` | Session validity |
+| `spring.cache.redis.key-prefix` | `plate:caches:` | Cache prefix |
+| `spring.cache.redis.time-to-live` | `10m` | Cache TTL (5min in tests) |
+| `spring.http.codecs.max-in-memory-size` | `256KB` | In-memory buffer cap (10MB in tests) |
+| `spring.r2dbc.pool.max-size` | `64` | Connection pool cap |
+| `spring.jackson.time-zone` | `GMT+8` | Timezone |
+| `spring.jackson.locale` | `zh_CN` | Locale |
 
 ---
 
 ## 13. CI/CD
 
-GitHub Actions 工作流 (`.github/workflows/`)：
+GitHub Actions workflows (`.github/workflows/`):
 
-| 文件 | 触发条件 | 职责 |
-|------|---------|------|
-| `gradle-tests.yml` | push to `main`/`dev` | 运行 `./gradlew test`（JDK 25 Liberica） |
-| `gradle-build.yml` | push to `main`/`dev` + tags `v*` + releases created | 多架构 OCI 镜像 (amd64+arm64) via Buildpacks → GHCR + Docker Hub |
-| `cleanup-caches.yml` | PR close | 清理 PR 缓存 |
+| File | Trigger | Responsibility |
+|------|---------|----------------|
+| `gradle-tests.yml` | push to `main`/`dev` | Runs `./gradlew test` (JDK 25 Liberica) |
+| `gradle-build.yml` | push to `main`/`dev` + tags `v*` + releases created | Multi-arch OCI image (amd64+arm64) via Buildpacks → GHCR + Docker Hub |
+| `cleanup-caches.yml` | PR close | Clean PR caches |
 
-镜像发布：`ghcr.io/<actor>/plate-platform` 和 `docker.io/alexbob/plate-platform`
+Image publish: `ghcr.io/<actor>/plate-platform` and `docker.io/alexbob/plate-platform`
 
----
-
-## 14. 环境要求
-
-| 组件 | 版本 | 说明 |
-|------|------|------|
-| Java | 25+ | Liberica JDK 推荐 |
-| Gradle | 9.5+ | Wrapper 已包含 |
-| PostgreSQL | 17+ | uuid-ossp, pg_trgm, zhparser 扩展 |
-| Redis | 7.0+ | 缓存 + WebSession |
-| Docker | 最新 | Testcontainers 测试 |
-| Node.js | LTS | 前端开发 |
-| pnpm | 11.5.2 | 前端包管理 |
+> Note: there is **no frontend quality workflow** in this repo. CI only builds/tests the backend (`.github/workflows/gradle-*.yml`). Do not add ESLint/coverage/lint CI gates unless explicitly requested.
 
 ---
 
-## 15. 相关文档
+## 14. Environment Requirements
 
-| 文档 | 路径 | 说明 |
-|------|------|------|
-| 项目总览 | `CLAUDE.md` | Claude Code 项目总览指引 |
-| 后端专属 | `boot/CLAUDE.md` | 后端技术栈、包结构、安全模式、数据库 Schema |
-| 前端编码规范 | `ui/ng-plate/AGENTS.md` | Angular/TypeScript 最佳实践（组件、模板、状态管理、无障碍） |
-| 项目 README | `README.md` | 功能介绍、快速启动、Docker 部署 |
-| 后端 README | `boot/README.md` / `boot/README_CH.md` | 后端部署文档（英文/中文） |
+| Component | Version | Notes |
+|----------|---------|-------|
+| Java | 25+ | Liberica JDK recommended |
+| Gradle | 9.5+ | Wrapper included |
+| PostgreSQL | 17+ | uuid-ossp, pg_trgm, zhparser extensions |
+| Redis | 7.0+ | Cache + WebSession |
+| Docker | Latest | Testcontainers tests |
+| Node.js | LTS | Frontend dev |
+| pnpm | 11.12.0 | Frontend package manager |
+
+---
+
+## 15. Related Documents
+
+| Document | Path | Notes |
+|----------|------|-------|
+| Project overview | `CLAUDE.md` | Claude Code project overview guide |
+| Backend-specific | `boot/AGENTS.md` | Backend tech stack, package structure, security model, DB schema |
+| Frontend coding standards | `ui/ng-plate/AGENTS.md` | Angular/TypeScript best practices (components, templates, state, accessibility) |
+| Project README | `README.md` | Features, quick start, Docker deployment |
+| Backend README | `boot/README.md` / `boot/README_CH.md` | Backend deployment docs (EN/ZH) |

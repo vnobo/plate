@@ -86,7 +86,7 @@ export class RoleForm {
     required(p.pcode, { message: '父级角色 是必填项' });
   });
 
-  /** 可选父级 = 除自身及其后代之外的所有角色（避免循环） */
+  /** Available parents = all roles except self and descendants (avoids cycles) */
   parentOptions = computed(() => {
     const data = this.userData();
     const selfCode = data?.code;

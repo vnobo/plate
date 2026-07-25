@@ -916,7 +916,7 @@ public final class QueryFragment extends HashMap<String, Object> {
             if (this.prefix != null && !this.prefix.isEmpty()) {
                 column = this.prefix + "." + column;
             }
-            // 优化列名替换逻辑：合并连续下划线并去除首尾下划线
+            // Optimize column-name replacement: collapse consecutive underscores and trim leading/trailing underscores
             var relColumn = column.replaceAll("[^\\p{Alnum}]+", "_").replaceAll("^_|_$", "");
             stringBuilder.append(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, column))
                     .append(' ').append(Objects.requireNonNull(criteria.getComparator()).getComparator());
@@ -959,7 +959,7 @@ public final class QueryFragment extends HashMap<String, Object> {
                     break;
 
                 default:
-                    // 优化null处理逻辑
+                    // Optimize null-handling logic
                     Object value = criteria.getValue();
                     if (value == null) {
                         throw new IllegalArgumentException("Criteria value cannot be null for column: " + relColumn);

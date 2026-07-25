@@ -42,9 +42,9 @@ import { environment } from '@envs/env';
   ],
 })
 export class AuthorityForm {
-  /** 当前所属角色编码 */
+  /** Code of the owning role */
   groupCode = input.required<string>();
-  /** 编辑时传入已有权限，新建时为 null */
+  /** Existing authority when editing; null when creating */
   inputData = input<GroupAuthority | null>(null);
 
   private readonly data = linkedSignal(this.inputData);

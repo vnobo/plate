@@ -1,6 +1,6 @@
-# CLAUDE.md — Backend (boot/)
+# AGENTS.md — Backend (boot/)
 
-This file provides backend-specific guidance to Claude Code. See the root `CLAUDE.md` for monorepo overview, frontend, and CI/CD.
+This file provides backend (Java) guidance for AI agents (Claude Code and others). See the root `AGENTS.md` / `CLAUDE.md` for monorepo overview, frontend, and CI/CD. The mandatory Java coding standards are in the Coding Standards section below.
 
 ## Project Overview
 
@@ -56,7 +56,7 @@ com.plate.boot/
 
 1. Netty (HTTP/2, port 8080) → `LoggerFilter` (audit logging for non-safe methods)
 2. Spring Security: session from Redis-backed WebSession, CSRF cookie validation, `@PreAuthorize`
-3. `WebConfiguration` routes by path prefix: `/rel/v1/**` → `com.plate.boot.relational`, `/sec/v1/**` → `com.plate.boot.security`
+3. `WebConfiguration` routes by path prefix: `/rel/**` → `com.plate.boot.relational`, `/sec/**` → `com.plate.boot.security` (prefixes defined in `application.yml` `spring.webflux.properties.path-prefixes`, no `/v1` in the path; API version goes via `x-api-version` header)
 4. Controller → Service (extends `AbstractCache`, Redis caching, event publishing) → Repository (R2DBC `ReactiveCrudRepository` or `DatabaseClient`)
 
 ### Entity Pattern
@@ -103,8 +103,12 @@ Common columns: UUIDv7 `code` (PK), `tenant_code`, `extend` JSONB, `text_search`
 - Use `@RequiredArgsConstructor` with `final` fields for dependency injection (Lombok)
 - Use `@Log4j2` for logging — Logback is excluded
 - Response DTOs (e.g., `UserRes`) must omit sensitive fields like passwords
-- Path prefixes: `/rel/v1` for relational, `/sec/v1` for security endpoints
+- Path prefixes: `/rel` for relational, `/sec` for security endpoints (config-driven via `WebfluxProperties`; no `/v1` path segment)
 - Use `QueryFragment`/`QueryHelper`/`QueryJsonHelper` for all dynamic SQL — never string concatenation
+
+## Coding Standards (see root `AGENTS.md` §0)
+
+Backend Java code MUST follow the **Alibaba Java Coding Guidelines** plus the WebFlux reactive-discipline rules (no `.block()` in the request path; propagate errors via `onErrorResume`/`onErrorReturn`). The full, authoritative standard, including the Java and Angular/TypeScript rules and the "do-not-add-lint" boundary, lives in the root [`AGENTS.md` §0](./AGENTS.md). These rules are enforced by agent discipline only; there is intentionally no Checkstyle/PMD/SpotBugs/ErrorProne config or `-Pquality` gate in this repo, so do not add them.
 
 ## Testing
 

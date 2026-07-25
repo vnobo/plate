@@ -38,7 +38,7 @@ export class Tenants {
     sorts: ['id,desc'],
   });
 
-  /** 名称关键字（后端按 name 模糊匹配） */
+  /** Name keyword (backend matches against name with fuzzy search) */
   protected readonly searchKeyword = signal('');
 
   private readonly emptyPage: Page<Tenant> = {
@@ -86,7 +86,7 @@ export class Tenants {
     },
   );
 
-  /** 全部租户（用于父级下拉与名称解析） */
+  /** All tenants (used for the parent dropdown and name resolution) */
   protected readonly parentResource = httpResource<Tenant[]>(
     () => ({
       url: environment.secApiPath + '/tenants/search',

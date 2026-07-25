@@ -124,6 +124,10 @@ Netty (HTTP/2) → `LoggerFilter` (audit log for non-safe methods) → Spring Se
 - Response DTOs must omit passwords; `UserRes` masks phone/email
 - Angular: standalone components (no NgModules), signals for state, `inject()` for DI, native control flow (`@if`/`@for`/`@switch`), zoneless change detection, SSR with incremental hydration, `@tabler/core` UI framework, SCSS for styles, `zh-Hans` locale, path aliases (`@app/` → `src/app/`)
 
+## Coding Standards (see root `AGENTS.md` §0)
+
+All AI-generated code in this repo MUST follow the mandatory AI coding standards: **Alibaba Java Coding Guidelines** (backend) and **Angular Style Guide + Google TypeScript Style** (frontend), including the WebFlux reactive-discipline rules (no `.block()` in the request path; propagate errors via `onErrorResume`/`onErrorReturn`). The authoritative, full text — with the "do-not-add-lint" boundary — lives in the root [`AGENTS.md` §0](./AGENTS.md). These rules are enforced by agent discipline only, not by any build tooling, so follow them rigorously when writing and reviewing.
+
 ## Testing
 
 Backend tests use **Testcontainers** with real PostgreSQL (`alexbob/postgres` image with zhparser extension) and Redis — no mocking of database/cache. Docker daemon must be running.
@@ -157,5 +161,5 @@ Images published to: `ghcr.io/.../plate-platform` and `docker.io/alexbob/plate-p
 
 ## Additional Documentation
 
-- `boot/CLAUDE.md` — Backend-specific guidance (tech stack details, package structure, security patterns, database schema)
+- `boot/AGENTS.md` — Backend-specific guidance (tech stack details, package structure, security patterns, database schema)
 - `AGENTS.md` — Detailed agent/module definitions, input/output specs, dependency graph, request/response formats
