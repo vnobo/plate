@@ -11,7 +11,7 @@ import java.util.UUID;
 /**
  * Represents a member within a group, associating a user with a specific group identified by codes.
  * This class extends {@link AbstractEntity} to inherit common entity attributes and behaviors.
- * It adds validation constraints on the `groupCode` and `userCode` fields to ensure they are not blank,
+ * It adds validation constraints on the `groupCode` and `userCode` fields to ensure they are not null,
  * enhancing data integrity.
  *
  * <p>

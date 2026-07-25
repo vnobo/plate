@@ -21,7 +21,7 @@ import java.util.UUID;
 public class Group extends AbstractEntity<Integer> {
 
     /**
-     * The code of the group, cannot be blank
+     * The parent group code; references the superior node in the group hierarchy.
      */
     @NotNull(message = "Group parent [pcode] cannot be empty!")
     private UUID pcode;
@@ -33,7 +33,7 @@ public class Group extends AbstractEntity<Integer> {
     private String name;
 
     /**
-     * The description of the tenant.
+     * The description of the group.
      */
     private String description;
 

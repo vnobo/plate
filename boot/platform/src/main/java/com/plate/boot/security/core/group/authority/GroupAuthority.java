@@ -12,16 +12,10 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.UUID;
 
 /**
- * Entity class representing a group authority.
- * This class implements GrantedAuthority interface.
- * It is annotated with \@Table to map it to the "se_group_authorities" table in the database.
- * It uses Lombok annotations for boilerplate code reduction.
- * <p>
- * The class extends AbstractEntity to inherit common entity properties.
- * It includes validation constraints for its fields.
- * <p>
- * \@author
- * <a href="https://github.com/vnobo">Alex bob</a>
+ * Entity class representing a permission (authority) assigned to a user group.
+ * Implements {@link GrantedAuthority} so group authorities can be resolved as Spring Security authorities.
+ * Maps to the {@code se_group_authorities} table and extends {@link AbstractEntity} for common
+ * entity attributes such as the primary key, tenant isolation, and audit fields.
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -29,15 +23,13 @@ import java.util.UUID;
 public class GroupAuthority extends AbstractEntity<Integer> implements GrantedAuthority, BaseEntity<Integer> {
 
     /**
-     * The unique code of the group.
-     * It is annotated with \@NotBlank to ensure it is not null or empty.
+     * The group code this authority belongs to; must not be {@code null}.
      */
     @NotNull(message = "Group authority [groupCode] cannot be empty!")
     private UUID groupCode;
 
     /**
-     * The authority granted to the group.
-     * It is annotated with \@NotBlank to ensure it is not null or empty.
+     * The authority (permission) granted to the group; must not be blank.
      */
     @NotBlank(message = "Group authority [authority] cannot be empty!")
     private String authority;
