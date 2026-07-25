@@ -3,6 +3,7 @@ package com.plate.boot.security.captcha;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.Ordered;
+import org.springframework.stereotype.Component;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -27,7 +28,7 @@ import static com.plate.boot.security.captcha.CaptchaRepository.DEFAULT_CAPTCHA_
  * It integrates with session management and captcha token validation to prevent unauthorized access.
  */
 @Log4j2
-//@Component
+@Component
 @RequiredArgsConstructor
 public class CaptchaFilter implements WebFilter, Ordered {
 
