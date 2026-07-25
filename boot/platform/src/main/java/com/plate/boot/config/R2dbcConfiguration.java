@@ -53,6 +53,10 @@ public class R2dbcConfiguration extends AbstractR2dbcConfiguration implements In
         return Lists.newArrayList(customConverters);
     }
 
+    /**
+     * Lifecycle callback invoked after all properties have been set.
+     * Logs a debug message confirming that the R2DBC configuration has been initialized.
+     */
     @Override
     public void afterPropertiesSet() {
         log.debug("R2DBC configuration initialized!");

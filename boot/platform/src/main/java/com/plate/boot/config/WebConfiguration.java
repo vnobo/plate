@@ -15,11 +15,9 @@ import org.springframework.web.reactive.result.method.annotation.ArgumentResolve
 import java.util.List;
 
 /**
- * Configures web-related settings and behaviors for an application, including RSocket setup,
- * scheduling, asynchronous method handling, and custom argument resolvers for reactive environments.
- * This configuration class integrates with Spring's WebFlux features to enable functionalities
- * like scheduling tasks, processing asynchronous requests, and defining custom argument resolving
- * strategies for handler methods.
+ * WebFlux configuration that registers custom handler-method argument resolvers (e.g. a reactive
+ * {@code Pageable} resolver) and applies package-based path prefixes driven by {@link WebfluxProperties}.
+ * Implements {@link WebFluxConfigurer} so these settings participate in Spring's WebFlux infrastructure.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({WebfluxProperties.class, HttpCodecsProperties.class})
@@ -46,12 +44,12 @@ public class WebConfiguration implements WebFluxConfigurer {
     }
 
     /**
-     * Configures path matching options for the application.
-     * This method uses the {@link PathMatchConfigurer} to add path prefixes for specific base packages.
-     * For example, it adds the "/oauth/v1" prefix for handler methods in the "com.plate.boot.security" package
-     * and the "/rela/v1" prefix for handler methods in the "com.plate.boot.relational" package.
+     * Configures path matching by registering package-based path prefixes.
+     * Each {@link WebfluxProperties.RouteDefinition} supplies a {@code path} prefix and a {@code basePackage};
+     * handler methods in that base package are routed under the configured prefix. The actual prefixes are
+     * data-driven from {@code spring.webflux.properties.path-prefixes} and are not hard-coded here.
      *
-     * @param configurer The {@link PathMatchConfigurer} used to configure path matching options.
+     * @param configurer The {@link PathMatchConfigurer} used to register the path prefixes.
      */
     @Override
     public void configurePathMatching(@NonNull PathMatchConfigurer configurer) {
