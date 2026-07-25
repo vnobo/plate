@@ -13,7 +13,7 @@ import java.io.Serializable;
  * or by extracting information from a {@code WebSession} and an {@code Authentication} object.
  *
  * @param token          The authentication token string.
- * @param expires        The timestamp indicating when the token expires, in seconds since the Unix epoch.
+ * @param expires        The session maximum idle time, in seconds.
  * @param lastAccessTime The timestamp of the last access made using this token, in seconds since the Unix epoch.
  * @param details        Arbitrary object containing additional details associated with the authentication, typically the principal.
  */
@@ -24,7 +24,7 @@ public record AuthenticationToken(String token, Long expires, Long lastAccessTim
      * Creates a new instance of {@link AuthenticationToken} with the provided parameters.
      *
      * @param token          The authentication token string.
-     * @param expires        The timestamp in seconds since the Unix epoch when the token expires.
+     * @param expires        The session maximum idle time, in seconds.
      * @param lastAccessTime The timestamp in seconds since the Unix epoch of the last access made using this token.
      * @param details        An arbitrary object containing additional details associated with the authentication.
      * @return A new {@link AuthenticationToken} instance initialized with the given arguments.
