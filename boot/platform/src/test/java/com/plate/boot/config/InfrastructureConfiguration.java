@@ -35,7 +35,11 @@ public class InfrastructureConfiguration {
     PostgreSQLContainer postgresContainer() {
         return new PostgreSQLContainer(
                 DockerImageName.parse("alexbob/postgres").asCompatibleSubstituteFor("postgres"))
-                .waitingFor(Wait.forLogMessage("^.*database system is ready to accept connections.*$", 2));
+                // The alexbob/postgres image is initialized with the zh_CN.UTF-8 locale, so PostgreSQL
+                // logs its readiness message in Chinese ("数据库系统准备接受连接"). The wait pattern MUST
+                // match the container's actual log output; an English pattern would never match and the
+                // container would time out. This is intentional and not an internal app message.
+                .waitingFor(Wait.forLogMessage("^.*数据库系统准备接受连接.*$", 2));
     }
 
     @Bean(destroyMethod = "close")
