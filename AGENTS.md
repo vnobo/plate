@@ -90,7 +90,7 @@ Authorities: Angular Style Guide (https://angular.dev/style-guide) + Google Type
 ### Backend (run from `boot/`)
 
 ```bash
-./gradlew :platform:bootRun --args='--spring.profiles.active=local'  # Local start (port 8080)
+./gradlew :platform:bootRun --args='--spring.profiles.active=local'  # Local start (port 8080) — no Docker needed
 ./gradlew :platform:test                                              # Platform tests (requires Docker)
 ./gradlew :platform:test --tests "com.plate.boot.security.SecurityManagerTest"  # Single test class
 ./gradlew :platform:test --tests "*MethodName*"                       # Single test method
@@ -106,7 +106,8 @@ Authorities: Angular Style Guide (https://angular.dev/style-guide) + Google Type
 pnpm install          # Install dependencies
 pnpm start            # Dev server → http://localhost:4200 (proxy /api → localhost:8080)
 pnpm build            # Production build (SSR + CSR, outputs dist/)
-pnpm test             # Vitest unit tests
+pnpm test             # Vitest unit tests (all)
+pnpm test user-list.component.spec.ts  # Single Vitest test file (path glob supported)
 pnpm serve:ssr:ng-plate  # Serve the SSR build (Express, http://localhost:4000)
 ```
 
@@ -251,9 +252,10 @@ HTTP Request (Netty, port 8080, HTTP/2)
        │
        ▼
  WebConfiguration path-prefix routing:
-    /rel/**   → com.plate.boot.relational
-    /sec/**   → com.plate.boot.security
-    /oauth2/** → SecurityController
+    /rel/**       → com.plate.boot.relational
+    /sec/**       → com.plate.boot.security
+    /sec/oauth2/** → SecurityController (login/csrf/bind/change-password)
+    /oauth2/logout → Spring Security internal endpoint (filter-based, NOT prefixed)
        │
        ▼
  Controller → Service (AbstractCache, Redis cache, event publish) → Repository (R2DBC) → PostgreSQL
@@ -261,12 +263,12 @@ HTTP Request (Netty, port 8080, HTTP/2)
 
 ### 4.7 Authentication flow
 
-1. `GET /oauth2/csrf` → CsrfWebFilter writes to Reactor Context → Cookie `XSRF-TOKEN`
-2. `GET /oauth2/login` → Basic Auth or existing Session → `SecurityManager.findByUsername()`
+1. `GET /sec/oauth2/csrf` → CsrfWebFilter writes to Reactor Context → Cookie `XSRF-TOKEN`
+2. `GET /sec/oauth2/login` → Basic Auth or existing Session → `SecurityManager.findByUsername()`
 3. SecurityManager: loads user (case-insensitive) → merges direct user authorities + inherited group authorities → loads group/tenant → assembles `SecurityDetails`
 4. Response → `Set-Cookie: SESSION=...` (Redis-backed WebSession)
 5. Subsequent requests carry the SESSION cookie to auto-restore `SecurityContext`
-6. `POST /oauth2/logout` → `Clear-Site-Data` response header
+6. `POST /oauth2/logout` → `Clear-Site-Data` response header (Spring Security internal endpoint, **no `/sec` prefix**)
 
 **SecurityManager cache keys** (TTL 10min): `OAUTH2_{bindType}_{openid}`, `USER_GROUPS-{userCode}`, `USER_TENANTS-{userCode}`, `USER_AUTHORITIES-{userCode}`, `GROUP_AUTHORITIES-{userCode}`
 
@@ -360,19 +362,23 @@ All tables prefixed `se_`. Common columns: `code` (UUIDv7 PK), `version` (optimi
 
 **Note**: `se_tenants.id` uses `serial` (not `BIGSERIAL`), unlike other tables.
 
+### Multi-tenancy isolation (enforcement)
+
+Every business table carries `tenant_code`, but isolation is **not** enforced by a DB row-level security policy — it is applied in the request path. Controllers/Service read the caller's tenant via `SecurityDetails.getTenantCode()` and inject it into the query as the `securityCode` field (e.g. `request.securityCode(securityDetails.getTenantCode())`); the `QueryFragment` then filters on `tenant_code`. `DEFAULT_UUID_CODE` is the shared/global-tenant fallback (records queryable across tenants). Audit logging (`LoggerFilter`) likewise stamps `tenant_code` from `SecurityDetails`. Understanding this requires reading `SecurityDetails`, the `*Req` builders, and `AbstractEntity` together.
+
 ---
 
 ## 8. API Contract
 
-### Auth API (`/oauth2/**`)
+### Auth API (`/sec/oauth2/**`, except logout)
 
 | Method | Path | Auth | Notes |
 |--------|------|------|-------|
-| `GET` | `/oauth2/login` | Basic Auth / Session | Login, returns `AuthenticationToken` |
-| `GET` | `/oauth2/csrf` | Session | Get CSRF Token |
-| `GET` | `/oauth2/bind` | Session | OAuth2 bind query |
-| `POST` | `/oauth2/change/password` | Session | Change password `{password, newPassword}` |
-| `POST` | `/oauth2/logout` | Session | Logout + Clear-Site-Data |
+| `GET` | `/sec/oauth2/login` | Basic Auth / Session | Login, returns `AuthenticationToken` |
+| `GET` | `/sec/oauth2/csrf` | Session | Get CSRF Token |
+| `GET` | `/sec/oauth2/bind` | Session | OAuth2 bind query |
+| `POST` | `/sec/oauth2/change/password` | Session | Change password `{password, newPassword}` |
+| `POST` | `/oauth2/logout` | Session | Logout + Clear-Site-Data (Spring Security internal endpoint, **no `/sec` prefix**) |
 
 ### Security business API (`/sec/**`)
 
@@ -399,7 +405,7 @@ All tables prefixed `se_`. Common columns: `code` (UUIDv7 PK), `version` (optimi
 | `GET` | `/rel/loggers/**` | Audit-log query |
 | `*` | `/rel/menus/**` | Menu management |
 
-**Request requirements**: POST/PUT/DELETE must carry Cookie `SESSION` + Header `X-XSRF-TOKEN`. API version is controlled via `x-api-version` Header or `apiVersion` Query param (default `v1`).
+**Request requirements**: POST/PUT/DELETE must carry Cookie `SESSION` + Header `X-XSRF-TOKEN`. CSRF is enforced for state-changing methods, **except** safe (GET/HEAD) methods and the `/oauth2/none` POST path (per `SecurityConfiguration`). API version is controlled via `x-api-version` Header or `apiVersion` Query param (default `v1`).
 
 > ✅ **Verified** (from `application.yml` + `WebConfiguration.configurePathMatching`): path prefixes are `rel → com.plate.boot.relational` and `sec → com.plate.boot.security` — i.e. `/rel/**` and `/sec/**`, **no `/v1` in the path**. Prefixes are data-driven via `WebfluxProperties.pathPrefixes` (`application.yml` → `spring.webflux.properties.path-prefixes`), not hard-coded. Any `/rel/v1`//`/sec/v1` reference in `boot/AGENTS.md` is outdated.
 
@@ -420,6 +426,8 @@ All tables prefixed `se_`. Common columns: `code` (UUIDv7 PK), `version` (optimi
 | **Reactive** | Controllers must return `Mono<T>`/`Flux<T>`; **forbidden** blocking IO |
 | **DTO** | `*Req` request DTO, `*Res` response DTO (**forbidden** to expose password; `UserRes` masks phone/email) |
 | **Hierarchy** | Group/Tenant/Dictionary/Menu all use `code` (parent node code) |
+| **Multi-tenancy** | Inject `SecurityDetails.getTenantCode()` as `securityCode` into the `*Req` query (e.g. `request.securityCode(securityDetails.getTenantCode())`); `DEFAULT_UUID_CODE` is the shared/global-tenant fallback |
+| **Entity transient fields** | Entities expose transient `query` (dynamic filter Map), `search` (full-text), `securityCode` (current tenant/user UUID); `BaseEntity.query()` builds a `QueryFragment` from entity fields |
 | **Path prefix** | `/rel/` → relational package, `/sec/` → security package (auto-bound by `WebConfiguration`) |
 | **Authorization** | `@PreAuthorize("hasRole('...')")`; admin role constant `ContextUtils.RULE_ADMINISTRATORS` (see note below) |
 | **DI** | Lombok `@RequiredArgsConstructor` + `final` fields |
@@ -488,7 +496,8 @@ cd boot
 
 ```bash
 cd ui/ng-plate
-pnpm test            # Vitest unit tests
+pnpm test                                  # Vitest unit tests (all)
+pnpm test user-list.component.spec.ts      # Single test file
 ```
 
 ---
@@ -544,7 +553,6 @@ Image publish: `ghcr.io/<actor>/plate-platform` and `docker.io/alexbob/plate-pla
 
 | Document | Path | Notes |
 |----------|------|-------|
-| Project overview | `CLAUDE.md` | Claude Code project overview guide |
 | Backend-specific | `boot/AGENTS.md` | Backend tech stack, package structure, security model, DB schema |
 | Frontend coding standards | `ui/ng-plate/AGENTS.md` | Angular/TypeScript best practices (components, templates, state, accessibility) |
 | Project README | `README.md` | Features, quick start, Docker deployment |
