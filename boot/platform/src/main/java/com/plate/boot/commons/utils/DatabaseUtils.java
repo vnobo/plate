@@ -268,9 +268,12 @@ public class DatabaseUtils implements InitializingBean {
             var event = ProgressEvent.of(index, req);
             return saveFunction.apply(req).flatMap(res -> Mono.just(event.withResult(
                             "Processed success batch save item.", res)))
-                    .onErrorResume(err -> Mono.just(event.withError("Processed failed save item. msg: "
-                                    + err.getCause().getMessage(),
-                            RestServerException.withMsg(err.getLocalizedMessage(), err))));
+                    .onErrorResume(err -> {
+                        var cause = err.getCause();
+                        var msg = cause != null ? cause.getMessage() : err.getMessage();
+                        return Mono.just(event.withError("Processed failed save item. msg: " + msg,
+                                RestServerException.withMsg(err.getLocalizedMessage(), err)));
+                    });
         });
         var endMono = Mono.fromCallable(() -> ProgressEvent.of(100L, null)
                 .withMessage("Batch processing completed"));

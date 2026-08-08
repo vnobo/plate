@@ -2,6 +2,7 @@ package com.plate.boot.commons;
 
 import com.plate.boot.commons.exception.RestServerException;
 import io.r2dbc.spi.R2dbcException;
+import java.util.Optional;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.*;
@@ -45,12 +46,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         if (logger.isDebugEnabled()) {
             logger.error(ex.getLocalizedMessage(), ex);
         }
+        String detail = Optional.ofNullable(ex.getCause())
+                .map(Throwable::getLocalizedMessage)
+                .orElseGet(ex::getLocalizedMessage);
         ProblemDetail problemDetail = ProblemDetail
-                .forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getCause().getLocalizedMessage());
+                .forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, detail);
         problemDetail.setTitle("Bad Sql Grammar Data Access Exception");
         problemDetail.setType(exchange.getRequest().getURI());
         return handleExceptionInternal(ex, problemDetail, exchange.getRequest().getHeaders(),
-                HttpStatus.INSUFFICIENT_STORAGE, exchange);
+                HttpStatus.INTERNAL_SERVER_ERROR, exchange);
     }
 
     /**
@@ -71,7 +75,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         problemDetail.setTitle("Runtime Server Error Exception");
         problemDetail.setType(exchange.getRequest().getURI());
         return handleExceptionInternal(ex, problemDetail, exchange.getRequest().getHeaders(),
-                HttpStatus.INSUFFICIENT_STORAGE, exchange);
+                HttpStatus.INTERNAL_SERVER_ERROR, exchange);
     }
 
     /**
@@ -121,10 +125,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             ServerWebExchange exchange) {
 
         if (logger.isDebugEnabled()) {
-            logger.error(ex.getCause().getMessage(), ex);
+            Throwable cause = ex.getCause();
+            logger.error(cause != null ? cause.getMessage() : ex.getMessage(), ex);
         }
+        String detail = Optional.ofNullable(ex.getCause())
+                .map(Throwable::getLocalizedMessage)
+                .orElseGet(ex::getLocalizedMessage);
         ProblemDetail problemDetail = ProblemDetail
-                .forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getCause().getLocalizedMessage());
+                .forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
         problemDetail.setTitle("Bad Request Server Input Error");
         problemDetail.setType(exchange.getRequest().getURI());
         return handleExceptionInternal(ex, problemDetail, headers, status, exchange);

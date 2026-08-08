@@ -127,8 +127,7 @@ public abstract class AbstractCache implements InitializingBean {
         if (ObjectUtils.isEmpty(cacheData)) {
             var sourceData = new java.util.concurrent.CopyOnWriteArrayList<T>();
             return sourceFlux.doOnNext(sourceData::add)
-                    .doOnComplete(() -> this.cachePut(cacheKey, sourceData))
-                    .doOnCancel(() -> this.cachePut(cacheKey, sourceData));
+                    .doOnComplete(() -> this.cachePut(cacheKey, sourceData));
         }
         return Flux.fromIterable(cacheData);
     }

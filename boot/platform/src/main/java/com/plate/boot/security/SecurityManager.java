@@ -209,8 +209,9 @@ public class SecurityManager extends AbstractCache implements ReactiveUserDetail
                 .onErrorResume(throwable -> Mono.defer(() ->
                         Mono.error(new BadCredentialsException(throwable.getMessage(), throwable))))
                 .publishOn(Schedulers.boundedElastic())
-                .doOnSuccess(details -> this.loginSuccess(details.getUsername())
-                        .subscribe(res -> log.debug("Login successful! Login info modified: {}", res)))
+                .flatMap(details -> this.loginSuccess(details.getUsername())
+                        .doOnSuccess(res -> log.debug("Login successful! Login info modified: {}", res))
+                        .thenReturn(details))
                 .doOnError(throwable -> log.error("User {} login failed: {}", username, throwable.getMessage()));
     }
 
