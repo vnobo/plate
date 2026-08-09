@@ -120,72 +120,15 @@ pnpm serve:ssr:ng-plate  # Serve the SSR build (Express, http://localhost:4000)
 
 ---
 
-## 2. Monorepo Structure
-
-```
-plate/
-├── AGENTS.md                    # This file
-├── CLAUDE.md                    # Project overview guide (English)
-├── boot/                        # Backend (Gradle single-module build)
-│   ├── AGENTS.md                # Backend-specific guide (English)
-│   ├── build.gradle             # Root build script (plugins/deps/Java 25 toolchain)
-│   ├── settings.gradle          # rootProject "plate", include :platform
-│   ├── gradle.properties        # version=4.1.0, graalvm, guava, springdoc versions
-│   └── platform/                # The only submodule — all backend code
-│       └── src/
-│           ├── main/java/com/plate/boot/
-│           │   ├── BootApplication.java       # Spring Boot entry (@SpringBootApplication)
-│           │   ├── commons/                   # Common base layer
-│           │   ├── config/                    # Infrastructure config layer
-│           │   ├── relational/                # Business domains (dictionary/log/menu)
-│           │   └── security/                  # Security domain (user/group/tenant/auth)
-│           ├── main/resources/
-│           │   ├── application.yml            # Production/default config
-│           │   ├── application-local.yml      # Local dev override (git-ignored)
-│           │   └── db/migration/              # Flyway migration scripts (V1.0.0–V1.0.6)
-│           └── test/                          # Tests (Testcontainers integration + unit)
-└── ui/ng-plate/                 # Frontend (Angular 22 SSR, standalone project)
-    ├── AGENTS.md                # Frontend coding standards (Angular/TypeScript best practices)
-    ├── angular.json             # Build config (pnpm, SCSS, Tabler CSS/JS, SSR)
-    ├── proxy.conf.json          # Dev proxy: /api → http://localhost:8080/ (strips /api prefix)
-    └── src/app/
-        ├── core/                # HTTP interceptor, route guards, Token service, storage wrapper
-        ├── layout/              # BaseLayout (sidebar+header), BlankLayout (login page)
-        ├── pages/               # Lazy-loaded page modules
-        └── plugins/             # Reusable UI components (DataTable, Modals, Toasts, Transfer)
-```
+## 2. Monorepo
 
 **Key fact**: Backend and frontend are completely independent build systems (Gradle vs pnpm/Angular CLI) with no shared workspace config and no pre-commit hooks. There is **intentionally no quality-gate tooling in the repo** (no ESLint/Checkstyle/PMD/JaCoCo config, no `lint`/`coverage` scripts). Coding standards (see §0) are **advisory for AI agents only**, not enforced by the build.
 
 ---
 
-## 3. Tech Stack
+## 3. Backend Architecture
 
-| Category | Technology | Version / Notes |
-|----------|-------------|-----------------|
-| **Backend language** | Java | 25 (virtual threads, GraalVM support) |
-| **Frontend language** | TypeScript | 6.x |
-| **Backend build** | Gradle | 9.5.x (Wrapper) |
-| **Frontend build** | pnpm | 11.12.0 |
-| **Web framework** | Spring Boot WebFlux | 4.1.0 (reactive non-blocking, Netty HTTP/2) |
-| **Frontend framework** | Angular | 22.x (SSR + Signals + Zoneless) |
-| **Database** | PostgreSQL | 17+ (uuid-ossp, pg_trgm, zhparser extensions) |
-| **Data access** | Spring Data R2DBC | Reactive relational database |
-| **Cache / Session** | Redis | 7.0+ (cache + WebSession) |
-| **Security** | Spring Security | Session-based + OAuth2 + CSRF Cookie |
-| **Migrations** | Flyway | baseline-on-migrate, V1.0.0–V1.0.6 |
-| **JSON** | Jackson 3.x (tools.jackson) | Use `ContextUtils.OBJECT_MAPPER` |
-| **UI** | Tabler UI | @tabler/core CSS/JS |
-| **Logging** | Log4j2 | `@Log4j2` annotation (Logback excluded) |
-| **Testing** | JUnit 5 + Testcontainers | Real PostgreSQL + Redis containers |
-| **Frontend testing** | Vitest | @angular/build:unit-test |
-| **SSR** | Angular SSR + Express 5.1.0 | Incremental Hydration |
-
----
-
-## 4. Backend Architecture
-
-### 4.1 Module responsibilities
+### 3.1 Module responsibilities
 
 | Module | Path | Responsibility |
 |--------|------|----------------|
@@ -194,7 +137,7 @@ plate/
 | **security/** | `com.plate.boot.security` | User/group/tenant CRUD, auth, permissions, captcha, OAuth2 |
 | **relational/** | `com.plate.boot.relational` | Dictionary management, menu management, audit logging |
 
-### 4.2 commons/ submodules
+### 3.2 commons/ submodules
 
 | Sub-package | Core classes | Responsibility |
 |-------------|--------------|----------------|
@@ -204,7 +147,7 @@ plate/
 | `converters/` | `JsonNodeConverters`, `UserAuditorConverters` | R2DBC type converters (JSONB ↔ JsonNode) |
 | `exception/` | `RestServerException`, `QueryException`, `JsonException` | Exception hierarchy, unified by `GlobalExceptionHandler` |
 
-### 4.3 config/ submodules
+### 3.3 config/ submodules
 
 | Class | Responsibility |
 |-------|----------------|
@@ -216,7 +159,7 @@ plate/
 | `WebfluxProperties` | Path prefixes, API version, pagination params |
 | `HttpCodecsProperties` | maxInMemorySize (default 256KB) |
 
-### 4.4 security/ submodules
+### 3.4 security/ submodules
 
 | Sub-package | Core classes | Responsibility |
 |-------------|--------------|----------------|
@@ -229,7 +172,7 @@ plate/
 
 **Standard structure per feature package**: Entity → `*Req` (request DTO) → `*Res` (response DTO) → `*Event` (domain event) → `*Service` (extends `AbstractCache`) → `*Repository` (R2DBC) → `*Controller` (returns `Mono`/`Flux`).
 
-### 4.5 relational/ submodules
+### 3.5 relational/ submodules
 
 | Sub-package | Core classes | Responsibility |
 |-------------|--------------|----------------|
@@ -238,7 +181,7 @@ plate/
 | `logger/` | `Logger`, `LoggersService/Controller` | Audit-log query (written by `LoggerFilter` event) |
 | `menus/` | `Menu`, `MenusService/Controller` | Menu management (`type`: FOLDER/MENU/LINK/API) |
 
-### 4.6 Request processing pipeline
+### 3.6 Request processing pipeline
 
 ```
 HTTP Request (Netty, port 8080, HTTP/2)
@@ -261,7 +204,7 @@ HTTP Request (Netty, port 8080, HTTP/2)
  Controller → Service (AbstractCache, Redis cache, event publish) → Repository (R2DBC) → PostgreSQL
 ```
 
-### 4.7 Authentication flow
+### 3.7 Authentication flow
 
 1. `GET /sec/oauth2/csrf` → CsrfWebFilter writes to Reactor Context → Cookie `XSRF-TOKEN`
 2. `GET /sec/oauth2/login` → Basic Auth or existing Session → `SecurityManager.findByUsername()`
@@ -274,9 +217,9 @@ HTTP Request (Netty, port 8080, HTTP/2)
 
 ---
 
-## 5. Frontend Architecture
+## 4. Frontend Architecture
 
-### 5.1 Key configuration
+### 4.1 Key configuration
 
 - **Zoneless** change detection (Signals-driven, no Zone.js)
 - **SSR** + Incremental Hydration (`withIncrementalHydration`)
@@ -287,7 +230,7 @@ HTTP Request (Netty, port 8080, HTTP/2)
 - **Styling**: SCSS, `@tabler/core` global CSS/JS
 - **i18n**: `zh-Hans` locale, dayjs Chinese locale
 
-### 5.2 Route structure
+### 4.2 Route structure
 
 | Route | Page | Layout |
 |-------|------|--------|
@@ -299,7 +242,7 @@ HTTP Request (Netty, port 8080, HTTP/2)
 | `/` → `/passport` | redirect | — |
 | `/**` → `/error` | fallback | — |
 
-### 5.3 Frontend coding conventions
+### 4.3 Frontend coding conventions
 
 - Standalone components — **do NOT** set `standalone: true` (Angular 22 default)
 - Use `inject()` for service injection, not constructor injection
@@ -315,7 +258,7 @@ HTTP Request (Netty, port 8080, HTTP/2)
 
 ---
 
-## 6. Module Dependency Rules
+## 5. Module Dependency Rules
 
 ```
 Config Agent ──┐
@@ -342,7 +285,7 @@ Security   Relational   (mutually independent, no cross-dependency)
 
 ---
 
-## 7. Data Model
+## 6. Data Model
 
 All tables prefixed `se_`. Common columns: `code` (UUIDv7 PK), `version` (optimistic lock), `tenant_code` (multi-tenant isolation), `extend` (JSONB extension), `created_by/updated_by` (UUID), `created_at/updated_at` (TIMESTAMPTZ), `text_search` (tsvector GIN index, zhparser Chinese tokenizer).
 
@@ -368,7 +311,7 @@ Every business table carries `tenant_code`, but isolation is **not** enforced by
 
 ---
 
-## 8. API Contract
+## 7. API Contract
 
 ### Auth API (`/sec/oauth2/**`, except logout)
 
@@ -411,71 +354,21 @@ Every business table carries `tenant_code`, but isolation is **not** enforced by
 
 ---
 
-## 9. Code Conventions
+## 8. Code Conventions
 
-### Backend
-
-| Rule | Notes |
-|------|-------|
-| **JSON** | Always use `ContextUtils.OBJECT_MAPPER`; **forbidden** `new ObjectMapper()` |
-| **Primary key** | `ContextUtils.nextId()` (UUIDv7) |
-| **Current user** | `ContextUtils.securityDetails()` → `Mono<SecurityDetails>`; **forbidden** `SecurityContextHolder` |
-| **Event publish** | `ContextUtils.eventPublisher(AbstractEvent)` |
-| **Dynamic SQL** | Use `QueryFragment`/`QueryHelper`/`QueryJsonHelper`; **forbidden** string concatenation |
-| **Service base** | Extend `AbstractCache` for `queryWithCache()`/`countWithCache()` (Redis prefix `plate:caches:`, TTL 10min) |
-| **Reactive** | Controllers must return `Mono<T>`/`Flux<T>`; **forbidden** blocking IO |
-| **DTO** | `*Req` request DTO, `*Res` response DTO (**forbidden** to expose password; `UserRes` masks phone/email) |
-| **Hierarchy** | Group/Tenant/Dictionary/Menu all use `code` (parent node code) |
-| **Multi-tenancy** | Inject `SecurityDetails.getTenantCode()` as `securityCode` into the `*Req` query (e.g. `request.securityCode(securityDetails.getTenantCode())`); `DEFAULT_UUID_CODE` is the shared/global-tenant fallback |
-| **Entity transient fields** | Entities expose transient `query` (dynamic filter Map), `search` (full-text), `securityCode` (current tenant/user UUID); `BaseEntity.query()` builds a `QueryFragment` from entity fields |
-| **Path prefix** | `/rel/` → relational package, `/sec/` → security package (auto-bound by `WebConfiguration`) |
-| **Authorization** | `@PreAuthorize("hasRole('...')")`; admin role constant `ContextUtils.RULE_ADMINISTRATORS` (see note below) |
-| **DI** | Lombok `@RequiredArgsConstructor` + `final` fields |
-| **Logging** | `@Log4j2` annotation; **forbidden** `System.out` or Logback |
-| **Password** | `DelegatingPasswordEncoder` (default bcrypt) |
-| **Cache threshold** | Objects over `HttpCodecsProperties.maxInMemorySize` (256KB) are not cached |
-| **Concurrent session** | Single user single session (`SessionLimit.of(1)`); later login evicts earlier |
+> See [`CLAUDE.md`](./CLAUDE.md) "Key Conventions" for the authoritative quick-reference. The backend and frontend rules live there.
 
 > ✅ **Verified** (from `ContextUtils.java:50`): the constant is `public final static String RULE_ADMINISTRATORS = "ROLE_SYSTEM_ADMINISTRATORS";` — the **field name** is `RULE_ADMINISTRATORS` (historical typo, kept for compatibility; do not rename), and its **value** is `ROLE_SYSTEM_ADMINISTRATORS`. Reference it as `ContextUtils.RULE_ADMINISTRATORS` in code.
 
-### Frontend
+---
 
-| Rule | Notes |
-|------|-------|
-| **Components** | Standalone components; do NOT set `standalone: true` |
-| **DI** | `inject()` function, not constructor injection |
-| **State** | Signals (`signal()`, `computed()`, `input()`, `output()`) |
-| **Templates** | Native control flow `@if`/`@for`/`@switch`, not structural directives |
-| **HTTP** | Angular HttpClient; interceptor auto-handles XSRF + auth |
-| **Routing** | Lazy loading (`loadChildren`), component input bindings |
-| **Styling** | SCSS + @tabler/core |
-| **Testing** | Vitest (`@angular/build:unit-test`), files `*.spec.ts` |
-| **Host bindings** | Use `host` object, not `@HostBinding`/`@HostListener` |
-| **Signal ops** | Use `update`/`set`, not `mutate` |
-| **Accessibility** | Must pass AXE; meet WCAG 2.1 AA (focus, contrast, ARIA) |
-| **Images** | Use `NgOptimizedImage` (not for inline base64) |
+## 9. Flyway Migrations
+
+**Rules**: `baseline-on-migrate: true`, `baseline-version: 1.0.0`. New tables require a new `V1.x.y__*.sql`. **Strictly forbidden** to modify existing migration files (Flyway checksum validation).: `baseline-on-migrate: true`, `baseline-version: 1.0.0`. New tables require a new `V1.x.y__*.sql`. **Strictly forbidden** to modify existing migration files (Flyway checksum validation).
 
 ---
 
-## 10. Flyway Migrations
-
-Script location: `boot/platform/src/main/resources/db/migration/`
-
-| Script | Content |
-|--------|---------|
-| `V1.0.0__Baseline.sql` | Baseline |
-| `V1.0.1__Extension.sql` | PostgreSQL extensions (uuid-ossp, pg_trgm, zhparser) |
-| `V1.0.2__Schema.sql` | Create all `se_*` tables + `updated_at` trigger function |
-| `V1.0.3__Data.sql` | Initial data |
-| `V1.0.4__InitTestData.sql` | Test data + `.conf` config files |
-| `V1.0.5__Dictionary.sql` | Dictionary table structure |
-| `V1.0.6__DictionaryData.sql` | Dictionary initial data |
-
-**Rules**: `baseline-on-migrate: true`, `baseline-version: 1.0.0`. New tables require a new `V1.x.y__*.sql`. **Strictly forbidden** to modify existing migration files (Flyway checksum validation).
-
----
-
-## 11. Testing
+## 10. Testing
 
 ### Backend
 
@@ -502,54 +395,11 @@ pnpm test user-list.component.spec.ts      # Single test file
 
 ---
 
-## 12. Configuration Properties Cheat-Sheet
-
-| Property | Value | Notes |
-|----------|-------|-------|
-| `server.port` | `8080` | HTTP port |
-| `server.http2.enabled` | `true` | HTTP/2 |
-| `spring.threads.virtual.enabled` | `true` | Java virtual threads |
-| `spring.session.timeout` | `8H` | Session validity |
-| `spring.cache.redis.key-prefix` | `plate:caches:` | Cache prefix |
-| `spring.cache.redis.time-to-live` | `10m` | Cache TTL (5min in tests) |
-| `spring.http.codecs.max-in-memory-size` | `256KB` | In-memory buffer cap (10MB in tests) |
-| `spring.r2dbc.pool.max-size` | `64` | Connection pool cap |
-| `spring.jackson.time-zone` | `GMT+8` | Timezone |
-| `spring.jackson.locale` | `zh_CN` | Locale |
-
----
-
-## 13. CI/CD
-
-GitHub Actions workflows (`.github/workflows/`):
-
-| File | Trigger | Responsibility |
-|------|---------|----------------|
-| `gradle-tests.yml` | push to `main`/`dev` | Runs `./gradlew test` (JDK 25 Liberica) |
-| `gradle-build.yml` | push to `main`/`dev` + tags `v*` + releases created | Multi-arch OCI image (amd64+arm64) via Buildpacks → GHCR + Docker Hub |
-| `cleanup-caches.yml` | PR close | Clean PR caches |
-
-Image publish: `ghcr.io/<actor>/plate-platform` and `docker.io/alexbob/plate-platform`
-
 > Note: there is **no frontend quality workflow** in this repo. CI only builds/tests the backend (`.github/workflows/gradle-*.yml`). Do not add ESLint/coverage/lint CI gates unless explicitly requested.
 
 ---
 
-## 14. Environment Requirements
-
-| Component | Version | Notes |
-|----------|---------|-------|
-| Java | 25+ | Liberica JDK recommended |
-| Gradle | 9.5+ | Wrapper included |
-| PostgreSQL | 17+ | uuid-ossp, pg_trgm, zhparser extensions |
-| Redis | 7.0+ | Cache + WebSession |
-| Docker | Latest | Testcontainers tests |
-| Node.js | LTS | Frontend dev |
-| pnpm | 11.12.0 | Frontend package manager |
-
----
-
-## 15. Related Documents
+## 11. Related Documents
 
 | Document | Path | Notes |
 |----------|------|-------|
