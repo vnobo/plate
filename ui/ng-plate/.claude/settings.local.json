@@ -3,5 +3,8 @@
   "enabledMcpjsonServers": ["angular-cli"],
   "permissions": {
     "allow": ["mcp__angular-cli__ai_tutor"]
+  },
+  "skillOverrides": {
+    "angular-developer": "off"
   }
 }

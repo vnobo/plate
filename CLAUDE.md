@@ -11,31 +11,7 @@ Plate Platform — a reactive, multi-tenant enterprise management system. Polygl
 
 For detailed architecture, data model, API contract, and coding standards, see [`AGENTS.md`](./AGENTS.md). Module-specific guides: [`boot/AGENTS.md`](./boot/AGENTS.md), [`ui/ng-plate/AGENTS.md`](./ui/ng-plate/AGENTS.md).
 
-## Essential Commands
-
-### Backend (run from `boot/`)
-
-```bash
-./gradlew :platform:bootRun --args='--spring.profiles.active=local'  # Start on port 8080
-./gradlew :platform:test                                              # All tests (requires Docker)
-./gradlew :platform:test --tests "com.plate.boot.security.SecurityManagerTest"  # Single class
-./gradlew :platform:test --tests "*MethodName*"                       # Single method
-./gradlew :platform:compileJava                                       # Compile only, skip tests
-./gradlew build                                                        # Full build + tests
-```
-
-### Frontend (run from `ui/ng-plate/`)
-
-```bash
-pnpm install              # Install dependencies
-pnpm start                # Dev server → http://localhost:4200 (proxy /api → localhost:8080)
-pnpm build                # Production build (SSR + CSR)
-pnpm test                 # Vitest unit tests (all)
-pnpm test user-list.component.spec.ts  # Single test file
-pnpm serve:ssr:ng-plate   # Serve SSR build → http://localhost:4000
-```
-
-### Default dev credentials
+## Default dev credentials
 - Backend Swagger UI: `http://127.0.0.1:8080/swagger-ui.html`
 - Admin: `admin` / `123456`, user: `user` / `123456`
 - PostgreSQL: `127.0.0.1:5432/plate`, user `farmer` / `123456`
@@ -43,39 +19,12 @@ pnpm serve:ssr:ng-plate   # Serve SSR build → http://localhost:4000
 
 ## Architecture
 
-### Monorepo layout
-
-```
-plate/
-├── boot/platform/                    # Single Gradle submodule — all backend code
-│   └── src/main/java/com/plate/boot/
-│       ├── BootApplication.java      # Entry point
-│       ├── commons/                  # Base layer: entities, QueryFragment SQL builder, utilities
-│       ├── config/                   # Security, Web, R2DBC, Redis, Session config
-│       ├── security/                 # Users, groups, tenants, auth, captcha, OAuth2
-│       └── relational/               # Dictionaries, menus, audit logging
-└── ui/ng-plate/src/app/
-    ├── core/          # HTTP interceptor, route guards, token service
-    ├── layout/        # BaseLayout (sidebar+header), BlankLayout
-    ├── pages/         # Lazy-loaded routes (dashboard, passport, platform)
-    └── plugins/       # Reusable UI (DataTable, Modals, Toasts, Transfer)
-```
-
 ### Module dependency rules
 
 - `commons/` → `security/` or `relational/`: ❌ forbidden (commons is the base layer)
 - `security/` ↔ `relational/`: ❌ forbidden (mutually independent)
 - Both may depend on `commons/` and `config/`
 - Any module may use `ContextUtils`
-
-### Request pipeline (backend)
-
-```
-Netty HTTP/2 (8080) → LoggerFilter (audit non-safe methods)
-  → Spring Security (CSRF → Auth → Session control)
-  → WebConfiguration path routing: /rel/** → relational, /sec/** → security
-  → Controller → Service (AbstractCache, Redis) → Repository (R2DBC) → PostgreSQL
-```
 
 ### API path prefixes
 
@@ -119,11 +68,6 @@ All tables prefixed `se_` with UUIDv7 PK (`code`), `tenant_code` (multi-tenant),
 ### General
 - **No quality-gate tooling**: there is intentionally no ESLint/Checkstyle/PMD/JaCoCo config in the repo — do not add lint/coverage scripts or CI quality gates
 - **No modifying existing Flyway migrations**: new tables require new `V1.x.y__*.sql` scripts
-
-## Testing
-
-- **Backend tests**: JUnit 5 + Testcontainers (real PostgreSQL + Redis in Docker) + `WebTestClient` + `StepVerifier`. Docker daemon must be running.
-- **Frontend tests**: Vitest via `@angular/build:unit-test`; spec files alongside source (`*.spec.ts`).
 
 ## Environment requirements
 
