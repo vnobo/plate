@@ -177,8 +177,6 @@ public class UsersService {
      * @return A Mono emitting the saved User entity after the operation completes successfully.
      * If the user is not found during update, a Mono error with RestServerException is returned.
      */
-    @CacheEvict(cacheNames = "users", allEntries = true)
-    @Transactional(rollbackFor = Exception.class)
     public Mono<@NonNull User> save(User user) {
         if (user.isNew()) {
             return this.usersRepository.save(user)

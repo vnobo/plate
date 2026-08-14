@@ -113,7 +113,6 @@ public class MenusService extends AbstractCache {
      * @param request The menu request containing the details of the menu to be saved.
      * @return A Mono of the saved Menu entity.
      */
-    @Transactional(rollbackFor = Exception.class)
     public Mono<Menu> operate(MenuReq request) {
         log.debug("Menu operate request: {}", request);
         return this.menusRepository.findByCode(request.getCode())
@@ -133,7 +132,6 @@ public class MenusService extends AbstractCache {
      * @param menu The menu entity to be saved.
      * @return A Mono of the saved Menu entity.
      */
-    @Transactional(rollbackFor = Exception.class)
     public Mono<Menu> save(Menu menu) {
         if (menu.isNew()) {
             return this.menusRepository.save(menu)
