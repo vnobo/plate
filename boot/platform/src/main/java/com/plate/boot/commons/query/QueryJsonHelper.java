@@ -3,7 +3,6 @@ package com.plate.boot.commons.query;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.plate.boot.commons.exception.QueryException;
-import com.plate.boot.commons.exception.RestServerException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.StringUtils;
