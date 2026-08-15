@@ -196,6 +196,15 @@ class QueryFragmentTest {
     }
 
     @Test
+    void pageableWrapsIgnoreCaseSortInLower() {
+        QueryFragment f = QueryFragment.from("users")
+                .pageable(PageRequest.of(0, 10, Sort.by(Sort.Order.asc("user_name").ignoreCase())));
+
+        assertThat(f.orderSql()).contains("LOWER(user_name) ASC");
+        assertThat(f.orderSql()).doesNotContain("user_name ASC");
+    }
+
+    @Test
     void conditionAddsSqlAndParametersFromCriteria() {
         Criteria criteria = Criteria.where("name").like("Bob").ignoreCase(true);
         QueryFragment f = QueryFragment.from("users").condition(QueryFragment.Condition.of(criteria));

@@ -409,7 +409,11 @@ public final class QueryFragment extends HashMap<String, Object> {
         this.limit(pageable.getPageSize(), pageable.getOffset());
         var sort = QueryJsonHelper.transformSortForJson(pageable.getSort());
         for (Sort.Order order : sort) {
-            this.orderBy(order.getProperty() + (order.isAscending() ? " ASC" : " DESC"));
+            String property = order.getProperty();
+            if (order.isIgnoreCase()) {
+                property = "LOWER(" + property + ")";
+            }
+            this.orderBy(property + (order.isAscending() ? " ASC" : " DESC"));
         }
         return this;
     }

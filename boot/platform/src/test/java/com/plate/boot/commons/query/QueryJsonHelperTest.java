@@ -122,6 +122,12 @@ class QueryJsonHelperTest {
     }
 
     @Test
+    void transformSortForJsonThrowsForDotsOnlySortProperty() {
+        assertThatThrownBy(() -> QueryJsonHelper.transformSortForJson(Sort.by(".")))
+                .isInstanceOf(QueryException.class);
+    }
+
+    @Test
     void transformSortForJsonThrowsForInvalidColumnName() {
         assertThatThrownBy(() -> QueryJsonHelper.transformSortForJson(Sort.by("bad-name")))
                 .isInstanceOf(QueryException.class);

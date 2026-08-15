@@ -135,6 +135,10 @@ public final class QueryJsonHelper {
      */
     private static Sort.Order convertSortOrderToCamelCase(Sort.Order order) {
         String[] keys = StringUtils.delimitedListToStringArray(order.getProperty(), ".");
+        if (keys.length == 0) {
+            throw QueryException.withError("Sort property is empty",
+                    new IllegalArgumentException("Sort property cannot be empty"));
+        }
 
         String firstKey = validateColumnName(keys[0]);
 
@@ -147,7 +151,11 @@ public final class QueryJsonHelper {
             }
             sortedProperty.append("->>'").append(escapeJsonKey(keys[lastIndex])).append("'");
         }
-        return Sort.Order.by(sortedProperty.toString()).with(order.getDirection());
+        Sort.Order transformed = Sort.Order.by(sortedProperty.toString()).with(order.getDirection());
+        if (order.isIgnoreCase()) {
+            transformed = transformed.ignoreCase();
+        }
+        return transformed;
     }
 
     private static String validateColumnName(String columnName) {
