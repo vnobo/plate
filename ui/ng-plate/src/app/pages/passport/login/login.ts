@@ -41,8 +41,8 @@ export class Login {
   });
 
   constructor() {
-    this.processLogin();
-    this.loadRememberedCredentials();
+    //this.processLogin();
+    //this.loadRememberedCredentials();
   }
 
   async onSubmit() {

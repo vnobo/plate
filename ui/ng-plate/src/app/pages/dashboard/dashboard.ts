@@ -1,19 +1,19 @@
 import { Routes } from '@angular/router';
-import { Users } from './users/users';
+import { Welcome } from './welcome/welcome';
 
 export const DASHBOARD_ROUTES: Routes = [
   {
     path: '',
     children: [
       {
-        path: 'users',
-        component: Users,
-        title: '用户管理',
+        path: 'welcome',
+        component: Welcome,
+        title: '欢迎',
       },
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'users',
+        redirectTo: 'welcome',
       },
     ],
   },

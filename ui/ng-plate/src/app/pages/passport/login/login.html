@@ -175,7 +175,8 @@
               <button
                 [class.disabled]="isSubmitting()"
                 tabindex="4"
-                type="submit"
+                type="button"
+                (click)="onSubmit()"
                 class="btn btn-primary w-100 border-0"
                 [disabled]="!loginForm().valid() || isSubmitting()"
               >
