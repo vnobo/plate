@@ -11,6 +11,7 @@ import org.springframework.data.r2dbc.convert.R2dbcConverter;
 import org.springframework.data.relational.core.query.Criteria;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -218,5 +219,119 @@ class QueryFragmentTest {
         QueryFragment f = QueryFragment.conditional(QueryFragment.Condition.of(criteria));
 
         assertThat(f.whereSql()).contains("active = :");
+    }
+
+    @Test
+    void conditionBindsBetweenBounds() {
+        Criteria criteria = Criteria.where("age").between(18, 65);
+        QueryFragment.Condition condition = QueryFragment.Condition.of(criteria);
+
+        assertThat(condition.toSql()).contains("age BETWEEN :age1 AND :age2");
+        assertThat(condition.get("age1")).isEqualTo(18);
+        assertThat(condition.get("age2")).isEqualTo(65);
+    }
+
+    @Test
+    void conditionBindsInValuesAsParameters() {
+        Criteria criteria = Criteria.where("status").in("active", "pending");
+        QueryFragment.Condition condition = QueryFragment.Condition.of(criteria);
+
+        assertThat(condition.toSql()).contains("status IN (:").doesNotContain("active").doesNotContain("pending");
+        assertThat(condition.get("status0")).isEqualTo("active");
+        assertThat(condition.get("status1")).isEqualTo("pending");
+    }
+
+    @Test
+    void conditionRendersNullAndBooleanComparatorsWithoutValues() {
+        Criteria criteria = Criteria.where("a").isNull().and("b").isNotNull().and("c").isTrue().and("d").isFalse();
+        QueryFragment.Condition condition = QueryFragment.Condition.of(criteria);
+
+        String sql = condition.toSql();
+        assertThat(sql).contains("a IS NULL").contains("b IS NOT NULL").contains("c IS TRUE").contains("d IS FALSE");
+        assertThat(condition).doesNotContainKeys("a", "b", "c", "d");
+    }
+
+    @Test
+    void conditionRendersChainedCriteriaWithCombinator() {
+        Criteria criteria = Criteria.where("a").is(1).and("b").is(2);
+        QueryFragment.Condition condition = QueryFragment.Condition.of(criteria);
+
+        assertThat(condition.toSql()).contains("a = :a").contains(" AND ").contains("b = :b");
+        assertThat(condition.get("a")).isEqualTo(1);
+        assertThat(condition.get("b")).isEqualTo(2);
+    }
+
+    @Test
+    void conditionWithPrefixQualifiesInColumn() {
+        Criteria criteria = Criteria.where("status").in("a");
+        QueryFragment.Condition condition = QueryFragment.Condition.of(criteria, "u");
+
+        assertThat(condition.toSql()).contains("u.status IN (:u_status0");
+        assertThat(condition.get("u_status0")).isEqualTo("a");
+    }
+
+    @Test
+    void conditionSkipsBlankSql() {
+        QueryFragment f = QueryFragment.from("users").condition(
+                QueryFragment.Condition.of(Criteria.empty()));
+
+        assertThat(f.whereSql()).isEmpty();
+    }
+
+    @Test
+    void tsKeepsExistingColumns() {
+        QueryFragment f = QueryFragment.from("docs").column("id").ts("text_search", "hi");
+
+        assertThat(f.columnSql()).startsWith("id,TS_RANK_CD(").contains("AS rank");
+        assertThat(f.querySql()).contains("SELECT id,TS_RANK_CD(");
+    }
+
+    @Test
+    void nullLikeValueAddsNoCondition() {
+        QueryFragment f = QueryFragment.from("users").like("name", null);
+
+        assertThat(f.whereSql()).isEmpty();
+    }
+
+    @Test
+    void conditionBindsNotBetweenBounds() {
+        Criteria criteria = Criteria.where("age").notBetween(18, 65);
+        QueryFragment.Condition condition = QueryFragment.Condition.of(criteria);
+
+        assertThat(condition.toSql()).contains("age NOT BETWEEN :age1 AND :age2");
+        assertThat(condition.get("age1")).isEqualTo(18);
+        assertThat(condition.get("age2")).isEqualTo(65);
+    }
+
+    @Test
+    void conditionBindsNotInValues() {
+        Criteria criteria = Criteria.where("status").notIn("a", "b");
+        QueryFragment.Condition condition = QueryFragment.Condition.of(criteria);
+
+        assertThat(condition.toSql()).contains("status NOT IN (:status0, :status1");
+        assertThat(condition.get("status0")).isEqualTo("a");
+        assertThat(condition.get("status1")).isEqualTo("b");
+    }
+
+    @Test
+    void conditionHandlesEmptyInCollection() {
+        Criteria criteria = Criteria.where("status").in(java.util.Collections.emptyList());
+        QueryFragment.Condition condition = QueryFragment.Condition.of(criteria);
+
+        assertThat(condition.toSql()).contains("status IN ()");
+    }
+
+    @Test
+    void ofMapInitializesFragmentWithoutRecursion() {
+        QueryFragment fragment = QueryFragment.of(Map.of("name", "alice"));
+
+        assertThat(fragment).containsEntry("name", "alice");
+    }
+
+    @Test
+    void ofSizeOffsetMapInitializesFragmentWithoutRecursion() {
+        QueryFragment fragment = QueryFragment.of(10, 5, Map.of("name", "bob"));
+
+        assertThat(fragment).containsEntry("name", "bob");
     }
 }

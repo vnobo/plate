@@ -98,7 +98,6 @@ public class GroupsService extends AbstractCache {
                     .doOnNext(res -> ContextUtils.eventPublisher(GroupEvent.insert(res)));
         } else {
             // Update group, preserving creation time and code information
-            assert group.getId() != null;
             return this.groupsRepository.findById(group.getId()).flatMap(old -> {
                         group.setCreatedAt(old.getCreatedAt());
                         group.setCode(old.getCode());

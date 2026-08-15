@@ -189,7 +189,11 @@ public final class QueryFragment extends HashMap<String, Object> {
      * @return a new QueryFragment instance with the specified parameters
      */
     public static QueryFragment of(Map<String, Object> params) {
-        return of(Integer.MAX_VALUE, 0, params);
+        var fragment = new QueryFragment();
+        if (params != null && !params.isEmpty()) {
+            fragment.putAll(params);
+        }
+        return fragment;
     }
 
     /**
@@ -211,7 +215,11 @@ public final class QueryFragment extends HashMap<String, Object> {
      * @return a new QueryFragment instance with the specified size, offset, and parameters
      */
     public static QueryFragment of(int size, long offset, Map<String, Object> params) {
-        return of(params).limit(size, offset);
+        var fragment = new QueryFragment();
+        if (params != null && !params.isEmpty()) {
+            fragment.putAll(params);
+        }
+        return fragment.limit(size, offset);
     }
 
     /**
@@ -401,9 +409,7 @@ public final class QueryFragment extends HashMap<String, Object> {
         this.limit(pageable.getPageSize(), pageable.getOffset());
         var sort = QueryJsonHelper.transformSortForJson(pageable.getSort());
         for (Sort.Order order : sort) {
-            String sortedPropertyName = order.getProperty();
-            String sortedProperty = order.isIgnoreCase() ? "LOWER(" + sortedPropertyName + ")" : sortedPropertyName;
-            this.orderBy(sortedProperty + (order.isAscending() ? " ASC" : " DESC"));
+            this.orderBy(order.getProperty() + (order.isAscending() ? " ASC" : " DESC"));
         }
         return this;
     }

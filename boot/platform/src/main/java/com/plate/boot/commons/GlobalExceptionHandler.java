@@ -43,9 +43,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(DataAccessException.class)
     public Mono<ResponseEntity<Object>> handleDataAccessException(DataAccessException ex, ServerWebExchange exchange) {
-        if (logger.isDebugEnabled()) {
-            logger.error(ex.getLocalizedMessage(), ex);
-        }
+        logger.error(ex.getLocalizedMessage(), ex);
         String detail = Optional.ofNullable(ex.getCause())
                 .map(Throwable::getLocalizedMessage)
                 .orElseGet(ex::getLocalizedMessage);
@@ -67,9 +65,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(RuntimeException.class)
     public Mono<ResponseEntity<Object>> handleRuntimeException(RuntimeException ex, ServerWebExchange exchange) {
-        if (logger.isDebugEnabled()) {
-            logger.error(ex.getMessage(), ex);
-        }
+        logger.error(ex.getMessage(), ex);
         ProblemDetail problemDetail = ProblemDetail
                 .forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getLocalizedMessage());
         problemDetail.setTitle("Runtime Server Error Exception");
@@ -93,12 +89,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                           HttpHeaders headers,
                                                                           HttpStatusCode status,
                                                                           ServerWebExchange exchange) {
-        if (logger.isDebugEnabled()) {
-            for (var err : ex.getAllErrors()) {
-                logger.error("Bind Request Error! Field: " + err.getObjectName() + ",Error: " + err.getDefaultMessage());
-            }
-            logger.error(ex.getMessage(), ex);
+        for (var err : ex.getAllErrors()) {
+            logger.error("Bind Request Error! Field: " + err.getObjectName() + ",Error: " + err.getDefaultMessage());
         }
+        logger.error(ex.getMessage(), ex);
         var errMsg = ex.getAllErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
         ProblemDetail problemDetail = ProblemDetail
@@ -124,10 +118,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             ServerWebInputException ex, HttpHeaders headers, HttpStatusCode status,
             ServerWebExchange exchange) {
 
-        if (logger.isDebugEnabled()) {
-            Throwable cause = ex.getCause();
-            logger.error(cause != null ? cause.getMessage() : ex.getMessage(), ex);
-        }
+        Throwable cause = ex.getCause();
+        logger.error(cause != null ? cause.getMessage() : ex.getMessage(), ex);
         String detail = Optional.ofNullable(ex.getCause())
                 .map(Throwable::getLocalizedMessage)
                 .orElseGet(ex::getLocalizedMessage);

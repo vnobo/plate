@@ -89,7 +89,6 @@ public class LoggersService extends AbstractCache {
         if (logger.isNew()) {
             return this.loggersRepository.save(logger);
         } else {
-            assert logger.getId() != null;
             return this.loggersRepository.findById(logger.getId()).flatMap(old -> {
                 logger.setCreatedAt(old.getCreatedAt());
                 return this.loggersRepository.save(logger);

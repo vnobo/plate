@@ -135,10 +135,6 @@ public final class QueryJsonHelper {
      */
     private static Sort.Order convertSortOrderToCamelCase(Sort.Order order) {
         String[] keys = StringUtils.delimitedListToStringArray(order.getProperty(), ".");
-        if (keys.length == 0) {
-            throw QueryException.withError("Delimited list to string property empty",
-                    new IllegalArgumentException("Empty property name in sort order"));
-        }
 
         String firstKey = validateColumnName(keys[0]);
 

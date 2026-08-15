@@ -68,7 +68,6 @@ public class GroupAuthoritiesService extends AbstractCache {
             return this.authoritiesRepository.save(groupAuthority);
         } else {
             // Update existing group authority
-            assert groupAuthority.getId() != null;
             return this.authoritiesRepository.findById(groupAuthority.getId())
                     .flatMap(old -> this.authoritiesRepository.save(groupAuthority));
         }

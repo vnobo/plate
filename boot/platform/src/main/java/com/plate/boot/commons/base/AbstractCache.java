@@ -177,7 +177,7 @@ public abstract class AbstractCache implements InitializingBean {
      */
     protected Mono<Long> countWithCache(Object key, Mono<Long> sourceMono) {
         String cacheKey = key + ":count";
-        Long cacheCount = this.cache.get(cacheKey, () -> 0L);
+        Long cacheCount = this.cache.get(cacheKey, Long.class);
         Mono<Long> source = sourceMono.doOnNext(count -> this.cachePut(cacheKey, count));
         return Mono.justOrEmpty(cacheCount).switchIfEmpty(Mono.defer(() -> source));
     }

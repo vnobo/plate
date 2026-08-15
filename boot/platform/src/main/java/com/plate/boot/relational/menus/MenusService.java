@@ -137,7 +137,6 @@ public class MenusService extends AbstractCache {
             return this.menusRepository.save(menu)
                     .doOnNext((res) -> ContextUtils.eventPublisher(MenuEvent.insert(res)));
         } else {
-            assert menu.getId() != null;
             return this.menusRepository.findById(menu.getId()).flatMap(old -> {
                 menu.setCode(old.getCode());
                 menu.setCreatedAt(old.getCreatedAt());

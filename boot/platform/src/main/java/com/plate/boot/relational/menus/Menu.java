@@ -109,7 +109,7 @@ public class Menu extends AbstractEntity<Integer> {
         }
         String role = authority;
         if (!authority.startsWith(MenusService.AUTHORITY_PREFIX)) {
-            role = MenusService.AUTHORITY_PREFIX + "_"
+            role = MenusService.AUTHORITY_PREFIX
                     + CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, authority);
         }
         role = role.toUpperCase();

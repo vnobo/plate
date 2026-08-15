@@ -120,6 +120,51 @@ class BeanUtilsTest {
     }
 
     @Test
+    void copyPropertiesWithIgnoreNullCopiesNonNullAndKeepsTargetNulls() {
+        Person person = new Person("Bob", null, "Bob B");
+        PersonDto dto = new PersonDto();
+        dto.setAge(5);
+
+        BeanUtils.copyProperties(person, dto, true);
+
+        assertThat(dto.getName()).isEqualTo("Bob");
+        assertThat(dto.getAge()).isEqualTo(5);
+        assertThat(dto.getFullName()).isEqualTo("Bob B");
+    }
+
+    @Test
+    void jsonPathToBeanWrapsInvalidPointerSyntax() {
+        var node = ContextUtils.OBJECT_MAPPER.createObjectNode().put("name", "John");
+
+        assertThatThrownBy(() -> BeanUtils.jsonPathToBean(node, "name", String.class))
+                .isInstanceOf(JsonPointerException.class);
+    }
+
+    @Test
+    void serializeUserAuditorReturnsEmptyForNullObject() {
+        assertThat(BeanUtils.serializeUserAuditor(null).block()).isNull();
+    }
+
+    @Test
+    void serializeUserAuditorWarnsWhenAuditorValueIsEmpty() {
+        AuditedBean bean = new AuditedBean();
+
+        AuditedBean result = BeanUtils.serializeUserAuditor(bean).block();
+
+        assertThat(result).isSameAs(bean);
+        assertThat(result.getCreatedBy()).isNull();
+    }
+
+    @Test
+    void serializeUserAuditorWarnsWhenPropertyIsNotWritable() {
+        GetterOnlyAuditedBean bean = new GetterOnlyAuditedBean();
+
+        GetterOnlyAuditedBean result = BeanUtils.serializeUserAuditor(bean).block();
+
+        assertThat(result).isSameAs(bean);
+    }
+
+    @Test
     void cacheKeyForBeanContainsPropertyEntries() {
         Person person = new Person("Alice", 30, "Alice A");
 
@@ -133,6 +178,28 @@ class BeanUtilsTest {
         String key = BeanUtils.cacheKey(PageRequest.of(0, 10, Sort.by("name").ascending()));
 
         assertThat(key).contains("0_10").contains("name_ASC");
+    }
+
+    @Test
+    void cacheKeyForEmptyArgsReturnsEmptyString() {
+        assertThat(BeanUtils.cacheKey()).isEmpty();
+    }
+
+    @Test
+    void cacheKeyForPageableWithMultipleSortsContainsEachOrder() {
+        String key = BeanUtils.cacheKey(PageRequest.of(1, 20,
+                Sort.by(Sort.Order.asc("name"), Sort.Order.desc("createdAt"))));
+
+        assertThat(key).contains("1_20").contains("name_ASC").contains("createdAt_DESC");
+    }
+
+    @Test
+    void cacheKeyCombinesBeanAndPageableEntries() {
+        Person person = new Person("Alice", 30, "Alice A");
+
+        String key = BeanUtils.cacheKey(person, PageRequest.of(0, 10));
+
+        assertThat(key).contains("name=Alice").contains("age=30").contains("0_10");
     }
 
     @Test
@@ -188,6 +255,73 @@ class BeanUtilsTest {
 
         assertThat(result).isSameAs(bean);
         assertThat(result.getValue()).isEqualTo("hi");
+    }
+
+    @Test
+    void serializeUserAuditorRecoversWhenLoaderErrors() {
+        UserAuditorAware aware = mock(UserAuditorAware.class);
+        UUID code = UUID.randomUUID();
+        when(aware.loadByCode(code)).thenReturn(reactor.core.publisher.Mono.error(new RuntimeException("db down")));
+        BeanUtils.USER_AUDITOR_AWARE = aware;
+
+        AuditedBean bean = new AuditedBean();
+        bean.setCreatedBy(UserAuditor.withCode(code));
+
+        AuditedBean result = BeanUtils.serializeUserAuditor(bean).block();
+
+        assertThat(result).isSameAs(bean);
+        assertThat(bean.getCreatedBy().name()).isNull();
+    }
+
+    @Test
+    void serializeUserAuditorCatchesThrowingAuditorGetter() {
+        ThrowingAuditedBean bean = new ThrowingAuditedBean();
+
+        ThrowingAuditedBean result = BeanUtils.serializeUserAuditor(bean).block();
+
+        assertThat(result).isSameAs(bean);
+    }
+
+    @Test
+    void beanToMapSkipsWriteOnlyProperty() {
+        WriteOnlyBean bean = new WriteOnlyBean();
+        bean.setValue("v");
+
+        Map<String, Object> map = BeanUtils.beanToMap(bean);
+
+        assertThat(map).doesNotContainKey("value");
+    }
+
+    @Test
+    void beanToMapSurvivesThrowingGetter() {
+        ThrowingGetterBean bean = new ThrowingGetterBean();
+        bean.setGood("ok");
+
+        Map<String, Object> map = BeanUtils.beanToMap(bean);
+
+        assertThat(map).containsEntry("good", "ok").doesNotContainKey("boom");
+    }
+
+    @Test
+    void jsonPathToBeanSupportsCommaDelimitedPath() {
+        var node = ContextUtils.OBJECT_MAPPER.createObjectNode()
+                .set("user", ContextUtils.OBJECT_MAPPER.createObjectNode().put("name", "John"));
+
+        String name = BeanUtils.jsonPathToBean(node, "/user,name", String.class);
+
+        assertThat(name).isEqualTo("John");
+    }
+
+    @Test
+    void afterPropertiesSetRegistersAuditorAware() {
+        UserAuditorAware aware = mock(UserAuditorAware.class);
+        UserAuditorAware saved = BeanUtils.USER_AUDITOR_AWARE;
+        try {
+            new BeanUtils(aware).afterPropertiesSet();
+            assertThat(BeanUtils.USER_AUDITOR_AWARE).isSameAs(aware);
+        } finally {
+            BeanUtils.USER_AUDITOR_AWARE = saved;
+        }
     }
 
     // ---- test fixtures -----------------------------------------------------
@@ -321,6 +455,45 @@ class BeanUtilsTest {
 
         public void setCreatedBy(UserAuditor createdBy) {
             this.createdBy = createdBy;
+        }
+    }
+
+    static class GetterOnlyAuditedBean {
+        public UserAuditor getCreatedBy() {
+            return UserAuditor.withCode(UUID.randomUUID());
+        }
+    }
+
+    static class ThrowingAuditedBean {
+        public UserAuditor getCreatedBy() {
+            throw new IllegalStateException("boom");
+        }
+
+        public void setCreatedBy(UserAuditor createdBy) {
+        }
+    }
+
+    static class WriteOnlyBean {
+        private String value;
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+    }
+
+    static class ThrowingGetterBean {
+        private String good;
+
+        public String getGood() {
+            return good;
+        }
+
+        public void setGood(String good) {
+            this.good = good;
+        }
+
+        public String getBoom() {
+            throw new IllegalStateException("boom");
         }
     }
 }

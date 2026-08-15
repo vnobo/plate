@@ -84,7 +84,6 @@ public class GroupMembersService extends AbstractCache {
             return this.memberRepository.save(groupMember);
         } else {
             // Update existing group member
-            assert groupMember.getId() != null;
             return this.memberRepository.findById(groupMember.getId())
                     .flatMap(old -> this.memberRepository.save(groupMember));
         }

@@ -11,6 +11,7 @@ import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.relational.core.query.Criteria;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -130,6 +131,31 @@ class QueryHelperTest {
         assertThat(sql).contains("name LIKE :").contains("code = :");
         assertThat(sql).doesNotContain("search");
         assertThat(sql).doesNotContain("extend");
+    }
+
+    @Test
+    void criteriaBindsOtherScalarTypesAsEquality() {
+        Map<String, Object> map = Map.of(
+                "age", 30,
+                "active", true,
+                "score", 9.5D,
+                "count", 12L);
+
+        Criteria criteria = QueryHelper.criteria(map);
+        String sql = QueryFragment.Condition.of(criteria).toSql();
+
+        assertThat(sql).contains("age = :").contains("active = :")
+                .contains("score = :").contains("count = :");
+    }
+
+    @Test
+    void criteriaRejectsNullValue() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", null);
+
+        assertThatThrownBy(() -> QueryHelper.criteria(map))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Value must not be null");
     }
 
     @Table("sample_entity")
