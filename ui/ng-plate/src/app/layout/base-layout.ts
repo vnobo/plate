@@ -7,11 +7,15 @@ import { LayoutHeader } from './layout-header';
   selector: 'app-layout-base',
   imports: [RouterOutlet, LayoutHeader, LayoutAside],
   template: `
-    <app-layout-header></app-layout-header>
-    <app-layout-aside></app-layout-aside>
-    <div class="page-wrapper">
-      <div class="container-fluid">
-        <router-outlet></router-outlet>
+    <layout-aside class="layout-aside"></layout-aside>
+    <div class="layout-content">
+      <layout-header></layout-header>
+      <div class="page-wrapper">
+        <div class="page-body">
+          <div class="container-xl">
+            <router-outlet></router-outlet>
+          </div>
+        </div>
       </div>
     </div>
   `,

@@ -8,3 +8,69 @@ body {
   width: 100%;
   height: 100%;
 }
+
+/* 平台布局：左侧固定侧边栏 + 右侧内容 */
+.layout-aside {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 16rem;
+  z-index: 1030;
+  border-right: 1px solid var(--tblr-border-color, #e6e7e9);
+  background: var(--tblr-bg-surface, #fff);
+  overflow-y: auto;
+}
+
+.layout-content {
+  margin-left: 16rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-content > .layout-header {
+  flex: 0 0 auto;
+}
+
+.layout-content > .page-wrapper {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-content > .page-wrapper > .page-body {
+  flex: 1 1 auto;
+}
+
+/* 折叠态：仅收起品牌文字，保留图标栏 */
+.layout-collapsed .layout-aside {
+  width: 4rem;
+}
+
+.layout-collapsed .layout-content {
+  margin-left: 4rem;
+}
+
+.layout-collapsed .layout-aside .nav-link-title,
+.layout-collapsed .layout-aside .navbar-brand-text {
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  .layout-aside {
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+
+  .layout-collapsed .layout-aside {
+    transform: translateX(0);
+    width: 16rem;
+  }
+
+  .layout-content {
+    margin-left: 0;
+  }
+
+  .layout-collapsed .layout-content {
+    margin-left: 0;
+  }
+}

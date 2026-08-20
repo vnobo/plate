@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { inject, Service, signal } from '@angular/core';
+import { computed, inject, Service, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Authentication } from '@plate/types';
 import { SessionStorage } from '@app/core';
@@ -18,6 +18,23 @@ export class TokenService {
 
   readonly isLoggedIn$ = toObservable(this.isLoggedIn);
   readonly authentication$ = toObservable(this.authentication);
+
+  /** 当前登录用户名（昵称优先，否则姓名，否则账号） */
+  readonly name = computed(() => {
+    const details = this.authentication()?.details;
+    if (!details) return '未登录';
+    return details.nickname || details.name || details.code || '用户';
+  });
+
+  /** 当前用户首字母，用于头像占位 */
+  readonly initial = computed(() => this.name().charAt(0).toUpperCase());
+
+  /** 当前用户角色（拼接 authority） */
+  readonly role = computed(() => {
+    const authorities = this.authentication()?.details?.authorities;
+    if (!authorities?.length) return '';
+    return authorities.map((a) => (typeof a === 'string' ? a : a.authority)).join(' / ');
+  });
 
   hasRole(role: string): boolean {
     const auth = this.authentication();
