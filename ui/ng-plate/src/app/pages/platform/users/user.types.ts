@@ -17,8 +17,16 @@ export interface User extends Search {
   bio?: string;
   extend?: Record<string, unknown>;
   loginTime?: Date;
-  creator?: UserAuditor;
-  updater?: UserAuditor;
-  updatedTime?: Date;
-  createdTime?: Date;
+  createdBy?: UserAuditor;
+  updatedBy?: UserAuditor;
+  updatedAt?: Date;
+  createdAt?: Date;
+}
+
+/** Direct authority assigned to a user (maps to the se_authorities table). */
+export interface UserAuthority extends Search {
+  id?: number;
+  code?: string;
+  userCode?: string;
+  authority?: string;
 }
