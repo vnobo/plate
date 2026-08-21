@@ -1,5 +1,26 @@
 You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
 
+## Project Workflow
+
+- Use `pnpm@11.21.0`; keep `package.json` and `pnpm-lock.yaml` synchronized when dependencies change.
+- The project uses Angular 22, standalone components, signals, `computed()`, `linkedSignal()`, `inject()`, and native `@if`/`@for` control flow.
+- Organize pages by business domain under `src/app/pages`. Keep top-level routes in `src/app/app.routes.ts` and domain routes near their feature pages; prefer lazy loading.
+- Put cross-cutting services and storage adapters in `src/app/core`, layouts in `src/app/layout`, reusable UI plugins in `src/app/plugins`, and shared primitives in `src/app/shared`.
+- Reuse the existing HTTP interceptor and environment configuration for API requests. Do not duplicate the API host, timeout, or version headers in individual services.
+- Reuse `ModalsService` for dynamic forms and preserve the existing output-based refresh flow when changing modal inputs or results.
+- Signal Forms are already used by feature forms; follow the local pattern instead of introducing template-driven forms.
+
+## Code Update And Synchronization
+
+- After ordinary source changes, run `pnpm exec ng build`.
+- After changing tests or component behavior, run `pnpm test -- --watch=false` in addition to the build.
+- After changing routes, shared services, interceptors, layouts, modals, environment files, SSR, or dependencies, run both checks and manually verify the affected page with `pnpm start`.
+- When changing dependencies, build configuration, Angular versions, or test tooling, update the relevant documentation in `README.md` and keep the lockfile in sync.
+- When adding a page, update its feature route and the corresponding route index/export when the local feature pattern requires it.
+- Before considering a change synchronized, inspect the diff, confirm no generated `dist/` output or local environment files were added, and report any unrelated pre-existing changes instead of reverting them.
+- Direct use of `document`, `window`, browser storage, Tabler globals, or `confirm` must remain safe for SSR and tests; interactive elements must also retain keyboard and focus accessibility.
+- A guard is not active merely because it exists: verify that it is attached to the relevant route before relying on it for protection.
+
 ## TypeScript Best Practices
 
 - Use strict type checking
@@ -49,5 +70,5 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 ## Services
 
 - Design services around a single responsibility
-- Use the `@Service()` option for singleton services
+- Use Angular's `@Injectable({ providedIn: 'root' })` for singleton services
 - Use the `inject()` function instead of constructor injection
