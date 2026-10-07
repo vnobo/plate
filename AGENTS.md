@@ -4,7 +4,7 @@
 > This document provides high-signal project context for AI Agents to onboard quickly and avoid pitfalls.
 >
 > - **Backend** (`boot/`): Spring Boot 4.1 / WebFlux / R2DBC / Redis — Java 25, Gradle 9.5.x
-> - **Frontend** (`ui/ng-plate/`): Angular 22 SSR — TypeScript 6, pnpm 11.12.0, Tabler UI
+> - **Frontend** (`ui/ng-plate/`): Angular 22 SSR — TypeScript 6, pnpm 11.20.0, Tabler UI
 >
 > Module-ownership note: the backend/frontend context below is maintained per-module by the agent files
 > `boot/AGENTS.md` (backend) and `ui/ng-plate/AGENTS.md` (frontend). This root file is the consolidated entry point.
@@ -356,7 +356,7 @@ Every business table carries `tenant_code`, but isolation is **not** enforced by
 
 ## 8. Code Conventions
 
-> See [`CLAUDE.md`](./CLAUDE.md) "Key Conventions" for the authoritative quick-reference. The backend and frontend rules live there.
+> See [`ui/ng-plate/.claude/CLAUDE.md`](./ui/ng-plate/.claude/CLAUDE.md) "Key Conventions" for the authoritative quick-reference. The backend and frontend rules live there. (There is **no** `CLAUDE.md` at the repo root.)
 
 > ✅ **Verified** (from `ContextUtils.java:50`): the constant is `public final static String RULE_ADMINISTRATORS = "ROLE_SYSTEM_ADMINISTRATORS";` — the **field name** is `RULE_ADMINISTRATORS` (historical typo, kept for compatibility; do not rename), and its **value** is `ROLE_SYSTEM_ADMINISTRATORS`. Reference it as `ContextUtils.RULE_ADMINISTRATORS` in code.
 
@@ -364,7 +364,7 @@ Every business table carries `tenant_code`, but isolation is **not** enforced by
 
 ## 9. Flyway Migrations
 
-**Rules**: `baseline-on-migrate: true`, `baseline-version: 1.0.0`. New tables require a new `V1.x.y__*.sql`. **Strictly forbidden** to modify existing migration files (Flyway checksum validation).: `baseline-on-migrate: true`, `baseline-version: 1.0.0`. New tables require a new `V1.x.y__*.sql`. **Strictly forbidden** to modify existing migration files (Flyway checksum validation).
+**Rules**: `baseline-on-migrate: true`, `baseline-version: 1.0.0`. New tables require a new `V1.x.y__*.sql`. **Strictly forbidden** to modify existing migration files (Flyway checksum validation).
 
 ---
 
@@ -372,8 +372,9 @@ Every business table carries `tenant_code`, but isolation is **not** enforced by
 
 ### Backend
 
-- **Integration tests**: `ApplicationTests.java` (21 tests, `@SpringBootTest(webEnvironment = RANDOM_PORT)`, `WebTestClient`)
-- **Unit tests**: `SecurityManagerTest.java`, `SecurityControllerTest.java` (Mockito + StepVerifier)
+- **Integration tests**: `platform/src/test/java/com/plate/boot/**/*IntegrationTests.java` (extend `AbstractIntegrationTests`, `@SpringBootTest(webEnvironment = RANDOM_PORT)`, `WebTestClient`)
+- **Context tests**: `ApplicationContextTests.java` (Spring context + infrastructure/security/Testcontainers bean loading)
+- **Unit tests**: `**/*Test.java` — `commons/` (base, query, utils, converters, exception) plus `security/` (`AuthenticationTokenTest`, `CaptchaRepositoryTest`, `CaptchaTokenTest`, `UserAuthoritiesServiceTest`) (Mockito + StepVerifier)
 - **Infrastructure**: `InfrastructureConfiguration.java` (Testcontainers: `alexbob/postgres` + zhparser, Redis)
 - **Test config**: `src/test/resources/application.yml` (cache TTL 5min, maxInMemorySize 10MB, debug logging)
 - **Prerequisite**: Docker daemon must be running
