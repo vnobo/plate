@@ -71,6 +71,8 @@ spring:
 springdoc:
   api-docs:
     enabled: true
+    groups:
+      enabled: true
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
