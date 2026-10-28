@@ -3,7 +3,7 @@
 > Plate Platform — reactive, multi-tenant administration system (Polyglot Monorepo).
 > This document provides high-signal project context for AI Agents to onboard quickly and avoid pitfalls.
 >
-> - **Backend** (`boot/`): Spring Boot 4.1 / WebFlux / R2DBC / Redis — Java 25, Gradle 9.5.x
+> - **Backend** (`boot/`): Spring Boot 4.1.2 / WebFlux / R2DBC / Redis — Java 25, Gradle 9.8.x
 > - **Frontend** (`ui/ng-plate/`): Angular 22 SSR — TypeScript 6, pnpm 11.22.0, Tabler UI
 >
 > Module-ownership note: the backend/frontend context below is maintained per-module by the agent files

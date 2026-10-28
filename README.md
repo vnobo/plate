@@ -4,13 +4,13 @@
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/vnobo/plate)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-green.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.2-green.svg)](https://spring.io/projects/spring-boot)
 [![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/)
 [![Angular](https://img.shields.io/badge/Angular-v22.0.0-red.svg)](https://angular.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17+-blue.svg)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7.0+-red.svg)](https://redis.io/)
 
-A modern enterprise management platform built with **Spring Boot 4.1.0** and **Angular 22**, featuring reactive architecture, comprehensive user management, role-based access control, and advanced security features.
+A modern enterprise management platform built with **Spring Boot 4.1.2** and **Angular 22**, featuring reactive architecture, comprehensive user management, role-based access control, and advanced security features.
 
 </div>
 
@@ -67,11 +67,11 @@ A modern enterprise management platform built with **Spring Boot 4.1.0** and **A
 
 ### Backend Requirements
 
-- **Java**: OpenJDK 25 or later (required for Spring Boot 4.1.0)
+- **Java**: OpenJDK 25 or later (required for Spring Boot 4.1.2)
 - **Database**: PostgreSQL 17+ with SSL support
 - **Cache**: Redis 7.0+ for session storage, caching, and pub/sub
-- **Build Tool**: Gradle 9.5.1 (wrapper) with Kotlin DSL
-- **Note**: Spring Boot 4.1.0 requires Java 25 (toolchain) and includes breaking changes from Spring Boot 3.x
+- **Build Tool**: Gradle 9.8.0 (wrapper) with Groovy DSL
+- **Note**: Spring Boot 4.1.2 requires Java 25 (toolchain) and includes breaking changes from Spring Boot 3.x
 
 ### Frontend Requirements
 
@@ -142,7 +142,7 @@ A modern enterprise management platform built with **Spring Boot 4.1.0** and **A
    nvm use 22.0.0
    ```
 
-### 📦 Backend Setup (Spring Boot 4.1.0)
+### 📦 Backend Setup (Spring Boot 4.1.2)
 
 1. **Clone and Setup**
 
@@ -199,7 +199,7 @@ A modern enterprise management platform built with **Spring Boot 4.1.0** and **A
 5. **Access the Application**
    - **HTTP**: http://localhost:8080
    - **HTTPS**: https://localhost:8443 (with SSL)
-   - **Note**: Spring Boot 4.1.0 includes enhanced reactive capabilities and improved native image support
+   - **Note**: Spring Boot 4.1.2 includes enhanced reactive capabilities and improved native image support
 
 ### 🎨 Frontend Setup (Angular 22)
 
@@ -345,7 +345,7 @@ export const environment = {
 1. **Build Docker Images**
 
    ```bash
-   # Build backend (Spring Boot 4.1.0)
+   # Build backend (Spring Boot 4.1.2)
    docker build -t plate-backend ./boot/platform
 
    # Build frontend (Angular 22)
@@ -399,7 +399,7 @@ export const environment = {
 
 ## 🧪 Testing
 
-### Backend Testing (Spring Boot 4.1.0)
+### Backend Testing (Spring Boot 4.1.2)
 
 ```bash
 # Run all tests
@@ -482,7 +482,7 @@ The Plate Platform provides RESTful APIs with reactive endpoints. API documentat
 
 ### Backend Technologies
 
-- **Spring Boot 4.1.0** - Main application framework
+- **Spring Boot 4.1.2** - Main application framework
 - **Spring Security** - Authentication and authorization
 - **Spring WebFlux** - Reactive web framework
 - **Spring Data R2DBC** - Reactive database access
@@ -507,7 +507,7 @@ The Plate Platform provides RESTful APIs with reactive endpoints. API documentat
 
 ### DevOps & Tools
 
-- **Gradle** - Build tool with Kotlin DSL
+- **Gradle** - Build tool with Groovy DSL
 - **Docker** - Containerization
 - **GitHub Actions** - CI/CD pipeline
 - **JUnit 5** - Testing framework
@@ -552,11 +552,11 @@ The Apache License 2.0 is a permissive free software license that allows users t
 
 ## 🚀 Migration Notes
 
-### Spring Boot 4.1.0 Upgrade
+### Spring Boot 4.1.2 Upgrade
 
-This project has been upgraded to Spring Boot 4.1.0, which includes several important changes:
+This project has been upgraded to Spring Boot 4.1.2, which includes several important changes:
 
-- **Java 25 Requirement**: Spring Boot 4.1.0 requires Java 25 (toolchain)
+- **Java 25 Requirement**: Spring Boot 4.1.2 requires Java 25 (toolchain)
 - **Enhanced Reactive Support**: Improved WebFlux and R2DBC integration
 - **Native Image Improvements**: Better GraalVM native compilation support
 - **Breaking Changes**: Some configuration properties and APIs may have changed from Spring Boot 3.x
@@ -576,7 +576,7 @@ Plate Platform is under active development with the latest technology stack and 
 **Current version**: 0.0.1 (Development)
 
 **Technology Stack**:
-- ✅ **Backend**: Spring Boot 4.1.0 with Java 25
+- ✅ **Backend**: Spring Boot 4.1.2 with Java 25
 - ✅ **Frontend**: Angular 22 with SSR support
 - ✅ **Database**: PostgreSQL 17+ with R2DBC reactive driver
 - ✅ **Cache**: Redis 7.0+ for distributed sessions

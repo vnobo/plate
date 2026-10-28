@@ -4,7 +4,7 @@ This file provides backend (Java) guidance for AI agents (Claude Code and others
 
 ## Project Overview
 
-Single Gradle multi-module build: root project `plate` with one submodule `platform`. Group ID `com.alex.plate`, version `4.1.0`. Spring Boot 4.1 / WebFlux / R2DBC / Redis, Java 25 with virtual threads.
+Single Gradle multi-module build: root project `plate` with one submodule `platform`. Group ID `com.alex.plate`, version `4.1.2`. Spring Boot 4.1.2 / WebFlux / R2DBC / Redis, Java 25 with virtual threads.
 
 ## Common Commands
 
@@ -27,7 +27,7 @@ All commands run from `boot/` directory:
 
 ### Tech Stack
 
-- **Framework**: Spring Boot 4.1.0, Spring WebFlux (reactive, non-blocking on Netty)
+- **Framework**: Spring Boot 4.1.2, Spring WebFlux (reactive, non-blocking on Netty)
 - **Database**: PostgreSQL via R2DBC (reactive), Flyway migrations (V1.0.0–V1.0.6)
 - **Cache/Session**: Redis (cache prefix `plate:caches:`, 10min TTL; session 8h timeout)
 - **Security**: Spring Security (session-based, `@PreAuthorize`), GitHub OAuth2, CSRF cookie tokens
