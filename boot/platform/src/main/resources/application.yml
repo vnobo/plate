@@ -79,8 +79,10 @@ springdoc:
   show-actuator: true
   group-configs:
     - group: security
-      paths-to-match: /sec/**
+      paths-to-match:
+        - /sec/**
       display-name: Security APIs
     - group: relational
-      paths-to-match: /rel/**
+      paths-to-match:
+        - /rel/**
       display-name: Relational APIs
