@@ -4,7 +4,7 @@
 > This document provides high-signal project context for AI Agents to onboard quickly and avoid pitfalls.
 >
 > - **Backend** (`boot/`): Spring Boot 4.1 / WebFlux / R2DBC / Redis — Java 25, Gradle 9.5.x
-> - **Frontend** (`ui/ng-plate/`): Angular 22 SSR — TypeScript 6, pnpm 11.20.0, Tabler UI
+> - **Frontend** (`ui/ng-plate/`): Angular 22 SSR — TypeScript 6, pnpm 11.22.0, Tabler UI
 >
 > Module-ownership note: the backend/frontend context below is maintained per-module by the agent files
 > `boot/AGENTS.md` (backend) and `ui/ng-plate/AGENTS.md` (frontend). This root file is the consolidated entry point.
@@ -234,11 +234,11 @@ HTTP Request (Netty, port 8080, HTTP/2)
 
 | Route | Page | Layout |
 |-------|------|--------|
-| `/passport` | Login, lock screen | BlankLayout |
-| `/dashboard` | Welcome, user management (list+form) | BaseLayout |
-| `/platform` | Tenant management | BaseLayout |
-| `/examples` | DataTable example, Transfer example | BaseLayout |
-| `/error` | 404, 500, 512 | — |
+| `/passport` | redirect → `/passport/login`; login, lock screen | — |
+| `/dashboard` | redirect → `/dashboard/welcome`; welcome | — |
+| `/platform` | BaseLayout; users, tenant, role | BaseLayout |
+| `/examples` | redirect → `/examples/transfer`; transfer, data-table | — |
+| `/error` | redirect → `/error/404`; 403, 404, 500, trigger (512) | — |
 | `/` → `/passport` | redirect | — |
 | `/**` → `/error` | fallback | — |
 

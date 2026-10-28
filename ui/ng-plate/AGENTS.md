@@ -2,7 +2,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## Project Workflow
 
-- Use `pnpm@11.21.0`; keep `package.json` and `pnpm-lock.yaml` synchronized when dependencies change.
+- Use `pnpm@11.22.0`; keep `package.json` and `pnpm-lock.yaml` synchronized when dependencies change.
 - The project uses Angular 22, standalone components, signals, `computed()`, `linkedSignal()`, `inject()`, and native `@if`/`@for` control flow.
 - Organize pages by business domain under `src/app/pages`. Keep top-level routes in `src/app/app.routes.ts` and domain routes near their feature pages; prefer lazy loading.
 - Put cross-cutting services and storage adapters in `src/app/core`, layouts in `src/app/layout`, reusable UI plugins in `src/app/plugins`, and shared primitives in `src/app/shared`.
