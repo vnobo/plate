@@ -55,7 +55,7 @@ A modern enterprise management platform built with **Spring Boot 4.1.0** and **A
 
 ### 🛡️ Security Features
 
-- **JWT Authentication**: Stateless authentication with secure token management
+- **Session Authentication**: Redis-backed session with cookie and CSRF protection
 - **CSRF Protection**: Advanced cross-site request forgery protection
 - **Session Management**: Redis-based distributed session storage
 - **Captcha Protection**: Visual verification for login security
@@ -76,7 +76,7 @@ A modern enterprise management platform built with **Spring Boot 4.1.0** and **A
 ### Frontend Requirements
 
 - **Node.js**: 20.19+, 22.12+, or 24+ (LTS recommended: 22)
-- **Package Manager**: pnpm 11.12.0
+- **Package Manager**: pnpm 11.22.0
 - **Browser Support**: Modern browsers (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+)
 
 ### DevOps Requirements
