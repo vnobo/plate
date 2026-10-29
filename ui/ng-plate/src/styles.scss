@@ -1,22 +1,81 @@
-/* You can add global styles to this file, and also import other style files */
-:root {
-  --tblr-font-sans-serif: 'LXGW WenKai', 'Inter Var', Inter, '-apple-system', 'BlinkMacSystemFont',
+/* =============================================================================
+ * Plate 企业级设计令牌（基于 Tabler CSS 变量体系定制）
+ *
+ * 定制原则（参考 docs.tabler.io/ui/getting-started/customize）：
+ *   1. 只覆盖 Tabler 的语义变量，不重写组件 CSS；
+ *   2. -lt / -darken / -bg-subtle 等派生色由 oklch() 与 color-mix()
+ *      从下方基础色自动推导，无需重复定义；
+ *   3. 全站工具类（btn-primary / bg-primary-lt / text-primary / alert-*）
+ *      自动继承，组件样式天然统一。
+ * ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+ * 1. 字体与排版层次
+ *    正文 15px（默认 14px，偏小），行高 1.6；标题按 1.25 倍递减形成清晰层级。
+ * -------------------------------------------------------------------------- */
+html:root {
+  --plate-font-sans: 'LXGW WenKai', 'Inter Var', Inter, '-apple-system', 'BlinkMacSystemFont',
     'San Francisco', 'Segoe UI', Roboto, 'Helvetica Neue', 'sans-serif';
-}
-html,
-body {
-  width: 100%;
-  height: 100%;
+  --tblr-font-sans-serif: var(--plate-font-sans);
+  --tblr-body-font-family: var(--plate-font-sans);
+
+  --tblr-body-font-size: 0.9375rem;
+  --tblr-body-line-height: 1.6;
+
+  --tblr-font-size-h1: 2rem;
+  --tblr-font-size-h2: 1.625rem;
+  --tblr-font-size-h3: 1.375rem;
+  --tblr-font-size-h4: 1.125rem;
+  --tblr-font-size-h5: 1rem;
+  --tblr-font-size-h6: 0.875rem;
+
+  --tblr-line-height-h1: 1.25;
+  --tblr-line-height-h2: 1.3;
+  --tblr-line-height-h3: 1.35;
+  --tblr-line-height-h4: 1.4;
+  --tblr-line-height-h5: 1.5;
+  --tblr-line-height-h6: 1.5;
 }
 
-/* =============================================================
- * 企业级主题：以「专业蓝 + 浅蓝」为主基调
- * 仅覆盖语义色的基础色相；Tabler 的 -lt / -darken / -bg-subtle
- * 等派生变量通过 oklch()/color-mix() 自动从下列基础色生成。
- * 浅蓝 (--tblr-azure) 用于填充、边框、选中态，不作正文色以保证对比度。
- * ============================================================= */
-:root,
-[data-bs-theme='light'] {
+/* -----------------------------------------------------------------------------
+ * 2. 圆角与间距
+ *    圆角以 8px 为基准，scale 派生出卡片/按钮用的 10px，全站同一套档位。
+ *    间距沿用 Bootstrap 的 4px 网格（.25rem 步进），组件留白统一取 8px 倍数。
+ * -------------------------------------------------------------------------- */
+html:root {
+  --tblr-border-radius: 0.5rem;
+  --tblr-border-radius-scale: 1.25;
+
+  --tblr-card-spacer-x: 1.25rem;
+  --tblr-card-spacer-y: 1.25rem;
+  --tblr-card-title-margin-bottom: 0.5rem;
+  --tblr-card-cap-padding-y: 0.875rem;
+}
+
+/* -----------------------------------------------------------------------------
+ * 3. 组件视觉统一（按钮 / 卡片 / 表单 / 导航）
+ * -------------------------------------------------------------------------- */
+html:root {
+  --tblr-btn-font-weight: 500;
+  --tblr-btn-padding-x: 0.875rem;
+  --tblr-btn-padding-y: 0.4375rem;
+
+  /* 卡片阴影的源头变量（--tblr-card-box-shadow 由它派生） */
+  --tblr-shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+
+  /* 移动端输入框保持 16px，避免 iOS Safari 聚焦时自动缩放页面 */
+  --tblr-form-control-mobile-font-size: 1rem;
+
+  /* 侧边栏激活项用主色浅调，与主色系呼应 */
+  --tblr-navbar-active-bg: color-mix(in oklab, var(--tblr-primary) 14%, transparent);
+}
+
+/* -----------------------------------------------------------------------------
+ * 4. 配色：亮模式
+ *    主色「专业蓝」；浅蓝 (azure) 仅用于填充/边框，不作正文以保证对比度。
+ * -------------------------------------------------------------------------- */
+html:root,
+html[data-bs-theme='light'] {
   /* 主色：专业企业蓝 —— 按钮、链接、激活态、品牌标识 */
   --tblr-primary: #0a6ed1;
   --tblr-primary-rgb: 10, 110, 209;
@@ -60,8 +119,11 @@ body {
   --tblr-border-color: #e2e8f0;
 }
 
-[data-bs-theme='dark'] {
-  /* 主色：深底上提亮，保证 text-primary 与按钮白字可读 */
+/* -----------------------------------------------------------------------------
+ * 5. 配色：暗模式
+ *    主色提亮以保证 text-primary 与按钮白字可读；卡片略高于底色形成层次。
+ * -------------------------------------------------------------------------- */
+html[data-bs-theme='dark'] {
   --tblr-primary: #4a9be8;
   --tblr-primary-rgb: 74, 155, 232;
   --tblr-primary-fg: #ffffff;
@@ -97,4 +159,11 @@ body {
   --tblr-body-color: #e5edf7;
   --tblr-muted: #94a3b8;
   --tblr-border-color: #1e2a3f;
+  --tblr-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
 }

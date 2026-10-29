@@ -8,16 +8,20 @@ import { LayoutService } from './layout.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink],
   host: {
-    class: 'navbar navbar-expand-md sticky-top d-print-none',
+    // 用 expand-lg 与侧边栏断点对齐：否则 768–991px 汉堡键被隐藏、侧边栏又是抽屉，导航无法打开
+    class: 'navbar navbar-expand-lg sticky-top d-print-none',
+    '[attr.aria-label]': '"顶部导航"',
   },
   template: `
     <div class="container-xl">
+      <!-- 移动端：打开侧边栏抽屉 -->
       <button
         class="navbar-toggler d-lg-none"
         type="button"
         (click)="layout.toggleMobile()"
         [attr.aria-expanded]="layout.mobileOpen()"
-        aria-label="切换导航"
+        aria-controls="aside-menu"
+        aria-label="打开导航"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -38,9 +42,59 @@ import { LayoutService } from './layout.service';
         </svg>
       </button>
 
+      <!-- 桌面端：折叠 / 展开侧边栏 -->
+      <button
+        class="btn btn-ghost-secondary btn-icon d-none d-lg-flex me-1"
+        type="button"
+        (click)="layout.toggleCollapsed()"
+        [attr.aria-expanded]="!layout.collapsed()"
+        aria-controls="aside-menu"
+        [attr.aria-label]="layout.collapsed() ? '展开侧边栏' : '折叠侧边栏'"
+      >
+        @if (layout.collapsed()) {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M7 7l5 5l-5 5" />
+            <path d="M13 7l5 5l-5 5" />
+          </svg>
+        } @else {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M17 7l-5 5l5 5" />
+            <path d="M11 7l-5 5l5 5" />
+          </svg>
+        }
+      </button>
+
       <div class="navbar-nav flex-row order-md-last ms-auto">
         <div class="d-none d-md-flex me-2">
-          <a routerLink="/dashboard" class="btn btn-ghost-secondary btn-icon" aria-label="返回工作台">
+          <a
+            routerLink="/dashboard"
+            class="btn btn-ghost-secondary btn-icon"
+            aria-label="返回工作台"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="icon"
