@@ -10,6 +10,14 @@ import { RouterModule } from '@angular/router';
         <div class="page-body">
           <router-outlet></router-outlet>
         </div>
+        <footer class="footer footer-transparent d-print-none">
+          <div class="container-xl">
+            <div class="row text-center align-items-center flex-column flex-sm-row">
+              <div class="col-12 col-sm-6 text-sm-start">Plate 控制台</div>
+              <div class="col-12 col-sm-6 text-sm-end text-secondary">Copyright © 2026</div>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   `,

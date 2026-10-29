@@ -1,4 +1,4 @@
-import { afterNextRender, Component, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { LayoutAside } from './layout-aside';
 import { LayoutHeader } from './layout-header';
@@ -7,37 +7,30 @@ import { LayoutHeader } from './layout-header';
   selector: 'app-layout-base',
   imports: [RouterOutlet, LayoutHeader, LayoutAside],
   template: `
-    <layout-aside class="layout-aside"></layout-aside>
-    <div class="layout-content">
-      <layout-header></layout-header>
+    <div class="page">
+      <aside layout-aside></aside>
+      <header layout-header></header>
       <div class="page-wrapper">
         <div class="page-body">
           <div class="container-xl">
             <router-outlet></router-outlet>
           </div>
         </div>
+        <footer class="footer footer-transparent d-print-none">
+          <div class="container-xl">
+            <div class="row text-center align-items-center flex-column flex-sm-row">
+              <div class="col-12 col-sm-6 text-sm-start">Plate 控制台</div>
+              <div class="col-12 col-sm-6 text-sm-end text-secondary">Copyright © 2026</div>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   `,
   styles: `
     :host {
-      display: contents;
+      display: block;
     }
   `,
-  host: {
-    width: '100%',
-    height: '100%',
-    class: 'page',
-  },
 })
-export class BaseLayout implements OnDestroy {
-  constructor() {
-    afterNextRender(() => {
-      document.body.classList.add('layout-fluid');
-    });
-  }
-
-  ngOnDestroy(): void {
-    document.body.classList.remove('layout-fluid');
-  }
-}
+export class BaseLayout {}

@@ -1,9 +1,11 @@
 import { Routes } from '@angular/router';
+import { BaseLayout } from '@app/layout';
 import { Welcome } from './welcome/welcome';
 
 export const DASHBOARD_ROUTES: Routes = [
   {
     path: '',
+    component: BaseLayout,
     children: [
       {
         path: 'welcome',

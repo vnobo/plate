@@ -1,24 +1,23 @@
-import { computed, inject, Service, signal } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { computed, Service, signal } from '@angular/core';
 
 @Service()
 export class LayoutService {
-  private readonly document = inject(DOCUMENT);
   private readonly _collapsed = signal(false);
+  private readonly _mobileOpen = signal(false);
 
   readonly collapsed = this._collapsed.asReadonly();
+  readonly mobileOpen = this._mobileOpen.asReadonly();
   readonly expanded = computed(() => !this._collapsed());
 
   toggleCollapsed(): void {
-    this._collapsed.update((value) => {
-      const next = !value;
-      this.document.body.classList.toggle('layout-collapsed', next);
-      return next;
-    });
+    this._collapsed.update((value) => !value);
   }
 
-  setCollapsed(value: boolean): void {
-    this._collapsed.set(value);
-    this.document.body.classList.toggle('layout-collapsed', value);
+  toggleMobile(): void {
+    this._mobileOpen.update((value) => !value);
+  }
+
+  closeMobile(): void {
+    this._mobileOpen.set(false);
   }
 }
