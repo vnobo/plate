@@ -84,3 +84,15 @@ springdoc:
       display-name: Relational APIs
       paths-to-match:
         - /rel/**
+
+#---
+## Production hardening: hide API docs; activate with SPRING_PROFILES_ACTIVE=prod
+#spring:
+#  config:
+#    activate:
+#      on-profile: prod
+#springdoc:
+#  api-docs:
+#    enabled: false
+#  swagger-ui:
+#    enabled: false
