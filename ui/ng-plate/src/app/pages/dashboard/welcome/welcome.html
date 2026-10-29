@@ -1,1 +1,136 @@
-<h1>Welcome to the web</h1>
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col">
+      <div class="page-pretitle">概览</div>
+      <h2 class="page-title">工作台</h2>
+      <div class="text-secondary mt-1">欢迎回来，{{ token.name() }}</div>
+    </div>
+    <div class="col-auto ms-auto">
+      <span class="badge bg-primary-lt">Plate 控制台</span>
+    </div>
+  </div>
+</div>
+
+<div class="row row-deck row-cards">
+  @for (m of modules; track m.link) {
+    <div class="col-sm-6 col-lg-3">
+      <a [routerLink]="m.link" class="card card-sm card-link">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <span class="bg-primary text-white avatar me-3">
+              @switch (m.icon) {
+                @case ('users') {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                    <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
+                  </svg>
+                }
+                @case ('tenant') {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M3 21l18 0" />
+                    <path d="M3 10l18 0" />
+                    <path d="M5 6l7 -3l7 3" />
+                    <path d="M4 10l0 11" />
+                    <path d="M20 10l0 11" />
+                    <path d="M8 14l0 3" />
+                    <path d="M12 14l0 3" />
+                    <path d="M16 14l0 3" />
+                  </svg>
+                }
+                @case ('role') {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                    <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
+                  </svg>
+                }
+              }
+            </span>
+            <div>
+              <div class="font-weight-medium">{{ m.title }}</div>
+              <div class="text-secondary small">{{ m.desc }}</div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  }
+</div>
+
+<div class="row row-cards mt-3">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">账户信息</h3>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+          <span class="avatar avatar-lg bg-primary-lt me-3">{{ token.initial() }}</span>
+          <div>
+            <div class="h3 mb-0">{{ token.name() }}</div>
+            <div class="text-secondary">{{ token.role() || '未分配角色' }}</div>
+          </div>
+        </div>
+        <div class="list-group list-group-flush">
+          <div class="list-group-item px-0 d-flex justify-content-between">
+            <span class="text-secondary">昵称</span><span>{{ token.name() }}</span>
+          </div>
+          <div class="list-group-item px-0 d-flex justify-content-between">
+            <span class="text-secondary">角色</span><span>{{ token.role() || '—' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">使用提示</h3>
+      </div>
+      <div class="card-body">
+        <p class="text-secondary mb-2">左侧导航可切换用户、租户与角色管理模块。</p>
+        <p class="text-secondary mb-0">右上角菜单支持返回工作台与退出登录。</p>
+      </div>
+    </div>
+  </div>
+</div>
