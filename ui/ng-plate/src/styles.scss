@@ -8,3 +8,93 @@ body {
   width: 100%;
   height: 100%;
 }
+
+/* =============================================================
+ * 企业级主题：以「专业蓝 + 浅蓝」为主基调
+ * 仅覆盖语义色的基础色相；Tabler 的 -lt / -darken / -bg-subtle
+ * 等派生变量通过 oklch()/color-mix() 自动从下列基础色生成。
+ * 浅蓝 (--tblr-azure) 用于填充、边框、选中态，不作正文色以保证对比度。
+ * ============================================================= */
+:root,
+[data-bs-theme='light'] {
+  /* 主色：专业企业蓝 —— 按钮、链接、激活态、品牌标识 */
+  --tblr-primary: #0a6ed1;
+  --tblr-primary-rgb: 10, 110, 209;
+  --tblr-primary-fg: #ffffff;
+
+  /* 浅蓝点缀色（辅助强调，建议仅用于底色/边框/图标） */
+  --tblr-azure: #5b9bd5;
+  --tblr-azure-rgb: 91, 155, 213;
+  --tblr-azure-fg: #ffffff;
+
+  /* 辅助色：蓝灰 —— 兼顾 text-secondary 等次要文字的可读性 */
+  --tblr-secondary: #64748b;
+  --tblr-secondary-rgb: 100, 116, 139;
+  --tblr-secondary-fg: #ffffff;
+
+  /* 链接与焦点环 */
+  --tblr-link-color: #0a6ed1;
+  --tblr-link-hover-color: #0856a8;
+  --tblr-focus-ring-color: rgba(10, 110, 209, 0.35);
+
+  /* 状态色（与企业蓝协调，白字对比度达 AA） */
+  --tblr-success: #1f8a4d;
+  --tblr-success-rgb: 31, 138, 77;
+  --tblr-success-fg: #ffffff;
+  --tblr-info: #0b86a0;
+  --tblr-info-rgb: 11, 134, 160;
+  --tblr-info-fg: #ffffff;
+  --tblr-warning: #e08a00;
+  --tblr-warning-rgb: 224, 138, 0;
+  --tblr-warning-fg: #2a1c00; /* 浅色背景用深色字 */
+  --tblr-danger: #dc3545;
+  --tblr-danger-rgb: 220, 53, 69;
+  --tblr-danger-fg: #ffffff;
+
+  /* 背景 / 文字 / 边框（清爽冷灰蓝） */
+  --tblr-bg-surface: #ffffff;
+  --tblr-bg-surface-secondary: #f4f7fb;
+  --tblr-body-bg: #f4f7fb;
+  --tblr-body-color: #1f2937;
+  --tblr-muted: #64748b;
+  --tblr-border-color: #e2e8f0;
+}
+
+[data-bs-theme='dark'] {
+  /* 主色：深底上提亮，保证 text-primary 与按钮白字可读 */
+  --tblr-primary: #4a9be8;
+  --tblr-primary-rgb: 74, 155, 232;
+  --tblr-primary-fg: #ffffff;
+
+  --tblr-azure: #5b9bd5;
+  --tblr-azure-rgb: 91, 155, 213;
+  --tblr-azure-fg: #0f172a;
+
+  --tblr-secondary: #7c8aa0;
+  --tblr-secondary-rgb: 124, 138, 160;
+  --tblr-secondary-fg: #ffffff;
+
+  --tblr-link-color: #4a9be8;
+  --tblr-link-hover-color: #6fb0ef;
+  --tblr-focus-ring-color: rgba(74, 155, 232, 0.4);
+
+  --tblr-success: #34c172;
+  --tblr-success-rgb: 52, 193, 114;
+  --tblr-success-fg: #06210f;
+  --tblr-info: #2bc4e0;
+  --tblr-info-rgb: 43, 196, 224;
+  --tblr-info-fg: #04222a;
+  --tblr-warning: #f7b733;
+  --tblr-warning-rgb: 247, 183, 51;
+  --tblr-warning-fg: #2a1c00;
+  --tblr-danger: #f15b5b;
+  --tblr-danger-rgb: 241, 91, 91;
+  --tblr-danger-fg: #2a0808;
+
+  --tblr-bg-surface: #16223a;
+  --tblr-bg-surface-secondary: #0f172a;
+  --tblr-body-bg: #0f172a;
+  --tblr-body-color: #e5edf7;
+  --tblr-muted: #94a3b8;
+  --tblr-border-color: #1e2a3f;
+}

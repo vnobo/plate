@@ -39,10 +39,10 @@
               }
             ],
             "styles": [
+              "src/styles.scss",
               "node_modules/@tabler/core/dist/css/tabler.css",
               "node_modules/@tabler/core/dist/css/tabler-themes.css",
-              "node_modules/@tabler/core/dist/css/tabler-socials.css",
-              "src/styles.scss"
+              "node_modules/@tabler/core/dist/css/tabler-socials.css"
             ],
             "scripts": [
               "node_modules/@tabler/core/dist/js/tabler.js",
