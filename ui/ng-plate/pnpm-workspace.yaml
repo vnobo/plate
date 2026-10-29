@@ -1,3 +1,6 @@
+overrides:
+  # Angular 22.2.3 的 compiler-cli 声明 ^1.4.14，但其 bundle 用到只有 1.6.0 才有的 encodeRangeMappings
+  '@jridgewell/sourcemap-codec': ^1.6.0
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true
