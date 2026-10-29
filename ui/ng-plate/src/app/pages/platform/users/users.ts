@@ -148,16 +148,25 @@ export class Users {
 
   onDelete(user: User) {
     const label = user.name || user.username || user.code || '';
-    if (!confirm(`确定删除用户「${label}」吗？此操作不可撤销。`)) {
-      return;
-    }
-    this.delete(user)
-      .pipe(
-        tap(() => this._message.success('删除成功!')),
-        delay(1500),
-        takeUntilDestroyed(this._destroyRef),
-      )
-      .subscribe(() => this.fetchUserData());
+    this._modal
+      .confirm({
+        title: '删除用户',
+        message: `确定删除用户「${label}」吗？此操作不可撤销。`,
+        confirmText: '删除',
+        danger: true,
+      })
+      .then((ok) => {
+        if (!ok) {
+          return;
+        }
+        this.delete(user)
+          .pipe(
+            tap(() => this._message.success('删除成功!')),
+            delay(1500),
+            takeUntilDestroyed(this._destroyRef),
+          )
+          .subscribe(() => this.fetchUserData());
+      });
   }
 
   onDraftField(event: Event) {

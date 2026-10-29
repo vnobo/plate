@@ -1,7 +1,7 @@
 import { Component, computed, DestroyRef, inject, input, signal } from '@angular/core';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { FormField, form, required, submit } from '@angular/forms/signals';
-import { MessageService } from '@app/plugins';
+import { MessageService, ModalsService } from '@app/plugins';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { delay, tap } from 'rxjs';
 import { UserAuthority } from './user.types';
@@ -83,6 +83,7 @@ export class UserAuthorityForm {
 
   private readonly _http = inject(HttpClient);
   private readonly _message = inject(MessageService);
+  private readonly _modal = inject(ModalsService);
   private readonly _destroyRef = inject(DestroyRef);
 
   isSubmitting = signal(false);
@@ -132,18 +133,27 @@ export class UserAuthorityForm {
     if (item.id == null) {
       return;
     }
-    if (!confirm(`确定移除权限「${item.authority ?? ''}」吗？`)) {
-      return;
-    }
-    this._http
-      .delete<void>(environment.secApiPath + '/users/authorities/delete', {
-        body: { id: item.id, code: item.code },
+    this._modal
+      .confirm({
+        title: '移除权限',
+        message: `确定移除权限「${item.authority ?? ''}」吗？`,
+        confirmText: '移除',
+        danger: true,
       })
-      .pipe(
-        tap(() => this._message.success('权限已移除')),
-        delay(600),
-        takeUntilDestroyed(this._destroyRef),
-      )
-      .subscribe(() => this.authoritiesResource.reload());
+      .then((ok) => {
+        if (!ok) {
+          return;
+        }
+        this._http
+          .delete<void>(environment.secApiPath + '/users/authorities/delete', {
+            body: { id: item.id, code: item.code },
+          })
+          .pipe(
+            tap(() => this._message.success('权限已移除')),
+            delay(600),
+            takeUntilDestroyed(this._destroyRef),
+          )
+          .subscribe(() => this.authoritiesResource.reload());
+      });
   }
 }

@@ -21,6 +21,7 @@ import {
 } from '@angular/core';
 import { outputToObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { fromEvent } from 'rxjs';
+import { ConfirmDialogComponent } from './confirm-dialog';
 
 export interface ModalRef {
   title?: string;
@@ -37,6 +38,14 @@ export interface ModalOptions {
   keyboard?: boolean;
   focus?: boolean;
   show?: boolean;
+}
+
+export interface ConfirmOptions {
+  title?: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  danger?: boolean;
 }
 
 @Service()
@@ -63,6 +72,34 @@ export class ModalsService {
         this.modalRef = null;
       });
     return this.modalRef;
+  }
+
+  /** Opens a Tabler confirm dialog; resolves `true` on confirm, `false` on cancel/dismiss. */
+  confirm(opts: ConfirmOptions): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      let settled = false;
+      const finish = (ok: boolean) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        resolve(ok);
+      };
+      const ref = this.create({
+        title: opts.title ?? '确认操作',
+        contentRef: ConfirmDialogComponent,
+        contentInputs: {
+          message: opts.message,
+          confirmText: opts.confirmText ?? '确定',
+          cancelText: opts.cancelText ?? '取消',
+          danger: opts.danger ?? false,
+          onResult: finish,
+        },
+      });
+      outputToObservable(ref.instance.dropped)
+        .pipe(takeUntilDestroyed())
+        .subscribe(() => finish(false));
+    });
   }
 }
 
