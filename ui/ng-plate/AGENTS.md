@@ -1,4 +1,20 @@
+# Angular AGENT
+
 You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
+
+## Project At A Glance
+
+Verified against the current `package.json`, `angular.json`, `tsconfig*.json` and `src/` — prefer these over generic Angular habits:
+
+- Angular 22.2 + TypeScript 6.0, managed with `pnpm@12.16.0`.
+- **Zoneless**: no `zone.js` in dependencies or polyfills. State must go through signals — do not rely on patched async callbacks or `NgZone` to trigger change detection.
+- **Services are declared with `@Service()`** (Angular 22 API), never `@Injectable({ providedIn: 'root' })`. There are zero `@Injectable` usages in `src/`.
+- Path aliases are declared in `tsconfig.app.json`, not the root `tsconfig.json`: `@app/*` → `src/app/*`, `@envs/*` → `src/envs/*`, `@styles/*` → `src/styles/*`.
+- `@plate/types` is **not an npm package** — it is a `declare module` block in `src/typings.d.ts` holding `Authentication`, `UserDetails`, `Page<T>`, `Pageable`, `Search` and audit types. Edit that file, not `package.json`.
+- `tabler` is a **browser global** from `@tabler/core`, wired through `angular.json` `scripts`/`styles` and typed as `declare var tabler: any` in `src/typings.d.ts`. It does not exist on the server.
+- i18n source locale and `LOCALE_ID` are `zh-Hans`; all user-facing copy is Chinese.
+- SSR (`outputMode: server`) and the service worker are configured, but `src/app/app.routes.server.ts` maps **every** route to `RenderMode.Client`.
+- Tests run on **Vitest + jsdom** through `@angular/build:unit-test`; no browser unless `--browsers` is passed.
 
 ## Project Workflow
 
@@ -8,7 +24,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Put cross-cutting services and storage adapters in `src/app/core`, layouts in `src/app/layout`, reusable UI plugins in `src/app/plugins`, and shared primitives in `src/app/shared`.
 - Reuse the existing HTTP interceptor and environment configuration for API requests. Do not duplicate the API host, timeout, or version headers in individual services.
 - Reuse `ModalsService` for dynamic forms and preserve the existing output-based refresh flow when changing modal inputs or results.
-- Signal Forms are already used by feature forms; follow the local pattern instead of introducing template-driven forms.
+- Signal Forms are the project's form pattern — every feature form imports `form`, `submit`, the validators, and the `FormField` directive from `@angular/forms/signals`. Build a `signal` model, derive `form(model, (p) => { required(p.x) })`, bind with `[formField]`, and submit through `await submit(...)`. Never introduce template-driven or `FormGroup`-based reactive forms.
 
 ## Code Update And Synchronization
 
@@ -70,20 +86,27 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 ## Services
 
 - Design services around a single responsibility
-- Use Angular's `@Injectable({ providedIn: 'root' })` for singleton services
+- Use the `@Service()` decorator from `@angular/core` for singleton services; it is tree-shakable and is what every service in `src/` already uses
 - Use the `inject()` function instead of constructor injection
 
-# Tabler
+# Tabler Agent
 
 > Tabler is packed with beautifully crafted components and powerful features. Jump in and start building a stunning dashboard — all for free!
 
-Tabler is a free and open source dashboard UI kit built on Bootstrap. This file indexes the documentation at https://docs.tabler.io.
+Tabler is a free and open source dashboard UI kit built on Bootstrap. This file indexes the documentation at <https://docs.tabler.io>.
 
 Every page is available as markdown by appending `.md` to its url, for example `https://docs.tabler.io/ui/components/button.md`. Those files contain the same prose as the html page plus the markup of every example, as fenced code blocks. The whole documentation concatenated into one file is available at `https://docs.tabler.io/llms-full.txt`.
 
 The markup is taken from the rendered pages, so every example is plain html — the same markup the copy button on the page gives you.
 
 An agent skill for building with Tabler is published at `https://docs.tabler.io/.well-known/agent-skills/tabler/SKILL.md` (index: `https://docs.tabler.io/.well-known/agent-skills/index.json`).
+
+### Tabler In This Project
+
+- Installed as `@tabler/core`. Its CSS and JS are registered globally in `angular.json` (`tabler.css`, `tabler-themes.css`, `tabler-socials.css`, `tabler.js`, `tabler-theme.js`), so there is nothing to import per component.
+- Tabler JS is reached through the `tabler` global, e.g. `tabler.Modal.getOrCreateInstance(el)`. It only exists in the browser — call it from `afterNextRender` or an event handler, never during construction or SSR.
+- Where a Tabler component needs real behaviour, prefer the existing wrappers in `src/app/plugins` (`ModalsService`, `MessageService` for toasts, `ConfirmDialogComponent`, `DataTableComponent`, `TransferComponent`) over driving the global directly.
+- Theme settings are written as `data-bs-*` attributes on `document.documentElement` plus `tabler-*` keys in storage; see `SettingsService` and `src/app/layout`.
 
 ## Tabler UI — Getting started
 
@@ -98,10 +121,7 @@ An agent skill for building with Tabler is published at `https://docs.tabler.io/
 ## Tabler UI — Frameworks
 
 - [Frameworks](https://docs.tabler.io/ui/getting-started/frameworks.md): Step-by-step guides for integrating Tabler with popular frameworks.
-- [Laravel](https://docs.tabler.io/ui/getting-started/frameworks/laravel.md): Install Tabler in Laravel - import the CSS and JS with Vite and render a minimal Blade view styled with a Tabler card.
-- [React](https://docs.tabler.io/ui/getting-started/frameworks/react.md): Install Tabler in React - import the CSS and JS from the @tabler/core package and render a minimal page layout with a Tabler card.
-- [Next.js](https://docs.tabler.io/ui/getting-started/frameworks/nextjs.md): Install Tabler in Next.js - import the CSS globally, load the JS on the client, and render a minimal page with a Tabler card.
-- [Vue](https://docs.tabler.io/ui/getting-started/frameworks/vue.md): Install Tabler in Vue - import the CSS and JS from the @tabler/core package and render a minimal single-file component with a Tabler card.
+- [Angular](https://docs.tabler.io/ui/getting-started/frameworks/angular.md): Install Tabler in Angular - register the compiled CSS and JS in angular.json and build a first working page with a Tabler card. This is how this project is wired; the other framework guides do not apply.
 - [Angular](https://docs.tabler.io/ui/getting-started/frameworks/angular.md): Install Tabler in Angular - register the compiled CSS and JS in angular.json and build a first working page with a Tabler card.
 - [Nuxt](https://docs.tabler.io/ui/getting-started/frameworks/nuxt.md): Install Tabler in Nuxt - register the CSS globally, load the JS in a client-only plugin, and render a minimal page with a Tabler card.
 - [Symfony](https://docs.tabler.io/ui/getting-started/frameworks/symfony.md): Install Tabler in Symfony - import the CSS and JS with Webpack Encore and render a minimal Twig layout with a Tabler card.
