@@ -1,59 +1,88 @@
-# Angular AGENT
+# Angular
 
-You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
+You are a dedicated Angular developer who thrives on leveraging the absolute latest features of the framework to build cutting-edge applications. You are currently immersed in Angular v20+, passionately adopting signals for reactive state management, embracing standalone components for streamlined architecture, and utilizing the new control flow for more intuitive template logic. Performance is paramount to you, who constantly seeks to optimize change detection and improve user experience through these modern Angular paradigms. When prompted, assume You are familiar with all the newest APIs and best practices, valuing clean, efficient, and maintainable code.
 
-## Project At A Glance
+## Examples
 
-Verified against the current `package.json`, `angular.json`, `tsconfig*.json` and `src/` — prefer these over generic Angular habits:
+These are modern examples of how to write an Angular 20 component with signals
 
-- Angular 22.2 + TypeScript 6.0, managed with `pnpm@12.16.0`.
-- **Zoneless**: no `zone.js` in dependencies or polyfills. State must go through signals — do not rely on patched async callbacks or `NgZone` to trigger change detection.
-- **Services are declared with `@Service()`** (Angular 22 API), never `@Injectable({ providedIn: 'root' })`. There are zero `@Injectable` usages in `src/`.
-- Path aliases are declared in `tsconfig.app.json`, not the root `tsconfig.json`: `@app/*` → `src/app/*`, `@envs/*` → `src/envs/*`, `@styles/*` → `src/styles/*`.
-- `@plate/types` is **not an npm package** — it is a `declare module` block in `src/typings.d.ts` holding `Authentication`, `UserDetails`, `Page<T>`, `Pageable`, `Search` and audit types. Edit that file, not `package.json`.
-- `tabler` is a **browser global** from `@tabler/core`, wired through `angular.json` `scripts`/`styles` and typed as `declare var tabler: any` in `src/typings.d.ts`. It does not exist on the server.
-- i18n source locale and `LOCALE_ID` are `zh-Hans`; all user-facing copy is Chinese.
-- SSR (`outputMode: server`) and the service worker are configured, but `src/app/app.routes.server.ts` maps **every** route to `RenderMode.Client`.
-- Tests run on **Vitest + jsdom** through `@angular/build:unit-test`; no browser unless `--browsers` is passed.
+```ts
+import { Component, signal } from '@angular/core';
 
-## Project Workflow
 
-- Use `pnpm@12.16.0`; keep `package.json` and `pnpm-lock.yaml` synchronized when dependencies change.
-- The project uses Angular 22, standalone components, signals, `computed()`, `linkedSignal()`, `inject()`, and native `@if`/`@for` control flow.
-- Organize pages by business domain under `src/app/pages`. Keep top-level routes in `src/app/app.routes.ts` and domain routes near their feature pages; prefer lazy loading.
-- Put cross-cutting services and storage adapters in `src/app/core`, layouts in `src/app/layout`, reusable UI plugins in `src/app/plugins`, and shared primitives in `src/app/shared`.
-- Reuse the existing HTTP interceptor and environment configuration for API requests. Do not duplicate the API host, timeout, or version headers in individual services.
-- Reuse `ModalsService` for dynamic forms and preserve the existing output-based refresh flow when changing modal inputs or results.
-- Signal Forms are the project's form pattern — every feature form imports `form`, `submit`, the validators, and the `FormField` directive from `@angular/forms/signals`. Build a `signal` model, derive `form(model, (p) => { required(p.x) })`, bind with `[formField]`, and submit through `await submit(...)`. Never introduce template-driven or `FormGroup`-based reactive forms.
+@Component({
+  selector: '{{tag-name}}-root',
+  templateUrl: '{{tag-name}}.html',
+})
+export class {{ClassName}} {
+  protected readonly isServerRunning = signal(true);
+  toggleServerStatus() {
+    this.isServerRunning.update(isServerRunning => !isServerRunning);
+  }
+}
+```
 
-## Code Update And Synchronization
+```css
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
 
-- After ordinary source changes, run `pnpm exec ng build`.
-- After changing tests or component behavior, run `pnpm exec ng test --no-watch` in addition to the build.
-- After changing routes, shared services, interceptors, layouts, modals, environment files, SSR, or dependencies, run both checks and manually verify the affected page with `pnpm start`.
-- When changing dependencies, build configuration, Angular versions, or test tooling, update the relevant documentation in `README.md` and keep the lockfile in sync.
-- When adding a page, update its feature route and the corresponding route index/export when the local feature pattern requires it.
-- Before considering a change synchronized, inspect the diff, confirm no generated `dist/` output or local environment files were added, and report any unrelated pre-existing changes instead of reverting them.
-- Direct use of `document`, `window`, browser storage, Tabler globals, or `confirm` must remain safe for SSR and tests; interactive elements must also retain keyboard and focus accessibility.
-- A guard is not active merely because it exists: verify that it is attached to the relevant route before relying on it for protection.
+  button {
+    margin-top: 10px;
+  }
+}
+```
 
-## TypeScript Best Practices
+```html
+<section class="container">
+  @if (isServerRunning()) {
+  <span>Yes, the server is running</span>
+  } @else {
+  <span>No, the server is not running</span>
+  }
+  <button (click)="toggleServerStatus()">Toggle Server Status</button>
+</section>
+```
+
+When you update a component, be sure to put the logic in the ts file, the styles in the css file and the html template in the html file.
+
+## Resources
+
+Here are some links to the essentials for building Angular applications. Use these to get an understanding of how some of the core functionality works
+https://angular.dev/essentials/components
+https://angular.dev/essentials/signals
+https://angular.dev/essentials/templates
+https://angular.dev/essentials/dependency-injection
+
+## Best practices & Style guide
+
+Here are the best practices and the style guide information.
+
+### Coding Style guide
+
+Here is a link to the most recent Angular style guide https://angular.dev/style-guide
+
+### TypeScript Best Practices
 
 - Use strict type checking
 - Prefer type inference when the type is obvious
 - Avoid the `any` type; use `unknown` when type is uncertain
 
-## Angular Best Practices
+### Angular Best Practices
 
-- Always use standalone components over NgModules
-- Must NOT set `standalone: true` inside Angular decorators. It's the default in Angular v20+.
+- Always use standalone components over `NgModules`
+- Do NOT set `standalone: true` inside the `@Component`, `@Directive` and `@Pipe` decorators
+- Do NOT set `changeDetection: ChangeDetectionStrategy.OnPush` explicitly. `OnPush` is the default in Angular v22+.
 - Use signals for state management
 - Implement lazy loading for feature routes
 - Do NOT use the `@HostBinding` and `@HostListener` decorators. Put host bindings inside the `host` object of the `@Component` or `@Directive` decorator instead
 - Use `NgOptimizedImage` for all static images.
   - `NgOptimizedImage` does not work for inline base64 images.
 
-## Accessibility Requirements
+### Accessibility Requirements
 
 - It MUST pass all AXE checks.
 - It MUST follow all WCAG AA minimums, including focus management, color contrast, and ARIA attributes.
@@ -61,32 +90,39 @@ Verified against the current `package.json`, `angular.json`, `tsconfig*.json` an
 ### Components
 
 - Keep components small and focused on a single responsibility
-- Use `input()` and `output()` functions instead of decorators
-- Use `computed()` for derived state
+- Use `input()` signal instead of decorators, learn more here https://angular.dev/guide/components/inputs
+- Use `output()` function instead of decorators, learn more here https://angular.dev/guide/components/outputs
+- Use `model()` for two-way bound properties with `[(prop)]` syntax instead of pairing `input()` with `output()`
+- Use `computed()` for derived state learn more about signals here https://angular.dev/guide/signals.
+- Use `linkedSignal()` for state derived from multiple reactive sources that must stay synchronized
 - Prefer inline templates for small components
-- Prefer Reactive forms instead of Template-driven ones
-- Do NOT use `ngClass`, use `class` bindings instead
-- Do NOT use `ngStyle`, use `style` bindings instead
-- When using external templates/styles, use paths relative to the component TS file.
+- Prefer Signal Forms (`@angular/forms/signals`) for new forms. They are stable in Angular v22+ and provide signal-based state, type-safe field access, and schema-based validation
+- When not using Signal Forms, prefer Reactive forms instead of Template-driven ones
+- Do NOT use `ngClass`, use `class` bindings instead, for context: https://angular.dev/guide/templates/binding#css-class-and-style-property-bindings
+- Do NOT use `ngStyle`, use `style` bindings instead, for context: https://angular.dev/guide/templates/binding#css-class-and-style-property-bindings
+- Do NOT import `CommonModule`, import only the directives and pipes the template uses, such as `AsyncPipe` or `DatePipe`
 
-## State Management
+### State Management
 
 - Use signals for local component state
 - Use `computed()` for derived state
 - Keep state transformations pure and predictable
 - Do NOT use `mutate` on signals, use `update` or `set` instead
 
-## Templates
+### Templates
 
 - Keep templates simple and avoid complex logic
 - Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
-- Use the async pipe to handle observables
 - Do not assume globals like (`new Date()`) are available.
+- Use the async pipe to handle observables
+- Use built in pipes and import pipes when being used in a template, learn more https://angular.dev/guide/templates/pipes#
+- When using external templates/styles, use paths relative to the component TS file.
 
-## Services
+### Services
 
 - Design services around a single responsibility
-- Use the `@Service()` decorator from `@angular/core` for singleton services; it is tree-shakable and is what every service in `src/` already uses
+- Use the `providedIn: 'root'` option for singleton services
+- Prefer the `@Service` decorator over `@Injectable({providedIn: 'root'})` for new singleton services (Angular v22+)
 - Use the `inject()` function instead of constructor injection
 
 # Tabler Agent
@@ -120,15 +156,7 @@ An agent skill for building with Tabler is published at `https://docs.tabler.io/
 
 ## Tabler UI — Frameworks
 
-- [Frameworks](https://docs.tabler.io/ui/getting-started/frameworks.md): Step-by-step guides for integrating Tabler with popular frameworks.
 - [Angular](https://docs.tabler.io/ui/getting-started/frameworks/angular.md): Install Tabler in Angular - register the compiled CSS and JS in angular.json and build a first working page with a Tabler card. This is how this project is wired; the other framework guides do not apply.
-- [Angular](https://docs.tabler.io/ui/getting-started/frameworks/angular.md): Install Tabler in Angular - register the compiled CSS and JS in angular.json and build a first working page with a Tabler card.
-- [Nuxt](https://docs.tabler.io/ui/getting-started/frameworks/nuxt.md): Install Tabler in Nuxt - register the CSS globally, load the JS in a client-only plugin, and render a minimal page with a Tabler card.
-- [Symfony](https://docs.tabler.io/ui/getting-started/frameworks/symfony.md): Install Tabler in Symfony - import the CSS and JS with Webpack Encore and render a minimal Twig layout with a Tabler card.
-- [Django](https://docs.tabler.io/ui/getting-started/frameworks/django.md): Install Tabler in Django - serve the CSS and JS through static files and render a minimal template layout with a Tabler card.
-- [Rails](https://docs.tabler.io/ui/getting-started/frameworks/rails.md): Install Tabler in Rails - load the CSS and JS with the standard bundling gems and render a minimal ERB layout with a Tabler card.
-- [SvelteKit](https://docs.tabler.io/ui/getting-started/frameworks/sveltekit.md): Install Tabler in SvelteKit - import the CSS, load the JS on the client, and render a minimal page layout with a Tabler card.
-- [Astro](https://docs.tabler.io/ui/getting-started/frameworks/astro.md): Install Tabler in Astro - import the CSS, load the client-side JavaScript, and render a minimal page layout with a Tabler card.
 
 ## Tabler UI — Upgrade
 
@@ -275,65 +303,10 @@ An agent skill for building with Tabler is published at `https://docs.tabler.io/
 
 - [Tabler UI](https://docs.tabler.io/ui.md): Free and open source web application UI kit based on Bootstrap
 
-## Tabler Icons — Libraries
-
-- [Libraries](https://docs.tabler.io/icons/libraries.md): Official Tabler Icons libraries for React, Vue, Svelte, Angular and more. Use over 5000 icons as native components or a simple webfont.
-- [Astro](https://docs.tabler.io/icons/libraries/astro.md): Add Tabler Icons to Astro projects with the official tree-shakable package. Import any of over 5000 icons as native Astro components.
-- [Preact](https://docs.tabler.io/icons/libraries/preact.md): Add Tabler Icons to Preact apps with the official tree-shakable package. Import any of over 5000 lightweight SVG icons as components.
-- [React](https://docs.tabler.io/icons/libraries/react.md): Add Tabler Icons to React apps with the official tree-shakable package. Import over 5000 scalable SVG icons as customizable components.
-- [SolidJS](https://docs.tabler.io/icons/libraries/solidjs.md): Add Tabler Icons to SolidJS apps with the official tree-shakable package. Import over 5000 high-quality SVG icons as components.
-- [Svelte](https://docs.tabler.io/icons/libraries/svelte.md): Add Tabler Icons to Svelte apps with the official tree-shakable package. Import over 5000 clean SVG icons as customizable components.
-- [Vue](https://docs.tabler.io/icons/libraries/vue.md): Add Tabler Icons to Vue apps with the official package. Import over 5000 SVG icons as Vue components with tree-shaking and full styling control.
-- [Webfont](https://docs.tabler.io/icons/libraries/webfont.md): Use Tabler Icons as a webfont and add any of the icons with a CSS class.
-
-## Tabler Icons — Plugins
-
-- [Plugins](https://docs.tabler.io/icons/plugins.md): Bring Tabler Icons into your design tools with official plugins. Access the full, always up-to-date icon set right inside Figma.
-- [Figma plugin](https://docs.tabler.io/icons/plugins/figma.md): Insert any of the Tabler Icons into your designs with the Figma plugin, without leaving Figma.
-
-## Tabler Icons — Static files
-
-- [Static files](https://docs.tabler.io/icons/static-files.md): Download Tabler Icons as static files in SVG, PNG and PDF formats. Pick the format that fits your design or development workflow.
-- [PDF version](https://docs.tabler.io/icons/static-files/pdf.md): Download Tabler Icons as PDF files, ready to place in documents, presentations, and print workflows without conversion.
-- [PNG version](https://docs.tabler.io/icons/static-files/png.md): Download Tabler Icons as PNG files - raster images for mockups, chat apps, and tools that do not support vector formats.
-- [SVG version](https://docs.tabler.io/icons/static-files/svg.md): Download Tabler Icons as SVG files that scale without quality loss. Use them as images, backgrounds, or inline elements on the web.
-
 ## Tabler Icons
 
 - [Tabler Icons](https://docs.tabler.io/icons.md): Over 5000 pixel-perfect icons for web design and development
 - [Icon design guide](https://docs.tabler.io/icons/design-guide.md): Design rules for Tabler Icons. Canvas size, stroke, corner radius and spacing, plus the SVG format, naming and icon requests.
-
-## Tabler Illustrations
-
-- [Tabler Illustrations](https://docs.tabler.io/illustrations.md): Customizable SVG illustrations for web and mobile designs, in light and dark variants.
-- [Preview](https://docs.tabler.io/illustrations/preview.md): Browse all Tabler Illustrations in light and dark themes.
-- [Contents](https://docs.tabler.io/illustrations/contents.md): The folder structure of the Tabler Illustrations package and where to find each format, color variant and theme.
-- [Customization](https://docs.tabler.io/illustrations/customization.md): Customize Tabler Illustrations with CSS variables: the colors, the dark variant and auto dark mode.
-- [License](https://docs.tabler.io/illustrations/license.md): License terms for personal and team use of Tabler Illustrations.
-
-## Tabler Emails
-
-- [Tabler Emails](https://docs.tabler.io/emails.md): Customizable email templates for over 90 clients and devices.
-- [Contents](https://docs.tabler.io/emails/contents.md): See what is inside the Tabler Emails package - folder structure, compiled HTML templates ready to use, and editable source files.
-- [Compiled templates](https://docs.tabler.io/emails/compiled-html.md): How to use the compiled HTML email templates from the Tabler Emails package.
-- [Source templates](https://docs.tabler.io/emails/source-html.md): How to use the source HTML email templates from the Tabler Emails package.
-
-## Tabler Payments — Libraries
-
-- [Libraries](https://docs.tabler.io/payments/libraries.md): Official Tabler Payments packages for React, Vue, Preact and Astro. Use over 100 payment provider logos as native, tree-shakable components.
-- [Astro](https://docs.tabler.io/payments/libraries/astro.md): Add Tabler payment provider logos to Astro projects with the official tree-shakable package. Render 100+ payment provider logos as native components.
-- [Preact](https://docs.tabler.io/payments/libraries/preact.md): Add Tabler payment provider logos to Preact apps with the official tree-shakable package. Render 100+ payment provider logos as components.
-- [React](https://docs.tabler.io/payments/libraries/react.md): Add Tabler payment provider logos to React apps with the official tree-shakable package. Render 100+ payment provider logos as components.
-- [Vue](https://docs.tabler.io/payments/libraries/vue.md): Add Tabler payment provider logos to Vue apps with the official tree-shakable package. Render 100+ payment provider logos as components.
-
-## Tabler Payments
-
-- [Tabler Payments](https://docs.tabler.io/payments.md): Over 160 payment provider logos for checkout pages and payment forms.
-- [CSS plugin](https://docs.tabler.io/payments/css.md): Show payment provider logos like Visa, Mastercard, and PayPal with the payments CSS plugin to make checkout pages clearer.
-
-## Other
-
-- [Welcome to Tabler Documentation](https://docs.tabler.io/index.md): Guides, examples and reference for Tabler UI components, plugins, icons and the other Tabler tools.
 
 ## Class names
 
