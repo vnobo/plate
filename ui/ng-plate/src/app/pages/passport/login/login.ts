@@ -1,16 +1,16 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormField, form, maxLength, minLength, required, submit } from '@angular/forms/signals';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { BrowserStorage, TokenService } from '@app/core';
 import { MessageService } from '@app/plugins';
 import { Authentication } from '@plate/types';
-import { retry, tap } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { tap } from 'rxjs';
 
 @Component({
   selector: 'app-login',
-  imports: [FormField, RouterLink],
+  imports: [FormField],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -19,7 +19,6 @@ export class Login {
   private readonly _message = inject(MessageService);
   private readonly _http = inject(HttpClient);
   private readonly _router = inject(Router);
-  private readonly _route = inject(ActivatedRoute);
   private readonly _storage = inject(BrowserStorage);
   private readonly _destroyRef = inject(DestroyRef);
 
@@ -42,8 +41,15 @@ export class Login {
   });
 
   constructor() {
-    //this.processLogin();
-    //this.loadRememberedCredentials();
+    this.loadRememberedUsername();
+  }
+
+  /** 字段的首条错误文案；用户动过该字段后才提示，避免一进页面就一片红 */
+  protected errorOf(field: 'username' | 'password'): string {
+    const f = this.loginForm[field]();
+    if (!f.invalid() || !(f.dirty() || f.touched())) return '';
+    const [first] = f.errors() as Array<{ message?: unknown }>;
+    return typeof first?.message === 'string' ? first.message : '输入有误';
   }
 
   async onSubmit() {
@@ -67,16 +73,16 @@ export class Login {
     try {
       const credentials = this.loginModel();
       const headers = new HttpHeaders({
-        authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password),
+        authorization: this.basicAuth(credentials.username, credentials.password),
       });
       this.login(headers).subscribe({
-        next: (authentication: Authentication) => {
+        next: () => {
           if (credentials.rememberMe) {
-            this.storeCredentials(credentials);
+            this.rememberUsername(credentials.username);
           } else {
-            this.clearStoredCredentials();
+            this.clearRememberedUsername();
           }
-          this.handleLoginSuccess(authentication);
+          this.handleLoginSuccess();
         },
         error: (error) => {
           this.handleLoginError(error);
@@ -85,7 +91,8 @@ export class Login {
         complete: () => this.isSubmitting.set(false),
       });
     } catch (error) {
-      this._message.error('登录失败，请稍后再试! 错误: ' + (error || '未知错误'), {
+      console.error('[login] unexpected error', error);
+      this._message.error('登录失败，请稍后再试', {
         autohide: false,
         animation: false,
         delay: 1000,
@@ -94,67 +101,71 @@ export class Login {
     }
   }
 
-  private processLogin() {
-    const headers = new HttpHeaders({ 'x-requested-token': 'none-token-auto-login' });
-    this.login(headers).subscribe({
-      next: (authentication: Authentication) => this.handleLoginSuccess(authentication),
-      error: (error) => console.error(error.message),
-    });
-  }
-
-  private loadRememberedCredentials() {
-    const storedCredentials = this._storage.getItem('credentials');
-    if (storedCredentials) {
-      try {
-        const credentials = JSON.parse(atob(storedCredentials));
-        this.loginModel.update((m) => ({
-          ...m,
-          username: credentials.username,
-          password: credentials.password,
-          rememberMe: false,
-        }));
-      } catch {
-        this.clearStoredCredentials();
-      }
+  /**
+   * btoa 只接受码点 <= 255 的字符，中文凭据会抛 InvalidCharacterError，
+   * 所以先按 UTF-8 取字节再转 binary string。
+   */
+  private basicAuth(username: string, password: string): string {
+    const bytes = new TextEncoder().encode(`${username}:${password}`);
+    let binary = '';
+    for (const byte of bytes) {
+      binary += String.fromCharCode(byte);
     }
+    return 'Basic ' + btoa(binary);
   }
 
-  private storeCredentials(credentials: { username: string; password: string }) {
-    const credentialsToStore = {
-      username: credentials.username,
-      password: credentials.password,
-      remember: true,
-    };
-    const encodedCredentials = btoa(JSON.stringify(credentialsToStore));
-    this._storage.setItem('credentials', encodedCredentials);
+  /** 只记住用户名。密码绝不以任何形式落盘（base64 不是加密） */
+  private rememberUsername(username: string) {
+    this._storage.setItem('login-username', JSON.stringify({ username, remember: true }));
   }
 
-  private clearStoredCredentials() {
-    this._storage.removeItem('credentials');
+  private clearRememberedUsername() {
+    this._storage.removeItem('login-username');
+  }
+
+  private loadRememberedUsername() {
+    const raw = this._storage.getItem('login-username');
+    if (!raw) return;
+    try {
+      const { username } = JSON.parse(raw) as { username?: string };
+      if (username) {
+        this.loginModel.update((m) => ({ ...m, username, rememberMe: true }));
+      }
+    } catch {
+      this.clearRememberedUsername();
+    }
   }
 
   private login(headers: HttpHeaders) {
     return this._http.get<Authentication>('/sec/oauth2/login', { headers }).pipe(
       tap((authentication: Authentication) => this._tokenSer.login(authentication)),
-      retry(3),
+      // 登录请求不重试：401 重试等于把凭据再发一遍，只会放大锁定风险
+      // 组件销毁即退订，避免回调作用在已销毁的组件上
+      takeUntilDestroyed(this._destroyRef),
     );
   }
 
-  private handleLoginSuccess(authentication: Authentication) {
-    this._message.success('登录成功, 欢迎 ' + (authentication.details?.nickname as string) + '!', {
+  private handleLoginSuccess() {
+    this._message.success('登录成功, 欢迎 ' + this._tokenSer.name() + '!', {
       autohide: true,
       delay: 5000,
       animation: true,
     });
-    void this._router.navigate([this._tokenSer.redirectUrl], { relativeTo: this._route });
+    // redirectUrl 由 pages.guard 记为绝对路径，无需 relativeTo
+    void this._router.navigate([this._tokenSer.redirectUrl]);
   }
 
   private handleLoginError(error: unknown) {
-    const errorRecord = error as Record<string, string>;
+    console.error('[login] failed', error);
+    const status = error instanceof HttpErrorResponse ? error.status : 0;
     const errorMessage =
-      errorRecord?.['errors'] ||
-      (error as Error)?.message ||
-      '登录系统失败，请检查您的用户名和密码';
+      status === 401 || status === 403
+        ? '用户名或密码错误，请重试'
+        : status === 429
+          ? '尝试过于频繁，请稍后再试'
+          : status >= 500
+            ? '服务暂时不可用，请稍后再试'
+            : '登录系统失败，请检查您的用户名和密码';
     this._message.error(errorMessage, {
       autohide: true,
       animation: true,

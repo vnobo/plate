@@ -5,12 +5,7 @@
   "compilerOptions": {
     "outDir": "./out-tsc/app",
     "rootDir": "./src",
-    "types": ["node", "@angular/localize"],
-    "paths": {
-      "@app/*": ["./src/app/*"],
-      "@envs/*": ["./src/envs/*"],
-      "@styles/*": ["./src/styles/*"]
-    }
+    "types": ["node", "@angular/localize"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.spec.ts"]

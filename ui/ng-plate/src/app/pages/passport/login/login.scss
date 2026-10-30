@@ -13,7 +13,8 @@
 
 .card {
   width: 100%;
-  background: rgba(255, 255, 255, 0.2);
+  /* 由主题令牌派生毛玻璃底色：写死白色在暗色模式下会让卡片变成一层白膜，和黑蓝主题打架 */
+  background: color-mix(in srgb, var(--tblr-bg-surface) 82%, transparent);
   backdrop-filter: blur(1rem);
   -webkit-backdrop-filter: blur(1rem);
   border: 0.01rem solid rgba(255, 255, 255, 0.18);

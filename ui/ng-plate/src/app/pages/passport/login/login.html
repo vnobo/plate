@@ -23,17 +23,60 @@
     <div class="card card-md">
       <div class="card-body">
         <h2 class="card-title text-center h2 mb-4">登录你的账号</h2>
-        <form
-          aria-label="登录表单"
-          autocomplete="on"
-          class="needs-validation"
-          novalidate
-          role="form"
-          (ngSubmit)="onSubmit()"
-        >
-          <div class="container">
-            <div class="input-icon mb-3">
-              <label class="input-icon-addon" for="username">
+        <form aria-label="登录表单" autocomplete="on" novalidate (ngSubmit)="onSubmit()">
+          <div class="input-icon mb-3">
+            <label class="input-icon-addon" for="username">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-user-circle"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                <path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                <path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" />
+              </svg>
+              <span class="visually-hidden">手机或电子邮件</span>
+            </label>
+            <input
+              id="username"
+              class="form-control is-invalid-lite"
+              placeholder="手机或电子邮件"
+              autocomplete="username"
+              tabindex="1"
+              [formField]="loginForm.username"
+              [class.is-invalid]="
+                loginForm.username().invalid() &&
+                (loginForm.username().dirty() || loginForm.username().touched())
+              "
+              [class.is-valid]="loginForm.username().valid()"
+              [attr.aria-invalid]="
+                loginForm.username().invalid() &&
+                (loginForm.username().dirty() || loginForm.username().touched())
+              "
+              aria-describedby="username-error"
+            />
+            @if (errorOf('username'); as message) {
+              <div class="invalid-feedback d-block" id="username-error">{{ message }}</div>
+            }
+          </div>
+          <div class="mb-3">
+            <div class="text-end mb-1">
+              <!-- shortcut: 没有 forgot-password 路由，先不可点；等找回密码流程落地再换成 routerLink -->
+              <a href="javascript:void(0)" class="small" aria-disabled="true" title="功能开发中"
+                >忘记密码?</a
+              >
+            </div>
+            <div class="input-icon">
+              <label class="input-icon-addon" for="password">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -44,150 +87,123 @@
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  class="icon icon-tabler icons-tabler-outline icon-tabler-user-circle"
+                  aria-hidden="true"
+                  class="icon icon-tabler icons-tabler-outline icon-tabler-lock-password"
                 >
                   <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-                  <path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
-                  <path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" />
+                  <path
+                    d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z"
+                  />
+                  <path d="M8 11v-4a4 4 0 1 1 8 0v4" />
+                  <path d="M15 16h.01" />
+                  <path d="M12.01 16h.01" />
+                  <path d="M9.02 16h.01" />
                 </svg>
-                <span class="visually-hidden">手机或电子邮件</span>
+                <span class="visually-hidden">密 码</span>
               </label>
               <input
-                id="username"
+                id="password"
                 class="form-control is-invalid-lite"
-                placeholder="手机或电子邮件"
-                autocomplete="on"
-                tabindex="1"
-                [formField]="loginForm.username"
+                placeholder="密   码"
+                autocomplete="current-password"
+                tabindex="2"
+                [formField]="loginForm.password"
+                [type]="passwordFieldTextType() ? 'text' : 'password'"
                 [class.is-invalid]="
-                  loginForm.username().invalid() &&
-                  (loginForm.username().dirty() || loginForm.username().touched())
+                  loginForm.password().invalid() &&
+                  (loginForm.password().dirty() || loginForm.password().touched())
                 "
-                [class.is-valid]="loginForm.username().valid()"
+                [class.is-valid]="loginForm.password().valid()"
+                [attr.aria-invalid]="
+                  loginForm.password().invalid() &&
+                  (loginForm.password().dirty() || loginForm.password().touched())
+                "
+                aria-describedby="password-error"
               />
-            </div>
-            <div class="mb-3">
-              <div class="text-end mb-1">
-                <a routerLink="forgot-password" class="small">忘记密码?</a>
-              </div>
-              <div class="input-icon">
-                <label class="input-icon-addon" for="password">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="icon icon-tabler icons-tabler-outline icon-tabler-lock-password"
-                  >
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path
-                      d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z"
-                    />
-                    <path d="M8 11v-4a4 4 0 1 1 8 0v4" />
-                    <path d="M15 16h.01" />
-                    <path d="M12.01 16h.01" />
-                    <path d="M9.02 16h.01" />
-                  </svg>
-                  <span class="visually-hidden">密 码</span>
-                </label>
-                <input
-                  id="password"
-                  class="form-control is-invalid-lite"
-                  placeholder="密   码"
-                  autocomplete="on"
-                  tabindex="2"
-                  [formField]="loginForm.password"
-                  [type]="passwordFieldTextType() ? 'text' : 'password'"
-                  [class.is-invalid]="
-                    loginForm.password().invalid() &&
-                    (loginForm.password().dirty() || loginForm.password().touched())
-                  "
-                  [class.is-valid]="loginForm.password().valid()"
-                />
-                <button
-                  type="button"
-                  class="input-icon-addon border-0 bg-transparent p-0 text-secondary"
-                  tabindex="3"
-                  [attr.aria-label]="passwordFieldTextType() ? '隐藏密码' : '显示密码'"
-                  [attr.aria-pressed]="passwordFieldTextType()"
-                  (click)="showPassword()"
-                >
-                    @if (passwordFieldTextType()) {
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        fill="currentColor"
-                        class="bi bi-eye"
-                        viewBox="0 0 16 16"
-                      >
-                        <path
-                          d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"
-                        />
-                        <path
-                          d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0a3.5 3.5 0 0 1-7 0"
-                        />
-                      </svg>
-                    } @else {
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        fill="currentColor"
-                        class="bi bi-eye-slash"
-                        viewBox="0 0 16 16"
-                      >
-                        <path
-                          d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7 7 0 0 0-2.79.588l.77.771A6 6 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755q-.247.248-.517.486z"
-                        />
-                        <path
-                          d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829"
-                        />
-                        <path
-                          d="M3.35 5.47q-.27.24-.518.487A13 13 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7 7 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12z"
-                        />
-                      </svg>
-                    }
-                </button>
-              </div>
-            </div>
-            <div class="mb-2">
-              <label class="form-check">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  [formField]="loginForm.rememberMe"
-                />
-                <span class="form-check-label">在此设备记住我?</span>
-              </label>
-            </div>
-            <div class="form-footer">
               <button
-                [class.disabled]="isSubmitting()"
-                tabindex="4"
                 type="button"
-                (click)="onSubmit()"
-                class="btn btn-primary w-100 border-0"
-                [disabled]="!loginForm().valid() || isSubmitting()"
+                class="input-icon-addon border-0 bg-transparent p-0 text-secondary"
+                tabindex="3"
+                [attr.aria-label]="passwordFieldTextType() ? '隐藏密码' : '显示密码'"
+                [attr.aria-pressed]="passwordFieldTextType()"
+                (click)="showPassword()"
               >
-                @if (isSubmitting()) {
-                  <span
-                    class="spinner-border spinner-border-sm me-2"
-                    role="status"
-                    aria-hidden="true"
-                  ></span>
-                  登录中...
-                } @else {
-                  登 录
-                }
+                  @if (passwordFieldTextType()) {
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      class="icon"
+                    >
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                      <path
+                        d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"
+                      />
+                    </svg>
+                  } @else {
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      class="icon"
+                    >
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M10.585 10.587a2 2 0 0 0 2.829 2.828" />
+                      <path
+                        d="M9.362 5.689a9.797 9.797 0 0 1 2.638 -.189c3.6 0 6.6 2 9 6c-.713 1.188 -1.496 2.229 -2.345 3.104m-2.617 1.423c-.719 .297 -1.404 .473 -2.038 .473c-3.6 0 -6.6 -2 -9 -6c.818 -1.364 1.723 -2.523 2.704 -3.453"
+                      />
+                      <path d="M3 3l18 18" />
+                    </svg>
+                  }
               </button>
+              @if (errorOf('password'); as message) {
+                <div class="invalid-feedback d-block" id="password-error">{{ message }}</div>
+              }
             </div>
+          </div>
+          <div class="mb-2">
+            <label class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                [formField]="loginForm.rememberMe"
+              />
+              <span class="form-check-label">在此设备记住我?</span>
+            </label>
+          </div>
+          <div class="form-footer">
+            <button
+              tabindex="4"
+              type="submit"
+              class="btn btn-primary w-100 border-0"
+              [disabled]="!loginForm().valid() || isSubmitting()"
+            >
+              @if (isSubmitting()) {
+                <span
+                  class="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                登录中...
+              } @else {
+                登 录
+              }
+            </button>
           </div>
         </form>
       </div>
@@ -195,7 +211,7 @@
       <div class="card-body">
         <div class="row">
           <div class="col">
-            <a class="btn w-100" href="#">
+            <a class="btn w-100" href="javascript:void(0)" aria-disabled="true" title="功能开发中">
               <svg
                 class="icon bi bi-github"
                 fill="currentColor"
@@ -212,7 +228,7 @@
             </a>
           </div>
           <div class="col">
-            <a class="btn w-100" href="#">
+            <a class="btn w-100" href="javascript:void(0)" aria-disabled="true" title="功能开发中">
               <svg
                 class="icon bi bi-wechat"
                 fill="currentColor"
@@ -235,7 +251,8 @@
       </div>
       <div class="card-body">
         <div class="text-center">
-          <span class="text-info">你还没有账号? </span><a href="#" tabindex="5">现在注册</a>
+          <span class="text-info">你还没有账号? </span
+          ><a href="javascript:void(0)" tabindex="5" aria-disabled="true" title="功能开发中">现在注册</a>
         </div>
       </div>
     </div>
