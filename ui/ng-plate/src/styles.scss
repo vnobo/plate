@@ -130,7 +130,7 @@ html[data-bs-theme='dark'] {
 
   --tblr-azure: #5b9bd5;
   --tblr-azure-rgb: 91, 155, 213;
-  --tblr-azure-fg: #0f172a;
+  --tblr-azure-fg: #080d18;
 
   --tblr-secondary: #7c8aa0;
   --tblr-secondary-rgb: 124, 138, 160;
@@ -153,13 +153,16 @@ html[data-bs-theme='dark'] {
   --tblr-danger-rgb: 241, 91, 91;
   --tblr-danger-fg: #2a0808;
 
-  --tblr-bg-surface: #16223a;
-  --tblr-bg-surface-secondary: #0f172a;
-  --tblr-body-bg: #0f172a;
-  --tblr-body-color: #e5edf7;
-  --tblr-muted: #94a3b8;
-  --tblr-border-color: #1e2a3f;
-  --tblr-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.24);
+  /* 黑蓝（深海军蓝）层次：页面最深 → 悬浮层略高 → 卡片更高，逐层抬升形成纵深。
+     --tblr-bg-forms 必须一起改：Tabler 暗色默认取中性 gray-900，不改输入框会发灰 */
+  --tblr-body-bg: #080d18;
+  --tblr-bg-surface-secondary: #0c1322;
+  --tblr-bg-surface: #121d31;
+  --tblr-bg-forms: #0e1728;
+  --tblr-body-color: #dce5f4;
+  --tblr-muted: #8c9bb5;
+  --tblr-border-color: #1e2c46;
+  --tblr-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.32);
 }
 
 html,

@@ -5,6 +5,7 @@ import {
   ComponentRef,
   computed,
   createComponent,
+  DestroyRef,
   Directive,
   DOCUMENT,
   ElementRef,
@@ -55,8 +56,9 @@ export class MessageService {
     this.document.body.appendChild(this.toastRef.location.nativeElement);
     this.appRef.attachView(this.toastRef.hostView);
 
+    // 服务方法里没有注入上下文，必须显式传 DestroyRef；取组件自己的，随弹层销毁自动退订
     outputToObservable(this.toastRef.instance.toastsDropped)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.toastRef.injector.get(DestroyRef)))
       .subscribe(() => {
         this.cleanup();
       });

@@ -68,13 +68,11 @@
               />
             </div>
             <div class="mb-3">
-              <div class="form-label">
-                <span class="form-label-description mb-1">
-                  <a routerLink="forgot-password">忘记密码?</a>
-                </span>
+              <div class="text-end mb-1">
+                <a routerLink="forgot-password" class="small">忘记密码?</a>
               </div>
-              <div class="input-group input-group-flat">
-                <label class="input-group-text" for="password">
+              <div class="input-icon">
+                <label class="input-icon-addon" for="password">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -112,15 +110,14 @@
                   "
                   [class.is-valid]="loginForm.password().valid()"
                 />
-                <span class="input-group-text">
-                  <a
-                    aria-label="显示密码"
-                    class="link-secondary"
-                    data-bs-original-title="显示密码"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="right"
-                    (click)="showPassword()"
-                  >
+                <button
+                  type="button"
+                  class="input-icon-addon border-0 bg-transparent p-0 text-secondary"
+                  tabindex="3"
+                  [attr.aria-label]="passwordFieldTextType() ? '隐藏密码' : '显示密码'"
+                  [attr.aria-pressed]="passwordFieldTextType()"
+                  (click)="showPassword()"
+                >
                     @if (passwordFieldTextType()) {
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -157,8 +154,7 @@
                         />
                       </svg>
                     }
-                  </a>
-                </span>
+                </button>
               </div>
             </div>
             <div class="mb-2">

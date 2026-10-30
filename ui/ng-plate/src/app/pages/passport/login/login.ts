@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { FormField, form, maxLength, minLength, required, submit } from '@angular/forms/signals';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BrowserStorage, TokenService } from '@app/core';
@@ -21,6 +21,7 @@ export class Login {
   private readonly _router = inject(Router);
   private readonly _route = inject(ActivatedRoute);
   private readonly _storage = inject(BrowserStorage);
+  private readonly _destroyRef = inject(DestroyRef);
 
   passwordFieldTextType = signal(false);
   isSubmitting = signal(false);
@@ -95,12 +96,10 @@ export class Login {
 
   private processLogin() {
     const headers = new HttpHeaders({ 'x-requested-token': 'none-token-auto-login' });
-    this.login(headers)
-      .pipe(takeUntilDestroyed())
-      .subscribe({
-        next: (authentication: Authentication) => this.handleLoginSuccess(authentication),
-        error: (error) => console.error(error.message),
-      });
+    this.login(headers).subscribe({
+      next: (authentication: Authentication) => this.handleLoginSuccess(authentication),
+      error: (error) => console.error(error.message),
+    });
   }
 
   private loadRememberedCredentials() {

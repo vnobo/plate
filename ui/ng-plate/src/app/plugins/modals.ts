@@ -6,6 +6,7 @@ import {
   Component,
   ComponentRef,
   createComponent,
+  DestroyRef,
   Directive,
   ElementRef,
   EnvironmentInjector,
@@ -65,8 +66,9 @@ export class ModalsService {
     });
     document.body.appendChild(this.modalRef.location.nativeElement);
     this.appRef.attachView(this.modalRef.hostView);
+    // 服务方法里没有注入上下文，必须显式传 DestroyRef；取组件自己的，随弹层销毁自动退订
     outputToObservable(this.modalRef.instance.dropped)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.modalRef.injector.get(DestroyRef)))
       .subscribe(() => {
         this.modalRef?.destroy();
         this.modalRef = null;
@@ -96,8 +98,9 @@ export class ModalsService {
           onResult: finish,
         },
       });
+      // Promise executor 里更没有注入上下文，同样要显式传 DestroyRef
       outputToObservable(ref.instance.dropped)
-        .pipe(takeUntilDestroyed())
+        .pipe(takeUntilDestroyed(ref.injector.get(DestroyRef)))
         .subscribe(() => finish(false));
     });
   }
@@ -160,6 +163,7 @@ export class TablerModalsInit {
 })
 export class Modals implements OnInit, OnDestroy {
   private _el = inject(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   modalRef = input.required<ModalRef>();
   dropped = output<void>();
@@ -176,7 +180,7 @@ export class Modals implements OnInit, OnDestroy {
       const myModalAlternative = tabler.Modal.getOrCreateInstance(modalEl, options);
 
       fromEvent(modalEl, 'hidden.bs.modal')
-        .pipe(takeUntilDestroyed())
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
           this.dropped.emit();
         });
