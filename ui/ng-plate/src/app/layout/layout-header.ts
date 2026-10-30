@@ -420,13 +420,52 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             <span class="avatar avatar-sm bg-primary-lt">{{ tokenSer.initial() }}</span>
             <div class="d-none d-xl-block ps-2">
               <div>{{ tokenSer.name() }}</div>
-              <div class="mt-1 small text-secondary">{{ tokenSer.role() }}</div>
+              @if (tokenSer.role()) {
+                <div class="mt-1 small text-secondary">{{ tokenSer.role() }}</div>
+              }
             </div>
           </a>
           <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-            <a routerLink="/dashboard" class="dropdown-item">工作台</a>
+            <a routerLink="/dashboard" class="dropdown-item">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="icon dropdown-item-icon"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M10 3.2a9 9 0 1 0 10.8 10.8a1 1 0 0 0 -1 -1h-6.8a2 2 0 0 1 -2 -2v-7a.9 .9 0 0 0 -1 -.8" />
+                <path d="M15 3.5a9 9 0 0 1 5.5 5.5h-4.5a1 1 0 0 1 -1 -1v-4.5" />
+              </svg>
+              工作台
+            </a>
             <div class="dropdown-divider"></div>
-            <a href="javascript:void(0)" class="dropdown-item" (click)="logout()">退出登录</a>
+            <a href="javascript:void(0)" class="dropdown-item" (click)="logout()">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="icon dropdown-item-icon"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+                <path d="M7 12h14l-3 -3" />
+                <path d="M17 9l3 3" />
+              </svg>
+              退出登录
+            </a>
           </div>
         </div>
       </div>
