@@ -25,9 +25,14 @@ export const PLATFORM_ROUTES: Routes = [
         title: '租户管理',
       },
       {
-        path: 'role',
+        path: 'roles',
         loadComponent: () => import('./role/role').then((m) => m.Role),
         title: '角色管理',
+      },
+      {
+        path: 'menus',
+        loadComponent: () => import('./menus/menus').then((m) => m.Menus),
+        title: '菜单管理',
       },
       {
         path: '',
