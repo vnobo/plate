@@ -6,7 +6,12 @@ import { Router } from '@angular/router';
 import { BrowserStorage, TokenService } from '@app/core';
 import { MessageService } from '@app/plugins';
 import { Authentication } from '@plate/types';
+import dayjs from 'dayjs';
 import { tap } from 'rxjs';
+
+/** 记住我：凭据存 localStorage 的键与有效期（最多 2 天） */
+const CREDENTIALS_KEY = 'login-credentials';
+const CREDENTIALS_TTL_MS = 2 * 24 * 60 * 60 * 1000;
 
 @Component({
   selector: 'app-login',
@@ -41,7 +46,20 @@ export class Login {
   });
 
   constructor() {
-    this.loadRememberedUsername();
+    // 刷新后 sessionStorage 里还有令牌：没过期直接回内页，过期就留在登录页重新登录。
+    // SSR 没有存储，authenticationToken() 返回 null，不会误跳。
+    // 用 peek 那份判过期：authenticationToken() 会刷新 lastAccessTime，判出来永远不过期
+    const authentication = this._tokenSer.peekAuthentication();
+    if (authentication) {
+      if (!this._tokenSer.isExpired(authentication)) {
+        this._tokenSer.login(authentication);
+        void this._router.navigate([this._tokenSer.redirectUrl]);
+        return;
+      }
+      // 死令牌留着只会被下一个请求 401 再踢一次，先清掉
+      this._tokenSer.logout();
+    }
+    this.autoLoginWithRemembered();
   }
 
   /** 字段的首条错误文案；用户动过该字段后才提示，避免一进页面就一片红 */
@@ -88,9 +106,9 @@ export class Login {
             return;
           }
           if (credentials.rememberMe) {
-            this.rememberUsername(credentials.username);
+            this.rememberCredentials(credentials.username, credentials.password);
           } else {
-            this.clearRememberedUsername();
+            this.clearRemembered();
           }
           this.handleLoginSuccess(credentials.username);
         },
@@ -124,25 +142,48 @@ export class Login {
     return 'Basic ' + btoa(binary);
   }
 
-  /** 只记住用户名。密码绝不以任何形式落盘（base64 不是加密） */
-  private rememberUsername(username: string) {
-    this._storage.setItem('login-username', JSON.stringify({ username, remember: true }));
+  /**
+   * 勾选「记住我」才落盘，且连同密码一起存 —— 这是产品要求的「2 天内自动登录」的代价：
+   * 明文存在 localStorage，任何能跑脚本的同源页面都能读到。2 天到了就失效，不再自动登录。
+   */
+  private rememberCredentials(username: string, password: string) {
+    this._storage.setItem(
+      CREDENTIALS_KEY,
+      JSON.stringify({ username, password, savedAt: dayjs().valueOf() }),
+    );
   }
 
-  private clearRememberedUsername() {
-    this._storage.removeItem('login-username');
+  private clearRemembered() {
+    this._storage.removeItem(CREDENTIALS_KEY);
   }
 
-  private loadRememberedUsername() {
-    const raw = this._storage.getItem('login-username');
+  /** 记住的凭据还在 2 天有效期内就自动登录；过期或格式不对就清掉，不拿脏数据去撞 401 */
+  private autoLoginWithRemembered() {
+    const raw = this._storage.getItem(CREDENTIALS_KEY);
     if (!raw) return;
     try {
-      const { username } = JSON.parse(raw) as { username?: string };
-      if (username) {
-        this.loginModel.update((m) => ({ ...m, username, rememberMe: true }));
+      const saved = JSON.parse(raw) as {
+        username?: string;
+        password?: string;
+        savedAt?: number;
+      };
+      if (
+        !saved.username ||
+        !saved.password ||
+        !saved.savedAt ||
+        dayjs().valueOf() - saved.savedAt > CREDENTIALS_TTL_MS
+      ) {
+        this.clearRemembered();
+        return;
       }
+      this.loginModel.set({
+        username: saved.username,
+        password: saved.password,
+        rememberMe: true,
+      });
+      void this.onSubmit();
     } catch {
-      this.clearRememberedUsername();
+      this.clearRemembered();
     }
   }
 
@@ -172,6 +213,10 @@ export class Login {
     // 401 会被 handleErrorInterceptor 剥成响应体（不再是 HttpErrorResponse），
     // 登录接口走到这里只可能是凭据被拒；status 0 则是连不上/超时
     const status = error instanceof HttpErrorResponse ? error.status : 401;
+    // 凭据被拒：本地那份已经没用了，不清掉会每次进登录页都白撞一次 401（改过密码尤其明显）
+    if (status === 401 || status === 403) {
+      this.clearRemembered();
+    }
     const errorMessage =
       status === 0
         ? '无法连接服务器，请检查网络后重试'
