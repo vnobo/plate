@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+.pie {
+  width: 132px;
+  height: 132px;
+  flex: none;
+  // SVG 的 circle 默认从 3 点方向起笔，整体转 -90° 让第一块从 12 点开始
+  transform: rotate(-90deg);
+}
+
+.pie-track,
+.pie-slice {
+  fill: none;
+  stroke-width: 5;
+}
+
+.pie-track {
+  stroke: var(--tblr-border-color);
+}
+
+// 颜色由 text-* 工具类提供，描边/图点都取 currentColor
+.pie-slice {
+  stroke: currentColor;
+}
+
+.legend-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}

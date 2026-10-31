@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 @Service()
 export class TokenService {
   readonly loginUrl = '/passport/login';
-  redirectUrl = '/dashboard';
+  redirectUrl = '/platform';
 
   private readonly authenticationKey = 'authentication';
   private readonly _storage = inject(SessionStorage);

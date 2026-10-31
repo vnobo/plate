@@ -7,8 +7,13 @@ export const PLATFORM_ROUTES: Routes = [
     path: '',
     component: BaseLayout,
     canActivate: [canActivateGuard],
-    title: '系统管理',
+    title: '平台管理',
     children: [
+      {
+        path: 'welcome',
+        loadComponent: () => import('./welcome/welcome').then((m) => m.PlatformWelcome),
+        title: '平台欢迎',
+      },
       {
         path: 'users',
         loadComponent: () => import('./users/users').then((m) => m.Users),
@@ -27,7 +32,7 @@ export const PLATFORM_ROUTES: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'tenant',
+        redirectTo: 'welcome',
       },
     ],
   },
