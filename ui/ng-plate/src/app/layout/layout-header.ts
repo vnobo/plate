@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
-import { SettingsService, TokenService } from '@app/core';
+import { SettingsService, TokenService, UserService } from '@app/core';
 import { LayoutService } from './layout.service';
 
 type NoticeType = 'system' | 'mention' | 'comment' | 'like';
@@ -403,15 +403,29 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             data-bs-toggle="dropdown"
             aria-label="打开用户菜单"
           >
-            <span class="avatar avatar-sm bg-primary-lt">{{ tokenSer.initial() }}</span>
-            <div class="d-none d-xl-block ps-2">
-              <div>{{ tokenSer.name() }}</div>
-              @if (tokenSer.role()) {
-                <div class="mt-1 small text-secondary">{{ tokenSer.role() }}</div>
+            <span class="avatar avatar-sm bg-primary-lt">{{ user.initial() }}</span>
+            <!-- 只展示姓名与昵称，角色/权限不在界面上出现 -->
+            <div class="d-none d-xl-block ps-2 lh-sm">
+              <div class="fw-medium">{{ user.displayName() }}</div>
+              @if (showNickname()) {
+                <div class="small text-secondary">{{ user.nickname() }}</div>
               }
             </div>
           </a>
           <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+            <!-- xl 以下顶栏只剩头像，名字挪进菜单里，否则小屏看不出当前是谁 -->
+            <div class="d-xl-none">
+              <div class="dropdown-item-text d-flex align-items-center">
+                <span class="avatar avatar-sm bg-primary-lt">{{ user.initial() }}</span>
+                <div class="ps-2 lh-sm">
+                  <div class="fw-medium">{{ user.displayName() }}</div>
+                  @if (showNickname()) {
+                    <div class="small text-secondary">{{ user.nickname() }}</div>
+                  }
+                </div>
+              </div>
+              <div class="dropdown-divider"></div>
+            </div>
             <a routerLink="/dashboard" class="dropdown-item">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -461,8 +475,15 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
 export class LayoutHeader {
   private readonly router = inject(Router);
   protected readonly tokenSer = inject(TokenService);
+  protected readonly user = inject(UserService);
   protected readonly settings = inject(SettingsService);
   protected readonly layout = inject(LayoutService);
+
+  /** 昵称与主显示名相同时只显示一行，避免「张三 / 张三」 */
+  protected readonly showNickname = computed(() => {
+    const nickname = this.user.nickname();
+    return nickname !== '' && nickname !== this.user.displayName();
+  });
 
   // 图标是硬编码的静态 SVG；Angular 的 innerHTML 清洗会移除 <svg>，故声明为可信内容
   private readonly sanitizer = inject(DomSanitizer);

@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { TokenService } from '@app/core';
+import { UserService } from '@app/core';
 
 interface ModuleCard {
   title: string;
@@ -16,7 +16,7 @@ interface ModuleCard {
   styleUrl: './welcome.scss',
 })
 export class Welcome {
-  protected readonly token = inject(TokenService);
+  protected readonly user = inject(UserService);
 
   protected readonly modules: ReadonlyArray<ModuleCard> = [
     { title: '用户管理', desc: '账号与直接权限', link: '/platform/users', icon: 'users' },

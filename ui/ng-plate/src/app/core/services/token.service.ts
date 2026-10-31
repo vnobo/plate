@@ -19,22 +19,8 @@ export class TokenService {
   readonly isLoggedIn$ = toObservable(this.isLoggedIn);
   readonly authentication$ = toObservable(this.authentication);
 
-  /** 当前登录用户名（昵称优先，否则姓名，否则账号） */
-  readonly name = computed(() => {
-    const details = this.authentication()?.details;
-    if (!details) return '未登录';
-    return details.nickname || details.name || details.code || '用户';
-  });
-
-  /** 当前用户首字母，用于头像占位 */
-  readonly initial = computed(() => this.name().charAt(0).toUpperCase());
-
-  /** 当前用户角色（拼接 authority） */
-  readonly role = computed(() => {
-    const authorities = this.authentication()?.details?.authorities;
-    if (!authorities?.length) return '';
-    return authorities.map((a) => (typeof a === 'string' ? a : a.authority)).join(' / ');
-  });
+  /** 当前会话的只读快照；用户展示信息（姓名/昵称/头像）请走 UserService */
+  readonly current = computed(() => this.authentication());
 
   hasRole(role: string): boolean {
     const auth = this.authentication();

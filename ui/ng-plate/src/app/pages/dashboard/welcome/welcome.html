@@ -3,7 +3,7 @@
     <div class="col">
       <div class="page-pretitle">概览</div>
       <h2 class="page-title">工作台</h2>
-      <div class="text-secondary mt-1">欢迎回来，{{ token.name() }}</div>
+      <div class="text-secondary mt-1">欢迎回来，{{ user.name() }}</div>
     </div>
     <div class="col-auto ms-auto">
       <span class="badge bg-primary-lt">Plate 控制台</span>
@@ -104,18 +104,18 @@
       </div>
       <div class="card-body">
         <div class="d-flex align-items-center mb-3">
-          <span class="avatar avatar-lg bg-primary-lt me-3">{{ token.initial() }}</span>
+          <span class="avatar avatar-lg bg-primary-lt me-3">{{ user.initial() }}</span>
           <div>
-            <div class="h3 mb-0">{{ token.name() }}</div>
-            <div class="text-secondary">{{ token.role() || '未分配角色' }}</div>
+            <div class="h3 mb-0">{{ user.name() }}</div>
+            <div class="text-secondary">{{ user.role() || '未分配角色' }}</div>
           </div>
         </div>
         <div class="list-group list-group-flush">
           <div class="list-group-item px-0 d-flex justify-content-between">
-            <span class="text-secondary">昵称</span><span>{{ token.name() }}</span>
+            <span class="text-secondary">昵称</span><span>{{ user.name() }}</span>
           </div>
           <div class="list-group-item px-0 d-flex justify-content-between">
-            <span class="text-secondary">角色</span><span>{{ token.role() || '—' }}</span>
+            <span class="text-secondary">角色</span><span>{{ user.role() || '—' }}</span>
           </div>
         </div>
       </div>
