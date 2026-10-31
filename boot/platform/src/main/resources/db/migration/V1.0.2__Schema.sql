@@ -250,7 +250,7 @@ create index se_loggers_extend_gin_idx on se_loggers using gin (extend);
 create index se_loggers_text_search_gin_idx on se_loggers using gin (text_search);
 comment on table se_loggers is 'Operation log table';
 
-create or replace function plate_update_updated_at_column()
+create or replace function plate_updated_at_column()
     returns TRIGGER as
 $$
 begin
