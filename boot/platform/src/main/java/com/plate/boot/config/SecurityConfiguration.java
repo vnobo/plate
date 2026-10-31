@@ -2,6 +2,7 @@ package com.plate.boot.config;
 
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.security.RememberMeService;
 import com.plate.boot.security.oauth2.Oauth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -61,9 +62,17 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    private final ServerSecurityContextRepository securityContextRepository =
-            new WebSessionServerSecurityContextRepository();
     private final Oauth2SuccessHandler authenticationSuccessHandler;
+    private final RememberMeService rememberMeService;
+
+    /**
+     * Shared with {@link com.plate.boot.security.SecurityController#refresh}, which writes a rebuilt
+     * authentication into the WebSession; both must use the same repository or the session is not found.
+     */
+    @Bean
+    public ServerSecurityContextRepository securityContextRepository() {
+        return new WebSessionServerSecurityContextRepository();
+    }
 
     /**
      * Configures and provides an instance of {@link ReactiveOAuth2AuthorizedClientService} which is primarily
@@ -122,13 +131,17 @@ public class SecurityConfiguration {
      * various aspects of security including authorization rules, session management, basic authentication entry point,
      * form login, CSRF protection, logout handling, and OAuth2 login support.
      *
-     * @param http The ServerHttpSecurity builder used to configure web security settings.
+     * @param http                       The ServerHttpSecurity builder used to configure web security settings.
+     * @param securityContextRepository  Repository backing the WebSession security context.
      * @return A configured SecurityWebFilterChain ready to be used in the application's security filter chain.
      */
     @Bean
-    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http,
+                                                            ServerSecurityContextRepository securityContextRepository) {
         http.authorizeExchange(exchanges -> exchanges
                 .pathMatchers("/captcha/code", "/oauth2/qr/code").permitAll()
+                // 记住我换会话：此时没有会话也没有 Basic 头，必须放行，否则刷新页面会被挡在门外
+                .pathMatchers("/sec/oauth2/refresh").permitAll()
                 .matchers(PathRequest.toStaticResources().atCommonLocations().excluding(StaticResourceLocation.FONTS)).permitAll()
                 .anyExchange().authenticated());
         http.sessionManagement((sessions) -> sessions
@@ -178,8 +191,12 @@ public class SecurityConfiguration {
         ClearSiteDataServerHttpHeadersWriter writer = new ClearSiteDataServerHttpHeadersWriter(
                 ClearSiteDataServerHttpHeadersWriter.Directive.ALL);
         ServerLogoutHandler clearSiteData = new HeaderWriterServerLogoutHandler(writer);
+        // 主动退出必须吊销记住我的 token：cookie 是 HttpOnly，前端拿不到也删不掉，
+        // 只清浏览器端的话，那份 token 在 Redis 里还有 2 天可用
+        ServerLogoutHandler revokeRememberMe =
+                (exchange, authentication) -> this.rememberMeService.revoke(exchange.getExchange());
         DelegatingServerLogoutHandler logoutHandler =
-                new DelegatingServerLogoutHandler(securityContext, clearSiteData);
+                new DelegatingServerLogoutHandler(securityContext, clearSiteData, revokeRememberMe);
         logout.requiresLogout(new PathPatternParserServerWebExchangeMatcher("/oauth2/logout"));
         logout.logoutHandler(logoutHandler);
         logout.logoutSuccessHandler(new HttpStatusReturningServerLogoutSuccessHandler());

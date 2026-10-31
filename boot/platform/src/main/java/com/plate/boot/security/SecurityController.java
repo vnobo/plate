@@ -6,10 +6,15 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
@@ -51,20 +56,58 @@ public class SecurityController {
      * persistence of client details necessary for OAuth2 flows.
      */
     private final ServerOAuth2AuthorizedClientRepository clientRepository;
+    /**
+     * Issues and revokes the HttpOnly remember-me cookie, backed by a 2-day token in Redis.
+     */
+    private final RememberMeService rememberMeService;
+    /**
+     * Used by {@link #refresh} to write the rebuilt authentication into the WebSession.
+     */
+    private final ServerSecurityContextRepository securityContextRepository;
 
     /**
      * Generates authentication token information for the current session
      * <p>
      * This method builds an AuthenticationToken object using the current WebSession and Authentication information,
-     * representing the user's authentication status
+     * representing the user's authentication status. When {@code rememberMe} is requested a remember-me cookie is
+     * issued so the session can be restored later without the password.
      *
      * @param session        The current user's WebSession object, containing session ID and related time information
      * @param authentication The current user's authentication information, containing principal and authority information
+     * @param exchange       The current exchange, used to write the remember-me cookie
+     * @param rememberMe     Whether the browser should be remembered for 2 days
      * @return An AuthenticationToken object containing session authentication information
      */
     @GetMapping("login")
-    public Mono<AuthenticationToken> loginToken(WebSession session, Authentication authentication) {
-        return Mono.just(AuthenticationToken.build(session, authentication.getPrincipal()));
+    public Mono<AuthenticationToken> loginToken(WebSession session, Authentication authentication,
+                                                ServerWebExchange exchange,
+                                                @RequestParam(required = false, defaultValue = "false")
+                                                boolean rememberMe) {
+        var token = AuthenticationToken.build(session, authentication.getPrincipal());
+        return rememberMe
+                ? this.rememberMeService.issue(exchange, authentication.getName()).thenReturn(token)
+                : Mono.just(token);
+    }
+
+    /**
+     * Restores a session from the remember-me cookie, so a returning user lands inside the app without retyping
+     * the password. No cookie, expired or revoked → 401 and the frontend stays on the login page.
+     *
+     * @param session  The current WebSession, holding the id returned in the token
+     * @param exchange The current exchange, used to read the cookie and save the security context
+     * @return 200 with a fresh {@link AuthenticationToken}, or 401 when there is nothing to restore
+     */
+    @GetMapping("refresh")
+    public Mono<ResponseEntity<AuthenticationToken>> refresh(WebSession session, ServerWebExchange exchange) {
+        return this.rememberMeService.username(exchange)
+                .flatMap(this.securityManager::findByUsername)
+                .map(user -> new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()))
+                .flatMap(authentication -> this.securityContextRepository
+                        .save(exchange, new SecurityContextImpl(authentication))
+                        .thenReturn(authentication))
+                .map(authentication -> ResponseEntity.ok(
+                        AuthenticationToken.build(session, authentication.getPrincipal())))
+                .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
     /**
