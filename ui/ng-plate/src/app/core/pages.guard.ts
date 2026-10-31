@@ -11,7 +11,9 @@ import { TokenService } from './services/token.service';
 export const canActivateGuard: CanActivateFn = (route, state) => {
   const auth = inject(TokenService);
   const router = inject(Router);
-  if (auth.isLogged()) {
+  // 用 authenticationToken() 而不是 isLogged()：令牌存在 sessionStorage，
+  // 刷新后内存 signal 是 false，只查 isLogged() 会把已登录用户踢回登录页
+  if (auth.authenticationToken()) {
     return true;
   }
   auth.redirectUrl = state.url;

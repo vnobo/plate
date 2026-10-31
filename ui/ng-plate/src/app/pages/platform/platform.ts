@@ -1,10 +1,12 @@
 import { Routes } from '@angular/router';
+import { canActivateGuard } from '@app/core';
 import { BaseLayout } from '@app/layout';
 
 export const PLATFORM_ROUTES: Routes = [
   {
     path: '',
     component: BaseLayout,
+    canActivate: [canActivateGuard],
     title: '系统管理',
     children: [
       {

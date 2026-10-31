@@ -37,6 +37,9 @@ function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
         ) {
           return throwError(() => error.error);
         }
+        // 令牌已失效：不清掉旧令牌，guard 会凭 sessionStorage 里的它再次放行，
+        // 形成「进内页 → 401 → 回登录页」的循环
+        _auth.logout();
         _route.navigate([_auth.loginUrl]).then();
       }
       return throwError(() => error);
