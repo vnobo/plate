@@ -45,9 +45,9 @@ public record AuthenticationToken(String token, Long expires, Long lastAccessTim
      */
     public static AuthenticationToken build(WebSession session, Object principal) {
         Instant lastAccessTime = session.getLastAccessTime();
-        long lastAccessSeconds = (lastAccessTime != null ? lastAccessTime : Instant.now()).getEpochSecond();
+        long lastAccessSeconds = lastAccessTime.getEpochSecond();
         Duration maxIdleTime = session.getMaxIdleTime();
-        long maxIdleSeconds = (maxIdleTime != null ? maxIdleTime : Duration.ofSeconds(1800)).getSeconds();
+        long maxIdleSeconds = maxIdleTime.getSeconds();
         return of(session.getId(), maxIdleSeconds, lastAccessSeconds, principal);
     }
 }
