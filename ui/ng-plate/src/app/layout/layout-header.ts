@@ -65,23 +65,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
         aria-controls="aside-menu"
         aria-label="打开导航"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="icon"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path d="M4 6l16 0" />
-          <path d="M4 12l16 0" />
-          <path d="M4 18l16 0" />
-        </svg>
+        <!-- Tabler 自带的 toggler 图标（1.5em，mask 绘制，与预览页一致）；
+             换成内联 svg.icon 会被 .icon 规则压成 8px 宽 -->
+        <span class="navbar-toggler-icon"></span>
       </button>
 
       <!-- 桌面端：折叠 / 展开侧边栏 -->
