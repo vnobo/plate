@@ -27,11 +27,17 @@ function timeoutInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
 
 function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
   const _auth = inject(TokenService);
-  if (req.url.indexOf('/login') > -1) {
+  // 只给自家 API 带令牌：绝对 URL 可能是第三方，挂上 Bearer 等于把令牌交出去
+  const isOwnApi = environment.host
+    ? req.url.startsWith(environment.host)
+    : req.url.indexOf('http') !== 0;
+  // 只跳过登录端点本身：子串匹配 /login 会让 /login-history 这类接口静默丢令牌
+  if (!isOwnApi || req.url.indexOf('/oauth2/login') > -1) {
     return next(req);
   }
   const newReq = req.clone({
-    headers: req.headers.append('Authorization', `Bearer ${_auth.authToken()}`),
+    // 用 set 而不是 append：调用方若自带 Authorization，append 会叠成两个值
+    headers: req.headers.set('Authorization', `Bearer ${_auth.authToken()}`),
   });
   return next(newReq);
 }
