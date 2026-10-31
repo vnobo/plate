@@ -9,7 +9,7 @@ import { environment } from '@envs/env';
 
 function defaultInterceptor(
   req: HttpRequest<unknown>,
-  next: HttpHandlerFn
+  next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> {
   const _loading = inject(ProgressService);
   _loading.show();
@@ -18,10 +18,22 @@ function defaultInterceptor(
   }
   const originalUrl = req.url.indexOf('http') > -1 ? req.url : environment.host + req.url;
   const xRequestedReq = req.clone({ url: originalUrl });
-  return next(xRequestedReq).pipe(
-    timeout({ first: 5_000, each: 10_000 }),
-    finalize(() => _loading.hide())
-  );
+  return next(xRequestedReq).pipe(finalize(() => _loading.hide()));
+}
+
+function timeoutInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
+  return next(req).pipe(timeout({ first: 5_000, each: 10_000 }));
+}
+
+function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
+  const _auth = inject(TokenService);
+  if (req.url.indexOf('/login') > -1) {
+    return next(req);
+  }
+  const newReq = req.clone({
+    headers: req.headers.append('Authorization', `Bearer ${_auth.authToken()}`),
+  });
+  return next(newReq);
 }
 
 function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
@@ -43,13 +55,13 @@ function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
         _route.navigate([_auth.loginUrl]).then();
       }
       return throwError(() => error);
-    })
+    }),
   );
 }
 
 function apiVersionInterceptor(
   req: HttpRequest<unknown>,
-  next: HttpHandlerFn
+  next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> {
   const newReq = req.clone({
     headers: req.headers.append('x-api-version', `v1`),
@@ -57,4 +69,10 @@ function apiVersionInterceptor(
   return next(newReq);
 }
 
-export const indexInterceptor = [defaultInterceptor, apiVersionInterceptor, handleErrorInterceptor];
+export const indexInterceptor = [
+  defaultInterceptor,
+  apiVersionInterceptor,
+  authTokenInterceptor,
+  handleErrorInterceptor,
+  timeoutInterceptor,
+];
