@@ -16,7 +16,7 @@ interface ModuleCard {
   styleUrl: './welcome.scss',
 })
 export class Welcome {
-  protected readonly user = inject(UserService);
+  protected readonly user: UserService = inject(UserService);
 
   protected readonly modules: ReadonlyArray<ModuleCard> = [
     { title: '用户管理', desc: '账号与直接权限', link: '/platform/users', icon: 'users' },
