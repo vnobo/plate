@@ -90,83 +90,92 @@
     </div>
   </div>
 
-  <div class="table-responsive">
-    @if (isLoading()) {
-      <div class="text-center py-4">
-        <div class="spinner-border spinner-border-sm text-muted" role="status">
-          <span class="visually-hidden">加载中...</span>
+  <!-- userData() 在 resource 处于错误态时会抛异常，整块渲染会挂掉，用 @boundary 兜住 -->
+  @boundary {
+    <div class="table-responsive">
+      @if (isLoading()) {
+        <div class="text-center py-4">
+          <div class="spinner-border spinner-border-sm text-muted" role="status">
+            <span class="visually-hidden">加载中...</span>
+          </div>
+          <span class="ms-2 text-muted">加载中...</span>
         </div>
-        <span class="ms-2 text-muted">加载中...</span>
-      </div>
-    } @else {
-      <table class="table card-table table-vcenter text-nowrap datatable">
-        <thead>
-          <tr>
-            <th class="w-1">序号</th>
-            <th>用户名</th>
-            <th>昵称</th>
-            <th>电子邮件</th>
-            <th>手机号</th>
-            <th>状态</th>
-            <th>最近登录</th>
-            <th>创建时间</th>
-            <th class="w-1">操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (user of userData().content; track user.id) {
+      } @else {
+          <table class="table card-table table-vcenter text-nowrap datatable">
+          <thead>
             <tr>
-              <td>{{ user.id }}</td>
-              <td>{{ user.username }}</td>
-              <td>{{ user.name }}</td>
-              <td>{{ user.email }}</td>
-              <td>{{ user.phone }}</td>
-              <td>
-                @if (user.disabled) {
-                  <span class="badge bg-danger me-1">禁用</span>
-                } @else {
-                  <span class="badge bg-success me-1">启用</span>
-                }
-              </td>
-              <td>
-                @if (user.loginTime) {
-                  {{ user.loginTime | date: 'yyyy-MM-dd HH:mm' }}
-                } @else {
-                  <span class="text-muted">从未登录</span>
-                }
-              </td>
-              <td>{{ user.createdAt | date: 'yyyy-MM-dd HH:mm' }}</td>
-              <td>
-                <div class="btn-list flex-nowrap">
-                  <button (click)="openUserForm(user)" class="btn btn-outline-primary btn-sm">
-                    编辑
-                  </button>
-                  <button (click)="openAuthorityForm(user)" class="btn btn-outline-secondary btn-sm">
-                    权限
-                  </button>
-                  <button (click)="onDelete(user)" class="btn btn-outline-danger btn-sm">
-                    删除
-                  </button>
-                </div>
-              </td>
+              <th class="w-1">序号</th>
+              <th>用户名</th>
+              <th>昵称</th>
+              <th>电子邮件</th>
+              <th>手机号</th>
+              <th>状态</th>
+              <th>最近登录</th>
+              <th>创建时间</th>
+              <th class="w-1">操作</th>
             </tr>
-          } @empty {
-            <tr>
-              <td colspan="9" class="text-center text-muted py-4">暂无用户数据</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    }
-  </div>
+          </thead>
+          <tbody>
+            @for (user of userData().content; track user.id) {
+              <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.phone }}</td>
+                <td>
+                  @if (user.disabled) {
+                    <span class="badge bg-danger me-1">禁用</span>
+                  } @else {
+                    <span class="badge bg-success me-1">启用</span>
+                  }
+                </td>
+                <td>
+                  @if (user.loginTime) {
+                    {{ user.loginTime | date: 'yyyy-MM-dd HH:mm' }}
+                  } @else {
+                    <span class="text-muted">从未登录</span>
+                  }
+                </td>
+                <td>{{ user.createdAt | date: 'yyyy-MM-dd HH:mm' }}</td>
+                <td>
+                  <div class="btn-list flex-nowrap">
+                    <button (click)="openUserForm(user)" class="btn btn-outline-primary btn-sm">
+                      编辑
+                    </button>
+                    <button (click)="openAuthorityForm(user)" class="btn btn-outline-secondary btn-sm">
+                      权限
+                    </button>
+                    <button (click)="onDelete(user)" class="btn btn-outline-danger btn-sm">
+                      删除
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9" class="text-center text-muted py-4">暂无用户数据</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
 
-  <div class="card-footer">
-    <app-pagination
-      [page]="pageable().page"
-      [size]="pageable().size"
-      [totalElements]="userData().totalElements || 0"
-      (pageChange)="changePage($event)"
-      (sizeChange)="changeSize($event)"
-    ></app-pagination>
-  </div>
+    <div class="card-footer">
+      <app-pagination
+        [page]="pageable().page"
+        [size]="pageable().size"
+        [totalElements]="userData().totalElements || 0"
+        (pageChange)="changePage($event)"
+        (sizeChange)="changeSize($event)"
+      ></app-pagination>
+    </div>
+  } @error (retry = $reset) {
+    <div class="card-body text-center py-5">
+      <p class="text-muted mb-3">用户列表加载失败</p>
+      <!-- 先 reload 让 resource 脱离错误态，否则 $reset 重渲染会立刻再抛一次 -->
+      <button type="button" class="btn btn-primary" (click)="fetchUserData(); retry()">重试</button>
+    </div>
+  }
 </div>
