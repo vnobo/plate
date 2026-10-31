@@ -62,7 +62,7 @@ function emptyPage<T>(): Paged<T> {
   styleUrl: './welcome.scss',
 })
 export class PlatformWelcome {
-  protected readonly user = inject(UserService);
+  protected readonly user: UserService = inject(UserService);
 
   private readonly usersEnabled = httpResource<Paged<User>>(
     () => ({
