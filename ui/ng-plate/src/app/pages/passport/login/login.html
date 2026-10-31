@@ -23,7 +23,14 @@
     <div class="card card-md">
       <div class="card-body">
         <h2 class="card-title text-center h2 mb-4">登录你的账号</h2>
-        <form aria-label="登录表单" autocomplete="on" novalidate (ngSubmit)="onSubmit()">
+        <!-- 用原生 submit 并阻止默认提交：本页不导入 FormsModule，(ngSubmit) 不会生效，
+             一旦放行原生提交，带 name 的字段会把密码拼进 URL -->
+        <form
+          aria-label="登录表单"
+          autocomplete="on"
+          novalidate
+          (submit)="$event.preventDefault(); onSubmit()"
+        >
           <div class="input-icon mb-3">
             <label class="input-icon-addon" for="username">
               <svg

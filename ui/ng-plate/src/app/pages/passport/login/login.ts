@@ -77,12 +77,22 @@ export class Login {
       });
       this.login(headers).subscribe({
         next: () => {
+          // 200 但没有令牌不算成功：带着空令牌进内页，下一个请求就会被 401 踢回登录页
+          if (!this._tokenSer.authenticationToken()?.token) {
+            this._message.error('登录响应缺少令牌，请联系管理员', {
+              autohide: true,
+              animation: true,
+              delay: 5000,
+            });
+            this.isSubmitting.set(false);
+            return;
+          }
           if (credentials.rememberMe) {
             this.rememberUsername(credentials.username);
           } else {
             this.clearRememberedUsername();
           }
-          this.handleLoginSuccess();
+          this.handleLoginSuccess(credentials.username);
         },
         error: (error) => {
           this.handleLoginError(error);
@@ -145,8 +155,10 @@ export class Login {
     );
   }
 
-  private handleLoginSuccess() {
-    this._message.success('登录成功, 欢迎 ' + this._tokenSer.name() + '!', {
+  private handleLoginSuccess(username: string) {
+    // 昵称缺失时退回刚输入的账号，避免出现「欢迎 未登录!」
+    const name = this._tokenSer.authenticationToken()?.details?.nickname || username;
+    this._message.success('登录成功, 欢迎 ' + name + '!', {
       autohide: true,
       delay: 5000,
       animation: true,
@@ -157,11 +169,15 @@ export class Login {
 
   private handleLoginError(error: unknown) {
     console.error('[login] failed', error);
-    const status = error instanceof HttpErrorResponse ? error.status : 0;
+    // 401 会被 handleErrorInterceptor 剥成响应体（不再是 HttpErrorResponse），
+    // 登录接口走到这里只可能是凭据被拒；status 0 则是连不上/超时
+    const status = error instanceof HttpErrorResponse ? error.status : 401;
     const errorMessage =
-      status === 401 || status === 403
-        ? '用户名或密码错误，请重试'
-        : status === 429
+      status === 0
+        ? '无法连接服务器，请检查网络后重试'
+        : status === 401 || status === 403
+          ? '用户名或密码错误，请重试'
+          : status === 429
           ? '尝试过于频繁，请稍后再试'
           : status >= 500
             ? '服务暂时不可用，请稍后再试'
