@@ -423,12 +423,12 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             data-bs-toggle="dropdown"
             aria-label="打开用户菜单"
           >
-            <span class="avatar avatar-sm bg-primary-lt">{{ user.initial() }}</span>
+            <span class="avatar avatar-sm bg-primary-lt">{{ userSer.initial() }}</span>
             <!-- 只展示姓名与昵称，角色/权限不在界面上出现 -->
             <div class="d-none d-xl-block ps-2 lh-sm">
-              <div class="fw-medium">{{ user.displayName() }}</div>
+              <div class="fw-medium">{{ userSer.displayName() }}</div>
               @if (showNickname()) {
-                <div class="small text-secondary">{{ user.nickname() }}</div>
+                <div class="small text-secondary">{{ userSer.nickname() }}</div>
               }
             </div>
           </a>
@@ -436,11 +436,11 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             <!-- xl 以下顶栏只剩头像，名字挪进菜单里，否则小屏看不出当前是谁 -->
             <div class="d-xl-none">
               <div class="dropdown-item-text d-flex align-items-center">
-                <span class="avatar avatar-sm bg-primary-lt">{{ user.initial() }}</span>
+                <span class="avatar avatar-sm bg-primary-lt">{{ userSer.initial() }}</span>
                 <div class="ps-2 lh-sm">
-                  <div class="fw-medium">{{ user.displayName() }}</div>
+                  <div class="fw-medium">{{ userSer.displayName() }}</div>
                   @if (showNickname()) {
-                    <div class="small text-secondary">{{ user.nickname() }}</div>
+                    <div class="small text-secondary">{{ userSer.nickname() }}</div>
                   }
                 </div>
               </div>
@@ -499,7 +499,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
 export class LayoutHeader {
   private readonly router = inject(Router);
   protected readonly tokenSer = inject(TokenService);
-  protected readonly userSer = inject(UserService);
+  protected readonly userSer: UserService = inject(UserService);
   protected readonly settings = inject(SettingsService);
   protected readonly layout = inject(LayoutService);
 
