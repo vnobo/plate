@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { SettingsService, TokenService, UserService } from '@app/core';
@@ -163,7 +171,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
               stroke-linejoin="round"
             >
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+              <path
+                d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"
+              />
             </svg>
           </a>
           <a
@@ -187,7 +197,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             >
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
-              <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />
+              <path
+                d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"
+              />
             </svg>
           </a>
         </div>
@@ -216,7 +228,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
               stroke-linejoin="round"
             >
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6" />
+              <path
+                d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"
+              />
               <path d="M9 17v1a3 3 0 0 0 6 0v-1" />
             </svg>
             @if (unreadCount() > 0) {
@@ -282,7 +296,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
                             <div class="text-secondary text-truncate" [attr.title]="item.text">
                               {{ item.text }}
                             </div>
-                            <span class="ms-auto ps-2 small text-secondary text-nowrap">{{ item.time }}</span>
+                            <span class="ms-auto ps-2 small text-secondary text-nowrap">{{
+                              item.time
+                            }}</span>
                           </div>
                         </div>
                         <div class="col-auto">
@@ -308,7 +324,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
                               [class.text-muted]="!item.starred"
                             >
                               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                              <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245" />
+                              <path
+                                d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245"
+                              />
                             </svg>
                           </a>
                         </div>
@@ -330,7 +348,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
                           stroke-linejoin="round"
                         >
                           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+                          <path
+                            d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"
+                          />
                           <path d="M4 13h3l3 3h4l3 -3h3" />
                         </svg>
                         <div>暂无通知</div>
@@ -440,7 +460,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
                 stroke-linejoin="round"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M10 3.2a9 9 0 1 0 10.8 10.8a1 1 0 0 0 -1 -1h-6.8a2 2 0 0 1 -2 -2v-7a.9 .9 0 0 0 -1 -.8" />
+                <path
+                  d="M10 3.2a9 9 0 1 0 10.8 10.8a1 1 0 0 0 -1 -1h-6.8a2 2 0 0 1 -2 -2v-7a.9 .9 0 0 0 -1 -.8"
+                />
                 <path d="M15 3.5a9 9 0 0 1 5.5 5.5h-4.5a1 1 0 0 1 -1 -1v-4.5" />
               </svg>
               工作台
@@ -460,7 +482,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
                 stroke-linejoin="round"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+                <path
+                  d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"
+                />
                 <path d="M7 12h14l-3 -3" />
                 <path d="M17 9l3 3" />
               </svg>
@@ -475,14 +499,14 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
 export class LayoutHeader {
   private readonly router = inject(Router);
   protected readonly tokenSer = inject(TokenService);
-  protected readonly user = inject(UserService);
+  protected readonly userSer = inject(UserService);
   protected readonly settings = inject(SettingsService);
   protected readonly layout = inject(LayoutService);
 
   /** 昵称与主显示名相同时只显示一行，避免「张三 / 张三」 */
   protected readonly showNickname = computed(() => {
-    const nickname = this.user.nickname();
-    return nickname !== '' && nickname !== this.user.displayName();
+    const nickname = this.userSer.nickname();
+    return nickname !== '' && nickname !== this.userSer.displayName();
   });
 
   // 图标是硬编码的静态 SVG；Angular 的 innerHTML 清洗会移除 <svg>，故声明为可信内容
@@ -557,7 +581,9 @@ export class LayoutHeader {
   private loaded = false;
 
   protected readonly lang = signal<'zh-CN' | 'en'>(
-    typeof localStorage !== 'undefined' && localStorage.getItem('plate-lang') === 'en' ? 'en' : 'zh-CN',
+    typeof localStorage !== 'undefined' && localStorage.getItem('plate-lang') === 'en'
+      ? 'en'
+      : 'zh-CN',
   );
   protected readonly langLabel = computed(() => (this.lang() === 'en' ? 'EN' : '中文'));
 
@@ -582,7 +608,9 @@ export class LayoutHeader {
   }
 
   toggleStar(id: number): void {
-    this.notices.update((list) => list.map((n) => (n.id === id ? { ...n, starred: !n.starred } : n)));
+    this.notices.update((list) =>
+      list.map((n) => (n.id === id ? { ...n, starred: !n.starred } : n)),
+    );
   }
 
   markAllRead(): void {
