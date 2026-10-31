@@ -22,7 +22,7 @@
     ]
   },
   "private": true,
-  "packageManager": "pnpm@12.16.0",
+  "packageManager": "pnpm@12.16.1",
   "engines": {
     "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
   },

@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { BaseLayout } from '@app/layout';
-import { Welcome } from './welcome/welcome';
 
 export const DASHBOARD_ROUTES: Routes = [
   {
@@ -9,7 +8,7 @@ export const DASHBOARD_ROUTES: Routes = [
     children: [
       {
         path: 'welcome',
-        component: Welcome,
+        loadComponent: () => import('./welcome/welcome').then((m) => m.Welcome),
         title: '欢迎',
       },
       {

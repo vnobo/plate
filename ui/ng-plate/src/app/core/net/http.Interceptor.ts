@@ -3,7 +3,7 @@ import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { catchError, finalize, Observable, throwError, timeout } from 'rxjs';
 import { Router } from '@angular/router';
 
-import { TokenService } from '@app/core';
+import { TokenService } from '../services/token.service';
 import { ProgressService } from '@app/plugins/progress';
 import { environment } from '@envs/env';
 

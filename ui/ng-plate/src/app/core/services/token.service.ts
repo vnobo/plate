@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { computed, inject, Service, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Authentication } from '@plate/types';
-import { SessionStorage } from '@app/core';
+import { SessionStorage } from '../storage/session-storage';
 import dayjs from 'dayjs';
 
 @Service()

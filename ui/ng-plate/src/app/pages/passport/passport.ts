@@ -1,6 +1,4 @@
 import { Routes } from '@angular/router';
-import { Login } from './login/login';
-import { AuthLock } from './auth-lock/auth-lock';
 
 export const PASSPORT_ROUTES: Routes = [
   {
@@ -8,12 +6,12 @@ export const PASSPORT_ROUTES: Routes = [
     children: [
       {
         path: 'lock',
-        component: AuthLock,
+        loadComponent: () => import('./auth-lock/auth-lock').then((m) => m.AuthLock),
         title: '锁屏',
       },
       {
         path: 'login',
-        component: Login,
+        loadComponent: () => import('./login/login').then((m) => m.Login),
         title: '登录',
       },
       {

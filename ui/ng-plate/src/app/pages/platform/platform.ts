@@ -1,8 +1,5 @@
 import { Routes } from '@angular/router';
 import { BaseLayout } from '@app/layout';
-import { Tenants } from './tenant/tenant';
-import { Role } from './role/role';
-import { Users } from './users/users';
 
 export const PLATFORM_ROUTES: Routes = [
   {
@@ -12,17 +9,17 @@ export const PLATFORM_ROUTES: Routes = [
     children: [
       {
         path: 'users',
-        component: Users,
-        title: '欢迎',
+        loadComponent: () => import('./users/users').then((m) => m.Users),
+        title: '用户管理',
       },
       {
         path: 'tenant',
-        component: Tenants,
+        loadComponent: () => import('./tenant/tenant').then((m) => m.Tenants),
         title: '租户管理',
       },
       {
         path: 'role',
-        component: Role,
+        loadComponent: () => import('./role/role').then((m) => m.Role),
         title: '角色管理',
       },
       {
