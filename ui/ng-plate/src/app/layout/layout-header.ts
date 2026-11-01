@@ -7,6 +7,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router, RouterLink } from '@angular/router';
 import { SettingsService, TokenService, UserService } from '@app/core';
@@ -502,6 +503,7 @@ export class LayoutHeader {
   protected readonly userSer: UserService = inject(UserService);
   protected readonly settings = inject(SettingsService);
   protected readonly layout = inject(LayoutService);
+  private readonly http = inject(HttpClient);
 
   /** 昵称与主显示名相同时只显示一行，避免「张三 / 张三」 */
   protected readonly showNickname = computed(() => {
@@ -638,6 +640,15 @@ export class LayoutHeader {
   }
 
   logout(): void {
+    // 主动退出：先让后端吊销 HttpOnly 的 remember-me cookie（前端碰不到也删不掉），
+    // 服务器清不掉也要继续清本地，否则点了退出还停在里面
+    this.http.get('/oauth2/logout').subscribe({
+      next: () => this.finishLogout(),
+      error: () => this.finishLogout(),
+    });
+  }
+
+  private finishLogout() {
     this.tokenSer.logout();
     void this.router.navigate([this.tokenSer.loginUrl]);
   }

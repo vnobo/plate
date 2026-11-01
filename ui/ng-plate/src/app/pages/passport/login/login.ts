@@ -3,15 +3,10 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormField, form, maxLength, minLength, required, submit } from '@angular/forms/signals';
 import { Router } from '@angular/router';
-import { BrowserStorage, TokenService } from '@app/core';
+import { TokenService } from '@app/core';
 import { MessageService } from '@app/plugins';
 import { Authentication } from '@plate/types';
-import dayjs from 'dayjs';
 import { tap } from 'rxjs';
-
-/** 记住我：凭据存 localStorage 的键与有效期（最多 2 天） */
-const CREDENTIALS_KEY = 'login-credentials';
-const CREDENTIALS_TTL_MS = 2 * 24 * 60 * 60 * 1000;
 
 @Component({
   selector: 'app-login',
@@ -24,7 +19,6 @@ export class Login {
   private readonly _message = inject(MessageService);
   private readonly _http = inject(HttpClient);
   private readonly _router = inject(Router);
-  private readonly _storage = inject(BrowserStorage);
   private readonly _destroyRef = inject(DestroyRef);
 
   passwordFieldTextType = signal(false);
@@ -93,7 +87,7 @@ export class Login {
       const headers = new HttpHeaders({
         authorization: this.basicAuth(credentials.username, credentials.password),
       });
-      this.login(headers).subscribe({
+      this.login(headers, credentials.rememberMe).subscribe({
         next: () => {
           // 200 但没有令牌不算成功：带着空令牌进内页，下一个请求就会被 401 踢回登录页
           if (!this._tokenSer.authenticationToken()?.token) {
@@ -104,11 +98,6 @@ export class Login {
             });
             this.isSubmitting.set(false);
             return;
-          }
-          if (credentials.rememberMe) {
-            this.rememberCredentials(credentials.username, credentials.password);
-          } else {
-            this.clearRemembered();
           }
           this.handleLoginSuccess(credentials.username);
         },
@@ -143,52 +132,26 @@ export class Login {
   }
 
   /**
-   * 勾选「记住我」才落盘，且连同密码一起存 —— 这是产品要求的「2 天内自动登录」的代价：
-   * 明文存在 localStorage，任何能跑脚本的同源页面都能读到。2 天到了就失效，不再自动登录。
+   * 凭后端下发的 HttpOnly remember-me cookie 换一个新会话。
+   * 前端不存密码、也不存 token —— 密码换来的只是一个 2 天有效、服务端可吊销的随机串。
+   * 没有 cookie 或已被吊销 → 401，留在登录页让用户手输。
    */
-  private rememberCredentials(username: string, password: string) {
-    this._storage.setItem(
-      CREDENTIALS_KEY,
-      JSON.stringify({ username, password, savedAt: dayjs().valueOf() }),
-    );
-  }
-
-  private clearRemembered() {
-    this._storage.removeItem(CREDENTIALS_KEY);
-  }
-
-  /** 记住的凭据还在 2 天有效期内就自动登录；过期或格式不对就清掉，不拿脏数据去撞 401 */
   private autoLoginWithRemembered() {
-    const raw = this._storage.getItem(CREDENTIALS_KEY);
-    if (!raw) return;
-    try {
-      const saved = JSON.parse(raw) as {
-        username?: string;
-        password?: string;
-        savedAt?: number;
-      };
-      if (
-        !saved.username ||
-        !saved.password ||
-        !saved.savedAt ||
-        dayjs().valueOf() - saved.savedAt > CREDENTIALS_TTL_MS
-      ) {
-        this.clearRemembered();
-        return;
-      }
-      this.loginModel.set({
-        username: saved.username,
-        password: saved.password,
-        rememberMe: true,
-      });
-      void this.onSubmit();
-    } catch {
-      this.clearRemembered();
-    }
+    this._http.get<Authentication>('/sec/oauth2/refresh').subscribe({
+      next: (authentication) => {
+        // 有响应但没令牌不放行：带着空令牌进内页，下一个请求就会被 401 踢回登录页
+        if (!authentication?.token) return;
+        this._tokenSer.login(authentication);
+        void this._router.navigate([this._tokenSer.redirectUrl]);
+      },
+      // 401 = 没记住过/已过期/已退出，正常留在本页，不用提示
+      error: () => {},
+    });
   }
 
-  private login(headers: HttpHeaders) {
-    return this._http.get<Authentication>('/sec/oauth2/login', { headers }).pipe(
+  private login(headers: HttpHeaders, rememberMe: boolean) {
+    const url = rememberMe ? '/sec/oauth2/login?rememberMe=true' : '/sec/oauth2/login';
+    return this._http.get<Authentication>(url, { headers }).pipe(
       tap((authentication: Authentication) => this._tokenSer.login(authentication)),
       // 登录请求不重试：401 重试等于把凭据再发一遍，只会放大锁定风险
       // 组件销毁即退订，避免回调作用在已销毁的组件上
@@ -213,10 +176,6 @@ export class Login {
     // 401 会被 handleErrorInterceptor 剥成响应体（不再是 HttpErrorResponse），
     // 登录接口走到这里只可能是凭据被拒；status 0 则是连不上/超时
     const status = error instanceof HttpErrorResponse ? error.status : 401;
-    // 凭据被拒：本地那份已经没用了，不清掉会每次进登录页都白撞一次 401（改过密码尤其明显）
-    if (status === 401 || status === 403) {
-      this.clearRemembered();
-    }
     const errorMessage =
       status === 0
         ? '无法连接服务器，请检查网络后重试'

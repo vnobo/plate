@@ -31,8 +31,12 @@ function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
   const isOwnApi = environment.host
     ? req.url.startsWith(environment.host)
     : req.url.indexOf('http') !== 0;
-  // 只跳过登录端点本身：子串匹配 /login 会让 /login-history 这类接口静默丢令牌
-  if (!isOwnApi || req.url.indexOf('/oauth2/login') > -1) {
+  // 只跳过登录/刷新端点本身：子串匹配 /login 会让 /login-history 这类接口静默丢令牌
+  if (
+    !isOwnApi ||
+    req.url.indexOf('/oauth2/login') > -1 ||
+    req.url.indexOf('/oauth2/refresh') > -1
+  ) {
     return next(req);
   }
   const newReq = req.clone({

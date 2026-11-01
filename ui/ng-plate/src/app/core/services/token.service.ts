@@ -114,6 +114,8 @@ export class TokenService {
     this._storage.removeItem(this.authenticationKey);
   }
 
+
+
   /**
    * 存储里的令牌快照，不刷新 lastAccessTime —— 判过期必须用它：
    * authenticationToken() 会顺手把 lastAccessTime 改成现在，拿那个值判过期永远不过期。

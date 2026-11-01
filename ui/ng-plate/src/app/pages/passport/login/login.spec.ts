@@ -9,7 +9,7 @@ import { Login } from './login';
 @Component({ template: '' })
 class Dummy {}
 
-/** 这四条各自守住一个真实踩过的坑，改动后跑 `ng test` 即可确认没有回退 */
+/** 守住真实踩过的坑；改动后跑 `ng test` 即可确认没有回退 */
 describe('Login', () => {
   let httpMock: HttpTestingController;
 
@@ -30,17 +30,17 @@ describe('Login', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
+  /** 等一个宏任务，让 login.ts 里的异步链（如 refresh 订阅）跑完 */
+  const tick = () => new Promise((r) => setTimeout(r, 25));
+
   const submit = async (username: string, password: string, rememberMe = false) => {
     const fixture = TestBed.createComponent(Login);
     const cmp = fixture.componentInstance as any;
     cmp.loginModel.set({ username, password, rememberMe });
     await cmp.onSubmit();
+    await tick();
     return { fixture, cmp };
   };
-
-  /** 记住的凭据：savedAt 传 3 天前即已过期 */
-  const rememberCredentials = (username = 'admin', password = 'secret123', savedAt = dayjs().valueOf()) =>
-    localStorage.setItem('login-credentials', JSON.stringify({ username, password, savedAt }));
 
   /** 令牌：expires 是空闲时长（秒），这里给 30 分钟 */
   const putToken = (lastAccessTime = dayjs().unix(), expires = 1800) =>
@@ -62,43 +62,36 @@ describe('Login', () => {
     req.flush({ token: 't', details: { nickname: '管理员' } });
   });
 
-  it('勾选记住我把凭据存本地（含密码，2 天内自动登录用），不勾选则不留', async () => {
+  it('勾选记住我 → 登录请求带 rememberMe=true，不勾选则不带', async () => {
     await submit('admin', 'secret123', true);
-    httpMock.expectOne('/sec/oauth2/login').flush({ token: 't', details: {} });
-    const stored = localStorage.getItem('login-credentials') ?? '';
-    expect(JSON.parse(stored).username).toBe('admin');
-    expect(JSON.parse(stored).password).toBe('secret123');
+    const req = httpMock.expectOne('/sec/oauth2/login?rememberMe=true');
+    req.flush({ token: 't', details: {} });
 
     localStorage.clear();
     await submit('admin', 'secret123');
-    httpMock.expectOne('/sec/oauth2/login').flush({ token: 't', details: {} });
+    // 不勾选：仍是普通登录地址，且前端不再往 localStorage 落任何凭据
+    httpMock.expectOne('/sec/oauth2/login');
     expect(localStorage.getItem('login-credentials')).toBeNull();
   });
 
-  it('记住的凭据在 2 天内自动登录（进登录页直接带着账号密码发请求）', async () => {
-    rememberCredentials();
+  it('记住我：进登录页用后端 cookie 换会话直接进内页（本地不存任何账号密码）', async () => {
     TestBed.createComponent(Login);
-    const req = httpMock.expectOne('/sec/oauth2/login');
-    const raw = atob(req.request.headers.get('authorization')!.replace('Basic ', ''));
-    expect(raw).toBe('admin:secret123');
-    req.flush({ token: 't', details: {} });
-  });
-
-  it('记住的凭据超过 2 天就失效（不再自动登录，也不留脏数据）', () => {
-    rememberCredentials('admin', 'secret123', dayjs().valueOf() - 3 * 24 * 60 * 60 * 1000);
-    TestBed.createComponent(Login);
-    expect(() => httpMock.expectOne('/sec/oauth2/login')).toThrow();
+    await tick();
+    const req = httpMock.expectOne('/sec/oauth2/refresh');
+    req.flush({ token: 't', expires: 1800, lastAccessTime: dayjs().unix(), details: {} });
+    await tick();
     expect(localStorage.getItem('login-credentials')).toBeNull();
+    expect(TestBed.inject(Router).url).toBe('/platform');
   });
 
-  it('凭据被拒（401）就清掉本地那份（改过密码不该每次都白撞一次 401）', async () => {
-    rememberCredentials();
+  it('记住我 cookie 失效（401）→ 留在登录页，不报错', async () => {
     TestBed.createComponent(Login);
+    await tick();
     httpMock
-      .expectOne('/sec/oauth2/login')
-      .flush({ path: '/oauth2/login' }, { status: 401, statusText: 'Unauthorized' });
-    await new Promise((r) => setTimeout(r, 50));
-    expect(localStorage.getItem('login-credentials')).toBeNull();
+      .expectOne('/sec/oauth2/refresh')
+      .flush(null, { status: 401, statusText: 'Unauthorized' });
+    await tick();
+    expect(TestBed.inject(Router).url).not.toBe('/platform');
   });
 
   it('刷新后令牌没过期 → 直接回内页，不再停在登录页', async () => {
