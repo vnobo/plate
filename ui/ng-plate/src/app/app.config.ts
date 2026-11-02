@@ -21,7 +21,6 @@ import { indexInterceptor } from '@app/core';
 import {
   provideHttpClient,
   withInterceptors,
-  withInterceptorsFromDi,
   withXsrfConfiguration,
 } from '@angular/common/http';
 
@@ -32,7 +31,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideClientHydration(withEventReplay(), withI18nSupport()),
     provideHttpClient(
-      withInterceptorsFromDi(),
       withInterceptors(indexInterceptor),
       withXsrfConfiguration({
         cookieName: 'XSRF-TOKEN',

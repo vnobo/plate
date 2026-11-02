@@ -1,6 +1,6 @@
 import { Component, computed, Service, input, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 
 @Component({
   selector: 'tabler-progress',
@@ -57,23 +57,29 @@ export class Progress {
 
 @Service()
 export class ProgressService {
-  private readonly isShow = signal(false);
+  // Count of in-flight requests that want the spinner. A boolean would hide
+  // the spinner early when the first of several concurrent requests finishes.
+  private readonly pending = signal(0);
 
-  readonly isShow$ = toObservable(this.isShow).pipe(debounceTime(500), distinctUntilChanged());
+  readonly isShow$ = toObservable(this.pending).pipe(
+    map((count) => count > 0),
+    debounceTime(500),
+    distinctUntilChanged(),
+  );
 
   show(): void {
-    this.isShow.set(true);
+    this.pending.update((count) => count + 1);
   }
 
   hide(): void {
-    this.isShow.set(false);
+    this.pending.update((count) => Math.max(0, count - 1));
   }
 
   toggle(): void {
-    this.isShow.update((show) => !show);
+    this.pending.update((count) => (count > 0 ? 0 : 1));
   }
 
   isVisible(): boolean {
-    return this.isShow();
+    return this.pending() > 0;
   }
 }

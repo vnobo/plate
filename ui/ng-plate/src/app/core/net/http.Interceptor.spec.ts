@@ -1,10 +1,11 @@
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClient, HttpContext, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
 import { environment } from '@envs/env';
-import { indexInterceptor } from './http.Interceptor';
+import { ProgressService } from '@app/plugins/progress';
+import { indexInterceptor, SHOW_LOADING } from './http.Interceptor';
 
 describe('indexInterceptor 的令牌处理', () => {
   let http: HttpClient;
@@ -79,5 +80,27 @@ describe('indexInterceptor 的令牌处理', () => {
     http.get('/sec/users/page').subscribe({ error: (e) => (status = e.status) });
     httpMock.expectNone(api('/sec/users/page'));
     expect(status).toBe(401);
+  });
+
+  it('SHOW_LOADING=false 的请求不触发全局 loading spinner', () => {
+    putTokenInStorage('T');
+    const progress = TestBed.inject(ProgressService);
+    http
+      .get('/sec/users/page', { context: new HttpContext().set(SHOW_LOADING, false) })
+      .subscribe();
+    expect(progress.isVisible()).toBe(false);
+    const req = httpMock.expectOne(api('/sec/users/page'));
+    expect(req.request.headers.get('Authorization')).toBe('Bearer T');
+    req.flush({});
+  });
+
+  it('默认（不设 SHOW_LOADING）会显示全局 loading spinner', () => {
+    putTokenInStorage('T');
+    const progress = TestBed.inject(ProgressService);
+    http.get('/sec/users/page').subscribe();
+    expect(progress.isVisible()).toBe(true);
+    const req = httpMock.expectOne(api('/sec/users/page'));
+    req.flush({});
+    expect(progress.isVisible()).toBe(false);
   });
 });

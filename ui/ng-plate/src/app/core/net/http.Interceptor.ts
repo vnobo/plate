@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
+import { HttpContextToken, HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { catchError, finalize, Observable, throwError, timeout } from 'rxjs';
 import { Router } from '@angular/router';
 
@@ -7,17 +7,22 @@ import { TokenService } from '../services/token.service';
 import { ProgressService } from '@app/plugins/progress';
 import { environment } from '@envs/env';
 
+export const SHOW_LOADING = new HttpContextToken<boolean>(() => true);
+
 function defaultInterceptor(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> {
   const _loading = inject(ProgressService);
-  _loading.show();
-  if (req.url.indexOf('assets/') > -1) {
-    return next(req);
-  }
-  const originalUrl = req.url.indexOf('http') > -1 ? req.url : environment.host + req.url;
+  // Prefix relative URLs with the API host so they hit the backend in dev (through the proxy).
+  // Absolute URLs (third-party) are left untouched.
+  const originalUrl = req.url.startsWith('http') ? req.url : environment.host + req.url;
   const xRequestedReq = req.clone({ url: originalUrl });
+  // Honour the per-request opt-out for the global loading spinner.
+  if (!req.context.get(SHOW_LOADING)) {
+    return next(xRequestedReq);
+  }
+  _loading.show();
   return next(xRequestedReq).pipe(finalize(() => _loading.hide()));
 }
 
@@ -30,7 +35,7 @@ function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
   // 只给自家 API 带令牌：绝对 URL 可能是第三方，挂上 Bearer 等于把令牌交出去
   const isOwnApi = environment.host
     ? req.url.startsWith(environment.host)
-    : req.url.indexOf('http') !== 0;
+    : !req.url.startsWith('http');
   // 只跳过登录/刷新端点本身：子串匹配 /login 会让 /login-history 这类接口静默丢令牌
   if (
     !isOwnApi ||
@@ -74,7 +79,7 @@ function apiVersionInterceptor(
   next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> {
   const newReq = req.clone({
-    headers: req.headers.append('x-api-version', `v1`),
+    headers: req.headers.set('x-api-version', `v1`),
   });
   return next(newReq);
 }

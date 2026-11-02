@@ -1,4 +1,4 @@
-export { indexInterceptor } from './net/http.Interceptor';
+export { indexInterceptor, SHOW_LOADING } from './net/http.Interceptor';
 export { SessionStorage } from './storage/session-storage';
 export { BrowserStorage } from './storage/browser-storage';
 

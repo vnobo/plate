@@ -1,14 +1,23 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterOutlet } from '@angular/router';
 import { LayoutAside } from './layout-aside';
 import { LayoutHeader } from './layout-header';
 import { LayoutService } from './layout.service';
+import { ProgressService } from '@app/plugins/progress';
 
 @Component({
   selector: 'app-layout-base',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, LayoutHeader, LayoutAside],
   template: `
     <a class="visually-hidden-focusable" href="#page-body">跳到主要内容</a>
+    @if (showLoading()) {
+      <div class="global-loading" role="status" aria-live="polite">
+        <div class="spinner-border text-primary"></div>
+        <span class="visually-hidden">加载中…</span>
+      </div>
+    }
     <div class="page">
       <aside layout-aside></aside>
       <header layout-header></header>
@@ -37,8 +46,26 @@ import { LayoutService } from './layout.service';
     :host {
       display: block;
     }
+
+    .global-loading {
+      position: fixed;
+      inset: 0;
+      z-index: 1080;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(255, 255, 255, 0.55);
+      pointer-events: all;
+    }
+
+    .global-loading .spinner-border {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
   `,
 })
 export class BaseLayout {
   readonly layout = inject(LayoutService);
+  private readonly progress = inject(ProgressService);
+  readonly showLoading = toSignal(this.progress.isShow$, { initialValue: false });
 }
