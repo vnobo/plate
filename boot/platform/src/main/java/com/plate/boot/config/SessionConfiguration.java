@@ -1,24 +1,16 @@
 package com.plate.boot.config;
 
-import com.nimbusds.oauth2.sdk.dpop.verifiers.AccessTokenValidationException;
-import com.plate.boot.commons.exception.RestServerException;
 import lombok.NonNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.session.data.redis.config.annotation.web.server.EnableRedisIndexedWebSession;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.session.CookieWebSessionIdResolver;
 import org.springframework.web.server.session.HeaderWebSessionIdResolver;
 import org.springframework.web.server.session.WebSessionIdResolver;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Configures session management for web applications with support for custom session ID resolution,
@@ -51,13 +43,6 @@ public class SessionConfiguration {
      * This value is used to identify requests made via XMLHttpRequest.
      */
     public static final String XML_HTTP_REQUEST = "XMLHttpRequest";
-
-    /**
-     * A regular expression pattern for extracting Bearer tokens from the Authorization header.
-     * This pattern matches the Bearer token format and extracts the token value.
-     */
-    public static final Pattern AUTHORIZATION_PATTERN = Pattern.compile(
-            "^Bearer (?<token>[a-zA-Z0-9-._~+/]+=*)$", Pattern.CASE_INSENSITIVE);
 
     /**
      * Configures and provides a custom strategy for resolving the session ID from web requests.
@@ -101,37 +86,6 @@ public class SessionConfiguration {
         private final CookieWebSessionIdResolver cookieWebSessionIdResolver = new CookieWebSessionIdResolver();
 
         /**
-         * Resolves the access token from the request parameters.
-         * This method checks for the presence of an "access_token" parameter in the request query parameters.
-         * If a single token is found, it is returned; if multiple tokens are found, an exception is thrown.
-         *
-         * @param request The server HTTP request from which to extract the access token.
-         * @return The access token as a String, or null if no token is found.
-         * @throws RestServerException if multiple tokens are found in the request.
-         */
-        private static String resolveAccessTokenFromRequest(ServerHttpRequest request) {
-            List<String> parameterTokens = request.getQueryParams().get("access_token");
-            if (CollectionUtils.isEmpty(parameterTokens)) {
-                return null;
-            }
-            if (parameterTokens.size() == 1) {
-                return parameterTokens.getFirst();
-            }
-            throw invalidTokenError("Found multiple bearer tokens in the request");
-        }
-
-        /**
-         * Creates a RestServerException for invalid tokens.
-         * This method constructs an exception with a specific message and a nested AccessTokenValidationException.
-         *
-         * @param message The error message to be included in the exception.
-         * @return A RestServerException with the provided message and a nested AccessTokenValidationException.
-         */
-        private static RestServerException invalidTokenError(String message) {
-            return RestServerException.withMsg(message, new AccessTokenValidationException("Bearer token is malformed"));
-        }
-
-        /**
          * Sets the session ID in the server web exchange.
          * This method determines whether to use a header-based or cookie-based approach for setting the session ID
          * based on the presence of specific headers in the request.
@@ -163,12 +117,7 @@ public class SessionConfiguration {
             List<String> requestedWith;
             HttpHeaders httpHeaders = exchange.getRequest().getHeaders();
             if (XML_HTTP_REQUEST.equalsIgnoreCase(httpHeaders.getFirst(X_REQUESTED_WITH))) {
-                String token = token(exchange.getRequest());
-                if (StringUtils.hasLength(token)) {
-                    requestedWith = List.of(token);
-                } else {
-                    requestedWith = super.resolveSessionIds(exchange);
-                }
+                requestedWith = super.resolveSessionIds(exchange);
             } else {
                 requestedWith = cookieWebSessionIdResolver.resolveSessionIds(exchange);
             }
@@ -190,66 +139,5 @@ public class SessionConfiguration {
             cookieWebSessionIdResolver.expireSession(exchange);
         }
 
-        /**
-         * Retrieves the authentication token from the given server HTTP request.
-         * It checks for the token in the request's Authorization header and,
-         * if not found, checks for a parameter token which is supported for GET requests.
-         * If both are present, it throws an exception indicating multiple tokens.
-         * If neither is found, it returns null.
-         *
-         * @param request The server HTTP request from which to extract the token.
-         * @return The extracted token as a String, or null if no valid token is found.
-         * @throws RestServerException if multiple token instances are found in the request.
-         */
-        private String token(ServerHttpRequest request) {
-            String authorizationHeaderToken = resolveFromAuthorizationHeader(request.getHeaders());
-            String parameterToken = resolveAccessTokenFromRequest(request);
-
-            if (authorizationHeaderToken != null) {
-                if (parameterToken != null) {
-                    throw invalidTokenError("Found multiple bearer tokens in the request.");
-                }
-                return authorizationHeaderToken;
-            }
-            if (parameterToken != null && isParameterTokenSupportedForRequest(request)) {
-                return parameterToken;
-            }
-            return null;
-        }
-
-        /**
-         * Extracts the bearer token from the 'Authorization' header within the provided HTTP headers.
-         * If the header starts with 'Bearer', the method attempts to parse the token following this keyword.
-         * In case of a malformed bearer token format, an exception is thrown.
-         *
-         * @param headers The HTTP headers to inspect for the bearer token.
-         * @return The extracted bearer token as a String if present and correctly formatted, null otherwise.
-         * @throws RestServerException if the bearer token is malformed.
-         */
-        private String resolveFromAuthorizationHeader(HttpHeaders headers) {
-            String bearerTokenHeaderName = HttpHeaders.AUTHORIZATION;
-            String authorization = headers.getFirst(bearerTokenHeaderName);
-            if (!StringUtils.startsWithIgnoreCase(authorization, "bearer")) {
-                return null;
-            }
-            Matcher matcher = AUTHORIZATION_PATTERN.matcher(authorization);
-            if (!matcher.matches()) {
-                throw invalidTokenError("Extracts the bearer token from the" +
-                        " 'Authorization' header within the provided HTTP headers.");
-            }
-            return matcher.group("token");
-        }
-
-        /**
-         * Determines whether the given server HTTP request supports a parameter token based on its HTTP method.
-         * Specifically, this method checks if the request method is HTTP GET, as parameter tokens are typically
-         * supported in GET requests for fetching resources.
-         *
-         * @param request The server HTTP request to inspect for supported token parameters.
-         * @return {@code true} if the request method is HTTP GET, indicating support for parameter tokens; otherwise, {@code false}.
-         */
-        private boolean isParameterTokenSupportedForRequest(ServerHttpRequest request) {
-            return HttpMethod.GET.equals(request.getMethod());
-        }
     }
 }

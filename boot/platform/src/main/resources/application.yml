@@ -66,6 +66,14 @@ spring:
     github:
       client-id: "${github.client-id:Iv1.14a97a700a228437}"
 
+security:
+  jwt:
+    # HS256 needs >= 32 bytes; override in production with JWT_SECRET / -Djwt.secret
+    secret: "${jwt.secret:plate-local-dev-secret-change-me-0123456789}"
+    issuer: plate
+    access-ttl: 15m
+    refresh-ttl: 7d
+
 springdoc:
   api-docs:
     enabled: true

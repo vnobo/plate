@@ -2,6 +2,8 @@ package com.plate.boot.security;
 
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.security.core.user.User;
+import com.plate.boot.security.jwt.TokenService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -14,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +25,7 @@ import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
 
 import javax.naming.NameNotFoundException;
+import java.time.Instant;
 
 /**
  * The SecurityController class is a REST controller responsible for handling security-related endpoints.
@@ -64,29 +68,60 @@ public class SecurityController {
      * Used by {@link #refresh} to write the rebuilt authentication into the WebSession.
      */
     private final ServerSecurityContextRepository securityContextRepository;
+    /**
+     * Issues and rotates the JWT access token / refresh token pair.
+     */
+    private final TokenService tokenService;
 
     /**
-     * Generates authentication token information for the current session
+     * Issues the access token / refresh token pair for the authenticated user.
      * <p>
-     * This method builds an AuthenticationToken object using the current WebSession and Authentication information,
-     * representing the user's authentication status. When {@code rememberMe} is requested a remember-me cookie is
-     * issued so the session can be restored later without the password.
+     * Authentication itself is still performed by the filter chain (HTTP Basic or the OAuth2 login),
+     * so the existing user and authority loading is reused unchanged. When {@code rememberMe} is
+     * requested a remember-me cookie is also issued so the session can be restored later without the
+     * password.
      *
-     * @param session        The current user's WebSession object, containing session ID and related time information
      * @param authentication The current user's authentication information, containing principal and authority information
      * @param exchange       The current exchange, used to write the remember-me cookie
      * @param rememberMe     Whether the browser should be remembered for 2 days
-     * @return An AuthenticationToken object containing session authentication information
+     * @return An AuthenticationToken holding the JWT access token and its one-time refresh token
      */
     @GetMapping("login")
-    public Mono<AuthenticationToken> loginToken(WebSession session, Authentication authentication,
-                                                ServerWebExchange exchange,
+    public Mono<AuthenticationToken> loginToken(Authentication authentication, ServerWebExchange exchange,
                                                 @RequestParam(required = false, defaultValue = "false")
                                                 boolean rememberMe) {
-        var token = AuthenticationToken.build(session, authentication.getPrincipal());
-        return rememberMe
-                ? this.rememberMeService.issue(exchange, authentication.getName()).thenReturn(token)
-                : Mono.just(token);
+        if (!(authentication.getPrincipal() instanceof SecurityDetails details)) {
+            return Mono.error(RestServerException.withMsg("Unsupported principal type",
+                    new IllegalStateException("Principal is not a SecurityDetails")));
+        }
+        Mono<Void> remember = rememberMe
+                ? this.rememberMeService.issue(exchange, details.getUsername())
+                : Mono.empty();
+        return this.tokenService.issue(details)
+                .map(pair -> AuthenticationToken.of(pair.accessToken(), pair.refreshToken(), pair.expiresIn(),
+                        Instant.now().getEpochSecond(), details))
+                .flatMap(token -> remember.thenReturn(token));
+    }
+
+    /**
+     * Rotates a refresh token: the presented token is consumed and a brand new pair is issued.
+     * <p>
+     * Replaying an already consumed token is treated as theft and revokes every session of the user.
+     *
+     * @param request the one-time refresh token to consume
+     * @return the new token pair, or 401 when the token is unknown, expired, revoked or replayed
+     */
+    @PostMapping("refresh")
+    public Mono<ResponseEntity<AuthenticationToken>> rotate(@Valid @RequestBody RefreshTokenRequest request) {
+        return this.tokenService.consume(request.getRefreshToken())
+                .flatMap(rotation -> this.securityManager.details(rotation.username())
+                        .flatMap(details -> this.tokenService.rotate(details, rotation)
+                                .map(pair -> ResponseEntity.ok(AuthenticationToken.of(pair.accessToken(),
+                                        pair.refreshToken(), pair.expiresIn(),
+                                        Instant.now().getEpochSecond(), details)))))
+                .onErrorResume(InvalidBearerTokenException.class,
+                        e -> Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .<AuthenticationToken>build()));
     }
 
     /**
@@ -166,20 +201,22 @@ public class SecurityController {
             throw RestServerException.withMsg("New password cannot be the same as current password",
                     new IllegalArgumentException("New password cannot be the same as current password"));
         }
-        String presentedPassword = request.getPassword();
-        String currentEncodedPassword = (String) authentication.getCredentials();
-        if (!this.passwordEncoder.matches(presentedPassword, currentEncodedPassword)) {
-            throw RestServerException.withMsg(
-                    "Current password verification failed",
-                    new IllegalArgumentException("Current password verification failed"));
-        }
         String newPassword = this.passwordEncoder.encode(request.getNewPassword());
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof UserDetails userDetails)) {
             throw RestServerException.withMsg("User details not found",
                     new IllegalStateException("Principal is not an instance of UserDetails"));
         }
-        return this.securityManager.updatePassword(userDetails, newPassword);
+        // JWT 认证没有 credentials，改为从库里取当前密码校验，否则无状态令牌下改密码会失效
+        Mono<String> currentEncodedPassword = authentication.getCredentials() instanceof String encoded
+                ? Mono.just(encoded)
+                : this.securityManager.loadByUsername(authentication.getName()).map(User::getPassword);
+        return currentEncodedPassword
+                .filter(encoded -> this.passwordEncoder.matches(request.getPassword(), encoded))
+                .switchIfEmpty(Mono.error(RestServerException.withMsg(
+                        "Current password verification failed",
+                        new IllegalArgumentException("Current password verification failed"))))
+                .flatMap(encoded -> this.securityManager.updatePassword(userDetails, newPassword));
     }
 
     /**
@@ -215,6 +252,16 @@ public class SecurityController {
          */
         @NotBlank(message = "New password not empty!")
         private String newPassword;
+    }
+
+    /**
+     * The one-time refresh token presented to {@link #rotate(RefreshTokenRequest)}.
+     */
+    @Data
+    public static class RefreshTokenRequest {
+
+        @NotBlank(message = "Refresh token not empty!")
+        private String refreshToken;
     }
 
 }

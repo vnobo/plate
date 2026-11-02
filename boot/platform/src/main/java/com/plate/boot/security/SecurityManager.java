@@ -216,6 +216,21 @@ public class SecurityManager extends AbstractCache implements ReactiveUserDetail
     }
 
     /**
+     * Loads the full {@link SecurityDetails} for an already authenticated user.
+     * <p>
+     * Unlike {@link #findByUsername(String)} this has no side effects: it does not record a login
+     * time, so it is safe to call on every bearer-token request.
+     *
+     * @param username the username carried by the access token
+     * @return a Mono emitting the user details with authorities, groups and tenants attached
+     */
+    public Mono<@NonNull SecurityDetails> details(String username) {
+        return this.loadByUsername(username)
+                .zipWhen(user -> this.authorities(user.getCode()))
+                .flatMap(tuple2 -> this.buildUserDetails(tuple2.getT1(), new HashSet<>(tuple2.getT2())));
+    }
+
+    /**
      * Constructs a SecurityDetails object based on the provided User and GrantedAuthority set.
      * Additionally, asynchronously loads and attaches the user's group and tenant memberships.
      *

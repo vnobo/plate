@@ -3,34 +3,44 @@ package com.plate.boot.config;
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.security.RememberMeService;
+import com.plate.boot.security.SecurityDetails;
+import com.plate.boot.security.SecurityManager;
+import com.plate.boot.security.jwt.JwtProperties;
+import com.plate.boot.security.jwt.TokenService;
 import com.plate.boot.security.oauth2.Oauth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.jspecify.annotations.NullMarked;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.security.autoconfigure.web.StaticResourceLocation;
 import org.springframework.boot.security.autoconfigure.web.reactive.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.session.ReactiveSessionRegistry;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.R2dbcReactiveOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.HttpBasicServerAuthenticationEntryPoint;
-import org.springframework.security.web.server.authentication.SessionLimit;
 import org.springframework.security.web.server.authentication.logout.*;
+import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.security.web.server.csrf.CookieServerCsrfTokenRepository;
@@ -39,18 +49,11 @@ import org.springframework.security.web.server.header.ClearSiteDataServerHttpHea
 import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
-import org.springframework.session.ReactiveFindByIndexNameSessionRepository;
-import org.springframework.session.ReactiveSessionRepository;
-import org.springframework.session.Session;
-import org.springframework.session.security.SpringSessionBackedReactiveSessionRegistry;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * SecurityConfiguration configures the application's security settings by defining beans and rules for authentication,
@@ -59,6 +62,7 @@ import java.util.Set;
  */
 @Configuration(proxyBeanMethods = false)
 @EnableReactiveMethodSecurity
+@EnableConfigurationProperties(JwtProperties.class)
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
@@ -108,22 +112,54 @@ public class SecurityConfiguration {
     }
 
     /**
-     * Creates and configures a SpringSessionBackedReactiveSessionRegistry bean.
-     * This registry is designed to manage sessions within a reactive environment, backed by the provided
-     * ReactiveSessionRepository and ReactiveFindByIndexNameSessionRepository instances.
+     * Signs access tokens with the shared HS256 secret, making them self-signed: no key server,
+     * no external issuer.
      *
-     * @param <S>                      The type of session extending the Session interface.
-     * @param sessionRepository        A reactive session repository for storing and retrieving session data.
-     * @param indexedSessionRepository A reactive session repository capable of finding sessions by index name,
-     *                                 enhancing session management capabilities.
-     * @return An instance of SpringSessionBackedReactiveSessionRegistry configured with the given repositories,
-     * ready to manage and provide session-related services in a reactive context.
+     * @param properties the JWT settings holding the signing secret
+     * @return an encoder producing HS256 compact tokens
      */
     @Bean
-    public <S extends Session> ReactiveSessionRegistry sessionRegistry(
-            ReactiveSessionRepository<S> sessionRepository,
-            ReactiveFindByIndexNameSessionRepository<S> indexedSessionRepository) {
-        return new SpringSessionBackedReactiveSessionRegistry<>(sessionRepository, indexedSessionRepository);
+    public JwtEncoder jwtEncoder(JwtProperties properties) {
+        return NimbusJwtEncoder.withSecretKey(properties.secretKey()).build();
+    }
+
+    /**
+     * Verifies signature and expiry of incoming access tokens. Revocation is not checked here but in
+     * the authentication converter, because it needs a reactive Redis round trip.
+     *
+     * @param properties the JWT settings holding the signing secret
+     * @return a decoder restricted to HS256
+     */
+    @Bean
+    public ReactiveJwtDecoder jwtDecoder(JwtProperties properties) {
+        return NimbusReactiveJwtDecoder.withSecretKey(properties.secretKey())
+                .macAlgorithm(MacAlgorithm.HS256).build();
+    }
+
+    /**
+     * Turns a verified access token into an authenticated principal.
+     * <p>
+     * The token is rejected when its generation is older than the user's current one, which is how
+     * logout and refresh-token replay revoke every session of that user. The principal is a
+     * {@link SecurityDetails} so auditing ({@code UserAuditorAware}) and tenant scoping keep working
+     * exactly as they did with session based authentication.
+     *
+     * @param securityManager loads the user with authorities, groups and tenants
+     * @param tokenService    checks the revocation generation
+     * @return the converter used by the resource server
+     */
+    private Converter<Jwt, Mono<AbstractAuthenticationToken>> jwtAuthenticationConverter(
+            SecurityManager securityManager, TokenService tokenService) {
+        return jwt -> {
+            UUID userCode = UUID.fromString(Objects.requireNonNull(jwt.getClaimAsString("code")));
+            long generation = ((Number) Objects.requireNonNull(jwt.getClaim("gen"))).longValue();
+            return tokenService.isCurrent(userCode, generation)
+                    .flatMap(current -> current
+                            ? securityManager.details(jwt.getSubject())
+                            : Mono.error(new InvalidBearerTokenException("Token has been revoked")))
+                    .map(details -> (AbstractAuthenticationToken)
+                            new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities()));
+        };
     }
 
     /**
@@ -131,31 +167,42 @@ public class SecurityConfiguration {
      * various aspects of security including authorization rules, session management, basic authentication entry point,
      * form login, CSRF protection, logout handling, and OAuth2 login support.
      *
-     * @param http                       The ServerHttpSecurity builder used to configure web security settings.
-     * @param securityContextRepository  Repository backing the WebSession security context.
+     * @param http The ServerHttpSecurity builder used to configure web security settings.
      * @return A configured SecurityWebFilterChain ready to be used in the application's security filter chain.
      */
     @Bean
-    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http,
-                                                            ServerSecurityContextRepository securityContextRepository) {
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http, ReactiveJwtDecoder jwtDecoder,
+                                                            SecurityManager securityManager, TokenService tokenService) {
+
+        Converter<Jwt, Mono<AbstractAuthenticationToken>> jwtAuthConverter =
+                this.jwtAuthenticationConverter(securityManager, tokenService);
+        http.csrf(ServerHttpSecurity.CsrfSpec::disable);
         http.authorizeExchange(exchanges -> exchanges
                 .pathMatchers("/captcha/code", "/oauth2/qr/code").permitAll()
-                // 记住我换会话：此时没有会话也没有 Basic 头，必须放行，否则刷新页面会被挡在门外
-                .pathMatchers("/sec/oauth2/refresh").permitAll()
+                // the refresh token itself is the credential here, there is no access token yet;
+                // matched by suffix because the module prefix / api version are added by path matching
+                .matchers((ServerWebExchangeMatcher) exchange -> {
+                    var request = exchange.getRequest();
+                    boolean refreshing = HttpMethod.POST.equals(request.getMethod())
+                            && request.getPath().pathWithinApplication().value().endsWith("/oauth2/refresh");
+                    if (refreshing) {
+                        return ServerWebExchangeMatcher.MatchResult.match();
+                    }
+                    return ServerWebExchangeMatcher.MatchResult.notMatch();
+                }).permitAll()
                 .matchers(PathRequest.toStaticResources().atCommonLocations().excluding(StaticResourceLocation.FONTS)).permitAll()
                 .anyExchange().authenticated());
-        http.sessionManagement((sessions) -> sessions
-                .concurrentSessions((concurrency) -> concurrency
-                        .maximumSessions(SessionLimit.of(1))
-                ));
-        http.securityContextRepository(securityContextRepository);
+        // 无状态 JWT 下 session 互斥已无意义：认证不从 session 恢复（见下一行 NoOp），
+        // 单会话/撤销语义改由 TokenService 的用户代际计数保证，因此不再配置 sessionManagement。
+        http.securityContextRepository(NoOpServerSecurityContextRepository.getInstance());
         http.httpBasic(httpBasicSpec -> httpBasicSpec
                 .authenticationEntryPoint(new CustomServerAuthenticationEntryPoint()));
         http.formLogin(Customizer.withDefaults());
-        http.csrf(this::setCsrfSpec);
-        http.logout(this::setLogout);
+        http.logout(logout -> this.setLogout(logout, tokenService));
         http.oauth2Login(oAuth2LoginSpec ->
                 oAuth2LoginSpec.authenticationSuccessHandler(authenticationSuccessHandler));
+        http.oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(jwt -> jwt.jwtDecoder(jwtDecoder).jwtAuthenticationConverter(jwtAuthConverter)));
         return http.build();
     }
 
@@ -186,17 +233,22 @@ public class SecurityConfiguration {
      *
      * @param logout The LogoutSpec instance to configure logout specifics of ServerHttpSecurity.
      */
-    private void setLogout(ServerHttpSecurity.LogoutSpec logout) {
+    private void setLogout(ServerHttpSecurity.LogoutSpec logout, TokenService tokenService) {
         ServerLogoutHandler securityContext = new SecurityContextServerLogoutHandler();
         ClearSiteDataServerHttpHeadersWriter writer = new ClearSiteDataServerHttpHeadersWriter(
                 ClearSiteDataServerHttpHeadersWriter.Directive.ALL);
         ServerLogoutHandler clearSiteData = new HeaderWriterServerLogoutHandler(writer);
+        // JWT 是无状态的，不清除服务端状态就没有真正的登出：提升代际让该用户所有 access/refresh 一起失效
+        ServerLogoutHandler revokeTokens = (_, authentication) ->
+                authentication.getPrincipal() instanceof SecurityDetails details
+                        ? tokenService.revokeAll(details.getCode()).then()
+                        : Mono.empty();
         // 主动退出必须吊销记住我的 token：cookie 是 HttpOnly，前端拿不到也删不掉，
         // 只清浏览器端的话，那份 token 在 Redis 里还有 2 天可用
         ServerLogoutHandler revokeRememberMe =
-                (exchange, authentication) -> this.rememberMeService.revoke(exchange.getExchange());
+                (exchange, _) -> this.rememberMeService.revoke(exchange.getExchange());
         DelegatingServerLogoutHandler logoutHandler =
-                new DelegatingServerLogoutHandler(securityContext, clearSiteData, revokeRememberMe);
+                new DelegatingServerLogoutHandler(securityContext, clearSiteData, revokeRememberMe, revokeTokens);
         logout.requiresLogout(new PathPatternParserServerWebExchangeMatcher("/oauth2/logout"));
         logout.logoutHandler(logoutHandler);
         logout.logoutSuccessHandler(new HttpStatusReturningServerLogoutSuccessHandler());
