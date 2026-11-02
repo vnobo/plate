@@ -215,10 +215,7 @@ public final class QueryFragment extends HashMap<String, Object> {
      * @return a new QueryFragment instance with the specified size, offset, and parameters
      */
     public static QueryFragment of(int size, long offset, Map<String, Object> params) {
-        var fragment = new QueryFragment();
-        if (params != null && !params.isEmpty()) {
-            fragment.putAll(params);
-        }
+        var fragment = of(params);
         return fragment.limit(size, offset);
     }
 
