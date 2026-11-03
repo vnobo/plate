@@ -2,6 +2,7 @@ package com.plate.boot.config;
 
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.ContextUtils;
+import com.plate.boot.security.jwt.JwtSecurityContextRepository;
 import com.plate.boot.security.oauth2.Oauth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -30,8 +31,6 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.HttpBasicServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.authentication.SessionLimit;
 import org.springframework.security.web.server.authentication.logout.*;
-import org.springframework.security.web.server.context.ServerSecurityContextRepository;
-import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.security.web.server.csrf.CookieServerCsrfTokenRepository;
 import org.springframework.security.web.server.csrf.ServerCsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.server.header.ClearSiteDataServerHttpHeadersWriter;
@@ -61,9 +60,9 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    private final ServerSecurityContextRepository securityContextRepository =
-            new WebSessionServerSecurityContextRepository();
+    private final JwtSecurityContextRepository securityContextRepository;
     private final Oauth2SuccessHandler authenticationSuccessHandler;
+    private final WebfluxProperties webfluxProperties;
 
     /**
      * Configures and provides an instance of {@link ReactiveOAuth2AuthorizedClientService} which is primarily
@@ -127,8 +126,9 @@ public class SecurityConfiguration {
      */
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+        String authApiPattern = this.securityApiPrefix() + "/auth/**";
         http.authorizeExchange(exchanges -> exchanges
-                .pathMatchers("/captcha/code", "/oauth2/qr/code").permitAll()
+                .pathMatchers("/captcha/code", "/oauth2/qr/code", authApiPattern, "/auth/**").permitAll()
                 .matchers(PathRequest.toStaticResources().atCommonLocations().excluding(StaticResourceLocation.FONTS)).permitAll()
                 .anyExchange().authenticated());
         http.sessionManagement((sessions) -> sessions
@@ -144,6 +144,22 @@ public class SecurityConfiguration {
         http.oauth2Login(oAuth2LoginSpec ->
                 oAuth2LoginSpec.authenticationSuccessHandler(authenticationSuccessHandler));
         return http.build();
+    }
+
+    /**
+     * Resolves the configurable path prefix under which the security package's controllers
+     * are mounted (see {@code spring.webflux.properties.path-prefixes}), e.g. {@code /sec/v1}.
+     * Returns an empty string when no security prefix is configured.
+     *
+     * @return the security API path prefix, never {@code null}
+     */
+    private String securityApiPrefix() {
+        return this.webfluxProperties.getPathPrefixes().stream()
+                .filter(definition -> "com.plate.boot.security".equals(definition.getBasePackage()))
+                .map(WebfluxProperties.RouteDefinition::getPath)
+                .findFirst()
+                .map(path -> path.startsWith("/") ? path : "/" + path)
+                .orElse("");
     }
 
     /**
@@ -217,7 +233,26 @@ public class SecurityConfiguration {
                     .switchIfEmpty(Mono.defer(MatchResult::match));
             var request = exchange.getRequest();
             return Mono.justOrEmpty(request.getMethod()).filter(allowedMethods::contains)
-                    .flatMap((_) -> MatchResult.notMatch()).switchIfEmpty(Mono.defer(() -> ignoreMono));
+                    .flatMap((_) -> MatchResult.notMatch())
+                    .switchIfEmpty(Mono.defer(() -> isCsrfExempt(exchange) ? MatchResult.notMatch() : ignoreMono));
+        }
+
+        /**
+         * Determines whether the request is inherently immune to CSRF and therefore exempt
+         * from token enforcement: stateless JWT bearer requests never rely on ambient
+         * credentials, and the public authentication endpoints do not establish a session.
+         *
+         * @param exchange the server web exchange to evaluate
+         * @return {@code true} when CSRF protection may be skipped for this request
+         */
+        private static boolean isCsrfExempt(ServerWebExchange exchange) {
+            if (JwtSecurityContextRepository.isJwtToken(
+                    JwtSecurityContextRepository.resolveBearerToken(exchange))) {
+                return true;
+            }
+            String path = exchange.getRequest().getPath().pathWithinApplication().value();
+            return path.endsWith("/auth/login") || path.endsWith("/auth/refresh")
+                    || path.contains("/auth/wechat/");
         }
     }
 

@@ -5,6 +5,7 @@ import io.r2dbc.spi.R2dbcException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.*;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.util.StringUtils;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -23,6 +24,7 @@ import reactor.core.publisher.Mono;
  * <ul>
  *   <li>Binding/validation failures ({@link WebExchangeBindException}, via {@link ResponseEntityExceptionHandler}).</li>
  *   <li>Malformed request input ({@code ServerWebInputException}).</li>
+ *   <li>Authentication failures ({@link AuthenticationException}), mapped to {@code 401 Unauthorized}.</li>
  *   <li>Data access failures ({@link DataAccessException}).</li>
  *   <li>Any other uncaught {@link RuntimeException}.</li>
  * </ul>
@@ -51,6 +53,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         problemDetail.setType(exchange.getRequest().getURI());
         return handleExceptionInternal(ex, problemDetail, exchange.getRequest().getHeaders(),
                 HttpStatus.INSUFFICIENT_STORAGE, exchange);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public Mono<ResponseEntity<Object>> handleAuthenticationException(AuthenticationException ex,
+                                                                     ServerWebExchange exchange) {
+        if (logger.isDebugEnabled()) {
+            logger.error(ex.getMessage(), ex);
+        }
+        ProblemDetail problemDetail = ProblemDetail
+                .forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        problemDetail.setTitle("Authentication Failed");
+        problemDetail.setType(exchange.getRequest().getURI());
+        return handleExceptionInternal(ex, problemDetail, exchange.getRequest().getHeaders(),
+                HttpStatus.UNAUTHORIZED, exchange);
     }
 
     /**
