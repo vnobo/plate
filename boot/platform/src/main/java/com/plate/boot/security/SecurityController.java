@@ -119,7 +119,7 @@ public class SecurityController {
                                         Instant.now().getEpochSecond(), details)))))
                 .onErrorResume(InvalidBearerTokenException.class,
                         e -> Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                .<AuthenticationToken>build()));
+                                .build()));
     }
 
     /**

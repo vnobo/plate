@@ -43,17 +43,15 @@ import org.springframework.security.web.server.authentication.logout.*;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
-import org.springframework.security.web.server.csrf.CookieServerCsrfTokenRepository;
-import org.springframework.security.web.server.csrf.ServerCsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.server.header.ClearSiteDataServerHttpHeadersWriter;
-import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.UUID;
 
 /**
  * SecurityConfiguration configures the application's security settings by defining beans and rules for authentication,
@@ -187,7 +185,7 @@ public class SecurityConfiguration {
                 .pathMatchers("/captcha/code", "/oauth2/qr/code").permitAll()
                 // the refresh token itself is the credential here, there is no access token yet;
                 // matched by suffix because the module prefix / api version are added by path matching
-                .matchers((ServerWebExchangeMatcher) exchange -> {
+                .matchers(exchange -> {
                     var request = exchange.getRequest();
                     boolean refreshing = HttpMethod.POST.equals(request.getMethod())
                             && request.getPath().pathWithinApplication().value().endsWith("/oauth2/refresh");
@@ -210,24 +208,6 @@ public class SecurityConfiguration {
         http.oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt.jwtDecoder(jwtDecoder).jwtAuthenticationConverter(jwtAuthConverter)));
         return http.build();
-    }
-
-    /**
-     * Configures the Cross-Site Request Forgery (CSRF) protection specifications within the provided
-     * {@link ServerHttpSecurity.CsrfSpec}. This method customizes the CSRF behavior by:
-     * <ul>
-     *   <li>Defining a matcher to ignore CSRF protection for certain endpoints.</li>
-     *   <li>Setting a cookie-based repository for storing CSRF tokens with HTTP-only flag disabled.</li>
-     *   <li>Registering a handler to place the CSRF token as a request attribute.</li>
-     * </ul>
-     *
-     * @param csrfSpec The CSRF specification object to be configured, part of the {@link ServerHttpSecurity}
-     *                 configuration.
-     */
-    private void setCsrfSpec(ServerHttpSecurity.CsrfSpec csrfSpec) {
-        csrfSpec.requireCsrfProtectionMatcher(new IgnoreRequireCsrfProtectionMatcher());
-        csrfSpec.csrfTokenRepository(CookieServerCsrfTokenRepository.withHttpOnlyFalse());
-        csrfSpec.csrfTokenRequestHandler(new ServerCsrfTokenRequestAttributeHandler());
     }
 
     /**
@@ -258,42 +238,6 @@ public class SecurityConfiguration {
         logout.requiresLogout(new PathPatternParserServerWebExchangeMatcher("/oauth2/logout"));
         logout.logoutHandler(logoutHandler);
         logout.logoutSuccessHandler(new HttpStatusReturningServerLogoutSuccessHandler());
-    }
-
-    /**
-     * Matcher implementation to exclude specific HTTP requests from requiring CSRF protection. This is particularly
-     * useful for endpoints that are deemed safe from CSRF attacks due to their nature or implementation specifics, such
-     * as certain GET requests or known safe POST requests like OAuth2 token exchanges. The matcher combines a set of
-     * allowed HTTP methods and a list of more specific matchers to determine if CSRF protection should be ignored for a
-     * given request.
-     */
-    static class IgnoreRequireCsrfProtectionMatcher implements ServerWebExchangeMatcher {
-        private final Set<HttpMethod> allowedMethods = new HashSet<>(
-                Arrays.asList(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.TRACE, HttpMethod.OPTIONS));
-        private final List<ServerWebExchangeMatcher> allowedMatchers = List.of(
-                new PathPatternParserServerWebExchangeMatcher("/oauth2/none", HttpMethod.POST)
-        );
-
-        /**
-         * Evaluates whether a given server web exchange should be excluded from CSRF protection. It checks if the
-         * request's HTTP method is within the allowed set and if it matches any specified additional matchers.
-         *
-         * @param exchange The server web exchange to evaluate for CSRF protection exclusion.
-         * @return A Mono that emits a MatchResult indicating whether the exchange should be ignored for CSRF
-         * protection. - If the request method is allowed or matches custom criteria, emits MatchResult.notMatch(),
-         * suggesting the request should be ignored by CSRF protection. - Otherwise, emits MatchResult.match()
-         * indicating standard CSRF protection should apply.
-         */
-        @Override
-        public @NullMarked Mono<MatchResult> matches(ServerWebExchange exchange) {
-            Mono<MatchResult> ignoreMono = new OrServerWebExchangeMatcher(allowedMatchers)
-                    .matches(exchange).filter(MatchResult::isMatch)
-                    .flatMap(_ -> MatchResult.notMatch())
-                    .switchIfEmpty(Mono.defer(MatchResult::match));
-            var request = exchange.getRequest();
-            return Mono.justOrEmpty(request.getMethod()).filter(allowedMethods::contains)
-                    .flatMap((_) -> MatchResult.notMatch()).switchIfEmpty(Mono.defer(() -> ignoreMono));
-        }
     }
 
     /**
