@@ -1,13 +1,9 @@
 package com.plate.boot.commons;
 
-import com.plate.boot.commons.exception.RestServerException;
-import io.r2dbc.spi.R2dbcException;
-import java.util.Optional;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.*;
 import org.springframework.util.StringUtils;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.support.WebExchangeBindException;
@@ -15,6 +11,8 @@ import org.springframework.web.reactive.result.method.annotation.ResponseEntityE
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
+
+import java.util.Optional;
 
 /**
  * Centralized, reactive exception handler that translates exceptions thrown by REST endpoints

@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 
-import java.io.IOException;
-
 /**
  * Configuration class that registers custom R2DBC/Spring Data converters within the Spring context.
  * It registers converters between Jackson's {@link JsonNode} and the R2DBC {@link Json} type

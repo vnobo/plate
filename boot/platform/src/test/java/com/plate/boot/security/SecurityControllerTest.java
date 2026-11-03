@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,9 +18,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
-import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -60,17 +57,17 @@ class SecurityControllerTest {
     @InjectMocks
     private SecurityController controller;
 
-    private static SecurityDetails detailsOf(String username, UUID code) {
+    private static SecurityDetails detailsOf(UUID code) {
         SecurityDetails d = new SecurityDetails(
-                List.of(new SimpleGrantedAuthority("ROLE_USER")), Map.of("username", username), "username");
+                List.of(new SimpleGrantedAuthority("ROLE_USER")), Map.of("username", "admin"), "username");
         d.setCode(code);
-        d.setUsername(username);
+        d.setUsername("admin");
         return d;
     }
 
     @Test
     void loginTokenIssuesJwtPair() {
-        SecurityDetails details = detailsOf("admin", UUID.randomUUID());
+        SecurityDetails details = detailsOf(UUID.randomUUID());
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(details);
         ServerWebExchange exchange = mock(ServerWebExchange.class);
@@ -89,7 +86,7 @@ class SecurityControllerTest {
 
     @Test
     void loginTokenIssuesRememberMeCookieWhenRequested() {
-        SecurityDetails details = detailsOf("admin", UUID.randomUUID());
+        SecurityDetails details = detailsOf(UUID.randomUUID());
         Authentication auth = mock(Authentication.class);
         when(auth.getPrincipal()).thenReturn(details);
         ServerWebExchange exchange = mock(ServerWebExchange.class);
@@ -117,7 +114,7 @@ class SecurityControllerTest {
         TokenService.Rotation rotation = new TokenService.Rotation(code, "admin", "fam", 0L);
         RefreshTokenRequest request = new RefreshTokenRequest();
         request.setRefreshToken("refresh");
-        SecurityDetails details = detailsOf("admin", code);
+        SecurityDetails details = detailsOf(code);
         when(tokenService.consume("refresh")).thenReturn(Mono.just(rotation));
         when(securityManager.details("admin")).thenReturn(Mono.just(details));
         when(tokenService.rotate(details, rotation)).thenReturn(Mono.just(new TokenService.TokenPair("newAccess", "newRefresh", 900L)));

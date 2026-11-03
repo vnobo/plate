@@ -154,8 +154,8 @@ public class SecurityConfiguration {
             UUID userCode;
             long generation;
             try {
-                userCode = UUID.fromString(jwt.getClaimAsString("code"));
-                generation = ((Number) jwt.getClaim("gen")).longValue();
+                userCode = UUID.fromString(Objects.requireNonNull(jwt.getClaimAsString("code")));
+                generation = ((Number) Objects.requireNonNull(jwt.getClaim("gen"))).longValue();
             } catch (RuntimeException e) {
                 return Mono.error(new InvalidBearerTokenException("Malformed token claims"));
             }
