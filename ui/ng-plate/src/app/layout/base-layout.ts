@@ -13,9 +13,10 @@ import { ProgressService } from '@app/plugins/progress';
   template: `
     <a class="visually-hidden-focusable" href="#page-body">跳到主要内容</a>
     @if (showLoading()) {
-      <div class="global-loading" role="status" aria-live="polite">
-        <div class="spinner-border text-primary"></div>
-        <span class="visually-hidden">加载中…</span>
+      <div class="global-loading">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">加载中…</span>
+        </div>
       </div>
     }
     <div class="page">
