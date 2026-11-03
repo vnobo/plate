@@ -1,7 +1,6 @@
 package com.plate.boot.security;
 
 import com.plate.boot.commons.exception.RestServerException;
-import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.security.core.user.User;
 import com.plate.boot.security.jwt.TokenService;
 import jakarta.validation.Valid;
@@ -18,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
-import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -100,7 +98,7 @@ public class SecurityController {
         return this.tokenService.issue(details)
                 .map(pair -> AuthenticationToken.of(pair.accessToken(), pair.refreshToken(), pair.expiresIn(),
                         Instant.now().getEpochSecond(), details))
-                .flatMap(token -> remember.thenReturn(token));
+                .flatMap(remember::thenReturn);
     }
 
     /**
@@ -143,23 +141,6 @@ public class SecurityController {
                 .map(authentication -> ResponseEntity.ok(
                         AuthenticationToken.build(session, authentication.getPrincipal())))
                 .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
-    }
-
-    /**
-     * Retrieves the CSRF token from the context.
-     * <p>
-     * This endpoint is intended for obtaining a CSRF token which can be used to protect
-     * against cross-site request forgery attacks. It utilizes the context to fetch the
-     * CSRF token that has been stored there by the security framework.
-     *
-     * @return A Mono emitting the CsrfToken instance if present in the context, otherwise an empty Mono.
-     */
-    @GetMapping("csrf")
-    public Mono<CsrfToken> csrfToken() {
-        return Mono.deferContextual((contextView) -> {
-            CsrfToken ctk = contextView.get(ContextUtils.CSRF_TOKEN_CONTEXT);
-            return Mono.justOrEmpty(ctk);
-        });
     }
 
     /**

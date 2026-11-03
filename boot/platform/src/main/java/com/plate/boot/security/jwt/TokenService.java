@@ -92,20 +92,24 @@ public class TokenService {
         String hash = sha256(refreshToken);
         return this.redis.opsForValue().getAndDelete(REFRESH_PREFIX + hash)
                 .flatMap(raw -> {
-                    String[] parts = raw.split("\\|", 4);
-                    if (parts.length != 4) {
+                    try {
+                        String[] parts = raw.split("\\|", 4);
+                        if (parts.length != 4) {
+                            return Mono.<Rotation>error(new InvalidBearerTokenException("Refresh token is malformed"));
+                        }
+                        UUID userCode = UUID.fromString(parts[0]);
+                        String username = parts[1];
+                        String family = parts[2];
+                        long generation = Long.parseLong(parts[3]);
+                        return markUsed(hash, userCode)
+                                .then(currentGeneration(userCode))
+                                .flatMap(current -> current == generation
+                                        ? Mono.just(new Rotation(userCode, username, family, generation))
+                                        : Mono.<Rotation>error(new InvalidBearerTokenException(
+                                                "Refresh token has been revoked")));
+                    } catch (RuntimeException e) {
                         return Mono.<Rotation>error(new InvalidBearerTokenException("Refresh token is malformed"));
                     }
-                    UUID userCode = UUID.fromString(parts[0]);
-                    String username = parts[1];
-                    String family = parts[2];
-                    long generation = Long.parseLong(parts[3]);
-                    return markUsed(hash, userCode)
-                            .then(currentGeneration(userCode))
-                            .flatMap(current -> current == generation
-                                    ? Mono.just(new Rotation(userCode, username, family, generation))
-                                    : Mono.<Rotation>error(new InvalidBearerTokenException(
-                                            "Refresh token has been revoked")));
                 })
                 .switchIfEmpty(Mono.defer(() -> detectReplay(hash)));
     }

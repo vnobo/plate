@@ -151,8 +151,14 @@ public class SecurityConfiguration {
     private Converter<Jwt, Mono<AbstractAuthenticationToken>> jwtAuthenticationConverter(
             SecurityManager securityManager, TokenService tokenService) {
         return jwt -> {
-            UUID userCode = UUID.fromString(Objects.requireNonNull(jwt.getClaimAsString("code")));
-            long generation = ((Number) Objects.requireNonNull(jwt.getClaim("gen"))).longValue();
+            UUID userCode;
+            long generation;
+            try {
+                userCode = UUID.fromString(jwt.getClaimAsString("code"));
+                generation = ((Number) jwt.getClaim("gen")).longValue();
+            } catch (RuntimeException e) {
+                return Mono.error(new InvalidBearerTokenException("Malformed token claims"));
+            }
             return tokenService.isCurrent(userCode, generation)
                     .flatMap(current -> current
                             ? securityManager.details(jwt.getSubject())

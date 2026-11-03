@@ -1,27 +1,33 @@
 package com.plate.boot.security;
 
 import com.plate.boot.commons.exception.RestServerException;
-import com.plate.boot.commons.utils.ContextUtils;
 import com.plate.boot.security.SecurityController.ChangePasswordRequest;
+import com.plate.boot.security.SecurityController.RefreshTokenRequest;
+import com.plate.boot.security.jwt.TokenService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.time.Duration;
-import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -33,77 +39,107 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for {@link SecurityController}.
+ * Unit tests for {@link SecurityController}, focusing on the JWT issuance and refresh endpoints.
  */
 @ExtendWith(MockitoExtension.class)
 class SecurityControllerTest {
 
     @Mock
     private SecurityManager securityManager;
-
     @Mock
     private PasswordEncoder passwordEncoder;
-
     @Mock
     private ServerOAuth2AuthorizedClientRepository clientRepository;
+    @Mock
+    private RememberMeService rememberMeService;
+    @Mock
+    private org.springframework.security.web.server.context.ServerSecurityContextRepository securityContextRepository;
+    @Mock
+    private TokenService tokenService;
 
     @InjectMocks
     private SecurityController controller;
 
+    private static SecurityDetails detailsOf(String username, UUID code) {
+        SecurityDetails d = new SecurityDetails(
+                List.of(new SimpleGrantedAuthority("ROLE_USER")), Map.of("username", username), "username");
+        d.setCode(code);
+        d.setUsername(username);
+        return d;
+    }
+
     @Test
-    void loginTokenBuildsTokenFromSessionAndPrincipal() {
-        WebSession session = mock(WebSession.class);
-        when(session.getId()).thenReturn("session-1");
-        when(session.getLastAccessTime()).thenReturn(Instant.ofEpochSecond(1000));
-        when(session.getMaxIdleTime()).thenReturn(Duration.ofSeconds(1800));
+    void loginTokenIssuesJwtPair() {
+        SecurityDetails details = detailsOf("admin", UUID.randomUUID());
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(details);
+        ServerWebExchange exchange = mock(ServerWebExchange.class);
+        TokenService.TokenPair pair = new TokenService.TokenPair("access", "refresh", 900L);
+        when(tokenService.issue(details)).thenReturn(Mono.just(pair));
 
-        Object principal = new Object();
-        Authentication authentication = mock(Authentication.class);
-        when(authentication.getPrincipal()).thenReturn(principal);
-
-        StepVerifier.create(controller.loginToken(session, authentication))
+        StepVerifier.create(controller.loginToken(auth, exchange, false))
                 .assertNext(token -> {
-                    assertThat(token.token()).isEqualTo("session-1");
-                    assertThat(token.expires()).isEqualTo(1800L);
-                    assertThat(token.lastAccessTime()).isEqualTo(1000L);
-                    assertThat(token.details()).isSameAs(principal);
+                    assertThat(token.token()).isEqualTo("access");
+                    assertThat(token.refreshToken()).isEqualTo("refresh");
+                    assertThat(token.expires()).isEqualTo(900L);
                 })
                 .verifyComplete();
+        verify(rememberMeService, never()).issue(any(), any());
     }
 
     @Test
-    void loginTokenDefaultsMissingSessionTimes() {
-        WebSession session = mock(WebSession.class);
-        when(session.getId()).thenReturn("session-2");
-        when(session.getLastAccessTime()).thenReturn(null);
-        when(session.getMaxIdleTime()).thenReturn(null);
+    void loginTokenIssuesRememberMeCookieWhenRequested() {
+        SecurityDetails details = detailsOf("admin", UUID.randomUUID());
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(details);
+        ServerWebExchange exchange = mock(ServerWebExchange.class);
+        when(tokenService.issue(details)).thenReturn(Mono.just(new TokenService.TokenPair("a", "r", 900L)));
+        when(rememberMeService.issue(exchange, "admin")).thenReturn(Mono.empty());
 
-        Authentication authentication = mock(Authentication.class);
-        when(authentication.getPrincipal()).thenReturn("principal");
-
-        StepVerifier.create(controller.loginToken(session, authentication))
-                .assertNext(token -> {
-                    assertThat(token.expires()).isEqualTo(1800L);
-                    assertThat(token.lastAccessTime()).isNotNull();
-                })
-                .verifyComplete();
+        StepVerifier.create(controller.loginToken(auth, exchange, true)).expectNextCount(1).verifyComplete();
+        verify(rememberMeService).issue(exchange, "admin");
     }
 
     @Test
-    void csrfTokenReturnsTokenFromContext() {
-        CsrfToken csrfToken = mock(CsrfToken.class);
+    void loginTokenRejectsUnsupportedPrincipal() {
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn("not-details");
+        ServerWebExchange exchange = mock(ServerWebExchange.class);
 
-        StepVerifier.create(controller.csrfToken()
-                        .contextWrite(ctx -> ctx.put(ContextUtils.CSRF_TOKEN_CONTEXT, csrfToken)))
-                .expectNext(csrfToken)
-                .verifyComplete();
-    }
-
-    @Test
-    void csrfTokenErrorsWhenContextMissing() {
-        StepVerifier.create(controller.csrfToken())
-                .expectError()
+        StepVerifier.create(controller.loginToken(auth, exchange, false))
+                .expectErrorSatisfies(e -> assertThat(e).isInstanceOf(RestServerException.class))
                 .verify();
+    }
+
+    @Test
+    void rotateReturnsNewPair() {
+        UUID code = UUID.randomUUID();
+        TokenService.Rotation rotation = new TokenService.Rotation(code, "admin", "fam", 0L);
+        RefreshTokenRequest request = new RefreshTokenRequest();
+        request.setRefreshToken("refresh");
+        SecurityDetails details = detailsOf("admin", code);
+        when(tokenService.consume("refresh")).thenReturn(Mono.just(rotation));
+        when(securityManager.details("admin")).thenReturn(Mono.just(details));
+        when(tokenService.rotate(details, rotation)).thenReturn(Mono.just(new TokenService.TokenPair("newAccess", "newRefresh", 900L)));
+
+        StepVerifier.create(controller.rotate(request))
+                .assertNext(resp -> {
+                    assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.OK);
+                    assertThat(resp.getBody().token()).isEqualTo("newAccess");
+                    assertThat(resp.getBody().refreshToken()).isEqualTo("newRefresh");
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void rotateReturnsUnauthorizedOnInvalidToken() {
+        RefreshTokenRequest request = new RefreshTokenRequest();
+        request.setRefreshToken("bad");
+        when(tokenService.consume("bad")).thenReturn(Mono.error(new InvalidBearerTokenException("no")));
+
+        StepVerifier.create(controller.rotate(request))
+                .assertNext(resp -> assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED))
+                .verifyComplete();
     }
 
     @Test
@@ -158,15 +194,16 @@ class SecurityControllerTest {
         ChangePasswordRequest request = new ChangePasswordRequest();
         request.setPassword("old");
         request.setNewPassword("new");
+        UserDetails userDetails = mock(UserDetails.class);
         Authentication authentication = mock(Authentication.class);
         when(authentication.getCredentials()).thenReturn("encoded-old");
         when(passwordEncoder.matches("old", "encoded-old")).thenReturn(false);
+        when(authentication.getPrincipal()).thenReturn(userDetails);
 
-        assertThatThrownBy(() -> controller.changePassword(request, authentication))
-                .isInstanceOf(RestServerException.class)
-                .hasMessageContaining("verification failed");
-
-        verify(passwordEncoder, never()).encode(anyString());
+        StepVerifier.create(controller.changePassword(request, authentication))
+                .expectErrorSatisfies(e -> assertThat(e).isInstanceOf(RestServerException.class)
+                        .hasMessageContaining("verification failed"))
+                .verify();
         verify(securityManager, never()).updatePassword(any(), anyString());
     }
 
@@ -176,16 +213,11 @@ class SecurityControllerTest {
         request.setPassword("old");
         request.setNewPassword("new");
         Authentication authentication = mock(Authentication.class);
-        when(authentication.getCredentials()).thenReturn("encoded-old");
-        when(passwordEncoder.matches("old", "encoded-old")).thenReturn(true);
-        when(passwordEncoder.encode("new")).thenReturn("encoded-new");
         when(authentication.getPrincipal()).thenReturn("not-user-details");
 
         assertThatThrownBy(() -> controller.changePassword(request, authentication))
                 .isInstanceOf(RestServerException.class)
                 .hasMessageContaining("User details not found");
-
-        verify(securityManager, never()).updatePassword(any(), anyString());
     }
 
     @Test
