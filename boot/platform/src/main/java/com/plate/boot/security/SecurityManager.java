@@ -202,6 +202,24 @@ public class SecurityManager extends AbstractCache implements ReactiveUserDetail
      */
     @Override
     public @NonNull Mono<@NonNull UserDetails> findByUsername(@NonNull String username) {
+        return this.loadUserDetails(username)
+                .doOnSuccess(details -> this.loginSuccess(details.getUsername())
+                        .subscribe(res -> log.debug("Login successful! Login info modified: {}", res)));
+    }
+
+    /**
+     * Loads the full {@link UserDetails} (authorities, groups and tenants included) for a username
+     * without recording a login event.
+     * <p>This is the read-only counterpart of {@link #findByUsername(String)}: it performs the same
+     * principal assembly but does not touch {@code login_time}. The stateless JWT filter resolves the
+     * principal on every request through this method, so a per-request credential check must not be
+     * counted as a login nor incur a {@code se_users} write on each API call. Actual sign-ins keep
+     * going through {@link #findByUsername(String)}.</p>
+     *
+     * @param username the login name, matched case-insensitively
+     * @return a {@link Mono} emitting the assembled {@link UserDetails}, or an error when not found
+     */
+    public @NonNull Mono<@NonNull UserDetails> loadUserDetails(@NonNull String username) {
         var userMono = this.loadByUsername(username).zipWhen(user -> this.authorities(user.getCode()));
         var userDetailsMono = userMono.flatMap(tuple2 ->
                 buildUserDetails(tuple2.getT1(), new HashSet<>(tuple2.getT2())));
@@ -209,8 +227,6 @@ public class SecurityManager extends AbstractCache implements ReactiveUserDetail
                 .onErrorResume(throwable -> Mono.defer(() ->
                         Mono.error(new BadCredentialsException(throwable.getMessage(), throwable))))
                 .publishOn(Schedulers.boundedElastic())
-                .doOnSuccess(details -> this.loginSuccess(details.getUsername())
-                        .subscribe(res -> log.debug("Login successful! Login info modified: {}", res)))
                 .doOnError(throwable -> log.error("User {} login failed: {}", username, throwable.getMessage()));
     }
 

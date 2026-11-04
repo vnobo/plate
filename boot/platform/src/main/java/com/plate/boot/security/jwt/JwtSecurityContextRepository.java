@@ -86,11 +86,13 @@ public class JwtSecurityContextRepository implements ServerSecurityContextReposi
     /**
      * Builds the security context from a validated access token and the user's
      * authoritative record. Failures resolve to an anonymous (empty) context.
+     * <p>Uses {@link SecurityManager#loadUserDetails(String)} (not {@code findByUsername}) so that
+     * resolving the principal on every request neither records a login nor writes {@code login_time}.</p>
      */
     private Mono<SecurityContext> loadFromJwt(String token) {
         return this.jwtService.parse(token)
                 .filter(payload -> TokenType.ACCESS == payload.tokenType())
-                .flatMap(payload -> this.securityManager.findByUsername(payload.username()))
+                .flatMap(payload -> this.securityManager.loadUserDetails(payload.username()))
                 .ofType(SecurityDetails.class)
                 .map(details -> {
                     var authentication = UsernamePasswordAuthenticationToken

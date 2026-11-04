@@ -21,6 +21,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -54,7 +57,7 @@ class JwtSecurityContextRepositoryTest {
     @Test
     @DisplayName("should authenticate requests carrying a valid JWT bearer token")
     void shouldAuthenticateJwtBearerRequests() {
-        when(this.securityManager.findByUsername("bob")).thenReturn(Mono.just(this.details));
+        when(this.securityManager.loadUserDetails("bob")).thenReturn(Mono.just(this.details));
         MockServerWebExchange exchange = exchangeWith(bearer(this.jwtService, this.details));
 
         StepVerifier.create(this.repository.load(exchange))
@@ -63,6 +66,16 @@ class JwtSecurityContextRepositoryTest {
                     assertThat(context.getAuthentication().isAuthenticated()).isTrue();
                 })
                 .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("should resolve the principal read-only, without recording a login")
+    void shouldNotRecordLoginWhenResolvingPrincipal() {
+        when(this.securityManager.loadUserDetails("bob")).thenReturn(Mono.just(this.details));
+        MockServerWebExchange exchange = exchangeWith(bearer(this.jwtService, this.details));
+
+        StepVerifier.create(this.repository.load(exchange)).expectNextCount(1).verifyComplete();
+        verify(this.securityManager, never()).findByUsername(any());
     }
 
     @Test
