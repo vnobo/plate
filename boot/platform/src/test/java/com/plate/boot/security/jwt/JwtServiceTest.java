@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link JwtService}: token round-trips, claim layout and rejection paths.
@@ -77,22 +78,23 @@ class JwtServiceTest {
     }
 
     @Test
-    @DisplayName("should stamp the mini-program client type on issued tokens")
-    void shouldStampMiniAppClientType() {
-        JwtService service = new JwtService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
-
-        StepVerifier.create(service.issueTokenPair(this.details, ClientType.MINIAPP)
-                        .flatMap(pair -> service.parse(pair.accessToken())))
-                .assertNext(payload -> assertThat(payload.clientType()).isEqualTo(ClientType.MINIAPP))
-                .verifyComplete();
-    }
-
-    @Test
     @DisplayName("should reject expired tokens with BadCredentialsException")
     void shouldRejectExpiredTokens() throws InterruptedException {
         JwtService service = new JwtService(properties(SECRET, Duration.ofSeconds(1), Duration.ofSeconds(1)));
         String expired = service.issueTokenPair(this.details, ClientType.PC).block().accessToken();
         Thread.sleep(2200);
+
+        StepVerifier.create(service.parse(expired))
+                .expectErrorMatches(error -> error instanceof BadCredentialsException)
+                .verify();
+    }
+
+    @Test
+    @DisplayName("should reject expired refresh tokens as well")
+    void shouldRejectExpiredRefreshTokens() throws InterruptedException {
+        JwtService service = new JwtService(properties(SECRET, Duration.ofSeconds(1), Duration.ofSeconds(1)));
+        String expired = service.issueTokenPair(this.details, ClientType.PC).block().refreshToken();
+        Thread.sleep(1500);
 
         StepVerifier.create(service.parse(expired))
                 .expectErrorMatches(error -> error instanceof BadCredentialsException)
@@ -132,6 +134,29 @@ class JwtServiceTest {
         StepVerifier.create(service.parse("not-a-jwt"))
                 .expectErrorMatches(error -> error instanceof BadCredentialsException)
                 .verify();
+    }
+
+    @Test
+    @DisplayName("should reject null arguments when issuing a pair")
+    void shouldRejectNullIssueArguments() {
+        JwtService service = new JwtService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
+
+        assertThatThrownBy(() -> service.issueTokenPair(null, ClientType.PC))
+                .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> service.issueTokenPair(this.details, null))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("should omit the code claim when the user has no business code")
+    void shouldOmitCodeClaimWhenAbsent() {
+        JwtService service = new JwtService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
+        this.details.setCode(null);
+
+        StepVerifier.create(service.issueTokenPair(this.details, ClientType.PC)
+                        .flatMap(pair -> service.parse(pair.accessToken())))
+                .assertNext(payload -> assertThat(payload.code()).isNull())
+                .verifyComplete();
     }
 
     private static JwtProperties properties(String secret, Duration accessTtl, Duration refreshTtl) {

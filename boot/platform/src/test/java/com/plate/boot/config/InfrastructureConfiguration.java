@@ -1,8 +1,8 @@
 package com.plate.boot.config;
 
 import com.redis.testcontainers.RedisContainer;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -31,15 +31,16 @@ import org.testcontainers.utility.DockerImageName;
 public class InfrastructureConfiguration {
 
     @Bean(destroyMethod = "close")
-    @ServiceConnection
+    @ServiceConnection(name = "postgres")
     PostgreSQLContainer postgresContainer() {
         return new PostgreSQLContainer(
-                DockerImageName.parse("alexbob/postgres").asCompatibleSubstituteFor("postgres"))
+                DockerImageName.parse("ghcr.io/vnobo/postgres:latest").asCompatibleSubstituteFor("postgres"))
                 // The alexbob/postgres image is initialized with the zh_CN.UTF-8 locale, so PostgreSQL
                 // logs its readiness message in Chinese ("数据库系统准备接受连接"). The wait pattern MUST
                 // match the container's actual log output; an English pattern would never match and the
                 // container would time out. This is intentional and not an internal app message.
-                .waitingFor(Wait.forLogMessage("^.*数据库系统准备接受连接.*$", 2));
+                .waitingFor(Wait.forLogMessage("^.*(database system is ready to accept connections|数据库系统准备接受连接)" +
+                        ".*$", 2));
     }
 
     @Bean(destroyMethod = "close")

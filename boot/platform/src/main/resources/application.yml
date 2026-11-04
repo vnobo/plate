@@ -66,13 +66,17 @@ spring:
     github:
       client-id: "${github.client-id:Iv1.14a97a700a228437}"
 
-security:
-  jwt:
-    # HS256 needs >= 32 bytes; override in production with JWT_SECRET / -Djwt.secret
-    secret: "${jwt.secret:plate-local-dev-secret-change-me-0123456789}"
-    issuer: plate
-    access-ttl: 15m
-    refresh-ttl: 7d
+plate:
+  security:
+    jwt:
+      # HS256 needs >= 32 bytes; override in production with JWT_SECRET / -Djwt.secret
+      secret: "${jwt.secret:plate-local-dev-secret-change-me-0123456789}"
+      issuer: plate
+      access-token-ttl: 15m
+      refresh-token-ttl: 7d
+    cors:
+      # SPA origins allowed to send Authorization: Bearer <token>; must not be "*" with credentials
+      allowed-origins: "${cors.allowed-origins:http://localhost:4200,http://localhost:8080}"
 
 springdoc:
   api-docs:

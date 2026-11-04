@@ -66,4 +66,26 @@ class JwtPropertiesTest {
         assertThat(key.getAlgorithm()).isEqualTo("HmacSHA256");
         assertThat(key.getEncoded().length).isEqualTo(SECRET.getBytes(StandardCharsets.UTF_8).length);
     }
+
+    @Test
+    void beanAccessorsMatchCompactAccessors() {
+        JwtProperties p = new JwtProperties();
+        p.setSecret(SECRET);
+        p.setIssuer("my-issuer");
+        p.setAccessTokenTtl(Duration.ofMinutes(5));
+        p.setRefreshTokenTtl(Duration.ofDays(1));
+
+        assertThat(p.getSecret()).isEqualTo(p.secret());
+        assertThat(p.getIssuer()).isEqualTo(p.issuer());
+        assertThat(p.getAccessTokenTtl()).isEqualTo(p.accessTtl());
+        assertThat(p.getRefreshTokenTtl()).isEqualTo(p.refreshTtl());
+    }
+
+    @Test
+    void defaultsApplyToBeanConstructor() {
+        JwtProperties p = new JwtProperties();
+        assertThat(p.issuer()).isEqualTo("plate");
+        assertThat(p.accessTtl()).isEqualTo(Duration.ofMinutes(15));
+        assertThat(p.refreshTtl()).isEqualTo(Duration.ofDays(7));
+    }
 }

@@ -3,17 +3,13 @@ package com.plate.boot.security.jwt;
 import com.plate.boot.AbstractIntegrationTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import reactor.core.publisher.Mono;
-
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 /**
  * End-to-end integration tests for the stateless JWT authentication endpoints covering the
- * PC, WeChat mini-program and native app client channels.
+ * PC and native app client channels.
  * <p>
  * Requires the Testcontainers infrastructure defined in {@code InfrastructureConfiguration}
  * (PostgreSQL + Redis) and therefore runs only where a Docker environment is available.
@@ -21,11 +17,8 @@ import static org.mockito.Mockito.when;
  *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
-@DisplayName("JWT Authentication (PC / MiniApp / App)")
+@DisplayName("JWT Authentication (PC / App)")
 class JwtAuthIntegrationTests extends AbstractIntegrationTests {
-
-    @MockitoBean
-    private WechatClient wechatClient;
 
     @Test
     @DisplayName("should issue a token pair for PC login with username and password")
@@ -110,24 +103,6 @@ class JwtAuthIntegrationTests extends AbstractIntegrationTests {
         webTestClient.post().uri(secPrefix() + "/auth/refresh")
                 .bodyValue(Map.of("refreshToken", accessToken))
                 .exchange().expectStatus().isUnauthorized();
-    }
-
-    @Test
-    @DisplayName("should login a mini-program user via the WeChat code exchange")
-    void shouldLoginMiniAppUserViaWechatCode() {
-        when(this.wechatClient.code2Session("wx-code-it-1"))
-                .thenReturn(Mono.just(new WechatSession("openid-it-1", "session-key", "unionid-it-1")));
-
-        var response = webTestClient.post().uri(secPrefix() + "/auth/wechat/miniapp")
-                .bodyValue(Map.of("code", "wx-code-it-1"))
-                .exchange().expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.accessToken").isNotEmpty()
-                .jsonPath("$.refreshToken").isNotEmpty()
-                .jsonPath("$.clientType").isEqualTo("MINIAPP")
-                .returnResult();
-
-        assertThat(response).isNotNull();
     }
 
     /**

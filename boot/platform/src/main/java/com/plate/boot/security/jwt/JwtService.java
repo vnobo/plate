@@ -6,15 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwsHeader;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
-import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -93,7 +85,7 @@ public class JwtService {
      */
     public JwtService(JwtProperties properties) {
         this.properties = properties;
-        SecretKeySpec secretKey = new SecretKeySpec(deriveKey(properties.getSecret()), "HmacSHA256");
+        SecretKeySpec secretKey = signingKey(properties.getSecret());
         this.jwtEncoder = new NimbusJwtEncoder(new ImmutableSecret<>(secretKey));
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(secretKey)
                 .macAlgorithm(MacAlgorithm.HS256).build();
@@ -189,11 +181,14 @@ public class JwtService {
     }
 
     /**
-     * Derives a 256-bit HMAC key from the configured secret via SHA-256.
+     * Derives a 256-bit HMAC key from the configured secret via SHA-256. Shared with the
+     * resource-server decoder/encoder beans so every token service uses the same key.
      */
-    private static byte[] deriveKey(String secret) {
+    public static SecretKeySpec signingKey(String secret) {
         try {
-            return MessageDigest.getInstance("SHA-256").digest(secret.getBytes(StandardCharsets.UTF_8));
+            byte[] key = MessageDigest.getInstance("SHA-256")
+                    .digest(secret.getBytes(StandardCharsets.UTF_8));
+            return new SecretKeySpec(key, "HmacSHA256");
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 algorithm not available", e);
         }

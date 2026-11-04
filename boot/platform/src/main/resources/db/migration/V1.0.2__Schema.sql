@@ -275,7 +275,7 @@ $$
                 execute format('CREATE TRIGGER %I_updated_at_trigger
                         BEFORE UPDATE ON %I
                         FOR EACH ROW
-                        EXECUTE FUNCTION plate_update_updated_at_column()',
+                        EXECUTE FUNCTION plate_updated_at_column()',
                                table_name_var, table_name_var);
             end loop;
     end

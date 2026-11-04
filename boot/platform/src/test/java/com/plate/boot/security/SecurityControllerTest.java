@@ -3,13 +3,17 @@ package com.plate.boot.security;
 import com.plate.boot.commons.exception.RestServerException;
 import com.plate.boot.security.SecurityController.ChangePasswordRequest;
 import com.plate.boot.security.SecurityController.RefreshTokenRequest;
-import com.plate.boot.security.jwt.TokenService;
+import com.plate.boot.security.jwt.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +26,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -30,10 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link SecurityController}, focusing on the JWT issuance and refresh endpoints.
@@ -53,6 +55,10 @@ class SecurityControllerTest {
     private org.springframework.security.web.server.context.ServerSecurityContextRepository securityContextRepository;
     @Mock
     private TokenService tokenService;
+    @Mock
+    private ReactiveAuthenticationManager authenticationManager;
+    @Spy
+    private JwtService jwtService = new JwtService(jwtProperties());
 
     @InjectMocks
     private SecurityController controller;
@@ -63,6 +69,100 @@ class SecurityControllerTest {
         d.setCode(code);
         d.setUsername("admin");
         return d;
+    }
+
+    private static JwtProperties jwtProperties() {
+        JwtProperties properties = new JwtProperties();
+        properties.setSecret("unit-test-secret-value");
+        properties.setIssuer("plate-test");
+        properties.setAccessTokenTtl(Duration.ofMinutes(5));
+        properties.setRefreshTokenTtl(Duration.ofHours(1));
+        return properties;
+    }
+
+    private static Authentication authenticated(SecurityDetails details) {
+        return UsernamePasswordAuthenticationToken.authenticated(details, null, details.getAuthorities());
+    }
+
+    @Test
+    void loginIssuesTokenPairForDefaultPcClient() {
+        SecurityDetails details = detailsOf(UUID.randomUUID());
+        when(authenticationManager.authenticate(any())).thenReturn(Mono.just(authenticated(details)));
+
+        StepVerifier.create(controller.login(new SecurityController.LoginRequest("admin", "pw", null)))
+                .assertNext(pair -> {
+                    assertThat(pair.tokenType()).isEqualTo("Bearer");
+                    assertThat(pair.clientType()).isEqualTo(ClientType.PC);
+                    assertThat(pair.accessToken()).isNotBlank();
+                    assertThat(pair.refreshToken()).isNotBlank();
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void loginHonoursRequestedClientType() {
+        SecurityDetails details = detailsOf(UUID.randomUUID());
+        when(authenticationManager.authenticate(any())).thenReturn(Mono.just(authenticated(details)));
+
+        StepVerifier.create(controller.login(new SecurityController.LoginRequest("admin", "pw", ClientType.APP)))
+                .assertNext(pair -> assertThat(pair.clientType()).isEqualTo(ClientType.APP))
+                .verifyComplete();
+    }
+
+    @Test
+    void loginRejectsBadCredentials() {
+        when(authenticationManager.authenticate(any()))
+                .thenReturn(Mono.error(new BadCredentialsException("bad credentials")));
+
+        StepVerifier.create(controller.login(new SecurityController.LoginRequest("admin", "wrong", null)))
+                .expectError(BadCredentialsException.class)
+                .verify();
+    }
+
+    @Test
+    void refreshRotatesPairAndKeepsClientType() {
+        SecurityDetails details = detailsOf(UUID.randomUUID());
+        TokenPair issued = jwtService.issueTokenPair(details, ClientType.APP).block();
+        assertThat(issued).isNotNull();
+        when(securityManager.loadUserDetails("admin")).thenReturn(Mono.just(details));
+
+        StepVerifier.create(controller.refresh(new SecurityController.RefreshRequest(issued.refreshToken())))
+                .assertNext(pair -> {
+                    assertThat(pair.clientType()).isEqualTo(ClientType.APP);
+                    assertThat(pair.accessToken()).isNotBlank();
+                    assertThat(pair.refreshToken()).isNotBlank();
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void refreshRejectsAccessToken() {
+        SecurityDetails details = detailsOf(UUID.randomUUID());
+        TokenPair issued = jwtService.issueTokenPair(details, ClientType.PC).block();
+        assertThat(issued).isNotNull();
+
+        StepVerifier.create(controller.refresh(new SecurityController.RefreshRequest(issued.accessToken())))
+                .expectError(BadCredentialsException.class)
+                .verify();
+    }
+
+    @Test
+    void refreshRejectsGarbageToken() {
+        StepVerifier.create(controller.refresh(new SecurityController.RefreshRequest("not-a-jwt")))
+                .expectError(BadCredentialsException.class)
+                .verify();
+    }
+
+    @Test
+    void refreshRejectsUnknownUser() {
+        SecurityDetails details = detailsOf(UUID.randomUUID());
+        TokenPair issued = jwtService.issueTokenPair(details, ClientType.PC).block();
+        assertThat(issued).isNotNull();
+        when(securityManager.loadUserDetails("admin")).thenReturn(Mono.empty());
+
+        StepVerifier.create(controller.refresh(new SecurityController.RefreshRequest(issued.refreshToken())))
+                .expectError(BadCredentialsException.class)
+                .verify();
     }
 
     @Test
@@ -116,7 +216,7 @@ class SecurityControllerTest {
         request.setRefreshToken("refresh");
         SecurityDetails details = detailsOf(code);
         when(tokenService.consume("refresh")).thenReturn(Mono.just(rotation));
-        when(securityManager.details("admin")).thenReturn(Mono.just(details));
+        when(securityManager.loadUserDetails("admin")).thenReturn(Mono.just(details));
         when(tokenService.rotate(details, rotation)).thenReturn(Mono.just(new TokenService.TokenPair("newAccess", "newRefresh", 900L)));
 
         StepVerifier.create(controller.rotate(request))
