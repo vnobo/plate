@@ -18,7 +18,7 @@ public enum TokenType {
     ACCESS,
 
     /**
-     * Long-lived credential used only at the {@code /auth/refresh} endpoint to obtain new token pairs.
+     * Long-lived credential used only at the {@code /oauth2/refresh} endpoint to obtain new token pairs.
      */
     REFRESH
 }

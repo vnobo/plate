@@ -4,6 +4,7 @@ import com.plate.boot.AbstractIntegrationTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,7 +24,7 @@ class JwtAuthIntegrationTests extends AbstractIntegrationTests {
     @Test
     @DisplayName("should issue a token pair for PC login with username and password")
     void shouldIssueTokenPairForPcLogin() {
-        webTestClient.post().uri(secPrefix() + "/auth/login")
+        webTestClient.post().uri(secPrefix() + "/oauth2/login")
                 .bodyValue(Map.of("username", ADMIN_USERNAME, "password", ADMIN_PASSWORD))
                 .exchange().expectStatus().isOk()
                 .expectBody()
@@ -48,7 +49,7 @@ class JwtAuthIntegrationTests extends AbstractIntegrationTests {
     @Test
     @DisplayName("should issue an APP client type pair for native app logins")
     void shouldIssueAppClientTypePair() {
-        webTestClient.post().uri(secPrefix() + "/auth/login")
+        webTestClient.post().uri(secPrefix() + "/oauth2/login")
                 .bodyValue(Map.of("username", ADMIN_USERNAME, "password", ADMIN_PASSWORD,
                         "clientType", "APP"))
                 .exchange().expectStatus().isOk()
@@ -74,7 +75,7 @@ class JwtAuthIntegrationTests extends AbstractIntegrationTests {
     @Test
     @DisplayName("should reject wrong password with 401")
     void shouldRejectWrongPassword() {
-        webTestClient.post().uri(secPrefix() + "/auth/login")
+        webTestClient.post().uri(secPrefix() + "/oauth2/login")
                 .bodyValue(Map.of("username", ADMIN_USERNAME, "password", "wrong-password"))
                 .exchange().expectStatus().isUnauthorized();
     }
@@ -84,7 +85,7 @@ class JwtAuthIntegrationTests extends AbstractIntegrationTests {
     void shouldRotateTokenPairOnRefresh() {
         String refreshToken = loginPcAndExtract("refreshToken");
 
-        var response = webTestClient.post().uri(secPrefix() + "/auth/refresh")
+        var response = webTestClient.post().uri(secPrefix() + "/oauth2/refresh")
                 .bodyValue(Map.of("refreshToken", refreshToken))
                 .exchange().expectStatus().isOk()
                 .expectBody()
@@ -100,9 +101,37 @@ class JwtAuthIntegrationTests extends AbstractIntegrationTests {
     void shouldRejectAccessTokensAtRefreshEndpoint() {
         String accessToken = loginPcAndExtract("accessToken");
 
-        webTestClient.post().uri(secPrefix() + "/auth/refresh")
+        webTestClient.post().uri(secPrefix() + "/oauth2/refresh")
                 .bodyValue(Map.of("refreshToken", accessToken))
                 .exchange().expectStatus().isUnauthorized();
+    }
+
+    @Test
+    @DisplayName("should reject an unbound third-party identity")
+    void shouldRejectUnboundOauth2Login() {
+        webTestClient.post().uri(secPrefix() + "/oauth2/login/github")
+                .bodyValue(Map.of("openid", "unbound-" + UUID.randomUUID()))
+                .exchange().expectStatus().isUnauthorized();
+    }
+
+    @Test
+    @DisplayName("should bind a third-party account and then log in with it")
+    void shouldBindThirdPartyAccountAndLoginWithIt() {
+        String openid = "it-github-" + UUID.randomUUID();
+
+        webTestClient.post().uri(secPrefix() + "/oauth2/bind")
+                .bodyValue(Map.of("username", ADMIN_USERNAME, "password", ADMIN_PASSWORD,
+                        "registrationId", "github", "openid", openid))
+                .exchange().expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.accessToken").isNotEmpty();
+
+        webTestClient.post().uri(secPrefix() + "/oauth2/login/github")
+                .bodyValue(Map.of("openid", openid))
+                .exchange().expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.accessToken").isNotEmpty()
+                .jsonPath("$.clientType").isEqualTo("PC");
     }
 
     /**
@@ -112,7 +141,7 @@ class JwtAuthIntegrationTests extends AbstractIntegrationTests {
      * @return the string value of the field
      */
     private String loginPcAndExtract(String jsonKey) {
-        Map<?, ?> body = webTestClient.post().uri(secPrefix() + "/auth/login")
+        Map<?, ?> body = webTestClient.post().uri(secPrefix() + "/oauth2/login")
                 .bodyValue(Map.of("username", ADMIN_USERNAME, "password", ADMIN_PASSWORD))
                 .exchange().expectStatus().isOk()
                 .expectBody(Map.class)

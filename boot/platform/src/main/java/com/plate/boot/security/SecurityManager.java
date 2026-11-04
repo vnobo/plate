@@ -177,6 +177,37 @@ public class SecurityManager extends AbstractCache implements ReactiveUserDetail
     }
 
     /**
+     * Associates a third-party account with an existing local user. The binding is stored in
+     * {@code se_users.extend -> 'oauth2' -> <bindType> -> 'openid'}, which is exactly the shape
+     * {@link #loadByOauth2(String, String)} queries. Only that JSONB path is updated, so no
+     * other user fields (including the password) can be overwritten by a bind call.
+     *
+     * @param username the local account name
+     * @param bindType the OAuth2 provider / registration id, alphanumeric or underscore only
+     * @param openid   the provider's stable user identifier
+     * @return a {@link Mono} emitting the number of updated rows (0 when the user is unknown)
+     */
+    public Mono<@NonNull Long> bindOauth2(String username, String bindType, String openid) {
+        if (!StringUtils.hasText(username) || !StringUtils.hasText(bindType)
+                || !OAUTH2_BIND_TYPE_PATTERN.matcher(bindType).matches() || !StringUtils.hasText(openid)) {
+            return Mono.error(new IllegalArgumentException("Invalid username, bindType or openid parameter"));
+        }
+        String sql = """
+                update se_users
+                   set extend = jsonb_set(
+                           jsonb_set(coalesce(extend, '{}'::jsonb), '{oauth2}',
+                                     coalesce(extend -> 'oauth2', '{}'::jsonb), true),
+                           array['oauth2', :bindType]::text[],
+                           jsonb_build_object('openid', :openid), true)
+                 where username = :username
+                """;
+        return DatabaseUtils.DATABASE_CLIENT.sql(sql)
+                .bind("bindType", bindType).bind("openid", openid).bind("username", username)
+                .fetch().rowsUpdated()
+                .doAfterTerminate(() -> this.cache.clear());
+    }
+
+    /**
      * Loads a user by their username in a case-insensitive manner.
      * Utilizes reactive programming to asynchronously fetch the user details.
      *

@@ -3,22 +3,15 @@ package com.plate.boot.security.jwt;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 /**
- * Configuration properties for the JWT authentication subsystem.
+ * Configuration properties for JWT authentication, bound from {@code plate.security.jwt}.
  * <p>
- * Bound from the {@code plate.security.jwt} prefix. {@link JwtService} derives a 256-bit
- * HS256 key (via SHA-256) from {@code secret}, so any configured string length is accepted;
- * production deployments MUST override the default value. TTLs control the lifetime of
- * access and refresh tokens respectively.
- * </p>
- * <p>The compact accessors and the validating constructor are used by the opaque
- * refresh-token service ({@link TokenService}); the JavaBean accessors are used for
- * configuration binding and by {@link JwtService}.</p>
+ * {@link JwtService} derives a 256-bit HS256 key (via SHA-256) from {@code secret}, so any
+ * string length is accepted; production deployments MUST override the default. TTLs control
+ * access and refresh token lifetimes respectively.
  *
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
@@ -57,7 +50,7 @@ public class JwtProperties {
     }
 
     /**
-     * Builds validated properties for the opaque refresh-token transport.
+     * Builds validated properties for programmatic use (e.g. tests).
      *
      * @throws IllegalStateException when the secret is blank/too short, or the access TTL is
      *                               not strictly shorter than the refresh TTL
@@ -76,28 +69,5 @@ public class JwtProperties {
         this.issuer = issuer == null || issuer.isBlank() ? "plate" : issuer;
         this.accessTokenTtl = effectiveAccess;
         this.refreshTokenTtl = effectiveRefresh;
-    }
-
-    public String secret() {
-        return this.secret;
-    }
-
-    public String issuer() {
-        return this.issuer;
-    }
-
-    public Duration accessTtl() {
-        return this.accessTokenTtl;
-    }
-
-    public Duration refreshTtl() {
-        return this.refreshTokenTtl;
-    }
-
-    /**
-     * The configured secret used verbatim as an HMAC-SHA256 key.
-     */
-    public SecretKey secretKey() {
-        return new SecretKeySpec(this.secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
     }
 }

@@ -22,7 +22,7 @@ class GlobalExceptionHandlerTest {
     void shouldMapAuthenticationExceptionToUnauthorized() {
         GlobalExceptionHandler handler = new GlobalExceptionHandler();
         MockServerWebExchange exchange =
-                MockServerWebExchange.from(MockServerHttpRequest.post("/sec/v1/auth/login"));
+                MockServerWebExchange.from(MockServerHttpRequest.post("/sec/v1/oauth2/login"));
 
         StepVerifier.create(handler.handleAuthenticationException(
                         new BadCredentialsException("Bad credentials"), exchange))

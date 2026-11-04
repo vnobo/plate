@@ -3,6 +3,7 @@ plugins {
     id "org.springframework.boot"
     id 'io.spring.dependency-management'
     id 'org.graalvm.buildtools.native'
+    id 'jacoco'
 }
 
 graalvmNative {
@@ -18,13 +19,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-aspectj'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.springframework.security:spring-security-oauth2-jose'
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
-    implementation 'org.springframework.boot:spring-boot-starter-session-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'org.postgresql:r2dbc-postgresql'
 
@@ -37,7 +37,6 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webflux-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-session-data-redis-test'
 
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:testcontainers-r2dbc'
@@ -47,4 +46,35 @@ dependencies {
 
 tasks.named("test") {
     useJUnitPlatform()
+    finalizedBy tasks.named("jacocoTestReport")
+}
+
+jacoco {
+    toolVersion = "0.8.13"
+}
+
+tasks.named("jacocoTestReport") {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+tasks.named("jacocoTestCoverageVerification") {
+    violationRules {
+        rule {
+            element = "CLASS"
+            includes = ["com.plate.boot.security.jwt.*"]
+            limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
+                minimum = 1.0
+            }
+            limit {
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = 1.0
+            }
+        }
+    }
 }

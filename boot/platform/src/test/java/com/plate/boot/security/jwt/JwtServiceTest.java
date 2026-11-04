@@ -1,11 +1,13 @@
 package com.plate.boot.security.jwt;
 
 import com.plate.boot.security.SecurityDetails;
+import com.plate.boot.security.SecurityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.Duration;
@@ -15,26 +17,30 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for {@link JwtService}: token round-trips, claim layout and rejection paths.
+ * Unit tests for {@link JwtService}: token round-trips, claim layout, refresh and rejection paths.
  */
 @DisplayName("JwtService")
 class JwtServiceTest {
 
     private static final String SECRET = "unit-test-secret-value";
 
+    private SecurityManager securityManager;
     private SecurityDetails details;
 
     @BeforeEach
     void setUp() {
+        this.securityManager = mock(SecurityManager.class);
         this.details = buildDetails("alice", List.of("ROLE_ADMIN", "user:read"));
     }
 
     @Test
     @DisplayName("should issue a token pair whose access token round-trips all claims")
     void shouldIssueAndParseAccessToken() {
-        JwtService service = new JwtService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
+        JwtService service = newService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
 
         StepVerifier.create(service.issueTokenPair(this.details, ClientType.PC))
                 .assertNext(pair -> {
@@ -64,7 +70,7 @@ class JwtServiceTest {
     @Test
     @DisplayName("should type refresh tokens as REFRESH and omit authorities")
     void shouldTypeRefreshTokensAsRefresh() {
-        JwtService service = new JwtService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
+        JwtService service = newService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
 
         StepVerifier.create(service.issueTokenPair(this.details, ClientType.APP)
                         .flatMap(pair -> service.parse(pair.refreshToken())))
@@ -80,7 +86,7 @@ class JwtServiceTest {
     @Test
     @DisplayName("should reject expired tokens with BadCredentialsException")
     void shouldRejectExpiredTokens() throws InterruptedException {
-        JwtService service = new JwtService(properties(SECRET, Duration.ofSeconds(1), Duration.ofSeconds(1)));
+        JwtService service = newService(properties(SECRET, Duration.ofSeconds(1), Duration.ofSeconds(1)));
         String expired = service.issueTokenPair(this.details, ClientType.PC).block().accessToken();
         Thread.sleep(2200);
 
@@ -92,7 +98,7 @@ class JwtServiceTest {
     @Test
     @DisplayName("should reject expired refresh tokens as well")
     void shouldRejectExpiredRefreshTokens() throws InterruptedException {
-        JwtService service = new JwtService(properties(SECRET, Duration.ofSeconds(1), Duration.ofSeconds(1)));
+        JwtService service = newService(properties(SECRET, Duration.ofSeconds(1), Duration.ofSeconds(1)));
         String expired = service.issueTokenPair(this.details, ClientType.PC).block().refreshToken();
         Thread.sleep(1500);
 
@@ -104,7 +110,7 @@ class JwtServiceTest {
     @Test
     @DisplayName("should reject tokens whose payload was tampered with")
     void shouldRejectTamperedTokens() {
-        JwtService service = new JwtService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
+        JwtService service = newService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
 
         StepVerifier.create(service.issueTokenPair(this.details, ClientType.PC)
                         .map(pair -> tamper(pair.accessToken()))
@@ -116,8 +122,8 @@ class JwtServiceTest {
     @Test
     @DisplayName("should reject tokens signed with a different secret")
     void shouldRejectForeignSignatures() {
-        JwtService issuer = new JwtService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
-        JwtService verifier = new JwtService(properties("another-secret-value",
+        JwtService issuer = newService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
+        JwtService verifier = newService(properties("another-secret-value",
                 Duration.ofMinutes(5), Duration.ofHours(1)));
 
         StepVerifier.create(issuer.issueTokenPair(this.details, ClientType.PC)
@@ -129,7 +135,7 @@ class JwtServiceTest {
     @Test
     @DisplayName("should reject garbage token strings")
     void shouldRejectGarbageTokens() {
-        JwtService service = new JwtService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
+        JwtService service = newService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
 
         StepVerifier.create(service.parse("not-a-jwt"))
                 .expectErrorMatches(error -> error instanceof BadCredentialsException)
@@ -139,7 +145,7 @@ class JwtServiceTest {
     @Test
     @DisplayName("should reject null arguments when issuing a pair")
     void shouldRejectNullIssueArguments() {
-        JwtService service = new JwtService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
+        JwtService service = newService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
 
         assertThatThrownBy(() -> service.issueTokenPair(null, ClientType.PC))
                 .isInstanceOf(NullPointerException.class);
@@ -150,13 +156,72 @@ class JwtServiceTest {
     @Test
     @DisplayName("should omit the code claim when the user has no business code")
     void shouldOmitCodeClaimWhenAbsent() {
-        JwtService service = new JwtService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
+        JwtService service = newService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
         this.details.setCode(null);
 
         StepVerifier.create(service.issueTokenPair(this.details, ClientType.PC)
                         .flatMap(pair -> service.parse(pair.accessToken())))
                 .assertNext(payload -> assertThat(payload.code()).isNull())
                 .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("should refresh a pair while preserving the client type")
+    void shouldRefreshPairPreservingClientType() {
+        JwtService service = newService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
+        TokenPair issued = service.issueTokenPair(this.details, ClientType.APP).block();
+        assertThat(issued).isNotNull();
+        when(this.securityManager.loadUserDetails("alice")).thenReturn(Mono.just(this.details));
+
+        StepVerifier.create(service.refresh(issued.refreshToken()))
+                .assertNext(pair -> {
+                    assertThat(pair.clientType()).isEqualTo(ClientType.APP);
+                    assertThat(pair.accessToken()).isNotBlank();
+                    assertThat(pair.refreshToken()).isNotBlank();
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("should reject access tokens at the refresh flow")
+    void shouldRejectAccessTokenOnRefresh() {
+        JwtService service = newService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
+        TokenPair issued = service.issueTokenPair(this.details, ClientType.PC).block();
+        assertThat(issued).isNotNull();
+
+        StepVerifier.create(service.refresh(issued.accessToken()))
+                .expectError(BadCredentialsException.class)
+                .verify();
+    }
+
+    @Test
+    @DisplayName("should reject refresh when the user no longer exists")
+    void shouldRejectRefreshForUnknownUser() {
+        JwtService service = newService(properties(SECRET, Duration.ofMinutes(5), Duration.ofHours(1)));
+        TokenPair issued = service.issueTokenPair(this.details, ClientType.PC).block();
+        assertThat(issued).isNotNull();
+        when(this.securityManager.loadUserDetails("alice")).thenReturn(Mono.empty());
+
+        StepVerifier.create(service.refresh(issued.refreshToken()))
+                .expectError(BadCredentialsException.class)
+                .verify();
+    }
+
+    @Test
+    @DisplayName("should reject an expired refresh token at the refresh flow")
+    void shouldRejectExpiredRefreshOnRefresh() throws InterruptedException {
+        JwtService service = newService(properties(SECRET, Duration.ofSeconds(1), Duration.ofSeconds(1)));
+        TokenPair issued = service.issueTokenPair(this.details, ClientType.PC).block();
+        assertThat(issued).isNotNull();
+        Thread.sleep(1500);
+
+        StepVerifier.create(service.refresh(issued.refreshToken()))
+                .expectError(BadCredentialsException.class)
+                .verify();
+    }
+
+    private JwtService newService(JwtProperties properties) {
+        return new JwtService(properties, this.securityManager);
     }
 
     private static JwtProperties properties(String secret, Duration accessTtl, Duration refreshTtl) {
