@@ -1,19 +1,22 @@
 import { Routes } from '@angular/router';
-import { Users } from './users/users';
+import { canActivateGuard } from '@app/core';
+import { BaseLayout } from '@app/layout';
 
 export const DASHBOARD_ROUTES: Routes = [
   {
     path: '',
+    component: BaseLayout,
+    canActivate: [canActivateGuard],
     children: [
       {
-        path: 'users',
-        component: Users,
-        title: '用户管理',
+        path: 'welcome',
+        loadComponent: () => import('./welcome/welcome').then((m) => m.Welcome),
+        title: '欢迎',
       },
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'users',
+        redirectTo: 'welcome',
       },
     ],
   },

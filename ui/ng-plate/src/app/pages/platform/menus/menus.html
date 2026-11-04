@@ -1,0 +1,168 @@
+<!-- Page header -->
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col">
+      <div class="page-pretitle">系统管理</div>
+      <h2 class="page-title">菜单管理</h2>
+    </div>
+    <div class="col-auto ms-auto">
+      <div class="btn-list">
+        <button (click)="openModal()" class="btn btn-primary" type="button">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M12 5l0 14"></path>
+            <path d="M5 12l14 0"></path>
+          </svg>
+          添加菜单
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">菜单列表</h3>
+  </div>
+
+  <div class="card-body border-bottom py-3">
+    <div class="row g-2 align-items-center">
+      <div class="col-auto">
+        <input
+          type="text"
+          class="form-control"
+          style="width: 14rem"
+          placeholder="菜单名称关键词..."
+          [value]="draft().keyword"
+          (input)="onDraftKeyword($event)"
+          (keydown.enter)="applySearch()"
+          aria-label="搜索关键词"
+        />
+      </div>
+      <div class="col-auto">
+        <select
+          class="form-select"
+          style="width: auto"
+          [value]="draft().type"
+          (change)="onDraftType($event)"
+          (keydown.enter)="applySearch()"
+          aria-label="菜单类型"
+        >
+          <option value="all">全部类型</option>
+          @for (type of menuTypes; track type) {
+            <option [value]="type">{{ type }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-auto">
+        <div class="btn-list">
+          <button type="button" class="btn btn-primary" (click)="applySearch()">查询</button>
+          <button type="button" class="btn btn-outline-secondary" (click)="resetSearch()">
+            重置
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- menuData() 在 resource 处于错误态时会抛异常，整块渲染会挂掉，用 @boundary 兜住 -->
+  @boundary {
+    <div class="table-responsive">
+      @if (isLoading()) {
+        <div class="text-center py-4">
+          <div class="spinner-border spinner-border-sm text-muted" role="status">
+            <span class="visually-hidden">加载中...</span>
+          </div>
+          <span class="ms-2 text-muted">加载中...</span>
+        </div>
+      } @else {
+        <table class="table card-table table-vcenter text-nowrap datatable">
+          <thead>
+            <tr>
+              <th class="w-1">序号</th>
+              <th>菜单名称</th>
+              <th>类型</th>
+              <th>权限标识</th>
+              <th>模块路径</th>
+              <th>图标</th>
+              <th>排序</th>
+              <th>创建时间</th>
+              <th class="w-1">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (menu of menuData().content; track menu.id) {
+              <tr>
+                <td>{{ menu.id }}</td>
+                <td>{{ menu.name }}</td>
+                <td>
+                  @if (menu.type) {
+                    <span class="badge me-1" [class]="typeBadges[menu.type].className">
+                      {{ typeBadges[menu.type].label }}
+                    </span>
+                  }
+                </td>
+                <td>{{ menu.authority }}</td>
+                <td>
+                  @if (menu.path) {
+                    {{ menu.path }}
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
+                </td>
+                <td>
+                  @if (menu.icons) {
+                    {{ menu.icons }}
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
+                </td>
+                <td>{{ menu.sortNo }}</td>
+                <td>{{ menu.createdAt | date: 'yyyy-MM-dd HH:mm' }}</td>
+                <td>
+                  <div class="btn-list flex-nowrap">
+                    <button (click)="openMenuForm(menu)" class="btn btn-outline-primary btn-sm">
+                      编辑
+                    </button>
+                    <button (click)="onDelete(menu)" class="btn btn-outline-danger btn-sm">删除</button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9" class="text-center text-muted py-4">暂无菜单数据</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <div class="card-footer">
+      <app-pagination
+        [page]="pageable().page"
+        [size]="pageable().size"
+        [totalElements]="menuData().totalElements || 0"
+        (pageChange)="changePage($event)"
+        (sizeChange)="changeSize($event)"
+      ></app-pagination>
+    </div>
+  } @error (retry = $reset) {
+    <div class="card-body text-center py-5">
+      <p class="text-muted mb-3">菜单列表加载失败</p>
+      <!-- 先 reload 让 resource 脱离错误态，否则 $reset 重渲染会立刻再抛一次 -->
+      <button type="button" class="btn btn-primary" (click)="fetchMenuData(); retry()">重试</button>
+    </div>
+  }
+</div>

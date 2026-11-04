@@ -3,7 +3,6 @@ package com.plate.boot.commons.query;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 import com.plate.boot.commons.exception.QueryException;
-import com.plate.boot.commons.exception.RestServerException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.util.StringUtils;
@@ -136,8 +135,8 @@ public final class QueryJsonHelper {
     private static Sort.Order convertSortOrderToCamelCase(Sort.Order order) {
         String[] keys = StringUtils.delimitedListToStringArray(order.getProperty(), ".");
         if (keys.length == 0) {
-            throw QueryException.withError("Delimited list to string property empty",
-                    new IllegalArgumentException("Empty property name in sort order"));
+            throw QueryException.withError("Sort property is empty",
+                    new IllegalArgumentException("Sort property cannot be empty"));
         }
 
         String firstKey = validateColumnName(keys[0]);
@@ -151,7 +150,11 @@ public final class QueryJsonHelper {
             }
             sortedProperty.append("->>'").append(escapeJsonKey(keys[lastIndex])).append("'");
         }
-        return Sort.Order.by(sortedProperty.toString()).with(order.getDirection());
+        Sort.Order transformed = Sort.Order.by(sortedProperty.toString()).with(order.getDirection());
+        if (order.isIgnoreCase()) {
+            transformed = transformed.ignoreCase();
+        }
+        return transformed;
     }
 
     private static String validateColumnName(String columnName) {

@@ -109,7 +109,6 @@ public class TenantsService {
         if (tenant.isNew()) {
             return this.tenantsRepository.save(tenant);
         } else {
-            assert tenant.getId() != null;
             return this.tenantsRepository.findById(tenant.getId()).flatMap(old -> {
                 tenant.setCreatedAt(old.getCreatedAt());
                 return this.tenantsRepository.save(tenant);

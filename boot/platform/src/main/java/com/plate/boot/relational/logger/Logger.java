@@ -1,7 +1,6 @@
 package com.plate.boot.relational.logger;
 
 import com.plate.boot.commons.base.AbstractEntity;
-import com.plate.boot.commons.base.BaseEntity;
 import com.plate.boot.relational.MethodType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

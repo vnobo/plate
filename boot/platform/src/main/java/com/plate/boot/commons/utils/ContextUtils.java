@@ -195,35 +195,6 @@ public final class ContextUtils implements InitializingBean {
         encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v4_1());
         encoders.put("argon2", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_2());
 
-        // Retained but deprecated encoders, kept only for verifying legacy passwords
-        @Deprecated(since = "5.7", forRemoval = true)
-        PasswordEncoder ldapEncoder = new org.springframework.security.crypto.password.LdapShaPasswordEncoder();
-        encoders.put("ldap", ldapEncoder);
-
-        @Deprecated(since = "5.7", forRemoval = true)
-        PasswordEncoder md4Encoder = new org.springframework.security.crypto.password.Md4PasswordEncoder();
-        encoders.put("MD4", md4Encoder);
-
-        @Deprecated(since = "5.7", forRemoval = true)
-        PasswordEncoder md5Encoder = new org.springframework.security.crypto.password.MessageDigestPasswordEncoder("MD5");
-        encoders.put("MD5", md5Encoder);
-
-        @Deprecated(since = "5.7", forRemoval = true)
-        PasswordEncoder sha1Encoder = new org.springframework.security.crypto.password.MessageDigestPasswordEncoder("SHA-1");
-        encoders.put("SHA-1", sha1Encoder);
-
-        @Deprecated(since = "5.7", forRemoval = true)
-        PasswordEncoder sha256Encoder = new org.springframework.security.crypto.password.MessageDigestPasswordEncoder("SHA-256");
-        encoders.put("SHA-256", sha256Encoder);
-
-        @Deprecated(since = "5.7", forRemoval = true)
-        PasswordEncoder standardEncoder = new org.springframework.security.crypto.password.StandardPasswordEncoder();
-        encoders.put("sha256", standardEncoder);
-
-        @Deprecated(since = "5.7", forRemoval = true)
-        PasswordEncoder noOpEncoder = org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
-        encoders.put("noop", noOpEncoder);
-
         return new DelegatingPasswordEncoder(encodingId, encoders);
     }
 

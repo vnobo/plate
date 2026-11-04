@@ -5,7 +5,7 @@ import { MessageService } from '@app/plugins';
 import { outputToObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { delay, tap } from 'rxjs';
 import { GroupMember } from './role.types';
-import { User } from '../../dashboard/users/user.types';
+import { User } from '../users/user.types';
 import { environment } from '@envs/env';
 
 @Component({
@@ -88,9 +88,7 @@ export class MemberForm {
           .post<GroupMember>(environment.secApiPath + '/groups/members/save', payload)
           .pipe(
             tap(() =>
-              this._message.success(
-                `已将用户 ${this.userName(this.model().userCode)} 加入该角色`,
-              ),
+              this._message.success(`已将用户 ${this.userName(this.model().userCode)} 加入该角色`),
             ),
             delay(800),
             takeUntilDestroyed(this._destroyRef),

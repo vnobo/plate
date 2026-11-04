@@ -1,14 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { inject, Service, signal } from '@angular/core';
+import { computed, inject, Service, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Authentication } from '@plate/types';
-import { SessionStorage } from '@app/core';
+import { SessionStorage } from '../storage/session-storage';
 import dayjs from 'dayjs';
 
 @Service()
 export class TokenService {
   readonly loginUrl = '/passport/login';
-  redirectUrl = '/home';
+  redirectUrl = '/platform';
 
   private readonly authenticationKey = 'authentication';
   private readonly _storage = inject(SessionStorage);
@@ -18,6 +18,9 @@ export class TokenService {
 
   readonly isLoggedIn$ = toObservable(this.isLoggedIn);
   readonly authentication$ = toObservable(this.authentication);
+
+  /** 当前会话的只读快照；用户展示信息（姓名/昵称/头像）请走 UserService */
+  readonly current = computed(() => this.authentication());
 
   hasRole(role: string): boolean {
     const auth = this.authentication();
@@ -111,8 +114,34 @@ export class TokenService {
     this._storage.removeItem(this.authenticationKey);
   }
 
+
+
+  /**
+   * 存储里的令牌快照，不刷新 lastAccessTime —— 判过期必须用它：
+   * authenticationToken() 会顺手把 lastAccessTime 改成现在，拿那个值判过期永远不过期。
+   */
+  peekAuthentication(): Authentication | null {
+    return this.authenticationLoadStorage();
+  }
+
+  /**
+   * 令牌是否过期。
+   * 后端 AuthenticationToken.expires 是「会话最大空闲时长（秒）」而不是绝对到期时间戳，
+   * 所以要拿 lastAccessTime + expires 跟现在比；expires 缺失/为 0 时不判过期，交给后端 401 兜底。
+   */
+  isExpired(authentication: Authentication | null): boolean {
+    if (!authentication?.expires) {
+      return false;
+    }
+    const deadline = (authentication.lastAccessTime ?? 0) + authentication.expires;
+    return dayjs().unix() > deadline;
+  }
+
   private authenticationLoadStorage(): Authentication | null {
-    const authenticationJsonStr = this._storage.getItem(this.authenticationKey);
+    return this.parse(this._storage.getItem(this.authenticationKey));
+  }
+
+  private parse(authenticationJsonStr: string | null): Authentication | null {
     if (authenticationJsonStr) {
       try {
         const authentication: Authentication = JSON.parse(

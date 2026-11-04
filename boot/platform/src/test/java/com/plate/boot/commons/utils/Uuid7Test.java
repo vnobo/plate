@@ -5,6 +5,11 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -59,5 +64,40 @@ class Uuid7Test {
         assertNotNull(uuid);
         assertEquals(7, uuid.version());
         assertEquals(2, uuid.variant());
+    }
+
+    @Test
+    void next_isMonotonicAndUniqueUnderConcurrency() throws InterruptedException {
+        int threadCount = 16;
+        int perThread = 20_000;
+        int total = threadCount * perThread;
+
+        // msb encodes (timestamp, rand_a) — the lock-free CAS state. Asserting msb
+        // uniqueness proves the generator stays monotonic and collision-free when the
+        // AtomicLong is contended across threads, not merely that rand_b happens to differ.
+        Set<Long> msbs = ConcurrentHashMap.newKeySet(total);
+        CountDownLatch start = new CountDownLatch(1);
+        CountDownLatch done = new CountDownLatch(threadCount);
+
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            for (int t = 0; t < threadCount; t++) {
+                executor.submit(() -> {
+                    try {
+                        start.await();
+                        for (int i = 0; i < perThread; i++) {
+                            msbs.add(Uuid7.next().getMostSignificantBits());
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    } finally {
+                        done.countDown();
+                    }
+                });
+            }
+            start.countDown();
+            assertTrue(done.await(60, TimeUnit.SECONDS), "all generator tasks must finish");
+        }
+
+        assertEquals(total, msbs.size(), "msb (timestamp + rand_a) must be unique across threads");
     }
 }

@@ -14,25 +14,35 @@ import java.time.Instant;
  * It provides static factory methods to facilitate the creation of {@code AuthenticationToken} instances from individual components
  * or by extracting information from a {@code WebSession} and an {@code Authentication} object.
  *
- * @param token          The authentication token string.
- * @param expires        The session maximum idle time, in seconds.
+ * @param token          The JWT access token string.
+ * @param refreshToken   The one-time refresh token, {@code null} when only a session was rebuilt.
+ * @param expires        The access token lifetime, in seconds.
  * @param lastAccessTime The timestamp of the last access made using this token, in seconds since the Unix epoch.
  * @param details        Arbitrary object containing additional details associated with the authentication, typically the principal.
  */
-public record AuthenticationToken(String token, Long expires, Long lastAccessTime,
+public record AuthenticationToken(String token, String refreshToken, Long expires, Long lastAccessTime,
                                   Object details) implements Serializable {
+
+    /**
+     * Creates a token without a refresh token.
+     */
+    public static AuthenticationToken of(String token, Long expires, Long lastAccessTime, Object details) {
+        return new AuthenticationToken(token, null, expires, lastAccessTime, details);
+    }
 
     /**
      * Creates a new instance of {@link AuthenticationToken} with the provided parameters.
      *
-     * @param token          The authentication token string.
-     * @param expires        The session maximum idle time, in seconds.
+     * @param token          The JWT access token string.
+     * @param refreshToken   The one-time refresh token.
+     * @param expires        The access token lifetime, in seconds.
      * @param lastAccessTime The timestamp in seconds since the Unix epoch of the last access made using this token.
      * @param details        An arbitrary object containing additional details associated with the authentication.
      * @return A new {@link AuthenticationToken} instance initialized with the given arguments.
      */
-    public static AuthenticationToken of(String token, Long expires, Long lastAccessTime, Object details) {
-        return new AuthenticationToken(token, expires, lastAccessTime, details);
+    public static AuthenticationToken of(String token, String refreshToken, Long expires, Long lastAccessTime,
+                                         Object details) {
+        return new AuthenticationToken(token, refreshToken, expires, lastAccessTime, details);
     }
 
     /**
@@ -45,9 +55,9 @@ public record AuthenticationToken(String token, Long expires, Long lastAccessTim
      */
     public static AuthenticationToken build(WebSession session, Object principal) {
         Instant lastAccessTime = session.getLastAccessTime();
-        long lastAccessSeconds = (lastAccessTime != null ? lastAccessTime : Instant.now()).getEpochSecond();
+        long lastAccessSeconds = lastAccessTime.getEpochSecond();
         Duration maxIdleTime = session.getMaxIdleTime();
-        long maxIdleSeconds = (maxIdleTime != null ? maxIdleTime : Duration.ofSeconds(1800)).getSeconds();
+        long maxIdleSeconds = maxIdleTime.getSeconds();
         return of(session.getId(), maxIdleSeconds, lastAccessSeconds, principal);
     }
 }

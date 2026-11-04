@@ -3,23 +3,23 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: 'platform',
-    loadChildren: () => import('@app/pages').then((m) => m.PLATFORM_ROUTES),
+    loadChildren: () => import('./pages/platform/platform').then((m) => m.PLATFORM_ROUTES),
   },
   {
     path: 'passport',
-    loadChildren: () => import('@app/pages').then((m) => m.PASSPORT_ROUTES),
+    loadChildren: () => import('./pages/passport/passport').then((m) => m.PASSPORT_ROUTES),
   },
   {
     path: 'dashboard',
-    loadChildren: () => import('@app/pages').then((m) => m.DASHBOARD_ROUTES),
+    loadChildren: () => import('./pages/dashboard/dashboard').then((m) => m.DASHBOARD_ROUTES),
   },
   {
     path: 'examples',
-    loadChildren: () => import('@app/pages').then((m) => m.EXAMPLES_ROUTES),
+    loadChildren: () => import('./pages/examples/examples').then((m) => m.EXAMPLES_ROUTES),
   },
   {
     path: 'error',
-    loadChildren: () => import('@app/pages').then((m) => m.EXCEPTION_ROUTES),
+    loadChildren: () => import('./pages/error/error').then((m) => m.EXCEPTION_ROUTES),
   },
   {
     path: '',

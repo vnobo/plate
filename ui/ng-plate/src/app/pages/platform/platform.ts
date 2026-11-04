@@ -1,28 +1,43 @@
 import { Routes } from '@angular/router';
+import { canActivateGuard } from '@app/core';
 import { BaseLayout } from '@app/layout';
-import { Tenants } from './tenant/tenant';
-import { Role } from './role/role';
 
 export const PLATFORM_ROUTES: Routes = [
   {
     path: '',
     component: BaseLayout,
-    title: '系统管理',
+    canActivate: [canActivateGuard],
+    title: '平台管理',
     children: [
       {
+        path: 'welcome',
+        loadComponent: () => import('./welcome/welcome').then((m) => m.PlatformWelcome),
+        title: '平台欢迎',
+      },
+      {
+        path: 'users',
+        loadComponent: () => import('./users/users').then((m) => m.Users),
+        title: '用户管理',
+      },
+      {
         path: 'tenant',
-        component: Tenants,
+        loadComponent: () => import('./tenant/tenant').then((m) => m.Tenants),
         title: '租户管理',
       },
       {
-        path: 'role',
-        component: Role,
+        path: 'roles',
+        loadComponent: () => import('./role/role').then((m) => m.Role),
         title: '角色管理',
+      },
+      {
+        path: 'menus',
+        loadComponent: () => import('./menus/menus').then((m) => m.Menus),
+        title: '菜单管理',
       },
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'tenant',
+        redirectTo: 'welcome',
       },
     ],
   },

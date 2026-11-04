@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
   host: '/api',
-  relaApiPath: '/rela',
+  relaApiPath: '/rel',
   secApiPath: '/sec',
 };

@@ -190,7 +190,6 @@ public class DictionariesService extends AbstractCache {
             return this.dictionariesRepository.save(dictionary)
                 .doOnNext(res -> ContextUtils.eventPublisher(DictionaryEvent.insert(res)));
         } else {
-            assert dictionary.getId() != null;
             return this.dictionariesRepository.findById(dictionary.getId()).flatMap(old -> {
                 dictionary.setCode(old.getCode());
                 dictionary.setCreatedAt(old.getCreatedAt());

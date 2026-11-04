@@ -91,8 +91,9 @@ public class UserAuditorAware implements ReactiveAuditorAware<UserAuditor> {
             return this.usersRepository.findByCode(code).map(UserAuditor::withUser);
         }
         UserAuditor userAuditor = this.cache.get(code, () -> null);
-        return Mono.justOrEmpty(userAuditor).switchIfEmpty(this.usersRepository.findByCode(code).map(UserAuditor::withUser)
-                .doOnNext(sourceData -> this.cache.put(code, sourceData)));
+        return Mono.justOrEmpty(userAuditor).switchIfEmpty(Mono.defer(() ->
+                this.usersRepository.findByCode(code).map(UserAuditor::withUser)
+                        .doOnNext(sourceData -> this.cache.put(code, sourceData))));
     }
 
 

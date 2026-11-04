@@ -1,13 +1,10 @@
 package com.plate.boot.commons;
 
-import com.plate.boot.commons.exception.RestServerException;
-import io.r2dbc.spi.R2dbcException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.*;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.util.StringUtils;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.support.WebExchangeBindException;
@@ -15,6 +12,8 @@ import org.springframework.web.reactive.result.method.annotation.ResponseEntityE
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
+
+import java.util.Optional;
 
 /**
  * Centralized, reactive exception handler that translates exceptions thrown by REST endpoints
@@ -44,15 +43,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(DataAccessException.class)
     public Mono<ResponseEntity<Object>> handleDataAccessException(DataAccessException ex, ServerWebExchange exchange) {
-        if (logger.isDebugEnabled()) {
-            logger.error(ex.getLocalizedMessage(), ex);
-        }
+        logger.error(ex.getLocalizedMessage(), ex);
+        String detail = Optional.ofNullable(ex.getCause())
+                .map(Throwable::getLocalizedMessage)
+                .orElseGet(ex::getLocalizedMessage);
         ProblemDetail problemDetail = ProblemDetail
-                .forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getCause().getLocalizedMessage());
+                .forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, detail);
         problemDetail.setTitle("Bad Sql Grammar Data Access Exception");
         problemDetail.setType(exchange.getRequest().getURI());
         return handleExceptionInternal(ex, problemDetail, exchange.getRequest().getHeaders(),
-                HttpStatus.INSUFFICIENT_STORAGE, exchange);
+                HttpStatus.INTERNAL_SERVER_ERROR, exchange);
     }
 
     @ExceptionHandler(AuthenticationException.class)
@@ -79,15 +79,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(RuntimeException.class)
     public Mono<ResponseEntity<Object>> handleRuntimeException(RuntimeException ex, ServerWebExchange exchange) {
-        if (logger.isDebugEnabled()) {
-            logger.error(ex.getMessage(), ex);
-        }
+        logger.error(ex.getMessage(), ex);
         ProblemDetail problemDetail = ProblemDetail
                 .forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getLocalizedMessage());
         problemDetail.setTitle("Runtime Server Error Exception");
         problemDetail.setType(exchange.getRequest().getURI());
         return handleExceptionInternal(ex, problemDetail, exchange.getRequest().getHeaders(),
-                HttpStatus.INSUFFICIENT_STORAGE, exchange);
+                HttpStatus.INTERNAL_SERVER_ERROR, exchange);
     }
 
     /**
@@ -105,12 +103,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                           HttpHeaders headers,
                                                                           HttpStatusCode status,
                                                                           ServerWebExchange exchange) {
-        if (logger.isDebugEnabled()) {
-            for (var err : ex.getAllErrors()) {
-                logger.error("Bind Request Error! Field: " + err.getObjectName() + ",Error: " + err.getDefaultMessage());
-            }
-            logger.error(ex.getMessage(), ex);
+        for (var err : ex.getAllErrors()) {
+            logger.error("Bind Request Error! Field: " + err.getObjectName() + ",Error: " + err.getDefaultMessage());
         }
+        logger.error(ex.getMessage(), ex);
         var errMsg = ex.getAllErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
         ProblemDetail problemDetail = ProblemDetail
@@ -136,11 +132,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             ServerWebInputException ex, HttpHeaders headers, HttpStatusCode status,
             ServerWebExchange exchange) {
 
-        if (logger.isDebugEnabled()) {
-            logger.error(ex.getCause().getMessage(), ex);
-        }
+        Throwable cause = ex.getCause();
+        logger.error(cause != null ? cause.getMessage() : ex.getMessage(), ex);
+        String detail = Optional.ofNullable(ex.getCause())
+                .map(Throwable::getLocalizedMessage)
+                .orElseGet(ex::getLocalizedMessage);
         ProblemDetail problemDetail = ProblemDetail
-                .forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getCause().getLocalizedMessage());
+                .forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
         problemDetail.setTitle("Bad Request Server Input Error");
         problemDetail.setType(exchange.getRequest().getURI());
         return handleExceptionInternal(ex, problemDetail, headers, status, exchange);

@@ -6,6 +6,7 @@ import {
   Component,
   ComponentRef,
   createComponent,
+  DestroyRef,
   Directive,
   ElementRef,
   EnvironmentInjector,
@@ -21,6 +22,7 @@ import {
 } from '@angular/core';
 import { outputToObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { fromEvent } from 'rxjs';
+import { ConfirmDialogComponent } from './confirm-dialog';
 
 export interface ModalRef {
   title?: string;
@@ -37,6 +39,14 @@ export interface ModalOptions {
   keyboard?: boolean;
   focus?: boolean;
   show?: boolean;
+}
+
+export interface ConfirmOptions {
+  title?: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  danger?: boolean;
 }
 
 @Service()
@@ -56,13 +66,43 @@ export class ModalsService {
     });
     document.body.appendChild(this.modalRef.location.nativeElement);
     this.appRef.attachView(this.modalRef.hostView);
+    // 服务方法里没有注入上下文，必须显式传 DestroyRef；取组件自己的，随弹层销毁自动退订
     outputToObservable(this.modalRef.instance.dropped)
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.modalRef.injector.get(DestroyRef)))
       .subscribe(() => {
         this.modalRef?.destroy();
         this.modalRef = null;
       });
     return this.modalRef;
+  }
+
+  /** Opens a Tabler confirm dialog; resolves `true` on confirm, `false` on cancel/dismiss. */
+  confirm(opts: ConfirmOptions): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      let settled = false;
+      const finish = (ok: boolean) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        resolve(ok);
+      };
+      const ref = this.create({
+        title: opts.title ?? '确认操作',
+        contentRef: ConfirmDialogComponent,
+        contentInputs: {
+          message: opts.message,
+          confirmText: opts.confirmText ?? '确定',
+          cancelText: opts.cancelText ?? '取消',
+          danger: opts.danger ?? false,
+          onResult: finish,
+        },
+      });
+      // Promise executor 里更没有注入上下文，同样要显式传 DestroyRef
+      outputToObservable(ref.instance.dropped)
+        .pipe(takeUntilDestroyed(ref.injector.get(DestroyRef)))
+        .subscribe(() => finish(false));
+    });
   }
 }
 
@@ -123,6 +163,7 @@ export class TablerModalsInit {
 })
 export class Modals implements OnInit, OnDestroy {
   private _el = inject(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   modalRef = input.required<ModalRef>();
   dropped = output<void>();
@@ -139,7 +180,7 @@ export class Modals implements OnInit, OnDestroy {
       const myModalAlternative = tabler.Modal.getOrCreateInstance(modalEl, options);
 
       fromEvent(modalEl, 'hidden.bs.modal')
-        .pipe(takeUntilDestroyed())
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
           this.dropped.emit();
         });

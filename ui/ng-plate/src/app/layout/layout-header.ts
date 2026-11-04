@@ -1,1565 +1,655 @@
-import { Component, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
-import { SettingsService } from '@app/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Router, RouterLink } from '@angular/router';
+import { SettingsService, TokenService, UserService } from '@app/core';
+import { LayoutService } from './layout.service';
+
+type NoticeType = 'system' | 'mention' | 'comment' | 'like';
+
+interface Notice {
+  id: number;
+  type: NoticeType;
+  title: string;
+  text: string;
+  time: string;
+  /** 仅用于排序的时间戳 */
+  at: number;
+  unread: boolean;
+  starred: boolean;
+}
+
+/** 通知类型 → 图标/圆点配色/文案。圆点颜色即类型，动画=未读，灰色=已读 */
+const NOTICE_TYPES: Record<NoticeType, { label: string; color: string; icon: string }> = {
+  system: {
+    label: '系统通知',
+    color: 'red',
+    icon: '<svg class="icon icon-sm text-secondary" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>',
+  },
+  mention: {
+    label: '@提醒',
+    color: 'blue',
+    icon: '<svg class="icon icon-sm text-secondary" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M16 12v1.5a2.5 2.5 0 0 0 5 0v-1.5a9 9 0 1 0 -5.5 8.28" /></svg>',
+  },
+  comment: {
+    label: '评论',
+    color: 'green',
+    icon: '<svg class="icon icon-sm text-secondary" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 9h8" /><path d="M8 13h6" /><path d="M18 4a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-5l-5 3v-3h-2a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12z" /></svg>',
+  },
+  like: {
+    label: '点赞',
+    color: 'pink',
+    icon: '<svg class="icon icon-sm text-secondary" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.566z" /></svg>',
+  },
+};
+
+/** 排序优先级：系统 > @提醒 > 评论 > 点赞 */
+const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
 
 @Component({
-  selector: 'app-layout-header',
-  imports: [RouterLink, RouterLinkActive],
+  selector: 'header[layout-header]',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink],
+  host: {
+    // 用 expand-lg 与侧边栏断点对齐：否则 768–991px 汉堡键被隐藏、侧边栏又是抽屉，导航无法打开
+    class: 'navbar navbar-expand-lg sticky-top d-print-none',
+    '[attr.aria-label]': '"顶部导航"',
+  },
   template: `
-    <header class="navbar navbar-expand-md d-print-none">
-      <div class="container-fluid">
-        <!-- BEGIN NAVBAR TOGGLER -->
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbar-menu"
-          aria-controls="navbar-menu"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <!-- END NAVBAR TOGGLER -->
-        <!-- BEGIN NAVBAR LOGO -->
-        <div class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-          <a routerLink="/" aria-label="Plate">
+    <div class="container-xl">
+      <!-- 移动端：打开侧边栏抽屉 -->
+      <button
+        class="navbar-toggler d-lg-none"
+        type="button"
+        (click)="layout.toggleMobile()"
+        [attr.aria-expanded]="layout.mobileOpen()"
+        aria-controls="aside-menu"
+        aria-label="打开导航"
+      >
+        <!-- Tabler 自带的 toggler 图标（1.5em，mask 绘制，与预览页一致）；
+             换成内联 svg.icon 会被 .icon 规则压成 8px 宽 -->
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- 桌面端：折叠 / 展开侧边栏 -->
+      <button
+        class="btn btn-ghost-secondary btn-icon d-none d-lg-flex"
+        type="button"
+        (click)="layout.toggleCollapsed()"
+        [attr.aria-expanded]="!layout.collapsed()"
+        aria-controls="aside-menu"
+        [attr.aria-label]="layout.collapsed() ? '展开侧边栏' : '折叠侧边栏'"
+      >
+        @if (layout.collapsed()) {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M7 7l5 5l-5 5" />
+            <path d="M13 7l5 5l-5 5" />
+          </svg>
+        } @else {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M17 7l-5 5l5 5" />
+            <path d="M11 7l-5 5l-5 5" />
+          </svg>
+        }
+      </button>
+
+      <!-- 动作区：顺序参照 Tabler 示例（主题 → 通知 → 语言 → 用户），全部用 .nav-link 统一外观 -->
+      <div class="navbar-nav flex-row order-md-last ms-auto align-items-center">
+        <div class="nav-item d-none d-md-flex">
+          <a routerLink="/dashboard" class="nav-link px-2" aria-label="返回工作台">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="110"
-              height="32"
-              viewBox="0 0 120 32"
-              class="navbar-brand-image"
+              class="icon"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
-              <!-- PLATE letter icon - modern minimalist style -->
-              <g fill="var(--tblr-primary, #066fd1)">
-                <!-- P -->
-                <path
-                  d="M8 6h4c2.2 0 4 1.8 4 4v8c0 2.2-1.8 4-4 4H8V6zm4 2h-2v8h2c1.1 0 2-0.9 2-2V10c0-1.1-0.9-2-2-2z"
-                />
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M5 12l14 0" />
+              <path d="M5 12l6 6" />
+              <path d="M5 12l6 -6" />
+            </svg>
+          </a>
+        </div>
 
-                <!-- L -->
-                <path d="M20 6h2v12h-2V6z" />
-
-                <!-- A -->
-                <path d="M26 18l3-12h2l3 12h-2l-0.5-2h-3l-0.5 2h-2zm3.5-4l1-4h0.5l1 4h-2.5z" />
-
-                <!-- T -->
-                <path d="M36 6h6v2h-6v3h4v2h-4v3h6v2h-8V6z" />
-
-                <!-- E -->
-                <path d="M46 6h8v2h-6v3h5v2h-5v3h6v2h-8V6z" />
-              </g>
-
-              <!-- Underline decoration -->
-              <rect
-                x="8"
-                y="22"
-                width="46"
-                height="2"
-                fill="var(--tblr-primary, #066fd1)"
-                opacity="0.3"
+        <!-- 亮/暗切换：显示哪个按钮由 Tabler 的 .hide-theme-dark / .hide-theme-light
+             依据 data-bs-theme 决定，组件无需维护当前主题状态 -->
+        <div class="nav-item d-flex">
+          <a
+            href="javascript:void(0)"
+            class="nav-link px-2 hide-theme-dark"
+            (click)="settings.setTheme('dark')"
+            title="切换到暗色模式"
+            aria-label="切换到暗色模式"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="icon"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path
+                d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"
               />
-              <rect
-                x="8"
-                y="25"
-                width="46"
-                height="1"
-                fill="var(--tblr-primary, #066fd1)"
-                opacity="0.6"
+            </svg>
+          </a>
+          <a
+            href="javascript:void(0)"
+            class="nav-link px-2 hide-theme-light"
+            (click)="settings.setTheme('light')"
+            title="切换到亮色模式"
+            aria-label="切换到亮色模式"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="icon"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+              <path
+                d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"
               />
             </svg>
           </a>
         </div>
-        <!-- END NAVBAR LOGO -->
-        <div class="navbar-nav flex-row order-md-last">
-          <div class="nav-item d-none d-md-flex me-3">
-            <div class="btn-list">
-              <a
-                routerLink="/platform"
-                routerLinkActive="active"
-                class="btn btn-5"
-                rel="noreferrer"
-              >
-                <!-- Download SVG icon from http://tabler.io/icons/icon/brand-github -->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="icon icon-tabler icons-tabler-outline icon-tabler-building-community"
-                >
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path
-                    d="M8 9l5 5v7h-5v-4m0 4h-5v-7l5 -5m1 1v-6a1 1 0 0 1 1 -1h10a1 1 0 0 1 1 1v17h-8"
-                  />
-                  <path d="M13 7l0 .01" />
-                  <path d="M17 7l0 .01" />
-                  <path d="M17 11l0 .01" />
-                  <path d="M17 15l0 .01" />
-                </svg>
-                平台管理
-              </a>
-            </div>
-          </div>
-          <div class="d-none d-md-flex">
-            <div class="nav-item">
-              <a
-                routerLink="./"
-                [queryParams]="{ theme: 'dark' }"
-                class="nav-link px-0 hide-theme-dark"
-                data-bs-toggle="tooltip"
-                data-bs-placement="bottom"
-                aria-label="Enable dark mode"
-                data-bs-original-title="Enable dark mode"
-              >
-                <!-- Download SVG icon from http://tabler.io/icons/icon/moon -->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="icon icon-1"
-                >
-                  <path
-                    d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"
-                  ></path>
-                </svg>
-              </a>
-              <a
-                routerLink="./"
-                [queryParams]="{ theme: 'light' }"
-                class="nav-link px-0 hide-theme-light"
-                data-bs-toggle="tooltip"
-                data-bs-placement="bottom"
-                aria-label="Enable light mode"
-                data-bs-original-title="Enable light mode"
-              >
-                <!-- Download SVG icon from http://tabler.io/icons/icon/sun -->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="icon icon-1"
-                >
-                  <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
-                  <path
-                    d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"
-                  ></path>
-                </svg>
-              </a>
-            </div>
-            <div class="nav-item dropdown d-none d-md-flex">
-              <a
-                href="#"
-                class="nav-link px-0"
-                data-bs-toggle="dropdown"
-                tabindex="-1"
-                aria-label="Show notifications"
-                data-bs-auto-close="outside"
-                aria-expanded="false"
-              >
-                <!-- Download SVG icon from http://tabler.io/icons/icon/bell -->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="icon icon-1"
-                >
-                  <path
-                    d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"
-                  ></path>
-                  <path d="M9 17v1a3 3 0 0 0 6 0v-1"></path>
-                </svg>
-                <span class="badge bg-red"></span>
-              </a>
-              <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
-                <div class="card">
-                  <div class="card-header d-flex">
-                    <h3 class="card-title">Notifications</h3>
-                    <div class="btn-close ms-auto" data-bs-dismiss="dropdown"></div>
-                  </div>
-                  <div class="list-group list-group-flush list-group-hoverable">
-                    <div class="list-group-item">
-                      <div class="row align-items-center">
-                        <div class="col-auto">
-                          <span class="status-dot status-dot-animated bg-red d-block"></span>
-                        </div>
-                        <div class="col text-truncate">
-                          <a href="#" class="text-body d-block">Example 1</a>
-                          <div class="d-block text-secondary text-truncate mt-n1">
-                            Change deprecated html tags to text decoration classes (#29604)
-                          </div>
-                        </div>
-                        <div class="col-auto">
-                          <a href="#" class="list-group-item-actions">
-                            <!-- Download SVG icon from http://tabler.io/icons/icon/star -->
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              class="icon text-muted icon-2"
-                            >
-                              <path
-                                d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"
-                              ></path>
-                            </svg>
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="list-group-item">
-                      <div class="row align-items-center">
-                        <div class="col-auto"><span class="status-dot d-block"></span></div>
-                        <div class="col text-truncate">
-                          <a href="#" class="text-body d-block">Example 2</a>
-                          <div class="d-block text-secondary text-truncate mt-n1">
-                            justify-content:between ⇒ justify-content:space-between (#29734)
-                          </div>
-                        </div>
-                        <div class="col-auto">
-                          <a href="#" class="list-group-item-actions show">
-                            <!-- Download SVG icon from http://tabler.io/icons/icon/star -->
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              class="icon text-yellow icon-2"
-                            >
-                              <path
-                                d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"
-                              ></path>
-                            </svg>
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="list-group-item">
-                      <div class="row align-items-center">
-                        <div class="col-auto"><span class="status-dot d-block"></span></div>
-                        <div class="col text-truncate">
-                          <a href="#" class="text-body d-block">Example 3</a>
-                          <div class="d-block text-secondary text-truncate mt-n1">
-                            Update change-version.js (#29736)
-                          </div>
-                        </div>
-                        <div class="col-auto">
-                          <a href="#" class="list-group-item-actions">
-                            <!-- Download SVG icon from http://tabler.io/icons/icon/star -->
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              class="icon text-muted icon-2"
-                            >
-                              <path
-                                d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"
-                              ></path>
-                            </svg>
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="list-group-item">
-                      <div class="row align-items-center">
-                        <div class="col-auto">
-                          <span class="status-dot status-dot-animated bg-green d-block"></span>
-                        </div>
-                        <div class="col text-truncate">
-                          <a href="#" class="text-body d-block">Example 4</a>
-                          <div class="d-block text-secondary text-truncate mt-n1">
-                            Regenerate package-lock.json (#29730)
-                          </div>
-                        </div>
-                        <div class="col-auto">
-                          <a href="#" class="list-group-item-actions">
-                            <!-- Download SVG icon from http://tabler.io/icons/icon/star -->
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              class="icon text-muted icon-2"
-                            >
-                              <path
-                                d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"
-                              ></path>
-                            </svg>
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="card-body">
-                    <div class="row">
-                      <div class="col">
-                        <a href="#" class="btn btn-2 w-100"> Archive all </a>
-                      </div>
-                      <div class="col">
-                        <a href="#" class="btn btn-2 w-100"> Mark all as read </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+
+        <!-- 通知：红点依赖 .nav-link > .badge 的绝对定位规则，不能换成 btn -->
+        <div class="nav-item dropdown">
+          <a
+            #notifyToggle
+            href="javascript:void(0)"
+            class="nav-link px-2"
+            data-bs-toggle="dropdown"
+            data-bs-auto-close="outside"
+            aria-label="通知"
+            (click)="openNotifications()"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="icon"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path
+                d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"
+              />
+              <path d="M9 17v1a3 3 0 0 0 6 0v-1" />
+            </svg>
+            @if (unreadCount() > 0) {
+              <span class="badge bg-red"></span>
+            }
+          </a>
+
+          <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
+            <div class="card">
+              <div class="card-header d-flex align-items-center">
+                <h2 class="card-title">通知</h2>
+                <span class="ms-2 small text-secondary">{{ unreadCount() }} 条未读</span>
+                <button
+                  type="button"
+                  class="btn-close ms-auto"
+                  (click)="closeNotifications()"
+                  aria-label="关闭"
+                ></button>
               </div>
-            </div>
-            <div class="nav-item dropdown d-none d-md-flex me-3">
-              <a
-                href="#"
-                class="nav-link px-0"
-                data-bs-toggle="dropdown"
-                tabindex="-1"
-                aria-label="Show app menu"
-                data-bs-auto-close="outside"
-                aria-expanded="false"
-              >
-                <!-- Download SVG icon from http://tabler.io/icons/icon/apps -->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="icon icon-1"
-                >
-                  <path
-                    d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"
-                  ></path>
-                  <path
-                    d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"
-                  ></path>
-                  <path
-                    d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"
-                  ></path>
-                  <path d="M14 7l6 0"></path>
-                  <path d="M17 4l0 6"></path>
-                </svg>
-              </a>
-              <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
-                <div class="card">
-                  <div class="card-header">
-                    <div class="card-title">My Apps</div>
-                    <div class="card-actions btn-actions">
-                      <a href="#" class="btn-action">
-                        <!-- Download SVG icon from http://tabler.io/icons/icon/settings -->
+
+              <div class="list-group list-group-flush list-group-hoverable">
+                @if (loading()) {
+                  @for (i of skeletons; track i) {
+                    <div class="list-group-item">
+                      <div class="row align-items-center placeholder-glow">
+                        <div class="col-auto">
+                          <span class="status-dot d-block"></span>
+                        </div>
+                        <div class="col">
+                          <span class="placeholder col-6 d-block mb-1"></span>
+                          <span class="placeholder col-10 d-block"></span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                } @else {
+                  @for (item of list(); track item.id) {
+                    <div class="list-group-item">
+                      <div class="row align-items-center">
+                        <div class="col-auto">
+                          <span
+                            [class]="
+                              'status-dot d-block' +
+                              (item.unread ? ' status-dot-animated bg-' + colorOf(item.type) : '')
+                            "
+                          >
+                            <span class="visually-hidden">{{ item.unread ? '未读' : '已读' }}</span>
+                          </span>
+                        </div>
+                        <div class="col text-truncate">
+                          <div class="d-flex align-items-center">
+                            <span class="me-1 d-inline-flex" [innerHTML]="iconOf(item.type)"></span>
+                            <a
+                              href="javascript:void(0)"
+                              class="text-body d-block text-truncate"
+                              [attr.title]="item.title"
+                              (click)="markRead(item.id)"
+                            >
+                              {{ item.title }}
+                            </a>
+                          </div>
+                          <div class="d-flex align-items-center mt-n1">
+                            <div class="text-secondary text-truncate" [attr.title]="item.text">
+                              {{ item.text }}
+                            </div>
+                            <span class="ms-auto ps-2 small text-secondary text-nowrap">{{
+                              item.time
+                            }}</span>
+                          </div>
+                        </div>
+                        <div class="col-auto">
+                          <a
+                            href="javascript:void(0)"
+                            class="list-group-item-actions"
+                            [class.show]="item.starred"
+                            [attr.aria-label]="item.starred ? '取消收藏' : '收藏'"
+                            (click)="toggleStar(item.id)"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="icon"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              stroke-width="2"
+                              stroke="currentColor"
+                              fill="none"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              [class.text-yellow]="item.starred"
+                              [class.text-muted]="!item.starred"
+                            >
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                              <path
+                                d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245"
+                              />
+                            </svg>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  } @empty {
+                    <div class="list-group-item">
+                      <div class="text-center text-secondary py-4">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
+                          class="icon icon-lg mb-2"
                           width="24"
                           height="24"
                           viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
                           stroke-width="2"
+                          stroke="currentColor"
+                          fill="none"
                           stroke-linecap="round"
                           stroke-linejoin="round"
-                          class="icon icon-1"
                         >
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                           <path
-                            d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"
-                          ></path>
-                          <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"></path>
+                            d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"
+                          />
+                          <path d="M4 13h3l3 3h4l3 -3h3" />
                         </svg>
-                      </a>
+                        <div>暂无通知</div>
+                      </div>
                     </div>
+                  }
+                }
+              </div>
+
+              <div class="card-body">
+                <div class="row g-2">
+                  <div class="col">
+                    <button class="btn w-100" type="button" (click)="archiveAll()">归档全部</button>
                   </div>
-                  <div class="card-body scroll-y p-2" style="max-height: 50vh">
-                    <div class="row g-0">
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/amazon.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Amazon</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/android.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Android</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/app-store.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Apple App Store</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/apple-podcast.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Apple Podcast</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/apple.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Apple</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/behance.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Behance</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/discord.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Discord</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/dribbble.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Dribbble</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/dropbox.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Dropbox</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/ever-green.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Ever Green</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/facebook.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Facebook</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/figma.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Figma</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/github.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">GitHub</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/gitlab.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">GitLab</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/google-ads.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Google Ads</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/google-adsense.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Google AdSense</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/google-analytics.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Google Analytics</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/google-cloud.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Google Cloud</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/google-drive.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Google Drive</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/google-fit.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Google Fit</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/google-home.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Google Home</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/google-maps.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Google Maps</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/google-meet.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Google Meet</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/google-photos.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Google Photos</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/google-play.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Google Play</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/google-shopping.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Google Shopping</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/google-teams.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Google Teams</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/google.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Google</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/instagram.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Instagram</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/klarna.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Klarna</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/linkedin.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">LinkedIn</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/mailchimp.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Mailchimp</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/medium.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Medium</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/messenger.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Messenger</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/meta.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Meta</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/monday.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Monday</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/netflix.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Netflix</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/notion.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Notion</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/office-365.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Office 365</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/opera.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Opera</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/paypal.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">PayPal</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/petreon.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Patreon</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/pinterest.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Pinterest</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/play-store.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Play Store</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/quora.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Quora</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/reddit.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Reddit</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/shopify.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Shopify</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/skype.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Skype</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/slack.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Slack</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/snapchat.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Snapchat</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/soundcloud.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">SoundCloud</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/spotify.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Spotify</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/stripe.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Stripe</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/telegram.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Telegram</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/tiktok.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">TikTok</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/tinder.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Tinder</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/trello.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Trello</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/truth.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Truth</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/tumblr.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Tumblr</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/twitch.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Twitch</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/twitter.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Twitter</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/vimeo.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Vimeo</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/vk.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">VK</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/watppad.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Wattpad</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/webflow.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Webflow</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/whatsapp.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">WhatsApp</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/wordpress.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">WordPress</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/xing.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Xing</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/yelp.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Yelp</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/youtube.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">YouTube</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/zapier.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Zapier</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/zendesk.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Zendesk</span>
-                        </a>
-                      </div>
-                      <div class="col-4">
-                        <a
-                          href="#"
-                          class="d-flex flex-column flex-center text-center text-secondary py-2 px-2 link-hoverable"
-                        >
-                          <img
-                            src="./static/brands/zoom.svg"
-                            class="w-6 h-6 mx-auto mb-2"
-                            width="24"
-                            height="24"
-                            alt=""
-                          />
-                          <span class="h5">Zoom</span>
-                        </a>
-                      </div>
-                    </div>
+                  <div class="col">
+                    <button
+                      class="btn w-100"
+                      type="button"
+                      [disabled]="unreadCount() === 0"
+                      (click)="markAllRead()"
+                    >
+                      全部标记已读
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="nav-item dropdown">
-            <a
-              href="#"
-              class="nav-link d-flex lh-1 p-0 px-2"
-              data-bs-toggle="dropdown"
-              aria-label="Open user menu"
+        </div>
+
+        <!-- 语言：shortcut: 只记录偏好与 <html lang>，项目尚未接入 i18n 资源，接入后由它驱动文案 -->
+        <div class="nav-item dropdown d-none d-md-flex">
+          <a
+            href="javascript:void(0)"
+            class="nav-link px-2 d-flex align-items-center"
+            data-bs-toggle="dropdown"
+            aria-label="切换语言"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="icon me-1"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
-              <span
-                class="avatar avatar-sm"
-                style="background-image: url(./static/avatars/000m.jpg)"
-              >
-              </span>
-              <div class="d-none d-xl-block ps-2">
-                <div>Paweł Kuna</div>
-                <div class="mt-1 small text-secondary">UI Designer</div>
-              </div>
-            </a>
-            <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-              <a href="#" class="dropdown-item">Status</a>
-              <a href="./profile.html" class="dropdown-item">Profile</a>
-              <a href="#" class="dropdown-item">Feedback</a>
-              <div class="dropdown-divider"></div>
-              <a href="./settings.html" class="dropdown-item">Settings</a>
-              <a href="./sign-in.html" class="dropdown-item">Logout</a>
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+              <path d="M3.6 9h16.8" />
+              <path d="M3.6 15h16.8" />
+              <path d="M11.5 3a17 17 0 0 0 0 18" />
+              <path d="M12.5 3a17 17 0 0 1 0 18" />
+            </svg>
+            {{ langLabel() }}
+          </a>
+          <div class="dropdown-menu dropdown-menu-end">
+            <button class="dropdown-item" type="button" (click)="setLang('zh-CN')">简体中文</button>
+            <button class="dropdown-item" type="button" (click)="setLang('en')">English</button>
+          </div>
+        </div>
+
+        <div class="nav-item dropdown">
+          <a
+            href="javascript:void(0)"
+            class="nav-link d-flex lh-1 p-0 px-2"
+            data-bs-toggle="dropdown"
+            aria-label="打开用户菜单"
+          >
+            <span class="avatar avatar-sm bg-primary-lt">{{ userSer.initial() }}</span>
+            <!-- 只展示姓名与昵称，角色/权限不在界面上出现 -->
+            <div class="d-none d-xl-block ps-2 lh-sm">
+              <div class="fw-medium">{{ userSer.displayName() }}</div>
+              @if (showNickname()) {
+                <div class="small text-secondary">{{ userSer.nickname() }}</div>
+              }
             </div>
+          </a>
+          <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+            <!-- xl 以下顶栏只剩头像，名字挪进菜单里，否则小屏看不出当前是谁 -->
+            <div class="d-xl-none">
+              <div class="dropdown-item-text d-flex align-items-center">
+                <span class="avatar avatar-sm bg-primary-lt">{{ userSer.initial() }}</span>
+                <div class="ps-2 lh-sm">
+                  <div class="fw-medium">{{ userSer.displayName() }}</div>
+                  @if (showNickname()) {
+                    <div class="small text-secondary">{{ userSer.nickname() }}</div>
+                  }
+                </div>
+              </div>
+              <div class="dropdown-divider"></div>
+            </div>
+            <a routerLink="/dashboard" class="dropdown-item">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="icon dropdown-item-icon"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path
+                  d="M10 3.2a9 9 0 1 0 10.8 10.8a1 1 0 0 0 -1 -1h-6.8a2 2 0 0 1 -2 -2v-7a.9 .9 0 0 0 -1 -.8"
+                />
+                <path d="M15 3.5a9 9 0 0 1 5.5 5.5h-4.5a1 1 0 0 1 -1 -1v-4.5" />
+              </svg>
+              工作台
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="javascript:void(0)" class="dropdown-item" (click)="logout()">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="icon dropdown-item-icon"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path
+                  d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"
+                />
+                <path d="M7 12h14l-3 -3" />
+                <path d="M17 9l3 3" />
+              </svg>
+              退出登录
+            </a>
           </div>
         </div>
       </div>
-    </header>
-  `,
-  styles: `
-    :host {
-      display: contents;
-    }
+    </div>
   `,
 })
 export class LayoutHeader {
-  private readonly router = inject(ActivatedRoute);
-  private readonly settings = inject(SettingsService);
+  private readonly router = inject(Router);
+  protected readonly tokenSer = inject(TokenService);
+  protected readonly userSer: UserService = inject(UserService);
+  protected readonly settings = inject(SettingsService);
+  protected readonly layout = inject(LayoutService);
+  private readonly http = inject(HttpClient);
 
-  constructor() {
-    this.router.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
-      if (params.get('theme')) {
-        this.settings.setting(params);
+  /** 昵称与主显示名相同时只显示一行，避免「张三 / 张三」 */
+  protected readonly showNickname = computed(() => {
+    const nickname = this.userSer.nickname();
+    return nickname !== '' && nickname !== this.userSer.displayName();
+  });
+
+  // 图标是硬编码的静态 SVG；Angular 的 innerHTML 清洗会移除 <svg>，故声明为可信内容
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly typeIcons = new Map<NoticeType, SafeHtml>(
+    (Object.keys(NOTICE_TYPES) as NoticeType[]).map((type) => [
+      type,
+      this.sanitizer.bypassSecurityTrustHtml(NOTICE_TYPES[type].icon),
+    ]),
+  );
+
+  private readonly notifyToggle = viewChild.required<ElementRef<HTMLElement>>('notifyToggle');
+
+  /** 通知示例数据：暂无后端接口，先用于验证结构与交互 */
+  protected readonly notices = signal<ReadonlyArray<Notice>>([
+    {
+      id: 1,
+      type: 'system',
+      title: '版本 1.4.0 已发布',
+      text: '修复租户切换后权限未刷新的问题 (#29604)',
+      time: '10 分钟前',
+      at: Date.now() - 10 * 60_000,
+      unread: true,
+      starred: false,
+    },
+    {
+      id: 2,
+      type: 'mention',
+      title: '张伟 在「用户管理」中 @ 了你',
+      text: '麻烦确认下这个租户的分组权限是否正确 (#29734)',
+      time: '1 小时前',
+      at: Date.now() - 60 * 60_000,
+      unread: true,
+      starred: true,
+    },
+    {
+      id: 3,
+      type: 'comment',
+      title: '李娜 评论了你的角色配置',
+      text: '建议把「只读」角色拆成两个更细的权限 (#29736)',
+      time: '3 小时前',
+      at: Date.now() - 3 * 60 * 60_000,
+      unread: false,
+      starred: false,
+    },
+    {
+      id: 4,
+      type: 'like',
+      title: '王强 赞了你的月度报表',
+      text: '「月度活跃用户」报表收到 5 个赞 (#29730)',
+      time: '昨天 18:02',
+      at: Date.now() - 26 * 60 * 60_000,
+      unread: true,
+      starred: false,
+    },
+  ]);
+
+  /** 排序：未读优先 → 类型优先级（系统 > @提醒 > 评论 > 点赞）→ 时间倒序 */
+  protected readonly list = computed(() => {
+    const priority = TYPE_PRIORITY;
+    return [...this.notices()].sort(
+      (a, b) =>
+        Number(b.unread) - Number(a.unread) ||
+        priority.indexOf(a.type) - priority.indexOf(b.type) ||
+        b.at - a.at,
+    );
+  });
+
+  protected readonly unreadCount = computed(() => this.notices().filter((n) => n.unread).length);
+  protected readonly loading = signal(false);
+  protected readonly skeletons = [1, 2, 3];
+  private loaded = false;
+
+  protected readonly lang = signal<'zh-CN' | 'en'>(
+    typeof localStorage !== 'undefined' && localStorage.getItem('plate-lang') === 'en'
+      ? 'en'
+      : 'zh-CN',
+  );
+  protected readonly langLabel = computed(() => (this.lang() === 'en' ? 'EN' : '中文'));
+
+  colorOf(type: NoticeType): string {
+    return NOTICE_TYPES[type].color;
+  }
+
+  iconOf(type: NoticeType): SafeHtml {
+    return this.typeIcons.get(type)!;
+  }
+
+  /** 首次打开时加载；shortcut: 暂无通知接口，用 400ms 模拟一次拉取，接入后替换成真实请求 */
+  openNotifications(): void {
+    if (this.loaded) return;
+    this.loaded = true;
+    this.loading.set(true);
+    setTimeout(() => this.loading.set(false), 400);
+  }
+
+  markRead(id: number): void {
+    this.notices.update((list) => list.map((n) => (n.id === id ? { ...n, unread: false } : n)));
+  }
+
+  toggleStar(id: number): void {
+    this.notices.update((list) =>
+      list.map((n) => (n.id === id ? { ...n, starred: !n.starred } : n)),
+    );
+  }
+
+  markAllRead(): void {
+    this.notices.update((list) => list.map((n) => ({ ...n, unread: false })));
+  }
+
+  archiveAll(): void {
+    this.notices.set([]);
+  }
+
+  /** 关闭面板用 Tabler 的 Dropdown 实例（Bootstrap 5 的 dropdown 不支持 data-bs-dismiss） */
+  closeNotifications(): void {
+    const dropdown = (
+      window as unknown as {
+        tabler?: { Dropdown?: { getOrCreateInstance(el: Element): { hide(): void } } };
       }
+    ).tabler?.Dropdown;
+    dropdown?.getOrCreateInstance(this.notifyToggle().nativeElement).hide();
+  }
+
+  setLang(lang: 'zh-CN' | 'en'): void {
+    this.lang.set(lang);
+    localStorage.setItem('plate-lang', lang);
+    document.documentElement.lang = lang;
+  }
+
+  logout(): void {
+    // 主动退出：先让后端吊销 HttpOnly 的 remember-me cookie（前端碰不到也删不掉），
+    // 服务器清不掉也要继续清本地，否则点了退出还停在里面
+    this.http.get('/oauth2/logout').subscribe({
+      next: () => this.finishLogout(),
+      error: () => this.finishLogout(),
     });
+  }
+
+  private finishLogout() {
+    this.tokenSer.logout();
+    void this.router.navigate([this.tokenSer.loginUrl]);
   }
 }

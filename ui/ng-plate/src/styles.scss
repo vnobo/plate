@@ -1,10 +1,179 @@
-/* You can add global styles to this file, and also import other style files */
-:root {
-  --tblr-font-sans-serif: 'LXGW WenKai', 'Inter Var', Inter, '-apple-system', 'BlinkMacSystemFont',
+/* =============================================================================
+ * Plate 企业级设计令牌（基于 Tabler CSS 变量体系定制）
+ *
+ * 定制原则（参考 docs.tabler.io/ui/getting-started/customize）：
+ *   1. 只覆盖 Tabler 的语义变量，不重写组件 CSS；
+ *   2. -lt / -darken / -bg-subtle 等派生色由 oklch() 与 color-mix()
+ *      从下方基础色自动推导，无需重复定义；
+ *   3. 全站工具类（btn-primary / bg-primary-lt / text-primary / alert-*）
+ *      自动继承，组件样式天然统一。
+ * ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+ * 1. 字体与排版层次
+ *    正文 15px（默认 14px，偏小），行高 1.6；标题按 1.25 倍递减形成清晰层级。
+ * -------------------------------------------------------------------------- */
+html:root {
+  --plate-font-sans: 'LXGW WenKai', 'Inter Var', Inter, '-apple-system', 'BlinkMacSystemFont',
     'San Francisco', 'Segoe UI', Roboto, 'Helvetica Neue', 'sans-serif';
+  --tblr-font-sans-serif: var(--plate-font-sans);
+  --tblr-body-font-family: var(--plate-font-sans);
+
+  --tblr-body-font-size: 0.9375rem;
+  --tblr-body-line-height: 1.6;
+
+  --tblr-font-size-h1: 2rem;
+  --tblr-font-size-h2: 1.625rem;
+  --tblr-font-size-h3: 1.375rem;
+  --tblr-font-size-h4: 1.125rem;
+  --tblr-font-size-h5: 1rem;
+  --tblr-font-size-h6: 0.875rem;
+
+  --tblr-line-height-h1: 1.25;
+  --tblr-line-height-h2: 1.3;
+  --tblr-line-height-h3: 1.35;
+  --tblr-line-height-h4: 1.4;
+  --tblr-line-height-h5: 1.5;
+  --tblr-line-height-h6: 1.5;
 }
+
+/* -----------------------------------------------------------------------------
+ * 2. 圆角与间距
+ *    圆角以 8px 为基准，scale 派生出卡片/按钮用的 10px，全站同一套档位。
+ *    间距沿用 Bootstrap 的 4px 网格（.25rem 步进），组件留白统一取 8px 倍数。
+ * -------------------------------------------------------------------------- */
+html:root {
+  --tblr-border-radius: 0.5rem;
+  --tblr-border-radius-scale: 1.25;
+
+  --tblr-card-spacer-x: 1.25rem;
+  --tblr-card-spacer-y: 1.25rem;
+  --tblr-card-title-margin-bottom: 0.5rem;
+  --tblr-card-cap-padding-y: 0.875rem;
+}
+
+/* -----------------------------------------------------------------------------
+ * 3. 组件视觉统一（按钮 / 卡片 / 表单 / 导航）
+ * -------------------------------------------------------------------------- */
+html:root {
+  --tblr-btn-font-weight: 500;
+  --tblr-btn-padding-x: 0.875rem;
+  --tblr-btn-padding-y: 0.4375rem;
+
+  /* 卡片阴影的源头变量（--tblr-card-box-shadow 由它派生） */
+  --tblr-shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+
+  /* 移动端输入框保持 16px，避免 iOS Safari 聚焦时自动缩放页面 */
+  --tblr-form-control-mobile-font-size: 1rem;
+
+  /* 侧边栏激活项用主色浅调，与主色系呼应 */
+  --tblr-navbar-active-bg: color-mix(in oklab, var(--tblr-primary) 14%, transparent);
+}
+
+/* -----------------------------------------------------------------------------
+ * 4. 配色：亮模式
+ *    主色「专业蓝」；浅蓝 (azure) 仅用于填充/边框，不作正文以保证对比度。
+ * -------------------------------------------------------------------------- */
+html:root,
+html[data-bs-theme='light'] {
+  /* 主色：专业企业蓝 —— 按钮、链接、激活态、品牌标识 */
+  --tblr-primary: #0a6ed1;
+  --tblr-primary-rgb: 10, 110, 209;
+  --tblr-primary-fg: #ffffff;
+
+  /* 浅蓝点缀色（辅助强调，建议仅用于底色/边框/图标） */
+  --tblr-azure: #5b9bd5;
+  --tblr-azure-rgb: 91, 155, 213;
+  --tblr-azure-fg: #ffffff;
+
+  /* 辅助色：蓝灰 —— 兼顾 text-secondary 等次要文字的可读性 */
+  --tblr-secondary: #64748b;
+  --tblr-secondary-rgb: 100, 116, 139;
+  --tblr-secondary-fg: #ffffff;
+
+  /* 链接与焦点环 */
+  --tblr-link-color: #0a6ed1;
+  --tblr-link-hover-color: #0856a8;
+  --tblr-focus-ring-color: rgba(10, 110, 209, 0.35);
+
+  /* 状态色（与企业蓝协调，白字对比度达 AA） */
+  --tblr-success: #1f8a4d;
+  --tblr-success-rgb: 31, 138, 77;
+  --tblr-success-fg: #ffffff;
+  --tblr-info: #0b86a0;
+  --tblr-info-rgb: 11, 134, 160;
+  --tblr-info-fg: #ffffff;
+  --tblr-warning: #e08a00;
+  --tblr-warning-rgb: 224, 138, 0;
+  --tblr-warning-fg: #2a1c00; /* 浅色背景用深色字 */
+  --tblr-danger: #dc3545;
+  --tblr-danger-rgb: 220, 53, 69;
+  --tblr-danger-fg: #ffffff;
+
+  /* 背景 / 文字 / 边框（清爽冷灰蓝） */
+  --tblr-bg-surface: #ffffff;
+  --tblr-bg-surface-secondary: #f4f7fb;
+  --tblr-body-bg: #f4f7fb;
+  --tblr-body-color: #1f2937;
+  --tblr-muted: #64748b;
+  --tblr-border-color: #e2e8f0;
+}
+
+/* -----------------------------------------------------------------------------
+ * 5. 配色：暗模式
+ *    主色提亮以保证 text-primary 与按钮白字可读；卡片略高于底色形成层次。
+ * -------------------------------------------------------------------------- */
+html[data-bs-theme='dark'] {
+  --tblr-primary: #4a9be8;
+  --tblr-primary-rgb: 74, 155, 232;
+  --tblr-primary-fg: #ffffff;
+
+  --tblr-azure: #5b9bd5;
+  --tblr-azure-rgb: 91, 155, 213;
+  --tblr-azure-fg: #080d18;
+
+  --tblr-secondary: #7c8aa0;
+  --tblr-secondary-rgb: 124, 138, 160;
+  --tblr-secondary-fg: #ffffff;
+
+  --tblr-link-color: #4a9be8;
+  --tblr-link-hover-color: #6fb0ef;
+  --tblr-focus-ring-color: rgba(74, 155, 232, 0.4);
+
+  --tblr-success: #34c172;
+  --tblr-success-rgb: 52, 193, 114;
+  --tblr-success-fg: #06210f;
+  --tblr-info: #2bc4e0;
+  --tblr-info-rgb: 43, 196, 224;
+  --tblr-info-fg: #04222a;
+  --tblr-warning: #f7b733;
+  --tblr-warning-rgb: 247, 183, 51;
+  --tblr-warning-fg: #2a1c00;
+  --tblr-danger: #f15b5b;
+  --tblr-danger-rgb: 241, 91, 91;
+  --tblr-danger-fg: #2a0808;
+
+  /* 黑蓝（深海军蓝）层次：页面最深 → 悬浮层略高 → 卡片更高，逐层抬升形成纵深。
+     --tblr-bg-forms 必须一起改：Tabler 暗色默认取中性 gray-900，不改输入框会发灰 */
+  --tblr-body-bg: #080d18;
+  --tblr-bg-surface-secondary: #0c1322;
+  --tblr-bg-surface: #121d31;
+  --tblr-bg-forms: #0e1728;
+  --tblr-body-color: #dce5f4;
+  --tblr-muted: #8c9bb5;
+  --tblr-border-color: #1e2c46;
+  --tblr-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.32);
+}
+
 html,
 body {
   width: 100%;
   height: 100%;
+}
+
+/* 触摸设备没有 hover：list-group 的操作按钮改为常显，否则用户看不到收藏等入口 */
+@media (hover: none) {
+  .list-group-hoverable .list-group-item .list-group-item-actions {
+    opacity: 1;
+  }
 }

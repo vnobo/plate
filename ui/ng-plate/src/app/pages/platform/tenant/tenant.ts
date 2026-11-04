@@ -13,20 +13,23 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { delay, tap } from 'rxjs';
 
-import { MessageService } from '@app/plugins';
+import { MessageService, ModalsService } from '@app/plugins';
+import { Pagination } from '@app/shared/pagination';
 import { Page, Pageable } from '@plate/types';
 import { environment } from '@envs/env';
 
 import { ROOT_PCODE, Tenant } from './tenant.types';
+import { TenantMembersForm } from './tenant-members-form';
 
 @Component({
   selector: 'app-tenant',
-  imports: [DatePipe, FormField],
+  imports: [DatePipe, FormField, Pagination],
   templateUrl: './tenant.html',
   styleUrl: './tenant.scss',
 })
 export class Tenants {
   private readonly _message = inject(MessageService);
+  private readonly _modal = inject(ModalsService);
   private readonly _http = inject(HttpClient);
   private readonly _destroyRef = inject(DestroyRef);
 
@@ -66,7 +69,8 @@ export class Tenants {
         size: page.size,
       };
       if (keyword) {
-        params['name'] = keyword;
+        // Backend string criteria use LIKE matching; wrap in wildcards for fuzzy search.
+        params['name'] = `%${keyword}%`;
       }
       for (const sort of page.sorts) {
         if (!params['sort']) {
@@ -117,8 +121,6 @@ export class Tenants {
     if (code === ROOT_PCODE) return '根租户';
     return this.parentNameMap().get(code) ?? code;
   }
-
-  protected readonly Math = Math;
 
   protected readonly isEditing = signal(false);
   protected readonly currentTenant = signal<Tenant | null>(null);
@@ -239,49 +241,28 @@ export class Tenants {
       });
   }
 
-  protected onSearchChange(value: string): void {
-    this.searchKeyword.set(value);
+  protected onSearchChange(event: Event): void {
+    this.searchKeyword.set((event.target as HTMLInputElement).value);
     this.pageable.update((p) => ({ ...p, page: 1 }));
   }
 
-  protected changePage(page: number): void {
-    if (page < 1 || page > this.getTotalPages()) {
+  /** Opens the member management modal for a tenant. */
+  protected openMembersForm(tenant: Tenant): void {
+    if (!tenant.code) {
       return;
     }
+    this._modal.create({
+      title: `成员管理 - ${tenant.name || tenant.code}`,
+      contentRef: TenantMembersForm,
+      contentInputs: { tenantCode: tenant.code, tenantName: tenant.name ?? '' },
+    });
+  }
+
+  protected changePage(page: number): void {
     this.pageable.update((p) => ({ ...p, page }));
   }
 
-  protected getTotalPages(): number {
-    const totalElements = this.tenantData().totalElements || 0;
-    return Math.ceil(totalElements / this.pageable().size);
-  }
-
-  protected getPageNumbers(): number[] {
-    const totalPages = this.getTotalPages();
-    const currentPage = this.pageable().page;
-    const pages: number[] = [];
-
-    if (totalPages >= 1) {
-      pages.push(1);
-    }
-    if (currentPage > 3) {
-      pages.push(-1);
-    }
-    for (
-      let i = Math.max(2, currentPage - 1);
-      i <= Math.min(totalPages - 1, currentPage + 1);
-      i++
-    ) {
-      if (i > 1 && i < totalPages) {
-        pages.push(i);
-      }
-    }
-    if (currentPage < totalPages - 2) {
-      pages.push(-1);
-    }
-    if (totalPages > 1) {
-      pages.push(totalPages);
-    }
-    return pages;
+  protected changeSize(size: number): void {
+    this.pageable.update((p) => ({ ...p, size, page: 1 }));
   }
 }

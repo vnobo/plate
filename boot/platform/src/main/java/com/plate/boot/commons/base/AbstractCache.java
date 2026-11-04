@@ -127,8 +127,7 @@ public abstract class AbstractCache implements InitializingBean {
         if (ObjectUtils.isEmpty(cacheData)) {
             var sourceData = new java.util.concurrent.CopyOnWriteArrayList<T>();
             return sourceFlux.doOnNext(sourceData::add)
-                    .doOnComplete(() -> this.cachePut(cacheKey, sourceData))
-                    .doOnCancel(() -> this.cachePut(cacheKey, sourceData));
+                    .doOnComplete(() -> this.cachePut(cacheKey, sourceData));
         }
         return Flux.fromIterable(cacheData);
     }
@@ -178,7 +177,7 @@ public abstract class AbstractCache implements InitializingBean {
      */
     protected Mono<Long> countWithCache(Object key, Mono<Long> sourceMono) {
         String cacheKey = key + ":count";
-        Long cacheCount = this.cache.get(cacheKey, () -> 0L);
+        Long cacheCount = this.cache.get(cacheKey, Long.class);
         Mono<Long> source = sourceMono.doOnNext(count -> this.cachePut(cacheKey, count));
         return Mono.justOrEmpty(cacheCount).switchIfEmpty(Mono.defer(() -> source));
     }
