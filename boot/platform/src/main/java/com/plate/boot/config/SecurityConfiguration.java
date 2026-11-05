@@ -2,179 +2,282 @@ package com.plate.boot.config;
 
 import com.plate.boot.commons.utils.BeanUtils;
 import com.plate.boot.commons.utils.ContextUtils;
-import com.plate.boot.security.SecurityDetails;
-import com.plate.boot.security.SecurityManager;
-import com.plate.boot.security.jwt.JwtProperties;
-import com.plate.boot.security.jwt.JwtService;
-import com.plate.boot.security.jwt.TokenType;
+import com.plate.boot.security.oauth2.Oauth2SuccessHandler;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.boot.security.autoconfigure.web.StaticResourceLocation;
 import org.springframework.boot.security.autoconfigure.web.reactive.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.security.authentication.*;
+import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.session.ReactiveSessionRegistry;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
+import org.springframework.security.oauth2.client.R2dbcReactiveOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
+import org.springframework.security.web.server.authentication.HttpBasicServerAuthenticationEntryPoint;
+import org.springframework.security.web.server.authentication.SessionLimit;
+import org.springframework.security.web.server.authentication.logout.*;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
+import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
+import org.springframework.security.web.server.csrf.CookieServerCsrfTokenRepository;
+import org.springframework.security.web.server.csrf.ServerCsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.server.header.ClearSiteDataServerHttpHeadersWriter;
+import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher;
+import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
+import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher;
+import org.springframework.session.ReactiveFindByIndexNameSessionRepository;
+import org.springframework.session.ReactiveSessionRepository;
+import org.springframework.session.Session;
+import org.springframework.session.security.SpringSessionBackedReactiveSessionRegistry;
 import org.springframework.web.ErrorResponse;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 
 /**
- * Stateless JWT security configuration. The filter chain validates
- * {@code Authorization: Bearer <accessToken>} on every request; the anonymous authentication
- * endpoints (local login, refresh, OAuth2 login and account binding) are handled by
- * {@code SecurityController}.
+ * SecurityConfiguration configures the application's security settings by defining beans and rules for authentication,
+ * authorization, session management, CSRF protection, logout behavior, and more. It leverages Spring Security features
+ * to secure both RESTful endpoints and RSocket interactions.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableReactiveMethodSecurity
-@EnableConfigurationProperties(JwtProperties.class)
+@RequiredArgsConstructor
 public class SecurityConfiguration {
 
+    private final ServerSecurityContextRepository securityContextRepository =
+            new WebSessionServerSecurityContextRepository();
+    private final Oauth2SuccessHandler authenticationSuccessHandler;
+
     /**
-     * Static so UsersService can obtain the encoder without instantiating this config class.
+     * Configures and provides an instance of {@link ReactiveOAuth2AuthorizedClientService} which is primarily
+     * responsible for managing OAuth2 authorized client details, storing and retrieving them from a reactive data
+     * source via {@link DatabaseClient} and handling client registrations defined in
+     * {@link ReactiveClientRegistrationRepository}.
+     *
+     * @param databaseClient   The reactive database client used for interacting with the data source to persist OAuth2
+     *                         authorization data.
+     * @param clientRepository The repository containing the definitions of all registered clients for OAuth2
+     *                         authentication.
+     * @return A configured instance of {@link R2dbcReactiveOAuth2AuthorizedClientService} capable of handling OAuth2
+     * authorized client services within a reactive context.
      */
     @Bean
-    public static PasswordEncoder passwordEncoder() {
+    @Primary
+    public ReactiveOAuth2AuthorizedClientService oAuth2ClientService(DatabaseClient databaseClient,
+                                                                     ReactiveClientRegistrationRepository clientRepository) {
+        return new R2dbcReactiveOAuth2AuthorizedClientService(databaseClient, clientRepository);
+    }
+
+    /**
+     * Provides a PasswordEncoder bean that utilizes a delegating strategy for encoding passwords. This delegating
+     * encoder can handle different password encoding schemes based on encoded passwords' ids. It consults a set of
+     * encoders and picks the one matching the id prepended to the encoded password.
+     *
+     * @return A {@link PasswordEncoder} instance which is capable of delegating to the appropriate password encoding
+     * strategy.
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
         return ContextUtils.createDelegatingPasswordEncoder("bcrypt");
     }
 
     /**
-     * Verifies HS256 signatures and expiration using the same derived key as {@link JwtService}.
+     * Creates and configures a SpringSessionBackedReactiveSessionRegistry bean.
+     * This registry is designed to manage sessions within a reactive environment, backed by the provided
+     * ReactiveSessionRepository and ReactiveFindByIndexNameSessionRepository instances.
+     *
+     * @param <S>                      The type of session extending the Session interface.
+     * @param sessionRepository        A reactive session repository for storing and retrieving session data.
+     * @param indexedSessionRepository A reactive session repository capable of finding sessions by index name,
+     *                                 enhancing session management capabilities.
+     * @return An instance of SpringSessionBackedReactiveSessionRegistry configured with the given repositories,
+     * ready to manage and provide session-related services in a reactive context.
      */
     @Bean
-    public ReactiveJwtDecoder jwtDecoder(JwtProperties properties) {
-        NimbusJwtDecoder delegate = NimbusJwtDecoder
-                .withSecretKey(JwtService.signingKey(properties.getSecret()))
-                .macAlgorithm(MacAlgorithm.HS256).build();
-        delegate.setJwtValidator(new JwtTimestampValidator(Duration.ZERO));
-        return token -> Mono.fromCallable(() -> delegate.decode(token));
+    public <S extends Session> ReactiveSessionRegistry sessionRegistry(
+            ReactiveSessionRepository<S> sessionRepository,
+            ReactiveFindByIndexNameSessionRepository<S> indexedSessionRepository) {
+        return new SpringSessionBackedReactiveSessionRegistry<>(sessionRepository, indexedSessionRepository);
     }
 
     /**
-     * Username/password authentication manager backing the login endpoint.
+     * Configures and returns a SecurityWebFilterChain bean for Spring Security's WebFlux setup. This method customizes
+     * various aspects of security including authorization rules, session management, basic authentication entry point,
+     * form login, CSRF protection, logout handling, and OAuth2 login support.
+     *
+     * @param http The ServerHttpSecurity builder used to configure web security settings.
+     * @return A configured SecurityWebFilterChain ready to be used in the application's security filter chain.
      */
     @Bean
-    @Primary
-    public ReactiveAuthenticationManager passwordAuthenticationManager(SecurityManager securityManager,
-                                                                       PasswordEncoder passwordEncoder) {
-        UserDetailsRepositoryReactiveAuthenticationManager manager =
-                new UserDetailsRepositoryReactiveAuthenticationManager(securityManager);
-        manager.setPasswordEncoder(passwordEncoder);
-        manager.setUserDetailsPasswordService(securityManager);
-        return manager;
-    }
-
-    /**
-     * Maps a verified access JWT to the authenticated principal. Refresh tokens are rejected
-     * so they can never be used as API credentials; the principal is reloaded on each request
-     * so authority changes and disabled accounts take effect immediately.
-     * <p>
-     * Kept as a plain factory method: registering it as a {@code Converter} bean would make
-     * {@code R2dbcConfiguration}'s {@code List<Converter<?, ?>>} pull it into repository startup
-     * and create a circular dependency through SecurityManager → UsersService → usersRepository.
-     */
-    private Converter<Jwt, Mono<AbstractAuthenticationToken>> jwtAuthenticationConverter(
-            SecurityManager securityManager) {
-        return jwt -> {
-            String tokenType = jwt.getClaimAsString(JwtService.CLAIM_TOKEN_TYPE);
-            if (!TokenType.ACCESS.name().equals(tokenType)) {
-                return Mono.error(new BadCredentialsException("Not an access token"));
-            }
-            return securityManager.loadUserDetails(Objects.requireNonNull(jwt.getSubject()))
-                    .ofType(SecurityDetails.class)
-                    .switchIfEmpty(Mono.error(new BadCredentialsException("Unknown JWT subject")))
-                    .map(details -> new UsernamePasswordAuthenticationToken(
-                            details, null, details.getAuthorities()));
-        };
-    }
-
-    /**
-     * Builds the stateless filter chain. Sessions, Basic Auth, form login, OAuth2 login,
-     * remember-me and logout are all intentionally absent: JWT is the only mechanism.
-     */
-    @Bean
-    public SecurityWebFilterChain springSecurityFilterChain(
-            ServerHttpSecurity http,
-            ReactiveJwtDecoder jwtDecoder,
-            SecurityManager securityManager,
-            ServerSecurityContextRepository securityContextRepository) {
-        http.csrf(ServerHttpSecurity.CsrfSpec::disable);
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http.authorizeExchange(exchanges -> exchanges
-                .pathMatchers(HttpMethod.POST, "/**/oauth2/login", "/**/oauth2/login/*",
-                        "/**/oauth2/refresh", "/**/oauth2/bind").permitAll()
                 .pathMatchers("/captcha/code", "/oauth2/qr/code").permitAll()
-                .matchers(PathRequest.toStaticResources().atCommonLocations()
-                        .excluding(StaticResourceLocation.FONTS)).permitAll()
+                .matchers(PathRequest.toStaticResources().atCommonLocations().excluding(StaticResourceLocation.FONTS)).permitAll()
                 .anyExchange().authenticated());
+        http.sessionManagement((sessions) -> sessions
+                .concurrentSessions((concurrency) -> concurrency
+                        .maximumSessions(SessionLimit.of(1))
+                ));
         http.securityContextRepository(securityContextRepository);
-        http.oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.jwtDecoder(jwtDecoder)
-                        .jwtAuthenticationConverter(jwtAuthenticationConverter(securityManager)))
+        http.httpBasic(httpBasicSpec -> httpBasicSpec
                 .authenticationEntryPoint(new CustomServerAuthenticationEntryPoint()));
+        http.formLogin(Customizer.withDefaults());
+        http.csrf(this::setCsrfSpec);
+        http.logout(this::setLogout);
+        http.oauth2Login(oAuth2LoginSpec ->
+                oAuth2LoginSpec.authenticationSuccessHandler(authenticationSuccessHandler));
         return http.build();
     }
 
     /**
-     * CORS policy for the separated frontend: the SPA sends {@code Authorization: Bearer ...}
-     * from another origin, so that header must be allowed. Origins default to the local dev
-     * server and can be overridden by configuration.
+     * Configures the Cross-Site Request Forgery (CSRF) protection specifications within the provided
+     * {@link ServerHttpSecurity.CsrfSpec}. This method customizes the CSRF behavior by:
+     * <ul>
+     *   <li>Defining a matcher to ignore CSRF protection for certain endpoints.</li>
+     *   <li>Setting a cookie-based repository for storing CSRF tokens with HTTP-only flag disabled.</li>
+     *   <li>Registering a handler to place the CSRF token as a request attribute.</li>
+     * </ul>
+     *
+     * @param csrfSpec The CSRF specification object to be configured, part of the {@link ServerHttpSecurity}
+     *                 configuration.
      */
-    private CorsConfiguration corsConfiguration() {
-        CorsConfiguration config = new CorsConfiguration();
-        //config.setAllowedOriginPatterns();
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"));
-        config.setAllowedHeaders(List.of(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE, "x-api-version"));
-        config.setExposedHeaders(List.of(HttpHeaders.AUTHORIZATION));
-        config.setAllowCredentials(true);
-        config.setMaxAge(3600L);
-        return config;
+    private void setCsrfSpec(ServerHttpSecurity.CsrfSpec csrfSpec) {
+        csrfSpec.requireCsrfProtectionMatcher(new IgnoreRequireCsrfProtectionMatcher());
+        csrfSpec.csrfTokenRepository(CookieServerCsrfTokenRepository.withHttpOnlyFalse());
+        csrfSpec.csrfTokenRequestHandler(new ServerCsrfTokenRequestAttributeHandler());
     }
 
     /**
-     * Returns a JSON 401 body for API clients instead of the default Basic Auth challenge.
+     * Configures the logout behavior for the server HTTP security.
+     * <p>
+     * This method sets up the logout process by adding a security context logout handler, a handler to clear site data
+     * through headers, and delegates these handlers to manage the logout process. It also specifies the URL that
+     * triggers the logout action and defines the success handler to return a HTTP status upon successful logout.
+     *
+     * @param logout The LogoutSpec instance to configure logout specifics of ServerHttpSecurity.
+     */
+    private void setLogout(ServerHttpSecurity.LogoutSpec logout) {
+        ServerLogoutHandler securityContext = new SecurityContextServerLogoutHandler();
+        ClearSiteDataServerHttpHeadersWriter writer = new ClearSiteDataServerHttpHeadersWriter(
+                ClearSiteDataServerHttpHeadersWriter.Directive.ALL);
+        ServerLogoutHandler clearSiteData = new HeaderWriterServerLogoutHandler(writer);
+        DelegatingServerLogoutHandler logoutHandler =
+                new DelegatingServerLogoutHandler(securityContext, clearSiteData);
+        logout.requiresLogout(new PathPatternParserServerWebExchangeMatcher("/oauth2/logout"));
+        logout.logoutHandler(logoutHandler);
+        logout.logoutSuccessHandler(new HttpStatusReturningServerLogoutSuccessHandler());
+    }
+
+    /**
+     * Matcher implementation to exclude specific HTTP requests from requiring CSRF protection. This is particularly
+     * useful for endpoints that are deemed safe from CSRF attacks due to their nature or implementation specifics, such
+     * as certain GET requests or known safe POST requests like OAuth2 token exchanges. The matcher combines a set of
+     * allowed HTTP methods and a list of more specific matchers to determine if CSRF protection should be ignored for a
+     * given request.
+     */
+    static class IgnoreRequireCsrfProtectionMatcher implements ServerWebExchangeMatcher {
+        private final Set<HttpMethod> allowedMethods = new HashSet<>(
+                Arrays.asList(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.TRACE, HttpMethod.OPTIONS));
+        private final List<ServerWebExchangeMatcher> allowedMatchers = List.of(
+                new PathPatternParserServerWebExchangeMatcher("/oauth2/none", HttpMethod.POST)
+        );
+
+        /**
+         * Evaluates whether a given server web exchange should be excluded from CSRF protection. It checks if the
+         * request's HTTP method is within the allowed set and if it matches any specified additional matchers.
+         *
+         * @param exchange The server web exchange to evaluate for CSRF protection exclusion.
+         * @return A Mono that emits a MatchResult indicating whether the exchange should be ignored for CSRF
+         * protection. - If the request method is allowed or matches custom criteria, emits MatchResult.notMatch(),
+         * suggesting the request should be ignored by CSRF protection. - Otherwise, emits MatchResult.match()
+         * indicating standard CSRF protection should apply.
+         */
+        @Override
+        public @NullMarked Mono<MatchResult> matches(ServerWebExchange exchange) {
+            Mono<MatchResult> ignoreMono = new OrServerWebExchangeMatcher(allowedMatchers)
+                    .matches(exchange).filter(MatchResult::isMatch)
+                    .flatMap(_ -> MatchResult.notMatch())
+                    .switchIfEmpty(Mono.defer(MatchResult::match));
+            var request = exchange.getRequest();
+            return Mono.justOrEmpty(request.getMethod()).filter(allowedMethods::contains)
+                    .flatMap((_) -> MatchResult.notMatch()).switchIfEmpty(Mono.defer(() -> ignoreMono));
+        }
+    }
+
+    /**
+     * CustomServerAuthenticationEntryPoint is a specialized entry point for handling authentication failures in a
+     * reactive server environment. It extends the HttpBasicServerAuthenticationEntryPoint to customize the behavior
+     * when an authentication exception occurs. Specifically, it differentiates between standard requests and
+     * XMLHttpRequests (AJAX calls) to provide appropriate responses.
+     *
+     * <p>This class overrides the commence method to log authentication failure details and customize the response
+     * based on the nature of the incoming request. If the request is identified as an AJAX call, it will return a JSON
+     * formatted error response with an UNAUTHORIZED status code. Otherwise, it falls back to the default behavior
+     * provided by its superclass.</p>
+     *
+     * <p>Notable Methods:</p>
+     * <ul>
+     *   <li>{@link #commence(ServerWebExchange, AuthenticationException)}: Handles the commencement of the authentication failure handling.</li>
+     *   <li>{@link #createErrorResponse(ServerWebExchange, AuthenticationException)}: Constructs an error response object for AJAX request failures.</li>
+     * </ul>
      */
     @Log4j2
-    static class CustomServerAuthenticationEntryPoint implements ServerAuthenticationEntryPoint {
+    static class CustomServerAuthenticationEntryPoint extends HttpBasicServerAuthenticationEntryPoint {
 
+        /**
+         * Handles the commencement of failure handling due to an authentication exception during a server web exchange.
+         * Determines the nature of the request and delegates to the appropriate failure handling method.
+         *
+         * @param exchange The current server web exchange containing the request and response objects.
+         * @param e        The authentication exception that triggered this failure handling.
+         * @return A Mono that, when subscribed to, signals the completion of the failure handling, typically without a
+         * value (Void).
+         */
         @Override
-        public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException e) {
+        public @NullMarked Mono<Void> commence(ServerWebExchange exchange, AuthenticationException e) {
             log.error("Authentication Failure: {}", e.getMessage(), e);
-            ErrorResponse errorResponse = ErrorResponse
-                    .builder(e, HttpStatus.UNAUTHORIZED, e.getMessage())
-                    .title("Authentication Failure").type(exchange.getRequest().getURI())
-                    .headers(headers -> headers.addAll(exchange.getResponse().getHeaders()))
-                    .build();
+            ErrorResponse errorResponse = createErrorResponse(exchange, e);
             ServerHttpResponse response = exchange.getResponse();
             response.setStatusCode(errorResponse.getStatusCode());
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-            byte[] bytes = BeanUtils.objectToBytes(errorResponse.getBody());
+            var body = errorResponse.getBody();
+            var bytes = BeanUtils.objectToBytes(body);
             var buffer = response.bufferFactory().wrap(bytes);
             return response.writeAndFlushWith(Mono.just(Mono.just(buffer)))
                     .doFinally(_ -> DataBufferUtils.release(buffer));
+        }
+
+        /**
+         * Constructs an error response object for authentication failures.
+         *
+         * @param exchange The ServerWebExchange associated with the request that triggered the error.
+         * @param ex       The AuthenticationException that caused the error response to be generated.
+         * @return An ErrorResponse instance representing the authentication failure, including details from the
+         * original request and the exception message.
+         */
+        private ErrorResponse createErrorResponse(ServerWebExchange exchange, AuthenticationException ex) {
+            return ErrorResponse.builder(ex, HttpStatus.UNAUTHORIZED, ex.getMessage())
+                    .title("Authentication Failure").type(exchange.getRequest().getURI())
+                    .headers(httpHeaders -> httpHeaders.addAll(exchange.getResponse().getHeaders()))
+                    .build();
+
         }
     }
 }

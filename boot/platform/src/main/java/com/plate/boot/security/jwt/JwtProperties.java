@@ -2,6 +2,7 @@ package com.plate.boot.security.jwt;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -16,6 +17,7 @@ import java.time.Duration;
  * @author <a href="https://github.com/vnobo">Alex Bob</a>
  */
 @Data
+@Component
 @ConfigurationProperties(prefix = "plate.security.jwt")
 public class JwtProperties {
 
