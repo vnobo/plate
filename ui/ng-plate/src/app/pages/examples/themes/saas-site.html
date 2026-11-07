@@ -1,0 +1,219 @@
+<div class="sc-root t-saas">
+  <a class="sc-skip" href="#saas-main">跳至主内容</a>
+
+  <header class="sc-nav">
+    <div class="container-xl sc-wrap">
+      <div class="sc-nav-inner">
+        <a class="sc-brand" routerLink="/examples/themes">
+          <span class="t-saas-mark" aria-hidden="true"></span>
+          Aether
+        </a>
+
+        <nav id="saas-nav" class="sc-links" [class.is-open]="menuOpen()" aria-label="主导航">
+          <a class="sc-link" href="#product">产品</a>
+          <a class="sc-link" href="#clients">客户</a>
+          <a class="sc-link" href="#metrics">数据</a>
+          <a class="sc-link" href="#start">定价</a>
+        </nav>
+
+        <div class="sc-actions">
+          <div class="btn-list">
+            <a class="btn sc-btn-ghost" href="#product">开发文档</a>
+            <a class="btn sc-btn" href="#start">免费试用</a>
+          </div>
+          <button
+            class="btn sc-menu-btn"
+            type="button"
+            (click)="toggleMenu()"
+            [attr.aria-expanded]="menuOpen()"
+            aria-controls="saas-nav"
+            aria-label="切换导航菜单"
+          >
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="saas-main">
+    <section class="sc-hero">
+      <div class="container-xl sc-wrap sc-hero-grid">
+        <div>
+          <div class="sc-kicker">
+            <span class="t-saas-dot" aria-hidden="true"></span>
+            面向现代团队的数据平台
+          </div>
+          <h1 class="sc-hero-title">让每一次决策<br /><span class="sc-grad">都有据可依</span></h1>
+          <p class="sc-lede">
+            把分散在业务系统里的数据汇成一张实时视图。从采集、建模到洞察与预警，Aether 让整个团队用同一种语言讨论增长。
+          </p>
+          <div class="btn-list sc-hero-actions">
+            <a class="btn sc-btn" href="#start">
+              免费开始使用
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6l-6 6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+            <a class="btn sc-btn-ghost" href="#product">预约产品演示</a>
+          </div>
+          <div class="t-saas-trust">已被 2,400+ 团队采用 · 99.99% 服务可用性 · SOC 2 Type II</div>
+        </div>
+
+        <div class="t-saas-visual">
+          <div class="sc-media t-saas-photo">
+            <img
+              [ngSrc]="heroImage.src"
+              [fill]="true"
+              [alt]="heroImage.alt"
+              [priority]="true"
+              [disableOptimizedSrcset]="true"
+            />
+          </div>
+
+          <div class="card t-saas-panel">
+            <div class="t-saas-panel-head">
+              <div>
+                <div class="t-saas-panel-label">本周活跃度</div>
+                <div class="t-saas-panel-value">128.4K</div>
+              </div>
+              <span class="badge t-saas-panel-tag">+18.6%</span>
+            </div>
+
+            <div class="t-saas-bars" aria-hidden="true">
+              @for (bar of bars; track $index) {
+                <span class="t-saas-bar" [style.height.%]="bar"></span>
+              }
+            </div>
+
+            <div class="t-saas-panel-grid">
+              @for (chip of chips; track chip.label) {
+                <div class="t-saas-chip">
+                  {{ chip.label }}
+                  <strong>{{ chip.value }}</strong>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="card t-saas-float">
+            <div class="t-saas-float-title">实时同步延迟</div>
+            <div class="t-saas-float-value">0.8s <span aria-hidden="true">↗</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sc-section" id="clients">
+      <div class="container-xl sc-wrap">
+        <div class="t-saas-logos" role="list" aria-label="部分合作客户">
+          @for (client of clients; track client) {
+            <span class="t-saas-logo" role="listitem">{{ client }}</span>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="sc-section" id="product">
+      <div class="container-xl sc-wrap">
+        <div class="sc-section-head">
+          <div class="sc-eyebrow">Why Aether</div>
+          <h2 class="sc-section-title">一套平台，覆盖从采集到决策的每一步</h2>
+          <p class="sc-section-sub">不用在五六个工具之间来回切换，也不必为了一个数字再开一次会。</p>
+        </div>
+
+        <div class="row row-deck row-cards sc-grid">
+          @for (feature of features; track feature.title) {
+            <div class="col-md-4">
+              <article class="card sc-card">
+                <span class="sc-card-icon">
+                  <svg
+                    class="icon sc-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path [attr.d]="feature.icon" />
+                  </svg>
+                </span>
+                <h3 class="card-title sc-card-title">{{ feature.title }}</h3>
+                <p class="sc-card-text">{{ feature.desc }}</p>
+              </article>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="sc-section" id="metrics">
+      <div class="container-xl sc-wrap">
+        <div class="sc-section-head">
+          <div class="sc-eyebrow">By the numbers</div>
+          <h2 class="sc-section-title">稳定，是可以被度量的</h2>
+        </div>
+        <div class="sc-metrics">
+          @for (metric of metrics; track metric.label) {
+            <div class="sc-metric">
+              <div class="sc-metric-num">{{ metric.value }}</div>
+              <div class="sc-metric-label">{{ metric.label }}</div>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="sc-section" id="start">
+      <div class="container-xl sc-wrap">
+        <div class="sc-cta">
+          <h2 class="sc-cta-title">今天就把数据变成答案</h2>
+          <p class="sc-cta-text">14 天完整功能试用，无需绑定信用卡，5 分钟接入第一个数据源。</p>
+          <div class="btn-list sc-cta-actions justify-content-center">
+            <a class="btn sc-btn" href="#saas-main">创建工作区</a>
+            <a class="btn sc-btn-ghost" href="#product">查看全部能力</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="sc-footer">
+    <div class="container-xl sc-wrap">
+      <div class="sc-footer-grid">
+        <div>
+          <div class="sc-footer-brand">Aether</div>
+          <p class="sc-footer-note">
+            为需要快速达成共识的团队而建的实时数据平台。让复杂的分析，回到一句能被听懂的结论。
+          </p>
+        </div>
+        <div>
+          <div class="sc-footer-title">产品</div>
+          <a class="sc-footer-link" href="#product">数据平台</a>
+          <a class="sc-footer-link" href="#metrics">指标中心</a>
+          <a class="sc-footer-link" href="#start">定价方案</a>
+        </div>
+        <div>
+          <div class="sc-footer-title">资源</div>
+          <a class="sc-footer-link" href="#product">开发文档</a>
+          <a class="sc-footer-link" href="#clients">客户故事</a>
+          <a class="sc-footer-link" href="#start">服务状态</a>
+        </div>
+        <div>
+          <div class="sc-footer-title">其他主题</div>
+          @for (theme of themes; track theme.slug) {
+            <a class="sc-footer-link" [routerLink]="theme.route">{{ theme.name }} · {{ theme.tagline }}</a>
+          }
+        </div>
+      </div>
+      <div class="sc-footer-bottom">
+        <span>© 2026 Aether Data · 保留所有权利</span>
+        <a class="sc-footer-link" routerLink="/examples/themes">返回主题画廊</a>
+      </div>
+    </div>
+  </footer>
+</div>

@@ -1,0 +1,333 @@
+.t-commerce {
+  --t-bg: #faf7f2;
+  --t-surface: #fffdf9;
+  --t-ink: #2a2620;
+  --t-muted: #7a7167;
+  --t-line: #e3dacf;
+  --t-accent: #c4714b;
+  --t-accent-ink: #ffffff;
+  --t-dark: #2a2620;
+  --t-font: Lora, 'Songti SC', 'PingFang SC', serif;
+  --t-display: 'Playfair Display', 'Songti SC', 'PingFang SC', serif;
+  --t-radius: 2px;
+  --t-gap: 28px;
+  --t-section: 120px;
+}
+
+.t-commerce .t-commerce-announce {
+  padding: 9px;
+  background: #2a2620;
+  color: #f7f1e8;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+
+.t-commerce .sc-nav {
+  position: relative;
+  border-bottom: 1px solid #e3dacf;
+  background: #faf7f2;
+}
+
+.t-commerce .sc-nav-inner {
+  min-height: 84px;
+}
+
+.t-commerce .sc-brand {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.t-commerce .sc-link {
+  color: #6b6258;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.t-commerce .sc-link::after {
+  background: #c4714b;
+}
+
+.t-commerce .sc-btn {
+  padding: 12px 26px;
+  border-radius: 2px;
+  background: #c4714b;
+  color: #ffffff;
+  letter-spacing: 0.06em;
+}
+
+.t-commerce .sc-btn-ghost {
+  border-color: #2a2620;
+  background: transparent;
+  color: #2a2620;
+}
+
+.t-commerce .sc-hero.t-commerce-hero {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 720px;
+  padding: 0;
+  overflow: hidden;
+  color: #ffffff;
+  text-align: center;
+}
+
+.t-commerce .sc-media.t-commerce-hero-media {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+  background: #6d6357;
+}
+
+.t-commerce .sc-media.t-commerce-hero-media img {
+  filter: brightness(0.72) saturate(0.85);
+}
+
+.t-commerce .t-commerce-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(30, 24, 18, 0.28), rgba(30, 24, 18, 0.58));
+}
+
+.t-commerce .t-commerce-hero-content {
+  position: relative;
+  z-index: 2;
+  padding: 140px 20px;
+}
+
+.t-commerce .t-commerce-hero-kicker {
+  color: #f4e5d8;
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.t-commerce .sc-hero-title {
+  font-size: clamp(48px, 6.4vw, 90px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.t-commerce .t-commerce-hero-lede {
+  max-width: 520px;
+  margin: 22px auto 0;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 17px;
+}
+
+.t-commerce .t-commerce-underline {
+  display: inline-block;
+  margin-top: 34px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+  color: #ffffff;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: letter-spacing 0.3s ease;
+}
+
+.t-commerce .t-commerce-underline:hover {
+  letter-spacing: 0.2em;
+}
+
+.t-commerce .sc-section-title {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.t-commerce .sc-eyebrow {
+  color: #c4714b;
+}
+
+.t-commerce .t-commerce-cats {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr 1.1fr;
+  align-items: start;
+  gap: 18px;
+}
+
+.t-commerce .t-commerce-cat:nth-child(2) {
+  margin-top: 56px;
+}
+
+.t-commerce .sc-media.t-commerce-cat-media {
+  border-radius: 2px;
+  background: #e9e1d6;
+  aspect-ratio: 3 / 4;
+}
+
+.t-commerce .t-commerce-cat:nth-child(2) .sc-media {
+  aspect-ratio: 4 / 5;
+}
+
+.t-commerce .t-commerce-cat-title {
+  margin-top: 16px;
+  font-family: var(--t-display);
+  font-size: 24px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.t-commerce .t-commerce-cat-note {
+  color: #8b8175;
+  font-size: 13px;
+  text-align: center;
+}
+
+.t-commerce .t-commerce-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 72px;
+  margin-bottom: 96px;
+}
+
+.t-commerce .t-commerce-row--reverse .t-commerce-row-media {
+  order: 2;
+}
+
+.t-commerce .sc-media.t-commerce-row-media {
+  border-radius: 2px;
+  background: #e9e1d6;
+  aspect-ratio: 4 / 3;
+}
+
+.t-commerce .t-commerce-row-kicker {
+  color: #c4714b;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.t-commerce .t-commerce-row-title {
+  margin-top: 16px;
+  font-family: var(--t-display);
+  font-size: clamp(30px, 3.4vw, 46px);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.t-commerce .t-commerce-row-text {
+  margin-top: 20px;
+  color: #7a7167;
+  line-height: 1.9;
+}
+
+.t-commerce .t-commerce-row-link {
+  display: inline-block;
+  margin-top: 26px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #c4714b;
+  color: #c4714b;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
+
+.t-commerce .t-commerce-quote {
+  max-width: 760px;
+  margin: 0 auto;
+  font-family: var(--t-display);
+  font-size: clamp(26px, 3.2vw, 40px);
+  font-style: italic;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.t-commerce .t-commerce-quote-by {
+  margin-top: 20px;
+  color: #8b8175;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.t-commerce .t-commerce-subscribe {
+  max-width: 520px;
+  margin: 32px auto 0;
+}
+
+.t-commerce .t-commerce-subscribe .form-control {
+  border-color: #d8cec1;
+  border-radius: 2px 0 0 2px;
+  background: transparent;
+  font-family: var(--t-font);
+}
+
+.t-commerce .t-commerce-subscribe .btn {
+  border-radius: 0 2px 2px 0;
+}
+
+.t-commerce .t-commerce-thanks {
+  margin-top: 14px;
+  color: #5b6b4a;
+  font-size: 14px;
+  text-align: center;
+}
+
+.t-commerce .sc-footer {
+  background: #f1ebe2;
+  color: #6b6258;
+}
+
+.t-commerce .sc-footer-brand {
+  color: #2a2620;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+.t-commerce .sc-footer-title {
+  color: #9a8f81;
+}
+
+.t-commerce .sc-footer-link {
+  color: #5f574d;
+}
+
+.t-commerce .sc-footer-bottom {
+  border-top-color: #dcd2c4;
+  color: #8b8175;
+}
+
+@media (max-width: 991px) {
+  .t-commerce .t-commerce-row {
+    gap: 36px;
+  }
+}
+
+@media (max-width: 767px) {
+  .t-commerce .sc-hero.t-commerce-hero {
+    min-height: 560px;
+  }
+
+  .t-commerce .sc-hero-title {
+    font-size: 36px;
+  }
+
+  .t-commerce .t-commerce-hero-content {
+    padding: 96px 20px;
+  }
+
+  .t-commerce .t-commerce-cats {
+    grid-template-columns: 1fr;
+  }
+
+  .t-commerce .t-commerce-cat:nth-child(2) {
+    margin-top: 0;
+  }
+
+  .t-commerce .t-commerce-row {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    margin-bottom: 56px;
+  }
+
+  .t-commerce .t-commerce-row--reverse .t-commerce-row-media {
+    order: 0;
+  }
+}

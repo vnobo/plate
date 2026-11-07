@@ -1,0 +1,367 @@
+.t-saas {
+  --t-bg: #0b1020;
+  --t-surface: rgba(255, 255, 255, 0.045);
+  --t-ink: #f3f6ff;
+  --t-muted: #9ba7c7;
+  --t-line: rgba(140, 160, 255, 0.16);
+  --t-accent: #22d3ee;
+  --t-accent-ink: #06101e;
+  --t-dark: #070c18;
+  --t-font: 'Space Grotesk', Inter, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --t-display: 'Space Grotesk', Inter, 'PingFang SC', sans-serif;
+  --t-radius: 20px;
+  --t-gap: 20px;
+  --t-section: 104px;
+
+  background:
+    radial-gradient(900px 600px at 78% -8%, rgba(124, 92, 255, 0.24), transparent 62%),
+    radial-gradient(700px 520px at 0% 30%, rgba(34, 211, 238, 0.13), transparent 60%),
+    #0b1020;
+}
+
+.t-saas .sc-nav {
+  background: rgba(11, 16, 32, 0.72);
+  border-bottom-color: transparent;
+  backdrop-filter: blur(20px);
+}
+
+.t-saas .sc-nav-inner {
+  min-height: 62px;
+  margin-top: 14px;
+  padding: 0 18px;
+  border: 1px solid var(--t-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.t-saas .sc-brand {
+  font-size: 21px;
+}
+
+.t-saas .t-saas-mark {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #22d3ee, #7c5cff);
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.8);
+}
+
+.t-saas .sc-link {
+  color: #aab6d6;
+}
+
+.t-saas .sc-link:hover {
+  color: #ffffff;
+}
+
+.t-saas .sc-btn {
+  border-radius: 999px;
+  background: linear-gradient(110deg, #22d3ee, #7c5cff);
+  color: #06101e;
+  box-shadow: 0 10px 30px rgba(80, 120, 255, 0.28);
+}
+
+.t-saas .sc-btn:hover {
+  box-shadow: 0 14px 40px rgba(80, 120, 255, 0.45);
+}
+
+.t-saas .sc-btn-ghost {
+  border-color: var(--t-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #eaf0ff;
+  box-shadow: none;
+}
+
+.t-saas .sc-hero {
+  position: relative;
+  padding-top: 108px;
+}
+
+.t-saas .sc-hero::before {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(140, 160, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(140, 160, 255, 0.055) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: linear-gradient(to bottom, #000, transparent 85%);
+  mask-image: linear-gradient(to bottom, #000, transparent 85%);
+  content: '';
+  pointer-events: none;
+}
+
+.t-saas .sc-hero-grid {
+  position: relative;
+}
+
+.t-saas .sc-kicker {
+  color: #7ce7f7;
+}
+
+.t-saas .t-saas-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22d3ee;
+  box-shadow: 0 0 12px #22d3ee;
+}
+
+.t-saas .sc-hero-title {
+  font-size: clamp(48px, 6vw, 84px);
+}
+
+.t-saas .sc-grad {
+  background: linear-gradient(100deg, #22d3ee, #a78bfa 70%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.t-saas .sc-lede {
+  color: #a8b4d2;
+}
+
+.t-saas .t-saas-trust {
+  margin-top: 30px;
+  color: #7d8aab;
+  font-size: 13px;
+}
+
+.t-saas .t-saas-visual {
+  position: relative;
+  min-height: 460px;
+}
+
+.t-saas .sc-media.t-saas-photo {
+  position: absolute;
+  inset: 30px 0 30px 60px;
+  border-radius: 28px;
+  opacity: 0.48;
+}
+
+.t-saas .sc-media.t-saas-photo img {
+  filter: saturate(0.8) contrast(1.1);
+}
+
+.t-saas .card.t-saas-panel {
+  position: relative;
+  z-index: 2;
+  margin-left: 20px;
+  padding: 26px;
+  border-color: rgba(140, 160, 255, 0.24);
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(30, 42, 74, 0.9), rgba(13, 20, 38, 0.92));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(18px);
+}
+
+.t-saas .t-saas-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.t-saas .t-saas-panel-label {
+  color: #a8b4d2;
+  font-size: 13px;
+}
+
+.t-saas .t-saas-panel-value {
+  margin-top: 4px;
+  color: #f3f6ff;
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.t-saas .t-saas-panel-tag {
+  padding: 5px 12px;
+  border: 1px solid rgba(34, 211, 238, 0.35);
+  border-radius: 999px;
+  color: #7ce7f7;
+  font-size: 12px;
+}
+
+.t-saas .t-saas-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 130px;
+  margin: 26px 0 20px;
+}
+
+.t-saas .t-saas-bar {
+  flex: 1;
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(180deg, #22d3ee, #7c5cff);
+  opacity: 0.85;
+}
+
+.t-saas .t-saas-panel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.t-saas .t-saas-chip {
+  padding: 12px;
+  border: 1px solid var(--t-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #9ba7c7;
+  font-size: 12px;
+}
+
+.t-saas .t-saas-chip strong {
+  display: block;
+  color: #f3f6ff;
+  font-size: 18px;
+}
+
+.t-saas .card.t-saas-float {
+  position: absolute;
+  right: -14px;
+  bottom: 12px;
+  z-index: 3;
+  padding: 16px 20px;
+  border-color: rgba(34, 211, 238, 0.32);
+  border-radius: 16px;
+  background: rgba(16, 26, 48, 0.9);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(14px);
+}
+
+.t-saas .t-saas-float-title {
+  color: #9ba7c7;
+  font-size: 12px;
+}
+
+.t-saas .t-saas-float-value {
+  margin-top: 4px;
+  color: #7ce7f7;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.t-saas .t-saas-logos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 30px 0;
+  border-top: 1px solid var(--t-line);
+  border-bottom: 1px solid var(--t-line);
+}
+
+.t-saas .t-saas-logo {
+  color: #8794b5;
+  font-family: var(--t-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.t-saas .sc-card {
+  backdrop-filter: blur(12px);
+}
+
+.t-saas .sc-card:hover {
+  border-color: rgba(34, 211, 238, 0.55);
+  box-shadow: 0 18px 50px rgba(34, 211, 238, 0.12);
+}
+
+.t-saas .sc-card-icon {
+  border-radius: 16px;
+  background: rgba(34, 211, 238, 0.1);
+  color: #22d3ee;
+}
+
+.t-saas .sc-card-text {
+  color: #9ba7c7;
+}
+
+.t-saas .sc-metric {
+  border-top-color: var(--t-line);
+}
+
+.t-saas .sc-metric-num {
+  background: linear-gradient(100deg, #22d3ee, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.t-saas .sc-cta {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(140, 160, 255, 0.22);
+  border-radius: 28px;
+  background: linear-gradient(115deg, rgba(34, 211, 238, 0.16), rgba(124, 92, 255, 0.24));
+}
+
+.t-saas .sc-cta::after {
+  position: absolute;
+  top: -60%;
+  right: -10%;
+  left: -10%;
+  height: 260px;
+  background: radial-gradient(ellipse, rgba(34, 211, 238, 0.22), transparent 70%);
+  content: '';
+  pointer-events: none;
+}
+
+.t-saas .sc-cta-title,
+.t-saas .sc-cta-text,
+.t-saas .sc-cta-actions {
+  position: relative;
+}
+
+.t-saas .sc-cta .sc-btn-ghost {
+  border-color: transparent;
+  background: #eaf6ff;
+  color: #06101e;
+}
+
+.t-saas .sc-footer {
+  background: #070c18;
+  border-top: 1px solid var(--t-line);
+}
+
+.t-saas .sc-footer-link {
+  color: #8e9bbc;
+}
+
+.t-saas .sc-footer-bottom {
+  border-top-color: var(--t-line);
+}
+
+@media (max-width: 767px) {
+  .t-saas .sc-hero {
+    padding-top: 64px;
+  }
+
+  .t-saas .sc-nav-inner {
+    margin-top: 0;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  .t-saas .t-saas-visual {
+    min-height: 380px;
+  }
+
+  .t-saas .sc-media.t-saas-photo {
+    inset: 20px 0 40px 24px;
+  }
+
+  .t-saas .card.t-saas-panel {
+    margin-left: 0;
+  }
+
+  .t-saas .card.t-saas-float {
+    right: 0;
+  }
+}
