@@ -3,13 +3,11 @@ import {
   isDevMode,
   LOCALE_ID,
   provideBrowserGlobalErrorListeners,
-  provideZonelessChangeDetection,
 } from '@angular/core';
 import {
   provideClientHydration,
   withEventReplay,
   withI18nSupport,
-  withIncrementalHydration,
 } from '@angular/platform-browser';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
