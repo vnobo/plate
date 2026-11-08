@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { SettingsService, TokenService, UserService } from '@app/core';
 import { LayoutService } from './layout.service';
 
@@ -57,14 +57,15 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
 @Component({
   selector: 'header[layout-header]',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, RouterLinkActive],
   host: {
     // 用 expand-lg 与侧边栏断点对齐：否则 768–991px 汉堡键被隐藏、侧边栏又是抽屉，导航无法打开
     class: 'navbar navbar-expand-lg sticky-top d-print-none',
     '[attr.aria-label]': '"顶部导航"',
   },
   template: `
-    <div class="container-xl">
+    <!-- flex-nowrap：窄屏 navbar 默认 flex-wrap 会把动作区挤到第二行，模块导航常显需保持单行 -->
+    <div class="container-xl flex-nowrap">
       <!-- 移动端：打开侧边栏抽屉 -->
       <button
         class="navbar-toggler d-lg-none"
@@ -74,8 +75,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
         aria-controls="aside-menu"
         aria-label="打开导航"
       >
-        <!-- Tabler 自带的 toggler 图标（1.5em，mask 绘制，与预览页一致）；
-             换成内联 svg.icon 会被 .icon 规则压成 8px 宽 -->
+        <!-- Tabler 自带的 toggler 图标（1.5em，mask 绘制，与预览页一致）；换成内联 svg.icon 会被 .icon 规则压成 8px 宽 -->
         <span class="navbar-toggler-icon"></span>
       </button>
 
@@ -125,30 +125,29 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
         }
       </button>
 
+      <!-- 模块主导航：Tabler 水平导航 navbar-nav > nav-item > nav-link；
+           flex-row 保证窄屏也横排，否则 .navbar-nav 默认纵向会占满一行；
+           项目未定义 --tblr-navbar-active-color，仅靠 .active 看不出高亮，故补主色与中等字重 -->
+      <ul class="navbar-nav flex-row ms-2">
+        <li class="nav-item">
+          <a class="nav-link px-2" routerLink="/platform"
+            routerLinkActive="active text-primary fw-medium"
+            ariaCurrentWhenActive="page">平台管理</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-2" routerLink="/dashboard"
+            routerLinkActive="active text-primary fw-medium"
+            ariaCurrentWhenActive="page">工作台</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-2" routerLink="/examples"
+            routerLinkActive="active text-primary fw-medium"
+            ariaCurrentWhenActive="page">示例</a>
+        </li>
+      </ul>
+
       <!-- 动作区：顺序参照 Tabler 示例（主题 → 通知 → 语言 → 用户），全部用 .nav-link 统一外观 -->
       <div class="navbar-nav flex-row order-md-last ms-auto align-items-center">
-        <div class="nav-item d-none d-md-flex">
-          <a routerLink="/dashboard" class="nav-link px-2" aria-label="返回工作台">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="icon"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              stroke-width="2"
-              stroke="currentColor"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M5 12l14 0" />
-              <path d="M5 12l6 6" />
-              <path d="M5 12l6 -6" />
-            </svg>
-          </a>
-        </div>
-
         <!-- 亮/暗切换：显示哪个按钮由 Tabler 的 .hide-theme-dark / .hide-theme-light
              依据 data-bs-theme 决定，组件无需维护当前主题状态 -->
         <div class="nav-item d-flex">
