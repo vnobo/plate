@@ -13,9 +13,17 @@
  * 1. 字体与排版层次
  *    正文 15px（默认 14px，偏小），行高 1.6；标题按 1.25 倍递减形成清晰层级。
  * -------------------------------------------------------------------------- */
+/* Font: LXGW WenKai 1.530.0 (Regular / Medium), SIL Open Font License 1.1.
+   Source: cdnjs, pinned 1.530.0, subset WOFF2 with unicode-range.
+   Web rendering only; no installable desktop font is distributed here. */
+/* The cdnjs subsets declare U+20-7E (ASCII), so a Latin family placed after
+   WenKai never wins. Put the Latin/system stack first: it owns ASCII while CJK
+   glyphs fall through to 'LXGW WenKai'. Quoted generic names are not resolved,
+   so keep -apple-system / BlinkMacSystemFont / sans-serif unquoted. */
 html:root {
-  --plate-font-sans: 'LXGW WenKai', 'Inter Var', Inter, '-apple-system', 'BlinkMacSystemFont',
-    'San Francisco', 'Segoe UI', Roboto, 'Helvetica Neue', 'sans-serif';
+  --plate-font-sans: 'Inter Var', Inter, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'LXGW WenKai',
+    'PingFang SC', 'Microsoft YaHei', sans-serif;
   --tblr-font-sans-serif: var(--plate-font-sans);
   --tblr-body-font-family: var(--plate-font-sans);
 
