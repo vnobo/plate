@@ -32,41 +32,6 @@ export class TokenService {
     );
   }
 
-  hasAnyRole(roles: string[]): boolean {
-    if (!roles?.length) return false;
-
-    const auth = this.authentication();
-    if (!auth?.details?.authorities) return false;
-
-    return roles.some((role) =>
-      auth.details!.authorities.some((authority) =>
-        typeof authority === 'string' ? authority === role : authority.authority === role,
-      ),
-    );
-  }
-
-  hasAllRoles(roles: string[]): boolean {
-    if (!roles?.length) return true;
-
-    const auth = this.authentication();
-    if (!auth?.details?.authorities) return false;
-
-    return roles.every((role) =>
-      auth.details!.authorities.some((authority) =>
-        typeof authority === 'string' ? authority === role : authority.authority === role,
-      ),
-    );
-  }
-
-  getUserRoles(): string[] {
-    const auth = this.authentication();
-    if (!auth?.details?.authorities) return [];
-
-    return auth.details.authorities.map((authority) =>
-      typeof authority === 'string' ? authority : authority.authority,
-    );
-  }
-
   authenticationToken(): Authentication | null {
     if (this.isLoggedIn()) {
       return this.authentication();
