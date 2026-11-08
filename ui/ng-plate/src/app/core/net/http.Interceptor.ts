@@ -1,29 +1,20 @@
 import { inject } from '@angular/core';
-import { HttpContextToken, HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
-import { catchError, finalize, Observable, throwError, timeout } from 'rxjs';
+import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
+import { catchError, Observable, throwError, timeout } from 'rxjs';
 import { Router } from '@angular/router';
 
 import { TokenService } from '../services/token.service';
-import { ProgressService } from '@app/plugins/progress';
 import { environment } from '@envs/env';
-
-export const SHOW_LOADING = new HttpContextToken<boolean>(() => true);
 
 function defaultInterceptor(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> {
-  const _loading = inject(ProgressService);
   // Prefix relative URLs with the API host so they hit the backend in dev (through the proxy).
   // Absolute URLs (third-party) are left untouched.
   const originalUrl = req.url.startsWith('http') ? req.url : environment.host + req.url;
   const xRequestedReq = req.clone({ url: originalUrl });
-  // Honour the per-request opt-out for the global loading spinner.
-  if (!req.context.get(SHOW_LOADING)) {
-    return next(xRequestedReq);
-  }
-  _loading.show();
-  return next(xRequestedReq).pipe(finalize(() => _loading.hide()));
+  return next(xRequestedReq);
 }
 
 function timeoutInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
