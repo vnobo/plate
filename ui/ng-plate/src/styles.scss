@@ -73,6 +73,26 @@ html blockquote {
   font-family: var(--plate-font-emphasis);
 }
 
+/* Scoped with `html` to win over Tabler (loaded after this file): tables,
+   chips and code-like labels stay legible at 12-14px with the system stack. */
+html .table,
+html .card-table,
+html .datatable,
+html .table th,
+html .table td,
+html code,
+html kbd,
+html pre,
+html samp,
+html .transfer-item-title,
+html .transfer-item-desc,
+html .role-tree-name,
+html .role-tree-desc,
+html .authority-chip,
+html .authority-chip code {
+  font-family: var(--plate-font-ui);
+}
+
 /* -----------------------------------------------------------------------------
  * 2. 圆角与间距
  *    圆角以 8px 为基准，scale 派生出卡片/按钮用的 10px，全站同一套档位。
