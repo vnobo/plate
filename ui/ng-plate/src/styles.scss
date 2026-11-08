@@ -45,6 +45,34 @@ html:root {
   --tblr-line-height-h6: 1.5;
 }
 
+/* cdnjs publishes Medium under a separate family name ('LXGW WenKai Medium',
+   weight 500); a font-weight variable cannot reach it. Expose a family token
+   and apply it to headings / emphasized prose instead. */
+/* Dense B-end UI uses the system sans stack: WenKai Regular is too thin at
+   12-14px in tables, chips and code-like labels. No LXGW family here. */
+html:root {
+  --plate-font-emphasis: 'Inter Var', Inter, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'LXGW WenKai Medium',
+    'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  --plate-font-ui: 'Inter Var', Inter, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC',
+    'Microsoft YaHei', sans-serif;
+}
+
+/* Keep h4-h6 on Regular: h6 is 14px and Medium shows rough outlines there.
+   .lead / blockquote are reserved for future mid-length prose and quotes. */
+html h1,
+html h2,
+html h3,
+html .h1,
+html .h2,
+html .h3,
+html .lead,
+html blockquote {
+  font-family: var(--plate-font-emphasis);
+}
+
 /* -----------------------------------------------------------------------------
  * 2. 圆角与间距
  *    圆角以 8px 为基准，scale 派生出卡片/按钮用的 10px，全站同一套档位。
