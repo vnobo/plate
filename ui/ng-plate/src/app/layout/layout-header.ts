@@ -120,7 +120,6 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
           >
             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
             <path d="M17 7l-5 5l5 5" />
-            <path d="M11 7l-5 5l-5 5" />
           </svg>
         }
       </button>
@@ -130,19 +129,31 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
            项目未定义 --tblr-navbar-active-color，仅靠 .active 看不出高亮，故补主色与中等字重 -->
       <ul class="navbar-nav flex-row ms-2">
         <li class="nav-item">
-          <a class="nav-link px-2" routerLink="/platform"
+          <a
+            class="nav-link px-2"
+            routerLink="/platform"
             routerLinkActive="active text-primary fw-medium"
-            ariaCurrentWhenActive="page">平台管理</a>
+            ariaCurrentWhenActive="page"
+            >平台管理</a
+          >
         </li>
         <li class="nav-item">
-          <a class="nav-link px-2" routerLink="/dashboard"
+          <a
+            class="nav-link px-2"
+            routerLink="/dashboard"
             routerLinkActive="active text-primary fw-medium"
-            ariaCurrentWhenActive="page">工作台</a>
+            ariaCurrentWhenActive="page"
+            >工作台</a
+          >
         </li>
         <li class="nav-item">
-          <a class="nav-link px-2" routerLink="/examples"
+          <a
+            class="nav-link px-2"
+            routerLink="/examples"
             routerLinkActive="active text-primary fw-medium"
-            ariaCurrentWhenActive="page">示例</a>
+            ariaCurrentWhenActive="page"
+            >示例</a
+          >
         </li>
       </ul>
 
