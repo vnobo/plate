@@ -219,6 +219,11 @@ html[data-bs-theme='dark'] {
   --tblr-muted: #8c9bb5;
   --tblr-border-color: #1e2c46;
   --tblr-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.32);
+
+  /* WenKai Regular strokes thin out on dark surfaces. Keep the typeface and
+     the weight scale intact; only adjust rasterisation. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 html,
