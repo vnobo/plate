@@ -75,7 +75,7 @@ Authorities: Angular Style Guide (https://angular.dev/style-guide) + Google Type
 - **Angular idioms (follow repo patterns)**
   - **Standalone components** (no `NgModule` where avoidable).
   - State via **signals**; DI via **`inject()`**; native control flow (`@if`/`@for`/`@switch`).
-  - `OnPush` change detection; services use `providedIn: 'root'`.
+  - `OnPush` is the default in Angular v22+; do not set `changeDetection: ChangeDetectionStrategy.OnPush` explicitly. Services use `providedIn: 'root'`.
   - Lazy-load routes via `loadChildren`; use `NgOptimizedImage` for `<img>`.
   - One responsibility per file; keep functions < ~75 lines; keep files focused.
   - Prefer `for...of` over indexed `for`; use arrow functions / `bind` to preserve `this`.
@@ -222,7 +222,7 @@ HTTP Request (Netty, port 8080, HTTP/2)
 ### 4.1 Key configuration
 
 - **Zoneless** change detection (Signals-driven, no Zone.js)
-- **SSR** + Incremental Hydration (`withIncrementalHydration`)
+- **SSR infrastructure** enabled (server entry + `outputMode: server` + `ssr.entry`); all routes use `RenderMode.Client` (client-only hydration shell, intentional)
 - **XSRF** protection: cookie `XSRF-TOKEN` → header `X-XSRF-TOKEN`
 - **PWA**: Service Worker enabled in production only
 - **Path aliases**: `@app/` → `src/app/`, `@envs/` → `src/envs/`, `@styles/` → `src/styles/`
