@@ -1,0 +1,37 @@
+---
+description: ng-plate 项目的 MCP 服务来源、工具名与构建/浏览器验证链；改动前端代码、核对框架 API 或排查样式与运行时问题时使用
+alwaysApply: true
+enabled: true
+updatedAt: 2026-10-31T04:31:01.825Z
+provider: 
+---
+
+# MCP 使用规则（ng-plate）
+
+## 服务来源
+
+- 项目级只声明 `angular-cli`，见 [.vscode/mcp.json](mdc:.vscode/mcp.json)（VS Code 的 `servers` 键，`npx -y @angular/cli mcp`）。
+- 其余服务来自用户级 `mcp.json`（`mcpServers` 键）：`mobbin`、`context7`（HTTP），`Hyperbrowser`、`playwright`、`chrome-devtools`、`GitHub`（stdio）。会话挂载 ≠ 配置声明，调用前先用工具描述确认工具名与参数。
+- `Hyperbrowser`、`GitHub` 的 `env` 值属凭据：不得写入回复、日志、文档或提交物。
+
+## 工具名
+
+- 实际 MCP 工具名是下划线形式：`list_projects`、`get_best_practices`、`search_documentation`、`devserver_start`、`devserver_wait_for_build`、`devserver_stop`。旧文本里的 `devserver.start` 是点号写法，勿照抄。
+- `pnpm build`、`read_lints`、`git status` 是本地/IDE 工具，不是 MCP 工具；MCP 服务不可用时降级为它们 + 只读检查，不臆造工具名。
+
+## 验证链（改完前端代码必走）
+
+1. `angular-cli`：`list_projects` → `devserver_start`（端口 4200）→ `devserver_wait_for_build` 拿构建日志。
+2. `chrome-devtools`：打开 `http://localhost:4200`，用 `navigate_page` / `take_snapshot` / `evaluate_script` / `list_console_messages` 读控制台与网络请求定位问题；窄屏用 `resize_page` 或 `emulate`（375px），关键交互可用 Playwright MCP 复跑。
+3. 修复后重跑步骤 1–2，`read_lints` 为 0，收尾 `devserver_stop`。
+
+## 准确性与环境噪声
+
+- 查 Angular 文档用 `search_documentation(query, version: 22)` 并核对返回的 `searchedVersion`；第三方库用 Context7 的 `resolve-library-id` → `query-docs`。
+- 后端未启动时 `/rel/menus/me`、`/sec/users/page` 等经 `proxy.conf.json` 转发的请求返回 502，属环境噪声；只把本次改动新增的错误当作回归。
+
+## 相关文件
+
+- 工作规范：[.agents/PlateUI.md](mdc:.agents/PlateUI.md)、[AGENTS.md](mdc:AGENTS.md)
+- 项目智能体：[.codebuddy/agents/plateui-expert.md](mdc:.codebuddy/agents/plateui-expert.md)
+- 版本基线：[package.json](mdc:package.json)
