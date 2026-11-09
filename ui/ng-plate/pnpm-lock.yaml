@@ -194,8 +194,8 @@ importers:
         specifier: ^22.2.4
         version: 22.2.5(@angular/common@22.2.4(@angular/core@22.2.4(@angular/compiler@22.2.4)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.4(@angular/compiler@22.2.4)(rxjs@7.8.2))(@angular/platform-server@22.2.4(@angular/common@22.2.4(@angular/core@22.2.4(@angular/compiler@22.2.4)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/compiler@22.2.4)(@angular/core@22.2.4(@angular/compiler@22.2.4)(rxjs@7.8.2))(@angular/platform-browser@22.2.4(@angular/common@22.2.4(@angular/core@22.2.4(@angular/compiler@22.2.4)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.4(@angular/compiler@22.2.4)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/router@22.2.4(@angular/common@22.2.4(@angular/core@22.2.4(@angular/compiler@22.2.4)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.4(@angular/compiler@22.2.4)(rxjs@7.8.2))(@angular/platform-browser@22.2.4(@angular/common@22.2.4(@angular/core@22.2.4(@angular/compiler@22.2.4)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.4(@angular/compiler@22.2.4)(rxjs@7.8.2)))(rxjs@7.8.2))
       '@tabler/core':
-        specifier: ^1.7.3
-        version: 1.7.3
+        specifier: ^1.7.4
+        version: 1.7.4
       dayjs:
         specifier: ^1.11.23
         version: 1.11.23
@@ -1399,8 +1399,8 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@tabler/core@1.7.3':
-    resolution: {integrity: sha512-9PDS6U69svI987zIpd0AVLF4Gw9Uxfq1aypceVMNxye9Jp4QWYZEtzTL7z60L8qLyVQupHA+ug1AIA8gGAnYRA==}
+  '@tabler/core@1.7.4':
+    resolution: {integrity: sha512-fHAPnsKl9JnJJkLxE5UbPkLUBlgn/G1b0urLh5LMGt2DnebpK2tZNEKD/8YiwGz67EoNahGretSsHovDOvJGWA==}
     engines: {node: '>=20'}
     peerDependencies:
       vanilla-calendar-pro: ^3.3.2
@@ -3595,7 +3595,7 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
-  '@tabler/core@1.7.3':
+  '@tabler/core@1.7.4':
     dependencies:
       '@popperjs/core': 2.11.8
 
