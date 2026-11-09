@@ -1,37 +1,49 @@
 ---
-description: ng-plate 项目的 MCP 服务来源、工具名与构建/浏览器验证链；改动前端代码、核对框架 API 或排查样式与运行时问题时使用
+description: MCP service sources, tool names and the build/browser verification chain for the ng-plate project. Use when changing front-end code, verifying framework APIs or diagnosing styling and runtime issues.
 alwaysApply: true
 enabled: true
 updatedAt: 2026-10-31T04:31:01.825Z
 provider: 
 ---
 
-# MCP 使用规则（ng-plate）
+# MCP Usage Rules (ng-plate)
 
-## 服务来源
+## Service Sources
 
-- 项目级只声明 `angular-cli`，见 [.vscode/mcp.json](mdc:.vscode/mcp.json)（VS Code 的 `servers` 键，`npx -y @angular/cli mcp`）。
-- 其余服务来自用户级 `mcp.json`（`mcpServers` 键）：`mobbin`、`context7`（HTTP），`Hyperbrowser`、`playwright`、`chrome-devtools`、`GitHub`（stdio）。会话挂载 ≠ 配置声明，调用前先用工具描述确认工具名与参数。
-- `Hyperbrowser`、`GitHub` 的 `env` 值属凭据：不得写入回复、日志、文档或提交物。
+- The project declares only `angular-cli`, see [.vscode/mcp.json](mdc:.vscode/mcp.json) (VS Code `servers` key,
+  `npx -y @angular/cli mcp`).
+- The remaining services come from the user-level `mcp.json` (`mcpServers` key): `mobbin`, `context7` (HTTP),
+  `Hyperbrowser`, `playwright`, `chrome-devtools`, `GitHub` (stdio). Services mounted in a session are not the same as
+  declared configuration; confirm tool names and parameters from the tool description before calling.
+- `env` values for `Hyperbrowser` and `GitHub` are credentials: never write them into replies, logs, documents or
+  committed artifacts.
 
-## 工具名
+## Tool Names
 
-- 实际 MCP 工具名是下划线形式：`list_projects`、`get_best_practices`、`search_documentation`、`devserver_start`、`devserver_wait_for_build`、`devserver_stop`。旧文本里的 `devserver.start` 是点号写法，勿照抄。
-- `pnpm build`、`read_lints`、`git status` 是本地/IDE 工具，不是 MCP 工具；MCP 服务不可用时降级为它们 + 只读检查，不臆造工具名。
+- Actual MCP tool names use underscores: `list_projects`, `get_best_practices`, `search_documentation`,
+  `devserver_start`, `devserver_wait_for_build`, `devserver_stop`. The dotted `devserver.start` in older text must not
+  be copied.
+- `pnpm build`, `read_lints`, `git status` are local/IDE tools, not MCP tools; when MCP services are unavailable, fall
+  back to them plus read-only checks. Never invent tool names.
 
-## 验证链（改完前端代码必走）
+## Verification Chain (required after front-end code changes)
 
-1. `angular-cli`：`list_projects` → `devserver_start`（端口 4200）→ `devserver_wait_for_build` 拿构建日志。
-2. `chrome-devtools`：打开 `http://localhost:4200`，用 `navigate_page` / `take_snapshot` / `evaluate_script` / `list_console_messages` 读控制台与网络请求定位问题；窄屏用 `resize_page` 或 `emulate`（375px），关键交互可用 Playwright MCP 复跑。
-3. 修复后重跑步骤 1–2，`read_lints` 为 0，收尾 `devserver_stop`。
+1. `angular-cli`: `list_projects` → `devserver_start` (port 4200) → `devserver_wait_for_build` to obtain the build log.
+2. `chrome-devtools`: open `http://localhost:4200`, use `navigate_page` / `take_snapshot` / `evaluate_script` /
+   `list_console_messages` to read the console and network requests and locate problems; for narrow screens use
+   `resize_page` or `emulate` (375px); Playwright MCP can re-run key interactions.
+3. After the fix, repeat steps 1–2, ensure `read_lints` is 0, then finish with `devserver_stop`.
 
-## 准确性与环境噪声
+## Accuracy and Environmental Noise
 
-- 查 Angular 文档用 `search_documentation(query, version: 22)` 并核对返回的 `searchedVersion`；第三方库用 Context7 的 `resolve-library-id` → `query-docs`。
-- 后端未启动时 `/rel/menus/me`、`/sec/users/page` 等经 `proxy.conf.json` 转发的请求返回 502，属环境噪声；只把本次改动新增的错误当作回归。
+- For Angular docs use `search_documentation(query, version: 22)` and verify the returned `searchedVersion`; for
+  third-party libraries use Context7's `resolve-library-id` → `query-docs`.
+- When the backend is not running, requests proxied through `proxy.conf.json` such as `/rel/menus/me` and
+  `/sec/users/page` return 502 — environmental noise; treat only errors newly introduced by the current change as
+  regressions.
 
-## 相关文件
+## Related Files
 
-- 工作规范：[.agents/PlateUI.md](mdc:.agents/PlateUI.md)、[AGENTS.md](mdc:AGENTS.md)
-- 项目智能体：[.codebuddy/agents/plateui-expert.md](mdc:.codebuddy/agents/plateui-expert.md)
-- 版本基线：[package.json](mdc:package.json)
+- Working specification: [.agents/PlateUI.md](mdc:.agents/PlateUI.md), [AGENTS.md](mdc:AGENTS.md)
+- Project agent: [.codebuddy/agents/plateui-expert.md](mdc:.codebuddy/agents/plateui-expert.md)
+- Version baseline: [package.json](mdc:package.json)

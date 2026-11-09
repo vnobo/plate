@@ -1,0 +1,53 @@
+---
+description:
+  MANDATORY language rule for git-tracked files. Fetch before creating, editing or staging any file in this repository: all version-controlled content must be primarily English. Local temporary and ignored files are exempt.
+alwaysApply: true
+---
+
+# English-first for version-controlled files
+
+**MANDATORY.** Every file tracked by git in this repository must be written primarily in English. This keeps commits
+readable on GitHub, supports international contributors, and keeps the codebase in one consistent language. This rule is
+not optional and must not be weakened for convenience.
+
+## Scope: git-tracked files only
+
+- In scope: source, templates, styles, tests, docs, `.mdc` rules, configuration, comments, identifiers, UI copy and
+  commit messages that land in the repository.
+- Determine scope with `git ls-files` and `git status --short`. A tracked file being modified (`M`) or a file staged for
+  addition (`A`) is in scope.
+- **Exempt**: local temporary files that are not under version control — anything ignored
+  by [.gitignore](mdc:.gitignore) or a parent `.gitignore` (e.g. `node_modules/`, `dist/`, `.angular/`, local logs,
+  screenshots, scratch notes, IDE-local plans and user-level config). They may use any language and must never be added
+  to the repository just to satisfy this rule. Use `git check-ignore -v <path>` when in doubt.
+- A file becomes in-scope the moment it moves from ignored/untracked into git: translate its content **before** staging
+  it.
+
+## What "primarily English" means
+
+- Identifiers, file names, comments and JSDoc, UI labels and messages, test names, error messages, documentation
+  headings, rule bodies and commit messages are in English.
+- Allowed exceptions: proper nouns, brand names, third-party URLs, snippets quoted verbatim from external documentation,
+  and data values that must match an external system.
+- Existing Chinese content in tracked files is **technical debt, not an exception**. Whenever such a file is edited,
+  convert its touched lines and that file's comments/labels to English in the same change. A full translation pass of
+  untouched files is a separate, explicitly requested task.
+
+## Why
+
+A repository shared on GitHub is read by international maintainers. Mixed Chinese/English identifiers, comments, UI copy
+and commit messages hurt grep-ability, tooling and AI context, and make reviews harder. Consistency beats partial
+localization.
+
+## Verification before delivery
+
+- `git status --short` shows only the intended files.
+- For each changed tracked file, grep for CJK characters (`[\u4e00-\u9fff]`); every hit must be one of the allowed
+  exceptions above.
+
+## References
+
+- [.gitignore](mdc:.gitignore)
+- [AGENTS.md](mdc:AGENTS.md)
+- [.agents/PlateUI.md](mdc:.agents/PlateUI.md)
+- [.codebuddy/rules/MCP.mdc](mdc:.codebuddy/rules/MCP.mdc)
