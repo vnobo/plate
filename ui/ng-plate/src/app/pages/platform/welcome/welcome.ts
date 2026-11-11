@@ -124,17 +124,17 @@ export class PlatformWelcome {
     const groupsRoot = this.count(this.groupsRoot);
 
     return [
-      this.toChart('users', '用户分布', [
-        { label: '启用', value: this.count(this.usersEnabled), color: 'text-green' },
-        { label: '禁用', value: this.count(this.usersDisabled), color: 'text-red' },
+      this.toChart('users', 'User Distribution', [
+        { label: 'Enabled', value: this.count(this.usersEnabled), color: 'text-green' },
+        { label: 'Disabled', value: this.count(this.usersDisabled), color: 'text-red' },
       ]),
-      this.toChart('tenants', '租户分布', [
-        { label: '根租户', value: tenantsRoot, color: 'text-primary' },
-        { label: '子租户', value: Math.max(tenantsTotal - tenantsRoot, 0), color: 'text-azure' },
+      this.toChart('tenants', 'Tenant Distribution', [
+        { label: 'Root Tenant', value: tenantsRoot, color: 'text-primary' },
+        { label: 'Sub Tenant', value: Math.max(tenantsTotal - tenantsRoot, 0), color: 'text-azure' },
       ]),
-      this.toChart('groups', '角色分布', [
-        { label: '顶层角色', value: groupsRoot, color: 'text-indigo' },
-        { label: '子角色', value: Math.max(groupsTotal - groupsRoot, 0), color: 'text-cyan' },
+      this.toChart('groups', 'Role Distribution', [
+        { label: 'Top-level Role', value: groupsRoot, color: 'text-indigo' },
+        { label: 'Sub Role', value: Math.max(groupsTotal - groupsRoot, 0), color: 'text-cyan' },
       ]),
     ];
   });

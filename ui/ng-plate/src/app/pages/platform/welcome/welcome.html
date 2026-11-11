@@ -1,12 +1,12 @@
 <div class="page-header d-print-none">
   <div class="row align-items-center">
     <div class="col">
-      <div class="page-pretitle">概览</div>
-      <h2 class="page-title">平台欢迎</h2>
-      <div class="text-secondary mt-1">欢迎回来，{{ user.name() }}</div>
+      <div class="page-pretitle">Overview</div>
+      <h2 class="page-title">Platform Welcome</h2>
+      <div class="text-secondary mt-1">Welcome back, {{ user.name() }}</div>
     </div>
     <div class="col-auto ms-auto">
-      <span class="badge bg-primary-lt">Plate 控制台</span>
+      <span class="badge bg-primary-lt">Plate Console</span>
     </div>
   </div>
 </div>
@@ -17,20 +17,20 @@
       <div class="card h-100">
         <div class="card-header">
           <h3 class="card-title">{{ chart.title }}</h3>
-          <p class="card-subtitle">共 {{ chart.total }}</p>
+          <p class="card-subtitle">Total: {{ chart.total }}</p>
         </div>
         <div class="card-body">
           @if (isLoading()) {
-            <div class="text-secondary">统计加载中…</div>
+            <div class="text-secondary">Loading statistics…</div>
           } @else if (chart.total === 0) {
-            <div class="text-secondary">暂无数据</div>
+            <div class="text-secondary">No data</div>
           } @else {
             <div class="d-flex flex-column flex-sm-row align-items-center">
               <svg
                 class="pie"
                 viewBox="0 0 42 42"
                 role="img"
-                [attr.aria-label]="chart.title + '占比图'"
+                [attr.aria-label]="chart.title + ' distribution'"
               >
                 <circle class="pie-track" cx="21" cy="21" r="15.9155" />
                 @for (slice of chart.slices; track slice.label) {

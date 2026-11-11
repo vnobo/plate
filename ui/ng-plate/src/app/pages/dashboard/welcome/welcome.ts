@@ -19,8 +19,8 @@ export class Welcome {
   protected readonly user: UserService = inject(UserService);
 
   protected readonly modules: ReadonlyArray<ModuleCard> = [
-    { title: '用户管理', desc: '账号与直接权限', link: '/platform/users', icon: 'users' },
-    { title: '租户管理', desc: '租户与成员', link: '/platform/tenant', icon: 'tenant' },
-    { title: '角色管理', desc: '角色与授权', link: '/platform/role', icon: 'role' },
+    { title: 'User Management', desc: 'Accounts and direct permissions', link: '/platform/users', icon: 'users' },
+    { title: 'Tenant Management', desc: 'Tenants and members', link: '/platform/tenant', icon: 'tenant' },
+    { title: 'Role Management', desc: 'Roles and authorization', link: '/platform/role', icon: 'role' },
   ];
 }

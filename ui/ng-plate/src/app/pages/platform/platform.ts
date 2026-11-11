@@ -7,32 +7,32 @@ export const PLATFORM_ROUTES: Routes = [
     path: '',
     component: BaseLayout,
     canActivate: [canActivateGuard],
-    title: '平台管理',
+    title: 'Platform Management',
     children: [
       {
         path: 'welcome',
         loadComponent: () => import('./welcome/welcome').then((m) => m.PlatformWelcome),
-        title: '平台欢迎',
+        title: 'Platform Welcome',
       },
       {
         path: 'users',
         loadComponent: () => import('./users/users').then((m) => m.Users),
-        title: '用户管理',
+        title: 'User Management',
       },
       {
         path: 'tenant',
         loadComponent: () => import('./tenant/tenant').then((m) => m.Tenants),
-        title: '租户管理',
+        title: 'Tenant Management',
       },
       {
         path: 'roles',
         loadComponent: () => import('./role/role').then((m) => m.Role),
-        title: '角色管理',
+        title: 'Role Management',
       },
       {
         path: 'menus',
         loadComponent: () => import('./menus/menus').then((m) => m.Menus),
-        title: '菜单管理',
+        title: 'Menu Management',
       },
       {
         path: '',

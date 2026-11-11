@@ -1,12 +1,12 @@
 <div class="page-header d-print-none">
   <div class="row align-items-center">
     <div class="col">
-      <div class="page-pretitle">概览</div>
-      <h2 class="page-title">工作台</h2>
-      <div class="text-secondary mt-1">欢迎回来，{{ user.name() }}</div>
+      <div class="page-pretitle">Overview</div>
+      <h2 class="page-title">Dashboard</h2>
+      <div class="text-secondary mt-1">Welcome back, {{ user.name() }}</div>
     </div>
     <div class="col-auto ms-auto">
-      <span class="badge bg-primary-lt">Plate 控制台</span>
+      <span class="badge bg-primary-lt">Plate Console</span>
     </div>
   </div>
 </div>
@@ -100,22 +100,22 @@
   <div class="col-lg-8">
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">账户信息</h3>
+        <h3 class="card-title">Account Info</h3>
       </div>
       <div class="card-body">
         <div class="d-flex align-items-center mb-3">
           <span class="avatar avatar-lg bg-primary-lt me-3">{{ user.initial() }}</span>
           <div>
             <div class="h3 mb-0">{{ user.name() }}</div>
-            <div class="text-secondary">{{ user.role() || '未分配角色' }}</div>
+            <div class="text-secondary">{{ user.role() || 'No role assigned' }}</div>
           </div>
         </div>
         <div class="list-group list-group-flush">
           <div class="list-group-item px-0 d-flex justify-content-between">
-            <span class="text-secondary">昵称</span><span>{{ user.name() }}</span>
+            <span class="text-secondary">Nickname</span><span>{{ user.name() }}</span>
           </div>
           <div class="list-group-item px-0 d-flex justify-content-between">
-            <span class="text-secondary">角色</span><span>{{ user.role() || '—' }}</span>
+            <span class="text-secondary">Role</span><span>{{ user.role() || '—' }}</span>
           </div>
         </div>
       </div>
@@ -125,11 +125,11 @@
   <div class="col-lg-4">
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">使用提示</h3>
+        <h3 class="card-title">Tips</h3>
       </div>
       <div class="card-body">
-        <p class="text-secondary mb-2">左侧导航可切换用户、租户与角色管理模块。</p>
-        <p class="text-secondary mb-0">右上角菜单支持返回工作台与退出登录。</p>
+        <p class="text-secondary mb-2">Use the left navigation to switch between users, tenants, and roles.</p>
+        <p class="text-secondary mb-0">The top-right menu lets you return to the dashboard or sign out.</p>
       </div>
     </div>
   </div>
