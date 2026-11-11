@@ -239,6 +239,92 @@ body {
   height: 100%;
 }
 
+/* -----------------------------------------------------------------------------
+ * 6. Theme palettes
+ *    Only Tabler semantic variables are overridden, so the component markup,
+ *    Bootstrap 5.3 utilities and layout rules stay shared across palettes.
+ *    SettingsService.setPalette() applies the palette and its light/dark mode.
+ * -------------------------------------------------------------------------- */
+html[data-plate-theme='azure'] {
+  --tblr-primary: #0a6ed1;
+  --tblr-primary-rgb: 10, 110, 209;
+  --tblr-primary-fg: #ffffff;
+  --tblr-body-bg: #f4f7fb;
+  --tblr-bg-surface: #ffffff;
+  --tblr-bg-surface-secondary: #f4f7fb;
+  --tblr-bg-forms: #ffffff;
+  --tblr-body-color: #1f2937;
+  --tblr-muted: #64748b;
+  --tblr-border-color: #e2e8f0;
+  --tblr-link-color: #0a6ed1;
+  --tblr-link-hover-color: #0856a8;
+  --tblr-focus-ring-color: rgba(10, 110, 209, 0.35);
+  --tblr-border-radius: 0.5rem;
+  --tblr-card-spacer-x: 1.25rem;
+  --tblr-card-spacer-y: 1.25rem;
+  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(16, 24, 40, 0.04), 0 0.0625rem 0.1875rem rgba(16, 24, 40, 0.06);
+}
+
+html[data-plate-theme='slate'] {
+  --tblr-primary: #4a9be8;
+  --tblr-primary-rgb: 74, 155, 232;
+  --tblr-primary-fg: #ffffff;
+  --tblr-body-bg: #080d18;
+  --tblr-bg-surface: #121d31;
+  --tblr-bg-surface-secondary: #0c1322;
+  --tblr-bg-forms: #0e1728;
+  --tblr-body-color: #dce5f4;
+  --tblr-muted: #8c9bb5;
+  --tblr-border-color: #1e2c46;
+  --tblr-link-color: #4a9be8;
+  --tblr-link-hover-color: #6fb0ef;
+  --tblr-focus-ring-color: rgba(74, 155, 232, 0.4);
+  --tblr-border-radius: 0.5rem;
+  --tblr-card-spacer-x: 1rem;
+  --tblr-card-spacer-y: 1rem;
+  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.32);
+}
+
+html[data-plate-theme='ledger'] {
+  --tblr-primary: #8a6320;
+  --tblr-primary-rgb: 138, 99, 32;
+  --tblr-primary-fg: #ffffff;
+  --tblr-body-bg: #f5f7fa;
+  --tblr-bg-surface: #ffffff;
+  --tblr-bg-surface-secondary: #eef2f7;
+  --tblr-bg-forms: #ffffff;
+  --tblr-body-color: #0c2340;
+  --tblr-muted: #5b6a7e;
+  --tblr-border-color: #dde4ec;
+  --tblr-link-color: #8a6320;
+  --tblr-link-hover-color: #6d4e19;
+  --tblr-focus-ring-color: rgba(138, 99, 32, 0.32);
+  --tblr-border-radius: 0.25rem;
+  --tblr-card-spacer-x: 1.5rem;
+  --tblr-card-spacer-y: 1.5rem;
+  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(12, 35, 64, 0.06);
+}
+
+html[data-plate-theme='atelier'] {
+  --tblr-primary: #ad5b38;
+  --tblr-primary-rgb: 173, 91, 56;
+  --tblr-primary-fg: #ffffff;
+  --tblr-body-bg: #faf7f2;
+  --tblr-bg-surface: #fffdf9;
+  --tblr-bg-surface-secondary: #f3ede4;
+  --tblr-bg-forms: #fffdf9;
+  --tblr-body-color: #2a2620;
+  --tblr-muted: #7a7167;
+  --tblr-border-color: #e3dacf;
+  --tblr-link-color: #ad5b38;
+  --tblr-link-hover-color: #8f482b;
+  --tblr-focus-ring-color: rgba(173, 91, 56, 0.3);
+  --tblr-border-radius: 0.875rem;
+  --tblr-card-spacer-x: 1.75rem;
+  --tblr-card-spacer-y: 1.75rem;
+  --tblr-shadow-card: 0 0.0625rem 0.1875rem rgba(42, 38, 32, 0.07);
+}
+
 /* Touch devices have no hover: keep list-group action buttons always visible,
    otherwise affordances such as starring are undiscoverable. */
 @media (hover: none) {

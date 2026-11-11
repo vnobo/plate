@@ -10,7 +10,7 @@ import {
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { SettingsService, TokenService, UserService } from '@app/core';
+import { PLATE_THEMES, SettingsService, TokenService, UserService } from '@app/core';
 import { LayoutService } from './layout.service';
 
 type NoticeType = 'system' | 'mention' | 'comment' | 'like';
@@ -427,6 +427,71 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
           </div>
         </div>
 
+        <!-- Theme palette: directly left of the avatar, using the same Tabler dropdown pattern as the language switcher. Hidden below md like the language switcher so the action row never overflows. -->
+        <div class="nav-item dropdown d-none d-md-flex">
+          <a
+            href="javascript:void(0)"
+            class="nav-link px-2 d-flex align-items-center"
+            data-bs-toggle="dropdown"
+            aria-label="Switch theme"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="icon"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <circle cx="12" cy="12" r="9" />
+              <circle cx="8" cy="10" r="1" />
+              <circle cx="12" cy="7.5" r="1" />
+              <circle cx="16" cy="10" r="1" />
+              <path d="M8 16h8" />
+            </svg>
+            <span class="d-none d-xl-inline ms-1">{{ currentTheme().name }}</span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+            @for (theme of themes; track theme.id) {
+              <button
+                class="dropdown-item d-flex align-items-center"
+                type="button"
+                [class.active]="theme.id === currentTheme().id"
+                [attr.aria-current]="theme.id === currentTheme().id ? 'true' : null"
+                (click)="selectTheme(theme.id)"
+              >
+                <span class="avatar avatar-xs me-2" [style.background]="theme.swatch"></span>
+                <span class="flex-fill">
+                  <span class="d-block">{{ theme.name }}</span>
+                  <span class="d-block small text-secondary">{{ theme.description }}</span>
+                </span>
+                @if (theme.id === currentTheme().id) {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="icon ms-2 text-primary"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M5 12l5 5L20 7" />
+                  </svg>
+                }
+              </button>
+            }
+          </div>
+        </div>
+
         <div class="nav-item dropdown">
           <a
             href="javascript:void(0)"
@@ -512,8 +577,16 @@ export class LayoutHeader {
   protected readonly tokenSer = inject(TokenService);
   protected readonly userSer: UserService = inject(UserService);
   protected readonly settings = inject(SettingsService);
+  protected readonly themes = PLATE_THEMES;
+  protected readonly currentTheme = computed(
+    () => PLATE_THEMES.find((theme) => theme.id === this.settings.palette()) ?? PLATE_THEMES[0]!,
+  );
   protected readonly layout = inject(LayoutService);
   private readonly http = inject(HttpClient);
+
+  protected selectTheme(id: string): void {
+    this.settings.setPalette(id);
+  }
 
   /** Show one line when the nickname matches the display name, avoiding a duplicate like "Zhang San / Zhang San" */
   protected readonly showNickname = computed(() => {
