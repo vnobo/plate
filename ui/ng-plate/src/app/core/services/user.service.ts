@@ -15,15 +15,15 @@ export class UserService {
   /** 显示名：昵称优先，否则姓名，否则账号 */
   readonly name = computed(() => {
     const details = this.details();
-    if (!details) return '未登录';
-    return details.nickname || details.name || details.code || '用户';
+    if (!details) return 'Not signed in';
+    return details.nickname || details.name || details.code || 'User';
   });
 
   /** 主显示名：姓名优先，缺省退回昵称，再退回账号（需要与昵称分行展示时用这个） */
   readonly displayName = computed(() => {
     const details = this.details();
-    if (!details) return '未登录';
-    return details.name || details.nickname || details.code || '用户';
+    if (!details) return 'Not signed in';
+    return details.name || details.nickname || details.code || 'User';
   });
 
   /** 昵称；与主显示名相同时调用方不必重复展示 */
