@@ -126,8 +126,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
 
       <!-- Module primary nav: Tabler horizontal nav navbar-nav > nav-item > nav-link;
            flex-row keeps it horizontal on narrow screens, otherwise .navbar-nav defaults to a vertical full-width row;
-           the project does not define --tblr-navbar-active-color, so .active alone shows no highlight, hence the primary colour and medium font weight -->
-      <ul class="navbar-nav flex-row ms-2">
+           the project does not define --tblr-navbar-active-color, so .active alone shows no highlight, hence the primary colour and medium font weight.
+           Hidden below sm: English labels are wider than the original CJK ones and overflow the single-row header; the sidebar drawer covers navigation there. -->
+      <ul class="navbar-nav flex-row ms-2 d-none d-sm-flex">
         <li class="nav-item">
           <a
             class="nav-link px-2"
