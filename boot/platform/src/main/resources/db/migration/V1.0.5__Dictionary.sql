@@ -91,8 +91,7 @@ VALUES
 
 -- Language Dictionary
 INSERT INTO se_dictionaries (tenant_code, dict_type, dict_key, dict_value, dict_label, description, sort_no, enabled)
-VALUES
-    ('00000000-0000-0000-0000-000000000000', 'LANGUAGE', 'ZH_CN', 'zh_CN', '简体中文', 'Simplified Chinese', 1, true),
+VALUES ('00000000-0000-0000-0000-000000000000', 'LANGUAGE', 'ZH_CN', 'zh_CN', 'Chinese', 'Simplified Chinese', 1, true),
     ('00000000-0000-0000-0000-000000000000', 'LANGUAGE', 'EN_US', 'en_US', 'English', 'English (United States)', 2, true),
     ('00000000-0000-0000-0000-000000000000', 'LANGUAGE', 'JA_JP', 'ja_JP', '日本語', 'Japanese', 3, true),
     ('00000000-0000-0000-0000-000000000000', 'LANGUAGE', 'KO_KR', 'ko_KR', '한국어', 'Korean', 4, true);

@@ -17,7 +17,7 @@ $do$
                 insert into se_users(code, username, password, name, phone, email, bio, created_by, updated_by)
                 values (v_code, 'user' || i,
                         '{pbkdf2}7d8a68bc5d507bd19bc153ff10bcdef66f5a5f3d0c1ab2438630e50b5c65894bccc2c7e4404c5afa',
-                        '普通用户' || i, v_phone, 'user' || i || '@qq.com', null,
+                        'Normal User' || i, v_phone, 'user' || i || '@qq.com', null,
                         'f47ac10b-58cc-4372-a567-0e02b2c3d479', 'f47ac10b-58cc-4372-a567-0e02b2c3d479');
 
                 insert into se_authorities(code, user_code, authority, created_by, updated_by)
