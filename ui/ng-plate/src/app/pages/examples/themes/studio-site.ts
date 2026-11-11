@@ -32,36 +32,36 @@ export class StudioSite {
 
   protected readonly projects: ReadonlyArray<Project> = [
     {
-      image: showcaseImage('photo-1541701494587-cb58502866ab', 900, 700, '高饱和流体色块构成的抽象视觉'),
-      title: '曜石品牌重塑',
-      category: '品牌识别',
+      image: showcaseImage('photo-1541701494587-cb58502866ab', 900, 700, 'Abstract visual built from saturated fluid color blocks'),
+      title: 'Obsidian Rebrand',
+      category: 'Brand Identity',
       year: '2026',
     },
     {
-      image: showcaseImage('photo-1550859492-d5da9d8e45f3', 700, 560, '粉紫渐变的抽象光影作品'),
-      title: '流动的城市',
-      category: '数字体验',
+      image: showcaseImage('photo-1550859492-d5da9d8e45f3', 700, 560, 'Abstract light study in pink-purple gradient'),
+      title: 'Fluid City',
+      category: 'Digital Experience',
       year: '2025',
     },
     {
-      image: showcaseImage('photo-1487958449943-2429e8be8625', 700, 560, '白色几何建筑立面的摄影'),
-      title: '留白美术馆',
-      category: '空间视觉',
+      image: showcaseImage('photo-1487958449943-2429e8be8625', 700, 560, 'Photograph of a white geometric building facade'),
+      title: 'Negative Space Gallery',
+      category: 'Spatial Visual',
       year: '2025',
     },
     {
-      image: showcaseImage('photo-1524504388940-b1c1722653e1', 1200, 500, '高对比人像与光影的实验影像'),
-      title: '无题 04',
-      category: '实验影像',
+      image: showcaseImage('photo-1524504388940-b1c1722653e1', 1200, 500, 'Experimental imagery of high-contrast portrait and light'),
+      title: 'Untitled 04',
+      category: 'Experimental Film',
       year: '2024',
     },
   ];
 
   protected readonly services: ReadonlyArray<Service> = [
-    { title: '品牌策略与识别', desc: '从命名、叙事到一整套可生长的视觉系统。' },
-    { title: '数字产品体验', desc: '网站、应用与交互原型，兼顾表达与可用性。' },
-    { title: '影像与动效', desc: '把静态概念变成能被记住的一段运动。' },
-    { title: '空间与展陈', desc: '让品牌在真实空间里同样有说服力。' },
+    { title: 'Brand Strategy & Identity', desc: 'From naming and narrative to a visual system that keeps growing.' },
+    { title: 'Digital Product Experience', desc: 'Websites, apps and interaction prototypes that balance expression and usability.' },
+    { title: 'Film & Motion', desc: 'Turning static concepts into a movement people remember.' },
+    { title: 'Space & Exhibition', desc: 'Making the brand just as convincing in physical space.' },
   ];
 
   protected readonly awards: ReadonlyArray<string> = [

@@ -1,10 +1,10 @@
 <div class="sc-root t-finance">
-  <a class="sc-skip" href="#finance-main">跳至主内容</a>
+  <a class="sc-skip" href="#finance-main">Skip to main content</a>
 
   <div class="t-finance-topbar">
     <div class="container-xl sc-wrap">
-      <span>客户服务热线 400-800-2026 · 工作日 09:00–18:00</span>
-      <span>中文 / EN · 投资者关系</span>
+      <span>Client hotline 400-800-2026 · Weekdays 09:00–18:00</span>
+      <span>中文 / EN · Investor Relations</span>
     </div>
   </div>
 
@@ -16,16 +16,16 @@
           Meridian
         </a>
 
-        <nav id="finance-nav" class="sc-links" [class.is-open]="menuOpen()" aria-label="主导航">
-          <a class="sc-link" href="#business">业务领域</a>
-          <a class="sc-link" href="#performance">业绩表现</a>
-          <a class="sc-link" href="#insights">研究洞察</a>
-          <a class="sc-link" href="#voices">客户声音</a>
+        <nav id="finance-nav" class="sc-links" [class.is-open]="menuOpen()" aria-label="Main navigation">
+          <a class="sc-link" href="#business">Business</a>
+          <a class="sc-link" href="#performance">Performance</a>
+          <a class="sc-link" href="#insights">Insights</a>
+          <a class="sc-link" href="#voices">Client voices</a>
         </nav>
 
         <div class="sc-actions">
           <div class="btn-list">
-            <a class="btn sc-btn-ghost" href="#contact">预约咨询</a>
+            <a class="btn sc-btn-ghost" href="#contact">Book a consultation</a>
           </div>
           <button
             class="btn sc-menu-btn"
@@ -33,7 +33,7 @@
             (click)="toggleMenu()"
             [attr.aria-expanded]="menuOpen()"
             aria-controls="finance-nav"
-            aria-label="切换导航菜单"
+            aria-label="Toggle navigation menu"
           >
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" />
@@ -58,14 +58,14 @@
 
       <div class="container-xl sc-wrap sc-hero-grid">
         <div class="sc-kicker">Meridian Capital / Since 1998</div>
-        <h1 class="sc-hero-title">以长期主义，<br />管理每一份托付</h1>
+        <h1 class="sc-hero-title">With long-termism,<br />we steward every mandate</h1>
         <p class="sc-lede">
-          我们相信稳健比速度更重要。以可验证的研究、清晰的风险边界与跨越周期的经验，陪伴客户走向更长远的目标。
+          We believe steadiness matters more than speed. With verifiable research, clear risk boundaries and cycle-spanning experience, we walk with clients toward longer-term goals.
         </p>
         <div class="t-finance-rule" aria-hidden="true"></div>
         <div class="btn-list sc-hero-actions justify-content-center">
-          <a class="btn sc-btn" href="#contact">预约专属顾问</a>
-          <a class="btn sc-btn-ghost" href="#business">了解我们的业务</a>
+          <a class="btn sc-btn" href="#contact">Book a dedicated advisor</a>
+          <a class="btn sc-btn-ghost" href="#business">Explore our business</a>
         </div>
 
         <div class="t-finance-panels">
@@ -84,8 +84,8 @@
       <div class="container-xl sc-wrap">
         <div class="sc-section-head mx-auto text-center">
           <div class="sc-eyebrow">What we do</div>
-          <h2 class="sc-section-title">三条业务线，一个共同标准</h2>
-          <p class="sc-section-sub">审慎、透明、可解释，是我们对每一项服务的底线要求。</p>
+          <h2 class="sc-section-title">Three lines of business, one shared standard</h2>
+          <p class="sc-section-sub">Prudence, transparency and explainability are the baseline we demand of every service.</p>
         </div>
 
         <div class="row row-deck row-cards sc-grid">
@@ -109,7 +109,7 @@
                 <h3 class="card-title sc-card-title">{{ service.title }}</h3>
                 <p class="sc-card-text">{{ service.desc }}</p>
                 <a class="t-finance-more" href="#insights">
-                  了解更多
+                  Learn more
                   <svg class="icon sc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path d="M5 12h14M13 6l6 6l-6 6" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -125,7 +125,7 @@
       <div class="container-xl sc-wrap">
         <div class="sc-section-head mx-auto text-center">
           <div class="sc-eyebrow">By the numbers</div>
-          <h2 class="sc-section-title">经得起时间检验的成绩</h2>
+          <h2 class="sc-section-title">Results that stand the test of time</h2>
         </div>
         <div class="sc-metrics">
           @for (metric of metrics; track metric.label) {
@@ -142,8 +142,8 @@
       <div class="container-xl sc-wrap">
         <div class="sc-section-head">
           <div class="sc-eyebrow">Research & insights</div>
-          <h2 class="sc-section-title">最新研究与观点</h2>
-          <p class="sc-section-sub">每周更新，来自一线分析师的持续跟踪。</p>
+          <h2 class="sc-section-title">Latest research & views</h2>
+          <p class="sc-section-sub">Updated weekly, with ongoing tracking from front-line analysts.</p>
         </div>
 
         @for (insight of insights; track insight.title) {
@@ -163,8 +163,8 @@
       <div class="container-xl sc-wrap">
         <div class="t-finance-quote">
           <span class="t-finance-quote-mark" aria-hidden="true">“</span>
-          <p>「他们没有替我们做决定，但让每一个决定都有充分的依据。」</p>
-          <p class="t-finance-quote-by">某制造业集团 · 财务负责人</p>
+          <p>"They never made decisions for us, yet every decision we made had solid ground."</p>
+          <p class="t-finance-quote-by">A manufacturing group · Finance lead</p>
         </div>
       </div>
     </section>
@@ -172,11 +172,11 @@
     <section class="sc-section" id="contact">
       <div class="container-xl sc-wrap">
         <div class="sc-cta">
-          <h2 class="sc-cta-title">让我们从一次对话开始</h2>
-          <p class="sc-cta-text">留下您的需求，专属顾问将在一个工作日内与您联系。</p>
+          <h2 class="sc-cta-title">Let's start with a conversation</h2>
+          <p class="sc-cta-text">Leave your needs and a dedicated advisor will reach out within one business day.</p>
           <div class="btn-list sc-cta-actions justify-content-center">
-            <a class="btn sc-btn" href="#finance-main">预约顾问</a>
-            <a class="btn sc-btn-ghost" href="#insights">下载研究报告</a>
+            <a class="btn sc-btn" href="#finance-main">Book an advisor</a>
+            <a class="btn sc-btn-ghost" href="#insights">Download research</a>
           </div>
         </div>
       </div>
@@ -189,23 +189,23 @@
         <div>
           <div class="sc-footer-brand">Meridian</div>
           <p class="sc-footer-note">
-            成立于 1998 年的综合性资产管理机构。以长期主义为原则，为客户提供审慎、透明、可解释的金融服务。
+            A diversified asset manager founded in 1998. Guided by long-termism, we provide prudent, transparent and explainable financial services to our clients.
           </p>
         </div>
         <div>
-          <div class="sc-footer-title">业务</div>
-          <a class="sc-footer-link" href="#business">资产管理</a>
-          <a class="sc-footer-link" href="#business">企业融资</a>
-          <a class="sc-footer-link" href="#insights">研究洞察</a>
+          <div class="sc-footer-title">Business</div>
+          <a class="sc-footer-link" href="#business">Asset Management</a>
+          <a class="sc-footer-link" href="#business">Corporate Finance</a>
+          <a class="sc-footer-link" href="#insights">Research & Insight</a>
         </div>
         <div>
-          <div class="sc-footer-title">关于</div>
-          <a class="sc-footer-link" href="#performance">公司概况</a>
-          <a class="sc-footer-link" href="#voices">客户声音</a>
-          <a class="sc-footer-link" href="#contact">联系我们</a>
+          <div class="sc-footer-title">About</div>
+          <a class="sc-footer-link" href="#performance">Company profile</a>
+          <a class="sc-footer-link" href="#voices">Client voices</a>
+          <a class="sc-footer-link" href="#contact">Contact us</a>
         </div>
         <div>
-          <div class="sc-footer-title">其他主题</div>
+          <div class="sc-footer-title">Other themes</div>
           @for (theme of themes; track theme.slug) {
             <a class="sc-footer-link" [routerLink]="theme.route">{{ theme.name }} · {{ theme.tagline }}</a>
           }
@@ -213,12 +213,12 @@
       </div>
 
       <p class="t-finance-disclaimer">
-        风险提示：本页所有名称、数据、观点与文案均为设计展示所用的模拟内容，不构成任何投资建议、要约或承诺。市场有风险，决策需谨慎。
+        Risk notice: all names, data, views and copy on this page are simulated content for design demonstration only and do not constitute any investment advice, offer or commitment. Markets carry risk — decisions require caution.
       </p>
 
       <div class="sc-footer-bottom">
-        <span>© 2026 Meridian Capital · 合规披露与隐私政策</span>
-        <a class="sc-footer-link" routerLink="/examples/themes">返回主题画廊</a>
+        <span>© 2026 Meridian Capital · Compliance disclosures & privacy policy</span>
+        <a class="sc-footer-link" routerLink="/examples/themes">Back to theme gallery</a>
       </div>
     </div>
   </footer>

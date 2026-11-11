@@ -25,8 +25,8 @@ import { Component, input } from '@angular/core';
 })
 export class ConfirmDialogComponent {
   message = input.required<string>();
-  confirmText = input('确定');
-  cancelText = input('取消');
+  confirmText = input('OK');
+  cancelText = input('Cancel');
   danger = input(false);
   /** Resolves the promise returned by `ModalsService.confirm`. */
   onResult = input<(ok: boolean) => void>();

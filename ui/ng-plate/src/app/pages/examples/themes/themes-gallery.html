@@ -1,34 +1,34 @@
 <div class="g-page">
-  <a class="g-skip" href="#gallery-main">跳至主内容</a>
+  <a class="g-skip" href="#gallery-main">Skip to main content</a>
 
   <header class="g-nav">
     <div class="container-xl g-wrap g-nav-inner">
       <a class="g-brand" routerLink="/examples/themes">
         <span class="g-brand-mark" aria-hidden="true"></span>
         Theme Board
-        <span class="badge g-count">4 套</span>
+        <span class="badge g-count">4 sets</span>
       </a>
 
       <nav
         id="gallery-nav"
         class="g-links"
         [class.is-open]="menuOpen()"
-        aria-label="画廊导航"
+        aria-label="Gallery navigation"
       >
-        <a class="g-link" href="#themes">主题方案</a>
-        <a class="g-link" href="#compare">差异维度</a>
-        <a class="g-link" href="#about">关于展台</a>
+        <a class="g-link" href="#themes">Themes</a>
+        <a class="g-link" href="#compare">Differences</a>
+        <a class="g-link" href="#about">About</a>
       </nav>
 
       <div class="g-actions">
-        <a class="btn g-btn-ghost" routerLink="/examples">返回示例模块</a>
+        <a class="btn g-btn-ghost" routerLink="/examples">Back to Examples</a>
         <button
           class="btn g-menu"
           type="button"
           (click)="toggleMenu()"
           [attr.aria-expanded]="menuOpen()"
           aria-controls="gallery-nav"
-          aria-label="切换导航菜单"
+          aria-label="Toggle navigation menu"
         >
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" />
@@ -43,18 +43,18 @@
       <div class="container-xl g-wrap g-hero-inner">
         <div>
           <div class="g-kicker">Design directions / 2026</div>
-          <h1 class="g-title">4 套主题，<br /><span>一次对比</span></h1>
+          <h1 class="g-title">4 themes,<br /><span>side by side</span></h1>
           <p class="g-lede">
-            从科技产品到生活方式，从创意表达到企业信任感。每套都是包含导航、主视觉、内容区与页脚的完整网站，点开即可逐页挑选。
+            From tech products to lifestyle, from creative expression to corporate trust. Each is a complete site with navigation, hero, content and footer — open one and pick page by page.
           </p>
           <div class="btn-list g-hero-actions">
             <a class="btn g-btn" href="#themes">
-              浏览全部方案
+              Browse all themes
               <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M5 12h14M13 6l6 6l-6 6" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </a>
-            <a class="btn g-btn-ghost" href="#compare">看差异维度</a>
+            <a class="btn g-btn-ghost" href="#compare">See the differences</a>
           </div>
         </div>
 
@@ -71,8 +71,8 @@
       <div class="container-xl g-wrap">
         <div class="g-section-head">
           <div class="g-kicker">01 / 候选方案</div>
-          <h2 class="g-section-title">挑一个，或者全部留下</h2>
-          <p class="g-section-sub">每张卡片对应一条独立路由，页面互不干扰，可以并列打开慢慢比较。</p>
+          <h2 class="g-section-title">Pick one, or keep them all</h2>
+          <p class="g-section-sub">Each card maps to its own route; pages never interfere, so you can open them side by side and compare at leisure.</p>
         </div>
 
         <div class="row row-deck row-cards g-grid">
@@ -104,7 +104,7 @@
 
                   <div class="g-meta">
                     <div class="g-meta-row">
-                      <span class="g-meta-label">色板</span>
+                      <span class="g-meta-label">Palette</span>
                       <div class="g-swatches">
                         @for (color of theme.palette; track color) {
                           <span class="g-dot" [style.background]="color"></span>
@@ -112,7 +112,7 @@
                       </div>
                     </div>
                     <div class="g-meta-row">
-                      <span class="g-meta-label">字体</span>
+                      <span class="g-meta-label">Font</span>
                       <span class="g-meta-value">{{ theme.fontLabel }}</span>
                     </div>
                     <div class="badge-list g-traits">
@@ -123,7 +123,7 @@
                   </div>
 
                   <a class="btn g-btn g-card-link" [routerLink]="theme.route">
-                    查看完整页面
+                    View full page
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <path d="M5 12h14M13 6l6 6l-6 6" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -153,7 +153,7 @@
         </div>
 
         <div class="g-direct">
-          <span>直达：</span>
+          <span>Jump to:</span>
           @for (theme of themes; track theme.slug) {
             <a [routerLink]="theme.route">{{ theme.name }} · {{ theme.tagline }}</a>
           }
@@ -168,31 +168,31 @@
         <div class="col-md-4">
           <div class="g-footer-brand">Theme Board</div>
           <p class="g-footer-note">
-            为 Plate 示例模块准备的设计方案展台。四套页面均为静态展示，不含真实业务请求，可放心切换预览。
+            A design showcase built for the Plate examples module. All four pages are static demos with no real business requests, so feel free to switch and preview.
           </p>
         </div>
         <div class="col-md-3">
-          <div class="g-footer-title">主题导航</div>
+          <div class="g-footer-title">Theme Navigation</div>
           @for (theme of themes; track theme.slug) {
             <a class="g-footer-link" [routerLink]="theme.route">{{ theme.name }} · {{ theme.tagline }}</a>
           }
         </div>
         <div class="col-md-2">
-          <div class="g-footer-title">展台</div>
-          <a class="g-footer-link" href="#themes">候选方案</a>
-          <a class="g-footer-link" href="#compare">差异维度</a>
+          <div class="g-footer-title">Showcase</div>
+          <a class="g-footer-link" href="#themes">Themes</a>
+          <a class="g-footer-link" href="#compare">Differences</a>
           <a class="g-footer-link" routerLink="/examples">示例模块</a>
         </div>
         <div class="col-md-3">
-          <div class="g-footer-title">使用提示</div>
+          <div class="g-footer-title">Tips</div>
           <p class="g-footer-note">
-            四个页面都是独立地址，建议在新标签页中并列打开，按导航、主视觉、内容区、页脚逐段对比。
+            Each page is a separate address — open them in parallel tabs and compare section by section: navigation, hero, content and footer.
           </p>
         </div>
       </div>
 
       <div class="g-footer-bottom">
-        <span>© 2026 Plate UI · 主题方案展台</span>
+        <span>© 2026 Plate UI · Theme Showcase</span>
         <span>Built with Angular 22 + Tabler</span>
       </div>
     </div>

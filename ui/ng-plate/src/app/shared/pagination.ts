@@ -12,20 +12,20 @@ import { Component, computed, input, output } from '@angular/core';
   template: `
     <div class="d-flex align-items-center flex-wrap gap-2">
       <p class="m-0 text-secondary">
-        显示 {{ start() }} 到 {{ end() }} 项，共 {{ totalElements() }} 项
+        Showing {{ start() }} to {{ end() }} of {{ totalElements() }} items
       </p>
       <div class="ms-auto d-flex align-items-center flex-wrap gap-2">
         <select
           class="form-select form-select-sm w-auto"
           [value]="size()"
           (change)="onSizeChange($event)"
-          aria-label="每页显示条数"
+          aria-label="Items per page"
         >
           @for (s of PAGE_SIZES; track s) {
-            <option [value]="s">每页 {{ s }} 条</option>
+            <option [value]="s">{{ s }} per page</option>
           }
         </select>
-        <nav aria-label="分页导航">
+        <nav aria-label="Pagination">
           <ul class="pagination pagination-sm m-0">
             <li class="page-item" [class.disabled]="page() <= 1">
               <button
@@ -33,7 +33,7 @@ import { Component, computed, input, output } from '@angular/core';
                 class="page-link"
                 [disabled]="page() <= 1"
                 (click)="goto(page() - 1)"
-                aria-label="上一页"
+                aria-label="Previous"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -64,7 +64,7 @@ import { Component, computed, input, output } from '@angular/core';
                     class="page-link"
                     (click)="goto(p)"
                     [attr.aria-current]="p === page() ? 'page' : null"
-                    [attr.aria-label]="'第 ' + p + ' 页'"
+                    [attr.aria-label]="'Page ' + p"
                   >
                     {{ p }}
                   </button>
@@ -77,7 +77,7 @@ import { Component, computed, input, output } from '@angular/core';
                 class="page-link"
                 [disabled]="page() >= totalPages()"
                 (click)="goto(page() + 1)"
-                aria-label="下一页"
+                aria-label="Next"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

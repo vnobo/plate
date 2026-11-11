@@ -1,25 +1,25 @@
 <div class="sc-root t-commerce">
-  <a class="sc-skip" href="#commerce-main">跳至主内容</a>
+  <a class="sc-skip" href="#commerce-main">Skip to main content</a>
 
-  <div class="t-commerce-announce">全站满 399 元免运费 · 新客首单享 9 折 · 每周四上新</div>
+  <div class="t-commerce-announce">Free shipping over ¥399 · 10% off first order · New arrivals every Thursday</div>
 
   <header class="sc-nav">
     <div class="container-xl sc-wrap">
       <div class="sc-nav-inner">
         <a class="sc-brand" routerLink="/examples/themes">Maison</a>
 
-        <nav id="commerce-nav" class="sc-links" [class.is-open]="menuOpen()" aria-label="主导航">
-          <a class="sc-link" href="#categories">本季精选</a>
-          <a class="sc-link" href="#categories">衣饰</a>
-          <a class="sc-link" href="#stories">居家</a>
-          <a class="sc-link" href="#stories">杂志</a>
-          <a class="sc-link" href="#story">关于我们</a>
+        <nav id="commerce-nav" class="sc-links" [class.is-open]="menuOpen()" aria-label="Main navigation">
+          <a class="sc-link" href="#categories">This season</a>
+          <a class="sc-link" href="#categories">Apparel</a>
+          <a class="sc-link" href="#stories">Home</a>
+          <a class="sc-link" href="#stories">Journal</a>
+          <a class="sc-link" href="#story">About us</a>
         </nav>
 
         <div class="sc-actions">
           <div class="btn-list">
-            <a class="btn sc-btn-ghost" href="#story">品牌故事</a>
-            <a class="btn sc-btn" href="#categories">逛一逛</a>
+            <a class="btn sc-btn-ghost" href="#story">Brand story</a>
+            <a class="btn sc-btn" href="#categories">Browse</a>
           </div>
           <button
             class="btn sc-menu-btn"
@@ -27,7 +27,7 @@
             (click)="toggleMenu()"
             [attr.aria-expanded]="menuOpen()"
             aria-controls="commerce-nav"
-            aria-label="切换导航菜单"
+            aria-label="Toggle navigation menu"
           >
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" />
@@ -52,12 +52,12 @@
       <div class="t-commerce-hero-overlay" aria-hidden="true"></div>
 
       <div class="t-commerce-hero-content">
-        <div class="t-commerce-hero-kicker">Maison / 2026 春夏系列</div>
-        <h1 class="sc-hero-title">把日常，<br />过成喜欢的样子</h1>
+        <div class="t-commerce-hero-kicker">Maison / Spring-Summer 2026</div>
+        <h1 class="sc-hero-title">Make everyday,<br />a life you like</h1>
         <p class="t-commerce-hero-lede">
-          挑选那些经得起反复使用的物件：一件柔软的衬衫、一只手感温润的杯子，和一点不必解释的从容。
+          Choose things worth using again and again: a soft shirt, a cup that warms the hand, and a little ease that needs no explanation.
         </p>
-        <a class="t-commerce-underline" href="#categories">探索本季精选</a>
+        <a class="t-commerce-underline" href="#categories">Explore this season</a>
       </div>
     </section>
 
@@ -65,8 +65,8 @@
       <div class="container-xl sc-wrap">
         <div class="sc-section-head">
           <div class="sc-eyebrow">The collection</div>
-          <h2 class="sc-section-title">三个方向，一种生活</h2>
-          <p class="sc-section-sub">每一季只保留真正想留在身边的东西。</p>
+          <h2 class="sc-section-title">Three directions, one life</h2>
+          <p class="sc-section-sub">Each season we keep only what we truly want by our side.</p>
         </div>
 
         <div class="t-commerce-cats">
@@ -114,24 +114,24 @@
     <section class="sc-section" id="story">
       <div class="container-xl sc-wrap">
         <p class="t-commerce-quote">
-          「我们相信，好的物件不需要喧哗。它只是安静地待在日常里，慢慢变成你生活的一部分。」
+          "We believe good objects need not shout. They simply sit quietly in daily life, slowly becoming part of yours."
         </p>
-        <p class="t-commerce-quote-by">Maison 编辑部 · 创刊手记</p>
+        <p class="t-commerce-quote-by">Maison Editorial · Founding note</p>
 
         <form class="input-group t-commerce-subscribe" (submit)="subscribe($event)">
-          <label class="visually-hidden" for="maison-email">邮箱地址</label>
+          <label class="visually-hidden" for="maison-email">Email address</label>
           <input
             id="maison-email"
             class="form-control"
             type="email"
             required
             autocomplete="email"
-            placeholder="留下邮箱，收到每季精选"
+            placeholder="Leave your email for each season's picks"
           />
-          <button class="btn sc-btn" type="submit">订阅</button>
+          <button class="btn sc-btn" type="submit">Subscribe</button>
         </form>
         @if (subscribed()) {
-          <p class="t-commerce-thanks" role="status">已收到，下一季精选会第一时间送达。</p>
+          <p class="t-commerce-thanks" role="status">Received — next season's picks will arrive first.</p>
         }
       </div>
     </section>
@@ -143,31 +143,31 @@
         <div>
           <div class="sc-footer-brand">Maison</div>
           <p class="sc-footer-note">
-            一家关于日常物件的生活方式买手店。慢一点挑选，久一点使用，让生活自己长出样子。
+            A lifestyle boutique about everyday objects. Choose a little slower, use a little longer, and let life find its own shape.
           </p>
         </div>
         <div>
-          <div class="sc-footer-title">选购</div>
-          <a class="sc-footer-link" href="#categories">本季精选</a>
-          <a class="sc-footer-link" href="#categories">衣饰 / 家居 / 配饰</a>
-          <a class="sc-footer-link" href="#story">礼品卡</a>
+          <div class="sc-footer-title">Shop</div>
+          <a class="sc-footer-link" href="#categories">This season</a>
+          <a class="sc-footer-link" href="#categories">Apparel / Home / Accessories</a>
+          <a class="sc-footer-link" href="#story">Gift card</a>
         </div>
         <div>
-          <div class="sc-footer-title">关于</div>
-          <a class="sc-footer-link" href="#story">品牌故事</a>
-          <a class="sc-footer-link" href="#stories">编辑杂志</a>
-          <a class="sc-footer-link" href="#story">配送与退换</a>
+          <div class="sc-footer-title">About</div>
+          <a class="sc-footer-link" href="#story">Brand story</a>
+          <a class="sc-footer-link" href="#stories">Editorial magazine</a>
+          <a class="sc-footer-link" href="#story">Shipping & returns</a>
         </div>
         <div>
-          <div class="sc-footer-title">其他主题</div>
+          <div class="sc-footer-title">Other themes</div>
           @for (theme of themes; track theme.slug) {
             <a class="sc-footer-link" [routerLink]="theme.route">{{ theme.name }} · {{ theme.tagline }}</a>
           }
         </div>
       </div>
       <div class="sc-footer-bottom">
-        <span>© 2026 Maison Living · 缓慢而认真地生活</span>
-        <a class="sc-footer-link" routerLink="/examples/themes">返回主题画廊</a>
+        <span>© 2026 Maison Living · Slow and deliberate living</span>
+        <a class="sc-footer-link" routerLink="/examples/themes">Back to theme gallery</a>
       </div>
     </div>
   </footer>

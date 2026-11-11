@@ -88,12 +88,12 @@ export class ModalsService {
         resolve(ok);
       };
       const ref = this.create({
-        title: opts.title ?? '确认操作',
+        title: opts.title ?? 'Confirm Action',
         contentRef: ConfirmDialogComponent,
         contentInputs: {
           message: opts.message,
-          confirmText: opts.confirmText ?? '确定',
-          cancelText: opts.cancelText ?? '取消',
+          confirmText: opts.confirmText ?? 'OK',
+          cancelText: opts.cancelText ?? 'Cancel',
           danger: opts.danger ?? false,
           onResult: finish,
         },

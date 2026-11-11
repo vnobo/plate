@@ -18,16 +18,16 @@ export class ThemesGallery {
 
   protected readonly dimensions: ReadonlyArray<Dimension> = [
     {
-      title: '配色',
-      desc: '从深墨电光到暖米陶土，从荧光柠檬到海军蓝金，四套色板互不重叠，气质一眼可辨。',
+      title: 'Color',
+      desc: 'From electric ink to warm clay, from fluorescent lemon to navy gold — four palettes that never overlap and read as distinct at a glance.',
     },
     {
-      title: '字体',
-      desc: '几何无衬线、优雅衬线、压缩粗体与稳健数字体，各自建立不同的阅读节奏与标题比例。',
+      title: 'Typography',
+      desc: 'Geometric sans-serif, elegant serif, condensed bold and sturdy numeral fonts each set their own reading rhythm and heading scale.',
     },
     {
-      title: '组件',
-      desc: '玻璃拟态卡片、细线编辑式图文、粗描边作品格与对称数据面板，连按钮形状都不一样。',
+      title: 'Components',
+      desc: 'Glassmorphism cards, thin-line editorial layouts, heavy-bordered portfolio grids and symmetric data panels — even the button shapes differ.',
     },
   ];
 

@@ -1,21 +1,21 @@
 <div class="sc-root t-studio">
-  <a class="sc-skip" href="#studio-main">跳至主内容</a>
+  <a class="sc-skip" href="#studio-main">Skip to main content</a>
 
   <header class="sc-nav">
     <div class="container-xl sc-wrap">
       <div class="sc-nav-inner">
         <a class="sc-brand" routerLink="/examples/themes">Atelier</a>
 
-        <nav id="studio-nav" class="sc-links" [class.is-open]="menuOpen()" aria-label="主导航">
-          <a class="sc-link" href="#work">01 作品</a>
-          <a class="sc-link" href="#services">02 服务</a>
-          <a class="sc-link" href="#awards">03 奖项</a>
-          <a class="sc-link" href="#contact">04 联系</a>
+        <nav id="studio-nav" class="sc-links" [class.is-open]="menuOpen()" aria-label="Main navigation">
+          <a class="sc-link" href="#work">01 Work</a>
+          <a class="sc-link" href="#services">02 Services</a>
+          <a class="sc-link" href="#awards">03 Awards</a>
+          <a class="sc-link" href="#contact">04 Contact</a>
         </nav>
 
         <div class="sc-actions">
           <div class="btn-list">
-            <a class="btn sc-btn" href="#contact">开始一个项目</a>
+            <a class="btn sc-btn" href="#contact">Start a project</a>
           </div>
           <button
             class="btn sc-menu-btn"
@@ -23,7 +23,7 @@
             (click)="toggleMenu()"
             [attr.aria-expanded]="menuOpen()"
             aria-controls="studio-nav"
-            aria-label="切换导航菜单"
+            aria-label="Toggle navigation menu"
           >
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" />
@@ -38,10 +38,10 @@
     <section class="sc-hero t-studio-hero">
       <div class="container-xl sc-wrap">
         <div class="sc-kicker">Atelier / Independent design studio</div>
-        <h1 class="sc-hero-title">设计，不该<br /><span class="t-studio-hl">被忽略</span></h1>
+        <h1 class="sc-hero-title">Design should never<br /><span class="t-studio-hl">be ignored</span></h1>
         <div class="t-studio-hero-foot">
-          <span>一家只做少数项目、但把每个都做到底的独立设计工作室。</span>
-          <span class="t-studio-status">2026 Q4 开放合作中</span>
+          <span>An independent design studio that takes on few projects but finishes every one of them.</span>
+          <span class="t-studio-status">Open for collaboration · Q4 2026</span>
         </div>
       </div>
     </section>
@@ -50,8 +50,8 @@
       <div class="container-xl sc-wrap">
         <div class="sc-section-head">
           <div class="sc-eyebrow">01 / Selected work</div>
-          <h2 class="sc-section-title">最近的作品</h2>
-          <p class="sc-section-sub">品牌、数字体验与影像，四段不同的合作。</p>
+          <h2 class="sc-section-title">Recent work</h2>
+          <p class="sc-section-sub">Brand, digital experience and film — four different collaborations.</p>
         </div>
 
         <div class="t-studio-projects">
@@ -80,7 +80,7 @@
       <div class="container-xl sc-wrap">
         <div class="sc-section-head">
           <div class="sc-eyebrow">02 / What we do</div>
-          <h2 class="sc-section-title">我们做的事</h2>
+          <h2 class="sc-section-title">What we do</h2>
         </div>
 
         @for (service of services; track service.title) {
@@ -93,7 +93,7 @@
       </div>
     </section>
 
-    <section class="t-studio-marquee" id="awards" aria-label="合作品牌与奖项">
+    <section class="t-studio-marquee" id="awards" aria-label="Partner brands and awards">
       <div class="t-studio-marquee-track">
         <div class="t-studio-marquee-group">
           @for (award of awards; track award) {
@@ -111,11 +111,11 @@
     <section class="sc-section" id="contact">
       <div class="container-xl sc-wrap">
         <div class="sc-cta">
-          <h2 class="sc-cta-title">一起做点<br />什么</h2>
-          <p class="sc-cta-text">有想法就写信来，我们通常在两个工作日内回复。</p>
+          <h2 class="sc-cta-title">Let's create<br />something</h2>
+          <p class="sc-cta-text">Got an idea? Write to us — we usually reply within two business days.</p>
           <div class="btn-list sc-cta-actions justify-content-center">
-            <a class="btn sc-btn" href="#studio-main">聊聊项目</a>
-            <a class="btn sc-btn-ghost" href="#work">先看作品</a>
+            <a class="btn sc-btn" href="#studio-main">Talk about a project</a>
+            <a class="btn sc-btn-ghost" href="#work">See the work</a>
           </div>
         </div>
       </div>
@@ -128,23 +128,23 @@
         <div>
           <div class="sc-footer-brand">Atelier</div>
           <p class="sc-footer-note">
-            独立设计工作室。相信克制、相信排版、相信一个想法值得被反复打磨到最后一像素。
+            An independent design studio. We believe in restraint, in typography, and in an idea worth polishing to its final pixel.
           </p>
         </div>
         <div>
-          <div class="sc-footer-title">工作室</div>
-          <a class="sc-footer-link" href="#work">作品</a>
-          <a class="sc-footer-link" href="#services">服务</a>
-          <a class="sc-footer-link" href="#awards">奖项</a>
+          <div class="sc-footer-title">Studio</div>
+          <a class="sc-footer-link" href="#work">Work</a>
+          <a class="sc-footer-link" href="#services">Services</a>
+          <a class="sc-footer-link" href="#awards">Awards</a>
         </div>
         <div>
-          <div class="sc-footer-title">联系</div>
-          <a class="sc-footer-link" href="#contact">项目咨询</a>
-          <a class="sc-footer-link" href="#studio-main">社交媒体</a>
-          <a class="sc-footer-link" href="#contact">合作方式</a>
+          <div class="sc-footer-title">Contact</div>
+          <a class="sc-footer-link" href="#contact">Project inquiry</a>
+          <a class="sc-footer-link" href="#studio-main">Social media</a>
+          <a class="sc-footer-link" href="#contact">How to collaborate</a>
         </div>
         <div>
-          <div class="sc-footer-title">其他主题</div>
+          <div class="sc-footer-title">Other themes</div>
           @for (theme of themes; track theme.slug) {
             <a class="sc-footer-link" [routerLink]="theme.route">{{ theme.name }} · {{ theme.tagline }}</a>
           }
@@ -152,7 +152,7 @@
       </div>
       <div class="sc-footer-bottom">
         <span>© 2026 Atelier Studio · All rights reserved</span>
-        <a class="sc-footer-link" routerLink="/examples/themes">返回主题画廊</a>
+        <a class="sc-footer-link" routerLink="/examples/themes">Back to theme gallery</a>
       </div>
     </div>
   </footer>
