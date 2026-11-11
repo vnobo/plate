@@ -96,7 +96,7 @@ export class DataTableDemoComponent {
   ];
 
   columns: DataTableColumn[] = [
-    { key: 'id', title: 'ID', sortable: true, width: '80px' },
+    { key: 'id', title: 'ID', sortable: true, width: '5rem' },
     { key: 'name', title: '姓名', sortable: true },
     { key: 'email', title: '邮箱', sortable: true },
     { key: 'role', title: '角色', sortable: true },
@@ -161,7 +161,7 @@ export class DataTableDemoComponent {
   ];
 
   productColumns: DataTableColumn[] = [
-    { key: 'id', title: 'ID', sortable: true, width: '80px' },
+    { key: 'id', title: 'ID', sortable: true, width: '5rem' },
     { key: 'name', title: '产品名称', sortable: true },
     { key: 'category', title: '类别', sortable: true },
     {

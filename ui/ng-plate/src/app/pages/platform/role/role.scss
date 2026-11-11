@@ -4,7 +4,7 @@
 
 .role-tree {
   overflow-y: auto;
-  max-height: calc(100vh - 220px);
+  max-height: calc(100vh - 13.75rem);
   padding: 0.5rem 0;
 }
 
@@ -16,7 +16,7 @@
   padding-bottom: 0.5rem;
   padding-right: 0.75rem;
   cursor: pointer;
-  border-left: 3px solid transparent;
+  border-left: 0.1875rem solid transparent;
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease;
@@ -93,7 +93,7 @@
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
   background: var(--tblr-bg-surface-secondary, #f1f5f9);
-  border: 1px solid var(--tblr-border-color);
+  border: 0.0625rem solid var(--tblr-border-color);
   border-radius: 0.5rem;
 }
 

@@ -172,7 +172,7 @@ const FALLBACK_ICON = svg(
       }
 
       /* Mobile: off-canvas drawer instead of an empty in-flow bar */
-      @media (max-width: 991.98px) {
+      @media (max-width: 61.99875rem) {
         :host {
           position: fixed;
           inset-block: 0;

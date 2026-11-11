@@ -3,8 +3,8 @@
 }
 
 .pie {
-  width: 132px;
-  height: 132px;
+  width: 8.25rem;
+  height: 8.25rem;
   flex: none;
   // SVG 的 circle 默认从 3 点方向起笔，整体转 -90° 让第一块从 12 点开始
   transform: rotate(-90deg);

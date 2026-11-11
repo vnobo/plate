@@ -11,7 +11,7 @@
 
 /* -----------------------------------------------------------------------------
  * 1. Fonts and typographic scale
- *    Body text 15px (default 14px is a bit small), line-height 1.6; headings
+ *    Body text 0.9375rem (default 0.875rem is a bit small), line-height 1.6; headings
  *    step down by a factor of 1.25 to form a clear hierarchy.
  * -------------------------------------------------------------------------- */
 /* Font: LXGW WenKai 1.530.0 (Regular / Medium), SIL Open Font License 1.1.
@@ -54,7 +54,7 @@ html:root {
     'Microsoft YaHei', sans-serif;
 }
 
-/* Keep h4-h6 on Regular: h6 is 14px and Medium shows rough outlines there.
+/* Keep h4-h6 on Regular: h6 is 0.875rem and Medium shows rough outlines there.
    .lead / blockquote are reserved for future mid-length prose and quotes. */
 html h1,
 html h2,
@@ -68,7 +68,7 @@ html blockquote {
 }
 
 /* Scoped with `html` to win over Tabler (loaded after this file): tables,
-   chips and code-like labels stay legible at 12-14px with the system stack. */
+   chips and code-like labels stay legible at 0.75rem–0.875rem with the system stack. */
 html .table,
 html .card-table,
 html .datatable,
@@ -89,10 +89,10 @@ html .authority-chip code {
 
 /* -----------------------------------------------------------------------------
  * 2. Border radius and spacing
- *    Radius starts at 8px; the scale derives 10px for cards/buttons, one shared
+ *    Radius starts at 0.5rem; the scale derives 0.625rem for cards/buttons, one shared
  *    set of steps site-wide.
- *    Spacing follows Bootstrap's 4px grid (.25rem increments); component padding
- *    uses multiples of 8px.
+ *    Spacing follows Bootstrap's 0.25rem grid (.25rem increments); component padding
+ *    uses multiples of 0.5rem.
  * -------------------------------------------------------------------------- */
 html:root {
   --tblr-border-radius: 0.5rem;
@@ -113,9 +113,9 @@ html:root {
   --tblr-btn-padding-y: 0.4375rem;
 
   /* Source variable for the card shadow (--tblr-card-box-shadow derives from it) */
-  --tblr-shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(16, 24, 40, 0.04), 0 0.0625rem 0.1875rem rgba(16, 24, 40, 0.06);
 
-  /* Keep mobile inputs at 16px to avoid iOS Safari zooming the page on focus */
+  /* Keep mobile inputs at 1rem to avoid iOS Safari zooming the page on focus */
   --tblr-form-control-mobile-font-size: 1rem;
 }
 
@@ -225,7 +225,7 @@ html[data-bs-theme='dark'] {
   --tblr-body-color: #dce5f4;
   --tblr-muted: #8c9bb5;
   --tblr-border-color: #1e2c46;
-  --tblr-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.32);
+  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.32);
 
   /* WenKai Regular strokes thin out on dark surfaces. Keep the typeface and
      the weight scale intact; only adjust rasterisation. */

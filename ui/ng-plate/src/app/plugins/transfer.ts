@@ -166,7 +166,7 @@ export interface TransferData {
       flex: 1;
       display: flex;
       flex-direction: column;
-      border: 1px solid var(--tblr-border-color);
+      border: 0.0625rem solid var(--tblr-border-color);
       border-radius: var(--tblr-border-radius);
       background: var(--tblr-bg-surface);
       box-shadow: var(--tblr-shadow-card);
@@ -174,18 +174,18 @@ export interface TransferData {
 
     .transfer-header {
       padding: 0.75rem 1rem;
-      border-bottom: 1px solid var(--tblr-border-color);
+      border-bottom: 0.0625rem solid var(--tblr-border-color);
       display: flex;
       align-items: center;
       background: var(--tblr-bg-surface-secondary);
-      border-top-left-radius: calc(var(--tblr-border-radius) - 1px);
-      border-top-right-radius: calc(var(--tblr-border-radius) - 1px);
+      border-top-left-radius: calc(var(--tblr-border-radius) - 0.0625rem);
+      border-top-right-radius: calc(var(--tblr-border-radius) - 0.0625rem);
     }
 
     .transfer-body {
       flex: 1;
       overflow: auto;
-      max-height: 300px;
+      max-height: 18.75rem;
       padding: 0.5rem;
     }
 
@@ -239,7 +239,7 @@ export interface TransferData {
       padding: 0;
       border-radius: 50%;
       background: var(--tblr-bg-surface);
-      border: 1px solid var(--tblr-border-color);
+      border: 0.0625rem solid var(--tblr-border-color);
       color: var(--tblr-text-secondary);
       transition: all 0.2s ease;
     }
@@ -275,7 +275,7 @@ export interface TransferData {
       flex: 1;
     }
 
-    @media (max-width: 767.98px) {
+    @media (max-width: 47.99875rem) {
       .transfer-container {
         flex-direction: column;
       }

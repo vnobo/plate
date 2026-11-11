@@ -31,7 +31,7 @@ export class {{ClassName}} {
   height: 100vh;
 
   button {
-    margin-top: 10px;
+    margin-top: 0.625rem;
   }
 }
 ```

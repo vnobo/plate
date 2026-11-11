@@ -13,7 +13,7 @@ import { RouterOutlet } from '@angular/router';
     }
 
     .app-content {
-      padding: 20px;
+      padding: 1.25rem;
       text-align: center;
     }
   `,

@@ -10,17 +10,17 @@
   --t-font: 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --t-display: Oswald, 'Arial Narrow', 'PingFang SC', sans-serif;
   --t-radius: 0;
-  --t-gap: 16px;
-  --t-section: 88px;
+  --t-gap: 1rem;
+  --t-section: 5.5rem;
 }
 
 .t-studio .sc-nav {
-  border-bottom: 2px solid #292929;
+  border-bottom: 0.125rem solid #292929;
   background: #111111;
 }
 
 .t-studio .sc-brand {
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: -0.03em;
   text-transform: uppercase;
@@ -29,18 +29,18 @@
 .t-studio .sc-link {
   color: #b7b7b7;
   font-family: var(--t-display);
-  font-size: 15px;
+  font-size: 0.9375rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .t-studio .sc-link::after {
-  height: 2px;
+  height: 0.125rem;
   background: #e8ff47;
 }
 
 .t-studio .sc-btn {
-  padding: 14px 26px;
+  padding: 0.875rem 1.625rem;
   border-radius: 0;
   background: #e8ff47;
   color: #111111;
@@ -49,23 +49,23 @@
 }
 
 .t-studio .sc-btn:hover {
-  transform: translate(-3px, -3px);
-  box-shadow: 6px 6px 0 #e8ff47;
+  transform: translate(-0.1875rem, -0.1875rem);
+  box-shadow: 0.375rem 0.375rem 0 #e8ff47;
 }
 
 .t-studio .sc-btn-ghost {
-  border: 2px solid #f5f5f0;
+  border: 0.125rem solid #f5f5f0;
   background: transparent;
   color: #f5f5f0;
 }
 
 .t-studio .sc-hero {
-  padding-top: 80px;
-  padding-bottom: 56px;
+  padding-top: 5rem;
+  padding-bottom: 3.5rem;
 }
 
 .t-studio .sc-hero.t-studio-hero {
-  border-bottom: 2px solid #292929;
+  border-bottom: 0.125rem solid #292929;
 }
 
 .t-studio .sc-kicker {
@@ -73,7 +73,7 @@
 }
 
 .t-studio .sc-hero-title {
-  font-size: clamp(64px, 11vw, 150px);
+  font-size: clamp(4rem, 11vw, 9.375rem);
   font-weight: 700;
   line-height: 1.12;
   letter-spacing: -0.05em;
@@ -91,35 +91,35 @@
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  margin-top: 72px;
-  padding-bottom: 40px;
+  gap: 1.25rem;
+  margin-top: 4.5rem;
+  padding-bottom: 2.5rem;
   color: #a0a0a0;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 
 .t-studio .t-studio-status {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border: 2px solid #e8ff47;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  border: 0.125rem solid #e8ff47;
   color: #e8ff47;
   font-family: var(--t-display);
-  font-size: 13px;
+  font-size: 0.8125rem;
   text-transform: uppercase;
 }
 
 .t-studio .t-studio-status::before {
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   background: #e8ff47;
   content: '';
 }
 
 .t-studio .sc-section-title {
-  font-size: clamp(38px, 5vw, 72px);
+  font-size: clamp(2.375rem, 5vw, 4.5rem);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -127,15 +127,15 @@
 .t-studio .t-studio-projects {
   display: grid;
   grid-template-columns: 1.35fr 1fr;
-  grid-auto-rows: 250px;
-  gap: 16px;
+  grid-auto-rows: 15.625rem;
+  gap: 1rem;
 }
 
 .t-studio .t-studio-project {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 2px solid #333333;
+  border: 0.125rem solid #333333;
   background: #181818;
   transition:
     background 0.3s ease,
@@ -155,7 +155,7 @@
   flex: 1;
   min-height: 0;
   border-radius: 0;
-  border-bottom: 2px solid #333333;
+  border-bottom: 0.125rem solid #333333;
   background: #222222;
 }
 
@@ -178,14 +178,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
 }
 
 .t-studio .t-studio-project-num {
   color: #e8ff47;
   font-family: var(--t-display);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .t-studio .t-studio-project:hover .t-studio-project-num {
@@ -194,14 +194,14 @@
 
 .t-studio .t-studio-project-title {
   font-family: var(--t-display);
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 600;
   text-transform: uppercase;
 }
 
 .t-studio .t-studio-project-cat {
   color: var(--t-muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   white-space: nowrap;
 }
 
@@ -211,44 +211,44 @@
 
 .t-studio .t-studio-service {
   display: grid;
-  grid-template-columns: 80px 1fr auto;
+  grid-template-columns: 5rem 1fr auto;
   align-items: center;
-  gap: 20px;
-  padding: 28px 0;
-  border-bottom: 2px solid #292929;
+  gap: 1.25rem;
+  padding: 1.75rem 0;
+  border-bottom: 0.125rem solid #292929;
   transition:
     padding-left 0.25s ease,
     color 0.25s ease;
 }
 
 .t-studio .t-studio-service:hover {
-  padding-left: 16px;
+  padding-left: 1rem;
   color: #e8ff47;
 }
 
 .t-studio .t-studio-service-num {
   color: #e8ff47;
   font-family: var(--t-display);
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .t-studio .t-studio-service-title {
   font-family: var(--t-display);
-  font-size: clamp(24px, 3vw, 40px);
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
   font-weight: 600;
   text-transform: uppercase;
 }
 
 .t-studio .t-studio-service-desc {
   color: #a0a0a0;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .t-studio .t-studio-marquee {
   overflow: hidden;
-  padding: 24px 0;
-  border-top: 2px solid #292929;
-  border-bottom: 2px solid #292929;
+  padding: 1.5rem 0;
+  border-top: 0.125rem solid #292929;
+  border-bottom: 0.125rem solid #292929;
   white-space: nowrap;
 }
 
@@ -259,14 +259,14 @@
 
 .t-studio .t-studio-marquee-group {
   display: inline-flex;
-  gap: 48px;
-  padding-right: 48px;
+  gap: 3rem;
+  padding-right: 3rem;
 }
 
 .t-studio .t-studio-marquee-group span {
   color: #3f3f3f;
   font-family: var(--t-display);
-  font-size: 30px;
+  font-size: 1.875rem;
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -282,14 +282,14 @@
 }
 
 .t-studio .sc-cta {
-  padding: 96px 40px;
+  padding: 6rem 2.5rem;
   border-radius: 0;
   background: #e8ff47;
   color: #111111;
 }
 
 .t-studio .sc-cta-title {
-  font-size: clamp(56px, 10vw, 140px);
+  font-size: clamp(3.5rem, 10vw, 8.75rem);
   font-weight: 700;
   line-height: 0.9;
   text-transform: uppercase;
@@ -312,7 +312,7 @@
 
 .t-studio .sc-footer {
   background: #0b0b0b;
-  border-top: 2px solid #292929;
+  border-top: 0.125rem solid #292929;
 }
 
 .t-studio .sc-footer-link {
@@ -323,20 +323,20 @@
   color: #e8ff47;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 47.9375rem) {
   .t-studio .sc-hero-title {
-    font-size: 52px;
+    font-size: 3.25rem;
   }
 
   .t-studio .t-studio-hero-foot {
     flex-direction: column;
     align-items: stretch;
-    margin-top: 40px;
+    margin-top: 2.5rem;
   }
 
   .t-studio .t-studio-projects {
     grid-template-columns: 1fr;
-    grid-auto-rows: 230px;
+    grid-auto-rows: 14.375rem;
   }
 
   .t-studio .t-studio-project:nth-child(n) {
@@ -345,7 +345,7 @@
   }
 
   .t-studio .t-studio-service {
-    grid-template-columns: 48px 1fr;
+    grid-template-columns: 3rem 1fr;
   }
 
   .t-studio .t-studio-service-desc {
@@ -353,6 +353,6 @@
   }
 
   .t-studio .sc-cta {
-    padding: 64px 24px;
+    padding: 4rem 1.5rem;
   }
 }

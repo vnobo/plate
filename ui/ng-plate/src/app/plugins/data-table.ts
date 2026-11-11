@@ -231,7 +231,7 @@ export interface DataTablePageEvent {
     }
 
     .card {
-      border: 1px solid var(--tblr-border-color);
+      border: 0.0625rem solid var(--tblr-border-color);
       border-radius: var(--tblr-border-radius);
       background: var(--tblr-bg-surface);
       box-shadow: var(--tblr-shadow-card);
@@ -242,10 +242,10 @@ export interface DataTablePageEvent {
       justify-content: space-between;
       align-items: center;
       padding: 0.75rem 1rem;
-      border-bottom: 1px solid var(--tblr-border-color);
+      border-bottom: 0.0625rem solid var(--tblr-border-color);
       background: var(--tblr-bg-surface-secondary);
-      border-top-left-radius: calc(var(--tblr-border-radius) - 1px);
-      border-top-right-radius: calc(var(--tblr-border-radius) - 1px);
+      border-top-left-radius: calc(var(--tblr-border-radius) - 0.0625rem);
+      border-top-right-radius: calc(var(--tblr-border-radius) - 0.0625rem);
     }
 
     .card-title {
@@ -279,10 +279,10 @@ export interface DataTablePageEvent {
       justify-content: space-between;
       align-items: center;
       padding: 0.75rem 1rem;
-      border-top: 1px solid var(--tblr-border-color);
+      border-top: 0.0625rem solid var(--tblr-border-color);
       background: var(--tblr-bg-surface-secondary);
-      border-bottom-left-radius: calc(var(--tblr-border-radius) - 1px);
-      border-bottom-right-radius: calc(var(--tblr-border-radius) - 1px);
+      border-bottom-left-radius: calc(var(--tblr-border-radius) - 0.0625rem);
+      border-bottom-right-radius: calc(var(--tblr-border-radius) - 0.0625rem);
     }
 
     .pagination {

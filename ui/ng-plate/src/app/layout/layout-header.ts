@@ -59,7 +59,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive],
   host: {
-    // 用 expand-lg 与侧边栏断点对齐：否则 768–991px 汉堡键被隐藏、侧边栏又是抽屉，导航无法打开
+    // 用 expand-lg 与侧边栏断点对齐：否则 48rem–61.9375rem 汉堡键被隐藏、侧边栏又是抽屉，导航无法打开
     class: 'navbar navbar-expand-lg sticky-top d-print-none',
     '[attr.aria-label]': '"顶部导航"',
   },
@@ -75,7 +75,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
         aria-controls="aside-menu"
         aria-label="打开导航"
       >
-        <!-- Tabler 自带的 toggler 图标（1.5em，mask 绘制，与预览页一致）；换成内联 svg.icon 会被 .icon 规则压成 8px 宽 -->
+        <!-- Tabler 自带的 toggler 图标（1.5em，mask 绘制，与预览页一致）；换成内联 svg.icon 会被 .icon 规则压成 0.5rem 宽 -->
         <span class="navbar-toggler-icon"></span>
       </button>
 
