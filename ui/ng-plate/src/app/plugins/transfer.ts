@@ -275,7 +275,7 @@ export interface TransferData {
       flex: 1;
     }
 
-    @media (max-width: 47.99875rem) {
+    @media (max-width: 767.98px) {
       .transfer-container {
         flex-direction: column;
       }

@@ -1,4 +1,4 @@
-/* 共享骨架：所有选择器以 .sc-root / .sc- 开头，配色由 .t-* 令牌覆盖。 */
+/* Shared skeleton: all selectors start with .sc-root / .sc-, and colours are overridden by .t-* tokens. */
 .sc-root {
   --t-bg: #ffffff;
   --t-surface: #ffffff;
@@ -452,7 +452,7 @@
   flex: none;
 }
 
-@media (max-width: 61.9375rem) {
+@media (max-width: 991px) {
   .sc-hero-grid {
     grid-template-columns: 1fr;
     gap: 2.75rem;
@@ -467,7 +467,7 @@
   }
 }
 
-@media (max-width: 47.9375rem) {
+@media (max-width: 767px) {
   .sc-links {
     position: absolute;
     top: 100%;

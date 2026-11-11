@@ -21,37 +21,37 @@ interface Notice {
   title: string;
   text: string;
   time: string;
-  /** 仅用于排序的时间戳 */
+  /** Timestamp used for sorting only */
   at: number;
   unread: boolean;
   starred: boolean;
 }
 
-/** 通知类型 → 图标/圆点配色/文案。圆点颜色即类型，动画=未读，灰色=已读 */
+/** Notice type → icon / dot colour / label. Dot colour encodes the type, animation = unread, grey = read */
 const NOTICE_TYPES: Record<NoticeType, { label: string; color: string; icon: string }> = {
   system: {
-    label: '系统通知',
+    label: 'System',
     color: 'red',
     icon: '<svg class="icon icon-sm text-secondary" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></svg>',
   },
   mention: {
-    label: '@提醒',
+    label: '@Mentions',
     color: 'blue',
     icon: '<svg class="icon icon-sm text-secondary" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M16 12v1.5a2.5 2.5 0 0 0 5 0v-1.5a9 9 0 1 0 -5.5 8.28" /></svg>',
   },
   comment: {
-    label: '评论',
+    label: 'Comments',
     color: 'green',
     icon: '<svg class="icon icon-sm text-secondary" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 9h8" /><path d="M8 13h6" /><path d="M18 4a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-5l-5 3v-3h-2a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12z" /></svg>',
   },
   like: {
-    label: '点赞',
+    label: 'Likes',
     color: 'pink',
     icon: '<svg class="icon icon-sm text-secondary" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.566z" /></svg>',
   },
 };
 
-/** 排序优先级：系统 > @提醒 > 评论 > 点赞 */
+/** Sort priority: System > @Mentions > Comments > Likes */
 const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
 
 @Component({
@@ -59,34 +59,34 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive],
   host: {
-    // 用 expand-lg 与侧边栏断点对齐：否则 48rem–61.9375rem 汉堡键被隐藏、侧边栏又是抽屉，导航无法打开
+    // Align with the sidebar breakpoint using expand-lg: otherwise between 48rem–61.9375rem the hamburger is hidden while the sidebar is still a drawer, leaving navigation unreachable
     class: 'navbar navbar-expand-lg sticky-top d-print-none',
-    '[attr.aria-label]': '"顶部导航"',
+    '[attr.aria-label]': '"Top navigation"',
   },
   template: `
-    <!-- flex-nowrap：窄屏 navbar 默认 flex-wrap 会把动作区挤到第二行，模块导航常显需保持单行 -->
+    <!-- flex-nowrap: on narrow screens the navbar's default flex-wrap pushes the action area onto a second row; the module nav stays visible so one row must be kept -->
     <div class="container-xl flex-nowrap">
-      <!-- 移动端：打开侧边栏抽屉 -->
+      <!-- Mobile: open the sidebar drawer -->
       <button
         class="navbar-toggler d-lg-none"
         type="button"
         (click)="layout.toggleMobile()"
         [attr.aria-expanded]="layout.mobileOpen()"
         aria-controls="aside-menu"
-        aria-label="打开导航"
+        aria-label="Open navigation"
       >
-        <!-- Tabler 自带的 toggler 图标（1.5em，mask 绘制，与预览页一致）；换成内联 svg.icon 会被 .icon 规则压成 0.5rem 宽 -->
+        <!-- Tabler's built-in toggler icon (1.5em, drawn with mask, same as the preview page); an inline svg.icon would be squeezed to 0.5rem wide by the .icon rule -->
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <!-- 桌面端：折叠 / 展开侧边栏 -->
+      <!-- Desktop: collapse / expand the sidebar -->
       <button
         class="btn btn-ghost-secondary btn-icon d-none d-lg-flex"
         type="button"
         (click)="layout.toggleCollapsed()"
         [attr.aria-expanded]="!layout.collapsed()"
         aria-controls="aside-menu"
-        [attr.aria-label]="layout.collapsed() ? '展开侧边栏' : '折叠侧边栏'"
+        [attr.aria-label]="layout.collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
       >
         @if (layout.collapsed()) {
           <svg
@@ -124,9 +124,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
         }
       </button>
 
-      <!-- 模块主导航：Tabler 水平导航 navbar-nav > nav-item > nav-link；
-           flex-row 保证窄屏也横排，否则 .navbar-nav 默认纵向会占满一行；
-           项目未定义 --tblr-navbar-active-color，仅靠 .active 看不出高亮，故补主色与中等字重 -->
+      <!-- Module primary nav: Tabler horizontal nav navbar-nav > nav-item > nav-link;
+           flex-row keeps it horizontal on narrow screens, otherwise .navbar-nav defaults to a vertical full-width row;
+           the project does not define --tblr-navbar-active-color, so .active alone shows no highlight, hence the primary colour and medium font weight -->
       <ul class="navbar-nav flex-row ms-2">
         <li class="nav-item">
           <a
@@ -134,7 +134,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             routerLink="/platform"
             routerLinkActive="active text-primary fw-medium"
             ariaCurrentWhenActive="page"
-            >平台管理</a
+            >Platform</a
           >
         </li>
         <li class="nav-item">
@@ -143,7 +143,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             routerLink="/dashboard"
             routerLinkActive="active text-primary fw-medium"
             ariaCurrentWhenActive="page"
-            >工作台</a
+            >Dashboard</a
           >
         </li>
         <li class="nav-item">
@@ -152,22 +152,22 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             routerLink="/examples"
             routerLinkActive="active text-primary fw-medium"
             ariaCurrentWhenActive="page"
-            >示例</a
+            >Examples</a
           >
         </li>
       </ul>
 
-      <!-- 动作区：顺序参照 Tabler 示例（主题 → 通知 → 语言 → 用户），全部用 .nav-link 统一外观 -->
+      <!-- Action area: order follows the Tabler example (theme → notifications → language → user), all styled uniformly with .nav-link -->
       <div class="navbar-nav flex-row order-md-last ms-auto align-items-center">
-        <!-- 亮/暗切换：显示哪个按钮由 Tabler 的 .hide-theme-dark / .hide-theme-light
-             依据 data-bs-theme 决定，组件无需维护当前主题状态 -->
+        <!-- Light/dark toggle: which button is shown is decided by Tabler's .hide-theme-dark / .hide-theme-light
+             based on data-bs-theme, so the component does not need to track the current theme -->
         <div class="nav-item d-flex">
           <a
             href="javascript:void(0)"
             class="nav-link px-2 hide-theme-dark"
             (click)="settings.setTheme('dark')"
-            title="切换到暗色模式"
-            aria-label="切换到暗色模式"
+            title="Switch to dark mode"
+            aria-label="Switch to dark mode"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -191,8 +191,8 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             href="javascript:void(0)"
             class="nav-link px-2 hide-theme-light"
             (click)="settings.setTheme('light')"
-            title="切换到亮色模式"
-            aria-label="切换到亮色模式"
+            title="Switch to light mode"
+            aria-label="Switch to light mode"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -215,7 +215,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
           </a>
         </div>
 
-        <!-- 通知：红点依赖 .nav-link > .badge 的绝对定位规则，不能换成 btn -->
+        <!-- Notifications: the red dot relies on the .nav-link > .badge absolute-positioning rule, so it cannot be replaced by btn -->
         <div class="nav-item dropdown">
           <a
             #notifyToggle
@@ -223,7 +223,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             class="nav-link px-2"
             data-bs-toggle="dropdown"
             data-bs-auto-close="outside"
-            aria-label="通知"
+            aria-label="Notifications"
             (click)="openNotifications()"
           >
             <svg
@@ -252,13 +252,13 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
           <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
             <div class="card">
               <div class="card-header d-flex align-items-center">
-                <h2 class="card-title">通知</h2>
-                <span class="ms-2 small text-secondary">{{ unreadCount() }} 条未读</span>
+                <h2 class="card-title">Notifications</h2>
+                <span class="ms-2 small text-secondary">{{ unreadCount() }} unread</span>
                 <button
                   type="button"
                   class="btn-close ms-auto"
                   (click)="closeNotifications()"
-                  aria-label="关闭"
+                  aria-label="Close"
                 ></button>
               </div>
 
@@ -288,7 +288,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
                               (item.unread ? ' status-dot-animated bg-' + colorOf(item.type) : '')
                             "
                           >
-                            <span class="visually-hidden">{{ item.unread ? '未读' : '已读' }}</span>
+                            <span class="visually-hidden">{{ item.unread ? 'Unread' : 'Read' }}</span>
                           </span>
                         </div>
                         <div class="col text-truncate">
@@ -317,7 +317,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
                             href="javascript:void(0)"
                             class="list-group-item-actions"
                             [class.show]="item.starred"
-                            [attr.aria-label]="item.starred ? '取消收藏' : '收藏'"
+                            [attr.aria-label]="item.starred ? 'Unstar' : 'Star'"
                             (click)="toggleStar(item.id)"
                           >
                             <svg
@@ -364,7 +364,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
                           />
                           <path d="M4 13h3l3 3h4l3 -3h3" />
                         </svg>
-                        <div>暂无通知</div>
+                        <div>No notifications</div>
                       </div>
                     </div>
                   }
@@ -374,7 +374,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
               <div class="card-body">
                 <div class="row g-2">
                   <div class="col">
-                    <button class="btn w-100" type="button" (click)="archiveAll()">归档全部</button>
+                    <button class="btn w-100" type="button" (click)="archiveAll()">Archive all</button>
                   </div>
                   <div class="col">
                     <button
@@ -383,7 +383,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
                       [disabled]="unreadCount() === 0"
                       (click)="markAllRead()"
                     >
-                      全部标记已读
+                      Mark all as read
                     </button>
                   </div>
                 </div>
@@ -392,13 +392,13 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
           </div>
         </div>
 
-        <!-- 语言：shortcut: 只记录偏好与 <html lang>，项目尚未接入 i18n 资源，接入后由它驱动文案 -->
+        <!-- Language: shortcut: records only the preference and <html lang>; the project has no i18n resources yet, and copy will be driven by them once integrated -->
         <div class="nav-item dropdown d-none d-md-flex">
           <a
             href="javascript:void(0)"
             class="nav-link px-2 d-flex align-items-center"
             data-bs-toggle="dropdown"
-            aria-label="切换语言"
+            aria-label="Switch language"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -422,7 +422,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             {{ langLabel() }}
           </a>
           <div class="dropdown-menu dropdown-menu-end">
-            <button class="dropdown-item" type="button" (click)="setLang('zh-CN')">简体中文</button>
+            <button class="dropdown-item" type="button" (click)="setLang('zh-CN')">Simplified Chinese</button>
             <button class="dropdown-item" type="button" (click)="setLang('en')">English</button>
           </div>
         </div>
@@ -432,10 +432,10 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             href="javascript:void(0)"
             class="nav-link d-flex lh-1 p-0 px-2"
             data-bs-toggle="dropdown"
-            aria-label="打开用户菜单"
+            aria-label="Open user menu"
           >
             <span class="avatar avatar-sm bg-primary-lt">{{ userSer.initial() }}</span>
-            <!-- 只展示姓名与昵称，角色/权限不在界面上出现 -->
+            <!-- Show only the name and nickname; roles/permissions are not exposed in the UI -->
             <div class="d-none d-xl-block ps-2 lh-sm">
               <div class="fw-medium">{{ userSer.displayName() }}</div>
               @if (showNickname()) {
@@ -444,7 +444,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             </div>
           </a>
           <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-            <!-- xl 以下顶栏只剩头像，名字挪进菜单里，否则小屏看不出当前是谁 -->
+            <!-- Below xl the top bar keeps only the avatar, so the name moves into the menu; otherwise small screens cannot tell who is signed in -->
             <div class="d-xl-none">
               <div class="dropdown-item-text d-flex align-items-center">
                 <span class="avatar avatar-sm bg-primary-lt">{{ userSer.initial() }}</span>
@@ -476,7 +476,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
                 />
                 <path d="M15 3.5a9 9 0 0 1 5.5 5.5h-4.5a1 1 0 0 1 -1 -1v-4.5" />
               </svg>
-              工作台
+              Dashboard
             </a>
             <div class="dropdown-divider"></div>
             <a href="javascript:void(0)" class="dropdown-item" (click)="logout()">
@@ -499,7 +499,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
                 <path d="M7 12h14l-3 -3" />
                 <path d="M17 9l3 3" />
               </svg>
-              退出登录
+              Log out
             </a>
           </div>
         </div>
@@ -515,13 +515,13 @@ export class LayoutHeader {
   protected readonly layout = inject(LayoutService);
   private readonly http = inject(HttpClient);
 
-  /** 昵称与主显示名相同时只显示一行，避免「张三 / 张三」 */
+  /** Show one line when the nickname matches the display name, avoiding a duplicate like "Zhang San / Zhang San" */
   protected readonly showNickname = computed(() => {
     const nickname = this.userSer.nickname();
     return nickname !== '' && nickname !== this.userSer.displayName();
   });
 
-  // 图标是硬编码的静态 SVG；Angular 的 innerHTML 清洗会移除 <svg>，故声明为可信内容
+  // Icons are hard-coded static SVG; Angular's innerHTML sanitisation strips <svg>, so they are declared trusted
   private readonly sanitizer = inject(DomSanitizer);
   private readonly typeIcons = new Map<NoticeType, SafeHtml>(
     (Object.keys(NOTICE_TYPES) as NoticeType[]).map((type) => [
@@ -532,14 +532,14 @@ export class LayoutHeader {
 
   private readonly notifyToggle = viewChild.required<ElementRef<HTMLElement>>('notifyToggle');
 
-  /** 通知示例数据：暂无后端接口，先用于验证结构与交互 */
+  /** Sample notice data: no back-end endpoint yet, used to verify structure and interactions */
   protected readonly notices = signal<ReadonlyArray<Notice>>([
     {
       id: 1,
       type: 'system',
-      title: '版本 1.4.0 已发布',
-      text: '修复租户切换后权限未刷新的问题 (#29604)',
-      time: '10 分钟前',
+      title: 'Version 1.4.0 released',
+      text: 'Fixed permissions not refreshing after switching tenants (#29604)',
+      time: '10 minutes ago',
       at: Date.now() - 10 * 60_000,
       unread: true,
       starred: false,
@@ -547,9 +547,9 @@ export class LayoutHeader {
     {
       id: 2,
       type: 'mention',
-      title: '张伟 在「用户管理」中 @ 了你',
-      text: '麻烦确认下这个租户的分组权限是否正确 (#29734)',
-      time: '1 小时前',
+      title: 'Zhang Wei mentioned you in "User Management"',
+      text: 'Please confirm whether the group permissions for this tenant are correct (#29734)',
+      time: '1 hour ago',
       at: Date.now() - 60 * 60_000,
       unread: true,
       starred: true,
@@ -557,9 +557,9 @@ export class LayoutHeader {
     {
       id: 3,
       type: 'comment',
-      title: '李娜 评论了你的角色配置',
-      text: '建议把「只读」角色拆成两个更细的权限 (#29736)',
-      time: '3 小时前',
+      title: 'Li Na commented on your role configuration',
+      text: 'Suggest splitting the "Read-only" role into two finer-grained permissions (#29736)',
+      time: '3 hours ago',
       at: Date.now() - 3 * 60 * 60_000,
       unread: false,
       starred: false,
@@ -567,16 +567,16 @@ export class LayoutHeader {
     {
       id: 4,
       type: 'like',
-      title: '王强 赞了你的月度报表',
-      text: '「月度活跃用户」报表收到 5 个赞 (#29730)',
-      time: '昨天 18:02',
+      title: 'Wang Qiang liked your monthly report',
+      text: 'The "Monthly Active Users" report received 5 likes (#29730)',
+      time: 'Yesterday 18:02',
       at: Date.now() - 26 * 60 * 60_000,
       unread: true,
       starred: false,
     },
   ]);
 
-  /** 排序：未读优先 → 类型优先级（系统 > @提醒 > 评论 > 点赞）→ 时间倒序 */
+  /** Sort: unread first → type priority (System > @Mentions > Comments > Likes) → newest first */
   protected readonly list = computed(() => {
     const priority = TYPE_PRIORITY;
     return [...this.notices()].sort(
@@ -597,7 +597,7 @@ export class LayoutHeader {
       ? 'en'
       : 'zh-CN',
   );
-  protected readonly langLabel = computed(() => (this.lang() === 'en' ? 'EN' : '中文'));
+  protected readonly langLabel = computed(() => (this.lang() === 'en' ? 'EN' : 'Chinese'));
 
   colorOf(type: NoticeType): string {
     return NOTICE_TYPES[type].color;
@@ -607,7 +607,7 @@ export class LayoutHeader {
     return this.typeIcons.get(type)!;
   }
 
-  /** 首次打开时加载；shortcut: 暂无通知接口，用 400ms 模拟一次拉取，接入后替换成真实请求 */
+  /** Load on first open; shortcut: no notification endpoint yet, a 400ms delay simulates a fetch, replace with a real request once integrated */
   openNotifications(): void {
     if (this.loaded) return;
     this.loaded = true;
@@ -633,7 +633,7 @@ export class LayoutHeader {
     this.notices.set([]);
   }
 
-  /** 关闭面板用 Tabler 的 Dropdown 实例（Bootstrap 5 的 dropdown 不支持 data-bs-dismiss） */
+  /** Closing the panel uses Tabler's Dropdown instance (Bootstrap 5's dropdown does not support data-bs-dismiss) */
   closeNotifications(): void {
     const dropdown = (
       window as unknown as {
@@ -650,8 +650,8 @@ export class LayoutHeader {
   }
 
   logout(): void {
-    // 主动退出：先让后端吊销 HttpOnly 的 remember-me cookie（前端碰不到也删不掉），
-    // 服务器清不掉也要继续清本地，否则点了退出还停在里面
+    // Explicit logout: first ask the back-end to revoke the HttpOnly remember-me cookie (the front-end cannot read or delete it),
+    // and clear local state regardless of whether the server succeeds, otherwise the user stays signed in after clicking logout
     this.http.get('/oauth2/logout').subscribe({
       next: () => this.finishLogout(),
       error: () => this.finishLogout(),

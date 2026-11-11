@@ -7,12 +7,12 @@ import { TokenService } from '@app/core';
 import { environment } from '@envs/env';
 import { LayoutService } from './layout.service';
 
-/** 后端 se_menus 的菜单项，只声明侧栏用到的字段 */
+/** Menu item from the back-end se_menus response; only the fields used by the sidebar are declared. */
 interface MenuItem {
   code?: string;
   name?: string;
   path?: string;
-  /** FOLDER 是分组目录，只有它下面挂 MENU；MENU/LINK/API 才是可点的项 */
+  /** FOLDER is a grouping header; only it holds child MENU items, and MENU/LINK/API are the clickable ones. */
   type?: 'FOLDER' | 'MENU' | 'LINK' | 'API';
   icons?: string;
 }
@@ -21,7 +21,7 @@ interface NavItem {
   title: string;
   link: string;
   icon: SafeHtml;
-  /** FOLDER 只作分组标题，不参与导航 */
+  /** FOLDER is only a group heading and does not take part in navigation. */
   heading: boolean;
 }
 
@@ -29,8 +29,8 @@ const svg = (body: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
 
 /**
- * 后端 icons 字段给的是图标名（setting/user/group/menu），项目没装图标库，
- * 所以按名字映射到内联 SVG；认不出的名字走 FALLBACK，避免图标位空白。
+ * The back-end icons field carries icon names (setting/user/group/menu); the project has no icon library,
+ * so names are mapped to inline SVG. Unknown names fall back to FALLBACK to avoid an empty icon slot.
  */
 const ICONS: Record<string, string> = {
   setting: svg(
@@ -63,13 +63,13 @@ const FALLBACK_ICON = svg(
     class: 'navbar navbar-vertical navbar-expand-lg',
     '[class.navbar-folded]': 'layout.collapsed()',
     '[class.show]': 'layout.mobileOpen()',
-    '[attr.aria-label]': '"主导航"',
-    // 抽屉打开时按 Esc 关闭（closeMobile 幂等，未打开时无副作用）
+    '[attr.aria-label]': '"Main navigation"',
+    // Close the drawer on Esc when open (closeMobile is idempotent and has no effect when closed)
     '(document:keydown.escape)': 'layout.closeMobile()',
   },
   template: `
     <div class="container-fluid">
-      <!-- 桌面端品牌区：纯链接，回到工作台（折叠按钮改放到顶栏） -->
+      <!-- Desktop brand area: a plain link back to the dashboard (collapse button moved to the top bar) -->
       <div class="navbar-brand navbar-brand-autodark d-none d-lg-flex">
         <a class="d-flex align-items-center text-decoration-none" routerLink="/dashboard">
           <span class="navbar-brand-logo">P</span>
@@ -77,7 +77,7 @@ const FALLBACK_ICON = svg(
         </a>
       </div>
 
-      <!-- 移动端抽屉头部 -->
+      <!-- Mobile drawer header -->
       <div
         class="d-flex d-lg-none align-items-center justify-content-between px-3 py-2 border-bottom"
       >
@@ -89,7 +89,7 @@ const FALLBACK_ICON = svg(
           class="btn btn-ghost-secondary btn-icon"
           type="button"
           (click)="layout.closeMobile()"
-          aria-label="关闭导航"
+          aria-label="Close navigation"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -114,12 +114,12 @@ const FALLBACK_ICON = svg(
         <ul class="navbar-nav pt-lg-3">
           @for (item of menu(); track item.link) {
             @if (item.heading) {
-              <!-- FOLDER 只是分组标题，点了没有落地页，所以不给链接 -->
+              <!-- FOLDER is only a group heading with no landing page, so it gets no link -->
               <li class="nav-item">
                 <div class="nav-link disabled">{{ item.title }}</div>
               </li>
             } @else {
-              <!-- active 类要落在 nav-item 上：Tabler 用 .nav-item.active > .nav-link 做激活态 -->
+              <!-- The active class must sit on nav-item: Tabler styles the active state via .nav-item.active > .nav-link -->
               <li class="nav-item" routerLinkActive="active" ariaCurrentWhenActive="page">
                 <a class="nav-link" [routerLink]="item.link" (click)="layout.closeMobile()">
                   <span
@@ -134,7 +134,7 @@ const FALLBACK_ICON = svg(
           @if (menuFailed()) {
             <li class="nav-item">
               <button class="nav-link text-danger" type="button" (click)="reloadMenu()">
-                菜单加载失败，点击重试
+                Failed to load menu, click to retry
               </button>
             </li>
           }
@@ -166,13 +166,13 @@ const FALLBACK_ICON = svg(
         display: none;
       }
 
-      /* 折叠态下图标居中 */
+      /* Center icons in the folded state */
       :host(.navbar-folded) .nav-link {
         justify-content: center;
       }
 
       /* Mobile: off-canvas drawer instead of an empty in-flow bar */
-      @media (max-width: 61.99875rem) {
+      @media (max-width: 991.98px) {
         :host {
           position: fixed;
           inset-block: 0;
@@ -203,28 +203,28 @@ const FALLBACK_ICON = svg(
 })
 export class LayoutAside {
   readonly layout = inject(LayoutService);
-  // 图标是硬编码的静态 SVG；Angular 的 innerHTML 清洗会移除 <svg>，故声明为可信内容
+  // Icons are hard-coded static SVG; Angular's innerHTML sanitisation strips <svg>, so they are declared trusted
   private readonly sanitizer = inject(DomSanitizer);
   private readonly tokenSer = inject(TokenService);
 
   /**
-   * 当前用户的菜单。httpResource 是 HttpClient 的响应式封装，全局拦截器（令牌、401 登出）照旧生效；
-   * 未登录（含 SSR 首屏没有会话）时返回 undefined，资源保持 idle 不发请求。
+   * Menu of the current user. httpResource is the reactive wrapper over HttpClient, so global interceptors (token, 401 logout) still apply;
+   * when not logged in (including SSR first render without a session) it returns undefined and the resource stays idle without issuing a request.
    */
   protected readonly menuResource = httpResource<MenuItem[]>(
     () => (this.tokenSer.isLogged() ? { url: environment.relaApiPath + '/menus/me' } : undefined),
     { defaultValue: [] },
   );
 
-  /** 401 由全局拦截器统一登出并跳登录页，这里只兜住「请求失败/超时」这类情况 */
+  /** 401 is handled globally by the interceptor (logout + redirect to login); here we only cover request failures/timeouts */
   protected readonly menuFailed = computed(() => !!this.menuResource.error());
 
   protected readonly menu = computed<NavItem[]>(() => {
-    // 错误态读 value() 会抛错，先问 hasValue()（官方明确要求）
+    // Reading value() in an error state throws; check hasValue() first (explicitly required by the docs)
     if (!this.menuResource.hasValue()) return [];
     return this.menuResource.value().map((item) => ({
       title: item.name ?? item.path ?? '',
-      // 后端 path 是模块内的相对路径，前端统一挂在 /platform 下
+      // The back-end path is relative within the module; the front-end mounts everything under /platform
       link: `/platform/${item.path ?? ''}`,
       icon: this.sanitizer.bypassSecurityTrustHtml(ICONS[item.icons ?? ''] ?? FALLBACK_ICON),
       heading: item.type === 'FOLDER',

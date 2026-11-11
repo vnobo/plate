@@ -31,7 +31,7 @@ export interface DataTablePageEvent {
             <input
               type="text"
               class="form-control"
-              placeholder="搜索..."
+              placeholder="Search..."
               [value]="filterTextValue()"
               (input)="onFilterChange($event)"
             />
@@ -146,7 +146,7 @@ export interface DataTablePageEvent {
               </tr>
             } @empty {
               <tr>
-                <td [attr.colspan]="columns().length" class="text-center py-4">没有找到数据</td>
+                <td [attr.colspan]="columns().length" class="text-center py-4">No data found</td>
               </tr>
             }
           </tbody>
@@ -156,9 +156,9 @@ export interface DataTablePageEvent {
       @if (showPagination()) {
         <div class="card-footer d-flex align-items-center">
           <div class="text-muted">
-            显示第 {{ currentPageIndexValue() * pageSize() + 1 }} -
-            {{ min((currentPageIndexValue() + 1) * pageSize(), filteredData().length) }} 条，共
-            {{ filteredData().length }} 条
+            Showing {{ currentPageIndexValue() * pageSize() + 1 }} -
+            {{ min((currentPageIndexValue() + 1) * pageSize(), filteredData().length) }} of
+            {{ filteredData().length }} entries
           </div>
           <div class="ms-auto">
             <ul class="pagination mb-0">

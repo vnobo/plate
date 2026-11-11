@@ -6,7 +6,7 @@
   width: 8.25rem;
   height: 8.25rem;
   flex: none;
-  // SVG 的 circle 默认从 3 点方向起笔，整体转 -90° 让第一块从 12 点开始
+  // SVG circles start drawing from the 3 o'clock position; rotate -90° so the first slice starts at 12 o'clock
   transform: rotate(-90deg);
 }
 
@@ -20,7 +20,7 @@
   stroke: var(--tblr-border-color);
 }
 
-// 颜色由 text-* 工具类提供，描边/图点都取 currentColor
+// Colours come from text-* utility classes; stroke and legend dots both use currentColor
 .pie-slice {
   stroke: currentColor;
 }
