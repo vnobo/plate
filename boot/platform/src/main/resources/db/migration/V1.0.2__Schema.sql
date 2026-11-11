@@ -13,8 +13,8 @@ drop table if exists
 create table if not exists se_menus
 (
     id          BIGSERIAL primary key,
-    code uuid not null unique default uuidv7(),
     version     int          not null        default 0,
+    code uuid not null unique default uuidv7(),
     pcode       uuid         not null        default '00000000-0000-0000-0000-000000000000',
     tenant_code uuid         not null        default '00000000-0000-0000-0000-000000000000',
     authority   varchar(256) not null,
@@ -220,8 +220,8 @@ comment on table se_tenant_members is 'Tenant-user relationship table';
 create table if not exists se_loggers
 (
     id          BIGSERIAL primary key,
-    code    uuid not null unique default uuidv7(),
-    version int  not null        default 0,
+    code        uuid not null unique default uuidv7(),
+    version     int  not null        default 0,
     tenant_code uuid        not null        default '00000000-0000-0000-0000-000000000000',
     prefix      varchar(64),
     operator    varchar(64),
@@ -242,7 +242,9 @@ create table if not exists se_loggers
         setweight(to_tsvector('chinese', coalesce(method, '')), 'B') || ' ' ||
         setweight(to_tsvector('chinese', coalesce(url, '')), 'C') || ' ' ||
         setweight(jsonb_to_tsvector('chinese', context::jsonb, '[
-          "string"
+          "string",
+          "number",
+          "boolean"
         ]'), 'D')) stored
 );
 create index se_loggers_context_gin_idx on se_loggers using gin (context);
