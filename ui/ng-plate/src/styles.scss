@@ -1,17 +1,18 @@
 /* =============================================================================
- * Plate 企业级设计令牌（基于 Tabler CSS 变量体系定制）
+ * Plate enterprise design tokens (customised on top of Tabler CSS variables)
  *
- * 定制原则（参考 docs.tabler.io/ui/getting-started/customize）：
- *   1. 只覆盖 Tabler 的语义变量，不重写组件 CSS；
- *   2. -lt / -darken / -bg-subtle 等派生色由 oklch() 与 color-mix()
- *      从下方基础色自动推导，无需重复定义；
- *   3. 全站工具类（btn-primary / bg-primary-lt / text-primary / alert-*）
- *      自动继承，组件样式天然统一。
+ * Customisation principles (see docs.tabler.io/ui/getting-started/customize):
+ *   1. Override only Tabler's semantic variables; do not rewrite component CSS;
+ *   2. Derived shades (-lt / -darken / -bg-subtle) are computed automatically
+ *      from the base colours below via oklch() and color-mix(); no duplication;
+ *   3. Site-wide utility classes (btn-primary / bg-primary-lt / text-primary /
+ *      alert-*) inherit them, so component styles stay consistent by default.
  * ============================================================================= */
 
 /* -----------------------------------------------------------------------------
- * 1. 字体与排版层次
- *    正文 15px（默认 14px，偏小），行高 1.6；标题按 1.25 倍递减形成清晰层级。
+ * 1. Fonts and typographic scale
+ *    Body text 15px (default 14px is a bit small), line-height 1.6; headings
+ *    step down by a factor of 1.25 to form a clear hierarchy.
  * -------------------------------------------------------------------------- */
 /* Font: LXGW WenKai 1.530.0 (Regular / Medium), SIL Open Font License 1.1.
    Source: cdnjs, pinned 1.530.0, subset WOFF2 with unicode-range.
@@ -87,9 +88,11 @@ html .authority-chip code {
 }
 
 /* -----------------------------------------------------------------------------
- * 2. 圆角与间距
- *    圆角以 8px 为基准，scale 派生出卡片/按钮用的 10px，全站同一套档位。
- *    间距沿用 Bootstrap 的 4px 网格（.25rem 步进），组件留白统一取 8px 倍数。
+ * 2. Border radius and spacing
+ *    Radius starts at 8px; the scale derives 10px for cards/buttons, one shared
+ *    set of steps site-wide.
+ *    Spacing follows Bootstrap's 4px grid (.25rem increments); component padding
+ *    uses multiples of 8px.
  * -------------------------------------------------------------------------- */
 html:root {
   --tblr-border-radius: 0.5rem;
@@ -102,50 +105,58 @@ html:root {
 }
 
 /* -----------------------------------------------------------------------------
- * 3. 组件视觉统一（按钮 / 卡片 / 表单 / 导航）
+ * 3. Component visual consistency (buttons / cards / forms / navigation)
  * -------------------------------------------------------------------------- */
 html:root {
   --tblr-btn-font-weight: 500;
   --tblr-btn-padding-x: 0.875rem;
   --tblr-btn-padding-y: 0.4375rem;
 
-  /* 卡片阴影的源头变量（--tblr-card-box-shadow 由它派生） */
+  /* Source variable for the card shadow (--tblr-card-box-shadow derives from it) */
   --tblr-shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
 
-  /* 移动端输入框保持 16px，避免 iOS Safari 聚焦时自动缩放页面 */
+  /* Keep mobile inputs at 16px to avoid iOS Safari zooming the page on focus */
   --tblr-form-control-mobile-font-size: 1rem;
+}
 
-  /* 侧边栏激活项用主色浅调，与主色系呼应 */
+/* Declare on the .navbar element itself so it outranks Tabler's `.navbar`
+   reset (tabler.css:13878), which loads after this file. A value on html:root
+   is only inherited and gets shadowed at the .navbar level. Scoped to the
+   vertical sidebar so the horizontal header keeps the framework default.
+   The active text colour is made explicit and theme-aware (var(--tblr-primary)). */
+.navbar.navbar-vertical {
   --tblr-navbar-active-bg: color-mix(in oklab, var(--tblr-primary) 14%, transparent);
+  --tblr-navbar-active-color: var(--tblr-primary);
 }
 
 /* -----------------------------------------------------------------------------
- * 4. 配色：亮模式
- *    主色「专业蓝」；浅蓝 (azure) 仅用于填充/边框，不作正文以保证对比度。
+ * 4. Colours: light mode
+ *    Primary "professional blue"; light blue (azure) is used only for fills and
+ *    borders, never for body text, to preserve contrast.
  * -------------------------------------------------------------------------- */
 html:root,
 html[data-bs-theme='light'] {
-  /* 主色：专业企业蓝 —— 按钮、链接、激活态、品牌标识 */
+  /* Primary: professional enterprise blue - buttons, links, active state, brand */
   --tblr-primary: #0a6ed1;
   --tblr-primary-rgb: 10, 110, 209;
   --tblr-primary-fg: #ffffff;
 
-  /* 浅蓝点缀色（辅助强调，建议仅用于底色/边框/图标） */
+  /* Light blue accent (secondary emphasis; use only for fills / borders / icons) */
   --tblr-azure: #5b9bd5;
   --tblr-azure-rgb: 91, 155, 213;
   --tblr-azure-fg: #ffffff;
 
-  /* 辅助色：蓝灰 —— 兼顾 text-secondary 等次要文字的可读性 */
+  /* Secondary: blue-grey - keeps text-secondary and other muted text legible */
   --tblr-secondary: #64748b;
   --tblr-secondary-rgb: 100, 116, 139;
   --tblr-secondary-fg: #ffffff;
 
-  /* 链接与焦点环 */
+  /* Links and focus ring */
   --tblr-link-color: #0a6ed1;
   --tblr-link-hover-color: #0856a8;
   --tblr-focus-ring-color: rgba(10, 110, 209, 0.35);
 
-  /* 状态色（与企业蓝协调，白字对比度达 AA） */
+  /* Status colours (tuned to the enterprise blue; white text meets AA contrast) */
   --tblr-success: #1f8a4d;
   --tblr-success-rgb: 31, 138, 77;
   --tblr-success-fg: #ffffff;
@@ -154,12 +165,12 @@ html[data-bs-theme='light'] {
   --tblr-info-fg: #ffffff;
   --tblr-warning: #e08a00;
   --tblr-warning-rgb: 224, 138, 0;
-  --tblr-warning-fg: #2a1c00; /* 浅色背景用深色字 */
+  --tblr-warning-fg: #2a1c00; /* dark text on a light background */
   --tblr-danger: #dc3545;
   --tblr-danger-rgb: 220, 53, 69;
   --tblr-danger-fg: #ffffff;
 
-  /* 背景 / 文字 / 边框（清爽冷灰蓝） */
+  /* Background / text / borders (clean cool grey-blue) */
   --tblr-bg-surface: #ffffff;
   --tblr-bg-surface-secondary: #f4f7fb;
   --tblr-body-bg: #f4f7fb;
@@ -169,8 +180,9 @@ html[data-bs-theme='light'] {
 }
 
 /* -----------------------------------------------------------------------------
- * 5. 配色：暗模式
- *    主色提亮以保证 text-primary 与按钮白字可读；卡片略高于底色形成层次。
+ * 5. Colours: dark mode
+ *    Primary is lightened so text-primary and white button labels stay legible;
+ *    cards sit slightly above the page background to create depth.
  * -------------------------------------------------------------------------- */
 html[data-bs-theme='dark'] {
   --tblr-primary: #4a9be8;
@@ -202,8 +214,10 @@ html[data-bs-theme='dark'] {
   --tblr-danger-rgb: 241, 91, 91;
   --tblr-danger-fg: #2a0808;
 
-  /* 黑蓝（深海军蓝）层次：页面最深 → 悬浮层略高 → 卡片更高，逐层抬升形成纵深。
-     --tblr-bg-forms 必须一起改：Tabler 暗色默认取中性 gray-900，不改输入框会发灰 */
+  /* Black-blue (deep navy) layers: page darkest -> overlays slightly higher ->
+     cards higher still, stepped up to create depth.
+     --tblr-bg-forms must change too: Tabler's dark default uses neutral
+     gray-900, so inputs look washed out unless it is overridden. */
   --tblr-body-bg: #080d18;
   --tblr-bg-surface-secondary: #0c1322;
   --tblr-bg-surface: #121d31;
@@ -225,7 +239,8 @@ body {
   height: 100%;
 }
 
-/* 触摸设备没有 hover：list-group 的操作按钮改为常显，否则用户看不到收藏等入口 */
+/* Touch devices have no hover: keep list-group action buttons always visible,
+   otherwise affordances such as starring are undiscoverable. */
 @media (hover: none) {
   .list-group-hoverable .list-group-item .list-group-item-actions {
     opacity: 1;
