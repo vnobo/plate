@@ -15,12 +15,12 @@ import { environment } from '@envs/env';
     <div class="container-fluid">
       <form (ngSubmit)="onSubmit()" class="form-wrapper">
         @if (usersResource.isLoading()) {
-          <div class="text-center py-2 text-muted">加载用户列表中...</div>
+          <div class="text-center py-2 text-muted">Loading users...</div>
         }
         <div class="mb-3">
-          <label class="form-label" for="userCode">选择用户 *</label>
+          <label class="form-label" for="userCode">Select User *</label>
           <select class="form-select" id="userCode" [formField]="memberForm.userCode">
-            <option value="">— 请选择 —</option>
+            <option value="">— Please select —</option>
             @for (u of users(); track u.code) {
               <option [value]="u.code">
                 {{ u.name || u.username }}<ng-container> ({{ u.username }})</ng-container>
@@ -34,7 +34,7 @@ import { environment } from '@envs/env';
             type="submit"
             [disabled]="!memberForm().valid() || isSubmitting()"
           >
-            添加成员
+            Add Member
           </button>
         </div>
       </form>
@@ -73,7 +73,7 @@ export class MemberForm {
   protected readonly model = signal({ ...this.initialModel });
 
   protected readonly memberForm = form(this.model, (p) => {
-    required(p.userCode, { message: '请选择用户' });
+    required(p.userCode, { message: 'Please select a user' });
   });
 
   async onSubmit() {
@@ -88,7 +88,7 @@ export class MemberForm {
           .post<GroupMember>(environment.secApiPath + '/groups/members/save', payload)
           .pipe(
             tap(() =>
-              this._message.success(`已将用户 ${this.userName(this.model().userCode)} 加入该角色`),
+              this._message.success(`Added user ${this.userName(this.model().userCode)} to the role`),
             ),
             delay(800),
             takeUntilDestroyed(this._destroyRef),

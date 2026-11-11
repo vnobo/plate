@@ -18,11 +18,11 @@ import { MenuItem, MenuType, MENU_TYPES, ROOT_PCODE } from './menus.types';
       <form novalidate (submit)="$event.preventDefault(); onSubmit()" class="form-wrapper">
         <div class="row mb-3">
           <div class="col-lg-6">
-            <label class="form-label" for="name">菜单名称 *</label>
+            <label class="form-label" for="name">Menu Name *</label>
             <input class="form-control" type="text" id="name" [formField]="menuForm.name" />
           </div>
           <div class="col-lg-6">
-            <label class="form-label" for="authority">权限标识 *</label>
+            <label class="form-label" for="authority">Authority Code *</label>
             <input
               class="form-control"
               type="text"
@@ -31,48 +31,48 @@ import { MenuItem, MenuType, MENU_TYPES, ROOT_PCODE } from './menus.types';
               [formField]="menuForm.authority"
             />
             <div class="form-hint">
-              只用英文字母和下划线；不带 ROLE_ 时后端自动补全，如 menuSystemX → ROLE_MENU_SYSTEM_X
+              Use only letters and underscores; the ROLE_ prefix is auto-completed server-side, e.g. menuSystemX → ROLE_MENU_SYSTEM_X
             </div>
           </div>
         </div>
         <div class="row mb-3">
           <div class="col-lg-6">
-            <label class="form-label" for="pcode">父级菜单</label>
+            <label class="form-label" for="pcode">Parent Menu</label>
             <select class="form-select" id="pcode" [formField]="menuForm.pcode">
-              <option [value]="ROOT_PCODE">顶级菜单（无父级）</option>
+              <option [value]="ROOT_PCODE">Top-level menu (no parent)</option>
               @for (p of parentOptions(); track p.code) {
                 <option [value]="p.code">{{ p.name }}</option>
               }
             </select>
           </div>
           <div class="col-lg-6">
-            <label class="form-label" for="type">菜单类型</label>
+            <label class="form-label" for="type">Menu Type</label>
             <select class="form-select" id="type" [formField]="menuForm.type">
               @for (t of menuTypes; track t) {
                 <option [value]="t">{{ t }}</option>
               }
             </select>
-            <div class="form-hint">FOLDER 只作侧栏分组标题，没有落地页</div>
+            <div class="form-hint">FOLDER is only a sidebar group title with no landing page</div>
           </div>
         </div>
         <div class="row mb-3">
           <div class="col-lg-6">
-            <label class="form-label" for="path">模块路径</label>
+            <label class="form-label" for="path">Module Path</label>
             <input class="form-control" type="text" id="path" [formField]="menuForm.path" />
-            <div class="form-hint">相对路径，前端统一挂在 /platform 下</div>
+            <div class="form-hint">Relative path, mounted under /platform on the frontend</div>
           </div>
           <div class="col-lg-3">
-            <label class="form-label" for="sortNo">排序号</label>
+            <label class="form-label" for="sortNo">Sort Order</label>
             <input class="form-control" type="number" id="sortNo" [formField]="menuForm.sortNo" />
           </div>
           <div class="col-lg-3">
-            <label class="form-label" for="icons">图标名</label>
+            <label class="form-label" for="icons">Icon Name</label>
             <input class="form-control" type="text" id="icons" [formField]="menuForm.icons" />
           </div>
         </div>
         <div class="d-flex">
           <button class="btn btn-primary ms-auto" type="submit" [disabled]="!menuForm().valid() || isSubmitting()">
-            保存菜单
+            Save Menu
           </button>
         </div>
       </form>
@@ -118,8 +118,8 @@ export class MenuForm {
   protected readonly menuModel = signal({ ...this.initialModel });
 
   protected readonly menuForm = form(this.menuModel, (p) => {
-    required(p.name, { message: '菜单名称 是必填项' });
-    required(p.authority, { message: '权限标识 是必填项' });
+    required(p.name, { message: 'Menu name is required' });
+    required(p.authority, { message: 'Authority code is required' });
     // 后端 modify() 会用库里的旧值覆盖 authority，编辑时改了也不生效，直接禁用
     disabled(p.authority, () => !this.created());
   });
@@ -168,7 +168,7 @@ export class MenuForm {
         this._http
           .post<MenuItem>(environment.relaApiPath + '/menus/save', payload)
           .pipe(
-            tap(() => this._message.success(this.created() ? '菜单创建成功' : '菜单更新成功')),
+            tap(() => this._message.success(this.created() ? 'Menu created' : 'Menu updated')),
             delay(800),
             takeUntilDestroyed(this._destroyRef),
           )

@@ -2,8 +2,8 @@
 <div class="page-header d-print-none">
   <div class="row align-items-center">
     <div class="col">
-      <div class="page-pretitle">系统管理</div>
-      <h2 class="page-title">菜单管理</h2>
+      <div class="page-pretitle">System Management</div>
+      <h2 class="page-title">Menu Management</h2>
     </div>
     <div class="col-auto ms-auto">
       <div class="btn-list">
@@ -24,7 +24,7 @@
             <path d="M12 5l0 14"></path>
             <path d="M5 12l14 0"></path>
           </svg>
-          添加菜单
+          Add Menu
         </button>
       </div>
     </div>
@@ -33,7 +33,7 @@
 
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">菜单列表</h3>
+    <h3 class="card-title">Menu List</h3>
   </div>
 
   <div class="card-body border-bottom py-3">
@@ -43,11 +43,11 @@
           type="text"
           class="form-control"
           style="width: 14rem"
-          placeholder="菜单名称关键词..."
+          placeholder="Menu name keyword..."
           [value]="draft().keyword"
           (input)="onDraftKeyword($event)"
           (keydown.enter)="applySearch()"
-          aria-label="搜索关键词"
+          aria-label="Search keyword"
         />
       </div>
       <div class="col-auto">
@@ -57,9 +57,9 @@
           [value]="draft().type"
           (change)="onDraftType($event)"
           (keydown.enter)="applySearch()"
-          aria-label="菜单类型"
+          aria-label="Menu type"
         >
-          <option value="all">全部类型</option>
+          <option value="all">All types</option>
           @for (type of menuTypes; track type) {
             <option [value]="type">{{ type }}</option>
           }
@@ -67,9 +67,9 @@
       </div>
       <div class="col-auto">
         <div class="btn-list">
-          <button type="button" class="btn btn-primary" (click)="applySearch()">查询</button>
+          <button type="button" class="btn btn-primary" (click)="applySearch()">Search</button>
           <button type="button" class="btn btn-outline-secondary" (click)="resetSearch()">
-            重置
+            Reset
           </button>
         </div>
       </div>
@@ -82,23 +82,23 @@
       @if (isLoading()) {
         <div class="text-center py-4">
           <div class="spinner-border spinner-border-sm text-muted" role="status">
-            <span class="visually-hidden">加载中...</span>
+            <span class="visually-hidden">Loading...</span>
           </div>
-          <span class="ms-2 text-muted">加载中...</span>
+          <span class="ms-2 text-muted">Loading...</span>
         </div>
       } @else {
         <table class="table card-table table-vcenter text-nowrap datatable">
           <thead>
             <tr>
-              <th class="w-1">序号</th>
-              <th>菜单名称</th>
-              <th>类型</th>
-              <th>权限标识</th>
-              <th>模块路径</th>
-              <th>图标</th>
-              <th>排序</th>
-              <th>创建时间</th>
-              <th class="w-1">操作</th>
+              <th class="w-1">#</th>
+              <th>Menu Name</th>
+              <th>Type</th>
+              <th>Authority Code</th>
+              <th>Module Path</th>
+              <th>Icon</th>
+              <th>Sort</th>
+              <th>Created</th>
+              <th class="w-1">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -133,15 +133,15 @@
                 <td>
                   <div class="btn-list flex-nowrap">
                     <button (click)="openMenuForm(menu)" class="btn btn-outline-primary btn-sm">
-                      编辑
+                      Edit
                     </button>
-                    <button (click)="onDelete(menu)" class="btn btn-outline-danger btn-sm">删除</button>
+                    <button (click)="onDelete(menu)" class="btn btn-outline-danger btn-sm">Delete</button>
                   </div>
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="9" class="text-center text-muted py-4">暂无菜单数据</td>
+                <td colspan="9" class="text-center text-muted py-4">No menu data</td>
               </tr>
             }
           </tbody>
@@ -160,9 +160,9 @@
     </div>
   } @error (retry = $reset) {
     <div class="card-body text-center py-5">
-      <p class="text-muted mb-3">菜单列表加载失败</p>
+      <p class="text-muted mb-3">Failed to load menus</p>
       <!-- 先 reload 让 resource 脱离错误态，否则 $reset 重渲染会立刻再抛一次 -->
-      <button type="button" class="btn btn-primary" (click)="fetchMenuData(); retry()">重试</button>
+      <button type="button" class="btn btn-primary" (click)="fetchMenuData(); retry()">Retry</button>
     </div>
   }
 </div>

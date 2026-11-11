@@ -2,8 +2,8 @@
 <div class="page-header d-print-none">
   <div class="row align-items-center">
     <div class="col">
-      <div class="page-pretitle">系统管理</div>
-      <h2 class="page-title">用户管理</h2>
+      <div class="page-pretitle">System Management</div>
+      <h2 class="page-title">User Management</h2>
     </div>
     <div class="col-auto ms-auto">
       <div class="btn-list">
@@ -24,7 +24,7 @@
             <path d="M12 5l0 14"></path>
             <path d="M5 12l14 0"></path>
           </svg>
-          添加用户
+          Add User
         </button>
       </div>
     </div>
@@ -34,7 +34,7 @@
 <!-- Card for user table -->
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">用户列表</h3>
+    <h3 class="card-title">User List</h3>
   </div>
 
   <div class="card-body border-bottom py-3">
@@ -46,7 +46,7 @@
           [value]="draft().field"
           (change)="onDraftField($event)"
           (keydown.enter)="applySearch()"
-          aria-label="搜索字段"
+          aria-label="Search field"
         >
           @for (field of searchFields; track field.value) {
             <option [value]="field.value">{{ field.label }}</option>
@@ -58,11 +58,11 @@
           type="text"
           class="form-control"
           style="width: 14rem"
-          placeholder="输入关键词..."
+          placeholder="Enter keyword..."
           [value]="draft().keyword"
           (input)="onDraftKeyword($event)"
           (keydown.enter)="applySearch()"
-          aria-label="搜索关键词"
+          aria-label="Search keyword"
         />
       </div>
       <div class="col-auto">
@@ -72,18 +72,18 @@
           [value]="draft().status"
           (change)="onDraftStatus($event)"
           (keydown.enter)="applySearch()"
-          aria-label="账号状态"
+          aria-label="Account status"
         >
-          <option value="all">全部状态</option>
-          <option value="enabled">启用</option>
-          <option value="disabled">禁用</option>
+          <option value="all">All statuses</option>
+          <option value="enabled">Enabled</option>
+          <option value="disabled">Disabled</option>
         </select>
       </div>
       <div class="col-auto">
         <div class="btn-list">
-          <button type="button" class="btn btn-primary" (click)="applySearch()">查询</button>
+          <button type="button" class="btn btn-primary" (click)="applySearch()">Search</button>
           <button type="button" class="btn btn-outline-secondary" (click)="resetSearch()">
-            重置
+            Reset
           </button>
         </div>
       </div>
@@ -96,23 +96,23 @@
       @if (isLoading()) {
         <div class="text-center py-4">
           <div class="spinner-border spinner-border-sm text-muted" role="status">
-            <span class="visually-hidden">加载中...</span>
+            <span class="visually-hidden">Loading...</span>
           </div>
-          <span class="ms-2 text-muted">加载中...</span>
+          <span class="ms-2 text-muted">Loading...</span>
         </div>
       } @else {
           <table class="table card-table table-vcenter text-nowrap datatable">
           <thead>
             <tr>
-              <th class="w-1">序号</th>
-              <th>用户名</th>
-              <th>昵称</th>
-              <th>电子邮件</th>
-              <th>手机号</th>
-              <th>状态</th>
-              <th>最近登录</th>
-              <th>创建时间</th>
-              <th class="w-1">操作</th>
+              <th class="w-1">#</th>
+              <th>Username</th>
+              <th>Nickname</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Status</th>
+              <th>Last Login</th>
+              <th>Created</th>
+              <th class="w-1">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -125,36 +125,36 @@
                 <td>{{ user.phone }}</td>
                 <td>
                   @if (user.disabled) {
-                    <span class="badge bg-danger me-1">禁用</span>
+                    <span class="badge bg-danger me-1">Disabled</span>
                   } @else {
-                    <span class="badge bg-success me-1">启用</span>
+                    <span class="badge bg-success me-1">Enabled</span>
                   }
                 </td>
                 <td>
                   @if (user.loginTime) {
                     {{ user.loginTime | date: 'yyyy-MM-dd HH:mm' }}
                   } @else {
-                    <span class="text-muted">从未登录</span>
+                    <span class="text-muted">Never logged in</span>
                   }
                 </td>
                 <td>{{ user.createdAt | date: 'yyyy-MM-dd HH:mm' }}</td>
                 <td>
                   <div class="btn-list flex-nowrap">
                     <button (click)="openUserForm(user)" class="btn btn-outline-primary btn-sm">
-                      编辑
+                      Edit
                     </button>
                     <button (click)="openAuthorityForm(user)" class="btn btn-outline-secondary btn-sm">
-                      权限
+                      Permissions
                     </button>
                     <button (click)="onDelete(user)" class="btn btn-outline-danger btn-sm">
-                      删除
+                      Delete
                     </button>
                   </div>
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="9" class="text-center text-muted py-4">暂无用户数据</td>
+                <td colspan="9" class="text-center text-muted py-4">No user data</td>
               </tr>
             }
           </tbody>
@@ -173,9 +173,9 @@
     </div>
   } @error (retry = $reset) {
     <div class="card-body text-center py-5">
-      <p class="text-muted mb-3">用户列表加载失败</p>
+      <p class="text-muted mb-3">Failed to load users</p>
       <!-- 先 reload 让 resource 脱离错误态，否则 $reset 重渲染会立刻再抛一次 -->
-      <button type="button" class="btn btn-primary" (click)="fetchUserData(); retry()">重试</button>
+      <button type="button" class="btn btn-primary" (click)="fetchUserData(); retry()">Retry</button>
     </div>
   }
 </div>

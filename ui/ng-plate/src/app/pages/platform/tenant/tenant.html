@@ -1,8 +1,8 @@
 <div class="page-header d-print-none">
   <div class="row align-items-center">
     <div class="col">
-      <div class="page-pretitle">系统管理</div>
-      <h2 class="page-title">租户管理</h2>
+      <div class="page-pretitle">System Management</div>
+      <h2 class="page-title">Tenant Management</h2>
     </div>
     <div class="col-auto ms-auto">
       <div class="btn-list">
@@ -23,7 +23,7 @@
             <path d="M12 5l0 14"></path>
             <path d="M5 12l14 0"></path>
           </svg>
-          创建租户
+          Create Tenant
         </button>
       </div>
     </div>
@@ -35,9 +35,9 @@
     <div class="card-header">
       <h3 class="card-title">
         @if (currentTenant()) {
-          编辑租户
+          Edit Tenant
         } @else {
-          创建租户
+          Create Tenant
         }
       </h3>
     </div>
@@ -46,7 +46,7 @@
         <div class="row">
           <div class="col-md-6">
             <div class="mb-3">
-              <label for="name" class="form-label">租户名称 *</label>
+              <label for="name" class="form-label">Tenant Name *</label>
               <input
                 type="text"
                 id="name"
@@ -64,14 +64,14 @@
 
           <div class="col-md-6">
             <div class="mb-3">
-              <label for="pcode" class="form-label">父级租户 *</label>
+              <label for="pcode" class="form-label">Parent Tenant *</label>
               <select
                 id="pcode"
                 class="form-select"
                 [class.is-invalid]="isFieldInvalid('pcode')"
                 [formField]="tenantForm.pcode"
               >
-                <option [value]="ROOT_PCODE">根租户（顶级）</option>
+                <option [value]="ROOT_PCODE">Root Tenant (top level)</option>
                 @for (p of parents(); track p.code) {
                   <option [value]="p.code">{{ p.name }}</option>
                 }
@@ -86,7 +86,7 @@
         </div>
 
         <div class="mb-3">
-          <label for="description" class="form-label">描述</label>
+          <label for="description" class="form-label">Description</label>
           <textarea
             id="description"
             class="form-control"
@@ -103,10 +103,10 @@
 
         <div class="form-footer">
           <button type="button" class="btn btn-secondary me-2" (click)="cancelEdit()">
-            取消
+            Cancel
           </button>
           <button type="submit" class="btn btn-primary" [disabled]="!tenantForm().valid()">
-            保存
+            Save
           </button>
         </div>
       </form>
@@ -116,16 +116,16 @@
 
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">租户列表</h3>
+    <h3 class="card-title">Tenant List</h3>
     <div class="card-actions">
       <div class="input-icon">
         <input
           type="text"
-          placeholder="搜索租户名称..."
+          placeholder="Search tenant name..."
           [value]="searchKeyword()"
           (input)="onSearchChange($event)"
           class="form-control"
-          aria-label="搜索租户名称"
+          aria-label="Search tenant name"
         />
         <span class="input-icon-addon">
           <svg
@@ -153,19 +153,19 @@
     @if (isLoading()) {
       <div class="text-center py-4">
         <div class="spinner-border spinner-border-sm text-muted" role="status">
-          <span class="visually-hidden">加载中...</span>
+          <span class="visually-hidden">Loading...</span>
         </div>
-        <span class="ms-2 text-muted">加载中...</span>
+        <span class="ms-2 text-muted">Loading...</span>
       </div>
     } @else {
       <table class="table card-table table-vcenter text-nowrap datatable">
         <thead>
           <tr>
-            <th>租户名称</th>
-            <th>描述</th>
-            <th>父级租户</th>
-            <th>创建时间</th>
-            <th class="w-1">操作</th>
+            <th>Tenant Name</th>
+            <th>Description</th>
+            <th>Parent Tenant</th>
+            <th>Created</th>
+            <th class="w-1">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -178,20 +178,20 @@
               <td>
                 <div class="btn-list flex-nowrap">
                   <button class="btn btn-outline-secondary btn-sm" (click)="openMembersForm(tenant)">
-                    成员
+                    Members
                   </button>
                   <button class="btn btn-outline-primary btn-sm" (click)="editTenant(tenant)">
-                    编辑
+                    Edit
                   </button>
                   <button class="btn btn-outline-danger btn-sm" (click)="onDelete(tenant)">
-                    删除
+                    Delete
                   </button>
                 </div>
               </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="5" class="text-center text-muted py-4">暂无租户数据</td>
+              <td colspan="5" class="text-center text-muted py-4">No tenant data</td>
             </tr>
           }
         </tbody>

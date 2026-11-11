@@ -16,12 +16,12 @@ import { environment } from '@envs/env';
         @if (authoritiesResource.isLoading()) {
           <div class="text-center py-3">
             <div class="spinner-border spinner-border-sm text-muted" role="status">
-              <span class="visually-hidden">加载中...</span>
+              <span class="visually-hidden">Loading...</span>
             </div>
-            <span class="ms-2 text-muted">加载权限列表中...</span>
+            <span class="ms-2 text-muted">Loading authorities...</span>
           </div>
         } @else if (authorities().length === 0) {
-          <div class="text-muted text-center py-3">该用户尚未分配直接权限</div>
+          <div class="text-muted text-center py-3">This user has no directly assigned authorities yet</div>
         } @else {
           <div class="list-group list-group-flush">
             @for (item of authorities(); track item.code) {
@@ -31,9 +31,9 @@ import { environment } from '@envs/env';
                   type="button"
                   class="btn btn-ghost-danger btn-sm"
                   (click)="onRemove(item)"
-                  [attr.aria-label]="'移除权限 ' + item.authority"
+                  [attr.aria-label]="'Remove authority ' + item.authority"
                 >
-                  移除
+                  Remove
                 </button>
               </div>
             }
@@ -43,16 +43,16 @@ import { environment } from '@envs/env';
 
       <form (ngSubmit)="onSubmit()" class="form-wrapper border-top pt-3">
         <div class="mb-3">
-          <label class="form-label" for="authority">权限标识 *</label>
+          <label class="form-label" for="authority">Authority Code *</label>
           <input
             class="form-control"
             type="text"
             id="authority"
             autocomplete="off"
-            placeholder="例如 USER_VIEW"
+            placeholder="e.g. USER_VIEW"
             [formField]="authorityForm.authority"
           />
-          <div class="form-hint">为用户直接分配的权限标识，与角色权限合并生效。</div>
+          <div class="form-hint">Authority code directly assigned to the user, merged with role authorities.</div>
         </div>
         <div class="d-flex">
           <button
@@ -60,7 +60,7 @@ import { environment } from '@envs/env';
             type="submit"
             [disabled]="!authorityForm().valid() || isSubmitting()"
           >
-            添加权限
+            Add Authority
           </button>
         </div>
       </form>
@@ -102,7 +102,7 @@ export class UserAuthorityForm {
   protected readonly model = signal({ ...this.initialModel });
 
   protected readonly authorityForm = form(this.model, (p) => {
-    required(p.authority, { message: '权限标识 是必填项' });
+    required(p.authority, { message: 'Authority code is required' });
   });
 
   async onSubmit() {
@@ -116,7 +116,7 @@ export class UserAuthorityForm {
         this._http
           .post<UserAuthority>(environment.secApiPath + '/users/authorities/save', payload)
           .pipe(
-            tap(() => this._message.success('权限已添加')),
+            tap(() => this._message.success('Authority added')),
             delay(800),
             takeUntilDestroyed(this._destroyRef),
           )
@@ -135,9 +135,9 @@ export class UserAuthorityForm {
     }
     this._modal
       .confirm({
-        title: '移除权限',
-        message: `确定移除权限「${item.authority ?? ''}」吗？`,
-        confirmText: '移除',
+        title: 'Remove Authority',
+        message: `Are you sure you want to remove authority "${item.authority ?? ''}"?`,
+        confirmText: 'Remove',
         danger: true,
       })
       .then((ok) => {
@@ -149,7 +149,7 @@ export class UserAuthorityForm {
             body: { id: item.id, code: item.code },
           })
           .pipe(
-            tap(() => this._message.success('权限已移除')),
+            tap(() => this._message.success('Authority removed')),
             delay(600),
             takeUntilDestroyed(this._destroyRef),
           )

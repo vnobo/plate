@@ -24,7 +24,7 @@ import { environment } from '@envs/env';
       <form (ngSubmit)="onSubmit()" class="form-wrapper">
         <div class="row mb-3">
           <div class="col-lg-6">
-            <label class="form-label" for="username">用&nbsp;&nbsp;户&nbsp;&nbsp;名</label>
+            <label class="form-label" for="username">Username</label>
             <input
               class="form-control"
               type="text"
@@ -35,7 +35,7 @@ import { environment } from '@envs/env';
           </div>
           <div class="col-lg-6">
             <label class="form-label" for="name">
-              昵&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;称
+              Nickname
             </label>
             <input
               class="form-control"
@@ -50,7 +50,7 @@ import { environment } from '@envs/env';
           <div class="row mb-3">
             <div class="col-lg-6">
               <label class="form-label" for="password">
-                密&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;码
+                Password
               </label>
               <input
                 class="form-control"
@@ -65,7 +65,7 @@ import { environment } from '@envs/env';
               }
             </div>
             <div class="col-lg-6">
-              <label class="form-label" for="confirmPassword">确认密码</label>
+              <label class="form-label" for="confirmPassword">Confirm Password</label>
               <input
                 class="form-control"
                 type="password"
@@ -82,22 +82,22 @@ import { environment } from '@envs/env';
         }
         <div class="row mb-3">
           <div class="col-lg-6">
-            <label class="form-label" for="email">电子邮件</label>
+            <label class="form-label" for="email">Email</label>
             <input class="form-control" type="email" id="email" [formField]="userForm.email" />
           </div>
           <div class="col-lg-6">
             <label class="form-label" for="phone">
-              手&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;机
+              Phone
             </label>
             <input class="form-control" type="text" id="phone" [formField]="userForm.phone" />
           </div>
         </div>
         <div class="mb-3">
-          <label class="form-label" for="bio">个人简介</label>
+          <label class="form-label" for="bio">Bio</label>
           <textarea class="form-control" type="text" id="bio" [formField]="userForm.bio"></textarea>
         </div>
         <div class="mb-3 d-flex">
-          <button class="btn btn-danger" type="button" (click)="resetForm()">重置表单</button>
+          <button class="btn btn-danger" type="button" (click)="resetForm()">Reset Form</button>
           <button
             class="btn btn-primary ms-auto"
             [disabled]="!userForm().valid() || isSubmitting()"
@@ -118,7 +118,7 @@ import { environment } from '@envs/env';
               <path d="M12 5l0 14" />
               <path d="M5 12l14 0" />
             </svg>
-            保存用户信息
+            Save User
           </button>
         </div>
       </form>
@@ -168,10 +168,10 @@ export class UserForm {
   protected readonly userModel = signal({ ...this.initialModel });
 
   protected readonly userForm = form(this.userModel, (p) => {
-    required(p.username, { message: '用户名 是必填项' });
+    required(p.username, { message: 'Username is required' });
     disabled(p.username, () => !this.created());
-    required(p.name, { message: '昵称 是必填项' });
-    email(p.email, { message: '电子邮件 格式不正确' });
+    required(p.name, { message: 'Nickname is required' });
+    email(p.email, { message: 'Invalid email format' });
   });
 
   constructor() {
@@ -197,17 +197,17 @@ export class UserForm {
     if (this.created()) {
       const model = this.userModel();
       if (!model.password || model.password.length < 6) {
-        this.passwordError.set(model.password ? '密码至少6个字符' : '密码 是必填项');
+        this.passwordError.set(model.password ? 'Password must be at least 6 characters' : 'Password is required');
         return;
       }
       if (!model.confirmPassword || model.confirmPassword.length < 6) {
         this.confirmPasswordError.set(
-          model.confirmPassword ? '确认密码至少6个字符' : '确认密码 是必填项',
+          model.confirmPassword ? 'Confirm password must be at least 6 characters' : 'Confirm password is required',
         );
         return;
       }
       if (model.password !== model.confirmPassword) {
-        this.confirmPasswordError.set('两次输入的密码不一致');
+        this.confirmPasswordError.set('Passwords do not match');
         return;
       }
     }
@@ -228,7 +228,7 @@ export class UserForm {
         request
           .pipe(
             tap(() =>
-              this._message.success(this.created() ? '用户创建成功' : '用户更新成功'),
+              this._message.success(this.created() ? 'User created' : 'User updated'),
             ),
             delay(800),
             takeUntilDestroyed(this._destroyRef),

@@ -23,25 +23,25 @@ import { environment } from '@envs/env';
     <div class="container-fluid">
       <form (ngSubmit)="onSubmit()" class="form-wrapper">
         <div class="mb-3">
-          <label class="form-label" for="name">角色名称 *</label>
+          <label class="form-label" for="name">Role Name *</label>
           <input class="form-control" type="text" id="name" [formField]="roleForm.name" />
         </div>
         <div class="mb-3">
-          <label class="form-label" for="pcode">父级角色</label>
+          <label class="form-label" for="pcode">Parent Role</label>
           <select class="form-select" id="pcode" [formField]="roleForm.pcode">
-            <option [value]="ROOT_PCODE">根角色（顶级）</option>
+            <option [value]="ROOT_PCODE">Root Role (top level)</option>
             @for (p of parentOptions(); track p.code) {
               <option [value]="p.code">{{ p.name }}</option>
             }
           </select>
         </div>
         <div class="mb-3">
-          <label class="form-label" for="description">描述</label>
+          <label class="form-label" for="description">Description</label>
           <textarea class="form-control" type="text" id="description" rows="3" [formField]="roleForm.description"></textarea>
         </div>
         <div class="d-flex">
           <button class="btn btn-primary ms-auto" type="submit" [disabled]="!roleForm().valid() || isSubmitting()">
-            保存角色
+            Save Role
           </button>
         </div>
       </form>
@@ -82,8 +82,8 @@ export class RoleForm {
   protected readonly roleModel = signal({ ...this.initialModel });
 
   protected readonly roleForm = form(this.roleModel, (p) => {
-    required(p.name, { message: '角色名称 是必填项' });
-    required(p.pcode, { message: '父级角色 是必填项' });
+    required(p.name, { message: 'Role name is required' });
+    required(p.pcode, { message: 'Parent role is required' });
   });
 
   /** Available parents = all roles except self and descendants (avoids cycles) */
@@ -149,7 +149,7 @@ export class RoleForm {
         this._http
           .post<Group>(environment.secApiPath + '/groups/save', result)
           .pipe(
-            tap(() => this._message.success(this.created() ? '角色创建成功' : '角色更新成功')),
+            tap(() => this._message.success(this.created() ? 'Role created' : 'Role updated')),
             delay(800),
             takeUntilDestroyed(this._destroyRef),
           )

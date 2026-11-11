@@ -17,12 +17,12 @@ import { environment } from '@envs/env';
         @if (membersResource.isLoading()) {
           <div class="text-center py-3">
             <div class="spinner-border spinner-border-sm text-muted" role="status">
-              <span class="visually-hidden">加载中...</span>
+              <span class="visually-hidden">Loading...</span>
             </div>
-            <span class="ms-2 text-muted">加载成员列表中...</span>
+            <span class="ms-2 text-muted">Loading members...</span>
           </div>
         } @else if (memberRows().length === 0) {
-          <div class="text-muted text-center py-3">该租户尚未添加成员</div>
+          <div class="text-muted text-center py-3">This tenant has no members yet</div>
         } @else {
           <div class="list-group list-group-flush">
             @for (row of memberRows(); track row.member.code) {
@@ -36,20 +36,20 @@ import { environment } from '@envs/env';
                     @if (row.user) {
                       {{ row.user.username }}
                     } @else {
-                      用户编码：{{ row.member.userCode }}
+                      User code: {{ row.member.userCode }}
                     }
                   </div>
                 </div>
                 @if (row.member.enabled === false) {
-                  <span class="badge bg-secondary-lt me-2">已停用</span>
+                  <span class="badge bg-secondary-lt me-2">Disabled</span>
                 }
                 <button
                   type="button"
                   class="btn btn-ghost-danger btn-sm"
                   (click)="onRemove(row.member)"
-                  [attr.aria-label]="'移除成员 ' + row.displayName"
+                  [attr.aria-label]="'Remove member ' + row.displayName"
                 >
-                  移除
+                  Remove
                 </button>
               </div>
             }
@@ -59,14 +59,14 @@ import { environment } from '@envs/env';
 
       <form (ngSubmit)="onSubmit()" class="form-wrapper border-top pt-3">
         <div class="mb-3">
-          <label class="form-label" for="userCode">选择用户 *</label>
+          <label class="form-label" for="userCode">Select User *</label>
           @if (usersResource.isLoading()) {
-            <div class="text-muted small">加载用户列表中...</div>
+            <div class="text-muted small">Loading users...</div>
           } @else if (candidates().length === 0) {
-            <div class="text-muted small">所有用户均已是该租户成员</div>
+            <div class="text-muted small">All users are already members of this tenant</div>
           }
           <select class="form-select" id="userCode" [formField]="memberForm.userCode">
-            <option value="">— 请选择 —</option>
+            <option value="">— Please select —</option>
             @for (u of candidates(); track u.code) {
               <option [value]="u.code">{{ u.name || u.username }} ({{ u.username }})</option>
             }
@@ -78,7 +78,7 @@ import { environment } from '@envs/env';
             type="submit"
             [disabled]="!memberForm().valid() || isSubmitting()"
           >
-            添加成员
+            Add Member
           </button>
         </div>
       </form>
@@ -161,7 +161,7 @@ export class TenantMembersForm {
   protected readonly model = signal({ ...this.initialModel });
 
   protected readonly memberForm = form(this.model, (p) => {
-    required(p.userCode, { message: '请选择用户' });
+    required(p.userCode, { message: 'Please select a user' });
   });
 
   async onSubmit() {
@@ -177,7 +177,7 @@ export class TenantMembersForm {
           .post<TenantMember>(environment.secApiPath + '/tenants/members/save', payload)
           .pipe(
             tap(() =>
-              this._message.success(`已将用户 ${this.userName(this.model().userCode)} 加入租户`),
+              this._message.success(`Added user ${this.userName(this.model().userCode)} to the tenant`),
             ),
             delay(800),
             takeUntilDestroyed(this._destroyRef),
@@ -197,8 +197,8 @@ export class TenantMembersForm {
     }
     const name = member.userCode
       ? this.userMap().get(member.userCode)?.name ?? member.userCode
-      : '该成员';
-    if (!confirm(`确定将「${name}」移出租户吗？`)) {
+      : 'this member';
+    if (!confirm(`Are you sure you want to remove "${name}" from the tenant?`)) {
       return;
     }
     this._http
@@ -206,7 +206,7 @@ export class TenantMembersForm {
         body: { id: member.id, code: member.code },
       })
       .pipe(
-        tap(() => this._message.success('成员已移除')),
+        tap(() => this._message.success('Member removed')),
         delay(600),
         takeUntilDestroyed(this._destroyRef),
       )

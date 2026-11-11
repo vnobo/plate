@@ -118,7 +118,7 @@ export class Tenants {
 
   protected parentName(code?: string): string {
     if (!code) return '-';
-    if (code === ROOT_PCODE) return '根租户';
+    if (code === ROOT_PCODE) return 'Root Tenant';
     return this.parentNameMap().get(code) ?? code;
   }
 
@@ -134,11 +134,11 @@ export class Tenants {
   protected readonly tenantModel = signal({ ...this.initialModel });
 
   protected readonly tenantForm = form(this.tenantModel, (p) => {
-    required(p.name, { message: '租户名称 是必填项' });
-    minLength(p.name, 2, { message: '租户名称 至少需要 2 个字符' });
-    maxLength(p.name, 50, { message: '租户名称 不能超过 50 个字符' });
-    maxLength(p.description, 500, { message: '描述 不能超过 500 个字符' });
-    required(p.pcode, { message: '父级租户 是必填项' });
+    required(p.name, { message: 'Tenant name is required' });
+    minLength(p.name, 2, { message: 'Tenant name must be at least 2 characters' });
+    maxLength(p.name, 50, { message: 'Tenant name cannot exceed 50 characters' });
+    maxLength(p.description, 500, { message: 'Description cannot exceed 500 characters' });
+    required(p.pcode, { message: 'Parent tenant is required' });
   });
 
   protected getFieldError(fieldName: string): string {
@@ -152,7 +152,7 @@ export class Tenants {
     for (const error of errors) {
       if (error.message) return error.message;
     }
-    return '输入有误';
+    return 'Invalid input';
   }
 
   protected isFieldInvalid(fieldName: string): boolean {
@@ -206,7 +206,7 @@ export class Tenants {
 
         request
           .pipe(
-            tap(() => this._message.success(current?.code ? '租户已更新' : '租户已创建')),
+            tap(() => this._message.success(current?.code ? 'Tenant updated' : 'Tenant created')),
             delay(800),
             takeUntilDestroyed(this._destroyRef),
           )
@@ -223,7 +223,7 @@ export class Tenants {
     if (!tenant.code || tenant.id == null) {
       return;
     }
-    if (!confirm(`确定要删除租户「${tenant.name ?? tenant.code}」吗？此操作不可撤销。`)) {
+    if (!confirm(`Are you sure you want to delete tenant "${tenant.name ?? tenant.code}"? This action cannot be undone.`)) {
       return;
     }
     this._http
@@ -231,7 +231,7 @@ export class Tenants {
         body: { id: tenant.id, code: tenant.code },
       })
       .pipe(
-        tap(() => this._message.success('租户已删除')),
+        tap(() => this._message.success('Tenant deleted')),
         delay(800),
         takeUntilDestroyed(this._destroyRef),
       )
@@ -252,7 +252,7 @@ export class Tenants {
       return;
     }
     this._modal.create({
-      title: `成员管理 - ${tenant.name || tenant.code}`,
+      title: `Member Management - ${tenant.name || tenant.code}`,
       contentRef: TenantMembersForm,
       contentInputs: { tenantCode: tenant.code, tenantName: tenant.name ?? '' },
     });

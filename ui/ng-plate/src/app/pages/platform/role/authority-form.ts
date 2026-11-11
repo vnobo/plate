@@ -14,10 +14,10 @@ import { environment } from '@envs/env';
     <div class="container-fluid">
       <form (ngSubmit)="onSubmit()" class="form-wrapper">
         <div class="mb-3">
-          <label class="form-label" for="authority">权限标识 *</label>
+          <label class="form-label" for="authority">Authority Code *</label>
           <input class="form-control" type="text" id="authority" [formField]="authorityForm.authority" />
           <div class="form-hint">
-            例如 <code>USER_VIEW</code>、<code>ROLE_EDIT</code>，用于标识该角色拥有的操作权限。
+            e.g. <code>USER_VIEW</code>, <code>ROLE_EDIT</code>, used to identify the operations this role is allowed to perform.
           </div>
         </div>
         <div class="d-flex">
@@ -26,7 +26,7 @@ import { environment } from '@envs/env';
             type="submit"
             [disabled]="!authorityForm().valid() || isSubmitting()"
           >
-            保存权限
+            Save Authority
           </button>
         </div>
       </form>
@@ -65,7 +65,7 @@ export class AuthorityForm {
   protected readonly model = signal({ ...this.initialModel });
 
   protected readonly authorityForm = form(this.model, (p) => {
-    required(p.authority, { message: '权限标识 是必填项' });
+    required(p.authority, { message: 'Authority code is required' });
   });
 
   constructor() {
@@ -100,7 +100,7 @@ export class AuthorityForm {
         this._http
           .post<GroupAuthority>(environment.secApiPath + '/groups/authorities/save', payload)
           .pipe(
-            tap(() => this._message.success(this.created() ? '权限已添加' : '权限已更新')),
+            tap(() => this._message.success(this.created() ? 'Authority added' : 'Authority updated')),
             delay(800),
             takeUntilDestroyed(this._destroyRef),
           )

@@ -127,7 +127,7 @@ export class Role {
 
   protected openRoleForm(group: Group | null): void {
     const ref = this._modal.create({
-      title: group ? '编辑角色' : '新建角色',
+      title: group ? 'Edit Role' : 'New Role',
       contentRef: RoleForm,
       contentInputs: { inputData: group, allGroups: this.groups() },
     });
@@ -140,7 +140,7 @@ export class Role {
     const code = this.selectedCode();
     if (!code) return;
     const ref = this._modal.create({
-      title: '添加权限',
+      title: 'Add Permission',
       contentRef: AuthorityForm,
       contentInputs: { groupCode: code, inputData: null },
     });
@@ -153,7 +153,7 @@ export class Role {
     const code = this.selectedCode();
     if (!code) return;
     const ref = this._modal.create({
-      title: '添加成员',
+      title: 'Add Member',
       contentRef: MemberForm,
       contentInputs: { groupCode: code },
     });
@@ -164,7 +164,7 @@ export class Role {
 
   protected onDeleteGroup(group: Group): void {
     if (!group.code || group.id == null) return;
-    if (!confirm(`确定删除角色「${group.name ?? group.code}」吗？其下权限与成员将一并移除。`)) {
+    if (!confirm(`Are you sure you want to delete role "${group.name ?? group.code}"? Its authorities and members will be removed as well.`)) {
       return;
     }
     this._http
@@ -172,7 +172,7 @@ export class Role {
         body: { id: group.id, code: group.code },
       })
       .pipe(
-        tap(() => this._message.success('角色已删除')),
+        tap(() => this._message.success('Role deleted')),
         delay(800),
         takeUntilDestroyed(this._destroyRef),
       )
@@ -189,7 +189,7 @@ export class Role {
         body: { id: item.id, code: item.code },
       })
       .pipe(
-        tap(() => this._message.success('权限已移除')),
+        tap(() => this._message.success('Permission removed')),
         delay(600),
         takeUntilDestroyed(this._destroyRef),
       )
@@ -203,7 +203,7 @@ export class Role {
         body: { id: item.id, code: item.code },
       })
       .pipe(
-        tap(() => this._message.success('成员已移除')),
+        tap(() => this._message.success('Member removed')),
         delay(600),
         takeUntilDestroyed(this._destroyRef),
       )

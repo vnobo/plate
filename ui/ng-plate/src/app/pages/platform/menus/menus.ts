@@ -20,10 +20,10 @@ const INITIAL_FILTERS: MenuFilters = { keyword: '', type: 'all' };
 
 /** 类型徽标 */
 const TYPE_BADGES: Record<MenuType, { label: string; className: string }> = {
-  FOLDER: { label: '分组', className: 'bg-secondary' },
-  MENU: { label: '菜单', className: 'bg-primary' },
-  LINK: { label: '外链', className: 'bg-info' },
-  API: { label: '接口', className: 'bg-warning' },
+  FOLDER: { label: 'Group', className: 'bg-secondary' },
+  MENU: { label: 'Menu', className: 'bg-primary' },
+  LINK: { label: 'External Link', className: 'bg-info' },
+  API: { label: 'API', className: 'bg-warning' },
 };
 
 @Component({
@@ -129,7 +129,7 @@ export class Menus {
 
   openMenuForm(menu: MenuItem) {
     const ref = this._modal.create({
-      title: menu.id ? '编辑菜单' : '添加菜单',
+      title: menu.id ? 'Edit Menu' : 'Add Menu',
       contentRef: MenuForm,
       contentInputs: { inputData: menu, allMenus: this.menus() },
     });
@@ -142,9 +142,9 @@ export class Menus {
     const label = menu.name || menu.authority || menu.code || '';
     this._modal
       .confirm({
-        title: '删除菜单',
-        message: `确定删除菜单「${label}」吗？此操作不可撤销。`,
-        confirmText: '删除',
+        title: 'Delete Menu',
+        message: `Are you sure you want to delete menu "${label}"? This action cannot be undone.`,
+        confirmText: 'Delete',
         danger: true,
       })
       .then((ok) => {
@@ -153,7 +153,7 @@ export class Menus {
         }
         this.delete(menu)
           .pipe(
-            tap(() => this._message.success('删除成功!')),
+            tap(() => this._message.success('Deleted!')),
             delay(1500),
             takeUntilDestroyed(this._destroyRef),
           )

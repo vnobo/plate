@@ -15,10 +15,10 @@ import { environment } from '@envs/env';
 
 /** Filterable user fields exposed by the search bar. */
 const USER_SEARCH_FIELDS = [
-  { value: 'username', label: '用户名' },
-  { value: 'name', label: '昵称' },
-  { value: 'email', label: '电子邮件' },
-  { value: 'phone', label: '手机号' },
+  { value: 'username', label: 'Username' },
+  { value: 'name', label: 'Nickname' },
+  { value: 'email', label: 'Email' },
+  { value: 'phone', label: 'Phone' },
 ] as const;
 
 type SearchField = (typeof USER_SEARCH_FIELDS)[number]['value'];
@@ -125,7 +125,7 @@ export class Users {
 
   openUserForm(user: User) {
     const ref = this._modal.create({
-      title: user.id ? '编辑用户' : '添加用户',
+      title: user.id ? 'Edit User' : 'Add User',
       contentRef: UserForm,
       contentInputs: { inputData: user },
     });
@@ -140,7 +140,7 @@ export class Users {
       return;
     }
     this._modal.create({
-      title: `分配权限 - ${user.name || user.username || ''}`,
+      title: `Assign Permissions - ${user.name || user.username || ''}`,
       contentRef: UserAuthorityForm,
       contentInputs: { userCode: user.code, userName: user.name ?? '' },
     });
@@ -150,9 +150,9 @@ export class Users {
     const label = user.name || user.username || user.code || '';
     this._modal
       .confirm({
-        title: '删除用户',
-        message: `确定删除用户「${label}」吗？此操作不可撤销。`,
-        confirmText: '删除',
+        title: 'Delete User',
+        message: `Are you sure you want to delete user "${label}"? This action cannot be undone.`,
+        confirmText: 'Delete',
         danger: true,
       })
       .then((ok) => {
@@ -161,7 +161,7 @@ export class Users {
         }
         this.delete(user)
           .pipe(
-            tap(() => this._message.success('删除成功!')),
+            tap(() => this._message.success('Deleted!')),
             delay(1500),
             takeUntilDestroyed(this._destroyRef),
           )
