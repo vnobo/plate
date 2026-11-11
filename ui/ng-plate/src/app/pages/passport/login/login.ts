@@ -31,12 +31,12 @@ export class Login {
   });
 
   protected readonly loginForm = form(this.loginModel, (p) => {
-    required(p.username, { message: '请输入用户名' });
-    minLength(p.username, 5, { message: '用户名至少5个字符' });
-    maxLength(p.username, 64, { message: '用户名不能超过64个字符' });
-    required(p.password, { message: '请输入密码' });
-    minLength(p.password, 6, { message: '密码至少6个字符' });
-    maxLength(p.password, 32, { message: '密码不能超过32个字符' });
+    required(p.username, { message: 'Please enter username' });
+    minLength(p.username, 5, { message: 'Username must be at least 5 characters' });
+    maxLength(p.username, 64, { message: 'Username cannot exceed 64 characters' });
+    required(p.password, { message: 'Please enter password' });
+    minLength(p.password, 6, { message: 'Password must be at least 6 characters' });
+    maxLength(p.password, 32, { message: 'Password cannot exceed 32 characters' });
   });
 
   constructor() {
@@ -61,7 +61,7 @@ export class Login {
     const f = this.loginForm[field]();
     if (!f.invalid() || !(f.dirty() || f.touched())) return '';
     const [first] = f.errors() as Array<{ message?: unknown }>;
-    return typeof first?.message === 'string' ? first.message : '输入有误';
+    return typeof first?.message === 'string' ? first.message : 'Invalid input';
   }
 
   async onSubmit() {
@@ -91,7 +91,7 @@ export class Login {
         next: () => {
           // 200 但没有令牌不算成功：带着空令牌进内页，下一个请求就会被 401 踢回登录页
           if (!this._tokenSer.authenticationToken()?.token) {
-            this._message.error('登录响应缺少令牌，请联系管理员', {
+            this._message.error('Login response is missing token, please contact the administrator', {
               autohide: true,
               animation: true,
               delay: 5000,
@@ -109,7 +109,7 @@ export class Login {
       });
     } catch (error) {
       console.error('[login] unexpected error', error);
-      this._message.error('登录失败，请稍后再试', {
+      this._message.error('Login failed, please try again later', {
         autohide: false,
         animation: false,
         delay: 1000,
@@ -162,7 +162,7 @@ export class Login {
   private handleLoginSuccess(username: string) {
     // 昵称缺失时退回刚输入的账号，避免出现「欢迎 未登录!」
     const name = this._tokenSer.authenticationToken()?.details?.nickname || username;
-    this._message.success('登录成功, 欢迎 ' + name + '!', {
+    this._message.success('Login successful, welcome ' + name + '!', {
       autohide: true,
       delay: 5000,
       animation: true,
@@ -178,14 +178,14 @@ export class Login {
     const status = error instanceof HttpErrorResponse ? error.status : 401;
     const errorMessage =
       status === 0
-        ? '无法连接服务器，请检查网络后重试'
+        ? 'Cannot connect to the server, please check your network and try again'
         : status === 401 || status === 403
-          ? '用户名或密码错误，请重试'
+          ? 'Username or password is incorrect, please try again'
           : status === 429
-          ? '尝试过于频繁，请稍后再试'
-          : status >= 500
-            ? '服务暂时不可用，请稍后再试'
-            : '登录系统失败，请检查您的用户名和密码';
+            ? 'Too many attempts, please try again later'
+            : status >= 500
+              ? 'Service temporarily unavailable, please try again later'
+              : 'Login failed, please check your username and password';
     this._message.error(errorMessage, {
       autohide: true,
       animation: true,

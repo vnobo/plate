@@ -125,14 +125,14 @@ describe('Login', () => {
       .expectOne('/sec/oauth2/login')
       .flush({ path: '/oauth2/login' }, { status: 401, statusText: 'Unauthorized' });
     await new Promise((r) => setTimeout(r, 50));
-    expect(document.querySelector('tabler-toasts')?.textContent).toContain('用户名或密码错误');
+    expect(document.querySelector('tabler-toasts')?.textContent).toContain('Username or password is incorrect');
   });
 
   it('200 但没有令牌时不放行（否则会带着空令牌进内页再被踢回）', async () => {
     await submit('admin', 'secret123');
     httpMock.expectOne('/sec/oauth2/login').flush({ token: '', details: {} });
     await new Promise((r) => setTimeout(r, 50));
-    expect(document.querySelector('tabler-toasts')?.textContent).toContain('缺少令牌');
+    expect(document.querySelector('tabler-toasts')?.textContent).toContain('missing token');
   });
 
   it('组件销毁后自动退订（请求取消，回调不再执行）', async () => {

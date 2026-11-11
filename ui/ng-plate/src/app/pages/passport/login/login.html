@@ -22,11 +22,11 @@
     </div>
     <div class="card card-md">
       <div class="card-body">
-        <h2 class="card-title text-center h2 mb-4">登录你的账号</h2>
+        <h2 class="card-title text-center h2 mb-4">Sign in to your account</h2>
         <!-- 用原生 submit 并阻止默认提交：本页不导入 FormsModule，(ngSubmit) 不会生效，
              一旦放行原生提交，带 name 的字段会把密码拼进 URL -->
         <form
-          aria-label="登录表单"
+          aria-label="Login form"
           autocomplete="on"
           novalidate
           (submit)="$event.preventDefault(); onSubmit()"
@@ -51,12 +51,12 @@
                 <path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
                 <path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" />
               </svg>
-              <span class="visually-hidden">手机或电子邮件</span>
+              <span class="visually-hidden">Phone or email</span>
             </label>
             <input
               id="username"
               class="form-control is-invalid-lite"
-              placeholder="手机或电子邮件"
+              placeholder="Phone or email"
               autocomplete="username"
               tabindex="1"
               [formField]="loginForm.username"
@@ -78,8 +78,8 @@
           <div class="mb-3">
             <div class="text-end mb-1">
               <!-- shortcut: 没有 forgot-password 路由，先不可点；等找回密码流程落地再换成 routerLink -->
-              <a href="javascript:void(0)" class="small" aria-disabled="true" title="功能开发中"
-                >忘记密码?</a
+              <a href="javascript:void(0)" class="small" aria-disabled="true" title="Coming soon"
+                >Forgot password?</a
               >
             </div>
             <div class="input-icon">
@@ -106,12 +106,12 @@
                   <path d="M12.01 16h.01" />
                   <path d="M9.02 16h.01" />
                 </svg>
-                <span class="visually-hidden">密 码</span>
+                <span class="visually-hidden">Password</span>
               </label>
               <input
                 id="password"
                 class="form-control is-invalid-lite"
-                placeholder="密   码"
+                placeholder="Password"
                 autocomplete="current-password"
                 tabindex="2"
                 [formField]="loginForm.password"
@@ -131,7 +131,7 @@
                 type="button"
                 class="input-icon-addon border-0 bg-transparent p-0 text-secondary"
                 tabindex="3"
-                [attr.aria-label]="passwordFieldTextType() ? '隐藏密码' : '显示密码'"
+                [attr.aria-label]="passwordFieldTextType() ? 'Hide password' : 'Show password'"
                 [attr.aria-pressed]="passwordFieldTextType()"
                 (click)="showPassword()"
               >
@@ -190,8 +190,8 @@
                 type="checkbox"
                 [formField]="loginForm.rememberMe"
               />
-              <span class="form-check-label">在此设备记住我?</span>
-              <span class="form-check-description">勾选后 2 天内无需再次输入账号密码</span>
+              <span class="form-check-label">Remember me on this device?</span>
+              <span class="form-check-description">When checked, no need to enter credentials again for 2 days</span>
             </label>
           </div>
           <div class="form-footer">
@@ -207,9 +207,9 @@
                   role="status"
                   aria-hidden="true"
                 ></span>
-                登录中...
+                Signing in...
               } @else {
-                登 录
+                Sign in
               }
             </button>
           </div>
@@ -219,7 +219,7 @@
       <div class="card-body">
         <div class="row">
           <div class="col">
-            <a class="btn w-100" href="javascript:void(0)" aria-disabled="true" title="功能开发中">
+            <a class="btn w-100" href="javascript:void(0)" aria-disabled="true" title="Coming soon">
               <svg
                 class="icon bi bi-github"
                 fill="currentColor"
@@ -232,11 +232,11 @@
                   d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"
                 />
               </svg>
-              使用 Github 登录
+              Sign in with Github
             </a>
           </div>
           <div class="col">
-            <a class="btn w-100" href="javascript:void(0)" aria-disabled="true" title="功能开发中">
+            <a class="btn w-100" href="javascript:void(0)" aria-disabled="true" title="Coming soon">
               <svg
                 class="icon bi bi-wechat"
                 fill="currentColor"
@@ -252,15 +252,15 @@
                   d="M0 6.826c0 1.455.781 2.765 2.001 3.656a.385.385 0 0 1 .143.439l-.161.6-.1.373a.5.5 0 0 0-.032.14.19.19 0 0 0 .193.193q.06 0 .111-.029l1.268-.733a.6.6 0 0 1 .308-.088q.088 0 .171.025a6.8 6.8 0 0 0 1.625.26 4.5 4.5 0 0 1-.177-1.251c0-2.936 2.785-5.02 5.824-5.02l.15.002C10.587 3.429 8.392 2 5.796 2 2.596 2 0 4.16 0 6.826m4.632-1.555a.77.77 0 1 1-1.54 0 .77.77 0 0 1 1.54 0m3.875 0a.77.77 0 1 1-1.54 0 .77.77 0 0 1 1.54 0"
                 />
               </svg>
-              使用微信登录
+              Sign in with WeChat
             </a>
           </div>
         </div>
       </div>
       <div class="card-body">
         <div class="text-center">
-          <span class="text-info">你还没有账号? </span
-          ><a href="javascript:void(0)" tabindex="5" aria-disabled="true" title="功能开发中">现在注册</a>
+          <span class="text-info">Don't have an account yet? </span
+          ><a href="javascript:void(0)" tabindex="5" aria-disabled="true" title="Coming soon">Sign up now</a>
         </div>
       </div>
     </div>
