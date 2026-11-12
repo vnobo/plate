@@ -23,8 +23,8 @@
     <div class="card card-md">
       <div class="card-body">
         <h2 class="card-title text-center h2 mb-4">Sign in to your account</h2>
-        <!-- 用原生 submit 并阻止默认提交：本页不导入 FormsModule，(ngSubmit) 不会生效，
-             一旦放行原生提交，带 name 的字段会把密码拼进 URL -->
+        <!-- Use a native submit and prevent the default: this page does not import FormsModule, so (ngSubmit) will not fire.
+             Allowing the native submit would append named fields (including the password) to the URL. -->
         <form
           aria-label="Login form"
           autocomplete="on"
@@ -77,7 +77,7 @@
           </div>
           <div class="mb-3">
             <div class="text-end mb-1">
-              <!-- shortcut: 没有 forgot-password 路由，先不可点；等找回密码流程落地再换成 routerLink -->
+              <!-- shortcut: no forgot-password route yet, so this stays non-clickable; swap to routerLink once the reset-password flow lands -->
               <a href="javascript:void(0)" class="small" aria-disabled="true" title="Coming soon"
                 >Forgot password?</a
               >

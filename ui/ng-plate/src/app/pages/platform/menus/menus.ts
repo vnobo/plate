@@ -18,7 +18,7 @@ interface MenuFilters {
 
 const INITIAL_FILTERS: MenuFilters = { keyword: '', type: 'all' };
 
-/** 类型徽标 */
+/** Type badge styles. */
 const TYPE_BADGES: Record<MenuType, { label: string; className: string }> = {
   FOLDER: { label: 'Group', className: 'bg-secondary' },
   MENU: { label: 'Menu', className: 'bg-primary' },
@@ -43,14 +43,14 @@ export class Menus {
   pageable = signal<Pageable>({
     page: 1,
     size: 10,
-    // 后端 MenusService 固定按 sortNo 升序，这里不额外下发 sort
+    // The backend MenusService always orders by sortNo ascending, so we do not send an extra sort.
     sorts: [],
   });
 
-  /** 搜索栏的草稿值 */
+  /** Draft values bound to the search bar. */
   protected readonly draft = signal<MenuFilters>({ ...INITIAL_FILTERS });
 
-  /** 真正驱动查询的筛选条件，由 查询 / 重置 刷新 */
+  /** Applied filters that actually drive the query; refreshed by Search / Reset. */
   private readonly applied = signal<MenuFilters>({ ...INITIAL_FILTERS });
 
   private readonly emptyPage: Page<MenuItem> = {
@@ -83,7 +83,7 @@ export class Menus {
       };
       const keyword = filters.keyword.trim();
       if (keyword) {
-        // 后端字符串条件走 LIKE 匹配，包一层通配符做模糊搜索
+        // Backend string criteria use LIKE matching, so wrap with wildcards for fuzzy search.
         params['name'] = `%${keyword}%`;
       }
       if (filters.type !== 'all') {
@@ -100,7 +100,7 @@ export class Menus {
     },
   );
 
-  /** 全部菜单，给新增/编辑表单选父级用 */
+  /** All menus, used to pick a parent in the add/edit form. */
   private readonly allMenusResource = httpResource<MenuItem[]>(
     () => ({
       url: environment.relaApiPath + '/menus/search',
@@ -113,7 +113,7 @@ export class Menus {
 
   isLoading = computed(() => this.menuResource.isLoading());
 
-  /** 错误态读 value() 会抛错，先问 hasValue() */
+  /** Reading value() in an error state throws, so check hasValue() first. */
   protected readonly menus = computed(() =>
     this.allMenusResource.hasValue() ? this.allMenusResource.value() : [],
   );
@@ -171,7 +171,7 @@ export class Menus {
     this.draft.update((d) => ({ ...d, type: value }));
   }
 
-  /** 应用草稿筛选并回到第一页 */
+  /** Applies the draft filters and returns to the first page. */
   applySearch() {
     this.applied.set({ ...this.draft() });
     this.pageable.update((p) => ({ ...p, page: 1 }));

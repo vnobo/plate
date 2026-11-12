@@ -13,7 +13,7 @@ import { LayoutService } from './layout.service';
       <aside layout-aside></aside>
       <header layout-header></header>
       @if (layout.mobileOpen()) {
-        <!-- d-lg-none：断点变宽后即使 mobileOpen 仍为 true 也不残留遮罩 -->
+        <!-- d-lg-none: once the breakpoint widens, the backdrop is not left behind even if mobileOpen stays true -->
         <div class="offcanvas-backdrop fade show d-lg-none" (click)="layout.closeMobile()"></div>
       }
       <div class="page-wrapper">

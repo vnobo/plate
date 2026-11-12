@@ -7,11 +7,11 @@ import { Group, ROOT_PCODE as GROUP_ROOT_PCODE } from '../role/role.types';
 import { ROOT_PCODE as TENANT_ROOT_PCODE, Tenant } from '../tenant/tenant.types';
 import { User } from '../users/user.types';
 
-/** 饼图的一块；percent/offset 是 SVG 弧长参数（整圈周长按 100 计） */
+/** One slice of the pie; percent/offset are SVG arc-length params (full circumference counted as 100). */
 interface PieSlice {
   label: string;
   value: number;
-  /** Tabler 文字色工具类，SVG 用 stroke=currentColor 取色 */
+  /** Tabler text-color utility class; SVG uses stroke=currentColor to inherit the color. */
   color: string;
   percent: number;
   percentText: string;
@@ -32,15 +32,15 @@ interface SliceSource {
 }
 
 /**
- * /page 端点的真实响应是 Spring PagedModel：{ content, page: { totalElements } }。
- * 与 @plate/types 里的 Page<T>（顶层 totalElements）不是一回事，故这里按实际结构声明。
+ * The real /page response is a Spring PagedModel: { content, page: { totalElements } }.
+ * This differs from Page<T> in @plate/types (top-level totalElements), so we declare the actual shape here.
  */
 interface Paged<T> {
   content: T[];
   page?: { size?: number; number?: number; totalElements?: number; totalPages?: number };
 }
 
-/** 只取计数的资源，避免为每个维度都写一遍 ?? 0 */
+/** Resource that only fetches a count, avoiding a repeated ?? 0 for every dimension. */
 interface Countable {
   value: () => Paged<unknown>;
 }
@@ -50,7 +50,7 @@ const EMPTY_PAGE: Paged<never> = {
   page: { size: 0, number: 0, totalElements: 0, totalPages: 0 },
 };
 
-/** 后端 max-page-size=100，所以统计只用 size=1 取 totalElements，维度靠过滤条件区分 */
+/** Backend max-page-size is 100, so stats use size=1 to fetch only totalElements; dimensions are separated by filter conditions. */
 function emptyPage<T>(): Paged<T> {
   return EMPTY_PAGE;
 }
@@ -139,12 +139,12 @@ export class PlatformWelcome {
     ];
   });
 
-  /** Spring PagedModel 把总数放在 page 里，缺字段时按 0 计 */
+  /** Spring PagedModel stores the total inside page; default to 0 when the field is absent. */
   private count(res: Countable): number {
     return res.value().page?.totalElements ?? 0;
   }
 
-  /** 按占比算出每块的弧长与起始偏移，首尾相接铺满一圈 */
+  /** Computes each slice's arc length and starting offset from its share, tiling the full circle end to end. */
   private toChart(key: string, title: string, sources: SliceSource[]): PieChart {
     const total = sources.reduce((sum, s) => sum + s.value, 0);
     let offset = 0;

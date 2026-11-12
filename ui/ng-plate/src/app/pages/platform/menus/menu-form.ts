@@ -13,8 +13,8 @@ import { MenuItem, MenuType, MENU_TYPES, ROOT_PCODE } from './menus.types';
   imports: [FormField],
   template: `
     <div class="container-fluid">
-      <!-- 用原生 submit 并阻止默认提交：本组件不导入 FormsModule，(ngSubmit) 不会生效，
-           一旦放行原生提交，表单字段会被拼进 URL -->
+      <!-- Use a native submit and prevent the default: this component does not import FormsModule, so (ngSubmit) will not fire,
+           and allowing the native submit would append form fields to the URL. -->
       <form novalidate (submit)="$event.preventDefault(); onSubmit()" class="form-wrapper">
         <div class="row mb-3">
           <div class="col-lg-6">
@@ -120,11 +120,11 @@ export class MenuForm {
   protected readonly menuForm = form(this.menuModel, (p) => {
     required(p.name, { message: 'Menu name is required' });
     required(p.authority, { message: 'Authority code is required' });
-    // 后端 modify() 会用库里的旧值覆盖 authority，编辑时改了也不生效，直接禁用
+    // The backend modify() overwrites authority with the stored value, so edits here have no effect; disable it.
     disabled(p.authority, () => !this.created());
   });
 
-  /** 只有 FOLDER 能当父级，且不能选自己 */
+  /** Only FOLDER entries can be a parent, and an item cannot be its own parent. */
   parentOptions = computed(() => {
     const selfCode = this.menuData()?.code;
     return this.allMenus().filter((m) => m.type === 'FOLDER' && m.code && m.code !== selfCode);
@@ -161,7 +161,7 @@ export class MenuForm {
       action: async () => {
         const payload: Record<string, unknown> = { ...this.menuModel() };
         if (this.created()) {
-          // 新增时后端不会补 tenantCode，空值会撞上 tenant_code 的 NOT NULL，这里给默认值
+          // On create the backend does not fill tenantCode, and a null would violate tenant_code NOT NULL, so we default it here.
           delete payload['code'];
           payload['tenantCode'] = ROOT_PCODE;
         }

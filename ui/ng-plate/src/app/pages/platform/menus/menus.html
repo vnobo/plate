@@ -76,7 +76,7 @@
     </div>
   </div>
 
-  <!-- menuData() 在 resource 处于错误态时会抛异常，整块渲染会挂掉，用 @boundary 兜住 -->
+  <!-- menuData() throws while the resource is in an error state and would break the whole render, so @boundary catches it. -->
   @boundary {
     <div class="table-responsive">
       @if (isLoading()) {
@@ -161,7 +161,7 @@
   } @error (retry = $reset) {
     <div class="card-body text-center py-5">
       <p class="text-muted mb-3">Failed to load menus</p>
-      <!-- 先 reload 让 resource 脱离错误态，否则 $reset 重渲染会立刻再抛一次 -->
+      <!-- Reload first to take the resource out of the error state; otherwise $reset would re-render and throw again immediately. -->
       <button type="button" class="btn btn-primary" (click)="fetchMenuData(); retry()">Retry</button>
     </div>
   }

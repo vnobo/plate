@@ -40,9 +40,9 @@ export class Login {
   });
 
   constructor() {
-    // 刷新后 sessionStorage 里还有令牌：没过期直接回内页，过期就留在登录页重新登录。
-    // SSR 没有存储，authenticationToken() 返回 null，不会误跳。
-    // 用 peek 那份判过期：authenticationToken() 会刷新 lastAccessTime，判出来永远不过期
+    // After a refresh, a token may still sit in sessionStorage: skip to the inner page if valid, otherwise stay on the login page.
+    // SSR has no storage, so authenticationToken() returns null and we will not jump by mistake.
+    // We judge expiry from the peeked copy: authenticationToken() refreshes lastAccessTime, which would make it look never-expired.
     const authentication = this._tokenSer.peekAuthentication();
     if (authentication) {
       if (!this._tokenSer.isExpired(authentication)) {
@@ -50,13 +50,13 @@ export class Login {
         void this._router.navigate([this._tokenSer.redirectUrl]);
         return;
       }
-      // 死令牌留着只会被下一个请求 401 再踢一次，先清掉
+      // A dead token would only be rejected by 401 on the next request, so clear it now.
       this._tokenSer.logout();
     }
     this.autoLoginWithRemembered();
   }
 
-  /** 字段的首条错误文案；用户动过该字段后才提示，避免一进页面就一片红 */
+  /** First error message for a field; only shown after the user touched it, to avoid a page full of red on entry. */
   protected errorOf(field: 'username' | 'password'): string {
     const f = this.loginForm[field]();
     if (!f.invalid() || !(f.dirty() || f.touched())) return '';
@@ -89,7 +89,7 @@ export class Login {
       });
       this.login(headers, credentials.rememberMe).subscribe({
         next: () => {
-          // 200 但没有令牌不算成功：带着空令牌进内页，下一个请求就会被 401 踢回登录页
+          // A 200 without a token is not success: entering the inner page with an empty token would be bounced back by 401 on the next request.
           if (!this._tokenSer.authenticationToken()?.token) {
             this._message.error('Login response is missing token, please contact the administrator', {
               autohide: true,
@@ -119,8 +119,8 @@ export class Login {
   }
 
   /**
-   * btoa 只接受码点 <= 255 的字符，中文凭据会抛 InvalidCharacterError，
-   * 所以先按 UTF-8 取字节再转 binary string。
+   * btoa only accepts code points <= 255; a CJK credential would throw InvalidCharacterError,
+   * so we take the UTF-8 bytes first and then convert to a binary string.
    */
   private basicAuth(username: string, password: string): string {
     const bytes = new TextEncoder().encode(`${username}:${password}`);
@@ -132,19 +132,19 @@ export class Login {
   }
 
   /**
-   * 凭后端下发的 HttpOnly remember-me cookie 换一个新会话。
-   * 前端不存密码、也不存 token —— 密码换来的只是一个 2 天有效、服务端可吊销的随机串。
-   * 没有 cookie 或已被吊销 → 401，留在登录页让用户手输。
+   * Exchanges the backend-issued HttpOnly remember-me cookie for a fresh session.
+   * The frontend stores neither the password nor the token — the password only buys a random string valid for 2 days and revocable server-side.
+   * No cookie or a revoked one -> 401, so we stay on the login page and let the user type credentials.
    */
   private autoLoginWithRemembered() {
     this._http.get<Authentication>('/sec/oauth2/refresh').subscribe({
       next: (authentication) => {
-        // 有响应但没令牌不放行：带着空令牌进内页，下一个请求就会被 401 踢回登录页
+        // A response without a token is not allowed through: entering the inner page with an empty token would be bounced back by 401 on the next request.
         if (!authentication?.token) return;
         this._tokenSer.login(authentication);
         void this._router.navigate([this._tokenSer.redirectUrl]);
       },
-      // 401 = 没记住过/已过期/已退出，正常留在本页，不用提示
+      // 401 = never remembered / expired / logged out, so staying on this page is expected and needs no prompt.
       error: () => {},
     });
   }
@@ -153,28 +153,28 @@ export class Login {
     const url = rememberMe ? '/sec/oauth2/login?rememberMe=true' : '/sec/oauth2/login';
     return this._http.get<Authentication>(url, { headers }).pipe(
       tap((authentication: Authentication) => this._tokenSer.login(authentication)),
-      // 登录请求不重试：401 重试等于把凭据再发一遍，只会放大锁定风险
-      // 组件销毁即退订，避免回调作用在已销毁的组件上
+      // Do not retry the login request: retrying on 401 just resends the credentials and increases lockout risk.
+      // Unsubscribe on destroy to avoid callbacks acting on a destroyed component.
       takeUntilDestroyed(this._destroyRef),
     );
   }
 
   private handleLoginSuccess(username: string) {
-    // 昵称缺失时退回刚输入的账号，避免出现「欢迎 未登录!」
+    // Fall back to the just-entered account when the nickname is missing, to avoid a "Welcome, Not signed in!" greeting.
     const name = this._tokenSer.authenticationToken()?.details?.nickname || username;
     this._message.success('Login successful, welcome ' + name + '!', {
       autohide: true,
       delay: 5000,
       animation: true,
     });
-    // redirectUrl 由 pages.guard 记为绝对路径，无需 relativeTo
+    // redirectUrl is recorded as an absolute path by pages.guard, so no relativeTo is needed.
     void this._router.navigate([this._tokenSer.redirectUrl]);
   }
 
   private handleLoginError(error: unknown) {
     console.error('[login] failed', error);
-    // 401 会被 handleErrorInterceptor 剥成响应体（不再是 HttpErrorResponse），
-    // 登录接口走到这里只可能是凭据被拒；status 0 则是连不上/超时
+    // 401 is unwrapped into a response body by handleErrorInterceptor (no longer an HttpErrorResponse),
+    // so reaching here from the login API can only mean rejected credentials; status 0 means unreachable / timed out.
     const status = error instanceof HttpErrorResponse ? error.status : 401;
     const errorMessage =
       status === 0

@@ -54,7 +54,7 @@ export class Users {
   /** Draft filter inputs bound to the search bar controls. */
   protected readonly draft = signal<UserFilters>({ ...INITIAL_FILTERS });
 
-  /** Applied filters driving the query; refreshed by 查询 / 重置. */
+  /** Applied filters driving the query; refreshed by Search / Reset. */
   private readonly applied = signal<UserFilters>({ ...INITIAL_FILTERS });
 
   private readonly emptyPage: Page<User> = {

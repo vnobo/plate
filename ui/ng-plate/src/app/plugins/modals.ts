@@ -66,7 +66,7 @@ export class ModalsService {
     });
     document.body.appendChild(this.modalRef.location.nativeElement);
     this.appRef.attachView(this.modalRef.hostView);
-    // 服务方法里没有注入上下文，必须显式传 DestroyRef；取组件自己的，随弹层销毁自动退订
+    // Service methods have no injection context, so DestroyRef must be passed explicitly; we take the component's own so it auto-unsubscribes when the modal is destroyed.
     outputToObservable(this.modalRef.instance.dropped)
       .pipe(takeUntilDestroyed(this.modalRef.injector.get(DestroyRef)))
       .subscribe(() => {
@@ -98,7 +98,7 @@ export class ModalsService {
           onResult: finish,
         },
       });
-      // Promise executor 里更没有注入上下文，同样要显式传 DestroyRef
+      // The Promise executor has no injection context either, so DestroyRef must also be passed explicitly here.
       outputToObservable(ref.instance.dropped)
         .pipe(takeUntilDestroyed(ref.injector.get(DestroyRef)))
         .subscribe(() => finish(false));

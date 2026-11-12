@@ -3,8 +3,8 @@ import { UserDetails } from '@plate/types';
 import { TokenService } from './token.service';
 
 /**
- * 用户展示信息（姓名、昵称、头像、首字母、角色）。
- * TokenService 只负责令牌与会话，这些展示用的派生字段放这里。
+ * Display info derived from the user (name, nickname, avatar, initial, roles).
+ * TokenService owns only the token and session; these display-only derived fields live here.
  */
 @Service()
 export class UserService {
@@ -12,30 +12,30 @@ export class UserService {
 
   readonly details = computed<UserDetails | null>(() => this.token.current()?.details ?? null);
 
-  /** 显示名：昵称优先，否则姓名，否则账号 */
+  /** Display name: nickname first, then name, then account code. */
   readonly name = computed(() => {
     const details = this.details();
     if (!details) return 'Not signed in';
     return details.nickname || details.name || details.code || 'User';
   });
 
-  /** 主显示名：姓名优先，缺省退回昵称，再退回账号（需要与昵称分行展示时用这个） */
+  /** Primary display name: name first, falling back to nickname, then account code (use when name and nickname must render on separate lines). */
   readonly displayName = computed(() => {
     const details = this.details();
     if (!details) return 'Not signed in';
     return details.name || details.nickname || details.code || 'User';
   });
 
-  /** 昵称；与主显示名相同时调用方不必重复展示 */
+  /** Nickname; callers need not show it again when identical to the primary display name. */
   readonly nickname = computed(() => this.details()?.nickname ?? '');
 
-  /** 头像地址，后端未下发时为 null */
+  /** Avatar URL; null when the backend does not provide one. */
   readonly avatar = computed(() => this.details()?.avatar ?? null);
 
-  /** 首字母，用于头像占位 */
+  /** Initial letter, used for the avatar placeholder. */
   readonly initial = computed(() => this.name().charAt(0).toUpperCase());
 
-  /** 角色串（authority 拼接） */
+  /** Role string (joined authorities). */
   readonly role = computed(() => {
     const authorities = this.details()?.authorities;
     if (!authorities?.length) return '';

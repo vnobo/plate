@@ -9,7 +9,7 @@ import { Login } from './login';
 @Component({ template: '' })
 class Dummy {}
 
-/** 守住真实踩过的坑；改动后跑 `ng test` 即可确认没有回退 */
+/** Guards a real pitfall we hit before; run `ng test` after changes to confirm no regression. */
 describe('Login', () => {
   let httpMock: HttpTestingController;
 
@@ -30,7 +30,7 @@ describe('Login', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  /** 等一个宏任务，让 login.ts 里的异步链（如 refresh 订阅）跑完 */
+  /** Waits one macrotask so the async chain in login.ts (e.g. the refresh subscription) finishes. */
   const tick = () => new Promise((r) => setTimeout(r, 25));
 
   const submit = async (username: string, password: string, rememberMe = false) => {
@@ -42,7 +42,7 @@ describe('Login', () => {
     return { fixture, cmp };
   };
 
-  /** 令牌：expires 是空闲时长（秒），这里给 30 分钟 */
+  /** Token: expires is the idle lifetime in seconds; 30 minutes is given here. */
   const putToken = (lastAccessTime = dayjs().unix(), expires = 1800) =>
     sessionStorage.setItem(
       'authentication',
@@ -69,7 +69,7 @@ describe('Login', () => {
 
     localStorage.clear();
     await submit('admin', 'secret123');
-    // 不勾选：仍是普通登录地址，且前端不再往 localStorage 落任何凭据
+    // Unchecked: still the plain login address, and the frontend no longer writes any credentials to localStorage.
     httpMock.expectOne('/sec/oauth2/login');
     expect(localStorage.getItem('login-credentials')).toBeNull();
   });
