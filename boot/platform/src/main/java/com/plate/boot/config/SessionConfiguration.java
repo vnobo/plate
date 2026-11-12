@@ -30,7 +30,7 @@ public class SessionConfiguration {
      * The name of the custom header used for session ID resolution.
      * This header is used to store and retrieve the session ID in AJAX requests.
      */
-    public static final String SESSION_ID_NAME = "SESSION";
+    public static final String SESSION_KEY_NAME = "X-Auth-Token";
 
     /**
      * The name of the header used to identify AJAX requests.
@@ -57,7 +57,7 @@ public class SessionConfiguration {
     @Bean
     public WebSessionIdResolver webSessionIdResolver() {
         HeaderWebSessionIdResolver resolver = new CustomWebSessionIdResolver();
-        resolver.setHeaderName(SESSION_ID_NAME);
+        resolver.setHeaderName(SESSION_KEY_NAME);
         return resolver;
     }
 
@@ -97,11 +97,11 @@ public class SessionConfiguration {
          */
         @Override
         public void setSessionId(@NonNull ServerWebExchange exchange, @NonNull String id) {
-            // Always persist as a cookie so the session survives any request type (including AJAX).
-            cookieWebSessionIdResolver.setCookieName(getHeaderName());
-            cookieWebSessionIdResolver.setSessionId(exchange, id);
-            // Additionally expose it as a response header for non-browser / API clients.
-            super.setSessionId(exchange, id);
+            if (isAjaxRequest(exchange)) {
+                super.setSessionId(exchange, id);
+            } else {
+                cookieWebSessionIdResolver.setSessionId(exchange, id);
+            }
         }
 
         /**
@@ -116,20 +116,14 @@ public class SessionConfiguration {
          */
         @Override
         public @NonNull List<String> resolveSessionIds(@NonNull ServerWebExchange exchange) {
-            // Cookie is the universal transport. Always try it first so that AJAX requests
-            // (which typically carry only the SESSION cookie, not a SESSION header/param) authenticate.
-            List<String> cookieIds = cookieWebSessionIdResolver.resolveSessionIds(exchange);
-            if (!CollectionUtils.isEmpty(cookieIds)) {
-                return cookieIds;
-            }
-            // Fallback for non-browser / API clients that pass the session via query param or header.
             if (isAjaxRequest(exchange)) {
-                List<String> paramIds = resolveTokenFromRequestParams(exchange);
-                if (!CollectionUtils.isEmpty(paramIds)) {
-                    return paramIds;
+                List<String> headerTokenIds = super.resolveSessionIds(exchange);
+                if (!CollectionUtils.isEmpty(headerTokenIds)) {
+                    return headerTokenIds;
                 }
+                return resolveTokenFromRequestParams(exchange);
             }
-            return super.resolveSessionIds(exchange);
+            return cookieWebSessionIdResolver.resolveSessionIds(exchange);
         }
 
         /**
