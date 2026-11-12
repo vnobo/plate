@@ -14,12 +14,20 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Configures session management for web applications with support for custom session ID resolution.
+ * Configures Redis-backed web session management with a dual-transport session ID resolver.
  * <p>
- * The session is always resolved from the {@code SESSION} cookie first (the universal transport used by
- * browsers and HTTP clients on every request type, including AJAX). Only when no cookie is present does it
- * fall back to a query parameter or the {@code SESSION} response header, supporting non-browser / API clients.
- * This guarantees that AJAX requests carrying only the session cookie are correctly authenticated.
+ * The transport is selected per request from the {@code X-Requested-With} header:
+ * <ul>
+ *   <li>AJAX requests ({@code X-Requested-With: XMLHttpRequest}) carry the session ID in the
+ *       {@code X-Auth-Token} request header, falling back to a query parameter of the same name.
+ *       The ID is written back through the {@code X-Auth-Token} response header.</li>
+ *   <li>All other requests carry the session ID in the default {@code SESSION} cookie, which is
+ *       also where it is written when the session is created.</li>
+ * </ul>
+ * The two transports are mutually exclusive per request: an AJAX request never consults the
+ * cookie, and a non-AJAX request never consults the header or the query parameter. AJAX clients
+ * are therefore expected to read the ID from the {@code X-Auth-Token} response header and send it
+ * back on subsequent requests.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableRedisIndexedWebSession
@@ -27,8 +35,9 @@ public class SessionConfiguration {
 
 
     /**
-     * The name of the custom header used for session ID resolution.
-     * This header is used to store and retrieve the session ID in AJAX requests.
+     * Name of the header, response header, and query parameter used to carry the session ID on
+     * AJAX requests. It is configured as the header name of {@link HeaderWebSessionIdResolver},
+     * so {@code super} reads it from request headers and writes it to response headers.
      */
     public static final String SESSION_KEY_NAME = "X-Auth-Token";
 
@@ -45,14 +54,11 @@ public class SessionConfiguration {
     public static final String XML_HTTP_REQUEST = "XMLHttpRequest";
 
     /**
-     * Configures and provides a custom strategy for resolving the session ID from web requests.
-     * This resolver extends {@link HeaderWebSessionIdResolver} and conditionally switches
-     * between header-based and cookie-based session ID resolution based on the presence of
-     * specific request headers or from parameters.
+     * Provides the session ID resolver used by Spring Session, with {@code X-Auth-Token}
+     * configured as its header name.
      *
-     * @return A configured instance of {@link WebSessionIdResolver} that is capable of
-     * handling session ID resolution with custom logic to support both header and
-     * cookie-based approaches depending on the nature of the incoming request.
+     * @return a {@link WebSessionIdResolver} that uses the {@code X-Auth-Token} header or query
+     * parameter for AJAX requests and the default {@code SESSION} cookie for all other requests
      */
     @Bean
     public WebSessionIdResolver webSessionIdResolver() {
@@ -62,35 +68,34 @@ public class SessionConfiguration {
     }
 
     /**
-     * CustomWebSessionIdResolver is a specialized implementation of {@link HeaderWebSessionIdResolver} designed to handle
-     * session ID resolution in web requests. It selectively employs either header-based or cookie-based strategies
-     * contingent upon the characteristics of the incoming request, enhancing flexibility and compatibility with diverse
-     * authentication mechanisms.
+     * A {@link HeaderWebSessionIdResolver} that selects one of two session ID transports per
+     * request, based on the {@code X-Requested-With} header.
      * <p>
-     * This resolver prioritizes the presence of certain request headers for session ID extraction but defaults to using
-     * cookies if the request does not meet specific criteria. It also supports extracting access tokens from request
-     * parameters, accommodating bearer token authentication schemes.
-     * <p>
-     * Key Features:
-     * <ul>
-     *   <li>Conditionally switches between header and cookie session ID resolution.</li>
-     *   <li>Supports resolving session IDs from authorization headers and request parameters.</li>
-     *   <li>Manages session ID setting, resolution, and expiration based on request context.</li>
-     * </ul>
+     * For AJAX requests the session ID is read from the {@code X-Auth-Token} request header (or a
+     * query parameter of the same name when the header is absent) and written to the
+     * {@code X-Auth-Token} response header. For every other request the session ID is read from
+     * and written to the default {@code SESSION} cookie via {@link CookieWebSessionIdResolver}.
+     * Expiration clears both the header-based and the cookie-based state.
      */
     static class CustomWebSessionIdResolver extends HeaderWebSessionIdResolver {
 
         private final CookieWebSessionIdResolver cookieWebSessionIdResolver = new CookieWebSessionIdResolver();
 
+        /**
+         * Reads session IDs from the query parameter named after the configured header
+         * ({@code X-Auth-Token}). Used as the AJAX fallback when the request header is absent.
+         *
+         * @param exchange The current server web exchange.
+         * @return The matching query parameter values, or an empty list if none are present.
+         */
         private List<String> resolveTokenFromRequestParams(ServerWebExchange exchange) {
             return exchange.getRequest().getQueryParams().getOrDefault(getHeaderName(), Collections.emptyList());
         }
 
         /**
-         * Sets the session ID in the server web exchange.
-         * The session is always persisted as a {@code SESSION} cookie so it can be reused on any transport
-         * (browsers and HTTP clients send cookies automatically). It is additionally exposed as a response
-         * header for non-browser / API clients that read it.
+         * Writes the session ID using the transport selected for the current request: the
+         * {@code X-Auth-Token} response header for AJAX requests, or the default {@code SESSION}
+         * cookie otherwise. Only one transport is written per request.
          *
          * @param exchange The server web exchange containing the request and response.
          * @param id       The session ID to be set.
@@ -105,11 +110,10 @@ public class SessionConfiguration {
         }
 
         /**
-         * Resolves session IDs from the given server web exchange.
-         * The {@code SESSION} cookie is always consulted first, because browsers and HTTP clients carry
-         * the session exclusively via the cookie regardless of the request type (including AJAX). Only when
-         * no cookie is present does it fall back to the query parameter / {@code SESSION} header used by
-         * non-browser API clients.
+         * Resolves session IDs using the transport selected for the current request. For AJAX
+         * requests the {@code X-Auth-Token} request header is read first, falling back to a query
+         * parameter of the same name when the header is absent. For all other requests the default
+         * {@code SESSION} cookie is used. AJAX requests do not consult the cookie.
          *
          * @param exchange The current server web exchange containing the request and response information.
          * @return A non-null list of session IDs associated with the given exchange.
@@ -127,10 +131,9 @@ public class SessionConfiguration {
         }
 
         /**
-         * Expires the session associated with the given server web exchange.
-         * <p>
-         * This method utilizes the {@code cookieWebSessionIdResolver} to expire the session,
-         * effectively invalidating any session data linked to the provided exchange.
+         * Expires the session ID on both transports by delegating to the superclass
+         * ({@code X-Auth-Token} response header) and then to the cookie resolver
+         * ({@code SESSION} cookie).
          *
          * @param exchange The server web exchange representing the current HTTP interaction,
          *                 from which the session will be expired.
@@ -142,6 +145,14 @@ public class SessionConfiguration {
             cookieWebSessionIdResolver.expireSession(exchange);
         }
 
+        /**
+         * Determines whether the request is treated as AJAX by matching the
+         * {@code X-Requested-With} header against the exact value {@code XMLHttpRequest}.
+         * Any other value (or a missing header) selects the cookie transport.
+         *
+         * @param exchange The current server web exchange.
+         * @return {@code true} if the request is an AJAX request.
+         */
         private Boolean isAjaxRequest(ServerWebExchange exchange) {
             return exchange.getRequest().getHeaders().containsHeaderValue(X_REQUESTED_WITH, XML_HTTP_REQUEST);
         }
