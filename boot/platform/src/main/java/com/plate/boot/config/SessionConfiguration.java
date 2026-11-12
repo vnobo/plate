@@ -1,44 +1,36 @@
 package com.plate.boot.config;
 
-import com.nimbusds.oauth2.sdk.dpop.verifiers.AccessTokenValidationException;
-import com.plate.boot.commons.exception.RestServerException;
 import lombok.NonNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.session.data.redis.config.annotation.web.server.EnableRedisIndexedWebSession;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.session.CookieWebSessionIdResolver;
 import org.springframework.web.server.session.HeaderWebSessionIdResolver;
 import org.springframework.web.server.session.WebSessionIdResolver;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- * Configures session management for web applications with support for custom session ID resolution,
- * particularly tailored for handling both AJAX requests and cases where a Bearer token might be
- * present either in the request header or from parameters.
+ * Configures session management for web applications with support for custom session ID resolution.
  * <p>
- * This configuration class enhances the session handling by introducing a custom strategy to read
- * session IDs from a custom header ({@code X-Auth-Token}) for AJAX requests or falling back to
- * cookies for non-AJAX requests. It also supports extracting Bearer tokens from the Authorization
- * header or access_token from parameter, ensuring secure and flexible session management.
+ * The session is always resolved from the {@code SESSION} cookie first (the universal transport used by
+ * browsers and HTTP clients on every request type, including AJAX). Only when no cookie is present does it
+ * fall back to a query parameter or the {@code SESSION} response header, supporting non-browser / API clients.
+ * This guarantees that AJAX requests carrying only the session cookie are correctly authenticated.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableRedisIndexedWebSession
 public class SessionConfiguration {
 
+
     /**
      * The name of the custom header used for session ID resolution.
      * This header is used to store and retrieve the session ID in AJAX requests.
      */
-    public static final String HEADER_SESSION_ID_NAME = "X-Auth-Token";
+    public static final String SESSION_ID_NAME = "SESSION";
 
     /**
      * The name of the header used to identify AJAX requests.
@@ -53,13 +45,6 @@ public class SessionConfiguration {
     public static final String XML_HTTP_REQUEST = "XMLHttpRequest";
 
     /**
-     * A regular expression pattern for extracting Bearer tokens from the Authorization header.
-     * This pattern matches the Bearer token format and extracts the token value.
-     */
-    public static final Pattern AUTHORIZATION_PATTERN = Pattern.compile(
-            "^Bearer (?<token>[a-zA-Z0-9-._~+/]+=*)$", Pattern.CASE_INSENSITIVE);
-
-    /**
      * Configures and provides a custom strategy for resolving the session ID from web requests.
      * This resolver extends {@link HeaderWebSessionIdResolver} and conditionally switches
      * between header-based and cookie-based session ID resolution based on the presence of
@@ -72,7 +57,7 @@ public class SessionConfiguration {
     @Bean
     public WebSessionIdResolver webSessionIdResolver() {
         HeaderWebSessionIdResolver resolver = new CustomWebSessionIdResolver();
-        resolver.setHeaderName(HEADER_SESSION_ID_NAME);
+        resolver.setHeaderName(SESSION_ID_NAME);
         return resolver;
     }
 
@@ -94,85 +79,57 @@ public class SessionConfiguration {
      * </ul>
      */
     static class CustomWebSessionIdResolver extends HeaderWebSessionIdResolver {
-        /**
-         * Resolver for session IDs using cookies.
-         * This resolver is used as a fallback when the request does not contain specific headers.
-         */
+
         private final CookieWebSessionIdResolver cookieWebSessionIdResolver = new CookieWebSessionIdResolver();
 
-        /**
-         * Resolves the access token from the request parameters.
-         * This method checks for the presence of an "access_token" parameter in the request query parameters.
-         * If a single token is found, it is returned; if multiple tokens are found, an exception is thrown.
-         *
-         * @param request The server HTTP request from which to extract the access token.
-         * @return The access token as a String, or null if no token is found.
-         * @throws RestServerException if multiple tokens are found in the request.
-         */
-        private static String resolveAccessTokenFromRequest(ServerHttpRequest request) {
-            List<String> parameterTokens = request.getQueryParams().get("access_token");
-            if (CollectionUtils.isEmpty(parameterTokens)) {
-                return null;
-            }
-            if (parameterTokens.size() == 1) {
-                return parameterTokens.getFirst();
-            }
-            throw invalidTokenError("Found multiple bearer tokens in the request");
-        }
-
-        /**
-         * Creates a RestServerException for invalid tokens.
-         * This method constructs an exception with a specific message and a nested AccessTokenValidationException.
-         *
-         * @param message The error message to be included in the exception.
-         * @return A RestServerException with the provided message and a nested AccessTokenValidationException.
-         */
-        private static RestServerException invalidTokenError(String message) {
-            return RestServerException.withMsg(message, new AccessTokenValidationException("Bearer token is malformed"));
+        private List<String> resolveTokenFromRequestParams(ServerWebExchange exchange) {
+            return exchange.getRequest().getQueryParams().getOrDefault(getHeaderName(), Collections.emptyList());
         }
 
         /**
          * Sets the session ID in the server web exchange.
-         * This method determines whether to use a header-based or cookie-based approach for setting the session ID
-         * based on the presence of specific headers in the request.
+         * The session is always persisted as a {@code SESSION} cookie so it can be reused on any transport
+         * (browsers and HTTP clients send cookies automatically). It is additionally exposed as a response
+         * header for non-browser / API clients that read it.
          *
          * @param exchange The server web exchange containing the request and response.
          * @param id       The session ID to be set.
          */
         @Override
         public void setSessionId(@NonNull ServerWebExchange exchange, @NonNull String id) {
-            if (exchange.getRequest().getHeaders().containsHeader(X_REQUESTED_WITH)) {
-                super.setSessionId(exchange, id);
-            } else {
-                cookieWebSessionIdResolver.setSessionId(exchange, id);
-            }
+            // Always persist as a cookie so the session survives any request type (including AJAX).
+            cookieWebSessionIdResolver.setCookieName(getHeaderName());
+            cookieWebSessionIdResolver.setSessionId(exchange, id);
+            // Additionally expose it as a response header for non-browser / API clients.
+            super.setSessionId(exchange, id);
         }
 
         /**
-         * Resolves session IDs from the given server web exchange based on the request's characteristics.
-         * If the request is identified as an XMLHttpRequest, it attempts to extract a token from the request.
-         * If the token is present, it returns a list containing that single token; otherwise, it delegates
-         * to the superclass implementation for session ID resolution. For non-XMLHttpRequests, it uses
-         * a cookie-based resolver to obtain the session IDs.
+         * Resolves session IDs from the given server web exchange.
+         * The {@code SESSION} cookie is always consulted first, because browsers and HTTP clients carry
+         * the session exclusively via the cookie regardless of the request type (including AJAX). Only when
+         * no cookie is present does it fall back to the query parameter / {@code SESSION} header used by
+         * non-browser API clients.
          *
          * @param exchange The current server web exchange containing the request and response information.
          * @return A non-null list of session IDs associated with the given exchange.
          */
         @Override
         public @NonNull List<String> resolveSessionIds(@NonNull ServerWebExchange exchange) {
-            List<String> requestedWith;
-            HttpHeaders httpHeaders = exchange.getRequest().getHeaders();
-            if (XML_HTTP_REQUEST.equalsIgnoreCase(httpHeaders.getFirst(X_REQUESTED_WITH))) {
-                String token = token(exchange.getRequest());
-                if (StringUtils.hasLength(token)) {
-                    requestedWith = List.of(token);
-                } else {
-                    requestedWith = super.resolveSessionIds(exchange);
-                }
-            } else {
-                requestedWith = cookieWebSessionIdResolver.resolveSessionIds(exchange);
+            // Cookie is the universal transport. Always try it first so that AJAX requests
+            // (which typically carry only the SESSION cookie, not a SESSION header/param) authenticate.
+            List<String> cookieIds = cookieWebSessionIdResolver.resolveSessionIds(exchange);
+            if (!CollectionUtils.isEmpty(cookieIds)) {
+                return cookieIds;
             }
-            return requestedWith;
+            // Fallback for non-browser / API clients that pass the session via query param or header.
+            if (isAjaxRequest(exchange)) {
+                List<String> paramIds = resolveTokenFromRequestParams(exchange);
+                if (!CollectionUtils.isEmpty(paramIds)) {
+                    return paramIds;
+                }
+            }
+            return super.resolveSessionIds(exchange);
         }
 
         /**
@@ -187,69 +144,13 @@ public class SessionConfiguration {
          */
         @Override
         public void expireSession(@NonNull ServerWebExchange exchange) {
+            super.expireSession(exchange);
             cookieWebSessionIdResolver.expireSession(exchange);
         }
 
-        /**
-         * Retrieves the authentication token from the given server HTTP request.
-         * It checks for the token in the request's Authorization header and,
-         * if not found, checks for a parameter token which is supported for GET requests.
-         * If both are present, it throws an exception indicating multiple tokens.
-         * If neither is found, it returns null.
-         *
-         * @param request The server HTTP request from which to extract the token.
-         * @return The extracted token as a String, or null if no valid token is found.
-         * @throws RestServerException if multiple token instances are found in the request.
-         */
-        private String token(ServerHttpRequest request) {
-            String authorizationHeaderToken = resolveFromAuthorizationHeader(request.getHeaders());
-            String parameterToken = resolveAccessTokenFromRequest(request);
-
-            if (authorizationHeaderToken != null) {
-                if (parameterToken != null) {
-                    throw invalidTokenError("Found multiple bearer tokens in the request.");
-                }
-                return authorizationHeaderToken;
-            }
-            if (parameterToken != null && isParameterTokenSupportedForRequest(request)) {
-                return parameterToken;
-            }
-            return null;
+        private Boolean isAjaxRequest(ServerWebExchange exchange) {
+            return exchange.getRequest().getHeaders().containsHeaderValue(X_REQUESTED_WITH, XML_HTTP_REQUEST);
         }
 
-        /**
-         * Extracts the bearer token from the 'Authorization' header within the provided HTTP headers.
-         * If the header starts with 'Bearer', the method attempts to parse the token following this keyword.
-         * In case of a malformed bearer token format, an exception is thrown.
-         *
-         * @param headers The HTTP headers to inspect for the bearer token.
-         * @return The extracted bearer token as a String if present and correctly formatted, null otherwise.
-         * @throws RestServerException if the bearer token is malformed.
-         */
-        private String resolveFromAuthorizationHeader(HttpHeaders headers) {
-            String bearerTokenHeaderName = HttpHeaders.AUTHORIZATION;
-            String authorization = headers.getFirst(bearerTokenHeaderName);
-            if (!StringUtils.startsWithIgnoreCase(authorization, "bearer")) {
-                return null;
-            }
-            Matcher matcher = AUTHORIZATION_PATTERN.matcher(authorization);
-            if (!matcher.matches()) {
-                throw invalidTokenError("Extracts the bearer token from the" +
-                        " 'Authorization' header within the provided HTTP headers.");
-            }
-            return matcher.group("token");
-        }
-
-        /**
-         * Determines whether the given server HTTP request supports a parameter token based on its HTTP method.
-         * Specifically, this method checks if the request method is HTTP GET, as parameter tokens are typically
-         * supported in GET requests for fetching resources.
-         *
-         * @param request The server HTTP request to inspect for supported token parameters.
-         * @return {@code true} if the request method is HTTP GET, indicating support for parameter tokens; otherwise, {@code false}.
-         */
-        private boolean isParameterTokenSupportedForRequest(ServerHttpRequest request) {
-            return HttpMethod.GET.equals(request.getMethod());
-        }
     }
 }
