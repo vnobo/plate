@@ -53,7 +53,7 @@ describe('Login', () => {
       ),
     );
 
-  it('中文凭据按 UTF-8 编码发送（btoa 直接吃中文会抛错，请求根本发不出去）', async () => {
+  it('sends UTF-8 encoded credentials (btoa throws on raw CJK, so the request would never go out)', async () => {
     await submit('管理员账号', '密码123456');
     const req = httpMock.expectOne('/sec/oauth2/login');
     const raw = atob(req.request.headers.get('authorization')!.replace('Basic ', ''));
@@ -62,7 +62,7 @@ describe('Login', () => {
     req.flush({ token: 't', details: { nickname: '管理员' } });
   });
 
-  it('刷新后令牌没过期 → 直接回内页，不再停在登录页', async () => {
+  it('navigates straight to the inner page when the token is still valid after a refresh', async () => {
     putToken();
     const router = TestBed.inject(Router);
     TestBed.createComponent(Login);
@@ -70,7 +70,7 @@ describe('Login', () => {
     expect(router.url).toBe('/platform');
   });
 
-  it('刷新后令牌已过期 → 留在登录页并清掉死令牌', async () => {
+  it('stays on the login page and clears the stale token when it has expired', async () => {
     putToken(dayjs().unix() - 3600);
     const router = TestBed.inject(Router);
     TestBed.createComponent(Login);
@@ -79,7 +79,7 @@ describe('Login', () => {
     expect(sessionStorage.getItem('authentication')).toBeNull();
   });
 
-  it('401 不重试（登录失败重发凭据只会放大锁定风险）', async () => {
+  it('does not retry on 401 (resending credentials would amplify account lockout risk)', async () => {
     await submit('admin', 'secret123');
     httpMock
       .expectOne('/sec/oauth2/login')
@@ -87,7 +87,7 @@ describe('Login', () => {
     expect(() => httpMock.expectOne('/sec/oauth2/login')).toThrow();
   });
 
-  it('401 提示凭据错误，而不是笼统的"登录系统失败"', async () => {
+  it('shows a credential error on 401 instead of a generic login failure', async () => {
     await submit('admin', 'secret123');
     httpMock
       .expectOne('/sec/oauth2/login')
@@ -96,14 +96,14 @@ describe('Login', () => {
     expect(document.querySelector('tabler-toasts')?.textContent).toContain('Username or password is incorrect');
   });
 
-  it('200 但没有令牌时不放行（否则会带着空令牌进内页再被踢回）', async () => {
+  it('does not grant access on 200 without a token (an empty token would be bounced back from the inner page)', async () => {
     await submit('admin', 'secret123');
     httpMock.expectOne('/sec/oauth2/login').flush({ token: '', details: {} });
     await new Promise((r) => setTimeout(r, 50));
     expect(document.querySelector('tabler-toasts')?.textContent).toContain('missing token');
   });
 
-  it('组件销毁后自动退订（请求取消，回调不再执行）', async () => {
+  it('unsubscribes on destroy (request cancelled, callbacks no longer run)', async () => {
     const { fixture } = await submit('admin', 'secret123');
     const req = httpMock.expectOne('/sec/oauth2/login');
     fixture.destroy();
