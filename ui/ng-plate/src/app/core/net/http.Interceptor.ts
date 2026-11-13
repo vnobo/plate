@@ -13,7 +13,16 @@ function defaultInterceptor(
   // Prefix relative URLs with the API host so they hit the backend in dev (through the proxy).
   // Absolute URLs (third-party) are left untouched.
   const originalUrl = req.url.startsWith('http') ? req.url : environment.host + req.url;
-  const xRequestedReq = req.clone({ url: originalUrl });
+  // Mark first-party API requests as AJAX so the backend carries the session id in the
+  // X-Auth-Token header instead of a cookie (see backend SessionConfiguration dual-transport).
+  // Third-party requests are left untouched so we never leak that we are an AJAX client.
+  const isOwnApi = environment.host
+    ? originalUrl.startsWith(environment.host)
+    : !req.url.startsWith('http');
+  const headers = isOwnApi
+    ? req.headers.set('X-Requested-With', 'XMLHttpRequest')
+    : req.headers;
+  const xRequestedReq = req.clone({ url: originalUrl, headers });
   return next(xRequestedReq);
 }
 
@@ -23,11 +32,13 @@ function timeoutInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
 
 function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
   const _auth = inject(TokenService);
-  // 只给自家 API 带令牌：绝对 URL 可能是第三方，挂上 Bearer 等于把令牌交出去
+  // Only attach the session token to first-party APIs: an absolute URL may be third-party,
+  // and sending our token there would leak it.
   const isOwnApi = environment.host
     ? req.url.startsWith(environment.host)
     : !req.url.startsWith('http');
-  // 只跳过登录/刷新端点本身：子串匹配 /login 会让 /login-history 这类接口静默丢令牌
+  // Skip only the login/refresh endpoints themselves: a substring match on /login would silently
+  // drop the token from endpoints like /login-history.
   if (
     !isOwnApi ||
     req.url.indexOf('/oauth2/login') > -1 ||
@@ -36,8 +47,9 @@ function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
     return next(req);
   }
   const newReq = req.clone({
-    // 用 set 而不是 append：调用方若自带 Authorization，append 会叠成两个值
-    headers: req.headers.set('Authorization', `Bearer ${_auth.authToken()}`),
+    // Use set, not append: if the caller supplied its own X-Auth-Token, append would stack two values.
+    // The backend resolves the session from this header on AJAX requests (X-Requested-With set above).
+    headers: req.headers.set('X-Auth-Token', _auth.authToken()),
   });
   return next(newReq);
 }
@@ -55,8 +67,8 @@ function handleErrorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
         ) {
           return throwError(() => error.error);
         }
-        // 令牌已失效：不清掉旧令牌，guard 会凭 sessionStorage 里的它再次放行，
-        // 形成「进内页 → 401 → 回登录页」的循环
+        // Token no longer valid: clear it so the guard will not let the stale session through
+        // again and create a "enter inner page -> 401 -> back to login" loop.
         _auth.logout();
         _route.navigate([_auth.loginUrl]).then();
       }

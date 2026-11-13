@@ -34,19 +34,21 @@ describe('indexInterceptor 的令牌处理', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('已登录时给自家接口带上 Bearer 令牌', () => {
+  it('已登录时给自家接口带上 X-Auth-Token 令牌', () => {
     putTokenInStorage('T');
     http.get('/sec/users/page').subscribe();
     const req = httpMock.expectOne(api('/sec/users/page'));
-    expect(req.request.headers.get('Authorization')).toBe('Bearer T');
+    expect(req.request.headers.get('X-Auth-Token')).toBe('T');
+    expect(req.request.headers.get('X-Requested-With')).toBe('XMLHttpRequest');
     req.flush({});
   });
 
-  it('登录请求不带令牌（它靠 Basic 凭据认证）', () => {
+  it('登录请求不带令牌（它靠 Basic 凭据认证），但仍带 X-Requested-With', () => {
     putTokenInStorage('T');
     http.get('/sec/oauth2/login').subscribe();
     const req = httpMock.expectOne(api('/sec/oauth2/login'));
-    expect(req.request.headers.has('Authorization')).toBe(false);
+    expect(req.request.headers.has('X-Auth-Token')).toBe(false);
+    expect(req.request.headers.get('X-Requested-With')).toBe('XMLHttpRequest');
     req.flush({});
   });
 
@@ -54,23 +56,26 @@ describe('indexInterceptor 的令牌处理', () => {
     putTokenInStorage('T');
     http.get('/sec/users/login-history').subscribe();
     const req = httpMock.expectOne(api('/sec/users/login-history'));
-    expect(req.request.headers.get('Authorization')).toBe('Bearer T');
+    expect(req.request.headers.get('X-Auth-Token')).toBe('T');
+    expect(req.request.headers.get('X-Requested-With')).toBe('XMLHttpRequest');
     req.flush({});
   });
 
-  it('第三方绝对地址不带令牌（不能把令牌交给别的域）', () => {
+  it('第三方绝对地址不带令牌也不带 X-Requested-With（不能把令牌交给别的域）', () => {
     putTokenInStorage('T');
     http.get('https://third.example.com/api').subscribe();
     const req = httpMock.expectOne('https://third.example.com/api');
-    expect(req.request.headers.has('Authorization')).toBe(false);
+    expect(req.request.headers.has('X-Auth-Token')).toBe(false);
+    expect(req.request.headers.has('X-Requested-With')).toBe(false);
     req.flush({});
   });
 
-  it('调用方自带的 Authorization 被覆盖，而不是叠加成两个值', () => {
+  it('调用方自带的 X-Auth-Token 被覆盖，而不是叠加成两个值', () => {
     putTokenInStorage('T');
-    http.get('/sec/users/page', { headers: { Authorization: 'Basic abc' } }).subscribe();
+    http.get('/sec/users/page', { headers: { 'X-Auth-Token': 'stale' } }).subscribe();
     const req = httpMock.expectOne(api('/sec/users/page'));
-    expect(req.request.headers.get('Authorization')).toBe('Bearer T');
+    expect(req.request.headers.get('X-Auth-Token')).toBe('T');
+    expect(req.request.headers.get('X-Requested-With')).toBe('XMLHttpRequest');
     req.flush({});
   });
 
