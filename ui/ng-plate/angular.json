@@ -39,15 +39,24 @@
               }
             ],
             "styles": [
-              "src/styles.scss",
-              "node_modules/@tabler/core/dist/css/tabler.css",
-              "node_modules/@tabler/core/dist/css/tabler-themes.css",
-              "node_modules/@tabler/core/dist/css/tabler-socials.css",
-              "src/app/pages/examples/themes/showcase.scss"
+              { "input": "src/styles.scss", "bundleName": "styles" },
+              { "input": "node_modules/@tabler/core/dist/css/tabler.css", "bundleName": "tabler" },
+              {
+                "input": "node_modules/@tabler/core/dist/css/tabler-themes.css",
+                "bundleName": "tabler"
+              },
+              {
+                "input": "node_modules/@tabler/core/dist/css/tabler-socials.css",
+                "bundleName": "tabler"
+              },
+              { "input": "src/app/pages/examples/themes/showcase.scss", "bundleName": "showcase" }
             ],
             "scripts": [
-              "node_modules/@tabler/core/dist/js/tabler.js",
-              "node_modules/@tabler/core/dist/js/tabler-theme.js"
+              { "input": "node_modules/@tabler/core/dist/js/tabler.js", "bundleName": "tabler" },
+              {
+                "input": "node_modules/@tabler/core/dist/js/tabler-theme.js",
+                "bundleName": "tabler"
+              }
             ],
             "server": "src/main.server.ts",
             "outputMode": "server",
