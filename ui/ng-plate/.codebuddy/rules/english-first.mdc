@@ -1,14 +1,23 @@
 ---
 description:
-  MANDATORY language rule for git-tracked files. Fetch before creating, editing or staging any file in this repository: all version-controlled content must be primarily English. Local temporary and ignored files are exempt.
+  MANDATORY language rule for git-tracked files. Fetch before creating, editing or staging any file in this repository: code and metadata must be English, while user-facing UI copy lives as Chinese (zh-Hans) i18n source text. Local temporary and ignored files are exempt.
 alwaysApply: true
 ---
 
-# English-first for version-controlled files
+# English code, Chinese UI copy (i18n source)
 
-**MANDATORY.** Every file tracked by git in this repository must be written primarily in English. This keeps commits
-readable on GitHub, supports international contributors, and keeps the codebase in one consistent language. This rule is
-not optional and must not be weakened for convenience.
+**MANDATORY.** This repository keeps one consistent language for *code* and one for *content*. The split is not a
+weakening of the rule; it is the rule.
+
+- **Code and metadata -> English.** Identifiers, file names, comments, JSDoc, test names, configuration keys, CSS
+  class names, route paths, API contracts, documentation headings, rule bodies and commit messages.
+- **User-facing copy -> Simplified Chinese (zh-Hans).** Button labels, navigation and menu items, page and section
+  headings, form labels, placeholders, tooltips and `aria-label`s, empty states, table headers, toast and banner
+  messages, validation messages. These are the **i18n source strings** for `sourceLocale: "zh-Hans"`, not technical
+  debt. The English UI is delivered by the `en-US` translation catalog, not by writing English into templates.
+
+This keeps the codebase grep-able and reviewable on GitHub for international maintainers while giving the product a
+real Chinese default locale and a complete English variant.
 
 ## Scope: git-tracked files only
 
@@ -20,30 +29,55 @@ not optional and must not be weakened for convenience.
   by [.gitignore](mdc:.gitignore) or a parent `.gitignore` (e.g. `node_modules/`, `dist/`, `.angular/`, local logs,
   screenshots, scratch notes, IDE-local plans and user-level config). They may use any language and must never be added
   to the repository just to satisfy this rule. Use `git check-ignore -v <path>` when in doubt.
-- A file becomes in-scope the moment it moves from ignored/untracked into git: translate its content **before** staging
-  it.
+- A file becomes in-scope the moment it moves from ignored/untracked into git: apply the code/content split **before**
+  staging it.
 
-## What "primarily English" means
+## Code layer (must be English)
 
-- Identifiers, file names, comments and JSDoc, UI labels and messages, test names, error messages, documentation
-  headings, rule bodies and commit messages are in English.
+- Identifiers, file names, comments and JSDoc, `describe` / `it` test names, commit messages, documentation headings,
+  rule bodies, configuration keys, CSS class names, route paths and API contracts.
+- Machine-readable values stay English: HTTP status codes, error codes, RFC7807 field names and types, log messages.
+  Only the display string rendered to a user may be Chinese.
 - Allowed exceptions: proper nouns, brand names, third-party URLs, snippets quoted verbatim from external documentation,
   and data values that must match an external system.
-- Existing Chinese content in tracked files is **technical debt, not an exception**. Whenever such a file is edited,
-  convert its touched lines and that file's comments/labels to English in the same change. A full translation pass of
-  untouched files is a separate, explicitly requested task.
+
+## Content layer (may and should be Chinese)
+
+- Any string rendered to the user, including button text, menu items, headings, labels, placeholders, tooltips,
+  aria-labels, empty states, table headers, toast / banner messages and validation messages.
+- Every such string must be marked for translation — an `i18n` attribute (or `i18n-*` for attributes) in templates, or
+  `$localize` in TypeScript — so `ng extract-i18n` can collect it into the message catalog.
+- Chinese strings held in TypeScript data (arrays, menu definitions, column headers, constants) are i18n source text
+  too, and must be wrapped in `$localize`.
+- Translation catalogs (`src/locale/messages.*.xlf` and equivalents) are content resources: the `zh-Hans` source
+  messages and any Chinese targets are expected and are **not** violations.
+- Test fixtures that intentionally contain Chinese characters (e.g. verifying UTF-8 Basic auth encoding) are data
+  values and stay as-is.
+
+## Handling existing English UI copy
+
+- English UI strings currently sitting in tracked templates are **migration debt, not the target state**. When a file is
+  touched for i18n work, convert its user-facing strings to Chinese source text, add translation markers, and keep its
+  code and comment layer English.
+- Do **not** add new English UI copy once i18n is in place. Translating a test title or a comment to English is still
+  correct — test names and comments belong to the code layer.
+- A full translation pass of untouched files is a separate, explicitly requested task.
 
 ## Why
 
-A repository shared on GitHub is read by international maintainers. Mixed Chinese/English identifiers, comments, UI copy
-and commit messages hurt grep-ability, tooling and AI context, and make reviews harder. Consistency beats partial
-localization.
+A repository shared on GitHub is read by international maintainers. Mixed Chinese/English identifiers, comments and
+commit messages hurt grep-ability, tooling and AI context, and make reviews harder. UI copy is different: it is content,
+and with Angular i18n it belongs in a marked source catalog plus a translation catalog. Keeping that content in Chinese
+for the base locale gives the product an honest `zh-Hans` default instead of a declared-but-unused one.
 
 ## Verification before delivery
 
 - `git status --short` shows only the intended files.
-- For each changed tracked file, grep for CJK characters (`[\u4e00-\u9fff]`); every hit must be one of the allowed
-  exceptions above.
+- For each changed tracked file, grep for CJK characters (`[\u4e00-\u9fff]`). Every hit must fall in the **content
+  layer** above (UI source copy, translation catalogs, or intentional test data) — never in identifiers, comments, test
+  names, log messages or commit messages.
+- Confirm every newly added UI string carries an `i18n` marker or `$localize`, and that `ng extract-i18n` collects the
+  expected message count.
 
 ## References
 
