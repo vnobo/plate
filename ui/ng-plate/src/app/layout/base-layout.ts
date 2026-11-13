@@ -18,12 +18,12 @@ import { LayoutService } from './layout.service';
       }
       <div class="page-wrapper">
         <main id="page-body" class="page-body">
-          <div class="container-xl">
+          <div class="container-fluid">
             <router-outlet></router-outlet>
           </div>
         </main>
         <footer class="footer footer-transparent d-print-none">
-          <div class="container-xl">
+          <div class="container-fluid">
             <div class="row text-center align-items-center flex-column flex-sm-row">
               <div class="col-12 col-sm-6 text-sm-start">Plate Console</div>
               <div class="col-12 col-sm-6 text-sm-end text-secondary">Copyright © 2026</div>
