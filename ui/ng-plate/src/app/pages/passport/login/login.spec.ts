@@ -33,10 +33,10 @@ describe('Login', () => {
   /** Waits one macrotask so the async login chain in login.ts finishes. */
   const tick = () => new Promise((r) => setTimeout(r, 25));
 
-  const submit = async (username: string, password: string, rememberMe = false) => {
+  const submit = async (username: string, password: string) => {
     const fixture = TestBed.createComponent(Login);
     const cmp = fixture.componentInstance as any;
-    cmp.loginModel.set({ username, password, rememberMe });
+    cmp.loginModel.set({ username, password });
     await cmp.onSubmit();
     await tick();
     return { fixture, cmp };
@@ -60,18 +60,6 @@ describe('Login', () => {
     const decoded = new TextDecoder().decode(Uint8Array.from(raw, (c) => c.charCodeAt(0)));
     expect(decoded).toBe('管理员账号:密码123456');
     req.flush({ token: 't', details: { nickname: '管理员' } });
-  });
-
-  it('勾选记住我 → 登录请求带 rememberMe=true，不勾选则不带', async () => {
-    await submit('admin', 'secret123', true);
-    const req = httpMock.expectOne('/sec/oauth2/login?rememberMe=true');
-    req.flush({ token: 't', details: {} });
-
-    localStorage.clear();
-    await submit('admin', 'secret123');
-    // Unchecked: still the plain login address, and the frontend no longer writes any credentials to localStorage.
-    httpMock.expectOne('/sec/oauth2/login');
-    expect(localStorage.getItem('login-credentials')).toBeNull();
   });
 
   it('刷新后令牌没过期 → 直接回内页，不再停在登录页', async () => {

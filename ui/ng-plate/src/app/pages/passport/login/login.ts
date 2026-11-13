@@ -27,7 +27,6 @@ export class Login {
   protected readonly loginModel = signal({
     username: '',
     password: '',
-    rememberMe: false,
   });
 
   protected readonly loginForm = form(this.loginModel, (p) => {
@@ -86,7 +85,7 @@ export class Login {
       const headers = new HttpHeaders({
         authorization: this.basicAuth(credentials.username, credentials.password),
       });
-      this.login(headers, credentials.rememberMe).subscribe({
+      this.login(headers).subscribe({
         next: () => {
           // A 200 without a token is not success: entering the inner page with an empty token would be bounced back by 401 on the next request.
           if (!this._tokenSer.authenticationToken()?.token) {
@@ -130,9 +129,8 @@ export class Login {
     return 'Basic ' + btoa(binary);
   }
 
-  private login(headers: HttpHeaders, rememberMe: boolean) {
-    const url = rememberMe ? '/sec/oauth2/login?rememberMe=true' : '/sec/oauth2/login';
-    return this._http.get<Authentication>(url, { headers }).pipe(
+  private login(headers: HttpHeaders) {
+    return this._http.get<Authentication>('/sec/oauth2/login', { headers }).pipe(
       tap((authentication: Authentication) => this._tokenSer.login(authentication)),
       // Do not retry the login request: retrying on 401 just resends the credentials and increases lockout risk.
       // Unsubscribe on destroy to avoid callbacks acting on a destroyed component.
