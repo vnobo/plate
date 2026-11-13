@@ -53,7 +53,6 @@ export class Login {
       // A dead token would only be rejected by 401 on the next request, so clear it now.
       this._tokenSer.logout();
     }
-    this.autoLoginWithRemembered();
   }
 
   /** First error message for a field; only shown after the user touched it, to avoid a page full of red on entry. */
@@ -129,24 +128,6 @@ export class Login {
       binary += String.fromCharCode(byte);
     }
     return 'Basic ' + btoa(binary);
-  }
-
-  /**
-   * Exchanges the backend-issued HttpOnly remember-me cookie for a fresh session.
-   * The frontend stores neither the password nor the token — the password only buys a random string valid for 2 days and revocable server-side.
-   * No cookie or a revoked one -> 401, so we stay on the login page and let the user type credentials.
-   */
-  private autoLoginWithRemembered() {
-    this._http.get<Authentication>('/sec/oauth2/refresh').subscribe({
-      next: (authentication) => {
-        // A response without a token is not allowed through: entering the inner page with an empty token would be bounced back by 401 on the next request.
-        if (!authentication?.token) return;
-        this._tokenSer.login(authentication);
-        void this._router.navigate([this._tokenSer.redirectUrl]);
-      },
-      // 401 = never remembered / expired / logged out, so staying on this page is expected and needs no prompt.
-      error: () => {},
-    });
   }
 
   private login(headers: HttpHeaders, rememberMe: boolean) {

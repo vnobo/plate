@@ -30,7 +30,7 @@ describe('Login', () => {
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  /** Waits one macrotask so the async chain in login.ts (e.g. the refresh subscription) finishes. */
+  /** Waits one macrotask so the async login chain in login.ts finishes. */
   const tick = () => new Promise((r) => setTimeout(r, 25));
 
   const submit = async (username: string, password: string, rememberMe = false) => {
@@ -72,26 +72,6 @@ describe('Login', () => {
     // Unchecked: still the plain login address, and the frontend no longer writes any credentials to localStorage.
     httpMock.expectOne('/sec/oauth2/login');
     expect(localStorage.getItem('login-credentials')).toBeNull();
-  });
-
-  it('记住我：进登录页用后端 cookie 换会话直接进内页（本地不存任何账号密码）', async () => {
-    TestBed.createComponent(Login);
-    await tick();
-    const req = httpMock.expectOne('/sec/oauth2/refresh');
-    req.flush({ token: 't', expires: 1800, lastAccessTime: dayjs().unix(), details: {} });
-    await tick();
-    expect(localStorage.getItem('login-credentials')).toBeNull();
-    expect(TestBed.inject(Router).url).toBe('/platform');
-  });
-
-  it('记住我 cookie 失效（401）→ 留在登录页，不报错', async () => {
-    TestBed.createComponent(Login);
-    await tick();
-    httpMock
-      .expectOne('/sec/oauth2/refresh')
-      .flush(null, { status: 401, statusText: 'Unauthorized' });
-    await tick();
-    expect(TestBed.inject(Router).url).not.toBe('/platform');
   });
 
   it('刷新后令牌没过期 → 直接回内页，不再停在登录页', async () => {

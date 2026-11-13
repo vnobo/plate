@@ -37,13 +37,9 @@ function authTokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
   const isOwnApi = environment.host
     ? req.url.startsWith(environment.host)
     : !req.url.startsWith('http');
-  // Skip only the login/refresh endpoints themselves: a substring match on /login would silently
+  // Skip only the login endpoint itself: a substring match on /login would silently
   // drop the token from endpoints like /login-history.
-  if (
-    !isOwnApi ||
-    req.url.indexOf('/oauth2/login') > -1 ||
-    req.url.indexOf('/oauth2/refresh') > -1
-  ) {
+  if (!isOwnApi || req.url.indexOf('/oauth2/login') > -1) {
     return next(req);
   }
   const newReq = req.clone({
