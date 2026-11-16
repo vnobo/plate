@@ -1,93 +1,79 @@
 <!doctype html>
 <html lang="zh-Hans" data-bs-navbar-position="combined">
-  <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport" />
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
     <title>Plate Web Console</title>
-    <base href="/" />
+    <base href="/"/>
 
     <!-- Primary Meta Tags -->
-    <meta content="Plate Web Console" name="title" />
-    <meta content="Plate Web Console - A modern web management console" name="description" />
-    <meta content="alexbob" name="author" />
-    <meta content="Web console, dashboard, admin panel, management system" name="keywords" />
+    <meta content="Plate Web Console" name="title"/>
+    <meta content="Plate Web Console - A modern web management console" name="description"/>
+    <meta content="alexbob" name="author"/>
+    <meta content="Web console, dashboard, admin panel, management system" name="keywords"/>
 
     <!-- Security Meta Tags -->
-    <meta content="1; mode=block" http-equiv="X-XSS-Protection" />
+    <meta content="1; mode=block" http-equiv="X-XSS-Protection"/>
 
     <!-- PWA Meta Tags -->
-    <meta content="#ffffff" name="theme-color" />
-    <meta content="yes" name="mobile-web-app-capable" />
-    <meta content="Plate Web Console" name="application-name" />
-    <meta content="yes" name="apple-mobile-web-app-capable" />
-    <meta content="default" name="apple-mobile-web-app-status-bar-style" />
-    <meta content="Plate Web Console" name="apple-mobile-web-app-title" />
+    <meta content="#ffffff" name="theme-color"/>
+    <meta content="yes" name="mobile-web-app-capable"/>
+    <meta content="Plate Web Console" name="application-name"/>
+    <meta content="yes" name="apple-mobile-web-app-capable"/>
+    <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
+    <meta content="Plate Web Console" name="apple-mobile-web-app-title"/>
 
     <!-- Performance Meta Tags -->
-    <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control" />
-    <meta content="telephone=no, date=no, email=no, address=no" name="format-detection" />
+    <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
+    <meta content="telephone=no, date=no, email=no, address=no" name="format-detection"/>
 
     <!-- Favicon -->
-    <link href="/favicon.ico" rel="icon" type="image/x-icon" />
+    <link href="/favicon.ico" rel="icon" type="image/x-icon"/>
 
     <!-- Preconnect to External Resources -->
-    <link href="https://fonts.googleapis.com" rel="preconnect" />
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-    <link crossorigin="" href="https://images.unsplash.com" rel="preconnect" />
-    <link crossorigin="" href="https://cdnjs.cloudflare.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link crossorigin="" href="https://images.unsplash.com" rel="preconnect"/>
+    <link crossorigin="" href="https://cdnjs.cloudflare.com" rel="preconnect"/>
 
     <!-- Theme showcase fonts: geometric sans-serif / elegant serif / compressed bold / gallery base font -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=Montserrat:wght@400;500;600;700;800&amp;family=Oswald:wght@500;600;700&amp;family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap"
-      rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=Montserrat:wght@400;500;600;700;800&amp;family=Oswald:wght@500;600;700&amp;family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap"
+            rel="stylesheet"
     />
 
     <!-- Fonts with display=swap for better performance -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap"
-      rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap"
+            rel="stylesheet"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&amp;display=swap"
-      rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&amp;display=swap"
+            rel="stylesheet"
     />
-    <!-- LXGW WenKai 1.530.0 (Regular + Medium), SIL Open Font License 1.1,
-         served as subset WOFF2 by cdnjs. Pinned version, no @latest.
-         Subsets are used only for on-screen web rendering; this app does not
-         expose the font files as an installable desktop-font download. -->
-    <link
-      rel="stylesheet"
-      crossorigin="anonymous"
-      integrity="sha512-9fHU8ex9wWwEJL/dGx7jHSJX4xV39NbamPL4M5IMj3BP90PWO4PyDU+XxiICxnyd5QTbL55zn8+TD/JHhXirsA=="
-      href="https://cdnjs.cloudflare.com/ajax/libs/lxgw-wenkai-web/1.530.0/lxgwwenkai-regular/result.css"
-    />
-    <link
-      rel="stylesheet"
-      crossorigin="anonymous"
-      integrity="sha512-hkWPtRhOSmcKXX8+RjuO8NDaJ/P5UTYWwezus+TsE2EAmE1iA5KJ4tF7gTEnFQU5qrrRBTBRnqI+kZMj6PGhgg=="
-      href="https://cdnjs.cloudflare.com/ajax/libs/lxgw-wenkai-web/1.530.0/lxgwwenkai-medium/result.css"
-    />
+    <!-- LXGW WenKai -->
+    <link href="https://cdn.jsdelivr.net/npm/@callmebill/lxgw-wenkai-web@latest/style.css" rel="stylesheet"/>
     <!-- PWD Manifest -->
-    <link rel="manifest" href="manifest.webmanifest" />
-  </head>
-  <body>
-    <app-root>
-      <div class="page page-center">
+    <link href="manifest.webmanifest" rel="manifest"/>
+</head>
+<body>
+<app-root>
+    <div class="page page-center">
         <div class="container container-slim py-4">
-          <div class="text-center">
-            <div class="mb-3">
-              <a href="." class="navbar-brand navbar-brand-autodark"
-                ><img src="./icons/icon-96x96.png" height="36" alt=""
-              /></a>
+            <div class="text-center">
+                <div class="mb-3">
+                    <a class="navbar-brand navbar-brand-autodark" href="."
+                    ><img alt="" height="36" src="./icons/icon-96x96.png"
+                    /></a>
+                </div>
+                <div class="text-secondary mb-3">Preparing application</div>
+                <div class="progress progress-sm">
+                    <div class="progress-bar progress-bar-indeterminate"></div>
+                </div>
             </div>
-            <div class="text-secondary mb-3">Preparing application</div>
-            <div class="progress progress-sm">
-              <div class="progress-bar progress-bar-indeterminate"></div>
-            </div>
-          </div>
         </div>
-      </div>
-    </app-root>
-    <noscript>Please enable JavaScript to continue using this application.</noscript>
-  </body>
+    </div>
+</app-root>
+<noscript>Please enable JavaScript to continue using this application.</noscript>
+</body>
 </html>
