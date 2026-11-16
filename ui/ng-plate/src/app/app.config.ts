@@ -1,7 +1,6 @@
 import {
   ApplicationConfig,
   isDevMode,
-  LOCALE_ID,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import {
@@ -24,7 +23,6 @@ import {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    { provide: LOCALE_ID, useValue: 'zh-Hans' },
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withComponentInputBinding()),
     provideClientHydration(withEventReplay(), withI18nSupport()),
