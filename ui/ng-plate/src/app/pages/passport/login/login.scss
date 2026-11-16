@@ -161,7 +161,8 @@
 
 .login-main-top {
   display: flex;
-  justify-content: flex-end;
+  justify-content: end;
+  gap: 8px;
   width: 100%;
   max-width: 26rem;
 }
@@ -205,8 +206,7 @@
   transition: box-shadow 0.2s ease;
 }
 
-/* Lift on hover is expressed as a shadow only: it still reads as a press affordance
-   while staying inside prefers-reduced-motion without a second media query. */
+/* Hover lift is shadow-only, so reduced-motion needs no second media query. */
 .login-card .btn-primary:hover:not(:disabled) {
   box-shadow: 0 1rem 2rem color-mix(in srgb, var(--tblr-primary) 32%, transparent);
 }

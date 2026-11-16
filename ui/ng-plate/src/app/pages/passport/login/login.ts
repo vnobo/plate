@@ -5,6 +5,7 @@ import {form, FormField, maxLength, minLength, required, submit} from '@angular/
 import {Router} from '@angular/router';
 import {SettingsService, TokenService} from '@app/core';
 import {LocaleSwitcher} from '@app/layout/locale-switcher';
+import {ThemeSwitcher} from '@app/layout/theme-switcher';
 import {MessageService} from '@app/plugins';
 import {Authentication} from '@plate/types';
 import {tap} from 'rxjs';
@@ -54,7 +55,7 @@ const SEASON_COPY: Record<LoginSeason, SeasonCopy> = {
 
 @Component({
   selector: 'app-login',
-  imports: [FormField, LocaleSwitcher],
+  imports: [FormField, LocaleSwitcher, ThemeSwitcher],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
