@@ -2,6 +2,10 @@
 .codebuddy/*
 !.codebuddy/agents/
 !.codebuddy/rules/
+.i18n-*/
+# Generated source message catalog; the tracked translation catalogs live in src/locale
+/src/locale/.generated/
+/src/locale/messages.xlf
 # Compiled output
 /dist
 /tmp

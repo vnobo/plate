@@ -7,7 +7,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:ng-plate": "node dist/ng-plate/server/server.mjs"
+    "serve:ssr:ng-plate": "node dist/ng-plate/server/server.mjs",
+    "i18n:extract": "ng extract-i18n",
+    "build:localized": "ng build --configuration production,i18n",
+    "build:i18n": "pnpm build:localized"
   },
   "prettier": {
     "printWidth": 100,

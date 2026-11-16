@@ -9,7 +9,8 @@
   "projects": {
     "ng-plate": {
       "i18n": {
-        "sourceLocale": "zh-Hans"
+        "sourceLocale": { "code": "zh-Hans", "subPath": "" },
+        "locales": { "en-US": "src/locale/messages.en-US.xlf" }
       },
       "projectType": "application",
       "schematics": {
@@ -63,7 +64,11 @@
             "ssr": {
               "entry": "src/server.ts"
             },
-            "polyfills": ["@angular/localize/init"]
+            "polyfills": ["@angular/localize/init"],
+            "i18nMissingTranslation": "error",
+            "security": {
+              "allowedHosts": ["localhost", "127.0.0.1"]
+            }
           },
           "configurations": {
             "production": {
@@ -100,6 +105,9 @@
                   "with": "src/envs/env.dev.ts"
                 }
               ]
+            },
+            "i18n": {
+              "localize": ["zh-Hans", "en-US"]
             }
           },
           "defaultConfiguration": "production"
@@ -119,6 +127,15 @@
         },
         "test": {
           "builder": "@angular/build:unit-test"
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n",
+          "options": {
+            "buildTarget": "ng-plate:build:production",
+            "outputPath": "src/locale/.generated",
+            "outFile": "messages.xlf",
+            "format": "xlf"
+          }
         }
       }
     }
