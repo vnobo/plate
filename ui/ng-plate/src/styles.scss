@@ -22,9 +22,8 @@
    glyphs fall through to 'LXGW WenKai'. Quoted generic names are not resolved,
    so keep -apple-system / BlinkMacSystemFont / sans-serif unquoted. */
 html:root {
-  --plate-font-sans:
-    'Inter Var', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
-    Arial, 'LXGW WenKai', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --plate-font-sans: 'LXGW WenKai', 'Inter Var', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+  Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --tblr-font-sans-serif: var(--plate-font-sans);
   --tblr-body-font-family: var(--plate-font-sans);
 
@@ -45,13 +44,11 @@ html:root {
   --tblr-line-height-h5: 1.5;
   --tblr-line-height-h6: 1.5;
 
-  --plate-font-emphasis:
-    'Inter Var', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
-    Arial, 'LXGW WenKai Medium', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --plate-font-emphasis: 'Inter Var', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+  Arial, 'LXGW WenKai Medium', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 
-  --plate-font-ui:
-    'Inter Var', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
-    Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --plate-font-ui: 'Inter Var', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+  Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
 /* Keep h4-h6 on Regular: h6 is 0.875rem and Medium shows rough outlines there.
@@ -113,8 +110,7 @@ html:root {
   --tblr-btn-padding-y: 0.4375rem;
 
   /* Source variable for the card shadow (--tblr-card-box-shadow derives from it) */
-  --tblr-shadow-card:
-    0 0.0625rem 0.125rem rgba(16, 24, 40, 0.04), 0 0.0625rem 0.1875rem rgba(16, 24, 40, 0.06);
+  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(16, 24, 40, 0.04), 0 0.0625rem 0.1875rem rgba(16, 24, 40, 0.06);
 
   /* Keep mobile inputs at 1rem to avoid iOS Safari zooming the page on focus */
   --tblr-form-control-mobile-font-size: 1rem;
@@ -132,34 +128,42 @@ html:root {
 
 /* -----------------------------------------------------------------------------
  * 4. Colours: light mode (= SPRING, the default palette)
- *    Primary is a verdant green (WCAG AA: 5.36:1 on white); the mint accent is
- *    used only for fills and borders, never for body text, to preserve contrast.
- *    Kept in sync with html[data-plate-theme='azure'] so the first paint before
- *    SettingsService runs does not flash a different hue.
+ *    Four-season specification, spring "new growth in morning mist".
+ *    The spec splits each season into a decorative primary (fills, icons, accents)
+ *    and a primary-deep (buttons, links, active state, footer). Tabler has no deep
+ *    concept, so --tblr-primary carries the deep shade everywhere white text or a
+ *    text colour is required; --plate-primary keeps the light decorative hue for
+ *    gradients, icon wells and motif accents. All combinations meet WCAG AA.
+ *    Kept in sync with html[data-plate-theme='azure'][data-bs-theme='light'] so the
+ *    first paint before SettingsService runs does not flash a different hue.
  * -------------------------------------------------------------------------- */
 html:root,
 html[data-bs-theme='light'] {
-  /* Primary: spring green - buttons, links, active state, brand */
-  --tblr-primary: #0c7a52;
-  --tblr-primary-rgb: 12, 122, 82;
+  /* Deep shade: buttons, links, active state, brand (white text 4.85:1) */
+  --tblr-primary: #3f7f45;
+  --tblr-primary-rgb: 63, 127, 69;
   --tblr-primary-fg: #ffffff;
 
-  /* Mint accent (secondary emphasis; use only for fills / borders / icons) */
-  --tblr-azure: #3aa981;
-  --tblr-azure-rgb: 58, 169, 129;
-  --tblr-azure-fg: #ffffff;
+  /* Decorative primary: icon wells, gradients, motif accents only */
+  --plate-primary: #86c57d;
+  --tblr-azure: #86c57d;
+  --tblr-azure-rgb: 134, 197, 125;
+  --tblr-azure-fg: #14301c;
 
-  /* Secondary: pine grey - keeps text-secondary and other muted text legible */
-  --tblr-secondary: #5d7268;
-  --tblr-secondary-rgb: 93, 114, 104;
+  /* Secondary: soft blossom pink - tag/icon backgrounds (dark text on it) */
+  --tblr-secondary: #8c9a8f;
+  --tblr-secondary-rgb: 140, 154, 143;
   --tblr-secondary-fg: #ffffff;
 
-  /* Links and focus ring */
-  --tblr-link-color: #0c7a52;
-  --tblr-link-hover-color: #096040;
-  --tblr-focus-ring-color: rgba(12, 122, 82, 0.3);
+  /* Accent: pale sky blue, decorative only */
+  --plate-accent: #90c9e8;
 
-  /* Status colours (tuned to the enterprise blue; white text meets AA contrast) */
+  /* Links and focus ring */
+  --tblr-link-color: #3f7f45;
+  --tblr-link-hover-color: #2f6334;
+  --tblr-focus-ring-color: rgba(63, 127, 69, 0.28);
+
+  /* Status colours (kept consistent across seasons; white text meets AA contrast) */
   --tblr-success: #1f8a4d;
   --tblr-success-rgb: 31, 138, 77;
   --tblr-success-fg: #ffffff;
@@ -169,42 +173,47 @@ html[data-bs-theme='light'] {
   --tblr-warning: #e08a00;
   --tblr-warning-rgb: 224, 138, 0;
   --tblr-warning-fg: #2a1c00; /* dark text on a light background */
-  --tblr-danger: #dc3545;
-  --tblr-danger-rgb: 220, 53, 69;
+  --tblr-danger: #b4453a;
+  --tblr-danger-rgb: 180, 69, 58;
   --tblr-danger-fg: #ffffff;
 
-  /* Background / text / borders (paper white with a mint cast) */
+  /* Background / text / borders (mint-tinted paper, spec neutral palette) */
   --tblr-bg-surface: #ffffff;
-  --tblr-bg-surface-secondary: #f0f7f3;
-  --tblr-body-bg: #f2f8f4;
-  --tblr-body-color: #1b2f27;
-  --tblr-muted: #5f7568;
-  --tblr-border-color: #dbeadf;
+  --tblr-bg-surface-secondary: #eef4ec;
+  --tblr-body-bg: #f9faf7;
+  --tblr-body-color: #444444;
+  --tblr-muted: #76766e;
+  --tblr-border-color: #e4ebdd;
 }
 
 /* -----------------------------------------------------------------------------
  * 5. Colours: dark mode (= WINTER)
- *    Primary is a frost blue with dark labels on top (9.77:1) instead of white,
- *    which would fail AA on a light primary; midnight layers step up in depth so
- *    cards sit above the page background.
- *    Kept in sync with html[data-plate-theme='slate'] to avoid a first-paint flash.
+ *    Winter "falling snow, quiet peaks". In dark mode the deep shade stays as the
+ *    button/link colour (white text 4.92:1) and midnight-ice layers step up in
+ *    depth so cards sit above the page. The decorative primary is the pale frost
+ *    blue, used only for icon wells and motif accents.
+ *    Kept in sync with html[data-plate-theme='slate'][data-bs-theme='dark'] to
+ *    avoid a first-paint flash.
  * -------------------------------------------------------------------------- */
 html[data-bs-theme='dark'] {
-  --tblr-primary: #7cc4e8;
-  --tblr-primary-rgb: 124, 196, 232;
-  --tblr-primary-fg: #06131c;
+  --tblr-primary: #5a738c;
+  --tblr-primary-rgb: 90, 115, 140;
+  --tblr-primary-fg: #ffffff;
 
-  --tblr-azure: #4f8fb8;
-  --tblr-azure-rgb: 79, 143, 184;
-  --tblr-azure-fg: #06131c;
+  --plate-primary: #b8d2e5;
+  --tblr-azure: #b8d2e5;
+  --tblr-azure-rgb: 184, 210, 229;
+  --tblr-azure-fg: #0a1a26;
 
-  --tblr-secondary: #7d8fa0;
-  --tblr-secondary-rgb: 125, 143, 160;
-  --tblr-secondary-fg: #06131c;
+  --tblr-secondary: #6d8296;
+  --tblr-secondary-rgb: 109, 130, 150;
+  --tblr-secondary-fg: #ffffff;
 
-  --tblr-link-color: #7cc4e8;
-  --tblr-link-hover-color: #a6dcf5;
-  --tblr-focus-ring-color: rgba(124, 196, 232, 0.34);
+  --plate-accent: #748ca6;
+
+  --tblr-link-color: #93b6d2;
+  --tblr-link-hover-color: #b8d2e5;
+  --tblr-focus-ring-color: rgba(184, 210, 229, 0.18);
 
   --tblr-success: #34c172;
   --tblr-success-rgb: 52, 193, 114;
@@ -215,22 +224,21 @@ html[data-bs-theme='dark'] {
   --tblr-warning: #f7b733;
   --tblr-warning-rgb: 247, 183, 51;
   --tblr-warning-fg: #2a1c00;
-  --tblr-danger: #f15b5b;
-  --tblr-danger-rgb: 241, 91, 91;
+  --tblr-danger: #e0675b;
+  --tblr-danger-rgb: 224, 103, 91;
   --tblr-danger-fg: #2a0808;
 
   /* Midnight (deep navy-ice) layers: page darkest -> overlays slightly higher ->
-     cards higher still, stepped up to create depth.
-     --tblr-bg-forms must change too: Tabler's dark default uses neutral
-     gray-900, so inputs look washed out unless it is overridden. */
-  --tblr-body-bg: #060f18;
-  --tblr-bg-surface-secondary: #0a1724;
-  --tblr-bg-surface: #0d1d2c;
-  --tblr-bg-forms: #0b1a28;
-  --tblr-body-color: #deeaf5;
-  --tblr-muted: #90a6b8;
-  --tblr-border-color: #1b3145;
-  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.32);
+     cards higher still, stepped up to create depth. --tblr-bg-forms must change
+     too: Tabler's dark default uses neutral gray-900, so inputs look washed out. */
+  --tblr-body-bg: #0b141d;
+  --tblr-bg-surface-secondary: #0e1b26;
+  --tblr-bg-surface: #13212e;
+  --tblr-bg-forms: #101c28;
+  --tblr-body-color: #e6eef6;
+  --tblr-muted: #9fb0c0;
+  --tblr-border-color: #24384a;
+  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.3);
 
   /* WenKai Regular strokes thin out on dark surfaces. Keep the typeface and
      the weight scale intact; only adjust rasterisation. */
@@ -256,171 +264,231 @@ body {
  *    slate=winter. Renaming an id would silently reset saved preferences.
  * -------------------------------------------------------------------------- */
 html[data-plate-theme='azure'][data-bs-theme='light'] {
-  /* SPRING / LIGHT - verdant green on mint-cast paper (primary 4.98:1 on surface) */
-  --tblr-primary: #0c7a52;
-  --tblr-primary-rgb: 12, 122, 82;
+  /* SPRING / LIGHT - new growth in morning mist. Rounding is the softest of the
+     four: 24px cards, pill buttons, 14px inputs; the lightest, airiest shadow. */
+  --tblr-primary: #3f7f45;
+  --tblr-primary-rgb: 63, 127, 69;
   --tblr-primary-fg: #ffffff;
-  --tblr-body-bg: #f2f8f4;
+  --plate-primary: #86c57d;
+  --tblr-azure: #86c57d;
+  --tblr-azure-rgb: 134, 197, 125;
+  --tblr-azure-fg: #14301c;
+  --plate-accent: #90c9e8;
+  --tblr-body-bg: #f9faf7;
   --tblr-bg-surface: #ffffff;
-  --tblr-bg-surface-secondary: #f0f7f3;
+  --tblr-bg-surface-secondary: #eef4ec;
   --tblr-bg-forms: #ffffff;
-  --tblr-body-color: #1b2f27;
-  --tblr-muted: #5f7568;
-  --tblr-border-color: #dbeadf;
-  --tblr-link-color: #0c7a52;
-  --tblr-link-hover-color: #096040;
-  --tblr-focus-ring-color: rgba(12, 122, 82, 0.3);
-  --tblr-border-radius: 0.75rem;
+  --tblr-body-color: #444444;
+  --tblr-muted: #76766e;
+  --tblr-border-color: #e4ebdd;
+  --tblr-link-color: #3f7f45;
+  --tblr-link-hover-color: #2f6334;
+  --tblr-focus-ring-color: rgba(63, 127, 69, 0.28);
+  --tblr-border-radius: 0.875rem; /* 14px inputs */
+  --tblr-card-border-radius: 1.5rem; /* 24px */
+  --tblr-btn-border-radius: 999px; /* pill */
   --tblr-card-spacer-x: 1.25rem;
   --tblr-card-spacer-y: 1.25rem;
-  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(16, 46, 34, 0.05), 0 0.0625rem 0.1875rem rgba(16, 46, 34, 0.07);
+  --tblr-shadow-card: 0 0.625rem 1.625rem rgba(134, 197, 125, 0.14);
 }
 
 html[data-plate-theme='azure'][data-bs-theme='dark'] {
-  /* SPRING / DARK - new shoots glowing on deep pine (primary 10.07:1 on surface) */
-  --tblr-primary: #4ade9a;
-  --tblr-primary-rgb: 74, 222, 154;
-  --tblr-primary-fg: #06281a;
-  --tblr-body-bg: #06140d;
-  --tblr-bg-surface: #0c1e15;
-  --tblr-bg-surface-secondary: #0a1b12;
-  --tblr-bg-forms: #0a1a12;
-  --tblr-body-color: #dff8ea;
-  --tblr-muted: #88b29b;
-  --tblr-border-color: #1d4030;
-  --tblr-link-color: #4ade9a;
-  --tblr-link-hover-color: #86f0c0;
-  --tblr-focus-ring-color: rgba(74, 222, 154, 0.34);
-  --tblr-border-radius: 0.75rem;
+  /* SPRING / DARK - glowing shoots on deep pine. */
+  --tblr-primary: #86c57d;
+  --tblr-primary-rgb: 134, 197, 125;
+  --tblr-primary-fg: #0a2413;
+  --plate-primary: #86c57d;
+  --tblr-azure: #86c57d;
+  --tblr-azure-rgb: 134, 197, 125;
+  --tblr-azure-fg: #0a2413;
+  --plate-accent: #90c9e8;
+  --tblr-body-bg: #0a1710;
+  --tblr-bg-surface: #10241a;
+  --tblr-bg-surface-secondary: #0c1d15;
+  --tblr-bg-forms: #0d1f16;
+  --tblr-body-color: #e6f5ea;
+  --tblr-muted: #9dbdaa;
+  --tblr-border-color: #1e3d2c;
+  --tblr-link-color: #a8dc9f;
+  --tblr-link-hover-color: #c4edbd;
+  --tblr-focus-ring-color: rgba(134, 197, 125, 0.2);
+  --tblr-border-radius: 0.875rem;
+  --tblr-card-border-radius: 1.5rem;
+  --tblr-btn-border-radius: 999px;
   --tblr-card-spacer-x: 1.25rem;
   --tblr-card-spacer-y: 1.25rem;
-  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.34);
+  --tblr-shadow-card: 0 0.5rem 1.375rem rgba(0, 0, 0, 0.32);
 }
 
 html[data-plate-theme='ledger'][data-bs-theme='light'] {
-  /* SUMMER / LIGHT - sunlit gold on warm ivory (primary 5.01:1 on surface) */
-  --tblr-primary: #8f6300;
-  --tblr-primary-rgb: 143, 99, 0;
+  /* SUMMER / LIGHT - open sky and sea breeze. Crisp 16px cards, 10px buttons and
+     inputs; the blue accent is the strongest of the four, yellow stays a small fill. */
+  --tblr-primary: #2679a0;
+  --tblr-primary-rgb: 38, 121, 160;
   --tblr-primary-fg: #ffffff;
-  --tblr-body-bg: #fdf8ec;
-  --tblr-bg-surface: #fffdf6;
-  --tblr-bg-surface-secondary: #faf1dd;
-  --tblr-bg-forms: #fffdf6;
-  --tblr-body-color: #2c2317;
-  --tblr-muted: #6f6350;
-  --tblr-border-color: #ecdec2;
-  --tblr-link-color: #8f6300;
-  --tblr-link-hover-color: #735000;
-  --tblr-focus-ring-color: rgba(143, 99, 0, 0.3);
-  --tblr-border-radius: 0.375rem;
+  --plate-primary: #38a3d4;
+  --tblr-azure: #38a3d4;
+  --tblr-azure-rgb: 56, 163, 212;
+  --tblr-azure-fg: #052436;
+  --plate-accent: #28b998;
+  --tblr-body-bg: #f7fbfe;
+  --tblr-bg-surface: #ffffff;
+  --tblr-bg-surface-secondary: #eaf4fb;
+  --tblr-bg-forms: #ffffff;
+  --tblr-body-color: #333333;
+  --tblr-muted: #6e7780;
+  --tblr-border-color: #e1eef7;
+  --tblr-link-color: #2679a0;
+  --tblr-link-hover-color: #1c5c7a;
+  --tblr-focus-ring-color: rgba(38, 121, 160, 0.28);
+  --tblr-border-radius: 0.625rem; /* 10px */
+  --tblr-card-border-radius: 1rem; /* 16px */
+  --tblr-btn-border-radius: 0.625rem; /* 10px */
   --tblr-card-spacer-x: 1.25rem;
   --tblr-card-spacer-y: 1.25rem;
-  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(64, 45, 10, 0.06), 0 0.0625rem 0.1875rem rgba(64, 45, 10, 0.08);
+  --tblr-shadow-card: 0 0.625rem 1.5rem rgba(56, 163, 212, 0.16);
 }
 
 html[data-plate-theme='ledger'][data-bs-theme='dark'] {
-  /* SUMMER / DARK - sunset gold on sun-baked cocoa (primary 10.76:1 on surface) */
-  --tblr-primary: #ffc247;
-  --tblr-primary-rgb: 255, 194, 71;
-  --tblr-primary-fg: #2a1800;
-  --tblr-body-bg: #1a1005;
-  --tblr-bg-surface: #251809;
-  --tblr-bg-surface-secondary: #1f1307;
-  --tblr-bg-forms: #201407;
-  --tblr-body-color: #fff1d6;
-  --tblr-muted: #c1a880;
-  --tblr-border-color: #4a3416;
-  --tblr-link-color: #ffc247;
-  --tblr-link-hover-color: #ffd77e;
-  --tblr-focus-ring-color: rgba(255, 194, 71, 0.34);
-  --tblr-border-radius: 0.375rem;
+  /* SUMMER / DARK - sunlit cyan on dusk navy. */
+  --tblr-primary: #38a3d4;
+  --tblr-primary-rgb: 56, 163, 212;
+  --tblr-primary-fg: #04202f;
+  --plate-primary: #38a3d4;
+  --tblr-azure: #38a3d4;
+  --tblr-azure-rgb: 56, 163, 212;
+  --tblr-azure-fg: #04202f;
+  --plate-accent: #28b998;
+  --tblr-body-bg: #07141c;
+  --tblr-bg-surface: #0d2330;
+  --tblr-bg-surface-secondary: #0a1c26;
+  --tblr-bg-forms: #0b2029;
+  --tblr-body-color: #e4f4fc;
+  --tblr-muted: #9db8c7;
+  --tblr-border-color: #1a3948;
+  --tblr-link-color: #6cc4ea;
+  --tblr-link-hover-color: #9ad9f2;
+  --tblr-focus-ring-color: rgba(56, 163, 212, 0.2);
+  --tblr-border-radius: 0.625rem;
+  --tblr-card-border-radius: 1rem;
+  --tblr-btn-border-radius: 0.625rem;
   --tblr-card-spacer-x: 1.25rem;
   --tblr-card-spacer-y: 1.25rem;
-  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.32);
+  --tblr-shadow-card: 0 0.5rem 1.375rem rgba(0, 0, 0, 0.32);
 }
 
 html[data-plate-theme='atelier'][data-bs-theme='light'] {
-  /* AUTUMN / LIGHT - persimmon on parchment (primary 5.82:1 on surface) */
-  --tblr-primary: #a63b23;
-  --tblr-primary-rgb: 166, 59, 35;
+  /* AUTUMN / LIGHT - harvest at dusk. The squarest, heaviest theme: 6px cards,
+     4px buttons/inputs, deepest shadow; headings switch to WenKai via the block below. */
+  --tblr-primary: #9a5a44;
+  --tblr-primary-rgb: 154, 90, 68;
   --tblr-primary-fg: #ffffff;
-  --tblr-body-bg: #faf3e6;
-  --tblr-bg-surface: #fffcf5;
-  --tblr-bg-surface-secondary: #f4e9d8;
-  --tblr-bg-forms: #fffcf5;
-  --tblr-body-color: #2e2318;
-  --tblr-muted: #766450;
-  --tblr-border-color: #e6d6bd;
-  --tblr-link-color: #a63b23;
-  --tblr-link-hover-color: #852e1a;
-  --tblr-focus-ring-color: rgba(166, 59, 35, 0.3);
-  --tblr-border-radius: 1rem;
-  --tblr-card-spacer-x: 1.75rem;
-  --tblr-card-spacer-y: 1.75rem;
-  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(58, 36, 16, 0.06), 0 0.0625rem 0.1875rem rgba(58, 36, 16, 0.08);
+  --plate-primary: #c4703a;
+  --tblr-azure: #c4703a;
+  --tblr-azure-rgb: 196, 112, 58;
+  --tblr-azure-fg: #2a1408;
+  --plate-accent: #d8c28e;
+  --tblr-body-bg: #f8f4ee;
+  --tblr-bg-surface: #fffcf7;
+  --tblr-bg-surface-secondary: #f1e8dc;
+  --tblr-bg-forms: #fffcf7;
+  --tblr-body-color: #3a3430;
+  --tblr-muted: #7a6e63;
+  --tblr-border-color: #ebdccb;
+  --tblr-link-color: #9a5a44;
+  --tblr-link-hover-color: #7d4835;
+  --tblr-focus-ring-color: rgba(154, 90, 68, 0.28);
+  --tblr-border-radius: 0.25rem; /* 4px inputs/buttons */
+  --tblr-card-border-radius: 0.375rem; /* 6px */
+  --tblr-btn-border-radius: 0.25rem; /* 4px */
+  --tblr-card-spacer-x: 1.5rem;
+  --tblr-card-spacer-y: 1.5rem;
+  --tblr-shadow-card: 0 0.625rem 1.5rem rgba(58, 52, 48, 0.15);
 }
 
 html[data-plate-theme='atelier'][data-bs-theme='dark'] {
-  /* AUTUMN / DARK - ember on warm charcoal (primary 7.54:1 on surface) */
-  --tblr-primary: #ff8a5c;
-  --tblr-primary-rgb: 255, 138, 92;
-  --tblr-primary-fg: #2a0c05;
-  --tblr-body-bg: #1b0f0a;
-  --tblr-bg-surface: #27150e;
-  --tblr-bg-surface-secondary: #20110a;
-  --tblr-bg-forms: #21120c;
-  --tblr-body-color: #ffe9d9;
-  --tblr-muted: #c9a38c;
-  --tblr-border-color: #4e2a1b;
-  --tblr-link-color: #ff8a5c;
-  --tblr-link-hover-color: #ffb08c;
-  --tblr-focus-ring-color: rgba(255, 138, 92, 0.34);
-  --tblr-border-radius: 1rem;
-  --tblr-card-spacer-x: 1.75rem;
-  --tblr-card-spacer-y: 1.75rem;
-  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.34);
+  /* AUTUMN / DARK - ember glow on warm charcoal. */
+  --tblr-primary: #c4703a;
+  --tblr-primary-rgb: 196, 112, 58;
+  --tblr-primary-fg: #2a1206;
+  --plate-primary: #c4703a;
+  --tblr-azure: #c4703a;
+  --tblr-azure-rgb: 196, 112, 58;
+  --tblr-azure-fg: #2a1206;
+  --plate-accent: #d8c28e;
+  --tblr-body-bg: #17100b;
+  --tblr-bg-surface: #241811;
+  --tblr-bg-surface-secondary: #1d140e;
+  --tblr-bg-forms: #20150f;
+  --tblr-body-color: #f6e9dd;
+  --tblr-muted: #c4a48c;
+  --tblr-border-color: #402a1d;
+  --tblr-link-color: #e0915f;
+  --tblr-link-hover-color: #f0a672;
+  --tblr-focus-ring-color: rgba(196, 112, 58, 0.2);
+  --tblr-border-radius: 0.25rem;
+  --tblr-card-border-radius: 0.375rem;
+  --tblr-btn-border-radius: 0.25rem;
+  --tblr-card-spacer-x: 1.5rem;
+  --tblr-card-spacer-y: 1.5rem;
+  --tblr-shadow-card: 0 0.5rem 1.375rem rgba(0, 0, 0, 0.36);
 }
 
 html[data-plate-theme='slate'][data-bs-theme='light'] {
-  /* WINTER / LIGHT - glacier blue on ice white (primary 5.08:1 on surface) */
-  --tblr-primary: #1f6f9e;
-  --tblr-primary-rgb: 31, 111, 158;
+  /* WINTER / LIGHT - falling snow, quiet peaks. The roundest theme: 28px cards,
+     pill buttons, 16px inputs, and the most diffuse (almost invisible) shadow. */
+  --tblr-primary: #5a738c;
+  --tblr-primary-rgb: 90, 115, 140;
   --tblr-primary-fg: #ffffff;
-  --tblr-body-bg: #f1f7fc;
-  --tblr-bg-surface: #ffffff;
-  --tblr-bg-surface-secondary: #e6f0f8;
+  --plate-primary: #b8d2e5;
+  --tblr-azure: #b8d2e5;
+  --tblr-azure-rgb: 184, 210, 229;
+  --tblr-azure-fg: #1b2b38;
+  --plate-accent: #748ca6;
+  --tblr-body-bg: #ffffff;
+  --tblr-bg-surface: #f7fafc;
+  --tblr-bg-surface-secondary: #edf3f8;
   --tblr-bg-forms: #ffffff;
-  --tblr-body-color: #102a3d;
-  --tblr-muted: #5b7385;
-  --tblr-border-color: #d5e4f0;
-  --tblr-link-color: #1f6f9e;
-  --tblr-link-hover-color: #17567e;
-  --tblr-focus-ring-color: rgba(31, 111, 158, 0.3);
-  --tblr-border-radius: 0.25rem;
-  --tblr-card-spacer-x: 1rem;
-  --tblr-card-spacer-y: 1rem;
-  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(16, 42, 61, 0.08);
+  --tblr-body-color: #2d3742;
+  --tblr-muted: #5c6b78;
+  --tblr-border-color: #e9eff4;
+  --tblr-link-color: #5a738c;
+  --tblr-link-hover-color: #455a70;
+  --tblr-focus-ring-color: rgba(90, 115, 140, 0.2);
+  --tblr-border-radius: 1rem; /* 16px inputs */
+  --tblr-card-border-radius: 1.75rem; /* 28px */
+  --tblr-btn-border-radius: 999px; /* pill */
+  --tblr-card-spacer-x: 1.5rem;
+  --tblr-card-spacer-y: 1.5rem;
+  --tblr-shadow-card: 0 0.5rem 1.375rem rgba(184, 210, 229, 0.3);
 }
 
 html[data-plate-theme='slate'][data-bs-theme='dark'] {
-  /* WINTER / DARK - frost blue on midnight (primary 8.88:1 on surface) */
-  --tblr-primary: #7cc4e8;
-  --tblr-primary-rgb: 124, 196, 232;
-  --tblr-primary-fg: #06131c;
-  --tblr-body-bg: #060f18;
-  --tblr-bg-surface: #0d1d2c;
-  --tblr-bg-surface-secondary: #0a1724;
-  --tblr-bg-forms: #0b1a28;
-  --tblr-body-color: #deeaf5;
-  --tblr-muted: #90a6b8;
-  --tblr-border-color: #1b3145;
-  --tblr-link-color: #7cc4e8;
-  --tblr-link-hover-color: #a6dcf5;
-  --tblr-focus-ring-color: rgba(124, 196, 232, 0.34);
-  --tblr-border-radius: 0.25rem;
-  --tblr-card-spacer-x: 1rem;
-  --tblr-card-spacer-y: 1rem;
-  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.36);
+  /* WINTER / DARK - frost blue on midnight. */
+  --tblr-primary: #5a738c;
+  --tblr-primary-rgb: 90, 115, 140;
+  --tblr-primary-fg: #ffffff;
+  --plate-primary: #b8d2e5;
+  --tblr-azure: #b8d2e5;
+  --tblr-azure-rgb: 184, 210, 229;
+  --tblr-azure-fg: #0a1a26;
+  --plate-accent: #748ca6;
+  --tblr-body-bg: #0b141d;
+  --tblr-bg-surface: #13212e;
+  --tblr-bg-surface-secondary: #0e1b26;
+  --tblr-bg-forms: #101c28;
+  --tblr-body-color: #e6eef6;
+  --tblr-muted: #9fb0c0;
+  --tblr-border-color: #24384a;
+  --tblr-link-color: #93b6d2;
+  --tblr-link-hover-color: #b8d2e5;
+  --tblr-focus-ring-color: rgba(184, 210, 229, 0.18);
+  --tblr-border-radius: 1rem;
+  --tblr-card-border-radius: 1.75rem;
+  --tblr-btn-border-radius: 999px;
+  --tblr-card-spacer-x: 1.5rem;
+  --tblr-card-spacer-y: 1.5rem;
+  --tblr-shadow-card: 0 0.5rem 1.375rem rgba(184, 210, 229, 0.12);
 }
 
 /* Login art motif motion. Global because all four seasons share the two keyframes;

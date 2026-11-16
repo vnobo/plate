@@ -12,32 +12,33 @@ export interface PlateTheme {
 const SPRING: PlateTheme = {
   id: 'azure',
   name: 'Verdant Spring',
-  description: 'Spring · fresh green on mint paper',
-  swatch: '#0c7a52',
+  description: 'Spring · new growth in morning mist',
+  swatch: '#86c57d',
 };
 
 /** One palette per season, listed in calendar order so the menu reads spring → winter.
-    Ids stay stable because they are storage keys. Each season has both a light and a
-    dark form in styles.scss, selected by html[data-bs-theme], independently of the id. */
+    Ids stay stable because they are storage keys. Colours follow the four-season UI
+    specification: the swatch is the decorative primary, while buttons and links use the
+    deeper shade defined in styles.scss. Each season has both a light and a dark form. */
 export const PLATE_THEMES: ReadonlyArray<PlateTheme> = [
   SPRING,
   {
     id: 'ledger',
     name: 'Amber Summer',
-    description: 'Summer · sunlit gold on ivory',
-    swatch: '#8f6300',
+    description: 'Summer · open sky and sea breeze',
+    swatch: '#38a3d4',
   },
   {
     id: 'atelier',
     name: 'Maple Autumn',
-    description: 'Autumn · persimmon on parchment',
-    swatch: '#a63b23',
+    description: 'Autumn · harvest at dusk',
+    swatch: '#c4703a',
   },
   {
     id: 'slate',
     name: 'Frost Winter',
-    description: 'Winter · frost blue on ice',
-    swatch: '#7cc4e8',
+    description: 'Winter · falling snow, quiet peaks',
+    swatch: '#8fb8d4',
   },
 ];
 
