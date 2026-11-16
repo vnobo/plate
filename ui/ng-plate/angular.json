@@ -49,8 +49,7 @@
               {
                 "input": "node_modules/@tabler/core/dist/css/tabler-socials.css",
                 "bundleName": "tabler"
-              },
-              { "input": "src/app/pages/examples/themes/showcase.scss", "bundleName": "showcase" }
+              }
             ],
             "scripts": [
               { "input": "node_modules/@tabler/core/dist/js/tabler.js", "bundleName": "tabler" },

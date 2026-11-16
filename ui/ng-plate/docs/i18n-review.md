@@ -56,15 +56,12 @@ Pages and forms:
   `menus/*` (+ `menu-form`).
 - `pages/platform/welcome/*`, `pages/dashboard/welcome/*`.
 - `pages/passport/auth-lock/*` (still Tabler sample copy, also a functional placeholder).
-- `pages/examples/transfer-demo.ts`, `data-table-demo.ts`.
-- `pages/examples/themes/{saas,commerce,studio,finance}-site.html`: demo marketing pages;
-  decide whether to localize or mark them as English-only demos.
 
 Suggested batches:
 
 1. Shared chrome + plugin defaults (one build/regression cycle, highest visibility).
 2. Platform pages and forms (largest volume; term list: 用户/租户/角色/菜单/权限/启用/停用).
-3. Welcome pages, auth-lock, examples; convert remaining counts to ICU.
+3. Welcome pages and auth-lock; convert remaining counts to ICU.
 4. Polish: every `aria-label`/`title`/`placeholder`/`alt`, `index.html` and PWA metadata.
 
 ## 4. P2: architecture and UX improvements

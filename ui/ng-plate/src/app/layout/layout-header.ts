@@ -148,15 +148,6 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             >Dashboard</a
           >
         </li>
-        <li class="nav-item">
-          <a
-            class="nav-link px-2"
-            routerLink="/examples"
-            routerLinkActive="active text-primary fw-medium"
-            ariaCurrentWhenActive="page"
-            >Examples</a
-          >
-        </li>
       </ul>
 
       <!-- Action area: order follows the Tabler example (theme → notifications → language → user), all styled uniformly with .nav-link -->
