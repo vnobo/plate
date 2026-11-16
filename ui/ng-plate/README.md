@@ -36,23 +36,59 @@ ng build
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
-## Running unit tests
+## Internationalization (i18n)
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+The UI is built once per locale with `@angular/localize`:
+
+| Locale | URL | Catalog |
+| --- | --- | --- |
+| `zh-Hans` (source, default) | `/` | strings in templates and `$localize` |
+| `en-US` | `/en-US/` | `src/locale/messages.en-US.xlf` |
 
 ```bash
-ng test
+pnpm i18n:extract     # source catalog -> src/locale/.generated/messages.xlf (gitignored)
+pnpm build:localized  # production build of both locales (alias: pnpm build:i18n)
+```
+
+`pnpm build` only produces the source locale. A missing `en-US` target fails the localized
+build (`i18nMissingTranslation: "error"`). Conventions, message-id rules, ICU guidance and
+the switching mechanism are documented in [docs/i18n.md](docs/i18n.md); the current gaps and
+the migration backlog are in [docs/i18n-review.md](docs/i18n-review.md).
+
+## Production SSR
+
+```bash
+pnpm build:localized
+pnpm serve:ssr:ng-plate   # http://localhost:4000, serves both locales
+```
+
+Runtime environment variables:
+
+- `PORT` — listen port (default `4000`).
+- `NG_ALLOWED_HOSTS` — comma-separated hostnames accepted by the SSR engine, overriding the
+  build value (`localhost,127.0.0.1`). Required in production, otherwise requests are
+  rejected with `400 Bad Request`.
+- `NG_TRUST_PROXY_HEADERS` — proxy headers to trust when running behind a reverse proxy,
+  e.g. `x-forwarded-host`.
+
+## Running unit tests
+
+To execute unit tests with [Vitest](https://vitest.dev), run:
+
+```bash
+pnpm test
+```
+
+To run a single test file, pass a path glob:
+
+```bash
+pnpm test user-list.component.spec.ts
 ```
 
 ## Running end-to-end tests
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Angular CLI does not come with an end-to-end testing framework by default. No e2e suite is
+configured in this project.
 
 ## Additional Resources
 

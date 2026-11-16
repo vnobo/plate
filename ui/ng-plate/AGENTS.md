@@ -125,6 +125,24 @@ Here is a link to the most recent Angular style guide https://angular.dev/style-
 - Prefer the `@Service` decorator over `@Injectable({providedIn: 'root'})` for new singleton services (Angular v22+)
 - Use the `inject()` function instead of constructor injection
 
+## Internationalization (i18n)
+
+- Two localized builds: `zh-Hans` at `/` (source locale) and `en-US` at `/en-US/`. Translation
+  is build-time via `@angular/localize`; do not add a runtime i18n library without an explicit
+  decision.
+- English code layer, Chinese UI copy: identifiers, comments, test names and commit messages
+  stay English; every user-visible string is Chinese and marked (`i18n` / `i18n-*` in
+  templates, `$localize` in TypeScript). Existing English UI copy is migration debt — convert
+  the strings of a file when you touch it for i18n work.
+- Reuse `LocaleService` and `LocaleSwitcher` (`@app/core`, `@app/layout`); never read
+  `localStorage`/`document.cookie` for the locale directly.
+- New message ids use `@@<area>.<feature>.<key>`; never rename an existing id. Add the English
+  target to `src/locale/messages.en-US.xlf` — a missing target fails `pnpm build:localized`
+  (`i18nMissingTranslation: "error"`).
+- Use ICU for counts, and keep placeholders (`${...}`, `<x .../>`, `VAR_PLURAL`) in targets.
+- Conventions and workflow: `docs/i18n.md`; outstanding gaps and dynamic-content design:
+  `docs/i18n-review.md`.
+
 # Tabler Agent
 
 > Tabler is packed with beautifully crafted components and powerful features. Jump in and start building a stunning dashboard — all for free!
