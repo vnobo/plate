@@ -12,6 +12,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { PLATE_THEMES, SettingsService, TokenService, UserService } from '@app/core';
 import { LayoutService } from './layout.service';
+import { LocaleSwitcher } from './locale-switcher';
 
 type NoticeType = 'system' | 'mention' | 'comment' | 'like';
 
@@ -57,7 +58,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
 @Component({
   selector: 'header[layout-header]',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, LocaleSwitcher],
   host: {
     // Align with the sidebar breakpoint using expand-lg: otherwise between 48rem–61.9375rem the hamburger is hidden while the sidebar is still a drawer, leaving navigation unreachable
     class: 'navbar navbar-expand-lg sticky-top d-print-none',
@@ -254,7 +255,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             <div class="card">
               <div class="card-header d-flex align-items-center">
                 <h2 class="card-title">Notifications</h2>
-                <span class="ms-2 small text-secondary">{{ unreadCount() }} unread</span>
+                <span class="ms-2 small text-secondary" i18n="@@headerUnreadCount"
+                  >{unreadCount(), plural, =0 {无未读} other {# 条未读}}</span
+                >
                 <button
                   type="button"
                   class="btn-close ms-auto"
@@ -393,39 +396,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
           </div>
         </div>
 
-        <!-- Language: shortcut: records only the preference and <html lang>; the project has no i18n resources yet, and copy will be driven by them once integrated -->
-        <div class="nav-item dropdown d-none d-md-flex">
-          <a
-            href="javascript:void(0)"
-            class="nav-link px-2 d-flex align-items-center"
-            data-bs-toggle="dropdown"
-            aria-label="Switch language"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="icon me-1"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              stroke-width="2"
-              stroke="currentColor"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-              <path d="M3.6 9h16.8" />
-              <path d="M3.6 15h16.8" />
-              <path d="M11.5 3a17 17 0 0 0 0 18" />
-              <path d="M12.5 3a17 17 0 0 1 0 18" />
-            </svg>
-            {{ langLabel() }}
-          </a>
-          <div class="dropdown-menu dropdown-menu-end">
-            <button class="dropdown-item" type="button" (click)="setLang('zh-CN')">Simplified Chinese</button>
-            <button class="dropdown-item" type="button" (click)="setLang('en')">English</button>
-          </div>
+        <!-- Language: reloads the page in the other localized build (zh-Hans at /, en-US at /en-US/). -->
+        <div class="d-none d-md-flex">
+          <app-locale-switcher />
         </div>
 
         <!-- Theme palette: directly left of the avatar, using the same Tabler dropdown pattern as the language switcher. Hidden below md like the language switcher so the action row never overflows. -->
@@ -666,13 +639,6 @@ export class LayoutHeader {
   protected readonly skeletons = [1, 2, 3];
   private loaded = false;
 
-  protected readonly lang = signal<'zh-CN' | 'en'>(
-    typeof localStorage !== 'undefined' && localStorage.getItem('plate-lang') === 'en'
-      ? 'en'
-      : 'zh-CN',
-  );
-  protected readonly langLabel = computed(() => (this.lang() === 'en' ? 'EN' : 'Chinese'));
-
   colorOf(type: NoticeType): string {
     return NOTICE_TYPES[type].color;
   }
@@ -715,12 +681,6 @@ export class LayoutHeader {
       }
     ).tabler?.Dropdown;
     dropdown?.getOrCreateInstance(this.notifyToggle().nativeElement).hide();
-  }
-
-  setLang(lang: 'zh-CN' | 'en'): void {
-    this.lang.set(lang);
-    localStorage.setItem('plate-lang', lang);
-    document.documentElement.lang = lang;
   }
 
   logout(): void {

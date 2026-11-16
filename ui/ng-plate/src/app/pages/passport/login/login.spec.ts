@@ -93,14 +93,18 @@ describe('Login', () => {
       .expectOne('/sec/oauth2/login')
       .flush({ path: '/oauth2/login' }, { status: 401, statusText: 'Unauthorized' });
     await new Promise((r) => setTimeout(r, 50));
-    expect(document.querySelector('tabler-toasts')?.textContent).toContain('Username or password is incorrect');
+    expect(document.querySelector('tabler-toasts')?.textContent).toContain(
+      $localize`:@@login.badCredentials:用户名或密码错误，请重试`,
+    );
   });
 
   it('does not grant access on 200 without a token (an empty token would be bounced back from the inner page)', async () => {
     await submit('admin', 'secret123');
     httpMock.expectOne('/sec/oauth2/login').flush({ token: '', details: {} });
     await new Promise((r) => setTimeout(r, 50));
-    expect(document.querySelector('tabler-toasts')?.textContent).toContain('missing token');
+    expect(document.querySelector('tabler-toasts')?.textContent).toContain(
+      $localize`:@@login.missingToken:登录响应缺少令牌，请联系管理员`,
+    );
   });
 
   it('unsubscribes on destroy (request cancelled, callbacks no longer run)', async () => {

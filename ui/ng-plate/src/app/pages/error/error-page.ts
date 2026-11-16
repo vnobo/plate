@@ -1,23 +1,34 @@
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-/** 错误码 → 提示文案，路由 data.type 决定渲染哪一个 */
-const MESSAGES: Record<number, string> = {
-  403: 'We are sorry but you do not have permission to access this page',
-  404: 'We are sorry but the page you are looking for was not found',
-  500: 'We are sorry but our server encountered an internal error',
-  512: 'We are sorry but your request has been blocked by our server',
-};
+import { LocaleSwitcher } from '@app/layout/locale-switcher';
+
+/** Route data.type -> user-facing copy; a switch keeps `$localize` evaluation lazy. */
+function messageFor(type: number): string {
+  switch (type) {
+    case 403:
+      return $localize`:@@error403:抱歉，您没有权限访问此页面`;
+    case 404:
+      return $localize`:@@error404:抱歉，未找到您要访问的页面`;
+    case 512:
+      return $localize`:@@error512:抱歉，您的请求已被服务器拦截`;
+    default:
+      return $localize`:@@error500:抱歉，服务器内部出现错误`;
+  }
+}
 
 @Component({
   selector: 'app-error-page',
-  imports: [RouterLink],
+  imports: [RouterLink, LocaleSwitcher],
   template: `
     <div class="page page-center">
       <div class="container-tight py-4">
+        <div class="d-flex justify-content-end mb-2">
+          <app-locale-switcher variant="ghost" />
+        </div>
         <div class="empty">
           <div class="empty-header">{{ message().code }}</div>
-          <p class="empty-title">Oops… You just found an error page</p>
+          <p class="empty-title" i18n="@@errorTitle">哎呀……您遇到了一个错误页面</p>
           <p class="empty-subtitle text-secondary">{{ message().text }}</p>
           <div class="empty-action">
             <a routerLink="/" class="btn btn-primary">
@@ -39,7 +50,7 @@ const MESSAGES: Record<number, string> = {
                 <path d="M5 12l6 6" />
                 <path d="M5 12l6 -6" />
               </svg>
-              Take me home
+              <span i18n="@@errorBackHome">返回首页</span>
             </a>
           </div>
         </div>
@@ -52,6 +63,6 @@ export class ErrorPage {
 
   protected readonly message = computed(() => ({
     code: this.type(),
-    text: MESSAGES[this.type()] ?? MESSAGES[500],
+    text: messageFor(this.type()),
   }));
 }

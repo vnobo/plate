@@ -8,7 +8,9 @@ import { LayoutService } from './layout.service';
   selector: 'app-layout-base',
   imports: [RouterOutlet, LayoutHeader, LayoutAside],
   template: `
-    <a class="visually-hidden-focusable" href="#page-body">Skip to main content</a>
+    <a class="visually-hidden-focusable" href="#page-body" i18n="@@layoutSkipToMain"
+      >跳转到主要内容</a
+    >
     <div class="page">
       <aside layout-aside></aside>
       <header layout-header></header>
@@ -25,8 +27,10 @@ import { LayoutService } from './layout.service';
         <footer class="footer footer-transparent d-print-none">
           <div class="container-fluid">
             <div class="row text-center align-items-center flex-column flex-sm-row">
-              <div class="col-12 col-sm-6 text-sm-start">Plate Console</div>
-              <div class="col-12 col-sm-6 text-sm-end text-secondary">Copyright © 2026</div>
+              <div class="col-12 col-sm-6 text-sm-start" i18n="@@layoutPlateConsole">Plate 控制台</div>
+              <div class="col-12 col-sm-6 text-sm-end text-secondary" i18n="@@layoutCopyright">
+                版权所有 © 2026
+              </div>
             </div>
           </div>
         </footer>

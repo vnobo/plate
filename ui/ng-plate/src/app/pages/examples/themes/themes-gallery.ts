@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { LocaleSwitcher } from '@app/layout/locale-switcher';
 import { THEMES, type ThemeMeta } from './theme-meta';
 
 interface Dimension {
@@ -9,7 +10,7 @@ interface Dimension {
 
 @Component({
   selector: 'app-themes-gallery',
-  imports: [RouterLink],
+  imports: [RouterLink, LocaleSwitcher],
   templateUrl: './themes-gallery.html',
 })
 export class ThemesGallery {
@@ -18,16 +19,16 @@ export class ThemesGallery {
 
   protected readonly dimensions: ReadonlyArray<Dimension> = [
     {
-      title: 'Color',
-      desc: 'From electric ink to warm clay, from fluorescent lemon to navy gold — four palettes that never overlap and read as distinct at a glance.',
+      title: $localize`:@@galleryDimensionColorTitle:配色`,
+      desc: $localize`:@@galleryDimensionColorDesc:从电光墨蓝到暖陶土，从荧光柠檬黄到海军金，四套配色互不重叠，一眼即可分辨。`,
     },
     {
-      title: 'Typography',
-      desc: 'Geometric sans-serif, elegant serif, condensed bold and sturdy numeral fonts each set their own reading rhythm and heading scale.',
+      title: $localize`:@@galleryDimensionTypographyTitle:字体`,
+      desc: $localize`:@@galleryDimensionTypographyDesc:几何无衬线、优雅衬线、压缩粗体与稳健数字字体，各自定下独特的阅读节奏与标题层级。`,
     },
     {
-      title: 'Components',
-      desc: 'Glassmorphism cards, thin-line editorial layouts, heavy-bordered portfolio grids and symmetric data panels — even the button shapes differ.',
+      title: $localize`:@@galleryDimensionComponentsTitle:组件`,
+      desc: $localize`:@@galleryDimensionComponentsDesc:玻璃拟态卡片、细线杂志版式、重边框作品集网格与对称数据面板，连按钮形态都各不相同。`,
     },
   ];
 
