@@ -1010,6 +1010,86 @@
           <context context-type="linenumber">35</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="loginArtSub" datatype="html">
+        <source>Plate 多租户管理平台 —— 账号、权限、组织与数据，一处贯通。</source>
+        <target>Plate multi-tenant platform — accounts, permissions, orgs and data in one place.</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/passport/login/login.html</context>
+          <context context-type="linenumber">22,24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="loginArtFoot" datatype="html">
+        <source>© 2026 Plate Platform</source>
+        <target>© 2026 Plate Platform</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/passport/login/login.html</context>
+          <context context-type="linenumber">27,27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="loginSeasonSpringLabel" datatype="html">
+        <source>春 · 新芽</source>
+        <target>Spring · new shoots</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/passport/login/login.ts</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="loginSeasonSpringHeadline" datatype="html">
+        <source>把新一季的打算，种在这里</source>
+        <target>Plant the plans of a new season here</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/passport/login/login.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="loginSeasonSummerLabel" datatype="html">
+        <source>夏 · 长日</source>
+        <target>Summer · long days</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/passport/login/login.ts</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="loginSeasonSummerHeadline" datatype="html">
+        <source>长日当空，进度不歇</source>
+        <target>Long days overhead, steady progress below</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/passport/login/login.ts</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="loginSeasonAutumnLabel" datatype="html">
+        <source>秋 · 丰收</source>
+        <target>Autumn · harvest</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/passport/login/login.ts</context>
+          <context context-type="linenumber">48</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="loginSeasonAutumnHeadline" datatype="html">
+        <source>一年的收成，此刻可见</source>
+        <target>A year of harvest, now in view</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/passport/login/login.ts</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="loginSeasonWinterLabel" datatype="html">
+        <source>冬 · 静雪</source>
+        <target>Winter · quiet snow</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/passport/login/login.ts</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="loginSeasonWinterHeadline" datatype="html">
+        <source>沉静蓄力，静候春来</source>
+        <target>Gather quietly, and wait for spring</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/passport/login/login.ts</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
+      </trans-unit>
     </body>
   </file>
 </xliff>

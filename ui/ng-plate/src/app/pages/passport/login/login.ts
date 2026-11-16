@@ -1,13 +1,56 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormField, form, maxLength, minLength, required, submit } from '@angular/forms/signals';
-import { Router } from '@angular/router';
-import { TokenService } from '@app/core';
-import { LocaleSwitcher } from '@app/layout/locale-switcher';
-import { MessageService } from '@app/plugins';
-import { Authentication } from '@plate/types';
-import { tap } from 'rxjs';
+import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
+import {Component, DestroyRef, inject, signal} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {form, FormField, maxLength, minLength, required, submit} from '@angular/forms/signals';
+import {Router} from '@angular/router';
+import {SettingsService, TokenService} from '@app/core';
+import {LocaleSwitcher} from '@app/layout/locale-switcher';
+import {MessageService} from '@app/plugins';
+import {Authentication} from '@plate/types';
+import {tap} from 'rxjs';
+
+/** Seasonal skin of the split-screen art panel. */
+export type LoginSeason = 'spring' | 'summer' | 'autumn' | 'winter';
+
+interface SeasonCopy {
+  readonly label: string;
+  readonly headline: string;
+}
+
+/** Months 12/1/2 map to winter so every season owns one contiguous quarter. */
+function seasonOf(date: Date): LoginSeason {
+  const month = date.getMonth();
+  if (month >= 2 && month <= 4) {
+    return 'spring';
+  }
+  if (month >= 5 && month <= 7) {
+    return 'summer';
+  }
+  if (month >= 8 && month <= 10) {
+    return 'autumn';
+  }
+  return 'winter';
+}
+
+/** Resolved once per page load; the message ids live in src/locale/messages.en-US.xlf. */
+const SEASON_COPY: Record<LoginSeason, SeasonCopy> = {
+  spring: {
+    label: $localize`:@@loginSeasonSpringLabel:春 · 新芽`,
+    headline: $localize`:@@loginSeasonSpringHeadline:把新一季的打算，种在这里`,
+  },
+  summer: {
+    label: $localize`:@@loginSeasonSummerLabel:夏 · 长日`,
+    headline: $localize`:@@loginSeasonSummerHeadline:长日当空，进度不歇`,
+  },
+  autumn: {
+    label: $localize`:@@loginSeasonAutumnLabel:秋 · 丰收`,
+    headline: $localize`:@@loginSeasonAutumnHeadline:一年的收成，此刻可见`,
+  },
+  winter: {
+    label: $localize`:@@loginSeasonWinterLabel:冬 · 静雪`,
+    headline: $localize`:@@loginSeasonWinterHeadline:沉静蓄力，静候春来`,
+  },
+};
 
 @Component({
   selector: 'app-login',
@@ -21,6 +64,10 @@ export class Login {
   private readonly _http = inject(HttpClient);
   private readonly _router = inject(Router);
   private readonly _destroyRef = inject(DestroyRef);
+
+  /** Fixed for the life of the page: the art panel follows the calendar season. */
+  protected readonly season: LoginSeason = seasonOf(new Date());
+  protected readonly seasonCopy: SeasonCopy = SEASON_COPY[this.season];
 
   passwordFieldTextType = signal(false);
   isSubmitting = signal(false);
@@ -40,6 +87,11 @@ export class Login {
   });
 
   constructor() {
+    // The passport route renders outside the app shell, so nothing else instantiates
+    // SettingsService here; injecting it applies the persisted seasonal palette on
+    // first paint instead of falling back to the compiled-in default.
+    inject(SettingsService);
+
     // After a refresh, a token may still sit in sessionStorage: skip to the inner page if valid, otherwise stay on the login page.
     // SSR has no storage, so authenticationToken() returns null and we will not jump by mistake.
     // We judge expiry from the peeked copy: authenticationToken() refreshes lastAccessTime, which would make it look never-expired.

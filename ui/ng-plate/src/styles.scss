@@ -64,7 +64,7 @@ html .h2,
 html .h3,
 html .lead,
 html blockquote {
-  font-family: var(--plate-font-emphasis);
+  font-family: var(--plate-font-emphasis), serif;
 }
 
 /* Scoped with `html` to win over Tabler (loaded after this file): tables,
@@ -84,7 +84,7 @@ html .role-tree-name,
 html .role-tree-desc,
 html .authority-chip,
 html .authority-chip code {
-  font-family: var(--plate-font-ui);
+  font-family: var(--plate-font-ui), serif;
 }
 
 /* -----------------------------------------------------------------------------
@@ -131,31 +131,33 @@ html:root {
 }
 
 /* -----------------------------------------------------------------------------
- * 4. Colours: light mode
- *    Primary "professional blue"; light blue (azure) is used only for fills and
- *    borders, never for body text, to preserve contrast.
+ * 4. Colours: light mode (= SPRING, the default palette)
+ *    Primary is a verdant green (WCAG AA: 5.36:1 on white); the mint accent is
+ *    used only for fills and borders, never for body text, to preserve contrast.
+ *    Kept in sync with html[data-plate-theme='azure'] so the first paint before
+ *    SettingsService runs does not flash a different hue.
  * -------------------------------------------------------------------------- */
 html:root,
 html[data-bs-theme='light'] {
-  /* Primary: professional enterprise blue - buttons, links, active state, brand */
-  --tblr-primary: #0a6ed1;
-  --tblr-primary-rgb: 10, 110, 209;
+  /* Primary: spring green - buttons, links, active state, brand */
+  --tblr-primary: #0c7a52;
+  --tblr-primary-rgb: 12, 122, 82;
   --tblr-primary-fg: #ffffff;
 
-  /* Light blue accent (secondary emphasis; use only for fills / borders / icons) */
-  --tblr-azure: #5b9bd5;
-  --tblr-azure-rgb: 91, 155, 213;
+  /* Mint accent (secondary emphasis; use only for fills / borders / icons) */
+  --tblr-azure: #3aa981;
+  --tblr-azure-rgb: 58, 169, 129;
   --tblr-azure-fg: #ffffff;
 
-  /* Secondary: blue-grey - keeps text-secondary and other muted text legible */
-  --tblr-secondary: #64748b;
-  --tblr-secondary-rgb: 100, 116, 139;
+  /* Secondary: pine grey - keeps text-secondary and other muted text legible */
+  --tblr-secondary: #5d7268;
+  --tblr-secondary-rgb: 93, 114, 104;
   --tblr-secondary-fg: #ffffff;
 
   /* Links and focus ring */
-  --tblr-link-color: #0a6ed1;
-  --tblr-link-hover-color: #0856a8;
-  --tblr-focus-ring-color: rgba(10, 110, 209, 0.35);
+  --tblr-link-color: #0c7a52;
+  --tblr-link-hover-color: #096040;
+  --tblr-focus-ring-color: rgba(12, 122, 82, 0.3);
 
   /* Status colours (tuned to the enterprise blue; white text meets AA contrast) */
   --tblr-success: #1f8a4d;
@@ -171,36 +173,38 @@ html[data-bs-theme='light'] {
   --tblr-danger-rgb: 220, 53, 69;
   --tblr-danger-fg: #ffffff;
 
-  /* Background / text / borders (clean cool grey-blue) */
+  /* Background / text / borders (paper white with a mint cast) */
   --tblr-bg-surface: #ffffff;
-  --tblr-bg-surface-secondary: #f4f7fb;
-  --tblr-body-bg: #f4f7fb;
-  --tblr-body-color: #1f2937;
-  --tblr-muted: #64748b;
-  --tblr-border-color: #e2e8f0;
+  --tblr-bg-surface-secondary: #f0f7f3;
+  --tblr-body-bg: #f2f8f4;
+  --tblr-body-color: #1b2f27;
+  --tblr-muted: #5f7568;
+  --tblr-border-color: #dbeadf;
 }
 
 /* -----------------------------------------------------------------------------
- * 5. Colours: dark mode
- *    Primary is lightened so text-primary and white button labels stay legible;
- *    cards sit slightly above the page background to create depth.
+ * 5. Colours: dark mode (= WINTER)
+ *    Primary is a frost blue with dark labels on top (9.77:1) instead of white,
+ *    which would fail AA on a light primary; midnight layers step up in depth so
+ *    cards sit above the page background.
+ *    Kept in sync with html[data-plate-theme='slate'] to avoid a first-paint flash.
  * -------------------------------------------------------------------------- */
 html[data-bs-theme='dark'] {
-  --tblr-primary: #4a9be8;
-  --tblr-primary-rgb: 74, 155, 232;
-  --tblr-primary-fg: #ffffff;
+  --tblr-primary: #7cc4e8;
+  --tblr-primary-rgb: 124, 196, 232;
+  --tblr-primary-fg: #06131c;
 
-  --tblr-azure: #5b9bd5;
-  --tblr-azure-rgb: 91, 155, 213;
-  --tblr-azure-fg: #080d18;
+  --tblr-azure: #4f8fb8;
+  --tblr-azure-rgb: 79, 143, 184;
+  --tblr-azure-fg: #06131c;
 
-  --tblr-secondary: #7c8aa0;
-  --tblr-secondary-rgb: 124, 138, 160;
-  --tblr-secondary-fg: #ffffff;
+  --tblr-secondary: #7d8fa0;
+  --tblr-secondary-rgb: 125, 143, 160;
+  --tblr-secondary-fg: #06131c;
 
-  --tblr-link-color: #4a9be8;
-  --tblr-link-hover-color: #6fb0ef;
-  --tblr-focus-ring-color: rgba(74, 155, 232, 0.4);
+  --tblr-link-color: #7cc4e8;
+  --tblr-link-hover-color: #a6dcf5;
+  --tblr-focus-ring-color: rgba(124, 196, 232, 0.34);
 
   --tblr-success: #34c172;
   --tblr-success-rgb: 52, 193, 114;
@@ -215,17 +219,17 @@ html[data-bs-theme='dark'] {
   --tblr-danger-rgb: 241, 91, 91;
   --tblr-danger-fg: #2a0808;
 
-  /* Black-blue (deep navy) layers: page darkest -> overlays slightly higher ->
+  /* Midnight (deep navy-ice) layers: page darkest -> overlays slightly higher ->
      cards higher still, stepped up to create depth.
      --tblr-bg-forms must change too: Tabler's dark default uses neutral
      gray-900, so inputs look washed out unless it is overridden. */
-  --tblr-body-bg: #080d18;
-  --tblr-bg-surface-secondary: #0c1322;
-  --tblr-bg-surface: #121d31;
-  --tblr-bg-forms: #0e1728;
-  --tblr-body-color: #dce5f4;
-  --tblr-muted: #8c9bb5;
-  --tblr-border-color: #1e2c46;
+  --tblr-body-bg: #060f18;
+  --tblr-bg-surface-secondary: #0a1724;
+  --tblr-bg-surface: #0d1d2c;
+  --tblr-bg-forms: #0b1a28;
+  --tblr-body-color: #deeaf5;
+  --tblr-muted: #90a6b8;
+  --tblr-border-color: #1b3145;
   --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.32);
 
   /* WenKai Regular strokes thin out on dark surfaces. Keep the typeface and
@@ -241,90 +245,212 @@ body {
 }
 
 /* -----------------------------------------------------------------------------
- * 6. Theme palettes
+ * 6. Seasonal palettes: four seasons x two forms (light / dark)
  *    Only Tabler semantic variables are overridden, so the component markup,
  *    Bootstrap 5.3 utilities and layout rules stay shared across palettes.
- *    SettingsService.setPalette() applies the palette and its light/dark mode.
+ *    SettingsService keeps the season and the light/dark mode independent.
+ *
+ *    Both selectors are mandatory: an unqualified palette rule placed after the
+ *    base dark block would leak dark surfaces into the light form.
+ *    The ids are localStorage keys: azure=spring, ledger=summer, atelier=autumn,
+ *    slate=winter. Renaming an id would silently reset saved preferences.
  * -------------------------------------------------------------------------- */
-html[data-plate-theme='azure'] {
-  --tblr-primary: #0a6ed1;
-  --tblr-primary-rgb: 10, 110, 209;
+html[data-plate-theme='azure'][data-bs-theme='light'] {
+  /* SPRING / LIGHT - verdant green on mint-cast paper (primary 4.98:1 on surface) */
+  --tblr-primary: #0c7a52;
+  --tblr-primary-rgb: 12, 122, 82;
   --tblr-primary-fg: #ffffff;
-  --tblr-body-bg: #f4f7fb;
+  --tblr-body-bg: #f2f8f4;
   --tblr-bg-surface: #ffffff;
-  --tblr-bg-surface-secondary: #f4f7fb;
+  --tblr-bg-surface-secondary: #f0f7f3;
   --tblr-bg-forms: #ffffff;
-  --tblr-body-color: #1f2937;
-  --tblr-muted: #64748b;
-  --tblr-border-color: #e2e8f0;
-  --tblr-link-color: #0a6ed1;
-  --tblr-link-hover-color: #0856a8;
-  --tblr-focus-ring-color: rgba(10, 110, 209, 0.35);
-  --tblr-border-radius: 0.5rem;
+  --tblr-body-color: #1b2f27;
+  --tblr-muted: #5f7568;
+  --tblr-border-color: #dbeadf;
+  --tblr-link-color: #0c7a52;
+  --tblr-link-hover-color: #096040;
+  --tblr-focus-ring-color: rgba(12, 122, 82, 0.3);
+  --tblr-border-radius: 0.75rem;
   --tblr-card-spacer-x: 1.25rem;
   --tblr-card-spacer-y: 1.25rem;
-  --tblr-shadow-card:
-    0 0.0625rem 0.125rem rgba(16, 24, 40, 0.04), 0 0.0625rem 0.1875rem rgba(16, 24, 40, 0.06);
+  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(16, 46, 34, 0.05), 0 0.0625rem 0.1875rem rgba(16, 46, 34, 0.07);
 }
 
-html[data-plate-theme='slate'] {
-  --tblr-primary: #4a9be8;
-  --tblr-primary-rgb: 74, 155, 232;
+html[data-plate-theme='azure'][data-bs-theme='dark'] {
+  /* SPRING / DARK - new shoots glowing on deep pine (primary 10.07:1 on surface) */
+  --tblr-primary: #4ade9a;
+  --tblr-primary-rgb: 74, 222, 154;
+  --tblr-primary-fg: #06281a;
+  --tblr-body-bg: #06140d;
+  --tblr-bg-surface: #0c1e15;
+  --tblr-bg-surface-secondary: #0a1b12;
+  --tblr-bg-forms: #0a1a12;
+  --tblr-body-color: #dff8ea;
+  --tblr-muted: #88b29b;
+  --tblr-border-color: #1d4030;
+  --tblr-link-color: #4ade9a;
+  --tblr-link-hover-color: #86f0c0;
+  --tblr-focus-ring-color: rgba(74, 222, 154, 0.34);
+  --tblr-border-radius: 0.75rem;
+  --tblr-card-spacer-x: 1.25rem;
+  --tblr-card-spacer-y: 1.25rem;
+  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.34);
+}
+
+html[data-plate-theme='ledger'][data-bs-theme='light'] {
+  /* SUMMER / LIGHT - sunlit gold on warm ivory (primary 5.01:1 on surface) */
+  --tblr-primary: #8f6300;
+  --tblr-primary-rgb: 143, 99, 0;
   --tblr-primary-fg: #ffffff;
-  --tblr-body-bg: #080d18;
-  --tblr-bg-surface: #121d31;
-  --tblr-bg-surface-secondary: #0c1322;
-  --tblr-bg-forms: #0e1728;
-  --tblr-body-color: #dce5f4;
-  --tblr-muted: #8c9bb5;
-  --tblr-border-color: #1e2c46;
-  --tblr-link-color: #4a9be8;
-  --tblr-link-hover-color: #6fb0ef;
-  --tblr-focus-ring-color: rgba(74, 155, 232, 0.4);
-  --tblr-border-radius: 0.5rem;
-  --tblr-card-spacer-x: 1rem;
-  --tblr-card-spacer-y: 1rem;
+  --tblr-body-bg: #fdf8ec;
+  --tblr-bg-surface: #fffdf6;
+  --tblr-bg-surface-secondary: #faf1dd;
+  --tblr-bg-forms: #fffdf6;
+  --tblr-body-color: #2c2317;
+  --tblr-muted: #6f6350;
+  --tblr-border-color: #ecdec2;
+  --tblr-link-color: #8f6300;
+  --tblr-link-hover-color: #735000;
+  --tblr-focus-ring-color: rgba(143, 99, 0, 0.3);
+  --tblr-border-radius: 0.375rem;
+  --tblr-card-spacer-x: 1.25rem;
+  --tblr-card-spacer-y: 1.25rem;
+  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(64, 45, 10, 0.06), 0 0.0625rem 0.1875rem rgba(64, 45, 10, 0.08);
+}
+
+html[data-plate-theme='ledger'][data-bs-theme='dark'] {
+  /* SUMMER / DARK - sunset gold on sun-baked cocoa (primary 10.76:1 on surface) */
+  --tblr-primary: #ffc247;
+  --tblr-primary-rgb: 255, 194, 71;
+  --tblr-primary-fg: #2a1800;
+  --tblr-body-bg: #1a1005;
+  --tblr-bg-surface: #251809;
+  --tblr-bg-surface-secondary: #1f1307;
+  --tblr-bg-forms: #201407;
+  --tblr-body-color: #fff1d6;
+  --tblr-muted: #c1a880;
+  --tblr-border-color: #4a3416;
+  --tblr-link-color: #ffc247;
+  --tblr-link-hover-color: #ffd77e;
+  --tblr-focus-ring-color: rgba(255, 194, 71, 0.34);
+  --tblr-border-radius: 0.375rem;
+  --tblr-card-spacer-x: 1.25rem;
+  --tblr-card-spacer-y: 1.25rem;
   --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.32);
 }
 
-html[data-plate-theme='ledger'] {
-  --tblr-primary: #8a6320;
-  --tblr-primary-rgb: 138, 99, 32;
+html[data-plate-theme='atelier'][data-bs-theme='light'] {
+  /* AUTUMN / LIGHT - persimmon on parchment (primary 5.82:1 on surface) */
+  --tblr-primary: #a63b23;
+  --tblr-primary-rgb: 166, 59, 35;
   --tblr-primary-fg: #ffffff;
-  --tblr-body-bg: #f5f7fa;
-  --tblr-bg-surface: #ffffff;
-  --tblr-bg-surface-secondary: #eef2f7;
-  --tblr-bg-forms: #ffffff;
-  --tblr-body-color: #0c2340;
-  --tblr-muted: #5b6a7e;
-  --tblr-border-color: #dde4ec;
-  --tblr-link-color: #8a6320;
-  --tblr-link-hover-color: #6d4e19;
-  --tblr-focus-ring-color: rgba(138, 99, 32, 0.32);
-  --tblr-border-radius: 0.25rem;
-  --tblr-card-spacer-x: 1.5rem;
-  --tblr-card-spacer-y: 1.5rem;
-  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(12, 35, 64, 0.06);
-}
-
-html[data-plate-theme='atelier'] {
-  --tblr-primary: #ad5b38;
-  --tblr-primary-rgb: 173, 91, 56;
-  --tblr-primary-fg: #ffffff;
-  --tblr-body-bg: #faf7f2;
-  --tblr-bg-surface: #fffdf9;
-  --tblr-bg-surface-secondary: #f3ede4;
-  --tblr-bg-forms: #fffdf9;
-  --tblr-body-color: #2a2620;
-  --tblr-muted: #7a7167;
-  --tblr-border-color: #e3dacf;
-  --tblr-link-color: #ad5b38;
-  --tblr-link-hover-color: #8f482b;
-  --tblr-focus-ring-color: rgba(173, 91, 56, 0.3);
-  --tblr-border-radius: 0.875rem;
+  --tblr-body-bg: #faf3e6;
+  --tblr-bg-surface: #fffcf5;
+  --tblr-bg-surface-secondary: #f4e9d8;
+  --tblr-bg-forms: #fffcf5;
+  --tblr-body-color: #2e2318;
+  --tblr-muted: #766450;
+  --tblr-border-color: #e6d6bd;
+  --tblr-link-color: #a63b23;
+  --tblr-link-hover-color: #852e1a;
+  --tblr-focus-ring-color: rgba(166, 59, 35, 0.3);
+  --tblr-border-radius: 1rem;
   --tblr-card-spacer-x: 1.75rem;
   --tblr-card-spacer-y: 1.75rem;
-  --tblr-shadow-card: 0 0.0625rem 0.1875rem rgba(42, 38, 32, 0.07);
+  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(58, 36, 16, 0.06), 0 0.0625rem 0.1875rem rgba(58, 36, 16, 0.08);
+}
+
+html[data-plate-theme='atelier'][data-bs-theme='dark'] {
+  /* AUTUMN / DARK - ember on warm charcoal (primary 7.54:1 on surface) */
+  --tblr-primary: #ff8a5c;
+  --tblr-primary-rgb: 255, 138, 92;
+  --tblr-primary-fg: #2a0c05;
+  --tblr-body-bg: #1b0f0a;
+  --tblr-bg-surface: #27150e;
+  --tblr-bg-surface-secondary: #20110a;
+  --tblr-bg-forms: #21120c;
+  --tblr-body-color: #ffe9d9;
+  --tblr-muted: #c9a38c;
+  --tblr-border-color: #4e2a1b;
+  --tblr-link-color: #ff8a5c;
+  --tblr-link-hover-color: #ffb08c;
+  --tblr-focus-ring-color: rgba(255, 138, 92, 0.34);
+  --tblr-border-radius: 1rem;
+  --tblr-card-spacer-x: 1.75rem;
+  --tblr-card-spacer-y: 1.75rem;
+  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.34);
+}
+
+html[data-plate-theme='slate'][data-bs-theme='light'] {
+  /* WINTER / LIGHT - glacier blue on ice white (primary 5.08:1 on surface) */
+  --tblr-primary: #1f6f9e;
+  --tblr-primary-rgb: 31, 111, 158;
+  --tblr-primary-fg: #ffffff;
+  --tblr-body-bg: #f1f7fc;
+  --tblr-bg-surface: #ffffff;
+  --tblr-bg-surface-secondary: #e6f0f8;
+  --tblr-bg-forms: #ffffff;
+  --tblr-body-color: #102a3d;
+  --tblr-muted: #5b7385;
+  --tblr-border-color: #d5e4f0;
+  --tblr-link-color: #1f6f9e;
+  --tblr-link-hover-color: #17567e;
+  --tblr-focus-ring-color: rgba(31, 111, 158, 0.3);
+  --tblr-border-radius: 0.25rem;
+  --tblr-card-spacer-x: 1rem;
+  --tblr-card-spacer-y: 1rem;
+  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(16, 42, 61, 0.08);
+}
+
+html[data-plate-theme='slate'][data-bs-theme='dark'] {
+  /* WINTER / DARK - frost blue on midnight (primary 8.88:1 on surface) */
+  --tblr-primary: #7cc4e8;
+  --tblr-primary-rgb: 124, 196, 232;
+  --tblr-primary-fg: #06131c;
+  --tblr-body-bg: #060f18;
+  --tblr-bg-surface: #0d1d2c;
+  --tblr-bg-surface-secondary: #0a1724;
+  --tblr-bg-forms: #0b1a28;
+  --tblr-body-color: #deeaf5;
+  --tblr-muted: #90a6b8;
+  --tblr-border-color: #1b3145;
+  --tblr-link-color: #7cc4e8;
+  --tblr-link-hover-color: #a6dcf5;
+  --tblr-focus-ring-color: rgba(124, 196, 232, 0.34);
+  --tblr-border-radius: 0.25rem;
+  --tblr-card-spacer-x: 1rem;
+  --tblr-card-spacer-y: 1rem;
+  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.36);
+}
+
+/* Login art motif motion. Global because all four seasons share the two keyframes;
+   keeping them here leaves the login component inside its 4kB style budget. */
+.ls-sway {
+  transform-origin: top center;
+  animation: ls-sway 6s ease-in-out infinite;
+}
+
+.ls-fall {
+  animation: ls-fall 9s linear infinite;
+}
+
+@keyframes ls-sway {
+  50% {
+    transform: rotate(1.5deg);
+  }
+}
+
+@keyframes ls-fall {
+  to {
+    transform: translateY(16px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-sway,
+  .ls-fall {
+    animation: none;
+  }
 }
 
 /* Touch devices have no hover: keep list-group action buttons always visible,

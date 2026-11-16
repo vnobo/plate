@@ -1,29 +1,122 @@
-<div class="page page-center">
-  <div class="container container-tight py-4">
-    <div class="d-flex justify-content-end mb-2">
-      <app-locale-switcher variant="ghost" />
-    </div>
-    <div class="text-center mb-4">
-      <a href="." class="navbar-brand">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="110"
-          height="32"
-          viewBox="0 0 232 68"
-          class="navbar-brand-image"
-        >
+<div [attr.data-season]="season" class="login-shell">
+    <!-- Season art panel: pure CSS, no remote image, so the page paints without a network round trip. -->
+    <section class="login-art">
+        <span aria-hidden="true" class="login-art-glow"></span>
+        <span aria-hidden="true" class="login-art-texture"></span>
+
+        <!-- Each season has its own motif; shapes are inline so the panel needs no image requests. -->
+        @if (season === 'spring') {
+            <!-- Weeping willow: long branches, small leaves and a few blossoms. -->
+            <svg aria-hidden="true" class="login-season-art" viewBox="0 0 460 320">
+                <g class="ls-sway" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width="2.5">
+                    <path d="M40 -10C60 70 20 130 62 240"/>
+                    <path d="M110 -10C130 60 90 120 128 205"/>
+                    <path d="M180 -10C200 80 155 140 190 265"/>
+                    <path d="M260 -10C275 60 240 120 275 200"/>
+                </g>
+                <g fill="#8fe0b4" fill-opacity=".82">
+                    <ellipse cx="52" cy="60" rx="4.5" ry="12" transform="rotate(-28 52 60)"/>
+                    <ellipse cx="46" cy="98" rx="4" ry="11" transform="rotate(25 46 98)"/>
+                    <ellipse cx="58" cy="140" rx="4.5" ry="12" transform="rotate(-22 58 140)"/>
+                    <ellipse cx="118" cy="72" rx="4" ry="11" transform="rotate(28 118 72)"/>
+                    <ellipse cx="110" cy="116" rx="4.5" ry="12" transform="rotate(-26 110 116)"/>
+                    <ellipse cx="126" cy="164" rx="4" ry="11" transform="rotate(22 126 164)"/>
+                    <ellipse cx="188" cy="86" rx="4.5" ry="12" transform="rotate(-30 188 86)"/>
+                    <ellipse cx="178" cy="146" rx="4" ry="11" transform="rotate(26 178 146)"/>
+                    <ellipse cx="192" cy="212" rx="4.5" ry="12" transform="rotate(-24 192 212)"/>
+                    <ellipse cx="272" cy="94" rx="4" ry="11" transform="rotate(24 272 94)"/>
+                    <ellipse cx="264" cy="152" rx="4.5" ry="12" transform="rotate(-25 264 152)"/>
+                </g>
+                <g fill="#f6aac9" fill-opacity=".85">
+                    <circle cx="66" cy="182" r="4"/>
+                    <circle cx="136" cy="126" r="3.5"/>
+                    <circle cx="204" cy="118" r="4"/>
+                    <circle cx="284" cy="128" r="3.5"/>
+                </g>
+            </svg>
+        } @else if (season === 'summer') {
+            <!-- Double oars on lake ripples under a high sun. -->
+            <svg aria-hidden="true" class="login-season-art" viewBox="0 0 460 320">
+                <circle cx="374" cy="72" fill="#ffcf5c" fill-opacity=".28" r="36"/>
+                <circle cx="374" cy="72" fill="#ffcf5c" fill-opacity=".6" r="21"/>
+                <g fill="none" stroke="currentColor" stroke-opacity=".38" stroke-width="2">
+                    <path d="M20 208C80 194 140 222 200 208S320 194 450 208"/>
+                    <path d="M10 246C90 232 160 260 240 246S360 232 450 246"/>
+                    <path d="M30 284C110 270 180 298 260 284S370 270 440 284"/>
+                </g>
+                <path d="M150 192h160l-26 38H176z" fill="#ffb03a" fill-opacity=".92"/>
+                <path d="M208 190l-58-88" stroke="#f6e3c0" stroke-linecap="round" stroke-width="4"/>
+                <path d="M252 190l62-88" stroke="#f6e3c0" stroke-linecap="round" stroke-width="4"/>
+                <path d="M150 100c-11-12-4-21 5-9z" fill="#ff7a3d"/>
+                <path d="M314 100c11-12 4-21-5-9z" fill="#ff7a3d"/>
+            </svg>
+        } @else if (season === 'autumn') {
+            <!-- Maple hillside with drifting leaves and a figure in red. -->
+            <svg aria-hidden="true" class="login-season-art" viewBox="0 0 460 320">
+                <defs>
+                    <path d="M0 -9L2 -3l7 -2-3 6 4 5-7-1-3 6-3-6-7 1 4-5-3-6 7 2z" id="login-maple"/>
+                </defs>
+                <path d="M0 320L95 168l62 62 90-118 92 118 55-48 66 138z" fill="#d2691e" fill-opacity=".22"/>
+                <path d="M175 112l30-38 34 38-20-8-14 12-12-12z" fill="#ffe6d0" fill-opacity=".5"/>
+                <g class="ls-fall" fill="#e0562d" fill-opacity=".9">
+                    <use href="#login-maple" transform="translate(60 70) rotate(-18)"/>
+                    <use href="#login-maple" transform="translate(140 44) rotate(24) scale(0.8)"/>
+                    <use href="#login-maple" transform="translate(232 76) rotate(-35) scale(1.15)"/>
+                    <use href="#login-maple" transform="translate(340 58) rotate(16) scale(0.9)"/>
+                    <use href="#login-maple" transform="translate(398 130) rotate(-12) scale(0.75)"/>
+                </g>
+                <circle cx="292" cy="168" fill="#d93025" r="8"/>
+                <path d="M284 180h16l12 52h-40z" fill="#d93025"/>
+                <path d="M284 185l-17 25" stroke="#d93025" stroke-linecap="round" stroke-width="6"/>
+            </svg>
+        } @else {
+            <!-- Layered snow mountains and slow falling snow. -->
+            <svg aria-hidden="true" class="login-season-art" viewBox="0 0 460 320">
+                <path d="M0 320L130 105l70 92 88-140 172 263z" fill="#9ad4f2" fill-opacity=".18"/>
+                <path d="M95 137l35-32 35 32-22-10-13 14-12-14z" fill="#eaf6ff" fill-opacity=".82"/>
+                <path d="M226 101l62-44 79 90-48-18-30 22-24-22z" fill="#eaf6ff" fill-opacity=".68"/>
+                <g class="ls-fall" fill="#ffffff" fill-opacity=".72">
+                    <circle cx="48" cy="42" r="3"/>
+                    <circle cx="128" cy="76" r="2.5"/>
+                    <circle cx="198" cy="34" r="3.5"/>
+                    <circle cx="266" cy="88" r="2.5"/>
+                    <circle cx="334" cy="40" r="3"/>
+                    <circle cx="406" cy="94" r="2.5"/>
+                    <circle cx="88" cy="132" r="2"/>
+                    <circle cx="372" cy="158" r="3"/>
+                </g>
+            </svg>
+        }
+
+        <div class="login-art-head">
+            <a aria-label="Plate" class="login-brand" href=".">
+                <svg aria-hidden="true" class="login-brand-svg" height="39" viewBox="0 0 232 68" width="132">
           <path
             d="M64.6 16.2C63 9.9 58.1 5 51.8 3.4 40 1.5 28 1.5 16.2 3.4 9.9 5 5 9.9 3.4 16.2 1.5 28 1.5 40 3.4 51.8 5 58.1 9.9 63 16.2 64.6c11.8 1.9 23.8 1.9 35.6 0C58.1 63 63 58.1 64.6 51.8c1.9-11.8 1.9-23.8 0-35.6zM33.3 36.3c-2.8 4.4-6.6 8.2-11.1 11-1.5.9-3.3.9-4.8.1s-2.4-2.3-2.5-4c0-1.7.9-3.3 2.4-4.1 2.3-1.4 4.4-3.2 6.1-5.3-1.8-2.1-3.8-3.8-6.1-5.3-2.3-1.3-3-4.2-1.7-6.4s4.3-2.9 6.5-1.6c4.5 2.8 8.2 6.5 11.1 10.9 1 1.4 1 3.3.1 4.7zM49.2 46H37.8c-2.1 0-3.8-1-3.8-3s1.7-3 3.8-3h11.4c2.1 0 3.8 1 3.8 3s-1.7 3-3.8 3z"
-            fill="#066fd1"
-            style="fill: var(--tblr-primary, #066fd1)"
+            fill="currentColor"
           ></path>
-          <text x="85" y="50" fill="#066fd1" style="font-size: 2.5rem; font-weight: bold">
-            Plate
-          </text>
+                    <text fill="currentColor" font-size="40" font-weight="700" x="85" y="50">Plate</text>
         </svg>
       </a>
+            <span class="login-season">{{ seasonCopy.label }}</span>
+        </div>
+
+        <div class="login-art-copy">
+            <h1 class="login-art-title">{{ seasonCopy.headline }}</h1>
+            <p class="login-art-sub" i18n="@@loginArtSub">
+                Plate 多租户管理平台 —— 账号、权限、组织与数据，一处贯通。
+            </p>
+        </div>
+
+        <p class="login-art-foot" i18n="@@loginArtFoot">© 2026 Plate Platform</p>
+    </section>
+
+    <main class="login-main">
+        <div class="login-main-top">
+            <app-locale-switcher variant="ghost"/>
     </div>
-    <div class="card card-md">
+
+        <div class="card card-md login-card">
       <div class="card-body">
         <h2 class="card-title text-center h2 mb-4" i18n="@@loginTitle">登录您的账户</h2>
         <!-- Use a native submit and prevent the default: this page does not import FormsModule, so (ngSubmit) will not fire.
@@ -148,46 +241,46 @@
                 (click)="showPassword()"
               >
                   @if (passwordFieldTextType()) {
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      class="icon"
-                    >
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
-                      <path
-                        d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"
-                      />
-                    </svg>
+                      <svg
+                              aria-hidden="true"
+                              class="icon"
+                              fill="none"
+                              height="24"
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                      >
+                          <path d="M0 0h24v24H0z" fill="none" stroke="none"/>
+                          <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/>
+                          <path
+                                  d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"
+                          />
+                      </svg>
                   } @else {
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      class="icon"
-                    >
-                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                      <path d="M10.585 10.587a2 2 0 0 0 2.829 2.828" />
-                      <path
-                        d="M9.362 5.689a9.797 9.797 0 0 1 2.638 -.189c3.6 0 6.6 2 9 6c-.713 1.188 -1.496 2.229 -2.345 3.104m-2.617 1.423c-.719 .297 -1.404 .473 -2.038 .473c-3.6 0 -6.6 -2 -9 -6c.818 -1.364 1.723 -2.523 2.704 -3.453"
-                      />
-                      <path d="M3 3l18 18" />
-                    </svg>
+                      <svg
+                              aria-hidden="true"
+                              class="icon"
+                              fill="none"
+                              height="24"
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              viewBox="0 0 24 24"
+                              width="24"
+                              xmlns="http://www.w3.org/2000/svg"
+                      >
+                          <path d="M0 0h24v24H0z" fill="none" stroke="none"/>
+                          <path d="M10.585 10.587a2 2 0 0 0 2.829 2.828"/>
+                          <path
+                                  d="M9.362 5.689a9.797 9.797 0 0 1 2.638 -.189c3.6 0 6.6 2 9 6c-.713 1.188 -1.496 2.229 -2.345 3.104m-2.617 1.423c-.719 .297 -1.404 .473 -2.038 .473c-3.6 0 -6.6 -2 -9 -6c.818 -1.364 1.723 -2.523 2.704 -3.453"
+                          />
+                          <path d="M3 3l18 18"/>
+                      </svg>
                   }
               </button>
               @if (errorOf('password'); as message) {
@@ -218,8 +311,9 @@
       </div>
       <div class="hr-text" i18n="@@loginOrDivider">或</div>
       <div class="card-body">
-        <div class="row">
-          <div class="col">
+          <!-- Stacked on phones: two "使用 X 登录" labels side by side do not fit 375px. -->
+          <div class="row row-cols-1 row-cols-sm-2 g-2">
+              <div>
             <a
               class="btn w-100"
               href="javascript:void(0)"
@@ -234,6 +328,7 @@
                 viewBox="0 0 16 16"
                 width="16"
                 xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
               >
                 <path
                   d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"
@@ -242,7 +337,7 @@
               <span i18n="@@loginGithubSignIn">使用 Github 登录</span>
             </a>
           </div>
-          <div class="col">
+              <div>
             <a
               class="btn w-100"
               href="javascript:void(0)"
@@ -257,6 +352,7 @@
                 viewBox="0 0 16 16"
                 width="16"
                 xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
               >
                 <path
                   d="M11.176 14.429c-2.665 0-4.826-1.8-4.826-4.018 0-2.22 2.159-4.02 4.824-4.02S16 8.191 16 10.411c0 1.21-.65 2.301-1.666 3.036a.32.32 0 0 0-.12.366l.218.81a.6.6 0 0 1 .029.117.166.166 0 0 1-.162.162.2.2 0 0 1-.092-.03l-1.057-.61a.5.5 0 0 0-.256-.074.5.5 0 0 0-.142.021 5.7 5.7 0 0 1-1.576.22M9.064 9.542a.647.647 0 1 0 .557-1 .645.645 0 0 0-.646.647.6.6 0 0 0 .09.353Zm3.232.001a.646.646 0 1 0 .546-1 .645.645 0 0 0-.644.644.63.63 0 0 0 .098.356"
@@ -272,7 +368,7 @@
       </div>
       <div class="card-body">
         <div class="text-center">
-          <span class="text-info" i18n="@@loginNoAccount">还没有账户？ </span>
+            <span class="text-secondary" i18n="@@loginNoAccount">还没有账户？ </span>
           <a
             href="javascript:void(0)"
             tabindex="5"
@@ -285,5 +381,5 @@
         </div>
       </div>
     </div>
-  </div>
+    </main>
 </div>

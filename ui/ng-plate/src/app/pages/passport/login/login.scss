@@ -1,29 +1,245 @@
+/* Split-screen login: the art panel carries the calendar season, the form side
+   follows the active Tabler palette, so the two never fight over the same hue. */
 :host {
-  min-height: 100%;
-  min-width: 100%;
+  display: block;
 }
 
-.page {
-  background-image: url(https://bing.biturl.top?resolution=1920&format=image&index=0&mkt=zh-CN),
-    linear-gradient(rgba(0, 0, 255, 0.5), rgba(255, 255, 0, 0.5));
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+.login-shell {
+  /* Spring defaults; each [data-season] block below re-tunes base, glow and texture. */
+  --ls-base: #061a12;
+  --ls-ink: #f2f8f5;
+  --ls-glow-a: #35d194;
+  --ls-texture: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0 1.4px, transparent 2px) 0 0 / 46px 46px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  min-height: 100dvh;
+  background: var(--tblr-body-bg);
+  color: var(--tblr-body-color);
 }
 
-.card {
+.login-shell[data-season='summer'] {
+  --ls-base: #1c1206;
+  --ls-ink: #fff6e6;
+  --ls-glow-a: #ffb703;
+  --ls-texture: repeating-linear-gradient(
+          112deg,
+          rgba(255, 255, 255, 0.11) 0 2px,
+          transparent 2px 26px
+  );
+}
+
+.login-shell[data-season='autumn'] {
+  --ls-base: #1a0d06;
+  --ls-ink: #fdf1e4;
+  --ls-glow-a: #d2691e;
+  --ls-texture: radial-gradient(
+          ellipse 9px 5px at 50% 50%,
+          rgba(255, 255, 255, 0.18) 0 60%,
+          transparent 62%
+  ) 0 0 / 64px 64px;
+}
+
+.login-shell[data-season='winter'] {
+  --ls-base: #04121e;
+  --ls-ink: #eef7ff;
+  --ls-glow-a: #7cc4e8;
+  --ls-texture: radial-gradient(circle, rgba(255, 255, 255, 0.55) 0 1px, transparent 1.8px) 0 0 /
+    36px 36px;
+}
+
+.login-art {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: clamp(1.75rem, 3vw, 3rem);
+  overflow: hidden;
+  background: var(--ls-base);
+  color: var(--ls-ink);
+}
+
+/* One soft bloom plus a tiled texture instead of a flat gradient: cheaper to
+   paint than a bitmap, and every layer re-tints from one variable per season. */
+.login-art-glow {
+  position: absolute;
+  inset: auto -22% -34% auto;
+  width: 40rem;
+  height: 40rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--ls-glow-a) 60%, transparent), transparent 64%);
+  filter: blur(4px);
+}
+
+.login-art-texture {
+  position: absolute;
+  inset: 0;
+  background: var(--ls-texture);
+  opacity: 0.22;
+}
+
+/* Seasonal motif sits behind the copy; text layers keep z-index 1. */
+.login-season-art {
+  position: absolute;
+  right: -2%;
+  bottom: 0;
+  z-index: 0;
+  width: min(78%, 34rem);
+  height: auto;
+  color: var(--ls-ink);
+  pointer-events: none;
+}
+
+.login-art-head,
+.login-art-copy,
+.login-art-foot {
+  position: relative;
+  z-index: 1;
+}
+
+.login-art-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Tabler paints links with var(--tblr-link-color) and headings with the global
+   heading colour; both would turn the panel copy into unreadable dark text here. */
+.login-brand,
+.login-art-title {
+  color: inherit;
+}
+
+.login-season {
+  flex: none;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--ls-ink) 32%, transparent);
+  border-radius: 62.5rem;
+  color: color-mix(in srgb, var(--ls-ink) 86%, transparent);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+}
+
+.login-art-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 30rem;
+}
+
+.login-art-title {
+  margin: 0;
+  font-family: var(--plate-font-emphasis), serif;
+  font-size: clamp(1.85rem, 2.7vw, 2.9rem);
+  line-height: 1.24;
+}
+
+.login-art-sub {
+  margin: 0.875rem 0 0;
+  color: color-mix(in srgb, var(--ls-ink) 72%, transparent);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+
+.login-art-foot {
+  margin: 0;
+  color: color-mix(in srgb, var(--ls-ink) 52%, transparent);
+  font-size: 0.75rem;
+}
+
+.login-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2.5rem 1.5rem;
+}
+
+.login-main-top {
+  display: flex;
+  justify-content: flex-end;
   width: 100%;
-  /* 由主题令牌派生毛玻璃底色：写死白色在暗色模式下会让卡片变成一层白膜，和黑蓝主题打架 */
-  background: color-mix(in srgb, var(--tblr-bg-surface) 82%, transparent);
-  backdrop-filter: blur(1rem);
-  -webkit-backdrop-filter: blur(1rem);
-  border: 0.01rem solid rgba(255, 255, 255, 0.18);
-  border-radius: 1rem;
-  box-shadow: 0 0.8rem 2rem rgba(31, 38, 135, 0.15);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 26rem;
+}
 
-  &:hover {
-    transform: translateY(-0.2rem);
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.2);
+/* Palette-driven card: every colour below resolves from --tblr-* tokens, so the
+   four seasonal palettes restyle the form without a single hard-coded hue. */
+.login-card {
+  position: relative;
+  width: 100%;
+  max-width: 26rem;
+  overflow: hidden;
+  border: 1px solid var(--tblr-border-color);
+  border-radius: 1rem;
+  box-shadow: 0 1.25rem 3rem color-mix(in srgb, var(--tblr-body-color) 14%, transparent);
+}
+
+.login-card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.1875rem;
+  background: linear-gradient(
+          90deg,
+          var(--tblr-primary),
+          color-mix(in srgb, var(--tblr-primary) 30%, transparent)
+  );
+  content: '';
+}
+
+.login-card .form-control:focus {
+  border-color: var(--tblr-primary);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--tblr-primary) 18%, transparent);
+}
+
+.login-card .btn-primary {
+  background-image: linear-gradient(
+          120deg,
+          var(--tblr-primary),
+          color-mix(in srgb, var(--tblr-primary) 70%, #ffffff)
+  );
+  box-shadow: 0 0.75rem 1.5rem color-mix(in srgb, var(--tblr-primary) 26%, transparent);
+  transition: box-shadow 0.2s ease;
+}
+
+/* Lift on hover is expressed as a shadow only: it still reads as a press affordance
+   while staying inside prefers-reduced-motion without a second media query. */
+.login-card .btn-primary:hover:not(:disabled) {
+  box-shadow: 0 1rem 2rem color-mix(in srgb, var(--tblr-primary) 32%, transparent);
+}
+
+.login-card .btn-primary:disabled {
+  box-shadow: none;
+}
+
+.login-card a:focus-visible {
+  outline: 0.125rem solid var(--tblr-primary);
+  outline-offset: 0.125rem;
+}
+
+@media (max-width: 991.98px) {
+  .login-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .login-art {
+    gap: 1.25rem;
+    min-height: 12rem;
+    padding: 1.75rem 1.5rem;
+  }
+
+  .login-art-title {
+    font-size: clamp(1.5rem, 5.5vw, 2rem);
+  }
+
+  .login-art-foot {
+    display: none;
+  }
+
+  .login-main {
+    padding: 1.75rem 1.25rem 2.5rem;
   }
 }
