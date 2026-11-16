@@ -11,7 +11,7 @@ export const DASHBOARD_ROUTES: Routes = [
       {
         path: 'welcome',
         loadComponent: () => import('./welcome/welcome').then((m) => m.Welcome),
-        title: 'Welcome',
+        title: $localize`:@@route.dashboard.welcome:欢迎`,
       },
       {
         path: '',

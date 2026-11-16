@@ -7,12 +7,12 @@ export const PASSPORT_ROUTES: Routes = [
       {
         path: 'lock',
         loadComponent: () => import('./auth-lock/auth-lock').then((m) => m.AuthLock),
-        title: 'Lock Screen',
+        title: $localize`:@@route.passport.lock:锁屏`,
       },
       {
         path: 'login',
         loadComponent: () => import('./login/login').then((m) => m.Login),
-        title: 'Sign In',
+        title: $localize`:@@route.passport.login:登录`,
       },
       {
         path: '',

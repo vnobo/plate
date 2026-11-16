@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, LOCALE_ID, inject } from '@angular/core';
 import { DataTableColumn, DataTableComponent, DataTableRow } from '../../plugins/data-table';
 
 @Component({
@@ -44,6 +44,8 @@ import { DataTableColumn, DataTableComponent, DataTableRow } from '../../plugins
   `,
 })
 export class DataTableDemoComponent {
+  private readonly localeId = inject(LOCALE_ID);
+
   users: DataTableRow[] = [
     {
       id: 1,
@@ -113,7 +115,7 @@ export class DataTableDemoComponent {
       key: 'createdAt',
       title: 'Created Date',
       sortable: true,
-      cellTemplate: (value: unknown) => (value as Date).toLocaleDateString('zh-CN'),
+      cellTemplate: (value: unknown) => (value as Date).toLocaleDateString(this.localeId),
     },
   ];
 
