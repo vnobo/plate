@@ -1,5 +1,5 @@
 import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
-import {Component, DestroyRef, inject, signal} from '@angular/core';
+import {Component, computed, DestroyRef, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {form, FormField, maxLength, minLength, required, submit} from '@angular/forms/signals';
 import {Router} from '@angular/router';
@@ -18,22 +18,8 @@ interface SeasonCopy {
   readonly headline: string;
 }
 
-/** Months 12/1/2 map to winter so every season owns one contiguous quarter. */
-function seasonOf(date: Date): LoginSeason {
-  const month = date.getMonth();
-  if (month >= 2 && month <= 4) {
-    return 'spring';
-  }
-  if (month >= 5 && month <= 7) {
-    return 'summer';
-  }
-  if (month >= 8 && month <= 10) {
-    return 'autumn';
-  }
-  return 'winter';
-}
-
-/** Resolved once per page load; the message ids live in src/locale/messages.en-US.xlf. */
+/** The art panel follows the active theme season, not the calendar. Copy is
+    resolved per season; message ids live in src/locale/messages.en-US.xlf. */
 const SEASON_COPY: Record<LoginSeason, SeasonCopy> = {
   spring: {
     label: $localize`:@@loginSeasonSpringLabel:春 · 新芽`,
@@ -65,10 +51,14 @@ export class Login {
   private readonly _http = inject(HttpClient);
   private readonly _router = inject(Router);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _settings = inject(SettingsService);
 
-  /** Fixed for the life of the page: the art panel follows the calendar season. */
-  protected readonly season: LoginSeason = seasonOf(new Date());
-  protected readonly seasonCopy: SeasonCopy = SEASON_COPY[this.season];
+  /** The art panel follows the active theme season, so switching the palette in
+      the top-right control updates the illustration and copy live. */
+  protected readonly season = computed<LoginSeason>(
+    () => this._settings.palette() as LoginSeason,
+  );
+  protected readonly seasonCopy = computed<SeasonCopy>(() => SEASON_COPY[this.season()]);
 
   passwordFieldTextType = signal(false);
   isSubmitting = signal(false);
@@ -88,11 +78,6 @@ export class Login {
   });
 
   constructor() {
-    // The passport route renders outside the app shell, so nothing else instantiates
-    // SettingsService here; injecting it applies the persisted seasonal palette on
-    // first paint instead of falling back to the compiled-in default.
-    inject(SettingsService);
-
     // After a refresh, a token may still sit in sessionStorage: skip to the inner page if valid, otherwise stay on the login page.
     // SSR has no storage, so authenticationToken() returns null and we will not jump by mistake.
     // We judge expiry from the peeked copy: authenticationToken() refreshes lastAccessTime, which would make it look never-expired.

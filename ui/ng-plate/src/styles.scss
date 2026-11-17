@@ -1,29 +1,26 @@
 /* =============================================================================
  * Plate enterprise design tokens (customised on top of Tabler CSS variables)
  *
- * Customisation principles (see docs.tabler.io/ui/getting-started/customize):
- *   1. Override only Tabler's semantic variables; do not rewrite component CSS;
- *   2. Derived shades (-lt / -darken / -bg-subtle) are computed automatically
- *      from the base colours below via oklch() and color-mix(); no duplication;
- *   3. Site-wide utility classes (btn-primary / bg-primary-lt / text-primary /
- *      alert-*) inherit them, so component styles stay consistent by default.
+ * Four-season UI specification. One component tree, four skins, switched by a
+ * single `data-season` attribute on <html> (spring / summer / autumn / winter).
+ * Layout is locked; only the token layer + decoration layer change per season.
+ *
+ * Two-layer primary (spec §1/§5): --tblr-primary is the decorative hue (icon
+ * wells, data numbers, hover outlines, tints) and --deep is the darker shade
+ * that carries white text (buttons, footer, links, hero title). Tabler has no
+ * deep concept, so primary variants are remapped to --deep once, below.
  * ============================================================================= */
 
 /* -----------------------------------------------------------------------------
  * 1. Fonts and typographic scale
- *    Body text 0.9375rem (default 0.875rem is a bit small), line-height 1.6; headings
- *    step down by a factor of 1.25 to form a clear hierarchy.
+ *    Body text 0.9375rem, line-height 1.6; headings step down by 1.25.
+ *    Per spec §2.3 only the heading family is seasonal: autumn uses LXGW WenKai,
+ *    the other three seasons use the system sans stack. Body text stays sans in
+ *    every season so tables and numeric columns remain legible.
  * -------------------------------------------------------------------------- */
-/* Font: LXGW WenKai 1.530.0 (Regular / Medium), SIL Open Font License 1.1.
-   Source: cdnjs, pinned 1.530.0, subset WOFF2 with unicode-range.
-   Web rendering only; no installable desktop font is distributed here. */
-/* The cdnjs subsets declare U+20-7E (ASCII), so a Latin family placed after
-   WenKai never wins. Put the Latin/system stack first: it owns ASCII while CJK
-   glyphs fall through to 'LXGW WenKai'. Quoted generic names are not resolved,
-   so keep -apple-system / BlinkMacSystemFont / sans-serif unquoted. */
 html:root {
-  --plate-font-sans: 'LXGW WenKai', 'Inter Var', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
-  Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --plate-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, 'PingFang SC', 'Microsoft YaHei',
+  'Helvetica Neue', Arial, sans-serif;
   --tblr-font-sans-serif: var(--plate-font-sans);
   --tblr-body-font-family: var(--plate-font-sans);
 
@@ -44,15 +41,16 @@ html:root {
   --tblr-line-height-h5: 1.5;
   --tblr-line-height-h6: 1.5;
 
-  --plate-font-emphasis: 'Inter Var', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
-  Arial, 'LXGW WenKai Medium', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-
-  --plate-font-ui: 'Inter Var', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
-  Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  /* --plate-font-heading defaults to the system sans stack (spring). Season
+     blocks override it with html:root[data-season=...] (higher specificity). */
+  --plate-font-heading: var(--plate-font-sans);
+  --plate-font-emphasis: var(--plate-font-heading);
+  --plate-font-ui: var(--plate-font-sans);
+  --plate-heading-weight: 600;
 }
 
-/* Keep h4-h6 on Regular: h6 is 0.875rem and Medium shows rough outlines there.
-   .lead / blockquote are reserved for future mid-length prose and quotes. */
+/* Headings follow the seasonal family; h4-h6 stay on the body sans stack so
+   small labels never pick up WenKai's thin strokes. */
 html h1,
 html h2,
 html h3,
@@ -61,11 +59,11 @@ html .h2,
 html .h3,
 html .lead,
 html blockquote {
-  font-family: var(--plate-font-emphasis), serif;
+  font-family: var(--plate-font-heading), serif;
 }
 
-/* Scoped with `html` to win over Tabler (loaded after this file): tables,
-   chips and code-like labels stay legible at 0.75rem–0.875rem with the system stack. */
+/* Tables, chips and code-like labels stay legible at 0.75rem-0.875rem with the
+   system stack, in every season (including autumn). */
 html .table,
 html .card-table,
 html .datatable,
@@ -85,414 +83,331 @@ html .authority-chip code {
 }
 
 /* -----------------------------------------------------------------------------
- * 2. Border radius and spacing
- *    Radius starts at 0.5rem; the scale derives 0.625rem for cards/buttons, one shared
- *    set of steps site-wide.
- *    Spacing follows Bootstrap's 0.25rem grid (.25rem increments); component padding
- *    uses multiples of 0.5rem.
+ * 2. Radius, spacing and motion tokens
+ *    Each season defines --radius-card / --radius-btn / --radius-input below;
+ *    here we only set the shared fallbacks for the very first paint.
  * -------------------------------------------------------------------------- */
 html:root {
-  --tblr-border-radius: 0.5rem;
-  --tblr-border-radius-scale: 1.25;
+  --radius-card: 1.5rem;
+  --radius-btn: 999px;
+  --radius-input: 0.875rem;
+
+  --tblr-border-radius: var(--radius-input);
+  --tblr-border-radius-scale: 1;
 
   --tblr-card-spacer-x: 1.25rem;
   --tblr-card-spacer-y: 1.25rem;
   --tblr-card-title-margin-bottom: 0.5rem;
   --tblr-card-cap-padding-y: 0.875rem;
+
+  --dur-fast: 200ms;
+  --dur-base: 280ms;
+  --dur-theme: 320ms;
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 /* -----------------------------------------------------------------------------
- * 3. Component visual consistency (buttons / cards / forms / navigation)
+ * 3. Component visual consistency
+ *    Every colour resolves from a semantic token. Tabler 1.7.x binds .btn-primary
+ *    to --tblr-primary, so primary variants are remapped to --deep once here:
+ *    white-on-deep meets AA in all four seasons, while --tblr-primary stays the
+ *    bright decorative hue used by icons, tints and data numbers (spec §7.2).
  * -------------------------------------------------------------------------- */
 html:root {
   --tblr-btn-font-weight: 500;
   --tblr-btn-padding-x: 0.875rem;
   --tblr-btn-padding-y: 0.4375rem;
 
-  /* Source variable for the card shadow (--tblr-card-box-shadow derives from it) */
-  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(16, 24, 40, 0.04), 0 0.0625rem 0.1875rem rgba(16, 24, 40, 0.06);
-
-  /* Keep mobile inputs at 1rem to avoid iOS Safari zooming the page on focus */
+  --tblr-shadow-card: var(--shadow-card);
+  --tblr-shadow-card-hover: var(--shadow-hover);
   --tblr-form-control-mobile-font-size: 1rem;
 }
 
-/* Declare on the .navbar element itself so it outranks Tabler's `.navbar`
-   reset (tabler.css:13878), which loads after this file. A value on html:root
-   is only inherited and gets shadowed at the .navbar level. Scoped to the
-   vertical sidebar so the horizontal header keeps the framework default.
-   The active text colour is made explicit and theme-aware (var(--tblr-primary)). */
+/* Primary family of buttons: background / border / hover all use --deep.
+   Outline and ghost primary get the same treatment for consistent legibility. */
+html .btn-primary,
+html .btn-outline-primary,
+html .btn-ghost-primary {
+  --tblr-btn-variant: var(--deep);
+  --tblr-btn-variant-fg: var(--color-on-deep, #ffffff);
+  --tblr-btn-variant-darken: color-mix(in oklab, var(--deep) 88%, #000000);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-base) var(--ease), box-shadow var(--dur-base) var(--ease),
+    background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+
+html .btn-primary:hover:not(:disabled),
+html .btn-outline-primary:hover:not(:disabled) {
+  box-shadow: var(--shadow-hover);
+}
+
+html .btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Links, active nav and focus ring use the deep shade so they read on surfaces. */
+html :is(a, .nav-link.active, .navbar-vertical .nav-link.active, .page-link):where(:not(.btn)) {
+  --tblr-link-color: var(--deep);
+}
+
+html a:focus-visible,
+html .btn:focus-visible,
+html .form-control:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--deep) 22%, transparent);
+  outline-offset: 2px;
+}
+
+/* Focus ring token for Tabler-native controls (1.6+ outline implementation). */
+html:root {
+  --tblr-focus-ring-width: 3px;
+  --tblr-focus-ring-offset: 2px;
+}
+
+/* -----------------------------------------------------------------------------
+ * 4. Radius applied to components
+ *    .card and .btn declare their own radius variables on the element, which
+ *    outrank any value inherited from <html>. Re-declare at element level with
+ *    a season-qualified selector so the three radius steps actually take effect.
+ * -------------------------------------------------------------------------- */
+html[data-season] .card {
+  --tblr-card-border-radius: var(--radius-card);
+  border-radius: var(--radius-card);
+}
+
+html[data-season] .btn {
+  --tblr-btn-border-radius: var(--radius-btn);
+  border-radius: var(--radius-btn);
+}
+
+html[data-season] .form-control,
+html[data-season] .form-select,
+html[data-season] .input-group-text,
+html[data-season] .form-control-plaintext {
+  --tblr-btn-input-border-radius: var(--radius-input);
+  border-radius: var(--radius-input);
+}
+
+/* Chips / badges that should inherit the pill radius on round themes. */
+html[data-season] .badge,
+html[data-season] .avatar {
+  border-radius: var(--radius-btn);
+}
+
+/* Vertical sidebar active state follows the decorative primary. */
 .navbar.navbar-vertical {
-  --tblr-navbar-active-bg: color-mix(in oklab, var(--tblr-primary) 14%, transparent);
-  --tblr-navbar-active-color: var(--tblr-primary);
+  --tblr-navbar-active-bg: color-mix(in oklab, var(--tblr-primary) 18%, transparent);
+  --tblr-navbar-active-color: var(--deep);
 }
 
 /* -----------------------------------------------------------------------------
- * 4. Colours: light mode (= SPRING, the default palette)
- *    Four-season specification, spring "new growth in morning mist".
- *    The spec splits each season into a decorative primary (fills, icons, accents)
- *    and a primary-deep (buttons, links, active state, footer). Tabler has no deep
- *    concept, so --tblr-primary carries the deep shade everywhere white text or a
- *    text colour is required; --plate-primary keeps the light decorative hue for
- *    gradients, icon wells and motif accents. All combinations meet WCAG AA.
- *    Kept in sync with html[data-plate-theme='azure'][data-bs-theme='light'] so the
- *    first paint before SettingsService runs does not flash a different hue.
+ * 5. Four seasons — the ONLY place colour literals appear (spec §6.1).
+ *    Each block sets: semantic colours, two-level primary, radius, shadow,
+ *    hero gradient and seasonal decoration tokens.
  * -------------------------------------------------------------------------- */
-html:root,
-html[data-bs-theme='light'] {
-  /* Deep shade: buttons, links, active state, brand (white text 4.85:1) */
-  --tblr-primary: #3f7f45;
-  --tblr-primary-rgb: 63, 127, 69;
-  --tblr-primary-fg: #ffffff;
 
-  /* Decorative primary: icon wells, gradients, motif accents only */
+/* SPRING · 新生薄雾 — softest: pill buttons, 24px cards, near-invisible shadow */
+html:root[data-season='spring'] {
+  --plate-font-heading: var(--plate-font-sans);
+  --plate-heading-weight: 600;
+  --deep: #3f7f45;
+  --color-on-deep: #ffffff;
+  --tblr-primary: #86c57d;
+  --tblr-primary-fg: #14301c;
   --plate-primary: #86c57d;
   --tblr-azure: #86c57d;
-  --tblr-azure-rgb: 134, 197, 125;
-  --tblr-azure-fg: #14301c;
-
-  /* Secondary: soft blossom pink - tag/icon backgrounds (dark text on it) */
-  --tblr-secondary: #8c9a8f;
-  --tblr-secondary-rgb: 140, 154, 143;
-  --tblr-secondary-fg: #ffffff;
-
-  /* Accent: pale sky blue, decorative only */
+  --plate-secondary: #f8d7da;
   --plate-accent: #90c9e8;
 
-  /* Links and focus ring */
-  --tblr-link-color: #3f7f45;
-  --tblr-link-hover-color: #2f6334;
-  --tblr-focus-ring-color: rgba(63, 127, 69, 0.28);
-
-  /* Status colours (kept consistent across seasons; white text meets AA contrast) */
-  --tblr-success: #1f8a4d;
-  --tblr-success-rgb: 31, 138, 77;
-  --tblr-success-fg: #ffffff;
-  --tblr-info: #0b86a0;
-  --tblr-info-rgb: 11, 134, 160;
-  --tblr-info-fg: #ffffff;
-  --tblr-warning: #e08a00;
-  --tblr-warning-rgb: 224, 138, 0;
-  --tblr-warning-fg: #2a1c00; /* dark text on a light background */
-  --tblr-danger: #b4453a;
-  --tblr-danger-rgb: 180, 69, 58;
-  --tblr-danger-fg: #ffffff;
-
-  /* Background / text / borders (mint-tinted paper, spec neutral palette) */
-  --tblr-bg-surface: #ffffff;
-  --tblr-bg-surface-secondary: #eef4ec;
-  --tblr-body-bg: #f9faf7;
-  --tblr-body-color: #444444;
-  --tblr-muted: #76766e;
-  --tblr-border-color: #e4ebdd;
-}
-
-/* -----------------------------------------------------------------------------
- * 5. Colours: dark mode (= WINTER)
- *    Winter "falling snow, quiet peaks". In dark mode the deep shade stays as the
- *    button/link colour (white text 4.92:1) and midnight-ice layers step up in
- *    depth so cards sit above the page. The decorative primary is the pale frost
- *    blue, used only for icon wells and motif accents.
- *    Kept in sync with html[data-plate-theme='slate'][data-bs-theme='dark'] to
- *    avoid a first-paint flash.
- * -------------------------------------------------------------------------- */
-html[data-bs-theme='dark'] {
-  --tblr-primary: #5a738c;
-  --tblr-primary-rgb: 90, 115, 140;
-  --tblr-primary-fg: #ffffff;
-
-  --plate-primary: #b8d2e5;
-  --tblr-azure: #b8d2e5;
-  --tblr-azure-rgb: 184, 210, 229;
-  --tblr-azure-fg: #0a1a26;
-
-  --tblr-secondary: #6d8296;
-  --tblr-secondary-rgb: 109, 130, 150;
+  --tblr-secondary: #76766e;
   --tblr-secondary-fg: #ffffff;
-
-  --plate-accent: #748ca6;
-
-  --tblr-link-color: #93b6d2;
-  --tblr-link-hover-color: #b8d2e5;
-  --tblr-focus-ring-color: rgba(184, 210, 229, 0.18);
-
-  --tblr-success: #34c172;
-  --tblr-success-rgb: 52, 193, 114;
-  --tblr-success-fg: #06210f;
-  --tblr-info: #2bc4e0;
-  --tblr-info-rgb: 43, 196, 224;
-  --tblr-info-fg: #04222a;
-  --tblr-warning: #f7b733;
-  --tblr-warning-rgb: 247, 183, 51;
-  --tblr-warning-fg: #2a1c00;
-  --tblr-danger: #e0675b;
-  --tblr-danger-rgb: 224, 103, 91;
-  --tblr-danger-fg: #2a0808;
-
-  /* Midnight (deep navy-ice) layers: page darkest -> overlays slightly higher ->
-     cards higher still, stepped up to create depth. --tblr-bg-forms must change
-     too: Tabler's dark default uses neutral gray-900, so inputs look washed out. */
-  --tblr-body-bg: #0b141d;
-  --tblr-bg-surface-secondary: #0e1b26;
-  --tblr-bg-surface: #13212e;
-  --tblr-bg-forms: #101c28;
-  --tblr-body-color: #e6eef6;
-  --tblr-muted: #9fb0c0;
-  --tblr-border-color: #24384a;
-  --tblr-shadow-card: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.3);
-
-  /* WenKai Regular strokes thin out on dark surfaces. Keep the typeface and
-     the weight scale intact; only adjust rasterisation. */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-html,
-body {
-  width: 100%;
-  height: 100%;
-}
-
-/* -----------------------------------------------------------------------------
- * 6. Seasonal palettes: four seasons x two forms (light / dark)
- *    Only Tabler semantic variables are overridden, so the component markup,
- *    Bootstrap 5.3 utilities and layout rules stay shared across palettes.
- *    SettingsService keeps the season and the light/dark mode independent.
- *
- *    Both selectors are mandatory: an unqualified palette rule placed after the
- *    base dark block would leak dark surfaces into the light form.
- *    The ids are localStorage keys: azure=spring, ledger=summer, atelier=autumn,
- *    slate=winter. Renaming an id would silently reset saved preferences.
- * -------------------------------------------------------------------------- */
-html[data-plate-theme='azure'][data-bs-theme='light'] {
-  /* SPRING / LIGHT - new growth in morning mist. Rounding is the softest of the
-     four: 24px cards, pill buttons, 14px inputs; the lightest, airiest shadow. */
-  --tblr-primary: #3f7f45;
-  --tblr-primary-rgb: 63, 127, 69;
-  --tblr-primary-fg: #ffffff;
-  --plate-primary: #86c57d;
-  --tblr-azure: #86c57d;
-  --tblr-azure-rgb: 134, 197, 125;
-  --tblr-azure-fg: #14301c;
-  --plate-accent: #90c9e8;
   --tblr-body-bg: #f9faf7;
   --tblr-bg-surface: #ffffff;
-  --tblr-bg-surface-secondary: #eef4ec;
+  --tblr-bg-surface-secondary: #f1f7ee;
   --tblr-bg-forms: #ffffff;
   --tblr-body-color: #444444;
   --tblr-muted: #76766e;
   --tblr-border-color: #e4ebdd;
   --tblr-link-color: #3f7f45;
   --tblr-link-hover-color: #2f6334;
-  --tblr-focus-ring-color: rgba(63, 127, 69, 0.28);
-  --tblr-border-radius: 0.875rem; /* 14px inputs */
-  --tblr-card-border-radius: 1.5rem; /* 24px */
-  --tblr-btn-border-radius: 999px; /* pill */
-  --tblr-card-spacer-x: 1.25rem;
-  --tblr-card-spacer-y: 1.25rem;
-  --tblr-shadow-card: 0 0.625rem 1.625rem rgba(134, 197, 125, 0.14);
+  --tblr-focus-ring-color: rgba(63, 127, 69, 0.22);
+
+  --tblr-success: #3e8e63;
+  --tblr-success-fg: #ffffff;
+  --tblr-info: #2679a0;
+  --tblr-info-fg: #ffffff;
+  --tblr-warning: #b8860b;
+  --tblr-warning-fg: #2a1c00;
+  --tblr-danger: #b4453a;
+  --tblr-danger-fg: #ffffff;
+
+  --radius-card: 24px;
+  --radius-btn: 999px;
+  --radius-input: 14px;
+  --shadow-card: 0 10px 26px rgba(134, 197, 125, 0.14);
+  --shadow-hover: 0 14px 32px rgba(134, 197, 125, 0.22);
+
+  --plate-hero-from: #f9faf7;
+  --plate-hero-to: #f8d7da;
+  --plate-hero-title: #3f7f45;
+  --plate-deco-opacity: 0.22;
 }
 
-html[data-plate-theme='azure'][data-bs-theme='dark'] {
-  /* SPRING / DARK - glowing shoots on deep pine. */
-  --tblr-primary: #86c57d;
-  --tblr-primary-rgb: 134, 197, 125;
-  --tblr-primary-fg: #0a2413;
-  --plate-primary: #86c57d;
-  --tblr-azure: #86c57d;
-  --tblr-azure-rgb: 134, 197, 125;
-  --tblr-azure-fg: #0a2413;
-  --plate-accent: #90c9e8;
-  --tblr-body-bg: #0a1710;
-  --tblr-bg-surface: #10241a;
-  --tblr-bg-surface-secondary: #0c1d15;
-  --tblr-bg-forms: #0d1f16;
-  --tblr-body-color: #e6f5ea;
-  --tblr-muted: #9dbdaa;
-  --tblr-border-color: #1e3d2c;
-  --tblr-link-color: #a8dc9f;
-  --tblr-link-hover-color: #c4edbd;
-  --tblr-focus-ring-color: rgba(134, 197, 125, 0.2);
-  --tblr-border-radius: 0.875rem;
-  --tblr-card-border-radius: 1.5rem;
-  --tblr-btn-border-radius: 999px;
-  --tblr-card-spacer-x: 1.25rem;
-  --tblr-card-spacer-y: 1.25rem;
-  --tblr-shadow-card: 0 0.5rem 1.375rem rgba(0, 0, 0, 0.32);
-}
-
-html[data-plate-theme='ledger'][data-bs-theme='light'] {
-  /* SUMMER / LIGHT - open sky and sea breeze. Crisp 16px cards, 10px buttons and
-     inputs; the blue accent is the strongest of the four, yellow stays a small fill. */
-  --tblr-primary: #2679a0;
-  --tblr-primary-rgb: 38, 121, 160;
-  --tblr-primary-fg: #ffffff;
+/* SUMMER · 晴空海风 — crisp: 16px cards, 10px buttons/inputs, lively blue shadow */
+html:root[data-season='summer'] {
+  --plate-font-heading: var(--plate-font-sans);
+  --plate-heading-weight: 600;
+  --deep: #2679a0;
+  --color-on-deep: #ffffff;
+  --tblr-primary: #38a3d4;
+  --tblr-primary-fg: #052436;
   --plate-primary: #38a3d4;
   --tblr-azure: #38a3d4;
-  --tblr-azure-rgb: 56, 163, 212;
-  --tblr-azure-fg: #052436;
+  --plate-secondary: #ffd260;
   --plate-accent: #28b998;
+
+  --tblr-secondary: #6e7780;
+  --tblr-secondary-fg: #ffffff;
   --tblr-body-bg: #f7fbfe;
   --tblr-bg-surface: #ffffff;
-  --tblr-bg-surface-secondary: #eaf4fb;
+  --tblr-bg-surface-secondary: #eef7fd;
   --tblr-bg-forms: #ffffff;
   --tblr-body-color: #333333;
   --tblr-muted: #6e7780;
   --tblr-border-color: #e1eef7;
   --tblr-link-color: #2679a0;
   --tblr-link-hover-color: #1c5c7a;
-  --tblr-focus-ring-color: rgba(38, 121, 160, 0.28);
-  --tblr-border-radius: 0.625rem; /* 10px */
-  --tblr-card-border-radius: 1rem; /* 16px */
-  --tblr-btn-border-radius: 0.625rem; /* 10px */
-  --tblr-card-spacer-x: 1.25rem;
-  --tblr-card-spacer-y: 1.25rem;
-  --tblr-shadow-card: 0 0.625rem 1.5rem rgba(56, 163, 212, 0.16);
+  --tblr-focus-ring-color: rgba(38, 121, 160, 0.22);
+
+  --tblr-success: #28b998;
+  --tblr-success-fg: #ffffff;
+  --tblr-info: #2679a0;
+  --tblr-info-fg: #ffffff;
+  --tblr-warning: #c98a00;
+  --tblr-warning-fg: #2a1c00;
+  --tblr-danger: #b4453a;
+  --tblr-danger-fg: #ffffff;
+
+  --radius-card: 16px;
+  --radius-btn: 10px;
+  --radius-input: 10px;
+  --shadow-card: 0 10px 24px rgba(56, 163, 212, 0.16);
+  --shadow-hover: 0 16px 34px rgba(56, 163, 212, 0.26);
+
+  --plate-hero-from: #f7fbfe;
+  --plate-hero-to: #fff1cf;
+  --plate-hero-title: #1f6c8e;
+  --plate-deco-opacity: 0.26;
 }
 
-html[data-plate-theme='ledger'][data-bs-theme='dark'] {
-  /* SUMMER / DARK - sunlit cyan on dusk navy. */
-  --tblr-primary: #38a3d4;
-  --tblr-primary-rgb: 56, 163, 212;
-  --tblr-primary-fg: #04202f;
-  --plate-primary: #38a3d4;
-  --tblr-azure: #38a3d4;
-  --tblr-azure-rgb: 56, 163, 212;
-  --tblr-azure-fg: #04202f;
-  --plate-accent: #28b998;
-  --tblr-body-bg: #07141c;
-  --tblr-bg-surface: #0d2330;
-  --tblr-bg-surface-secondary: #0a1c26;
-  --tblr-bg-forms: #0b2029;
-  --tblr-body-color: #e4f4fc;
-  --tblr-muted: #9db8c7;
-  --tblr-border-color: #1a3948;
-  --tblr-link-color: #6cc4ea;
-  --tblr-link-hover-color: #9ad9f2;
-  --tblr-focus-ring-color: rgba(56, 163, 212, 0.2);
-  --tblr-border-radius: 0.625rem;
-  --tblr-card-border-radius: 1rem;
-  --tblr-btn-border-radius: 0.625rem;
-  --tblr-card-spacer-x: 1.25rem;
-  --tblr-card-spacer-y: 1.25rem;
-  --tblr-shadow-card: 0 0.5rem 1.375rem rgba(0, 0, 0, 0.32);
-}
+/* AUTUMN · 黄昏丰收 — squarest & heaviest: 6px cards, 4px buttons/inputs;
+   headings switch to LXGW WenKai. Hover deepens instead of lifting. */
+html:root[data-season='autumn'] {
+  /* Only the heading family is seasonal (spec §2.3): WenKai for autumn titles,
+     system sans for the other three. Body text is unaffected. */
+  --plate-font-heading: 'LXGW WenKai', 'Songti SC', serif;
+  --plate-heading-weight: 400;
 
-html[data-plate-theme='atelier'][data-bs-theme='light'] {
-  /* AUTUMN / LIGHT - harvest at dusk. The squarest, heaviest theme: 6px cards,
-     4px buttons/inputs, deepest shadow; headings switch to WenKai via the block below. */
-  --tblr-primary: #9a5a44;
-  --tblr-primary-rgb: 154, 90, 68;
-  --tblr-primary-fg: #ffffff;
+  --deep: #9a5a44;
+  --color-on-deep: #ffffff;
+  --tblr-primary: #c4703a;
+  --tblr-primary-fg: #2a1408;
   --plate-primary: #c4703a;
   --tblr-azure: #c4703a;
-  --tblr-azure-rgb: 196, 112, 58;
-  --tblr-azure-fg: #2a1408;
+  --plate-secondary: #9a5a44;
   --plate-accent: #d8c28e;
+
+  --tblr-secondary: #7a6e63;
+  --tblr-secondary-fg: #ffffff;
   --tblr-body-bg: #f8f4ee;
   --tblr-bg-surface: #fffcf7;
-  --tblr-bg-surface-secondary: #f1e8dc;
+  --tblr-bg-surface-secondary: #f3eade;
   --tblr-bg-forms: #fffcf7;
   --tblr-body-color: #3a3430;
   --tblr-muted: #7a6e63;
   --tblr-border-color: #ebdccb;
   --tblr-link-color: #9a5a44;
   --tblr-link-hover-color: #7d4835;
-  --tblr-focus-ring-color: rgba(154, 90, 68, 0.28);
-  --tblr-border-radius: 0.25rem; /* 4px inputs/buttons */
-  --tblr-card-border-radius: 0.375rem; /* 6px */
-  --tblr-btn-border-radius: 0.25rem; /* 4px */
-  --tblr-card-spacer-x: 1.5rem;
-  --tblr-card-spacer-y: 1.5rem;
-  --tblr-shadow-card: 0 0.625rem 1.5rem rgba(58, 52, 48, 0.15);
+  --tblr-focus-ring-color: rgba(154, 90, 68, 0.2);
+
+  --tblr-success: #6f8a3e;
+  --tblr-success-fg: #ffffff;
+  --tblr-info: #9a5a44;
+  --tblr-info-fg: #ffffff;
+  --tblr-warning: #b07d1e;
+  --tblr-warning-fg: #2a1c00;
+  --tblr-danger: #b4453a;
+  --tblr-danger-fg: #ffffff;
+
+  --radius-card: 6px;
+  --radius-btn: 4px;
+  --radius-input: 4px;
+  --shadow-card: 0 10px 24px rgba(58, 52, 48, 0.15);
+  --shadow-hover: 0 16px 34px rgba(58, 52, 48, 0.24);
+
+  --plate-hero-from: #f8f4ee;
+  --plate-hero-to: #e8d3b6;
+  --plate-hero-title: #8a4e2c;
+  --plate-deco-opacity: 0.14;
 }
 
-html[data-plate-theme='atelier'][data-bs-theme='dark'] {
-  /* AUTUMN / DARK - ember glow on warm charcoal. */
-  --tblr-primary: #c4703a;
-  --tblr-primary-rgb: 196, 112, 58;
-  --tblr-primary-fg: #2a1206;
-  --plate-primary: #c4703a;
-  --tblr-azure: #c4703a;
-  --tblr-azure-rgb: 196, 112, 58;
-  --tblr-azure-fg: #2a1206;
-  --plate-accent: #d8c28e;
-  --tblr-body-bg: #17100b;
-  --tblr-bg-surface: #241811;
-  --tblr-bg-surface-secondary: #1d140e;
-  --tblr-bg-forms: #20150f;
-  --tblr-body-color: #f6e9dd;
-  --tblr-muted: #c4a48c;
-  --tblr-border-color: #402a1d;
-  --tblr-link-color: #e0915f;
-  --tblr-link-hover-color: #f0a672;
-  --tblr-focus-ring-color: rgba(196, 112, 58, 0.2);
-  --tblr-border-radius: 0.25rem;
-  --tblr-card-border-radius: 0.375rem;
-  --tblr-btn-border-radius: 0.25rem;
-  --tblr-card-spacer-x: 1.5rem;
-  --tblr-card-spacer-y: 1.5rem;
-  --tblr-shadow-card: 0 0.5rem 1.375rem rgba(0, 0, 0, 0.36);
+/* AUTUMN hover: deepen the surface instead of lifting (spec §2.6). */
+html:root[data-season='autumn'] .card:hover {
+  background: color-mix(in oklab, var(--tblr-bg-surface) 92%, var(--deep));
+  box-shadow: var(--shadow-hover);
 }
 
-html[data-plate-theme='slate'][data-bs-theme='light'] {
-  /* WINTER / LIGHT - falling snow, quiet peaks. The roundest theme: 28px cards,
-     pill buttons, 16px inputs, and the most diffuse (almost invisible) shadow. */
-  --tblr-primary: #5a738c;
-  --tblr-primary-rgb: 90, 115, 140;
-  --tblr-primary-fg: #ffffff;
+/* WINTER · 落雪清寂 — roundest & most diffuse: 28px cards, pill buttons,
+   16px inputs, almost invisible shadow; depth comes from surface contrast. */
+html:root[data-season='winter'] {
+  --plate-font-heading: var(--plate-font-sans);
+  --plate-heading-weight: 600;
+  --deep: #5a738c;
+  --color-on-deep: #ffffff;
+  --tblr-primary: #b8d2e5;
+  --tblr-primary-fg: #1b2b38;
   --plate-primary: #b8d2e5;
   --tblr-azure: #b8d2e5;
-  --tblr-azure-rgb: 184, 210, 229;
-  --tblr-azure-fg: #1b2b38;
+  --plate-secondary: #e8edf2;
   --plate-accent: #748ca6;
+
+  --tblr-secondary: #5c6b78;
+  --tblr-secondary-fg: #ffffff;
   --tblr-body-bg: #ffffff;
   --tblr-bg-surface: #f7fafc;
-  --tblr-bg-surface-secondary: #edf3f8;
+  --tblr-bg-surface-secondary: #f1f6fa;
   --tblr-bg-forms: #ffffff;
   --tblr-body-color: #2d3742;
   --tblr-muted: #5c6b78;
   --tblr-border-color: #e9eff4;
   --tblr-link-color: #5a738c;
   --tblr-link-hover-color: #455a70;
-  --tblr-focus-ring-color: rgba(90, 115, 140, 0.2);
-  --tblr-border-radius: 1rem; /* 16px inputs */
-  --tblr-card-border-radius: 1.75rem; /* 28px */
-  --tblr-btn-border-radius: 999px; /* pill */
-  --tblr-card-spacer-x: 1.5rem;
-  --tblr-card-spacer-y: 1.5rem;
-  --tblr-shadow-card: 0 0.5rem 1.375rem rgba(184, 210, 229, 0.3);
+  --tblr-focus-ring-color: rgba(90, 115, 140, 0.18);
+
+  --tblr-success: #3e8e63;
+  --tblr-success-fg: #ffffff;
+  --tblr-info: #5a738c;
+  --tblr-info-fg: #ffffff;
+  --tblr-warning: #a5781f;
+  --tblr-warning-fg: #2a1c00;
+  --tblr-danger: #b4453a;
+  --tblr-danger-fg: #ffffff;
+
+  --radius-card: 28px;
+  --radius-btn: 999px;
+  --radius-input: 16px;
+  --shadow-card: 0 8px 22px rgba(184, 210, 229, 0.3);
+  --shadow-hover: 0 14px 30px rgba(116, 140, 166, 0.24);
+
+  --plate-hero-from: #ffffff;
+  --plate-hero-to: #dce9f3;
+  --plate-hero-title: #2d3742;
+  --plate-deco-opacity: 0.12;
 }
 
-html[data-plate-theme='slate'][data-bs-theme='dark'] {
-  /* WINTER / DARK - frost blue on midnight. */
-  --tblr-primary: #5a738c;
-  --tblr-primary-rgb: 90, 115, 140;
-  --tblr-primary-fg: #ffffff;
-  --plate-primary: #b8d2e5;
-  --tblr-azure: #b8d2e5;
-  --tblr-azure-rgb: 184, 210, 229;
-  --tblr-azure-fg: #0a1a26;
-  --plate-accent: #748ca6;
-  --tblr-body-bg: #0b141d;
-  --tblr-bg-surface: #13212e;
-  --tblr-bg-surface-secondary: #0e1b26;
-  --tblr-bg-forms: #101c28;
-  --tblr-body-color: #e6eef6;
-  --tblr-muted: #9fb0c0;
-  --tblr-border-color: #24384a;
-  --tblr-link-color: #93b6d2;
-  --tblr-link-hover-color: #b8d2e5;
-  --tblr-focus-ring-color: rgba(184, 210, 229, 0.18);
-  --tblr-border-radius: 1rem;
-  --tblr-card-border-radius: 1.75rem;
-  --tblr-btn-border-radius: 999px;
-  --tblr-card-spacer-x: 1.5rem;
-  --tblr-card-spacer-y: 1.5rem;
-  --tblr-shadow-card: 0 0.5rem 1.375rem rgba(184, 210, 229, 0.12);
-}
-
-/* Login art motif motion. Global because all four seasons share the two keyframes;
-   keeping them here leaves the login component inside its 4kB style budget. */
+/* -----------------------------------------------------------------------------
+ * 6. Global decoration layer (spec §3.6 / §6.4): absolute, non-interactive,
+ *    behind content. Seasons paint their own motif in the login panel.
+ * -------------------------------------------------------------------------- */
 .ls-sway {
   transform-origin: top center;
   animation: ls-sway 6s ease-in-out infinite;
@@ -515,14 +430,16 @@ html[data-plate-theme='slate'][data-bs-theme='dark'] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ls-sway,
-  .ls-fall {
-    animation: none;
+  html *,
+  html *::before,
+  html *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
-/* Touch devices have no hover: keep list-group action buttons always visible,
-   otherwise affordances such as starring are undiscoverable. */
+/* Touch devices have no hover: keep list-group action buttons always visible. */
 @media (hover: none) {
   .list-group-hoverable .list-group-item .list-group-item-actions {
     opacity: 1;

@@ -1,11 +1,11 @@
-<div [attr.data-season]="season" class="login-shell">
+<div [attr.data-season]="season()" class="login-shell">
     <!-- Season art panel: pure CSS, no remote image, so the page paints without a network round trip. -->
     <section class="login-art">
         <span aria-hidden="true" class="login-art-glow"></span>
         <span aria-hidden="true" class="login-art-texture"></span>
 
         <!-- Each season has its own motif; shapes are inline so the panel needs no image requests. -->
-        @if (season === 'spring') {
+        @if (season() === 'spring') {
             <!-- Weeping willow: long branches, small leaves and a few blossoms. -->
             <svg aria-hidden="true" class="login-season-art" viewBox="0 0 460 320">
                 <g class="ls-sway" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width="2.5">
@@ -34,7 +34,7 @@
                     <circle cx="284" cy="128" r="3.5"/>
                 </g>
             </svg>
-        } @else if (season === 'summer') {
+        } @else if (season() === 'summer') {
             <!-- Double oars on lake ripples under a high sun. -->
             <svg aria-hidden="true" class="login-season-art" viewBox="0 0 460 320">
                 <circle cx="374" cy="72" fill="#ffcf5c" fill-opacity=".28" r="36"/>
@@ -50,7 +50,7 @@
                 <path d="M150 100c-11-12-4-21 5-9z" fill="#ff7a3d"/>
                 <path d="M314 100c11-12 4-21-5-9z" fill="#ff7a3d"/>
             </svg>
-        } @else if (season === 'autumn') {
+        } @else if (season() === 'autumn') {
             <!-- Maple hillside with drifting leaves and a figure in red. -->
             <svg aria-hidden="true" class="login-season-art" viewBox="0 0 460 320">
                 <defs>
@@ -98,11 +98,11 @@
                     <text fill="currentColor" font-size="40" font-weight="700" x="85" y="50">Plate</text>
         </svg>
       </a>
-            <span class="login-season">{{ seasonCopy.label }}</span>
+            <span class="login-season">{{ seasonCopy().label }}</span>
         </div>
 
         <div class="login-art-copy">
-            <h1 class="login-art-title">{{ seasonCopy.headline }}</h1>
+            <h1 class="login-art-title">{{ seasonCopy().headline }}</h1>
             <p class="login-art-sub" i18n="@@loginArtSub">
                 Plate 多租户管理平台 —— 账号、权限、组织与数据，一处贯通。
             </p>

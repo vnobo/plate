@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-Hans" data-bs-navbar-position="combined">
+<html lang="zh-Hans" data-bs-navbar-position="combined" data-season="spring">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
@@ -19,6 +19,28 @@
     <meta content="#ffffff" name="theme-color"/>
     <meta content="yes" name="mobile-web-app-capable"/>
     <meta content="Plate Web Console" name="application-name"/>
+
+    <!-- Apply the saved season before stylesheets load to avoid a first-paint flash.
+         Keep this below the theme-color meta so it can be updated on first paint.
+         Default is spring; a stored, valid choice wins. Guarded so private-mode
+         storage failures cannot break the page. -->
+    <script>
+        (function () {
+            try {
+                var season = localStorage.getItem('theme');
+                if (['spring', 'summer', 'autumn', 'winter'].indexOf(season) !== -1) {
+                    document.documentElement.setAttribute('data-season', season);
+                    var meta = document.querySelector('meta[name="theme-color"]');
+                    if (meta) {
+                        meta.setAttribute('content', {
+                            spring: '#f9faf7', summer: '#f7fbfe',
+                            autumn: '#f8f4ee', winter: '#ffffff'
+                        }[season]);
+                    }
+                }
+            } catch (e) { /* storage unavailable: keep the spring default */ }
+        })();
+    </script>
     <meta content="yes" name="apple-mobile-web-app-capable"/>
     <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
     <meta content="Plate Web Console" name="apple-mobile-web-app-title"/>

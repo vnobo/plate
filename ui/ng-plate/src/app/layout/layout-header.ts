@@ -10,7 +10,7 @@ import {
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { SettingsService, TokenService, UserService } from '@app/core';
+import { TokenService, UserService } from '@app/core';
 import { LayoutService } from './layout.service';
 import { LocaleSwitcher } from './locale-switcher';
 import { ThemeSwitcher } from './theme-switcher';
@@ -151,64 +151,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
         </li>
       </ul>
 
-      <!-- Action area: order follows the Tabler example (theme → notifications → language → user), all styled uniformly with .nav-link -->
+      <!-- Action area: season switcher → notifications → language → user, all styled uniformly with .nav-link.
+           The four-season spec defines no separate light/dark axis, so there is no mode toggle here. -->
       <div class="navbar-nav flex-row order-md-last ms-auto align-items-center">
-        <!-- Light/dark toggle: which button is shown is decided by Tabler's .hide-theme-dark / .hide-theme-light
-             based on data-bs-theme, so the component does not need to track the current theme -->
-        <div class="nav-item d-flex">
-          <a
-            href="javascript:void(0)"
-            class="nav-link px-2 hide-theme-dark"
-            (click)="settings.setTheme('dark')"
-            title="Switch to dark mode"
-            aria-label="Switch to dark mode"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="icon"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              stroke-width="2"
-              stroke="currentColor"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path
-                d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"
-              />
-            </svg>
-          </a>
-          <a
-            href="javascript:void(0)"
-            class="nav-link px-2 hide-theme-light"
-            (click)="settings.setTheme('light')"
-            title="Switch to light mode"
-            aria-label="Switch to light mode"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="icon"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              stroke-width="2"
-              stroke="currentColor"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
-              <path
-                d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"
-              />
-            </svg>
-          </a>
-        </div>
-
         <!-- Notifications: the red dot relies on the .nav-link > .badge absolute-positioning rule, so it cannot be replaced by btn -->
         <div class="nav-item dropdown">
           <a
@@ -482,7 +427,6 @@ export class LayoutHeader {
   private readonly router = inject(Router);
   protected readonly tokenSer = inject(TokenService);
   protected readonly userSer: UserService = inject(UserService);
-  protected readonly settings = inject(SettingsService);
   protected readonly layout = inject(LayoutService);
   private readonly http = inject(HttpClient);
 

@@ -52,11 +52,7 @@
               }
             ],
             "scripts": [
-              { "input": "node_modules/@tabler/core/dist/js/tabler.js", "bundleName": "tabler" },
-              {
-                "input": "node_modules/@tabler/core/dist/js/tabler-theme.js",
-                "bundleName": "tabler"
-              }
+              { "input": "node_modules/@tabler/core/dist/js/tabler.js", "bundleName": "tabler" }
             ],
             "server": "src/main.server.ts",
             "outputMode": "server",

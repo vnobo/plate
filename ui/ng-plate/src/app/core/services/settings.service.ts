@@ -1,4 +1,5 @@
-import {afterNextRender, Service, signal} from '@angular/core';
+import {isPlatformBrowser} from '@angular/common';
+import {afterNextRender, inject, PLATFORM_ID, Service, signal} from '@angular/core';
 
 export interface PlateTheme {
   id: string;
@@ -7,70 +8,90 @@ export interface PlateTheme {
   swatch: string;
 }
 
-/** Spring palette. The id is the persisted localStorage key, so it keeps the
-    historical 'azure' value even though the palette now carries the spring season. */
+/** One palette per season, in calendar order. The id is the persisted value of
+    localStorage['theme'] and the value of <html data-season>, so it must match
+    the selectors in styles.scss exactly. */
 const SPRING: PlateTheme = {
-  id: 'azure',
+  id: 'spring',
   name: 'Verdant Spring',
   description: 'Spring · new growth in morning mist',
   swatch: '#86c57d',
 };
 
-/** One palette per season, listed in calendar order so the menu reads spring → winter.
-    Ids stay stable because they are storage keys. Colours follow the four-season UI
-    specification: the swatch is the decorative primary, while buttons and links use the
-    deeper shade defined in styles.scss. Each season has both a light and a dark form. */
 export const PLATE_THEMES: ReadonlyArray<PlateTheme> = [
   SPRING,
   {
-    id: 'ledger',
+    id: 'summer',
     name: 'Amber Summer',
     description: 'Summer · open sky and sea breeze',
     swatch: '#38a3d4',
   },
   {
-    id: 'atelier',
+    id: 'autumn',
     name: 'Maple Autumn',
     description: 'Autumn · harvest at dusk',
     swatch: '#c4703a',
   },
   {
-    id: 'slate',
+    id: 'winter',
     name: 'Frost Winter',
     description: 'Winter · falling snow, quiet peaks',
-    swatch: '#8fb8d4',
+    swatch: '#b8d2e5',
   },
 ];
 
-const STORAGE_KEY = 'plate-theme';
-const MODE_KEY = 'tabler-theme';
+const STORAGE_KEY = 'theme';
+
+/** Storage can throw in private mode or when cookies are blocked. The inline
+    bootstrap script guards the same access; the service must not break the
+    theme dropdown when a user clicks it under the same conditions. */
+function readStoredSeason(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredSeason(id: string): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, id);
+  } catch {
+    // Keep the DOM attribute and the signal authoritative for this session.
+  }
+}
 
 @Service()
 export class SettingsService {
+  /** The active season id (spring / summer / autumn / winter). */
   readonly palette = signal<string>(SPRING.id);
 
   constructor() {
-    // localStorage is browser-only; afterNextRender keeps this off the SSR pass.
-    // Season and light/dark mode are two independent axes: a saved "winter + light"
-    // combination must survive a reload just as "winter + dark" does.
+    // index.html has already applied the stored season before first paint.
+    // Seed the signal from that attribute on the browser so the first Angular
+    // render (login art, switcher label) already matches the painted skin;
+    // reading it here, instead of in afterNextRender, also keeps SSR safe.
+    if (isPlatformBrowser(inject(PLATFORM_ID))) {
+      const applied = document.documentElement.getAttribute('data-season');
+      if (PLATE_THEMES.some((item) => item.id === applied)) {
+        this.palette.set(applied!);
+      }
+    }
+
+    // Still reconcile from storage: covers a blocked inline script (e.g. CSP).
     afterNextRender(() => {
-      this.setPalette(localStorage.getItem(STORAGE_KEY) ?? SPRING.id);
-      this.setTheme(localStorage.getItem(MODE_KEY) === 'dark' ? 'dark' : 'light');
+      const saved = readStoredSeason();
+      const season = PLATE_THEMES.some((item) => item.id === saved) ? saved! : SPRING.id;
+      this.setPalette(season);
     });
   }
 
-  /** Toggles only the light/dark form; the chosen season stays put. */
-  setTheme(mode: 'light' | 'dark'): void {
-    document.documentElement.setAttribute('data-bs-theme', mode);
-    // Prevent tabler-theme.js from restoring the system preference on the next load.
-    localStorage.setItem(MODE_KEY, mode);
-  }
-
-  /** Selects only the season; the current light/dark form stays put. */
+  /** Selects the season: updates the data-season attribute, storage and signal.
+      There is no separate light/dark axis — each season is a complete skin. */
   setPalette(id: string): void {
     const theme = PLATE_THEMES.find((item) => item.id === id) ?? SPRING;
-    document.documentElement.setAttribute('data-plate-theme', theme.id);
-    localStorage.setItem(STORAGE_KEY, theme.id);
+    document.documentElement.setAttribute('data-season', theme.id);
+    writeStoredSeason(theme.id);
     this.palette.set(theme.id);
   }
 }
