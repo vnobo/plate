@@ -11,86 +11,124 @@
     </span>
 
     <section class="login-art">
-        <!-- Each season has its own motif; shapes are inline so the page needs no image requests. -->
+        <!-- Single-colour inline SVG motifs with fill-opacity, per spec §6.4.
+             Every shape uses currentColor so a season switch repaints the art. -->
         @if (season() === 'spring') {
-            <!-- Weeping willow: long branches, small leaves and a few blossoms. -->
+            <!-- Willow branches, drifting petals and a dandelion focal point. -->
             <svg aria-hidden="true" class="login-season-art" viewBox="0 0 460 320">
-                <g class="ls-sway" fill="none" stroke="currentColor" stroke-opacity=".5" stroke-width="2.5">
-                    <path d="M40 -10C60 70 20 130 62 240"/>
-                    <path d="M110 -10C130 60 90 120 128 205"/>
-                    <path d="M180 -10C200 80 155 140 190 265"/>
-                    <path d="M260 -10C275 60 240 120 275 200"/>
+                <g class="ls-sway" fill="none" stroke="currentColor" stroke-opacity=".34" stroke-width="2">
+                    <path d="M60 -10C78 70 38 130 80 244"/>
+                    <path d="M132 -10C150 60 110 120 148 214"/>
+                    <path d="M204 -10C222 80 178 140 212 268"/>
+                    <path d="M286 -10C300 60 266 120 300 206"/>
                 </g>
-                <g fill="#8fe0b4" fill-opacity=".82">
-                    <ellipse cx="52" cy="60" rx="4.5" ry="12" transform="rotate(-28 52 60)"/>
-                    <ellipse cx="46" cy="98" rx="4" ry="11" transform="rotate(25 46 98)"/>
-                    <ellipse cx="58" cy="140" rx="4.5" ry="12" transform="rotate(-22 58 140)"/>
-                    <ellipse cx="118" cy="72" rx="4" ry="11" transform="rotate(28 118 72)"/>
-                    <ellipse cx="110" cy="116" rx="4.5" ry="12" transform="rotate(-26 110 116)"/>
-                    <ellipse cx="126" cy="164" rx="4" ry="11" transform="rotate(22 126 164)"/>
-                    <ellipse cx="188" cy="86" rx="4.5" ry="12" transform="rotate(-30 188 86)"/>
-                    <ellipse cx="178" cy="146" rx="4" ry="11" transform="rotate(26 178 146)"/>
-                    <ellipse cx="192" cy="212" rx="4.5" ry="12" transform="rotate(-24 192 212)"/>
-                    <ellipse cx="272" cy="94" rx="4" ry="11" transform="rotate(24 272 94)"/>
-                    <ellipse cx="264" cy="152" rx="4.5" ry="12" transform="rotate(-25 264 152)"/>
+                <g fill="currentColor" fill-opacity=".30">
+                    <ellipse cx="72" cy="62" rx="4" ry="11" transform="rotate(-28 72 62)"/>
+                    <ellipse cx="66" cy="100" rx="3.5" ry="10" transform="rotate(25 66 100)"/>
+                    <ellipse cx="80" cy="142" rx="4" ry="11" transform="rotate(-22 80 142)"/>
+                    <ellipse cx="140" cy="74" rx="3.5" ry="10" transform="rotate(28 140 74)"/>
+                    <ellipse cx="130" cy="118" rx="4" ry="11" transform="rotate(-26 130 118)"/>
+                    <ellipse cx="150" cy="166" rx="3.5" ry="10" transform="rotate(22 150 166)"/>
+                    <ellipse cx="212" cy="88" rx="4" ry="11" transform="rotate(-30 212 88)"/>
+                    <ellipse cx="202" cy="148" rx="3.5" ry="10" transform="rotate(26 202 148)"/>
+                    <ellipse cx="216" cy="214" rx="4" ry="11" transform="rotate(-24 216 214)"/>
+                    <ellipse cx="296" cy="96" rx="3.5" ry="10" transform="rotate(24 296 96)"/>
+                    <ellipse cx="288" cy="154" rx="4" ry="11" transform="rotate(-25 288 154)"/>
                 </g>
-                <g fill="#f6aac9" fill-opacity=".85">
-                    <circle cx="66" cy="182" r="4"/>
-                    <circle cx="136" cy="126" r="3.5"/>
-                    <circle cx="204" cy="118" r="4"/>
-                    <circle cx="284" cy="128" r="3.5"/>
+                <!-- Dandelion: thin stem with a sparse seed head. -->
+                <g fill="none" stroke="currentColor" stroke-opacity=".26" stroke-width="1.4">
+                    <path d="M372 292V168"/>
+                    <path d="M372 168l-26-26M372 168l-12-32M372 168l12-32M372 168l26-26M372 168l-32-8M372 168l32-8"/>
+                </g>
+                <circle cx="372" cy="168" fill="currentColor" fill-opacity=".34" r="4"/>
+                <g fill="currentColor" fill-opacity=".22">
+                    <circle cx="102" cy="196" r="3"/>
+                    <circle cx="176" cy="128" r="2.6"/>
+                    <circle cx="246" cy="176" r="3"/>
+                    <circle cx="330" cy="132" r="2.6"/>
                 </g>
             </svg>
         } @else if (season() === 'summer') {
-            <!-- Double oars on lake ripples under a high sun. -->
+            <!-- Palm silhouette, wave pattern and soft light spots. -->
             <svg aria-hidden="true" class="login-season-art" viewBox="0 0 460 320">
-                <circle cx="374" cy="72" fill="#ffcf5c" fill-opacity=".28" r="36"/>
-                <circle cx="374" cy="72" fill="#ffcf5c" fill-opacity=".6" r="21"/>
-                <g fill="none" stroke="currentColor" stroke-opacity=".38" stroke-width="2">
-                    <path d="M20 208C80 194 140 222 200 208S320 194 450 208"/>
-                    <path d="M10 246C90 232 160 260 240 246S360 232 450 246"/>
-                    <path d="M30 284C110 270 180 298 260 284S370 270 440 284"/>
+                <g fill="currentColor" fill-opacity=".16">
+                    <circle cx="356" cy="70" r="34"/>
+                    <circle cx="126" cy="104" r="5"/>
+                    <circle cx="164" cy="76" r="4"/>
                 </g>
-                <path d="M150 192h160l-26 38H176z" fill="#ffb03a" fill-opacity=".92"/>
-                <path d="M208 190l-58-88" stroke="#f6e3c0" stroke-linecap="round" stroke-width="4"/>
-                <path d="M252 190l62-88" stroke="#f6e3c0" stroke-linecap="round" stroke-width="4"/>
-                <path d="M150 100c-11-12-4-21 5-9z" fill="#ff7a3d"/>
-                <path d="M314 100c11-12 4-21-5-9z" fill="#ff7a3d"/>
+                <!-- Palm: single-colour trunk and fronds. -->
+                <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-opacity=".3">
+                    <path d="M150 292C158 214 168 150 190 104" stroke-width="7"/>
+                    <path d="M190 104c-34-30-66-28-88-12M190 104c-24-38-52-44-76-38M190 104c18-40 48-50 74-42M190 104c38-24 70-18 92 2M190 104c8-44 34-62 60-66"
+                          stroke-width="5"/>
+                </g>
+                <g fill="none" stroke="currentColor" stroke-opacity=".24" stroke-width="2">
+                    <path d="M16 232C80 216 140 248 204 232S330 216 452 232"/>
+                    <path d="M10 264C90 248 160 280 240 264S360 248 452 264"/>
+                    <path d="M30 296C110 280 180 312 260 296S370 280 442 296"/>
+                </g>
             </svg>
         } @else if (season() === 'autumn') {
-            <!-- Maple hillside with drifting leaves and a figure in red. -->
+            <!-- Lakeside cabin, layered hills, reflection and drifting maple leaves. -->
             <svg aria-hidden="true" class="login-season-art" viewBox="0 0 460 320">
                 <defs>
-                    <path d="M0 -9L2 -3l7 -2-3 6 4 5-7-1-3 6-3-6-7 1 4-5-3-6 7 2z" id="login-maple"/>
+                    <path d="M0 -9L3 -3l8 -2-3 6 4 5-8-1-4 6-3-6-8 1 4-5-3-6 8 2z" id="login-maple"/>
                 </defs>
-                <path d="M0 320L95 168l62 62 90-118 92 118 55-48 66 138z" fill="#d2691e" fill-opacity=".22"/>
-                <path d="M175 112l30-38 34 38-20-8-14 12-12-12z" fill="#ffe6d0" fill-opacity=".5"/>
-                <g class="ls-fall" fill="#e0562d" fill-opacity=".9">
-                    <use href="#login-maple" transform="translate(60 70) rotate(-18)"/>
-                    <use href="#login-maple" transform="translate(140 44) rotate(24) scale(0.8)"/>
-                    <use href="#login-maple" transform="translate(232 76) rotate(-35) scale(1.15)"/>
-                    <use href="#login-maple" transform="translate(340 58) rotate(16) scale(0.9)"/>
-                    <use href="#login-maple" transform="translate(398 130) rotate(-12) scale(0.75)"/>
+                <!-- Distant hills and dusk glow, all single-colour. -->
+                <circle cx="352" cy="72" fill="currentColor" fill-opacity=".08" r="60"/>
+                <path d="M0 214L96 132l54 48 78-76 82 92 60-52 90 70v106H0z" fill="currentColor" fill-opacity=".10"/>
+                <path d="M0 246L120 186l70 46 96-58 90 66 84-40v120H0z" fill="currentColor" fill-opacity=".08"/>
+                <!-- Cabin on the shore. -->
+                <g fill="currentColor">
+                    <path d="M168 190l52-40 52 40z" fill-opacity=".34"/>
+                    <path d="M180 190h80v56h-80z" fill-opacity=".22"/>
+                    <path d="M204 214h14v32h-14z" fill-opacity=".40"/>
+                    <circle cx="248" cy="210" fill-opacity=".34" r="5"/>
+                    <path d="M236 158v-22h8v14z" fill-opacity=".24"/>
                 </g>
-                <circle cx="292" cy="168" fill="#d93025" r="8"/>
-                <path d="M284 180h16l12 52h-40z" fill="#d93025"/>
-                <path d="M284 185l-17 25" stroke="#d93025" stroke-linecap="round" stroke-width="6"/>
+                <!-- Lake and the cabin's mirrored reflection. -->
+                <g fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="2">
+                    <path d="M24 268C110 256 174 280 260 268S380 256 448 268"/>
+                    <path d="M44 292C120 282 180 302 258 292S370 282 436 292"/>
+                </g>
+                <g fill="currentColor" fill-opacity=".12">
+                    <path d="M168 276l52 26 52-26v34h-104z"/>
+                </g>
+                <g class="ls-fall" fill="currentColor" fill-opacity=".26">
+                    <use href="#login-maple" transform="translate(70 70) rotate(-18)"/>
+                    <use href="#login-maple" transform="translate(150 44) rotate(24) scale(0.8)"/>
+                    <use href="#login-maple" transform="translate(300 66) rotate(-35) scale(1.05)"/>
+                    <use href="#login-maple" transform="translate(392 128) rotate(16) scale(0.75)"/>
+                </g>
             </svg>
         } @else {
-            <!-- Layered snow mountains and slow falling snow. -->
+            <!-- Snowy firs, a sitting fox silhouette and sparse snow crystals. -->
             <svg aria-hidden="true" class="login-season-art" viewBox="0 0 460 320">
-                <path d="M0 320L130 105l70 92 88-140 172 263z" fill="#9ad4f2" fill-opacity=".18"/>
-                <path d="M95 137l35-32 35 32-22-10-13 14-12-14z" fill="#eaf6ff" fill-opacity=".82"/>
-                <path d="M226 101l62-44 79 90-48-18-30 22-24-22z" fill="#eaf6ff" fill-opacity=".68"/>
-                <g class="ls-fall" fill="#ffffff" fill-opacity=".72">
-                    <circle cx="48" cy="42" r="3"/>
-                    <circle cx="128" cy="76" r="2.5"/>
-                    <circle cx="198" cy="34" r="3.5"/>
-                    <circle cx="266" cy="88" r="2.5"/>
-                    <circle cx="334" cy="40" r="3"/>
-                    <circle cx="406" cy="94" r="2.5"/>
-                    <circle cx="88" cy="132" r="2"/>
-                    <circle cx="372" cy="158" r="3"/>
+                <!-- Far mountains and near snow ground, single-colour. -->
+                <path d="M0 226L118 106l68 78 84-104 190 156v84H0z" fill="currentColor" fill-opacity=".10"/>
+                <path d="M0 268C92 248 168 280 252 264S376 248 460 266v54H0z" fill="currentColor" fill-opacity=".08"/>
+                <!-- Fir trees. -->
+                <g fill="currentColor" fill-opacity=".16">
+                    <path d="M60 250l24-88 24 88zM74 226l10-40 10 40z"/>
+                    <path d="M112 256l20-72 20 72zM124 236l8-34 8 34z"/>
+                    <path d="M392 256l24-86 24 86zM404 232l12-40 12 40z"/>
+                </g>
+                <!-- Fox sitting in profile: ears, head, muzzle, bushy tail. -->
+                <g fill="currentColor" fill-opacity=".30">
+                    <path d="M250 212l-8-34 18 16 14-18 6 36z"/>
+                    <path d="M244 200c-14 6-22 22-22 40 0 12 8 20 22 20h34c16 0 26-10 26-24 0-16-12-26-28-28z"/>
+                    <path d="M296 212c18 4 30 18 30 34 0 12-10 20-24 20h-18c14-8 20-32 12-54z"/>
+                    <path d="M276 236l28 8-28 10z" fill-opacity=".5"/>
+                </g>
+                <circle cx="272" cy="220" fill="currentColor" fill-opacity=".55" r="2.6"/>
+                <!-- Sparse snowflakes: six-arm outlines, well under the spec's density cap. -->
+                <g class="ls-fall" fill="none" stroke="currentColor" stroke-opacity=".22" stroke-width="1.4">
+                    <path d="M56 48v14M49 55h14M51 50l10 10M61 50L51 60"/>
+                    <path d="M148 76v12M142 82h12M144 78l8 8M152 78l-8 8"/>
+                    <path d="M236 42v14M229 49h14M231 44l10 10M241 44l-10 10"/>
+                    <path d="M330 84v12M324 90h12M326 86l8 8M336 86l-8 8"/>
+                    <path d="M410 52v14M403 59h14M405 54l10 10M415 54l-10 10"/>
+                    <path d="M96 148v10M91 153h10M93 150l6 6M99 150l-6 6"/>
                 </g>
             </svg>
         }

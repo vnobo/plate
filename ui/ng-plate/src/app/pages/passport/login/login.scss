@@ -47,11 +47,13 @@
   z-index: 1;
 }
 
+/* Brand and season label form one group at the top-left; keeping them
+   together gives the page a clear brand anchor instead of a split header. */
 .login-art-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  justify-content: flex-start;
+  gap: 1.25rem;
 }
 
 /* Tabler colours links and headings globally; both would turn panel copy dark. */
