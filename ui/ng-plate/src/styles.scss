@@ -417,6 +417,69 @@ html:root[data-season='winter'] {
   animation: ls-fall 9s linear infinite;
 }
 
+/* Login page background illustration: abstract geometry painted behind the
+   content. Global so component styles stay inside the anyComponentStyle budget;
+   every shape resolves from the active season's tokens. Purely decorative. */
+.login-deco {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.login-deco-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--plate-hero-title) 16%, transparent) 1px, transparent 1.4px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(115deg, #000, transparent 62%);
+  opacity: 0.45;
+}
+
+.login-deco-ring {
+  position: absolute;
+  border: 1px solid color-mix(in srgb, var(--plate-hero-title) 18%, transparent);
+  border-radius: 50%;
+}
+
+.login-deco-ring-a {
+  top: -14rem;
+  right: -10rem;
+  width: 36rem;
+  height: 36rem;
+}
+
+.login-deco-ring-b {
+  top: 3rem;
+  right: -3rem;
+  width: 23rem;
+  height: 23rem;
+  border-color: color-mix(in srgb, var(--plate-primary) 30%, transparent);
+}
+
+.login-deco-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(2px);
+}
+
+.login-deco-orb-a {
+  top: 6%;
+  right: 4%;
+  width: 28rem;
+  height: 28rem;
+  background: radial-gradient(circle, color-mix(in srgb, var(--tblr-primary) 28%, transparent), transparent 66%);
+}
+
+.login-deco-orb-b {
+  bottom: -10%;
+  left: 10%;
+  width: 30rem;
+  height: 30rem;
+  background: radial-gradient(circle, color-mix(in srgb, var(--plate-accent) 22%, transparent), transparent 68%);
+}
+
 @keyframes ls-sway {
   50% {
     transform: rotate(1.5deg);

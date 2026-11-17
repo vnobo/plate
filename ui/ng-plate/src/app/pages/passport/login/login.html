@@ -1,10 +1,17 @@
 <div [attr.data-season]="season()" class="login-shell">
-    <!-- Season art panel: pure CSS, no remote image, so the page paints without a network round trip. -->
-    <section class="login-art">
-        <span aria-hidden="true" class="login-art-glow"></span>
-        <span aria-hidden="true" class="login-art-texture"></span>
+    <!-- Season illustration paints the full-page background; pure CSS/SVG, no
+         remote image. Abstract geometry lives in the global stylesheet so the
+         decorative layers stay outside the component style budget. -->
+    <span aria-hidden="true" class="login-deco">
+        <span class="login-deco-grid"></span>
+        <span class="login-deco-ring login-deco-ring-a"></span>
+        <span class="login-deco-ring login-deco-ring-b"></span>
+        <span class="login-deco-orb login-deco-orb-a"></span>
+        <span class="login-deco-orb login-deco-orb-b"></span>
+    </span>
 
-        <!-- Each season has its own motif; shapes are inline so the panel needs no image requests. -->
+    <section class="login-art">
+        <!-- Each season has its own motif; shapes are inline so the page needs no image requests. -->
         @if (season() === 'spring') {
             <!-- Weeping willow: long branches, small leaves and a few blossoms. -->
             <svg aria-hidden="true" class="login-season-art" viewBox="0 0 460 320">
