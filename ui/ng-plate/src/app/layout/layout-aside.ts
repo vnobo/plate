@@ -23,6 +23,8 @@ interface NavItem {
   icon: SafeHtml;
   /** FOLDER is only a group heading and does not take part in navigation. */
   heading: boolean;
+  /** First character of the title, used as an icon-like glyph when a folder is folded. */
+  initial: string;
 }
 
 const svg = (body: string) =>
@@ -116,7 +118,14 @@ const FALLBACK_ICON = svg(
             @if (item.heading) {
               <!-- FOLDER is only a group heading with no landing page, so it gets no link -->
               <li class="nav-item">
-                <div class="nav-link disabled">{{ item.title }}</div>
+                <div class="nav-link disabled" [attr.title]="item.title">
+                  <span
+                    class="nav-link-icon nav-link-initial d-md-none d-lg-inline-block"
+                    aria-hidden="true"
+                    >{{ item.initial }}</span
+                  >
+                  <span class="nav-link-title">{{ item.title }}</span>
+                </div>
               </li>
             } @else {
               <!-- The active class must sit on nav-item: Tabler styles the active state via .nav-item.active > .nav-link -->
@@ -169,6 +178,20 @@ const FALLBACK_ICON = svg(
       /* Center icons in the folded state */
       :host(.navbar-folded) .nav-link {
         justify-content: center;
+      }
+
+      /* Folder initial rendered as a compact badge; the fixed square comes from Tabler .nav-link-icon */
+      .nav-link-initial {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.3rem;
+        background: var(--tblr-primary-lt, rgba(6, 111, 209, 0.12));
+        color: var(--tblr-primary, #066fd1);
+        font-size: 0.75rem;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
       }
 
       /* Mobile: off-canvas drawer instead of an empty in-flow bar */
@@ -228,6 +251,7 @@ export class LayoutAside {
       link: `/platform/${item.path ?? ''}`,
       icon: this.sanitizer.bypassSecurityTrustHtml(ICONS[item.icons ?? ''] ?? FALLBACK_ICON),
       heading: item.type === 'FOLDER',
+      initial: (item.name ?? item.path ?? '').slice(0, 1) || '?',
     }));
   });
 

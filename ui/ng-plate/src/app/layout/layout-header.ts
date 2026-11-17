@@ -67,7 +67,7 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
   },
   template: `
     <!-- flex-nowrap: on narrow screens the navbar's default flex-wrap pushes the action area onto a second row; the module nav stays visible so one row must be kept -->
-    <div class="container-xl flex-nowrap">
+    <div class="container-fluid flex-nowrap">
       <!-- Mobile: open the sidebar drawer -->
       <button
         class="navbar-toggler d-lg-none"
@@ -121,7 +121,8 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             stroke-linejoin="round"
           >
             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M17 7l-5 5l5 5" />
+            <path d="M7 7l-5 5l5 5" />
+            <path d="M13 7l-5 5l5 5" />
           </svg>
         }
       </button>
@@ -192,7 +193,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
             <div class="card">
               <div class="card-header d-flex align-items-center">
                 <h2 class="card-title">Notifications</h2>
-                <span class="ms-2 small text-secondary" i18n="@@headerUnreadCount"
+                <span
+                  class="ms-2 small text-secondary"
+                  i18n="@@headerUnreadCount"
                   >{unreadCount(), plural, =0 {无未读} other {# 条未读}}</span
                 >
                 <button
@@ -229,7 +232,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
                               (item.unread ? ' status-dot-animated bg-' + colorOf(item.type) : '')
                             "
                           >
-                            <span class="visually-hidden">{{ item.unread ? 'Unread' : 'Read' }}</span>
+                            <span class="visually-hidden">{{
+                              item.unread ? 'Unread' : 'Read'
+                            }}</span>
                           </span>
                         </div>
                         <div class="col text-truncate">
@@ -315,7 +320,9 @@ const TYPE_PRIORITY: NoticeType[] = ['system', 'mention', 'comment', 'like'];
               <div class="card-body">
                 <div class="row g-2">
                   <div class="col">
-                    <button class="btn w-100" type="button" (click)="archiveAll()">Archive all</button>
+                    <button class="btn w-100" type="button" (click)="archiveAll()">
+                      Archive all
+                    </button>
                   </div>
                   <div class="col">
                     <button
