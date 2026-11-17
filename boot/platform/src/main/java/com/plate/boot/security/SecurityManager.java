@@ -29,7 +29,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -75,11 +74,6 @@ public class SecurityManager extends AbstractCache implements ReactiveUserDetail
     private static final String CACHE_KEY_USER_TENANTS_PREFIX = "USER_TENANTS-";
     private static final String CACHE_KEY_USER_AUTHORITIES_PREFIX = "USER_AUTHORITIES-";
     private static final String CACHE_KEY_GROUP_AUTHORITIES_PREFIX = "GROUP_AUTHORITIES-";
-
-    /**
-     * Default cache duration
-     */
-    private static final Duration DEFAULT_CACHE_DURATION = Duration.ofMinutes(10);
 
     /**
      * Creates a new QueryFragment for querying group members
