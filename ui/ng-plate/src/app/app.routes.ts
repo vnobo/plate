@@ -19,8 +19,8 @@ export const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: '/passport',
+    redirectTo: 'platform',
     pathMatch: 'full',
   },
-  { path: '**', redirectTo: '/error' },
+  { path: '**', redirectTo: 'error' },
 ];
