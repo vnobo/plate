@@ -8,13 +8,10 @@ export interface PlateTheme {
   swatch: string;
 }
 
-/** One palette per season, in calendar order. The id is the persisted value of
-    localStorage['theme'] and the value of <html data-season>, so it must match
-    the selectors in styles.scss exactly. */
 const SPRING: PlateTheme = {
   id: 'spring',
-  name: 'Verdant Spring',
-  description: 'Spring · new growth in morning mist',
+  name: '春',
+  description: $localize`:@@settings.theme.springDescription:春 · 晨雾中的新生`,
   swatch: '#86c57d',
 };
 
@@ -22,20 +19,20 @@ export const PLATE_THEMES: ReadonlyArray<PlateTheme> = [
   SPRING,
   {
     id: 'summer',
-    name: 'Amber Summer',
-    description: 'Summer · open sky and sea breeze',
+    name: '夏',
+    description: $localize`:@@settings.theme.summerDescription:夏 · 晴空与海风`,
     swatch: '#38a3d4',
   },
   {
     id: 'autumn',
-    name: 'Maple Autumn',
-    description: 'Autumn · harvest at dusk',
+    name: '秋',
+    description: $localize`:@@settings.theme.autumnDescription:秋 · 黄昏的丰收`,
     swatch: '#c4703a',
   },
   {
     id: 'winter',
-    name: 'Frost Winter',
-    description: 'Winter · falling snow, quiet peaks',
+    name: '冬',
+    description: $localize`:@@settings.theme.winterDescription:冬 · 落雪与静谧山峰`,
     swatch: '#b8d2e5',
   },
 ];

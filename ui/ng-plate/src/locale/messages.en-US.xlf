@@ -50,6 +50,38 @@
           <context context-type="linenumber">18,20</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="settings.theme.springDescription" datatype="html">
+        <source>春 · 晨雾中的新生</source>
+        <target>Spring · new growth in morning mist</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/services/settings.service.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="settings.theme.summerDescription" datatype="html">
+        <source>夏 · 晴空与海风</source>
+        <target>Summer · open sky and sea breeze</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/services/settings.service.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="settings.theme.autumnDescription" datatype="html">
+        <source>秋 · 黄昏的丰收</source>
+        <target>Autumn · harvest at dusk</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/services/settings.service.ts</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="settings.theme.winterDescription" datatype="html">
+        <source>冬 · 落雪与静谧山峰</source>
+        <target>Winter · falling snow, quiet peaks</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/services/settings.service.ts</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="route.dashboard.welcome" datatype="html">
         <source>欢迎</source>
         <target>Welcome</target>

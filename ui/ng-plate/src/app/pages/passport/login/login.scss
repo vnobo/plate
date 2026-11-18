@@ -16,7 +16,8 @@
   color: var(--plate-hero-title);
 }
 
-/* Left column is transparent so the page-wide illustration reads as one scene. */
+/* Left rail is a self-contained brand surface: art is clipped to the rail
+   instead of bleeding across the whole page. */
 .login-art {
   position: relative;
   z-index: 1;
@@ -24,13 +25,16 @@
   flex-direction: column;
   justify-content: space-between;
   gap: 2rem;
+  overflow: hidden;
   padding: clamp(2rem, 4vw, 4.5rem);
+  border-right: 1px solid color-mix(in srgb, var(--plate-hero-title) 14%, transparent);
+  background: color-mix(in srgb, var(--tblr-bg-surface) 30%, transparent);
 }
 
 /* Season motif acts as a soft background illustration, not a foreground badge. */
 .login-season-art {
   position: absolute;
-  right: -6%;
+  right: 0;
   bottom: -4%;
   z-index: 0;
   width: min(88%, 40rem);
@@ -90,16 +94,17 @@
   line-height: 1.24;
 }
 
+/* Deeper seasonal token keeps secondary copy above WCAG AA on the rail surface. */
 .login-art-sub {
   margin: 0.875rem 0 0;
-  color: color-mix(in srgb, var(--plate-hero-title) 78%, transparent);
+  color: var(--tblr-link-hover-color);
   font-size: 0.9375rem;
   line-height: 1.75;
 }
 
 .login-art-foot {
   margin: 0;
-  color: color-mix(in srgb, var(--plate-hero-title) 58%, transparent);
+  color: var(--tblr-link-hover-color);
   font-size: 0.75rem;
 }
 
@@ -115,12 +120,13 @@
   padding: clamp(2.5rem, 6vw, 6rem) clamp(1.5rem, 5vw, 5rem);
 }
 
+/* Utility bar pinned to the top of the task column, not floating above the card. */
 .login-main-top {
+  position: absolute;
+  top: clamp(2rem, 4vw, 4.5rem);
+  right: clamp(1.5rem, 5vw, 5rem);
   display: flex;
-  justify-content: flex-end;
   gap: 0.5rem;
-  width: 100%;
-  max-width: 24rem;
 }
 
 /* Floating card: translucent surface over the illustration, lifted by a soft
@@ -132,7 +138,8 @@
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--tblr-bg-surface) 70%, var(--tblr-border-color));
   background: color-mix(in srgb, var(--tblr-bg-surface) 92%, transparent);
-  box-shadow: var(--shadow-hover), 0 1.5rem 3.5rem color-mix(in srgb, var(--deep) 14%, transparent);
+  box-shadow: var(--shadow-hover),
+  0 1.5rem 3.5rem color-mix(in srgb, var(--deep) 14%, transparent);
   backdrop-filter: blur(12px);
 }
 
@@ -140,7 +147,11 @@
   position: absolute;
   inset: 0 0 auto;
   height: 0.1875rem;
-  background: linear-gradient(90deg, var(--tblr-primary), color-mix(in srgb, var(--tblr-primary) 30%, transparent));
+  background: linear-gradient(
+          90deg,
+          var(--tblr-primary),
+          color-mix(in srgb, var(--tblr-primary) 30%, transparent)
+  );
   content: '';
 }
 
@@ -163,24 +174,26 @@
     grid-template-columns: 1fr;
   }
 
+  /* Brand collapses to a single strip so the form owns the first viewport. */
   .login-art {
-    gap: 1.25rem;
-    min-height: 11rem;
-    padding: 1.75rem 1.5rem 1.25rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 0;
+    padding: 1rem 1.25rem;
+    border-right: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--plate-hero-title) 14%, transparent);
   }
 
+  .login-art-copy,
+  .login-art-foot,
   .login-season-art {
-    right: -4%;
-    bottom: -18%;
-    width: min(72%, 24rem);
-  }
-
-  .login-art-title {
-    font-size: clamp(1.5rem, 5.5vw, 2rem);
-  }
-
-  .login-art-foot {
     display: none;
+  }
+
+  .login-main-top {
+    position: static;
+    justify-content: flex-end;
   }
 
   .login-main {
@@ -188,14 +201,10 @@
   }
 }
 
-/* Small phones: keep the card inset so the artwork stays visible around it. */
+/* Small phones: keep the card inset so the brand strip stays readable. */
 @media (max-width: 480px) {
   .login-main {
     padding: 0.75rem 1rem 2.5rem;
-  }
-
-  .login-art-copy {
-    max-width: 100%;
   }
 
   .login-deco-ring-b,
